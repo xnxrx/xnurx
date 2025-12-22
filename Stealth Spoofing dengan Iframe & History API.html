@@ -1,263 +1,258 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Social Media Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Obfuscation Demo</title>
     <style>
         body {
-            margin: 0;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        
+        h1 {
+            color: #ffff00;
+            border-bottom: 2px solid #00ff00;
+            padding-bottom: 10px;
+        }
+        
+        .technique {
+            background: #2a2a2a;
             padding: 20px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 5px solid #ff6600;
         }
         
-        .login-container {
-            max-width: 400px;
-            margin: 50px auto;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
-        }
-        
-        .login-header {
-            background: #4267B2;
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .facebook-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-        
-        .login-form {
-            padding: 30px;
-        }
-        
-        input {
-            width: 100%;
+        .url-display {
+            background: #000;
             padding: 15px;
+            border-radius: 5px;
             margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
+            font-family: monospace;
+            word-break: break-all;
         }
         
-        .login-btn {
-            width: 100%;
-            padding: 15px;
-            background: #4267B2;
+        button {
+            background: #ff6600;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 20px;
-        }
-        
-        .login-btn:hover {
-            background: #365899;
-        }
-        
-        .fake-url-bar {
-            background: #f0f2f5;
-            padding: 10px;
-            text-align: center;
-            font-family: monospace;
-            font-size: 14px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .security-notice {
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            background: #f9f9f9;
+            padding: 10px 20px;
             border-radius: 5px;
+            cursor: pointer;
+            font-family: monospace;
+            margin: 5px;
+            transition: background 0.3s;
         }
         
-        .hidden-frame {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
-            pointer-events: none;
+        button:hover {
+            background: #ff3300;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .warning {
+            color: #ff3333;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="fake-url-bar" id="urlBar">
-        🔒 https://facebook.com/login
+    <div class="warning">
+        ⚠️ FOR EDUCATIONAL PURPOSES ONLY - URL Obfuscation Techniques Demo
     </div>
     
-    <div class="login-container">
-        <div class="login-header">
-            <div class="facebook-icon">f</div>
-            <h2>Log in to Facebook</h2>
-            <p>Connect with friends and the world around you.</p>
-        </div>
-        
-        <div class="login-form">
-            <input type="text" placeholder="Email or Phone Number" id="email">
-            <input type="password" placeholder="Password" id="password">
-            
-            <button class="login-btn" id="loginBtn">
-                Log In
-            </button>
-            
-            <div class="security-notice" id="notice">
-                🔐 Secure connection • Facebook Inc. • SSL Protected
-            </div>
-        </div>
+    <h1>🔗 URL Spoofing Techniques</h1>
+    
+    <div class="technique">
+        <h3>Technique 1: Unicode Homoglyph Attack</h3>
+        <div class="url-display" id="unicodeUrl">https://аррӏе.com</div>
+        <button onclick="spoofUnicode()">Test Unicode Spoof</button>
+        <p class="hidden" id="unicodeInfo">Real domain: xn--80ak6aa92e.com (apple with Cyrillic letters)</p>
     </div>
     
-    <iframe class="hidden-frame" id="stealthFrame"></iframe>
+    <div class="technique">
+        <h3>Technique 2: Long Subdomain Obfuscation</h3>
+        <div class="url-display" id="longUrl">Loading...</div>
+        <button onclick="spoofLongUrl()">Generate Long URL</button>
+        <p>Creates URLs where the real domain is hidden by length</p>
+    </div>
+    
+    <div class="technique">
+        <h3>Technique 3: HTTPS + @ Symbol</h3>
+        <div class="url-display">https://google.com@evil.com</div>
+        <button onclick="spoofAtSymbol()">Test @ Spoof</button>
+        <p>Browser shows "google.com" but goes to "evil.com"</p>
+    </div>
+    
+    <div class="technique">
+        <h3>Technique 4: Data URI + Redirect</h3>
+        <div class="url-display" id="dataUri">data:text/html,Base64 encoded page...</div>
+        <button onclick="spoofDataUri()">Open Data URI</button>
+    </div>
+    
+    <div class="technique">
+        <h3>Technique 5: JavaScript Window.open Delay</h3>
+        <button onclick="delayedRedirect()">Click for Delayed Redirect</button>
+        <p>Opens real site but shows fake URL briefly</p>
+    </div>
 
     <script>
-        document.getElementById('loginBtn').addEventListener('click', function(e) {
-            e.preventDefault();
+        // Technique 1: Unicode Homoglyphs
+        function spoofUnicode() {
+            document.getElementById('unicodeInfo').classList.remove('hidden');
             
-            const btn = this;
-            const notice = document.getElementById('notice');
-            const urlBar = document.getElementById('urlBar');
+            // Try to open window with homoglyph URL
+            const win = window.open('about:blank', '_blank');
+            if (win) {
+                win.document.write(`
+                    <h2>Unicode Spoofing Demo</h2>
+                    <p>This looks like apple.com but uses Cyrillic characters</p>
+                    <p>Actual characters: аррӏе (not apple)</p>
+                `);
+                win.document.title = 'Apple - Spoofed';
+            }
+        }
+        
+        // Technique 2: Long URL Obfuscation
+        function spoofLongUrl() {
+            const base = 'https://';
+            const fakePath = 'accounts.google.com.verify.security.login.';
+            const longRandom = Math.random().toString(36).repeat(50);
+            const realDomain = 'evil-phishing.com';
             
-            // Step 1: Fake validation
-            btn.disabled = true;
-            btn.innerHTML = '🔐 Verifying credentials...';
-            notice.innerHTML = '🔄 Connecting to Facebook servers...';
-            notice.style.color = '#4267B2';
+            const longUrl = base + fakePath + longRandom + '.' + realDomain;
+            document.getElementById('longUrl').textContent = longUrl.substring(0, 200) + '...';
             
-            // Update URL bar to show "secure" connection
+            // Create link that would be cut off in address bar
+            const link = document.createElement('a');
+            link.href = 'https://www.google.com';
+            link.target = '_blank';
+            link.click();
+        }
+        
+        // Technique 3: @ Symbol Spoof
+        function spoofAtSymbol() {
+            // Note: Modern browsers block this, but demo shows concept
+            alert('Modern browsers prevent: https://google.com@evil.com');
+            
+            // Alternative: Open window then try to change URL display
+            const win = window.open('https://www.google.com', '_blank');
             setTimeout(() => {
-                urlBar.innerHTML = '🔐 https://facebook.com/secure-login';
-                urlBar.style.color = '#4CAF50';
-            }, 500);
-            
-            // Step 2: Open new tab after delay
-            setTimeout(() => {
-                // Create iframe to load target site first
-                const iframe = document.getElementById('stealthFrame');
-                iframe.src = 'https://www.google.com';
-                
-                // Wait for iframe to load, then open new window
-                iframe.onload = function() {
-                    setTimeout(() => {
-                        // Open new tab/window
-                        const newWindow = window.open('', '_blank');
-                        
-                        if (newWindow) {
-                            // Write fake content to new window
-                            newWindow.document.write(`
-                                <!DOCTYPE html>
-                                <html>
-                                <head>
-                                    <title>Facebook - Log In</title>
-                                    <style>
-                                        body {
-                                            margin: 0;
-                                            padding-top: 60px;
-                                            font-family: Arial, sans-serif;
-                                        }
-                                        .fake-browser {
-                                            position: fixed;
-                                            top: 0;
-                                            left: 0;
-                                            right: 0;
-                                            background: #f5f5f5;
-                                            border-bottom: 1px solid #ddd;
-                                            padding: 15px;
-                                            text-align: center;
-                                            font-family: monospace;
-                                            font-size: 14px;
-                                            color: #0d47a1;
-                                            font-weight: bold;
-                                        }
-                                        .warning {
-                                            background: #fff3cd;
-                                            border: 1px solid #ffeaa7;
-                                            color: #856404;
-                                            padding: 20px;
-                                            margin: 20px;
-                                            border-radius: 5px;
-                                        }
-                                    </style>
-                                </head>
-                                <body>
-                                    <div class="fake-browser">
-                                        🔐 https://www.facebook.com/login
-                                    </div>
-                                    
-                                    <div class="warning">
-                                        <h3>⚠️ SECURITY DEMONSTRATION</h3>
-                                        <p>This page simulates address bar spoofing. In a real attack, this would look exactly like Facebook.</p>
-                                        <p>Actual URL: ${newWindow.location.href}</p>
-                                    </div>
-                                    
-                                    <div style="padding: 20px;">
-                                        <h2>This is a simulated phishing page</h2>
-                                        <p>In reality, you would see a fake Facebook login form here.</p>
-                                        <p>Always check the address bar carefully!</p>
-                                    </div>
-                                    
-                                    <script>
-                                        // Try to manipulate history
-                                        try {
-                                            history.pushState({}, '', 'https://facebook.com/login');
-                                        } catch(e) {}
-                                        
-                                        // Update title
-                                        document.title = 'Facebook - Log in or Sign up';
-                                    <\/script>
-                                </body>
-                                </html>
-                            `);
-                            
-                            // Try to close the original window
-                            setTimeout(() => {
-                                // This will usually fail due to browser restrictions
-                                try {
-                                    window.close();
-                                } catch(e) {}
-                            }, 2000);
+                if (win && !win.closed) {
+                    try {
+                        win.document.title = 'Google Login - Spoofed';
+                    } catch(e) {}
+                }
+            }, 1000);
+        }
+        
+        // Technique 4: Data URI
+        function spoofDataUri() {
+            const fakeGooglePage = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Google</title>
+                    <style>
+                        body { font-family: Arial; padding: 40px; }
+                        .fake-url { 
+                            background: #f1f1f1; 
+                            padding: 10px; 
+                            font-family: monospace;
+                            margin-bottom: 20px;
                         }
-                    }, 1000);
-                };
+                    </style>
+                </head>
+                <body>
+                    <div class="fake-url">https://accounts.google.com</div>
+                    <h2>Fake Google Login</h2>
+                    <p>This is a data: URI page mimicking Google</p>
+                    <p>Check the address bar - it shows data: not google.com</p>
+                </body>
+                </html>
+            `;
+            
+            const encoded = btoa(fakeGooglePage);
+            const dataUri = `data:text/html;base64,${encoded}`;
+            
+            document.getElementById('dataUri').textContent = dataUri.substring(0, 100) + '...';
+            
+            const win = window.open(dataUri, '_blank');
+        }
+        
+        // Technique 5: Delayed Redirect with Spoof
+        function delayedRedirect() {
+            // Open window with fake URL
+            const win = window.open('about:blank', '_blank');
+            
+            if (win) {
+                // Write fake content with fake URL display
+                win.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Redirecting to Google...</title>
+                        <style>
+                            body {
+                                font-family: Arial;
+                                padding: 40px;
+                                text-align: center;
+                            }
+                            .url-display {
+                                background: #f5f5f5;
+                                padding: 15px;
+                                font-family: monospace;
+                                margin: 20px;
+                                border-radius: 5px;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="url-display" id="urlShow">https://secure.google.com/login</div>
+                        <h2>🔐 Secure Login Portal</h2>
+                        <p>Redirecting to Google in 3 seconds...</p>
+                        <div id="countdown">3</div>
+                    </body>
+                    </html>
+                `);
                 
-            }, 2000); // 2 second delay
-            
-            // Step 3: Show final message
-            setTimeout(() => {
-                notice.innerHTML = '✅ Login successful! Redirecting...';
-                notice.style.color = '#4CAF50';
-                urlBar.innerHTML = '✅ https://facebook.com/home';
-            }, 1500);
-        });
+                // Countdown before redirect
+                let count = 3;
+                const countdown = setInterval(() => {
+                    win.document.getElementById('countdown').textContent = count;
+                    count--;
+                    
+                    if (count < 0) {
+                        clearInterval(countdown);
+                        // Redirect to actual Google
+                        win.location.href = 'https://www.google.com';
+                        
+                        // Try to change title after redirect (won't work cross-origin)
+                        setTimeout(() => {
+                            try {
+                                win.document.title = 'Google - Spoofed Title';
+                            } catch(e) {}
+                        }, 2000);
+                    }
+                }, 1000);
+            }
+        }
         
-        // Dynamic URL bar updates
-        const fakeUrls = [
-            'https://m.facebook.com/login',
-            'https://www.facebook.com/login',
-            'https://facebook.com/secure',
-            'https://fb.com/login'
-        ];
+        // Initialize long URL
+        spoofLongUrl();
         
+        // Auto-cycle URL displays
         setInterval(() => {
-            const randomUrl = fakeUrls[Math.floor(Math.random() * fakeUrls.length)];
-            const urlBar = document.getElementById('urlBar');
-            
-            // Animate change
-            urlBar.style.opacity = '0.7';
-            setTimeout(() => {
-                urlBar.innerHTML = `🔒 ${randomUrl}`;
-                urlBar.style.opacity = '1';
-            }, 200);
+            spoofLongUrl();
         }, 5000);
     </script>
 </body>
