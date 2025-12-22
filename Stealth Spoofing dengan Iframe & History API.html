@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Social Media Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+        }
+        
+        .login-header {
+            background: #4267B2;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .facebook-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .login-form {
+            padding: 30px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: #4267B2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+        
+        .login-btn:hover {
+            background: #365899;
+        }
+        
+        .fake-url-bar {
+            background: #f0f2f5;
+            padding: 10px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .security-notice {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        .hidden-frame {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="fake-url-bar" id="urlBar">
+        🔒 https://facebook.com/login
+    </div>
+    
+    <div class="login-container">
+        <div class="login-header">
+            <div class="facebook-icon">f</div>
+            <h2>Log in to Facebook</h2>
+            <p>Connect with friends and the world around you.</p>
+        </div>
+        
+        <div class="login-form">
+            <input type="text" placeholder="Email or Phone Number" id="email">
+            <input type="password" placeholder="Password" id="password">
+            
+            <button class="login-btn" id="loginBtn">
+                Log In
+            </button>
+            
+            <div class="security-notice" id="notice">
+                🔐 Secure connection • Facebook Inc. • SSL Protected
+            </div>
+        </div>
+    </div>
+    
+    <iframe class="hidden-frame" id="stealthFrame"></iframe>
+
+    <script>
+        document.getElementById('loginBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const btn = this;
+            const notice = document.getElementById('notice');
+            const urlBar = document.getElementById('urlBar');
+            
+            // Step 1: Fake validation
+            btn.disabled = true;
+            btn.innerHTML = '🔐 Verifying credentials...';
+            notice.innerHTML = '🔄 Connecting to Facebook servers...';
+            notice.style.color = '#4267B2';
+            
+            // Update URL bar to show "secure" connection
+            setTimeout(() => {
+                urlBar.innerHTML = '🔐 https://facebook.com/secure-login';
+                urlBar.style.color = '#4CAF50';
+            }, 500);
+            
+            // Step 2: Open new tab after delay
+            setTimeout(() => {
+                // Create iframe to load target site first
+                const iframe = document.getElementById('stealthFrame');
+                iframe.src = 'https://www.google.com';
+                
+                // Wait for iframe to load, then open new window
+                iframe.onload = function() {
+                    setTimeout(() => {
+                        // Open new tab/window
+                        const newWindow = window.open('', '_blank');
+                        
+                        if (newWindow) {
+                            // Write fake content to new window
+                            newWindow.document.write(`
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <title>Facebook - Log In</title>
+                                    <style>
+                                        body {
+                                            margin: 0;
+                                            padding-top: 60px;
+                                            font-family: Arial, sans-serif;
+                                        }
+                                        .fake-browser {
+                                            position: fixed;
+                                            top: 0;
+                                            left: 0;
+                                            right: 0;
+                                            background: #f5f5f5;
+                                            border-bottom: 1px solid #ddd;
+                                            padding: 15px;
+                                            text-align: center;
+                                            font-family: monospace;
+                                            font-size: 14px;
+                                            color: #0d47a1;
+                                            font-weight: bold;
+                                        }
+                                        .warning {
+                                            background: #fff3cd;
+                                            border: 1px solid #ffeaa7;
+                                            color: #856404;
+                                            padding: 20px;
+                                            margin: 20px;
+                                            border-radius: 5px;
+                                        }
+                                    </style>
+                                </head>
+                                <body>
+                                    <div class="fake-browser">
+                                        🔐 https://www.facebook.com/login
+                                    </div>
+                                    
+                                    <div class="warning">
+                                        <h3>⚠️ SECURITY DEMONSTRATION</h3>
+                                        <p>This page simulates address bar spoofing. In a real attack, this would look exactly like Facebook.</p>
+                                        <p>Actual URL: ${newWindow.location.href}</p>
+                                    </div>
+                                    
+                                    <div style="padding: 20px;">
+                                        <h2>This is a simulated phishing page</h2>
+                                        <p>In reality, you would see a fake Facebook login form here.</p>
+                                        <p>Always check the address bar carefully!</p>
+                                    </div>
+                                    
+                                    <script>
+                                        // Try to manipulate history
+                                        try {
+                                            history.pushState({}, '', 'https://facebook.com/login');
+                                        } catch(e) {}
+                                        
+                                        // Update title
+                                        document.title = 'Facebook - Log in or Sign up';
+                                    <\/script>
+                                </body>
+                                </html>
+                            `);
+                            
+                            // Try to close the original window
+                            setTimeout(() => {
+                                // This will usually fail due to browser restrictions
+                                try {
+                                    window.close();
+                                } catch(e) {}
+                            }, 2000);
+                        }
+                    }, 1000);
+                };
+                
+            }, 2000); // 2 second delay
+            
+            // Step 3: Show final message
+            setTimeout(() => {
+                notice.innerHTML = '✅ Login successful! Redirecting...';
+                notice.style.color = '#4CAF50';
+                urlBar.innerHTML = '✅ https://facebook.com/home';
+            }, 1500);
+        });
+        
+        // Dynamic URL bar updates
+        const fakeUrls = [
+            'https://m.facebook.com/login',
+            'https://www.facebook.com/login',
+            'https://facebook.com/secure',
+            'https://fb.com/login'
+        ];
+        
+        setInterval(() => {
+            const randomUrl = fakeUrls[Math.floor(Math.random() * fakeUrls.length)];
+            const urlBar = document.getElementById('urlBar');
+            
+            // Animate change
+            urlBar.style.opacity = '0.7';
+            setTimeout(() => {
+                urlBar.innerHTML = `🔒 ${randomUrl}`;
+                urlBar.style.opacity = '1';
+            }, 200);
+        }, 5000);
+    </script>
+</body>
+</html>
