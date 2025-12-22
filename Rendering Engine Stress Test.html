@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rendering Stress Test - Research</title>
+    <style>
+        .test-container {
+            border: 2px solid #007bff;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+        }
+        .stress-element {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: red;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="test-container">
+    <h2>Browser Rendering Engine Stress Test</h2>
+    <p><strong>Tujuan:</strong> Test batasan rendering engine, bukan crash browser.</p>
+    
+    <button onclick="testCSSComplexity()">Test CSS Complexity</button>
+    <button onclick="testAnimationStress()">Test Animation Engine</button>
+    <button onclick="testLayoutThrashing()">Test Layout Thrashing</button>
+    
+    <div id="renderResults"></div>
+</div>
+
+<script>
+function testCSSComplexity() {
+    const results = document.getElementById('renderResults');
+    results.innerHTML = '<h3>Testing CSS Engine Complexity Limits</h3>';
+    
+    // Create extremely complex CSS selectors
+    const style = document.createElement('style');
+    let complexCSS = '';
+    
+    // Generate deeply nested selectors
+    for(let depth = 1; depth <= 20; depth++) {
+        let selector = '';
+        for(let i = 0; i < depth; i++) {
+            selector += ` div`;
+        }
+        complexCSS += `${selector} { color: hsl(${depth * 18}, 100%, 50%); }\n`;
+    }
+    
+    // Generate many pseudo-classes
+    for(let i = 0; i < 1000; i++) {
+        complexCSS += `
+            .test-${i}:nth-child(${i % 10 + 1}):hover:focus:not(.disabled) {
+                transform: rotate(${i % 360}deg);
+            }
+        `;
+    }
+    
+    style.textContent = complexCSS;
+    document.head.appendChild(style);
+    
+    results.innerHTML += `<p>Added ${complexCSS.split('}').length} CSS rules</p>`;
+    
+    // Create elements to match selectors
+    const container = document.createElement('div');
+    for(let i = 0; i < 100; i++) {
+        const div = document.createElement('div');
+        div.className = `test-${i}`;
+        div.textContent = `Element ${i}`;
+        container.appendChild(div);
+    }
+    document.body.appendChild(container);
+}
+
+function testAnimationStress() {
+    const results = document.getElementById('renderResults');
+    results.innerHTML = '<h3>Testing Animation Engine Limits</h3>';
+    
+    // Create many concurrent animations
+    const animationCount = 500;
+    let created = 0;
+    
+    for(let i = 0; i < animationCount; i++) {
+        const element = document.createElement('div');
+        element.className = 'stress-element';
+        element.style.left = `${Math.random() * 100}vw`;
+        element.style.top = `${Math.random() * 100}vh`;
+        
+        // Complex animation
+        const animation = element.animate([
+            { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
+            { transform: `translate(${Math.random() * 200}px, ${Math.random() * 200}px) rotate(${Math.random() * 360}deg)`, opacity: 0.5 },
+            { transform: 'translate(0, 0) rotate(360deg)', opacity: 1 }
+        ], {
+            duration: 1000 + Math.random() * 2000,
+            iterations: Infinity,
+            direction: 'alternate'
+        });
+        
+        document.body.appendChild(element);
+        created++;
+    }
+    
+    results.innerHTML += `<p>Created ${created} concurrent animations</p>`;
+    
+    // Monitor animation performance
+    const observer = new PerformanceObserver((list) => {
+        list.getEntries().forEach(entry => {
+            if(entry.duration > 50) { // Long frame
+                results.innerHTML += `<p style="color:orange">Long animation frame: ${entry.duration.toFixed(2)}ms</p>`;
+            }
+        });
+    });
+    
+    observer.observe({ entryTypes: ['animation'] });
+}
+
+function testLayoutThrashing() {
+    const results = document.getElementById('renderResults');
+    results.innerHTML = '<h3>Testing Layout/Reflow Behavior</h3>';
+    
+    // Create layout thrashing scenario
+    const elements = [];
+    
+    // Create many positioned elements
+    for(let i = 0; i < 1000; i++) {
+        const div = document.createElement('div');
+        div.style.cssText = `
+            position: absolute;
+            width: ${10 + Math.random() * 50}px;
+            height: ${10 + Math.random() * 50}px;
+            left: ${Math.random() * 100}vw;
+            top: ${Math.random() * 100}vh;
+            background: hsl(${Math.random() * 360}, 70%, 70%);
+        `;
+        document.body.appendChild(div);
+        elements.push(div);
+    }
+    
+    // Force synchronous layout thrashing
+    let thrashCount = 0;
+    const thrashInterval = setInterval(() => {
+        elements.forEach((el, i) => {
+            // Read layout property (forces layout)
+            const width = el.offsetWidth;
+            // Write layout property (triggers reflow)
+            el.style.width = `${width + 1}px`;
+            
+            // Move element
+            el.style.left = `${(parseFloat(el.style.left) + 1) % 100}vw`;
+        });
+        
+        thrashCount++;
+        results.innerHTML = `<p>Layout thrash cycles: ${thrashCount}</p>`;
+        
+        if(thrashCount >= 100) {
+            clearInterval(thrashInterval);
+            results.innerHTML += `<p>Layout thrashing test completed</p>`;
+        }
+    }, 16); // ~60fps
+}
+</script>
+
+</body>
+</html>
