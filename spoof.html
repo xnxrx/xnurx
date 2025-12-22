@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<button onclick="openFullscreenApp()">Buka Fullscreen "App Mode"</button>
+
+<script>
+function openFullscreenApp() {
+    // Buka dengan minimal chrome
+    const features = [
+        'fullscreen=yes',
+        'location=no',
+        'menubar=no',
+        'toolbar=no',
+        'status=no',
+        'scrollbars=yes'
+    ].join(',');
+    
+    const win = window.open('about:blank', '_blank', features);
+    
+    // Write fake content
+    win.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>System Alert</title>
+            <style>
+                body {
+                    margin: 0;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    height: 100vh;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                }
+                .alert-box {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    text-align: center;
+                    max-width: 400px;
+                }
+                .logo {
+                    font-size: 48px;
+                    margin-bottom: 20px;
+                }
+                h2 {
+                    color: #333;
+                    margin-bottom: 20px;
+                }
+                p {
+                    color: #666;
+                    line-height: 1.6;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="alert-box">
+                <div class="logo">⚠️</div>
+                <h2>Security Alert</h2>
+                <p>Your account requires verification. Please enter your credentials to continue.</p>
+                <input type="text" placeholder="Username" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px;">
+                <input type="password" placeholder="Password" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px;">
+                <button style="background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 8px; width: 100%; margin-top: 20px;">Continue</button>
+            </div>
+        </body>
+        </html>
+    `);
+    win.document.close();
+    
+    // Coba request fullscreen
+    setTimeout(() => {
+        if (win.document.documentElement.requestFullscreen) {
+            win.document.documentElement.requestFullscreen();
+        }
+    }, 1000);
+}
+</script>
+</body>
+</html>
