@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network Stack Test - Research</title>
+</head>
+<body>
+
+<h1>Browser Network Stack Boundary Testing</h1>
+
+<div style="background: #fff3cd; padding: 15px; margin: 20px; border-radius: 8px;">
+    <strong>⚠️ PENTING:</strong> Test ini membuat network requests. 
+    Hanya test ke server yang Anda kontrol atau localhost.
+</div>
+
+<button onclick="testConnectionLimits()">Test Connection Limits</button>
+<button onclick="testWebSocketStress()">Test WebSocket Limits</button>
+<button onclick="testFetchAbuse()">Test Fetch API Limits</button>
+
+<div id="networkResults" style="margin-top: 20px;"></div>
+
+<script>
+async function testConnectionLimits() {
+    const results = document.getElementById('networkResults');
+    results.innerHTML = '<h3>Testing HTTP Connection Management</h3>';
+    
+    // Test concurrent connections
+    const concurrentRequests = 100;
+    const promises = [];
+    
+    for(let i = 0; i < concurrentRequests; i++) {
+        // Request to a non-existent endpoint (will fail quickly)
+        const promise = fetch(`/test-${Date.now()}-${i}`, {
+            method: 'GET',
+            mode: 'no-cors',
+            cache: 'no-store'
+        }).catch(e => ({ error: e.message }));
+        
+        promises.push(promise);
+    }
+    
+    const start = performance.now();
+    
+    try {
+        const responses = await Promise.allSettled(promises);
+        const duration = performance.now() - start;
+        
+        const succeeded = responses.filter(r => r.status === 'fulfilled').length;
+        const failed = responses.filter(r => r.status === 'rejected').length;
+        
+        results.innerHTML += `
+            <p>Concurrent requests: ${concurrentRequests}</p>
+            <p>Succeeded: ${succeeded}, Failed: ${failed}</p>
+            <p>Total time: ${duration.toFixed(2)}ms</p>
+            <p>Requests/sec: ${(concurrentRequests / (duration / 1000)).toFixed(0)}</p>
+        `;
+        
+    } catch(e) {
+        results.innerHTML += `<p style="color:red">Test failed: ${e.message}</p>`;
+    }
+    
+    // Test keep-alive connections
+    results.innerHTML += '<h4>Testing Keep-Alive Connections...</h4>';
+    
+    const keepAliveRequests = 50;
+    const keepAlivePromises = [];
+    
+    for(let i = 0; i < keepAliveRequests; i++) {
+        const promise = fetch(window.location.href, {
+            headers: { 'Connection': 'keep-alive' }
+        }).then(r => r.text()).catch(e => null);
+        
+        keepAlivePromises.push(promise);
+    }
+    
+    const keepAliveStart = performance.now();
+    await Promise.allSettled(keepAlivePromises);
+    const keepAliveDuration = performance.now() - keepAliveStart;
+    
+    results.innerHTML += `
+        <p>Keep-alive requests: ${keepAliveRequests}</p>
+        <p>Duration: ${keepAliveDuration.toFixed(2)}ms</p>
+    `;
+}
+
+function testWebSocketStress() {
+    const results = document.getElementById('networkResults');
+    results.innerHTML = '<h3>Testing WebSocket Limits</h3>';
+    
+    // Try to create many WebSocket connections
+    const wsConnections = [];
+    const maxConnections = 50;
+    
+    for(let i = 0; i < maxConnections; i++) {
+        try {
+            // Connect to echo server (or will fail)
+            const ws = new WebSocket('wss://echo.websocket.org');
+            
+            ws.onopen = () => {
+                results.innerHTML += `<p>WS ${i}: Connected</p>`;
+                ws.send(`test ${i}`);
+            };
+            
+            ws.onerror = () => {
+                results.innerHTML += `<p>WS ${i}: Failed</p>`;
+            };
+            
+            wsConnections.push(ws);
+            
+        } catch(e) {
+            results.innerHTML += `<p>WS ${i}: ${e.message}</p>`;
+            break;
+        }
+    }
+    
+    results.innerHTML += `<p>WebSocket attempts: ${wsConnections.length}</p>`;
+    
+    // Test message throughput
+    if(wsConnections.length > 0) {
+        const testWs = wsConnections[0];
+        const messageCount = 1000;
+        let received = 0;
+        
+        testWs.onmessage = () => {
+            received++;
+            if(received >= messageCount) {
+                results.innerHTML += `<p>Received ${received} messages</p>`;
+            }
+        };
+        
+        // Send many messages
+        for(let i = 0; i < messageCount; i++) {
+            testWs.send(`msg${i}:${'x'.repeat(1024)}`); // 1KB messages
+        }
+    }
+    
+    // Clean up
+    setTimeout(() => {
+        wsConnections.forEach(ws => {
+            try { ws.close(); } catch(e) {}
+        });
+        results.innerHTML += `<p>Closed all WebSocket connections</p>`;
+    }, 5000);
+}
+
+async function testFetchAbuse() {
+    const results = document.getElementById('networkResults');
+    results.innerHTML = '<h3>Testing Fetch API Edge Cases</h3>';
+    
+    // Test 1: Large headers
+    results.innerHTML += '<h4>Testing Header Size Limits...</h4>';
+    
+    const largeHeader = 'X-Test: ' + 'x'.repeat(1024 * 10); // 10KB header
+    
+    try {
+        await fetch(window.location.href, {
+            headers: {
+                'X-Large-Header': 'x'.repeat(1024 * 8) // 8KB
+            }
+        });
+        results.innerHTML += `<p>Large header accepted (8KB)</p>`;
+    } catch(e) {
+        results.innerHTML += `<p>Large header rejected: ${e.message}</p>`;
+    }
+    
+    // Test 2: Many headers
+    results.innerHTML += '<h4>Testing Many Headers...</h4>';
+    
+    const headers = {};
+    for(let i = 0; i < 100; i++) {
+        headers[`X-Custom-${i}`] = `value${i}`;
+    }
+    
+    try {
+        await fetch(window.location.href, { headers });
+        results.innerHTML += `<p>Many headers (100) accepted</p>`;
+    } catch(e) {
+        results.innerHTML += `<p>Many headers rejected: ${e.message}</p>`;
+    }
+    
+    // Test 3: Streaming response
+    results.innerHTML += '<h4>Testing Streaming Response...</h4>';
+    
+    try {
+        const response = await fetch(window.location.href);
+        const reader = response.body?.getReader();
+        
+        if(reader) {
+            let chunks = 0;
+            let totalBytes = 0;
+            
+            while(true) {
+                const { done, value } = await reader.read();
+                if(done) break;
+                
+                chunks++;
+                totalBytes += value?.length || 0;
+                
+                if(chunks % 10 === 0) {
+                    results.innerHTML += `<p>Chunks: ${chunks}, Bytes: ${totalBytes}</p>`;
+                }
+            }
+            
+            results.innerHTML += `<p>Streaming complete: ${chunks} chunks, ${totalBytes} bytes</p>`;
+        }
+    } catch(e) {
+        results.innerHTML += `<p>Streaming failed: ${e.message}</p>`;
+    }
+}
+</script>
+
+</body>
+</html>
