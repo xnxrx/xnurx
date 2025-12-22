@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<!-- fake-tab-spoofing.html - HANYA untuk: your-research-domain.test -->
+<html>
+<head>
+    <title>Fake Tab Spoofing Research</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            color: #202124;
+        }
+        
+        .research-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border-left: 6px solid #4285f4;
+        }
+        
+        h1 {
+            color: #202124;
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        h1 .chrome-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #4285f4 0%, #34a853 33%, #fbbc05 66%, #ea4335 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            color: #5f6368;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .warning-banner {
+            background: #fef7e0;
+            border: 1px solid #fbbc05;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 25px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .warning-banner::before {
+            content: "⚠️";
+            font-size: 20px;
+        }
+        
+        .technique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .technique-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            transition: all 0.3s ease;
+            border: 1px solid #e8eaed;
+        }
+        
+        .technique-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .tech-title {
+            font-size: 18px;
+            color: #202124;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tech-desc {
+            color: #5f6368;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .tech-btn {
+            width: 100%;
+            padding: 14px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .tech-btn:hover {
+            background: #0c63da;
+        }
+        
+        .tech-btn.danger {
+            background: #ea4335;
+        }
+        
+        .tech-btn.danger:hover {
+            background: #d32f2f;
+        }
+        
+        .result-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            display: none;
+        }
+        
+        .result-panel.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .log-output {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8eaed;
+        }
+        
+        .log-time {
+            color: #5f6368;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .log-message {
+            color: #202124;
+        }
+        
+        .log-success { color: #34a853; }
+        .log-warning { color: #fbbc05; }
+        .log-danger { color: #ea4335; }
+        .log-info { color: #4285f4; }
+        
+        /* Fake Tab Overlay */
+        .fake-tab-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255,255,255,0.98);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .fake-tabs-bar {
+            background: #202124;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #3c4043;
+        }
+        
+        .fake-tab {
+            background: #3c4043;
+            color: #e8eaed;
+            padding: 10px 20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 200px;
+            cursor: pointer;
+        }
+        
+        .fake-tab.active {
+            background: #292a2d;
+            color: white;
+        }
+        
+        .fake-tab .favicon {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            background: #4285f4;
+        }
+        
+        .fake-tab .close {
+            margin-left: auto;
+            opacity: 0.6;
+        }
+        
+        .fake-tab .close:hover {
+            opacity: 1;
+        }
+        
+        .fake-browser-ui {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .fake-omnibox {
+            background: #292a2d;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #3c4043;
+        }
+        
+        .fake-omnibox .security-status {
+            background: #0c6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .fake-omnibox .url-display {
+            flex: 1;
+            background: #3c4043;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .fake-content-area {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: white;
+        }
+        
+        .google-logo {
+            font-size: 72px;
+            font-weight: 400;
+            color: #4285f4;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .google-search-box {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: box-shadow 0.2s;
+        }
+        
+        .google-search-box:hover {
+            box-shadow: 0 1px 6px rgba(32,33,36,0.28);
+        }
+        
+        .close-overlay-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(32,33,36,0.9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 10001;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .close-overlay-btn:hover {
+            background: #202124;
+        }
+        
+        .loading-sim {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4285f4;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .delay-info {
+            background: #e8f0fe;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e8eaed;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #0c6;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #5f6368;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .step .circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e8eaed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .step.active .circle {
+            background: #4285f4;
+            color: white;
+        }
+        
+        .step.completed .circle {
+            background: #34a853;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="research-container">
+        <header>
+            <h1>
+                <span class="chrome-icon">C</span>
+                Fake Tab UI Spoofing Research
+            </h1>
+            <p class="subtitle">Delayed Google.com origin appearance in new tabs</p>
+            <div class="warning-banner">
+                <strong>FOR ACADEMIC RESEARCH ONLY</strong> - This demonstrates tab spoofing techniques for security education. Only test on domains you own.
+            </div>
+        </header>
+        
+        <div class="technique-grid">
+            <!-- Technique 1 -->
+            <div class="technique-card">
+                <h3 class="tech-title">⏱️ Delayed Origin Display</h3>
+                <p class="tech-desc">
+                    Opens new tab with loading animation, then displays fake Google.com origin after delay. Exploits user trust in loading sequences.
+                </p>
+                <button class="tech-btn" onclick="testDelayedOrigin()">
+                    <span>🔍 Test Technique</span>
+                </button>
+            </div>
+            
+            <!-- Technique 2 -->
+            <div class="technique-card">
+                <h3 class="tech-title">🔄 Progressive UI Spoof</h3>
+                <p class="tech-desc">
+                    Gradually builds browser UI elements (tabs, omnibox, security indicators) to mimic legitimate Chrome tab.
+                </p>
+                <button class="tech-btn" onclick="testProgressiveSpoof()">
+                    <span>🧪 Test Technique</span>
+                </button>
+            </div>
+            
+            <!-- Technique 3 -->
+            <div class="technique-card">
+                <h3 class="tech-title">🎭 Multi-Tab Context Switch</h3>
+                <p class="tech-desc">
+                    Creates multiple fake tabs and switches between them, simulating real browser behavior with spoofed origins.
+                </p>
+                <button class="tech-btn danger" onclick="testMultiTabSpoof()">
+                    <span>⚠️ Test Technique</span>
+                </button>
+            </div>
+            
+            <!-- Technique 4 -->
+            <div class="technique-card">
+                <h3 class="tech-title">🔗 History State Manipulation</h3>
+                <p class="tech-desc">
+                    Uses history.pushState() to set URL to google.com after page load, while maintaining fake content.
+                </p>
+                <button class="tech-btn" onclick="testHistoryStateSpoof()">
+                    <span>📝 Test Technique</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="result-panel" id="resultPanel">
+            <h2>Research Results</h2>
+            <div class="log-output" id="logOutput">
+                <!-- Logs will appear here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fake Tab Overlay -->
+    <button class="close-overlay-btn" onclick="closeFakeTab()" id="closeOverlayBtn">Close Demo</button>
+    
+    <div class="fake-tab-overlay" id="fakeTabOverlay">
+        <div class="fake-tabs-bar">
+            <div class="fake-tab active" id="mainTab">
+                <div class="favicon"></div>
+                <span>Loading...</span>
+                <span class="close">×</span>
+            </div>
+            <div class="fake-tab" id="secondTab">
+                <div class="favicon" style="background: #34a853;"></div>
+                <span>about:blank</span>
+                <span class="close">×</span>
+            </div>
+        </div>
+        
+        <div class="fake-browser-ui">
+            <div class="fake-omnibox">
+                <div class="security-status" id="securityStatus">
+                    <span>🔒</span>
+                    <span>Secure</span>
+                </div>
+                <div class="url-display" id="urlDisplay">
+                    <span>about:blank</span>
+                </div>
+            </div>
+            
+            <div class="fake-content-area" id="fakeContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Research logging system
+        const logOutput = document.getElementById('logOutput');
+        const resultPanel = document.getElementById('resultPanel');
+        let logCounter = 0;
+        
+        function logResearch(message, type = 'info') {
+            logCounter++;
+            const timestamp = new Date().toLocaleTimeString();
+            const typeClass = `log-${type}`;
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">[${timestamp}]</span>
+                <span class="log-message ${typeClass}">${message}</span>
+            `;
+            
+            logOutput.appendChild(logEntry);
+            resultPanel.classList.add('active');
+            logOutput.scrollTop = logOutput.scrollHeight;
+            
+            // Also log to console
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // Fake tab control
+        const fakeTabOverlay = document.getElementById('fakeTabOverlay');
+        const closeOverlayBtn = document.getElementById('closeOverlayBtn');
+        
+        function showFakeTab() {
+            fakeTabOverlay.style.display = 'flex';
+            closeOverlayBtn.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            logResearch('Fake tab overlay activated', 'warning');
+        }
+        
+        function closeFakeTab() {
+            fakeTabOverlay.style.display = 'none';
+            closeOverlayBtn.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            logResearch('Fake tab overlay closed', 'info');
+        }
+        
+        // === TECHNIQUE 1: DELAYED ORIGIN DISPLAY ===
+        function testDelayedOrigin() {
+            logResearch('=== Testing Delayed Origin Display ===', 'danger');
+            logResearch('Opening fake tab with progressive loading...', 'info');
+            
+            showFakeTab();
+            
+            // Step 1: Show loading state
+            document.getElementById('fakeContent').innerHTML = `
+                <div class="loading-sim">
+                    <div class="loading-spinner"></div>
+                    <h2>Loading google.com...</h2>
+                    <p>Establishing secure connection...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="step-indicator">
+                        <div class="step active" id="step1">
+                            <div class="circle">1</div>
+                            <span>Connecting...</span>
+                        </div>
+                        <div class="step" id="step2">
+                            <div class="circle">2</div>
+                            <span>SSL Handshake</span>
+                        </div>
+                        <div class="step" id="step3">
+                            <div class="circle">3</div>
+                            <span>Loading page</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            logResearch('Step 1: Displaying loading animation', 'info');
+            
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                document.getElementById('progressFill').style.width = `${Math.min(progress, 100)}%`;
+                
+                if (progress >= 30) document.getElementById('step1').classList.add('completed');
+                if (progress >= 60) document.getElementById('step2').classList.add('active');
+                if (progress >= 80) document.getElementById('step3').classList.add('active');
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    document.getElementById('step3').classList.add('completed');
+                    
+                    // Delay before showing Google UI
+                    setTimeout(() => {
+                        simulateGooglePage();
+                    }, 800);
+                }
+            }, 300);
+            
+            function simulateGooglePage() {
+                logResearch('Step 2: Loading complete, showing fake Google.com', 'warning');
+                
+                // Update URL bar to show google.com
+                document.getElementById('urlDisplay').innerHTML = `
+                    <span style="color: #0c6">https://</span>
+                    <span style="color: white">www.google.com</span>
+                    <span style="color: #9aa0a6">/search?q=secure+banking</span>
+                `;
+                
+                document.getElementById('mainTab').innerHTML = `
+                    <div class="favicon" style="background: #4285f4;"></div>
+                    <span>Google Search - secure banking</span>
+                    <span class="close">×</span>
+                `;
+                
+                // Show Google search page
+                document.getElementById('fakeContent').innerHTML = `
+                    <div style="max-width: 700px; margin: 0 auto;">
+                        <div class="google-logo">Google</div>
+                        
+                        <div class="google-search-box">
+                            <span style="color: #9aa0a6">🔍</span>
+                            <input type="text" value="secure banking" style="flex: 1; border: none; outline: none; font-size: 16px;">
+                            <span style="color: #4285f4">⌨️</span>
+                        </div>
+                        
+                        <div style="margin-top: 30px; text-align: center; color: #5f6368;">
+                            <p>Search results for "secure banking"</p>
+                            <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-top: 20px; text-align: left;">
+                                <h3 style="color: #1a0dab; margin-bottom: 8px;">Secure Online Banking | Bank of America</h3>
+                                <p style="color: #5f6368; font-size: 14px;">https://www.bankofamerica.com/online-banking</p>
+                                <p style="color: #3c4043; margin-top: 8px;">Sign in to your Bank of America account securely. Our online banking platform uses...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="delay-info">
+                            <span>⚠️</span>
+                            <div>
+                                <strong>Research Note:</strong> This appears to be google.com in the address bar
+                                but is actually a simulated page. The URL was updated after initial loading.
+                            </div>
+                        </div>
+                        
+                        <button onclick="simulateLoginRedirect()" style="
+                            background: #1a73e8;
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            margin-top: 20px;
+                            cursor: pointer;
+                        ">
+                            Simulate "Sign In" click
+                        </button>
+                    </div>
+                `;
+                
+                logResearch('✅ Fake Google.com page displayed with delayed origin', 'success');
+                logResearch('Address bar shows: https://www.google.com/search?q=secure+banking', 'danger');
+                logResearch('Actual origin: ' + window.location.origin, 'info');
+            }
+            
+            logResearch('Technique analysis: Delayed origin appearance bypasses initial scrutiny', 'warning');
+        }
+        
+        function simulateLoginRedirect() {
+            logResearch('Simulating login redirect from search results...', 'warning');
+            
+            document.getElementById('fakeContent').innerHTML = `
+                <div style="max-width: 500px; margin: 40px auto; text-align: center;">
+                    <div class="loading-spinner"></div>
+                    <h2>Redirecting to Bank of America...</h2>
+                    <p>Please wait while we redirect you to the secure login page.</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; color: #5f6368; font-size: 14px;">
+                        <p>This is a simulation of a phishing attack flow:</p>
+                        <ol style="text-align: left; margin: 20px;">
+                            <li>User searches on fake Google</li>
+                            <li>Clicks bank link in results</li>
+                            <li>Redirected to fake login page</li>
+                        </ol>
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                document.getElementById('urlDisplay').innerHTML = `
+                    <span style="color: #0c6">https://</span>
+                    <span style="color: white">secure.bankofamerica.com</span>
+                    <span style="color: #9aa0a6">/signin</span>
+                `;
+                
+                document.getElementById('fakeContent').innerHTML = `
+                    <div style="max-width: 400px; margin: 40px auto;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <div style="font-size: 32px; color: #0066cc; font-weight: bold; margin-bottom: 10px;">
+                                Bank of America
+                            </div>
+                            <div style="color: #666; font-size: 14px;">Secure Sign In</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: #333;">Online ID</label>
+                                <input type="text" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; color: #333;">Passcode</label>
+                                <input type="password" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            
+                            <button style="width: 100%; padding: 12px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Sign In
+                            </button>
+                        </div>
+                        
+                        <div style="margin-top: 30px; text-align: center; color: #666; font-size: 12px;">
+                            <p>This is a research simulation. No data is collected.</p>
+                        </div>
+                    </div>
+                `;
+                
+                logResearch('✅ Redirected to fake bank login page', 'danger');
+                logResearch('Address bar shows: https://secure.bankofamerica.com/signin', 'danger');
+                logResearch('Actual origin remains: ' + window.location.origin, 'info');
+            }, 2000);
+        }
+        
+        // === TECHNIQUE 2: PROGRESSIVE UI SPOOF ===
+        function testProgressiveSpoof() {
+            logResearch('=== Testing Progressive UI Spoof ===', 'danger');
+            logResearch('Building browser UI elements progressively...', 'info');
+            
+            showFakeTab();
+            
+            document.getElementById('fakeContent').innerHTML = `
+                <div style="padding: 40px; text-align: center;">
+                    <h2>Initializing New Tab...</h2>
+                    <p>Setting up browser environment...</p>
+                </div>
+            `;
+            
+            const steps = [
+                { delay: 500, action: () => {
+                    document.getElementById('securityStatus').innerHTML = `
+                        <span>🔒</span>
+                        <span>Secure</span>
+                    `;
+                    logResearch('Step 1: Security badge displayed', 'info');
+                }},
+                { delay: 1000, action: () => {
+                    document.getElementById('urlDisplay').innerHTML = `
+                        <span style="color: #0c6">https://</span>
+                        <span style="color: white">accounts.google.com</span>
+                        <span style="color: #9aa0a6">/signin</span>
+                    `;
+                    logResearch('Step 2: URL updated to accounts.google.com', 'warning');
+                }},
+                { delay: 1500, action: () => {
+                    document.getElementById('mainTab').innerHTML = `
+                        <div class="favicon" style="background: #0c6;"></div>
+                        <span>Google Account</span>
+                        <span class="close">×</span>
+                    `;
+                    logResearch('Step 3: Tab title updated', 'info');
+                }},
+                { delay: 2000, action: () => {
+                    document.getElementById('fakeContent').innerHTML = `
+                        <div style="max-width: 450px; margin: 40px auto;">
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <div style="font-size: 32px; color: #5f6368; margin-bottom: 10px;">Welcome</div>
+                                <div style="color: #666; font-size: 14px;">to your Google Account</div>
+                            </div>
+                            
+                            <div style="background: #f8f9fa; padding: 25px; border-radius: 8px;">
+                                <h3 style="color: #202124; margin-bottom: 20px;">Sign in</h3>
+                                <input type="email" placeholder="Email or phone" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                                <button style="width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Next
+                                </button>
+                            </div>
+                            
+                            <div style="margin-top: 20px; text-align: center; color: #666; font-size: 12px;">
+                                <p>Progressive UI spoof complete. All elements loaded sequentially.</p>
+                            </div>
+                        </div>
+                    `;
+                    logResearch('✅ Progressive UI spoof complete', 'success');
+                }}
+            ];
+            
+            let currentStep = 0;
+            function executeNextStep() {
+                if (currentStep < steps.length) {
+                    setTimeout(() => {
+                        steps[currentStep].action();
+                        currentStep++;
+                        executeNextStep();
+                    }, steps[currentStep].delay);
+                }
+            }
+            
+            executeNextStep();
+            
+            logResearch('Technique analysis: Progressive loading appears more legitimate', 'warning');
+        }
+        
+        // === TECHNIQUE 3: MULTI-TAB SPOOF ===
+        function testMultiTabSpoof() {
+            logResearch('=== Testing Multi-Tab Context Switch ===', 'danger');
+            logResearch('Creating multiple fake tabs with different origins...', 'info');
+            
+            showFakeTab();
+            
+            // Enable second tab
+            document.getElementById('secondTab').classList.add('active');
+            document.getElementById('secondTab').onclick = () => {
+                document.getElementById('mainTab').classList.remove('active');
+                document.getElementById('secondTab').classList.add('active');
+                showSecondTabContent();
+            };
+            
+            document.getElementById('mainTab').onclick = () => {
+                document.getElementById('secondTab').classList.remove('active');
+                document.getElementById('mainTab').classList.add('active');
+                showMainTabContent();
+            };
+            
+            const tabs = {
+                main: {
+                    title: "Google Drive",
+                    url: "https://drive.google.com",
+                    icon: "#0c6",
+                    content: `
+                        <div style="max-width: 600px; margin: 40px auto;">
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <div style="font-size: 36px; color: #34a853; margin-bottom: 10px;">Google Drive</div>
+                                <div style="color: #666;">Your files are safe with us</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                                <h3>Storage almost full (95%)</h3>
+                                <p>Upgrade your storage plan to continue saving files.</p>
+                                <button style="padding: 10px 20px; background: #34a853; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Upgrade Storage
+                                </button>
+                            </div>
+                        </div>
+                    `
+                },
+                second: {
+                    title: "Gmail",
+                    url: "https://mail.google.com",
+                    icon: "#ea4335",
+                    content: `
+                        <div style="max-width: 800px; margin: 40px auto;">
+                            <div style="border-bottom: 1px solid #ddd; padding-bottom: 20px; margin-bottom: 20px;">
+                                <div style="font-size: 24px; color: #ea4335;">Gmail</div>
+                                <div style="color: #666;">Primary • Social • Promotions</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                                <h3>Security Alert</h3>
+                                <p>New sign-in from Windows in New York, NY</p>
+                                <p>If this wasn't you, secure your account now.</p>
+                                <button style="padding: 10px 20px; background: #ea4335; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Review Activity
+                                </button>
+                            </div>
+                        </div>
+                    `
+                }
+            };
+            
+            function showMainTabContent() {
+                const tab = tabs.main;
+                document.getElementById('urlDisplay').innerHTML = `
+                    <span style="color: #0c6">https://</span>
+                    <span style="color: white">${tab.url.replace('https://', '')}</span>
+                `;
+                document.getElementById('mainTab').innerHTML = `
+                    <div class="favicon" style="background: ${tab.icon};"></div>
+                    <span>${tab.title}</span>
+                    <span class="close">×</span>
+                `;
+                document.getElementById('fakeContent').innerHTML = tab.content;
+                logResearch(`Switched to tab: ${tab.url}`, 'info');
+            }
+            
+            function showSecondTabContent() {
+                const tab = tabs.second;
+                document.getElementById('urlDisplay').innerHTML = `
+                    <span style="color: #0c6">https://</span>
+                    <span style="color: white">${tab.url.replace('https://', '')}</span>
+                `;
+                document.getElementById('secondTab').innerHTML = `
+                    <div class="favicon" style="background: ${tab.icon};"></div>
+                    <span>${tab.title}</span>
+                    <span class="close">×</span>
+                `;
+                document.getElementById('fakeContent').innerHTML = tab.content;
+                logResearch(`Switched to tab: ${tab.url}`, 'info');
+            }
+            
+            // Start with main tab
+            showMainTabContent();
+            
+            // Simulate tab switching after delay
+            setTimeout(() => {
+                document.getElementById('secondTab').click();
+                setTimeout(() => {
+                    document.getElementById('mainTab').click();
+                    logResearch('✅ Multi-tab spoofing demonstration complete', 'success');
+                    logResearch('Users can switch between fake tabs with different origins', 'warning');
+                }, 2000);
+            }, 3000);
+            
+            logResearch('Technique analysis: Multi-tab interface increases legitimacy', 'warning');
+        }
+        
+        // === TECHNIQUE 4: HISTORY STATE MANIPULATION ===
+        function testHistoryStateSpoof() {
+            logResearch('=== Testing History State Manipulation ===', 'danger');
+            logResearch('Using history.pushState to spoof URL...', 'info');
+            
+            // Open real new tab/window
+            const newWindow = window.open('', '_blank', 'width=800,height=600');
+            
+            if (!newWindow) {
+                logResearch('Popup blocked by browser', 'danger');
+                return;
+            }
+            
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>History State Spoofing Research</title>
+                    <style>
+                        body {
+                            font-family: -apple-system, sans-serif;
+                            padding: 40px;
+                            background: white;
+                            color: #202124;
+                        }
+                        .demo-container {
+                            max-width: 600px;
+                            margin: 0 auto;
+                        }
+                        .url-display {
+                            background: #f8f9fa;
+                            padding: 15px;
+                            border-radius: 8px;
+                            font-family: monospace;
+                            margin: 20px 0;
+                            border: 1px solid #e8eaed;
+                        }
+                        .secure-badge {
+                            background: #0c6;
+                            color: white;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                            display: inline-block;
+                            margin-left: 10px;
+                        }
+                        .phase {
+                            padding: 20px;
+                            margin: 20px 0;
+                            border-radius: 8px;
+                            background: #f8f9fa;
+                        }
+                        .phase.complete {
+                            background: #e6f4ea;
+                            border-left: 4px solid #34a853;
+                        }
+                        .phase.active {
+                            background: #e8f0fe;
+                            border-left: 4px solid #1a73e8;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="demo-container">
+                        <h1>History State Manipulation Demo</h1>
+                        
+                        <div class="phase active" id="phase1">
+                            <h3>Phase 1: Initial Load</h3>
+                            <p>Page loaded with actual URL:</p>
+                            <div class="url-display" id="currentUrl">
+                                ${newWindow.location.href}
+                            </div>
+                        </div>
+                        
+                        <div class="phase" id="phase2">
+                            <h3>Phase 2: History Manipulation</h3>
+                            <p>Will use history.pushState to change displayed URL:</p>
+                            <div class="url-display">
+                                https://docs.google.com/document/d/12345
+                                <span class="secure-badge">Secure</span>
+                            </div>
+                        </div>
+                        
+                        <div class="phase" id="phase3">
+                            <h3>Phase 3: Content Spoofing</h3>
+                            <p>Show fake Google Docs interface while URL shows google.com</p>
+                        </div>
+                        
+                        <button onclick="startManipulation()" style="
+                            padding: 12px 24px;
+                            background: #1a73e8;
+                            color: white;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            margin-top: 20px;
+                        ">
+                            Start History Manipulation
+                        </button>
+                        
+                        <div id="result" style="margin-top: 30px; display: none;">
+                            <h3>✅ Manipulation Complete</h3>
+                            <p>Check the browser's address bar and history.</p>
+                            <p>Back/Forward buttons should work with spoofed URLs.</p>
+                        </div>
+                    </div>
+                    
+                    <script>
+                        function startManipulation() {
+                            // Phase 1 complete
+                            document.getElementById('phase1').classList.remove('active');
+                            document.getElementById('phase1').classList.add('complete');
+                            document.getElementById('phase2').classList.add('active');
+                            
+                            setTimeout(() => {
+                                // Manipulate history to show google.com URL
+                                history.pushState(
+                                    {page: 'google-docs'},
+                                    'Google Docs - My Document',
+                                    '/document/d/12345'
+                                );
+                                
+                                // Update displayed URL
+                                document.getElementById('currentUrl').innerHTML = 
+                                    'https://docs.google.com/document/d/12345' + 
+                                    '<span class="secure-badge">Secure</span>';
+                                
+                                // Phase 2 complete
+                                document.getElementById('phase2').classList.remove('active');
+                                document.getElementById('phase2').classList.add('complete');
+                                document.getElementById('phase3').classList.add('active');
+                                
+                                setTimeout(() => {
+                                    // Show fake Google Docs content
+                                    document.body.innerHTML = \`
+                                        <div style="padding: 20px;">
+                                            <div style="background: #f8f9fa; padding: 15px; margin-bottom: 20px; border-radius: 8px; font-family: monospace;">
+                                                https://docs.google.com/document/d/12345
+                                                <span style="background: #0c6; color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-left: 10px;">Secure</span>
+                                            </div>
+                                            
+                                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                                                <div style="font-size: 24px; color: #5f6368;">📄</div>
+                                                <div>
+                                                    <h2 style="margin: 0; color: #202124;">My Document</h2>
+                                                    <p style="margin: 0; color: #5f6368; font-size: 14px;">Last edited 2 minutes ago</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div style="background: white; border: 1px solid #e8eaed; border-radius: 8px; padding: 30px; min-height: 400px;">
+                                                <h1 style="color: #202124; margin-bottom: 20px;">Confidential Document</h1>
+                                                <p style="color: #5f6368; line-height: 1.6;">
+                                                    This appears to be a Google Docs page, but the URL has been manipulated using history.pushState().
+                                                </p>
+                                                
+                                                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                                                    <h3>Research Note:</h3>
+                                                    <p>The address bar shows docs.google.com but this page is actually hosted elsewhere.</p>
+                                                    <p>Browser history will show the spoofed URL.</p>
+                                                    <p>Back/Forward buttons work with the fake URL.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    \`;
+                                    
+                                    document.getElementById('result').style.display = 'block';
+                                    
+                                    // Try back/forward buttons
+                                    window.addEventListener('popstate', (event) => {
+                                        console.log('Location changed to:', document.location.href);
+                                    });
+                                    
+                                }, 1500);
+                                
+                            }, 1500);
+                        }
+                        
+                        // Initialize
+                        document.getElementById('currentUrl').innerHTML = 
+                            window.location.href + ' (actual origin)';
+                    <\/script>
+                </body>
+                </html>
+            `);
+            
+            newWindow.document.close();
+            
+            logResearch('✅ History state manipulation demo opened in new window', 'success');
+            logResearch('Technique uses history.pushState() to spoof displayed URL', 'warning');
+            logResearch('Effect: Address bar shows spoofed URL, back/forward buttons work', 'danger');
+        }
+        
+        // Initialize
+        logResearch('Fake Tab UI Spoofing Research Interface loaded', 'success');
+        logResearch('All tests simulate security research scenarios', 'info');
+        logResearch('Actual origin: ' + window.location.origin, 'info');
+        
+        // Close overlay on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeFakeTab();
+            }
+        });
+    </script>
+</body>
+</html>
