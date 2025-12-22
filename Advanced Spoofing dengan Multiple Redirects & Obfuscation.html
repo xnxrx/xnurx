@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Security Portal</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a237e;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .bank-header {
+            background: #283593;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .bank-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #64ffda;
+        }
+        
+        .security-badge {
+            background: #00c853;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-left: auto;
+        }
+        
+        .main-content {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 0 0 10px 10px;
+            margin-top: -5px;
+        }
+        
+        .url-bar {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            font-family: monospace;
+            border-radius: 5px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .url-bar span {
+            color: #0d47a1;
+            font-weight: bold;
+        }
+        
+        .lock-icon {
+            color: #4CAF50;
+            margin-right: 10px;
+        }
+        
+        .phishing-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="bank-header">
+        <div class="bank-logo">🏦 Global Secure Bank</div>
+        <div class="security-badge">🔐 SECURE CONNECTION</div>
+    </div>
+    
+    <div class="main-content">
+        <h2>Secure Account Access</h2>
+        <p>For your security, we're redirecting you to our authentication portal.</p>
+        
+        <div class="url-bar">
+            <span class="lock-icon">🔒</span>
+            <span id="displayUrl">https://secure.globalbank.com/login</span>
+        </div>
+        
+        <button id="proceedBtn" style="
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        ">
+            ⚡ Proceed to Secure Login
+        </button>
+        
+        <div class="phishing-warning" id="warning">
+            ⚠️ DEMONSTRATION ONLY: This is a phishing simulation. Real banks will never use this technique.
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 12px; color: #666;">
+            <p>Connection verified • SSL/TLS 1.3 • 256-bit encryption</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('proceedBtn').addEventListener('click', function() {
+            const btn = this;
+            const warning = document.getElementById('warning');
+            
+            // Show warning
+            warning.style.display = 'block';
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '🔄 Redirecting securely...';
+            btn.style.background = '#ccc';
+            
+            // Step 1: Fake processing delay
+            setTimeout(() => {
+                document.getElementById('displayUrl').textContent = 'https://auth.globalbank.com/verify';
+                document.getElementById('displayUrl').style.color = '#4CAF50';
+                
+                // Step 2: Another fake redirect
+                setTimeout(() => {
+                    document.getElementById('displayUrl').textContent = 'https://login.microsoftonline.com/globalbank';
+                    document.getElementById('displayUrl').style.color = '#2196F3';
+                    
+                    // Step 3: Open actual malicious/phishing site
+                    setTimeout(() => {
+                        // Open real Google (for demo) but show fake URL
+                        const newWindow = window.open('https://www.google.com', '_blank');
+                        
+                        if (newWindow) {
+                            // Try to manipulate the opened window
+                            setTimeout(() => {
+                                try {
+                                    // These attempts will fail due to same-origin policy
+                                    // but demonstrate the concept
+                                    newWindow.document.title = 'Global Secure Bank - Login';
+                                    
+                                    // Create fake URL bar inside page
+                                    const fakeUrlBar = newWindow.document.createElement('div');
+                                    fakeUrlBar.style.cssText = `
+                                        position: fixed;
+                                        top: 0;
+                                        left: 0;
+                                        right: 0;
+                                        background: #f1f1f1;
+                                        padding: 12px;
+                                        font-family: monospace;
+                                        border-bottom: 1px solid #ddd;
+                                        z-index: 99999;
+                                        text-align: center;
+                                        color: #0d47a1;
+                                        font-weight: bold;
+                                    `;
+                                    fakeUrlBar.textContent = 'https://secure.globalbank.com/login';
+                                    newWindow.document.body.appendChild(fakeUrlBar);
+                                    
+                                    // Add padding to body so content isn't hidden
+                                    newWindow.document.body.style.paddingTop = '60px';
+                                    
+                                } catch(e) {
+                                    console.log("Cross-origin restrictions apply");
+                                }
+                            }, 1000);
+                        }
+                        
+                        // Reset button
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = '⚡ Proceed to Secure Login';
+                            btn.style.background = '#2196F3';
+                            warning.style.display = 'none';
+                        }, 3000);
+                        
+                    }, 1500); // Final delay
+                    
+                }, 1500); // Second delay
+                
+            }, 1500); // First delay
+        });
+        
+        // Animate URL changes
+        const urls = [
+            'https://secure.globalbank.com',
+            'https://globalbank.com/secure',
+            'https://online.globalbank.com',
+            'https://login.globalbank.com'
+        ];
+        
+        let urlIndex = 0;
+        setInterval(() => {
+            const urlElement = document.getElementById('displayUrl');
+            urlElement.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                urlElement.textContent = urls[urlIndex];
+                urlElement.style.opacity = '1';
+                urlIndex = (urlIndex + 1) % urls.length;
+            }, 300);
+        }, 4000);
+    </script>
+</body>
+</html>
