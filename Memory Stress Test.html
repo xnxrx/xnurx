@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Memory Stress Test - Research</title>
+    <style>
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+        }
+        .test-area {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="warning">
+    <h3>⚠️ PERINGATAN PENGGUNAAN ETIS:</h3>
+    <p>Script ini hanya untuk <strong>security research</strong> di sistem yang Anda miliki.</p>
+    <p><strong>JANGAN</strong> gunakan di sistem orang lain tanpa izin tertulis.</p>
+</div>
+
+<h1>Browser Memory Management Test</h1>
+
+<div class="test-area">
+    <h3>Test 1: Memory Allocation Patterns</h3>
+    <button onclick="testMemoryAllocation()">Start Memory Test</button>
+    <div id="memResults"></div>
+</div>
+
+<div class="test-area">
+    <h3>Test 2: Garbage Collector Stress</h3>
+    <button onclick="testGCBehavior()">Test GC Behavior</button>
+    <div id="gcResults"></div>
+</div>
+
+<div class="test-area">
+    <h3>Test 3: DOM Node Management</h3>
+    <button onclick="testDOMManagement()">Test DOM Limits</button>
+    <div id="domResults"></div>
+</div>
+
+<script>
+// LEGITIMATE MEMORY TESTING - Untuk menemukan memory leak bugs
+let testObjects = [];
+
+function testMemoryAllocation() {
+    const results = document.getElementById('memResults');
+    results.innerHTML = '<p>Testing memory allocation patterns...</p>';
+    
+    const testCases = [
+        {
+            name: 'Array Buffer Allocation',
+            test: () => {
+                const buffers = [];
+                for(let i = 0; i < 100; i++) {
+                    buffers.push(new ArrayBuffer(1024 * 1024)); // 1MB each
+                }
+                return buffers.length;
+            }
+        },
+        {
+            name: 'Object Creation Rate',
+            test: () => {
+                const objects = [];
+                const start = performance.now();
+                for(let i = 0; i < 100000; i++) {
+                    objects.push({
+                        id: i,
+                        data: new Array(100).fill('test'),
+                        timestamp: Date.now()
+                    });
+                }
+                const duration = performance.now() - start;
+                return `Created ${objects.length} objects in ${duration.toFixed(2)}ms`;
+            }
+        },
+        {
+            name: 'String Memory',
+            test: () => {
+                let largeString = '';
+                for(let i = 0; i < 10000; i++) {
+                    largeString += 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ';
+                }
+                return `String length: ${largeString.length} chars`;
+            }
+        }
+    ];
+    
+    testCases.forEach(testCase => {
+        try {
+            const result = testCase.test();
+            results.innerHTML += `<p>${testCase.name}: ${result}</p>`;
+        } catch(e) {
+            results.innerHTML += `<p style="color:red">${testCase.name}: ERROR - ${e.message}</p>`;
+        }
+    });
+}
+
+function testGCBehavior() {
+    const results = document.getElementById('gcResults');
+    results.innerHTML = '<p>Testing garbage collector behavior...</p>';
+    
+    // Test 1: Circular references
+    let circularRefs = [];
+    for(let i = 0; i < 1000; i++) {
+        const objA = { id: `A${i}` };
+        const objB = { id: `B${i}` };
+        objA.ref = objB;
+        objB.ref = objA;
+        circularRefs.push(objA);
+    }
+    
+    results.innerHTML += `<p>Created ${circularRefs.length} circular references</p>`;
+    
+    // Test 2: Weak references (should be collected)
+    const weakRefs = [];
+    for(let i = 0; i < 1000; i++) {
+        const obj = { data: new Array(1000).fill('x') };
+        weakRefs.push(new WeakRef(obj));
+    }
+    
+    results.innerHTML += `<p>Created ${weakRefs.length} weak references</p>`;
+    
+    // Test 3: FinalizationRegistry
+    if(typeof FinalizationRegistry !== 'undefined') {
+        const registry = new FinalizationRegistry((heldValue) => {
+            console.log(`Collected: ${heldValue}`);
+        });
+        
+        for(let i = 0; i < 100; i++) {
+            const obj = { id: i };
+            registry.register(obj, `Object ${i}`);
+        }
+        
+        results.innerHTML += `<p>Registered ${100} objects with FinalizationRegistry</p>`;
+    }
+    
+    // Force GC if available (Chrome only)
+    if(window.gc) {
+        window.gc();
+        results.innerHTML += `<p>Garbage collection forced</p>`;
+    }
+}
+
+function testDOMManagement() {
+    const results = document.getElementById('domResults');
+    results.innerHTML = '<p>Testing DOM node management...</p>';
+    
+    const container = document.createElement('div');
+    container.style.cssText = 'position: absolute; left: -10000px;';
+    document.body.appendChild(container);
+    
+    // Create many DOM nodes
+    const nodeCount = 10000;
+    const fragment = document.createDocumentFragment();
+    
+    for(let i = 0; i < nodeCount; i++) {
+        const div = document.createElement('div');
+        div.textContent = `Node ${i}`;
+        div.style.cssText = `
+            display: inline-block;
+            padding: 2px;
+            margin: 1px;
+            border: 1px solid #ccc;
+        `;
+        fragment.appendChild(div);
+    }
+    
+    container.appendChild(fragment);
+    
+    results.innerHTML += `<p>Created ${nodeCount} DOM nodes</p>`;
+    
+    // Test mutation observer with many mutations
+    const observer = new MutationObserver((mutations) => {
+        results.innerHTML += `<p>MutationObserver detected ${mutations.length} mutations</p>`;
+    });
+    
+    observer.observe(container, {
+        childList: true,
+        subtree: true,
+        attributes: true
+    });
+    
+    // Make some mutations
+    for(let i = 0; i < 100; i++) {
+        const node = container.children[i];
+        if(node) {
+            node.style.backgroundColor = i % 2 === 0 ? '#f0f0f0' : '#e0e0e0';
+        }
+    }
+}
+</script>
+
+</body>
+</html>
