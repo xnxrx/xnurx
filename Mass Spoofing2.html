@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<!-- popup-research.html - HANYA untuk: your-lab-domain.test -->
+<html>
+<head>
+    <title>Popup Spoofing Research</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { 
+            padding: 12px 24px; 
+            margin: 10px; 
+            font-size: 16px; 
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #4285f4;
+            color: white;
+        }
+        .danger { background: #ea4335; }
+        .warning { background: #fbbc05; }
+        .info { background: #34a853; }
+        
+        #popup-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            display: none;
+        }
+        
+        .fake-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 8px;
+            min-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        
+        .chrome-header {
+            background: #f1f1f1;
+            padding: 12px 16px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chrome-url-bar {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-left: 10px;
+            flex-grow: 1;
+            font-family: monospace;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .secure-badge {
+            background: #0c6;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Popup Window Spoofing Research</h1>
+    
+    <div>
+        <button class="warning" onclick="testWindowFeatures()">Test Window Features</button>
+        <button class="danger" onclick="testOffscreenPopup()">Test Off-screen Popup</button>
+        <button class="info" onclick="testFakeBrowserUI()">Test Fake Browser UI</button>
+        <button onclick="testDialogSpoofing()">Test Dialog Spoofing</button>
+    </div>
+    
+    <div id="results" style="margin-top: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 5px;"></div>
+    
+    <div id="popup-container">
+        <div class="fake-popup" id="chrome-fake">
+            <div class="chrome-header">
+                <div style="display: flex; gap: 5px;">
+                    <div style="width: 12px; height: 12px; background: #ff5f57; border-radius: 50%;"></div>
+                    <div style="width: 12px; height: 12px; background: #ffbd2e; border-radius: 50%;"></div>
+                    <div style="width: 12px; height: 12px; background: #28ca42; border-radius: 50%;"></div>
+                </div>
+                <div class="chrome-url-bar">
+                    <span style="color: #0c6;">https://</span>accounts.google.com<span style="color: #666;">/signin/v2</span>
+                    <span class="secure-badge">Secure</span>
+                </div>
+            </div>
+            <div style="padding: 30px;">
+                <h2>Google Sign In</h2>
+                <p>Sign in to continue to Gmail</p>
+                <input type="email" placeholder="Email or phone" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
+                <button style="background: #1a73e8; color: white; padding: 10px 24px; border: none; border-radius: 4px; cursor: pointer;">Next</button>
+                <button onclick="hideFakePopup()" style="background: #ddd; margin-left: 10px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const results = document.getElementById('results');
+        let popupWindows = [];
+        
+        // === EXPERIMENT 1: WINDOW FEATURES MANIPULATION ===
+        function testWindowFeatures() {
+            results.innerHTML = '<h2>Window Features Experiment</h2>';
+            
+            const tests = [
+                {
+                    name: 'No UI Elements',
+                    features: 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no',
+                    desc: 'Attempt to hide all browser UI'
+                },
+                {
+                    name: 'Popup Feature (new in Chrome 120)',
+                    features: 'width=400,height=300,popup=yes',
+                    desc: 'Using Chrome\'s popup feature'
+                },
+                {
+                    name: 'Fullscreen Popup',
+                    features: 'fullscreen=yes',
+                    desc: 'Request fullscreen popup'
+                },
+                {
+                    name: 'Off-screen Position',
+                    features: 'left=10000,top=10000,width=300,height=200',
+                    desc: 'Open window outside visible area'
+                },
+                {
+                    name: 'Minimal UI',
+                    features: 'width=500,height=400,location=yes,menubar=no,toolbar=no',
+                    desc: 'Only show location bar'
+                }
+            ];
+            
+            tests.forEach((test, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = test.name;
+                btn.style.cssText = 'padding: 8px 16px; margin: 5px; background: #4285f4; color: white; border: none; border-radius: 4px; cursor: pointer;';
+                
+                btn.onclick = () => {
+                    const popup = window.open(
+                        'https://your-lab-domain.test/popup-content',
+                        `popup${index}`,
+                        test.features
+                    );
+                    
+                    if (popup) {
+                        popupWindows.push(popup);
+                        
+                        // Try to manipulate the popup
+                        setTimeout(() => {
+                            try {
+                                popup.document.body.innerHTML = `
+                                    <h1>${test.name}</h1>
+                                    <p>${test.desc}</p>
+                                    <p><strong>Features:</strong> ${test.features}</p>
+                                    <p><strong>URL in address bar:</strong> ${popup.location.href}</p>
+                                    <p><strong>Window dimensions:</strong> ${popup.innerWidth}x${popup.innerHeight}</p>
+                                    <button onclick="window.close()">Close</button>
+                                `;
+                                
+                                // Try to change title
+                                popup.document.title = `Spoofed: ${test.name} - Bank`;
+                                
+                                // Try to fake URL in console
+                                console.log(`Popup ${index} location:`, popup.location.href);
+                                
+                            } catch(e) {
+                                console.log(`Cannot manipulate popup ${index}:`, e.message);
+                            }
+                        }, 1000);
+                        
+                        // Monitor popup state
+                        const interval = setInterval(() => {
+                            if (popup.closed) {
+                                clearInterval(interval);
+                                results.innerHTML += `<p style="color: gray;">Popup ${index} closed</p>`;
+                            }
+                        }, 1000);
+                        
+                        results.innerHTML += `
+                            <div style="background: #e8f0fe; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                                <h4>${test.name}</h4>
+                                <p>${test.desc}</p>
+                                <p><code>${test.features}</code></p>
+                                ${popup ? '<p style="color: green;">✅ Popup opened</p>' : '<p style="color: red;">❌ Popup blocked</p>'}
+                            </div>
+                        `;
+                    } else {
+                        results.innerHTML += `<p style="color: red;">❌ Popup blocked by browser</p>`;
+                    }
+                };
+                
+                results.appendChild(btn);
+                results.appendChild(document.createElement('br'));
+            });
+        }
+        
+        // === EXPERIMENT 2: OFF-SCREEN POPUP ATTACK ===
+        function testOffscreenPopup() {
+            results.innerHTML = '<h2>Off-screen Popup Attack</h2>';
+            
+            // Open popup far off-screen
+            const popup = window.open(
+                'https://your-lab-domain.test/malicious',
+                'hiddenAttack',
+                'left=9999,top=9999,width=1,height=1,menubar=no,toolbar=no,location=no,status=no'
+            );
+            
+            if (popup) {
+                popupWindows.push(popup);
+                
+                // Wait for popup to load, then try to bring it to foreground
+                setTimeout(() => {
+                    try {
+                        // Try to resize and reposition to center
+                        popup.resizeTo(800, 600);
+                        popup.moveTo(
+                            window.screen.availWidth / 2 - 400,
+                            window.screen.availHeight / 2 - 300
+                        );
+                        
+                        // Create fake login page
+                        popup.document.body.innerHTML = `
+                            <div style="padding: 40px; font-family: Arial;">
+                                <div style="background: #f1f1f1; padding: 10px; border-radius: 4px; margin-bottom: 20px; font-family: monospace;">
+                                    https://accounts.facebook.com/login
+                                    <span style="background: #0c6; color: white; padding: 2px 5px; border-radius: 3px; font-size: 12px; margin-left: 10px;">Secure</span>
+                                </div>
+                                <h2>Log into Facebook</h2>
+                                <input type="text" placeholder="Email or phone number" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
+                                <input type="password" placeholder="Password" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
+                                <button style="background: #1877f2; color: white; padding: 12px 24px; border: none; border-radius: 4px; width: 100%; cursor: pointer;">Log In</button>
+                                <p style="font-size: 12px; color: #666; margin-top: 20px;">This is a research demo. No data is collected.</p>
+                            </div>
+                        `;
+                        
+                        popup.document.title = 'Facebook - Log In';
+                        
+                        // Try to focus the window
+                        popup.focus();
+                        
+                        results.innerHTML += `
+                            <div style="background: #ffebee; padding: 15px; border-radius: 5px;">
+                                <h4>⚠️ Off-screen Attack Demo</h4>
+                                <p>Popup was opened off-screen then moved to center.</p>
+                                <p>User might not notice the popup opening animation.</p>
+                                <p><strong>Current position:</strong> ${popup.screenX}, ${popup.screenY}</p>
+                                <p><strong>Size:</strong> ${popup.innerWidth}x${popup.innerHeight}</p>
+                            </div>
+                        `;
+                        
+                    } catch(e) {
+                        results.innerHTML += `<p style="color: red;">Error: ${e.message}</p>`;
+                    }
+                }, 500);
+            }
+        }
+        
+        // === EXPERIMENT 3: FAKE BROWSER UI ===
+        function testFakeBrowserUI() {
+            document.getElementById('popup-container').style.display = 'block';
+            
+            results.innerHTML = '<h2>Fake Browser UI Demo</h2>';
+            results.innerHTML += `
+                <div style="background: #fff8e1; padding: 20px; border-radius: 5px;">
+                    <h3>⚠️ Fake Chrome UI Displayed</h3>
+                    <p>This is a simulated browser window inside the page.</p>
+                    <p>Features that make it convincing:</p>
+                    <ul>
+                        <li>Chrome-style window controls</li>
+                        <li>Realistic URL bar with "Secure" badge</li>
+                        <li>Google-branded login page</li>
+                        <li>Overlay with semi-transparent background</li>
+                    </ul>
+                    <p>In a real attack, this could be triggered by clicking any link.</p>
+                </div>
+            `;
+        }
+        
+        function hideFakePopup() {
+            document.getElementById('popup-container').style.display = 'none';
+        }
+        
+        // === EXPERIMENT 4: DIALOG SPOOFING ===
+        function testDialogSpoofing() {
+            results.innerHTML = '<h2>Dialog Spoofing Experiment</h2>';
+            
+            // Create fake browser dialog
+            const fakeDialog = document.createElement('div');
+            fakeDialog.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                padding: 0;
+                z-index: 10001;
+                box-shadow: 0 4px 23px 0 rgba(0,0,0,0.2);
+                width: 500px;
+                font-family: system-ui, -apple-system, sans-serif;
+            `;
+            
+            fakeDialog.innerHTML = `
+                <div style="background: #f8f9fa; padding: 16px; border-bottom: 1px solid #e0e0e0; border-radius: 6px 6px 0 0;">
+                    <div style="font-weight: 600; font-size: 15px;">Chrome wants to</div>
+                </div>
+                <div style="padding: 24px;">
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div style="width: 48px; height: 48px; background: #4285f4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 16px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600;">Show notifications</div>
+                            <div style="font-size: 13px; color: #5f6368;">from accounts.google.com</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 4px; margin-bottom: 20px; font-size: 13px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>🔔 Get notifications like new messages and activity</span>
+                            <span style="color: #5f6368;">Allow</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                            <span>📢 Show notifications even when you're not active on the site</span>
+                            <span style="color: #5f6368;">Block</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 16px; border-top: 1px solid #e0e0e0; text-align: right; background: #f8f9fa; border-radius: 0 0 6px 6px;">
+                    <button id="dialog-cancel" style="padding: 8px 16px; background: transparent; border: 1px solid #dadce0; border-radius: 4px; margin-right: 8px; cursor: pointer;">Cancel</button>
+                    <button id="dialog-allow" style="padding: 8px 16px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer;">Allow</button>
+                </div>
+            `;
+            
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.5);
+                z-index: 10000;
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(fakeDialog);
+            
+            // Add event listeners
+            document.getElementById('dialog-cancel').onclick = () => {
+                fakeDialog.remove();
+                overlay.remove();
+                results.innerHTML += `<p style="color: #666;">User clicked Cancel</p>`;
+            };
+            
+            document.getElementById('dialog-allow').onclick = () => {
+                fakeDialog.remove();
+                overlay.remove();
+                results.innerHTML += `<p style="color: red;">⚠️ User clicked Allow on fake dialog!</p>`;
+                results.innerHTML += `<p>In real attack: permissions would be granted or malicious action performed.</p>`;
+            };
+            
+            results.innerHTML += `
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                    <h4>Fake Dialog Analysis</h4>
+                    <p>This dialog mimics Chrome's permission request UI.</p>
+                    <p>Visual cues used to trick users:</p>
+                    <ul>
+                        <li>Chrome's blue icon and color scheme</li>
+                        <li>Professional typography and spacing</li>
+                        <li>Realistic permission descriptions</li>
+                        <li>Semi-transparent overlay (dimmed background)</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            popupWindows.forEach(popup => {
+                if (popup && !popup.closed) {
+                    popup.close();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
