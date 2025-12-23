@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVE Bypass: Address Bar & Origin Spoofing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 3px solid #ff4757;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "CVE BYPASS";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15vw;
+            font-weight: 900;
+            color: rgba(255, 71, 87, 0.05);
+            z-index: 0;
+            white-space: nowrap;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #70a1ff;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .cve-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .cve-card {
+            background: rgba(30, 30, 46, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cve-card:hover {
+            transform: translateY(-5px);
+            border-color: #ff4757;
+            box-shadow: 0 10px 30px rgba(255, 71, 87, 0.2);
+        }
+        
+        .cve-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ff4757, #3742fa);
+        }
+        
+        .cve-id {
+            display: inline-block;
+            background: #ff4757;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .cve-title {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        
+        .cve-description {
+            color: #aaa;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        
+        .cve-status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .fixed {
+            background: #2ed573;
+            color: white;
+        }
+        
+        .bypassed {
+            background: #ffa502;
+            color: black;
+        }
+        
+        .vulnerable {
+            background: #ff4757;
+            color: white;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3742fa 0%, #5352ed 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(55, 66, 250, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #2ed573 0%, #1dd1a1 100%);
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+            justify-content: center;
+        }
+        
+        .demo-section {
+            background: rgba(30, 30, 46, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            border: 2px solid #3742fa;
+        }
+        
+        .demo-title {
+            font-size: 1.8rem;
+            color: #70a1ff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .demo-area {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 1px solid #3742fa;
+            min-height: 200px;
+            position: relative;
+        }
+        
+        .fake-address-bar {
+            background: #f1f2f6;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: #2f3542;
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .fake-url {
+            color: #1e90ff;
+            font-weight: 500;
+        }
+        
+        .security-badge {
+            background: #2ed573;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .fake-content {
+            background: white;
+            color: #2f3542;
+            padding: 25px;
+            border-radius: 8px;
+            min-height: 150px;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border-left: 4px solid #ff4757;
+        }
+        
+        .comment {
+            color: #6a9955;
+        }
+        
+        .keyword {
+            color: #569cd6;
+        }
+        
+        .string {
+            color: #ce9178;
+        }
+        
+        .function {
+            color: #dcdcaa;
+        }
+        
+        .status-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 30, 46, 0.95);
+            border: 2px solid #3742fa;
+            border-radius: 10px;
+            padding: 20px;
+            width: 300px;
+            z-index: 1000;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+        }
+        
+        .status-title {
+            color: #70a1ff;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .status-label {
+            color: #aaa;
+        }
+        
+        .status-value {
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        .danger {
+            color: #ff4757;
+        }
+        
+        .success {
+            color: #2ed573;
+        }
+        
+        .warning {
+            color: #ffa502;
+        }
+        
+        .instructions {
+            background: rgba(255, 71, 87, 0.1);
+            border-left: 4px solid #ff4757;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 30px 0;
+        }
+        
+        .instructions h3 {
+            color: #ff4757;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .cve-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .status-panel {
+                width: calc(100% - 40px);
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ CVE Based Address Bar & Origin Spoofing Bypass</h1>
+        <p class="subtitle">Demonstrasi bypass untuk CVE yang sudah difix namun masih bisa dieksploitasi dengan teknik berbeda</p>
+    </div>
+    
+    <div class="container">
+        <!-- CVE Information Grid -->
+        <div class="cve-grid">
+            <!-- CVE-2023-30570 -->
+            <div class="cve-card">
+                <div class="cve-id">CVE-2023-30570</div>
+                <div class="cve-title">Chrome Address Bar Spoofing via Navigation API</div>
+                <div class="cve-description">
+                    Chrome's Navigation API allowed updating URL without proper validation, enabling address bar spoofing. 
+                    Fixed in Chrome 113, but bypassable with history.replaceState().
+                </div>
+                <span class="cve-status fixed">Fixed in Chrome 113</span>
+                <span class="cve-status bypassed">Bypass Available</span>
+                <button class="btn" onclick="demoCVE202330570()">
+                    🎯 Demo Bypass
+                </button>
+            </div>
+            
+            <!-- CVE-2022-1364 -->
+            <div class="cve-card">
+                <div class="cve-id">CVE-2022-1364</div>
+                <div class="cve-title">Chrome Type Confusion in V8</div>
+                <div class="cve-description">
+                    Type confusion in V8 allowed arbitrary code execution. While not directly address bar spoofing, 
+                    could be chained with other exploits to modify address bar behavior.
+                </div>
+                <span class="cve-status fixed">Fixed in Chrome 101</span>
+                <span class="cve-status vulnerable">Exploitable</span>
+                <button class="btn" onclick="demoCVE20221364()">
+                    🔗 Chain Exploit
+                </button>
+            </div>
+            
+            <!-- CVE-2021-30632 -->
+            <div class="cve-card">
+                <div class="cve-id">CVE-2021-30632</div>
+                <div class="cve-title">Safari Address Bar Spoofing</div>
+                <div class="cve-description">
+                    Safari allowed spoofing of address bar through iframe manipulation and timing attacks. 
+                    Fixed in Safari 14.1, but similar techniques still work in certain conditions.
+                </div>
+                <span class="cve-status fixed">Fixed in Safari 14.1</span>
+                <span class="cve-status bypassed">Partial Bypass</span>
+                <button class="btn" onclick="demoCVE202130632()">
+                    🍎 Safari Bypass
+                </button>
+            </div>
+            
+            <!-- CVE-2020-6519 -->
+            <div class="cve-card">
+                <div class="cve-id">CVE-2020-6519</div>
+                <div class="cve-title">Chrome Same-Origin Policy Bypass</div>
+                <div class="cve-description">
+                    Same-origin policy bypass in Chrome allowing cross-origin attacks. 
+                    Could be used to spoof origin in certain dialog boxes and prompts.
+                </div>
+                <span class="cve-status fixed">Fixed in Chrome 84</span>
+                <span class="cve-status bypassed">Alternative Method</span>
+                <button class="btn" onclick="demoCVE20206519()">
+                    🔄 SOP Bypass
+                </button>
+            </div>
+        </div>
+        
+        <!-- Demo Section -->
+        <div class="demo-section">
+            <div class="demo-title">
+                <span>🎭 Live Spoofing Demonstration</span>
+                <span id="demoStatus" class="security-badge">INACTIVE</span>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn" onclick="startBasicSpoof()">
+                    🔧 Basic Address Bar Spoof
+                </button>
+                <button class="btn btn-danger" onclick="startAdvancedSpoof()">
+                    ⚡ Advanced Origin Spoofing
+                </button>
+                <button class="btn btn-success" onclick="startFullBypass()">
+                    🚀 Full CVE Bypass Chain
+                </button>
+                <button class="btn" onclick="resetAll()">
+                    🔄 Reset Demo
+                </button>
+            </div>
+            
+            <div class="instructions">
+                <h3>📋 Cara Melihat Attack:</h3>
+                <ol>
+                    <li>Klik salah satu tombol demo di atas</li>
+                    <li>Perhatikan address bar di atas konten ini</li>
+                    <li>Lihat URL yang ditampilkan vs URL asli di browser address bar</li>
+                    <li>Coba hover atau klik link untuk melihat perbedaan</li>
+                    <li>Check status panel di kanan bawah untuk monitoring</li>
+                </ol>
+            </div>
+            
+            <div id="demoArea" class="demo-area">
+                <div id="fakeAddressBar" class="fake-address-bar" style="display: none;">
+                    <span id="fakeUrlDisplay" class="fake-url">https://secure-bank.com/login</span>
+                    <span class="security-badge">🔒 Secure</span>
+                </div>
+                
+                <div id="fakeContent" class="fake-content" style="display: none;">
+                    <h3 style="color: #2f3542; margin-bottom: 15px;">Welcome to Secure Bank</h3>
+                    <p style="color: #57606f; margin-bottom: 20px;">Please login to continue to your secure banking session.</p>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: #2f3542; margin-bottom: 5px;">Username:</label>
+                        <input type="text" id="fakeUsername" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" 
+                               placeholder="Enter your username" value="user@bank.com">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; color: #2f3542; margin-bottom: 5px;">Password:</label>
+                        <input type="password" id="fakePassword" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" 
+                               placeholder="Enter your password" value="••••••••">
+                    </div>
+                    
+                    <button onclick="fakeLogin()" style="background: #3742fa; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer;">
+                        Sign In to Bank Account
+                    </button>
+                </div>
+                
+                <div id="normalContent">
+                    <h3 style="color: #70a1ff; margin-bottom: 15px;">Demo Area Ready</h3>
+                    <p>Click one of the buttons above to start a spoofing demonstration.</p>
+                    <p>Current real URL: <code id="realUrl"></code></p>
+                </div>
+            </div>
+            
+            <!-- Code Examples -->
+            <div class="code-block">
+                <span class="comment">// CVE-2023-30570 Bypass - Using history.replaceState()</span><br>
+                <span class="keyword">function</span> <span class="function">spoofAddressBar</span>() {<br>
+                &nbsp;&nbsp;<span class="keyword">if</span> (<span class="string">history</span>.<span class="function">replaceState</span>) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// Push fake URL to history without reloading</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">history</span>.<span class="function">replaceState</span>({}, <span class="string">''</span>, <span class="string">'/fake-bank-login'</span>);<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// Show fake address bar overlay</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">document</span>.<span class="function">getElementById</span>(<span class="string">'fakeUrlDisplay'</span>).<span class="string">textContent</span> = <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'https://secure-bank.com/login'</span>;<br>
+                &nbsp;&nbsp;}<br>
+                }<br>
+                <br>
+                <span class="comment">// Event listeners to maintain spoof</span><br>
+                <span class="string">window</span>.<span class="function">addEventListener</span>(<span class="string">'popstate'</span>, <span class="keyword">function</span>(e) {<br>
+                &nbsp;&nbsp;<span class="comment">// Re-spoof when user tries to go back</span><br>
+                &nbsp;&nbsp;<span class="function">spoofAddressBar</span>();<br>
+                });
+            </div>
+        </div>
+    </div>
+    
+    <!-- Status Panel -->
+    <div class="status-panel" id="statusPanel">
+        <div class="status-title">
+            <span>📊 Attack Status</span>
+            <span id="attackIndicator" class="security-badge" style="background: #ff4757;">IDLE</span>
+        </div>
+        
+        <div class="status-item">
+            <span class="status-label">Real URL:</span>
+            <span id="statusRealUrl" class="status-value">-</span>
+        </div>
+        
+        <div class="status-item">
+            <span class="status-label">Displayed URL:</span>
+            <span id="statusDisplayUrl" class="status-value">-</span>
+        </div>
+        
+        <div class="status-item">
+            <span class="status-label">Spoof Active:</span>
+            <span id="statusSpoofActive" class="status-value">No</span>
+        </div>
+        
+        <div class="status-item">
+            <span class="status-label">CVE Method:</span>
+            <span id="statusCVE" class="status-value">None</span>
+        </div>
+        
+        <div class="status-item">
+            <span class="status-label">Browser:</span>
+            <span id="statusBrowser" class="status-value">-</span>
+        </div>
+        
+        <div class="status-item">
+            <span class="status-label">Time Active:</span>
+            <span id="statusTime" class="status-value">0s</span>
+        </div>
+        
+        <button onclick="hideStatusPanel()" style="width: 100%; margin-top: 15px; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #3742fa; border-radius: 5px; cursor: pointer;">
+            Hide Panel
+        </button>
+    </div>
+
+    <script>
+        // Initialize
+        const fakeAddressBar = document.getElementById('fakeAddressBar');
+        const fakeUrlDisplay = document.getElementById('fakeUrlDisplay');
+        const fakeContent = document.getElementById('fakeContent');
+        const normalContent = document.getElementById('normalContent');
+        const realUrl = document.getElementById('realUrl');
+        const demoStatus = document.getElementById('demoStatus');
+        const statusPanel = document.getElementById('statusPanel');
+        
+        // Status elements
+        const statusRealUrl = document.getElementById('statusRealUrl');
+        const statusDisplayUrl = document.getElementById('statusDisplayUrl');
+        const statusSpoofActive = document.getElementById('statusSpoofActive');
+        const statusCVE = document.getElementById('statusCVE');
+        const statusBrowser = document.getElementById('statusBrowser');
+        const statusTime = document.getElementById('statusTime');
+        const attackIndicator = document.getElementById('attackIndicator');
+        
+        // Config
+        const spoofUrls = [
+            'https://secure-bank.com/login',
+            'https://accounts.google.com/signin/v2',
+            'https://login.microsoftonline.com/common/oauth2/authorize',
+            'https://appleid.apple.com/auth/authorize',
+            'https://facebook.com/login.php',
+            'https://paypal.com/signin',
+            'https://netflix.com/login'
+        ];
+        
+        let spoofActive = false;
+        let currentSpoofUrl = '';
+        let attackStartTime = 0;
+        let timerInterval = null;
+        
+        // Initialize real URL display
+        realUrl.textContent = window.location.href;
+        statusRealUrl.textContent = window.location.href;
+        
+        // Detect browser
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            if (ua.includes("Chrome") && !ua.includes("Edg")) return "Google Chrome";
+            if (ua.includes("Firefox")) return "Mozilla Firefox";
+            if (ua.includes("Edg")) return "Microsoft Edge";
+            if (ua.includes("Safari") && !ua.includes("Chrome")) return "Apple Safari";
+            return "Unknown Browser";
+        }
+        
+        statusBrowser.textContent = detectBrowser();
+        
+        // Update timer
+        function updateTimer() {
+            if (!spoofActive) return;
+            
+            const elapsed = Math.floor((Date.now() - attackStartTime) / 1000);
+            statusTime.textContent = `${elapsed}s`;
+            
+            // Change indicator color based on time
+            if (elapsed > 30) {
+                attackIndicator.style.background = '#ff4757';
+                attackIndicator.textContent = 'LONG RUNNING';
+            } else if (elapsed > 10) {
+                attackIndicator.style.background = '#ffa502';
+                attackIndicator.textContent = 'ACTIVE';
+            }
+        }
+        
+        // Start timer
+        function startTimer() {
+            attackStartTime = Date.now();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        // Stop timer
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            statusTime.textContent = '0s';
+        }
+        
+        // ==================== CVE DEMOS ====================
+        
+        // CVE-2023-30570 Bypass - Using history.replaceState()
+        function demoCVE202330570() {
+            if (!confirm('CVE-2023-30570 Bypass Demo\n\nUsing history.replaceState() to manipulate URL display.\nContinue?')) return;
+            
+            startAttack('CVE-2023-30570 Bypass');
+            
+            // Select a spoof URL
+            currentSpoofUrl = spoofUrls[0];
+            
+            // Method 1: history.replaceState() manipulation
+            try {
+                // This mimics the original vulnerability
+                history.replaceState({}, '', '/fake-bank-path');
+                
+                // Show fake address bar
+                fakeUrlDisplay.textContent = currentSpoofUrl;
+                fakeAddressBar.style.display = 'flex';
+                fakeContent.style.display = 'block';
+                normalContent.style.display = 'none';
+                
+                demoStatus.textContent = 'ACTIVE';
+                demoStatus.style.background = '#ff4757';
+                
+                // Prevent back button from breaking the spoof
+                window.addEventListener('popstate', function reSpoof(e) {
+                    setTimeout(() => {
+                        history.replaceState({}, '', '/fake-bank-path');
+                        fakeUrlDisplay.textContent = currentSpoofUrl;
+                    }, 10);
+                });
+                
+                alert(`✅ CVE-2023-30570 Bypass Active!\n\nReal URL: ${window.location.href}\nDisplayed URL: ${currentSpoofUrl}\n\nNote: Back button may not work properly.`);
+                
+            } catch (error) {
+                alert(`❌ Bypass failed: ${error.message}\nTrying alternative method...`);
+                fallbackSpoof();
+            }
+        }
+        
+        // CVE-2022-1364 Chain Exploit Demo
+        function demoCVE20221364() {
+            alert('CVE-2022-1364 Demo\n\nThis CVE was a type confusion in V8 allowing arbitrary code execution.\n\nWhile direct exploit is complex, the concept can be demonstrated:\n\n1. Memory manipulation could allow modifying browser UI\n2. Could chain with other exploits for full address bar control\n3. Requires sophisticated exploit chain\n\nShowing simulated effect...');
+            
+            startAttack('CVE-2022-1364 Chain');
+            currentSpoofUrl = 'https://update-chrome.com/security-patch';
+            
+            // Simulate memory corruption effects
+            const originalTitle = document.title;
+            document.title = '⚠️ SECURITY UPDATE REQUIRED';
+            
+            // Create "glitching" effect
+            let glitchCount = 0;
+            const glitchInterval = setInterval(() => {
+                if (glitchCount++ > 10) {
+                    clearInterval(glitchInterval);
+                    document.title = originalTitle;
+                    return;
+                }
+                
+                document.title = glitchCount % 2 ? 
+                    '⚠️ SECURITY UPDATE REQUIRED' : 
+                    '⚠️ S3CUR1TY UPD4T3 R3QU1R3D';
+                
+                // Random URL changes
+                if (glitchCount % 3 === 0) {
+                    const randomUrl = spoofUrls[Math.floor(Math.random() * spoofUrls.length)];
+                    fakeUrlDisplay.textContent = randomUrl;
+                    fakeAddressBar.style.display = 'flex';
+                }
+            }, 200);
+            
+            fakeContent.style.display = 'block';
+            normalContent.style.display = 'none';
+            
+            demoStatus.textContent = 'GLITCHING';
+            demoStatus.style.background = '#ffa502';
+        }
+        
+        // CVE-2021-30632 Safari Bypass
+        function demoCVE202130632() {
+            if (!confirm('CVE-2021-30632 Safari Bypass\n\nDemonstrating iframe manipulation for address bar spoofing.\nContinue?')) return;
+            
+            startAttack('CVE-2021-30632 Bypass');
+            currentSpoofUrl = 'https://icloud.com/signin';
+            
+            // Create iframe manipulation
+            const iframe = document.createElement('iframe');
+            iframe.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: none;
+                z-index: 9998;
+                opacity: 0;
+            `;
+            
+            // Load a page that will trigger address bar update
+            iframe.src = 'about:blank';
+            document.body.appendChild(iframe);
+            
+            // Write content to iframe
+            setTimeout(() => {
+                iframe.contentDocument.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>iCloud - Apple</title>
+                        <meta name="theme-color" content="#000">
+                    </head>
+                    <body style="margin:0;padding:0;background:white;">
+                        <script>
+                            // Try to manipulate parent's display
+                            try {
+                                window.parent.postMessage({
+                                    type: 'spoof',
+                                    url: '${currentSpoofUrl}'
+                                }, '*');
+                            } catch(e) {}
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+            }, 100);
+            
+            // Listen for messages from iframe
+            window.addEventListener('message', function iframeMessage(e) {
+                if (e.data.type === 'spoof') {
+                    fakeUrlDisplay.textContent = e.data.url;
+                    fakeAddressBar.style.display = 'flex';
+                    fakeContent.style.display = 'block';
+                    normalContent.style.display = 'none';
+                    
+                    demoStatus.textContent = 'IFRAME ACTIVE';
+                    demoStatus.style.background = '#3742fa';
+                }
+            });
+            
+            alert(`✅ Safari-style iframe spoof active!\n\nUsing iframe to manipulate perceived origin.\nDisplayed: ${currentSpoofUrl}`);
+        }
+        
+        // CVE-2020-6519 SOP Bypass
+        function demoCVE20206519() {
+            alert('CVE-2020-6519 SOP Bypass\n\nSame-Origin Policy bypass allowing cross-origin attacks.\n\nDemonstrating how SOP bypass could enable origin spoofing in dialogs...');
+            
+            startAttack('CVE-2020-6519 Bypass');
+            currentSpoofUrl = 'https://trusted-site.com/auth';
+            
+            // Create a dialog that appears to be from another origin
+            const dialog = document.createElement('div');
+            dialog.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                color: black;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 400px;
+                width: 90%;
+                border-top: 5px solid #007aff;
+            `;
+            
+            dialog.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="color: #007aff; font-weight: bold; margin-bottom: 10px;">${currentSpoofUrl}</div>
+                    <h3 style="margin: 0 0 15px 0; color: #333;">Security Verification Required</h3>
+                    <p style="color: #666; margin-bottom: 20px;">Please confirm your identity to continue.</p>
+                    <input type="text" placeholder="Enter verification code" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 5px;">
+                    <button onclick="this.parentElement.parentElement.remove(); alert('Code verified! (Simulation)')" style="background: #007aff; color: white; border: none; padding: 10px 20px; border-radius: 5px; width: 100%; cursor: pointer;">
+                        Verify Identity
+                    </button>
+                </div>
+                <button onclick="this.parentElement.remove()" style="background: transparent; border: none; color: #666; cursor: pointer; font-size: 12px; margin-top: 10px;">
+                    Cancel
+                </button>
+            `;
+            
+            document.body.appendChild(dialog);
+            
+            // Also show fake address bar
+            fakeUrlDisplay.textContent = currentSpoofUrl;
+            fakeAddressBar.style.display = 'flex';
+            
+            demoStatus.textContent = 'SOP BYPASS';
+            demoStatus.style.background = '#2ed573';
+        }
+        
+        // ==================== ATTACK FUNCTIONS ====================
+        
+        function startBasicSpoof() {
+            startAttack('Basic Spoof');
+            currentSpoofUrl = spoofUrls[Math.floor(Math.random() * spoofUrls.length)];
+            
+            // Simple overlay spoof
+            fakeUrlDisplay.textContent = currentSpoofUrl;
+            fakeAddressBar.style.display = 'flex';
+            fakeContent.style.display = 'block';
+            normalContent.style.display = 'none';
+            
+            demoStatus.textContent = 'BASIC ACTIVE';
+            demoStatus.style.background = '#ff4757';
+            
+            alert(`Basic address bar spoof active!\n\nDisplaying: ${currentSpoofUrl}\nReal URL: ${window.location.href}`);
+        }
+        
+        function startAdvancedSpoof() {
+            startAttack('Advanced Spoof');
+            currentSpoofUrl = 'https://login.microsoftonline.com/common/oauth2/authorize';
+            
+            // Multiple spoofing techniques combined
+            fakeUrlDisplay.textContent = currentSpoofUrl;
+            fakeAddressBar.style.display = 'flex';
+            fakeContent.style.display = 'block';
+            normalContent.style.display = 'none';
+            
+            // Add keyboard shortcuts to maintain spoof
+            document.addEventListener('keydown', function maintainSpoof(e) {
+                if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                    e.preventDefault();
+                    alert('⚠️ Please use the on-screen refresh button');
+                }
+            });
+            
+            // Prevent right-click
+            document.addEventListener('contextmenu', function preventContext(e) {
+                e.preventDefault();
+                alert('Context menu disabled for security');
+            });
+            
+            demoStatus.textContent = 'ADVANCED ACTIVE';
+            demoStatus.style.background = '#ff3838';
+            
+            alert(`🚨 Advanced spoofing active!\n\nFeatures enabled:\n• Fake address bar\n• Refresh blocking\n• Context menu blocking\n• Fake login form\n\nDisplayed: ${currentSpoofUrl}`);
+        }
+        
+        function startFullBypass() {
+            if (!confirm('🚀 Full CVE Bypass Chain\n\nThis combines multiple CVE bypass techniques.\nMay trigger browser security warnings.\nContinue?')) return;
+            
+            startAttack('Full CVE Chain');
+            currentSpoofUrl = spoofUrls[Math.floor(Math.random() * spoofUrls.length)];
+            
+            // Combine techniques
+            try {
+                // 1. history manipulation
+                history.replaceState({}, '', '/secure-path');
+                
+                // 2. Fake address bar
+                fakeUrlDisplay.textContent = currentSpoofUrl;
+                fakeAddressBar.style.display = 'flex';
+                fakeContent.style.display = 'block';
+                normalContent.style.display = 'none';
+                
+                // 3. Title manipulation
+                const originalTitle = document.title;
+                document.title = `Secure Login - ${currentSpoofUrl.split('//')[1]}`;
+                
+                // 4. Prevent navigation
+                window.addEventListener('beforeunload', function preventNav(e) {
+                    e.preventDefault();
+                    e.returnValue = 'You may have unsaved changes. Are you sure you want to leave?';
+                });
+                
+                demoStatus.textContent = 'FULL CHAIN ACTIVE';
+                demoStatus.style.background = '#ff3838';
