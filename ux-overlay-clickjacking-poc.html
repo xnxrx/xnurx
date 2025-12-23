@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Browser Security Test Suite - Bug Hunter Pro</title>
+    <style>
+        :root {
+            --vector-ux: #8b5cf6;
+            --vector-timing: #10b981;
+            --vector-cross: #3b82f6;
+            --vector-browser: #f59e0b;
+            --vector-extension: #ef4444;
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', 'Cascadia Code', monospace;
+            background: #0f172a;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.7;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            border: 1px solid #475569;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .vector-section {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 6px solid;
+            border-color: var(--section-color);
+        }
+        
+        .vector-title {
+            color: var(--section-color);
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-card {
+            background: #334155;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid #475569;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .test-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+            border-color: var(--section-color);
+        }
+        
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .test-id {
+            background: var(--section-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .test-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .chrome { background: #4285f4; }
+        .firefox { background: #ff7139; }
+        .safari { background: #000000; }
+        .edge { background: #0078d7; }
+        .critical { background: #dc2626; }
+        .high { background: #f97316; }
+        .medium { background: #eab308; }
+        .low { background: #84cc16; }
+        
+        .attack-controls {
+            display: flex;
+            gap: 10px;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .attack-btn {
+            background: linear-gradient(135deg, var(--section-color) 0%, color-mix(in srgb, var(--section-color) 70%, black) 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .attack-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .attack-btn.danger {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        }
+        
+        .code-block {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .code-header {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .copy-btn {
+            background: #475569;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        
+        .monitor-panel {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            padding: 8px;
+            border-bottom: 1px solid #334155;
+            font-size: 0.85rem;
+        }
+        
+        .log-time {
+            color: #94a3b8;
+        }
+        
+        .log-success { color: #10b981; }
+        .log-warning { color: #f59e0b; }
+        .log-error { color: #ef4444; }
+        .log-info { color: #3b82f6; }
+        
+        .visual-test-area {
+            width: 100%;
+            height: 300px;
+            background: #1e293b;
+            border: 2px dashed #475569;
+            border-radius: 8px;
+            margin: 1rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .visual-element {
+            position: absolute;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 ADVANCED BROWSER SECURITY TESTING SUITE</h1>
+            <p style="color: #94a3b8; margin-top: 10px;">Professional Bug Hunting Toolkit - Focused Attack Vectors</p>
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <div style="background: #475569; padding: 8px 16px; border-radius: 8px;">
+                    User Agent: <span id="userAgent"></span>
+                </div>
+                <div style="background: #475569; padding: 8px 16px; border-radius: 8px;">
+                    Platform: <span id="platform"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 1: UX CONFUSION ATTACKS -->
+        <div class="vector-section" style="--section-color: var(--vector-ux);">
+            <div class="vector-title">
+                <span>🎭 1. UX CONFUSION ATTACKS</span>
+                <span style="font-size: 0.9rem; color: #94a3b8; margin-left: auto;">Psychological & Visual Manipulation</span>
+            </div>
+            
+            <!-- Test 1.1: Overlay & Clickjacking -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 style="margin: 0;">UX-101: Invisible Overlay Attack</h3>
+                    <span class="test-id">CWE-1021</span>
+                </div>
+                <p style="color: #cbd5e1; margin: 10px 0;">Transparent overlays over legitimate UI elements</p>
+                
+                <div class="test-badges">
+                    <span class="badge chrome">Chrome</span>
+                    <span class="badge firefox">Firefox</span>
+                    <span class="badge safari">Safari</span>
+                    <span class="badge critical">CRITICAL</span>
+                </div>
+                
+                <div class="attack-controls">
+                    <button class="attack-btn" onclick="executeUX101()">
+                        <span>▶</span> Execute Overlay Attack
+                    </button>
+                    <button class="attack-btn" onclick="document.getElementById('code-ux101').style.display='block'">
+                        <span>📋</span> Show PoC Code
+                    </button>
+                </div>
+                
+                <div id="code-ux101" class="code-block" style="display: none;">
+                    <div class="code-header">
+                        <span>UX-101 Attack Code (Clickjacking Variant)</span>
+                        <button class="copy-btn" onclick="copyCode('code-ux101-content')">Copy</button>
+                    </div>
+                    <pre id="code-ux101-content">// Create deceptive overlay
+function createInvisibleOverlay() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: transparent;
+        z-index: 999999;
+        cursor: pointer;
+    `;
+    
+    // Position invisible buttons over legitimate UI
+    const fakeButtons = [
+        {top: '50px', left: '50px', width: '200px', height: '50px', action: 'stealFocus'},
+        {top: '120px', left: '300px', width: '150px', height: '40px', action: 'fakeSubmit'}
+    ];
+    
+    fakeButtons.forEach(btn => {
+        const fakeBtn = document.createElement('div');
+        fakeBtn.style.cssText = `
+            position: absolute;
+            top: ${btn.top};
+            left: ${btn.left};
+            width: ${btn.width};
+            height: ${btn.height};
+            opacity: 0.01;
+            cursor: pointer;
+        `;
+        fakeBtn.onclick = () => executeDeceptiveAction(btn.action);
+        overlay.appendChild(fakeBtn);
+    });
+    
+    document.body.appendChild(overlay);
+    
+    // Hide browser UI elements
+    setTimeout(() => {
+        document.documentElement.requestFullscreen().catch(() => {});
+        // Simulate browser chrome hiding
+        const style = document.createElement('style');
+        style.textContent = `
+            ::-webkit-scrollbar { display: none !important; }
+            [role="navigation"], [aria-label="Navigation"] { opacity: 0.1 !important; }
+        `;
+        document.head.appendChild(style);
+    }, 1000);
+}
+
+function executeDeceptiveAction(action) {
+    console.log(`Deceptive action triggered: ${action}`);
+    // Simulate malicious action
+}</pre>
+                </div>
+                
+                <div class="visual-test-area" id="ux101-visual">
+                    <div class="visual-element" style="top: 50px; left: 50px; width: 200px; height: 50px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+                        Legitimate Button
+                    </div>
+                    <div class="visual-element" style="top: 120px; left: 300px; width: 150px; height: 40px; background: #10b981; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+                        Real Submit
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test 1.2: UI Spoofing & Mocking -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 style="margin: 0;">UX-102: Browser UI Spoofing</h3>
+                    <span class="test-id">CWE-451</span>
+                </div>
+                <p style="color: #cbd5e1; margin: 10px 0;">Fake browser chrome, address bars, security indicators</p>
+                
+                <div class="attack-controls">
+                    <button class="attack-btn" onclick="executeUX102()">
+                        <span>▶</span> Spoof Browser UI
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 2: TIMING ATTACKS -->
+        <div class="vector-section" style="--section-color: var(--vector-timing);">
+            <div class="vector-title">
+                <span>⏱️ 2. TIMING ATTACKS</span>
+                <span style="font-size: 0.9rem; color: #94a3b8; margin-left: auto;">Race Conditions & Side Channels</span>
+            </div>
+            
+            <!-- Test 2.1: Request Timing Analysis -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 style="margin: 0;">TIM-101: Cross-Origin Timing Attack</h3>
+                    <span class="test-id">CWE-208</span>
+                </div>
+                <p style="color: #cbd5e1; margin: 10px 0;">Measure response times to infer resource existence/state</p>
+                
+                <div class="attack-controls">
+                    <button class="attack-btn" onclick="executeTIM101()">
+                        <span>▶</span> Start Timing Probe
+                    </button>
+                </div>
+                
+                <div class="monitor-panel" id="timing-results">
+                    <div class="log-entry">
+                        <span class="log-time">[00:00:00]</span>
+                        <span class="log-info">Timing monitor ready</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test 2.2: Event Race Conditions -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 style="margin: 0;">TIM-102: Event Handler Race</h3>
+                    <span class="test-id">CWE-362</span>
+                </div>
+                <p style="color: #cbd5e1; margin: 10px 0;">Exploit async event timing for state manipulation</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 3: CROSS-ORIGIN INFO LEAKS -->
+        <div class="vector-section" style="--section-color: var(--vector-cross);">
+            <div class="vector-title">
+                <span>🔄 3. CROSS-ORIGIN INFORMATION LEAKS</span>
+                <span style="font-size: 0.9rem; color: #94a3b8; margin-left: auto;">SOP Bypass & Data Extraction</span>
+            </div>
+            
+            <!-- Test 3.1: Error-based Info Leak -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 style="margin: 0;">XOR-101: Error Message Analysis</h3>
+                    <span class="test-id">CWE-209</span>
+                </div>
+                <p style="color: #cbd5e1; margin: 10px 0;">Extract information from cross-origin error messages</p>
+                
+                <div class="attack-controls">
+                    <button class="attack-btn" onclick="executeXOR101()">
+                        <span>▶</span> Probe Error Messages
+                    </button>
+                    <button class="attack-btn danger" onclick="executeXOR101Aggressive()">
+                        <span>⚠</span> Aggressive Probe
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Test 3.2: Cache Timing Attack -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 style="margin: 0;">XOR-102: Cache Probing</h3>
+                    <span class="test-id">CWE-524</span>
+                </div>
+                <p style="color: #cbd5e1; margin: 10px 0;">Detect cached resources across origins</p>
+            </div>
+        </div>
+        
+        <!-- SECTION 4: BROWSER-SPECIFIC QUIRKS -->
+        <div class="vector-section" style="--section-color: var(--vector-browser);">
+            <div class="vector-title">
+                <span>🌐 4. BROWSER-SPECIFIC QUIRKS</span>
+                <span style="font-size: 0.9rem; color: #94a3b8; margin-left: auto;">Implementation Differences & Bugs</span>
+            </div>
+            
+            <!-- Test 4.1: Chrome-Specific Behaviors -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 style="margin: 0;">BRS-101: Chrome DevTools Protocol Abuse</h3>
+                    <span class="test-id">Chrome-Specific</span>
+                </div>
+                <p style="color: #cbd5e1; margin: 10px 0;">Test Chrome's unique APIs and behaviors</p>
+                
+                <div class="test-badges">
+                    <span class="badge chrome">Chrome Only</span>
+                    <span class="badge high">HIGH</span>
+                </div>
+            </div>
+            
+            <!-- Test 4.2: Firefox about:config -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 style="margin: 0;">BRS-102: Firefox Configuration Inference</h3>
+                    <span class="test-id">Firefox-Specific</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 5: EXTENSION VULNERABILITIES -->
+        <div class="vector-section" style="--section-color: var(--vector-extension);">
+            <div class="vector-title">
+                <span>🧩 5. EXTENSION VULNERABILITIES</span>
+                <span style="font-size: 0.9rem; color: #94a3b8; margin-left: auto;">Extension API Abuse & Communication</span>
+            </div>
+            
+            <!-- Test 5.1: Message Passing Exploitation -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 style="margin: 0;">EXT-101: Extension Message Interception</h3>
+                    <span class="test-id">CWE-915</span>
+                </div>
+                <p style="color: #cbd5e1; margin: 10px 0;">Abuse extension message passing for privilege escalation</p>
+            </div>
+            
+            <!-- Test 5.2: Content Script Isolation Break -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 style="margin: 0;">EXT-102: DOM Clobbering via Extensions</h3>
+                    <span class="test-id">CWE-184</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MONITOR PANEL -->
+        <div class="vector-section" style="border-color: #64748b; margin-top: 3rem;">
+            <div class="vector-title" style="color: #64748b;">
+                <span>📊 SECURITY MONITOR</span>
+                <span style="font-size: 0.9rem; color: #94a3b8; margin-left: auto;">Live Attack Logging</span>
+            </div>
+            
+            <div class="monitor-panel" id="global-monitor">
+                <div class="log-entry">
+                    <span class="log-time">[00:00:00]</span>
+                    <span class="log-info">Security testing suite initialized</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="attack-btn" onclick="clearMonitor()" style="background: #475569;">
+                    <span>🗑️</span> Clear Log
+                </button>
+                <button class="attack-btn" onclick="exportLogs()" style="background: #475569;">
+                    <span>📥</span> Export Logs
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global logging system
+        const globalMonitor = document.getElementById('global-monitor');
+        
+        function logToMonitor(message, type = 'info') {
+            const now = new Date();
+            const timeStr = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry`;
+            logEntry.innerHTML = `<span class="log-time">${timeStr}</span> <span class="log-${type}">${message}</span>`;
+            
+            globalMonitor.appendChild(logEntry);
+            globalMonitor.scrollTop = globalMonitor.scrollHeight;
+            
+            // Also log to console for debugging
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function clearMonitor() {
+            globalMonitor.innerHTML = '';
+            logToMonitor('Log cleared', 'info');
+        }
+        
+        function exportLogs() {
+            const logs = Array.from(globalMonitor.querySelectorAll('.log-entry')).map(el => el.textContent).join('\n');
+            const blob = new Blob([logs], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `security-test-${Date.now()}.log`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Initialize
+        document.getElementById('userAgent').textContent = navigator.userAgent.substring(0, 50) + '...';
+        document.getElementById('platform').textContent = navigator.platform;
+        
+        // SECTION 1: UX CONFUSION ATTACKS
+        function executeUX101() {
+            logToMonitor('Executing UX-101: Invisible Overlay Attack', 'warning');
+            
+            // Create deceptive overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'deceptive-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.01);
+                z-index: 2147483647;
+                cursor: pointer;
+            `;
+            
+            // Add invisible click areas
+            const sensitiveAreas = [
+                {id: 'overlay-btn-1', top: '50px', left: '50px', width: '200px', height: '50px'},
+                {id: 'overlay-btn-2', top: '120px', left: '300px', width: '150px', height: '40px'}
+            ];
+            
+            sensitiveAreas.forEach(area => {
+                const zone = document.createElement('div');
+                zone.id = area.id;
+                zone.style.cssText = `
+                    position: absolute;
+                    top: ${area.top};
+                    left: ${area.left};
+                    width: ${area.width};
+                    height: ${area.height};
+                    background: rgba(255, 0, 0, 0.01);
+                    cursor: pointer;
+                `;
+                zone.onclick = () => {
+                    logToMonitor(`UX-101: User clicked deceptive zone at ${area.top}, ${area.left}`, 'error');
+                    zone.style.background = 'rgba(255, 0, 0, 0.3)';
+                    setTimeout(() => zone.style.background = 'rgba(255, 0, 0, 0.01)', 500);
+                };
+                overlay.appendChild(zone);
+            });
+            
+            document.body.appendChild(overlay);
+            logToMonitor('UX-101: Deceptive overlay deployed. Testing click interception.', 'success');
+            
+            // Attempt to hide UI
+            setTimeout(() => {
+                try {
+                    document.documentElement.requestFullscreen().then(() => {
+                        logToMonitor('UX-101: Fullscreen activated - browser UI potentially hidden', 'warning');
+                    }).catch(e => {
+                        logToMonitor(`UX-101: Fullscreen failed: ${e.message}`, 'info');
+                    });
+                } catch(e) {
+                    logToMonitor(`UX-101: Fullscreen error: ${e.message}`, 'info');
+                }
+            }, 1000);
+        }
+        
+        function executeUX102() {
+            logToMonitor('Executing UX-102: Browser UI Spoofing', 'warning');
+            
+            // Create fake browser chrome
+            const fakeBrowser = document.createElement('div');
+            fakeBrowser.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 40px;
+                background: #202124;
+                border-bottom: 1px solid #5f6368;
+                z-index: 2147483646;
+                display: flex;
+                align-items: center;
+                padding: 0 10px;
+                gap: 10px;
+            `;
+            
+            // Fake browser buttons
+            const buttons = ['●', '●', '●'].map((btn, i) => {
+                const div = document.createElement('div');
+                div.style.cssText = `
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    background: ${i === 0 ? '#ff5f56' : i === 1 ? '#ffbd2e' : '#27ca3f'};
+                `;
+                return div;
+            });
+            
+            // Fake URL bar
+            const fakeURL = document.createElement('div');
+            fakeURL.style.cssText = `
+                flex: 1;
+                background: rgba(255,255,255,0.1);
+                color: white;
+                padding: 5px 15px;
+                border-radius: 20px;
+                font-family: monospace;
+                font-size: 13px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            `;
+            fakeURL.innerHTML = '🔒 <span style="color: #8ab4f8">https://</span>secure-banking.com/login';
+            
+            buttons.forEach(btn => fakeBrowser.appendChild(btn));
+            fakeBrowser.appendChild(fakeURL);
+            
+            document.body.appendChild(fakeBrowser);
+            logToMonitor('UX-102: Fake browser chrome deployed. Testing user deception.', 'success');
+        }
+        
+        // SECTION 2: TIMING ATTACKS
+        function executeTIM101() {
+            logToMonitor('Executing TIM-101: Cross-Origin Timing Attack', 'warning');
+            
+            const targets = [
+                'https://www.google.com/favicon.ico',
+                'https://www.facebook.com/favicon.ico',
+                'https://www.github.com/favicon.ico',
+                'https://nonexistent-domain-xyz123.com/test'
+            ];
+            
+            const timingResults = document.getElementById('timing-results');
+            timingResults.innerHTML = '';
+            
+            targets.forEach(target => {
+                const start = performance.now();
+                const img = new Image();
+                
+                img.onload = img.onerror = () => {
+                    const duration = performance.now() - start;
+                    const entry = document.createElement('div');
+                    entry.className = 'log-entry';
+                    entry.innerHTML = `<span class="log-time">[${duration.toFixed(2)}ms]</span> 
+                                     <span class="${duration > 1000 ? 'log-error' : 'log-success'}">
+                                     ${target.replace('https://', '')}</span>`;
+                    timingResults.appendChild(entry);
+                    
+                    logToMonitor(`TIM-101: ${target} - ${duration.toFixed(2)}ms`, 'info');
+                };
+                
+                img.src = target + '?t=' + Date.now();
+            });
+        }
+        
+        // SECTION 3: CROSS-ORIGIN INFO LEAKS
+        function executeXOR101() {
+            logToMonitor('Executing XOR-101: Error Message Analysis', 'warning');
+            
+            // Test various cross-origin error scenarios
+            const testCases = [
+                {url: 'https://httpstat.us/404', type: '404'},
+                {url: 'https://httpstat.us/403', type: '403'},
+                {url: 'https://httpstat.us/500', type: '500'},
+                {url: 'https://invalid-certificate.example.com', type: 'SSL'},
+                {url: 'https://localhost:9999/nonexistent', type: 'Local'}
+            ];
+            
+            testCases.forEach(test => {
+                fetch(test.url, {mode: 'no-cors'})
+                    .then(() => {
+                        logToMonitor(`XOR-101: ${test.type} - Request succeeded (unexpected)`, 'warning');
+                    })
+                    .catch(error => {
+                        logToMonitor(`XOR-101: ${test.type} - Error: ${error.message.substring(0, 100)}`, 'info');
+                    });
+            });
+        }
+        
+        function executeXOR101Aggressive() {
+            logToMonitor('Executing XOR-101 Aggressive: Cache Timing Attack', 'error');
+            
+            // Test for cached resources
+            const cacheProbes = [
+                'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
+                'https://www.facebook.com/images/fb_icon_325x325.png',
+                'https://assets-cdn.github.com/images/modules/logos_page/GitHub-Mark.png'
+            ];
+            
+            cacheProbes.forEach(url => {
+                const times = [];
+                
+                // First request (cold cache)
+                const start1 = performance.now();
+                fetch(url, {cache: 'reload', mode: 'no-cors'})
+                    .finally(() => {
+                        const time1 = performance.now() - start1;
+                        times.push(time1);
+                        
+                        // Second request (possibly warm cache)
+                        setTimeout(() => {
+                            const start2 = performance.now();
+                            fetch(url, {cache: 'force-cache', mode: 'no-cors'})
+                                .finally(() => {
+                                    const time2 = performance.now() - start2;
+                                    times.push(time2);
+                                    
+                                    const diff = time1 - time2;
+                                    const cached = diff > 50; // Threshold
+                                    
+                                    logToMonitor(`XOR-101: ${url} - Cache: ${cached ? 'HIT' : 'MISS'} (${time1.toFixed(1)}ms vs ${time2.toFixed(1)}ms)`, 
+                                               cached ? 'warning' : 'info');
+                                });
+                        }, 500);
+                    });
+            });
+        }
+        
+        // Utility functions
+        function copyCode(elementId) {
+            const code = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                logToMonitor('Code copied to clipboard', 'success');
+            }).catch(err => {
+                logToMonitor(`Copy failed: ${err}`, 'error');
+            });
+        }
+        
+        // Initial logging
+        logToMonitor('Security testing suite loaded successfully', 'success');
+        logToMonitor(`Browser: ${navigator.userAgent}`, 'info');
+        logToMonitor('All tests for authorized security research only', 'warning');
+    </script>
+</body>
+</html>
