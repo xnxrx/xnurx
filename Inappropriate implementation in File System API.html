@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demonstrasi showSaveFilePicker + setTimeout</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .note { background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 15px 0; }
+        button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
+        #status { margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Demonstrasi Skenario Penundaan Dialog</h1>
+    <div class="note">
+        <strong>Catatan Pengujian:</strong><br>
+        1. Klik tombol di bawah untuk memulai.<br>
+        2. Anda punya <strong>3 detik</strong> untuk membuka tab baru dan mengunjungi situs web lain (misalnya, google.com).<br>
+        3. Jika berhasil, dialog "Save File" akan muncul di situs yang baru Anda kunjungi tersebut.
+    </div>
+
+    <button id="triggerBtn">Klik Saya (Aktifkan Picker dalam 3 detik)</button>
+    <p id="status"></p>
+
+    <script>
+        const triggerBtn = document.getElementById('triggerBtn');
+        const statusEl = document.getElementById('status');
+
+        triggerBtn.addEventListener('click', async () => {
+            statusEl.textContent = 'Timer dimulai! Anda punya 3 detik untuk pergi ke tab/situs lain...';
+            statusEl.style.color = 'orange';
+
+            // Gunakan setTimeout untuk menunda pemanggilan showSaveFilePicker selama 3 detik
+            setTimeout(async () => {
+                try {
+                    // Opsi untuk showSaveFilePicker: menyarankan nama file
+                    const options = {
+                        suggestedName: `log-${Date.now()}.txt`,
+                        types: [{
+                            description: 'Text Files',
+                            accept: { 'text/plain': ['.txt'] },
+                        }],
+                    };
+
+                    // Memanggil showSaveFilePicker. Jika user sudah berpindah origin,
+                    // dialog akan muncul di origin yang baru, bukan di halaman ini.
+                    const fileHandle = await window.showSaveFilePicker(options);
+                    statusEl.textContent = `Sukses! File akan disimpan sebagai: ${fileHandle.name}`;
+                    statusEl.style.color = 'green';
+
+                } catch (error) {
+                    // Menangani error, termasuk jika user membatalkan dialog atau terjadi SecurityError
+                    if (error.name === 'SecurityError') {
+                        statusEl.textContent = 'Gagal: Diperlukan interaksi pengguna atau melanggar kebijakan keamanan.';
+                    } else if (error.name === 'AbortError') {
+                        statusEl.textContent = 'Dialog dibatalkan oleh pengguna.';
+                    } else {
+                        statusEl.textContent = `Error lain: ${error.message}`;
+                    }
+                    statusEl.style.color = 'red';
+                    console.error('Error pada showSaveFilePicker:', error);
+                }
+            }, 3000); // Penundaan 3 detik
+        });
+    </script>
+</body>
+</html>
