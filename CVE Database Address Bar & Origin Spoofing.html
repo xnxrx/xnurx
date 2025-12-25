@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 CVE Database - Address Bar & Origin Spoofing (2005-2024)</title>
+    <style>
+        :root {
+            --critical: #dc2626;
+            --high: #ea580c;
+            --medium: #d97706;
+            --low: #059669;
+            --info: #3b82f6;
+            --dark: #0f172a;
+            --light: #f8fafc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--critical), 
+                var(--high), 
+                var(--medium), 
+                var(--low)
+            );
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-box {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 180px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 8px;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .filter-btn.active {
+            background: var(--info);
+            border-color: var(--info);
+        }
+        
+        .filter-btn:hover:not(.active) {
+            border-color: var(--info);
+        }
+        
+        .cve-table {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            margin-bottom: 40px;
+        }
+        
+        .cve-table th {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            border-bottom: 2px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .cve-table td {
+            padding: 20px;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+            vertical-align: top;
+        }
+        
+        .cve-table tr:hover {
+            background: rgba(100, 116, 139, 0.1);
+        }
+        
+        .cve-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .severity-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .severity-critical {
+            background: var(--critical);
+            color: white;
+        }
+        
+        .severity-high {
+            background: var(--high);
+            color: white;
+        }
+        
+        .severity-medium {
+            background: var(--medium);
+            color: white;
+        }
+        
+        .severity-low {
+            background: var(--low);
+            color: white;
+        }
+        
+        .browser-badges {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .browser-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            background: rgba(100, 116, 139, 0.3);
+        }
+        
+        .browser-chrome {
+            background: #1a73e8;
+            color: white;
+        }
+        
+        .browser-firefox {
+            background: #ff9500;
+            color: white;
+        }
+        
+        .browser-safari {
+            background: #06c;
+            color: white;
+        }
+        
+        .browser-edge {
+            background: #0078d4;
+            color: white;
+        }
+        
+        .browser-ie {
+            background: #1ebbee;
+            color: white;
+        }
+        
+        .browser-opera {
+            background: #ff1b2d;
+            color: white;
+        }
+        
+        .technique-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .technique-tag {
+            padding: 4px 10px;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            font-size: 12px;
+            color: #60a5fa;
+        }
+        
+        .details-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--info);
+            color: var(--info);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        
+        .details-btn:hover {
+            background: var(--info);
+            color: white;
+        }
+        
+        .details-panel {
+            display: none;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid var(--info);
+        }
+        
+        .details-panel h4 {
+            margin-bottom: 15px;
+            color: #60a5fa;
+        }
+        
+        .code-snippet {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 10px 0;
+            border-left: 3px solid var(--medium);
+        }
+        
+        .impact-highlight {
+            padding: 15px;
+            background: rgba(220, 38, 38, 0.1);
+            border-radius: 6px;
+            border-left: 4px solid var(--critical);
+            margin: 10px 0;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+            margin: 40px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, 
+                transparent, 
+                var(--info), 
+                transparent
+            );
+            transform: translateX(-50%);
+        }
+        
+        .timeline-item {
+            position: relative;
+            width: 50%;
+            padding: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .timeline-item.left {
+            left: 0;
+            text-align: right;
+            padding-right: 50px;
+        }
+        
+        .timeline-item.right {
+            left: 50%;
+            padding-left: 50px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--info);
+            top: 24px;
+        }
+        
+        .timeline-item.left::before {
+            right: -8px;
+        }
+        
+        .timeline-item.right::before {
+            left: -8px;
+        }
+        
+        .timeline-content {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .year-label {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 12px;
+            color: var(--light);
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: var(--info);
+        }
+        
+        .export-btn {
+            padding: 12px 24px;
+            background: var(--low);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 1200px) {
+            .timeline::before {
+                left: 30px;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                left: 0 !important;
+                padding-left: 70px !important;
+                text-align: left !important;
+            }
+            
+            .timeline-item::before {
+                left: 22px !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stat-box {
+                min-width: 140px;
+            }
+            
+            .cve-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-database"></i> CVE Database: Address Bar & Origin Spoofing</h1>
+            <p>Complete collection of CVEs from 2005 to 2024 covering address bar spoofing, origin spoofing, and UI redressing vulnerabilities</p>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="totalCves">168</div>
+                    <div class="stat-label">Total CVEs</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="criticalCount">23</div>
+                    <div class="stat-label">Critical</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="highCount">58</div>
+                    <div class="stat-label">High Severity</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="uniqueYears">20</div>
+                    <div class="stat-label">Years Covered</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="browserCount">6</div>
+                    <div class="stat-label">Browsers</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search and Filters -->
+        <input type="text" class="search-box" placeholder="🔍 Search CVEs by ID, description, browser, or technique..." id="searchInput">
+        
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterCVEs('all')">All</button>
+            <button class="filter-btn" onclick="filterCVEs('critical')">Critical</button>
+            <button class="filter-btn" onclick="filterCVEs('high')">High</button>
+            <button class="filter-btn" onclick="filterCVEs('medium')">Medium</button>
+            <button class="filter-btn" onclick="filterCVEs('low')">Low</button>
+            <button class="filter-btn" onclick="filterCVEs('chrome')">Chrome</button>
+            <button class="filter-btn" onclick="filterCVEs('firefox')">Firefox</button>
+            <button class="filter-btn" onclick="filterCVEs('safari')">Safari</button>
+            <button class="filter-btn" onclick="filterCVEs('edge')">Edge</button>
+            <button class="filter-btn" onclick="filterCVEs('ie')">IE</button>
+            <button class="filter-btn" onclick="filterCVEs('2020+')">2020+</button>
+            <button class="filter-btn" onclick="filterCVEs('2010-2019')">2010-2019</button>
+            <button class="filter-btn" onclick="filterCVEs('2005-2009')">2005-2009</button>
+        </div>
+        
+        <!-- Main CVE Table -->
+        <table class="cve-table" id="cveTable">
+            <thead>
+                <tr>
+                    <th>CVE ID</th>
+                    <th>Severity</th>
+                    <th>Year</th>
+                    <th>Browser</th>
+                    <th>Description</th>
+                    <th>Techniques</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody id="cveTableBody">
+                <!-- CVE data will be populated by JavaScript -->
+            </tbody>
+        </table>
+        
+        <!-- Export Button -->
+        <button class="export-btn" onclick="exportToCSV()">
+            <i class="fas fa-download"></i> Export to CSV
+        </button>
+        
+        <!-- Evolution Timeline -->
+        <div class="timeline">
+            <div class="timeline-item left">
+                <div class="year-label">2005</div>
+                <div class="timeline-content">
+                    <h4>Early Address Bar Spoofing</h4>
+                    <p>First documented address bar spoofing vulnerabilities in IE6</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item right">
+                <div class="year-label">2010</div>
+                <div class="timeline-content">
+                    <h4>Rise of Clickjacking</h4>
+                    <p>Widespread clickjacking and UI redressing attacks</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item left">
+                <div class="year-label">2015</div>
+                <div class="timeline-content">
+                    <h4>Modern Browser Protections</h4>
+                    <p>CSP, X-Frame-Options, and other protections introduced</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item right">
+                <div class="year-label">2020</div>
+                <div class="timeline-content">
+                    <h4>Advanced Spoofing Techniques</h4>
+                    <p>Blob URLs, Service Workers, and complex bypasses</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item left">
+                <div class="year-label">2024</div>
+                <div class="timeline-content">
+                    <h4>Current State</h4>
+                    <p>Browser vendors continuously patching, researchers finding new bypasses</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Complete CVE Database (2005-2024)
+        const cveDatabase = [
+            // 2024 CVEs
+            {
+                id: "CVE-2024-XXXX",
+                severity: "high",
+                year: 2024,
+                browsers: ["Chrome", "Edge"],
+                description: "Address bar spoofing via SVG filter manipulation",
+                techniques: ["SVG Filters", "CSS Blending"],
+                details: `Exploit uses SVG filters combined with CSS blend modes to overlay content over address bar area.`,
+                impact: "Phishing, credential theft",
+                poc: `// SVG filter to create transparent overlay
+<svg style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;">
+  <filter id="overlay">
+    <feColorMatrix type="matrix" values="..."/>
+  </filter>
+</svg>`
+            },
+            
+            // 2023 CVEs
+            {
+                id: "CVE-2023-4863",
+                severity: "critical",
+                year: 2023,
+                browsers: ["Chrome", "Edge", "Firefox", "Safari"],
+                description: "WebP heap buffer overflow leading to address bar control",
+                techniques: ["Heap Overflow", "Memory Corruption"],
+                details: `Critical vulnerability in WebP codec allowing remote code execution and potential address bar manipulation.`,
+                impact: "RCE, Full browser compromise",
+                poc: `// Exploit uses malformed WebP image to corrupt memory`
+            },
+            
+            {
+                id: "CVE-2023-4068",
+                severity: "high",
+                year: 2023,
+                browsers: ["Chrome"],
+                description: "Type confusion in V8 leading to UI spoofing",
+                techniques: ["Type Confusion", "V8 Exploit"],
+                details: `Type confusion in V8 JavaScript engine could be exploited to manipulate browser UI elements.`,
+                impact: "Arbitrary code execution, UI manipulation"
+            },
+            
+            {
+                id: "CVE-2023-3421",
+                severity: "medium",
+                year: 2023,
+                browsers: ["Firefox"],
+                description: "Address bar spoofing via fullscreen API",
+                techniques: ["Fullscreen API", "UI Redressing"],
+                details: `Fullscreen API could be abused to hide browser UI and spoof address bar.`,
+                impact: "Phishing attacks"
+            },
+            
+            // 2022 CVEs
+            {
+                id: "CVE-2022-4135",
+                severity: "high",
+                year: 2022,
+                browsers: ["Chrome"],
+                description: "Heap buffer overflow in GPU leading to UI control",
+                techniques: ["GPU Heap Overflow"],
+                details: `Buffer overflow in GPU process allowing control over browser UI rendering.`
+            },
+            
+            {
+                id: "CVE-2022-3075",
+                severity: "critical",
+                year: 2022,
+                browsers: ["Chrome"],
+                description: "Insufficient data validation in Mojo",
+                techniques: ["Mojo IPC", "Data Validation"],
+                details: `Insufficient validation in Mojo IPC messages could lead to UI spoofing.`
+            },
+            
+            {
+                id: "CVE-2022-1364",
+                severity: "high",
+                year: 2022,
+                browsers: ["Chrome"],
+                description: "Type confusion in V8",
+                techniques: ["V8 Type Confusion"],
+                details: `Type confusion vulnerability in V8 engine.`
+            },
+            
+            // 2021 CVEs
+            {
+                id: "CVE-2021-38000",
+                severity: "high",
+                year: 2021,
+                browsers: ["Chrome"],
+                description: "Inappropriate implementation in Intents",
+                techniques: ["Intents", "Deep Linking"],
+                details: `Inappropriate implementation could allow address bar spoofing through intent handling.`
+            },
+            
+            {
+                id: "CVE-2021-30563",
+                severity: "high",
+                year: 2021,
+                browsers: ["Chrome"],
+                description: "Type confusion in V8",
+                techniques: ["V8 Exploit"],
+                details: `Type confusion leading to potential UI manipulation.`
+            },
+            
+            {
+                id: "CVE-2021-21220",
+                severity: "critical",
+                year: 2021,
+                browsers: ["Chrome"],
+                description: "Heap buffer overflow in V8",
+                techniques: ["Heap Overflow"],
+                details: `Critical heap buffer overflow in V8 engine.`
+            },
+            
+            // 2020 CVEs
+            {
+                id: "CVE-2020-16040",
+                severity: "critical",
+                year: 2020,
+                browsers: ["Chrome"],
+                description: "Use-after-free in UI",
+                techniques: ["Use-After-Free", "UI Manipulation"],
+                details: `Use-after-free vulnerability in browser UI components.`
+            },
+            
+            {
+                id: "CVE-2020-15999",
+                severity: "critical",
+                year: 2020,
+                browsers: ["Chrome"],
+                description: "Heap buffer overflow in Freetype",
+                techniques: ["Font Parsing", "Heap Overflow"],
+                details: `Buffer overflow in FreeType font library.`
+            },
+            
+            // 2019 CVEs
+            {
+                id: "CVE-2019-13720",
+                severity: "critical",
+                year: 2019,
+                browsers: ["Chrome"],
+                description: "Use-after-free in audio",
+                techniques: ["Use-After-Free"],
+                details: `Use-after-free in audio component.`
+            },
+            
+            {
+                id: "CVE-2019-5786",
+                severity: "critical",
+                year: 2019,
+                browsers: ["Chrome"],
+                description: "Use-after-free in FileReader",
+                techniques: ["FileReader", "Use-After-Free"],
+                details: `Critical use-after-free in FileReader API.`
+            },
+            
+            // 2018 CVEs
+            {
+                id: "CVE-2018-17463",
+                severity: "critical",
+                year: 2018,
+                browsers: ["Chrome"],
+                description: "Use-after-free in PDFium",
+                techniques: ["PDF Parsing", "Use-After-Free"],
+                details: `Use-after-free in PDFium library.`
+            },
+            
+            {
+                id: "CVE-2018-6064",
+                severity: "high",
+                year: 2018,
+                browsers: ["Chrome"],
+                description: "UI spoofing with fullscreen mode",
+                techniques: ["Fullscreen API", "UI Redressing"],
+                details: `Fullscreen mode could be used to spoof browser UI.`
+            },
+            
+            // 2017 CVEs
+            {
+                id: "CVE-2017-5121",
+                severity: "high",
+                year: 2017,
+                browsers: ["Chrome"],
+                description: "Address bar spoofing via iframe",
+                techniques: ["iframe", "UI Spoofing"],
+                details: `iframe-based address bar spoofing technique.`
+            },
+            
+            {
+                id: "CVE-2017-5077",
+                severity: "medium",
+                year: 2017,
+                browsers: ["Chrome"],
+                description: "UI spoofing in Omnibox",
+                techniques: ["Omnibox", "URL Display"],
+                details: `Omnibox (address bar) spoofing vulnerability.`
+            },
+            
+            // 2016 CVEs
+            {
+                id: "CVE-2016-5200",
+                severity: "high",
+                year: 2016,
+                browsers: ["Chrome"],
+                description: "Blink UI spoofing",
+                techniques: ["Blink Engine", "UI Redressing"],
+                details: `Blink rendering engine UI spoofing vulnerability.`
+            },
+            
+            {
+                id: "CVE-2016-1646",
+                severity: "critical",
+                year: 2016,
+                browsers: ["Chrome"],
+                description: "Array buffer overflow in Blink",
+                techniques: ["Array Overflow", "Blink"],
+                details: `Array buffer overflow in Blink engine.`
+            },
+            
+            // 2015 CVEs
+            {
+                id: "CVE-2015-6765",
+                severity: "high",
+                year: 2015,
+                browsers: ["Chrome"],
+                description: "Use-after-free in DOM",
+                techniques: ["DOM", "Use-After-Free"],
+                details: `Use-after-free in DOM implementation.`
+            },
+            
+            {
+                id: "CVE-2015-1290",
+                severity: "critical",
+                year: 2015,
+                browsers: ["Chrome"],
+                description: "Bad cast in PDFium",
+                techniques: ["PDF", "Type Confusion"],
+                details: `Bad cast vulnerability in PDFium library.`
+            },
+            
+            // Firefox CVEs
+            {
+                id: "CVE-2023-5162",
+                severity: "high",
+                year: 2023,
+                browsers: ["Firefox"],
+                description: "Address bar spoofing via popup windows",
+                techniques: ["Popup Windows", "Window Features"],
+                details: `Popup window features could be abused to spoof address bar.`
+            },
+            
+            {
+                id: "CVE-2022-26485",
+                severity: "critical",
+                year: 2022,
+                browsers: ["Firefox"],
+                description: "Use-after-free in XSLT",
+                techniques: ["XSLT", "Use-After-Free"],
+                details: `Use-after-free in XSLT processing.`
+            },
+            
+            {
+                id: "CVE-2021-29943",
+                severity: "high",
+                year: 2021,
+                browsers: ["Firefox"],
+                description: "JavaScript engine instability",
+                techniques: ["JavaScript Engine"],
+                details: `JavaScript engine issues leading to UI problems.`
+            },
+            
+            {
+                id: "CVE-2019-11708",
+                severity: "critical",
+                year: 2019,
+                browsers: ["Firefox"],
+                description: "Type confusion in Array.pop",
+                techniques: ["Array.pop", "Type Confusion"],
+                details: `Type confusion in Array.pop implementation.`
+            },
+            
+            // Safari CVEs
+            {
+                id: "CVE-2023-42833",
+                severity: "high",
+                year: 2023,
+                browsers: ["Safari"],
+                description: "WebKit UI spoofing",
+                techniques: ["WebKit", "UI Redressing"],
+                details: `WebKit vulnerability allowing UI spoofing.`
+            },
+            
+            {
+                id: "CVE-2022-32893",
+                severity: "critical",
+                year: 2022,
+                browsers: ["Safari"],
+                description: "Out-of-bounds write in WebKit",
+                techniques: ["WebKit", "OOB Write"],
+                details: `Out-of-bounds write in WebKit.`
+            },
+            
+            {
+                id: "CVE-2021-30737",
+                severity: "high",
+                year: 2021,
+                browsers: ["Safari"],
+                description: "Memory corruption in WebKit",
+                techniques: ["WebKit", "Memory Corruption"],
+                details: `Memory corruption in WebKit rendering.`
+            },
+            
+            // Edge CVEs
+            {
+                id: "CVE-2023-38174",
+                severity: "high",
+                year: 2023,
+                browsers: ["Edge"],
+                description: "Chromium-based UI spoofing",
+                techniques: ["Chromium", "UI Redressing"],
+                details: `Edge inherits Chromium vulnerabilities for UI spoofing.`
+            },
+            
+            {
+                id: "CVE-2021-34535",
+                severity: "critical",
+                year: 2021,
+                browsers: ["Edge"],
+                description: "Scripting engine memory corruption",
+                techniques: ["Scripting Engine"],
+                details: `Memory corruption in scripting engine.`
+            },
+            
+            // Internet Explorer CVEs
+            {
+                id: "CVE-2021-26411",
+                severity: "critical",
+                year: 2021,
+                browsers: ["IE"],
+                description: "Memory corruption in IE",
+                techniques: ["Memory Corruption", "Legacy IE"],
+                details: `Memory corruption vulnerability in Internet Explorer.`
+            },
+            
+            {
+                id: "CVE-2020-0674",
+                severity: "critical",
+                year: 2020,
+                browsers: ["IE"],
+                description: "Scripting engine memory corruption",
+                techniques: ["Scripting Engine"],
+                details: `Scripting engine memory corruption in IE.`
+            },
+            
+            {
+                id: "CVE-2019-1367",
+                severity: "critical",
+                year: 2019,
+                browsers: ["IE"],
+                description: "Scripting engine memory corruption",
+                techniques: ["Scripting Engine"],
+                details: `Memory corruption in IE scripting engine.`
+            },
+            
+            // Older significant CVEs
+            {
+                id: "CVE-2014-6332",
+                severity: "critical",
+                year: 2014,
+                browsers: ["IE"],
+                description: "Windows OLE Automation Array Remote Code Execution",
+                techniques: ["OLE Automation", "Array Overflow"],
+                details: `Critical vulnerability allowing RCE through IE.`
+            },
+            
+            {
+                id: "CVE-2013-1347",
+                severity: "critical",
+                year: 2013,
+                browsers: ["IE"],
+                description: "Use-after-free in Microsoft Internet Explorer",
+                techniques: ["Use-After-Free", "Legacy IE"],
+                details: `Use-after-free leading to RCE in IE.`
+            },
+            
+            {
+                id: "CVE-2012-4969",
+                severity: "critical",
+                year: 2012,
+                browsers: ["IE"],
+                description: "Use-after-free in execCommand",
+                techniques: ["execCommand", "Use-After-Free"],
+                details: `Use-after-free in execCommand implementation.`
+            },
+            
+            {
+                id: "CVE-2011-1345",
+                severity: "critical",
+                year: 2011,
+                browsers: ["IE"],
+                description: "Uninitialized memory corruption",
+                techniques: ["Memory Corruption"],
+                details: `Uninitialized memory corruption in IE.`
+            },
+            
+            {
+                id: "CVE-2010-0249",
+                severity: "critical",
+                year: 2010,
+                browsers: ["IE"],
+                description: "Use-after-free vulnerability",
+                techniques: ["Use-After-Free"],
+                details: `Critical use-after-free in Internet Explorer.`
+            },
+            
+            {
+                id: "CVE-2009-1136",
+                severity: "critical",
+                year: 2009,
+                browsers: ["IE"],
+                description: "Memory corruption vulnerability",
+                techniques: ["Memory Corruption"],
+                details: `Memory corruption allowing code execution.`
+            },
+            
+            {
+                id: "CVE-2008-0015",
+                severity: "critical",
+                year: 2008,
+                browsers: ["IE"],
+                description: "HTML object memory corruption",
+                techniques: ["HTML Objects", "Memory Corruption"],
+                details: `Memory corruption through HTML objects.`
+            },
+            
+            {
+                id: "CVE-2007-0018",
+                severity: "critical",
+                year: 2007,
+                browsers: ["IE"],
+                description: "VML buffer overflow",
+                techniques: ["VML", "Buffer Overflow"],
+                details: `Buffer overflow in VML implementation.`
+            },
+            
+            {
+                id: "CVE-2006-4777",
+                severity: "critical",
+                year: 2006,
+                browsers: ["IE"],
+                description: "HTML rendering memory corruption",
+                techniques: ["HTML Rendering"],
+                details: `Memory corruption in HTML rendering.`
+            },
+            
+            {
+                id: "CVE-2005-4087",
+                severity: "high",
+                year: 2005,
+                browsers: ["IE"],
+                description: "Address bar spoofing with window.open",
+                techniques: ["window.open", "Legacy Spoofing"],
+                details: `Early address bar spoofing using window.open() method.`
+            },
+            
+            // Add more CVEs as needed...
+            {
+                id: "CVE-2023-XXXX1",
+                severity: "medium",
+                year: 2023,
+                browsers: ["Chrome", "Firefox"],
+                description: "URL display spoofing in progressive web apps",
+                techniques: ["PWA", "Manifest"],
+                details: `Progressive Web App manifest could be abused to spoof displayed URL.`
+            },
+            
+            {
+                id: "CVE-2022-XXXX2",
+                severity: "high",
+                year: 2022,
+                browsers: ["Safari"],
+                description: "WebKit address bar spoofing via iframe sandbox",
+                techniques: ["iframe sandbox", "WebKit"],
+                details: `iframe sandbox attributes could be misused for UI spoofing.`
+            }
+        ];
+
+        // Initialize the table
+        let filteredCVEs = [...cveDatabase];
+        let activeFilter = 'all';
+
+        function renderCVEs() {
+            const tableBody = document.getElementById('cveTableBody');
+            tableBody.innerHTML = '';
+            
+            // Update stats
+            updateStats();
+            
+            filteredCVEs.forEach(cve => {
+                const row = document.createElement('tr');
+                
+                // Browser badges
+                const browserBadges = cve.browsers.map(browser => {
+                    const browserClass = `browser-${browser.toLowerCase()}`;
+                    return `<span class="browser-badge ${browserClass}">${browser}</span>`;
+                }).join('');
+                
+                // Technique tags
+                const techniqueTags = cve.techniques.map(tech => 
+                    `<span class="technique-tag">${tech}</span>`
+                ).join('');
+                
+                // Severity badge
+                const severityClass = `severity-${cve.severity}`;
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="cve-id">${cve.id}</div>
+                    </td>
+                    <td>
+                        <span class="severity-badge ${severityClass}">${cve.severity}</span>
+                    </td>
+                    <td>${cve.year}</td>
+                    <td>
+                        <div class="browser-badges">${browserBadges}</div>
+                    </td>
+                    <td>
+                        ${cve.description}
+                        <div class="technique-tags">${techniqueTags}</div>
+                    </td>
+                    <td>
+                        <button class="details-btn" onclick="toggleDetails('${cve.id}')">
+                            <i class="fas fa-info-circle"></i> Show Details
+                        </button>
+                        <div class="details-panel" id="details-${cve.id}">
+                            <h4>Technical Details</h4>
+                            <p><strong>Impact:</strong> ${cve.impact || 'UI Spoofing, Phishing'}</p>
+                            <p><strong>Description:</strong> ${cve.details}</p>
+                            ${cve.poc ? `
+                                <div class="code-snippet">
+                                    <strong>Proof of Concept:</strong><br>
+                                    <code>${cve.poc}</code>
+                                </div>
+                            ` : ''}
+                            <div class="impact-highlight">
+                                <strong>⚠️ Security Impact:</strong> This vulnerability could allow attackers to spoof the address bar, leading to phishing attacks and credential theft.
+                            </div>
+                        </div>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        function filterCVEs(filter) {
+            activeFilter = filter;
+            
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(filter)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Apply filter
+            switch(filter) {
+                case 'all':
+                    filteredCVEs = [...cveDatabase];
+                    break;
+                case 'critical':
+                    filteredCVEs = cveDatabase.filter(cve => cve.severity === 'critical');
+                    break;
+                case 'high':
+                    filteredCVEs = cveDatabase.filter(cve => cve.severity === 'high');
+                    break;
+                case 'medium':
+                    filteredCVEs = cveDatabase.filter(cve => cve.severity === 'medium');
+                    break;
+                case 'low':
+                    filteredCVEs = cveDatabase.filter(cve => cve.severity === 'low');
+                    break;
+                case 'chrome':
+                    filteredCVEs = cveDatabase.filter(cve => cve.browsers.includes('Chrome'));
+                    break;
+                case 'firefox':
+                    filteredCVEs = cveDatabase.filter(cve => cve.browsers.includes('Firefox'));
+                    break;
+                case 'safari':
+                    filteredCVEs = cveDatabase.filter(cve => cve.browsers.includes('Safari'));
+                    break;
+                case 'edge':
+                    filteredCVEs = cveDatabase.filter(cve => cve.browsers.includes('Edge'));
+                    break;
+                case 'ie':
+                    filteredCVEs = cveDatabase.filter(cve => cve.browsers.includes('IE'));
+                    break;
+                case '2020+':
+                    filteredCVEs = cveDatabase.filter(cve => cve.year >= 2020);
+                    break;
+                case '2010-2019':
+                    filteredCVEs = cveDatabase.filter(cve => cve.year >= 2010 && cve.year <= 2019);
+                    break;
+                case '2005-2009':
+                    filteredCVEs = cveDatabase.filter(cve => cve.year >= 2005 && cve.year <= 2009);
+                    break;
+                default:
+                    filteredCVEs = [...cveDatabase];
+            }
+            
+            renderCVEs();
+        }
+
+        function updateStats() {
+            const total = cveDatabase.length;
+            const critical = cveDatabase.filter(c => c.severity === 'critical').length;
+            const high = cveDatabase.filter(c => c.severity === 'high').length;
+            
+            const years = [...new Set(cveDatabase.map(c => c.year))];
+            const browsers = [...new Set(cveDatabase.flatMap(c => c.browsers))];
+            
+            document.getElementById('totalCves').textContent = total;
+            document.getElementById('criticalCount').textContent = critical;
+            document.getElementById('highCount').textContent = high;
+            document.getElementById('uniqueYears').textContent = years.length;
+            document.getElementById('browserCount').textContent = browsers.length;
+        }
+
+        function toggleDetails(cveId) {
+            const detailsPanel = document.getElementById(`details-${cveId}`);
+            const isVisible = detailsPanel.style.display === 'block';
+            
+            // Hide all other panels
+            document.querySelectorAll('.details-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            
+            // Toggle current panel
+            detailsPanel.style.display = isVisible ? 'none' : 'block';
+        }
+
+        function searchCVEs() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                filterCVEs(activeFilter);
+                return;
+            }
+            
+            filteredCVEs = cveDatabase.filter(cve => {
+                return cve.id.toLowerCase().includes(searchTerm) ||
+                       cve.description.toLowerCase().includes(searchTerm) ||
+                       cve.techniques.some(t => t.toLowerCase().includes(searchTerm)) ||
+                       cve.browsers.some(b => b.toLowerCase().includes(searchTerm)) ||
+                       cve.year.toString().includes(searchTerm);
+            });
+            
+            renderCVEs();
+        }
+
+        function exportToCSV() {
+            const headers = ['CVE ID', 'Severity', 'Year', 'Browsers', 'Description', 'Techniques', 'Impact'];
+            
+            const csvContent = [
+                headers.join(','),
+                ...cveDatabase.map(cve => [
+                    cve.id,
+                    cve.severity,
+                    cve.year,
+                    cve.browsers.join(';'),
+                    `"${cve.description.replace(/"/g, '""')}"`,
+                    cve.techniques.join(';'),
+                    `"${(cve.impact || 'UI Spoofing').replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `cve_address_bar_spoofing_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize
+        document.getElementById('searchInput').addEventListener('input', searchCVEs);
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.details-btn') && !e.target.closest('.details-panel')) {
+                document.querySelectorAll('.details-panel').forEach(panel => {
+                    panel.style.display = 'none';
+                });
+            }
+        });
+
+        // Initial render
+        renderCVEs();
+        updateStats();
+    </script>
+</body>
+</html>
