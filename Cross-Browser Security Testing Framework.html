@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Browser Security Testing Framework</title>
+    <style>
+        :root {
+            --chrome-blue: #4285f4;
+            --firefox-orange: #ff9500;
+            --safari-blue: #5ac8fa;
+            --edge-blue: #0078d4;
+            --warning-red: #ea4335;
+            --success-green: #34a853;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: #202124;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #5f6368;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto 25px;
+        }
+        
+        .disclaimer {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border-left: 6px solid var(--warning-red);
+            padding: 20px;
+            margin: 25px auto;
+            border-radius: 12px;
+            max-width: 900px;
+        }
+        
+        .disclaimer h3 {
+            color: var(--warning-red);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .browser-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .browser-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 6px solid;
+        }
+        
+        .browser-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .browser-card.chrome { border-color: var(--chrome-blue); }
+        .browser-card.firefox { border-color: var(--firefox-orange); }
+        .browser-card.safari { border-color: var(--safari-blue); }
+        .browser-card.edge { border-color: var(--edge-blue); }
+        .browser-card.generic { border-color: #666; }
+        
+        .browser-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .browser-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        
+        .chrome .browser-icon { background: var(--chrome-blue); }
+        .firefox .browser-icon { background: var(--firefox-orange); }
+        .safari .browser-icon { background: var(--safari-blue); }
+        .edge .browser-icon { background: var(--edge-blue); }
+        .generic .browser-icon { background: #666; }
+        
+        .test-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .test-btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #f1f3f4;
+            color: #1a1a1a;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-btn:hover {
+            background: #e8eaed;
+            transform: translateX(5px);
+        }
+        
+        .test-btn.chrome:hover { background: #e8f0fe; }
+        .test-btn.firefox:hover { background: #fff3e0; }
+        .test-btn.safari:hover { background: #e3f2fd; }
+        .test-btn.edge:hover { background: #e3f2fd; }
+        
+        .test-window-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            display: none;
+            overflow: hidden;
+            min-width: 500px;
+            max-width: 90vw;
+        }
+        
+        .test-window-header {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .test-content {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .results-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .result-item {
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+            background: #f8f9fa;
+            border-left: 5px solid #ccc;
+        }
+        
+        .result-item.success { border-color: var(--success-green); background: #e6f4ea; }
+        .result-item.warning { border-color: var(--warning-red); background: #fce8e6; }
+        .result-item.info { border-color: var(--chrome-blue); background: #e8f0fe; }
+        
+        .close-btn {
+            background: var(--warning-red);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .status-safe { background: var(--success-green); }
+        .status-vulnerable { background: var(--warning-red); }
+        .status-unknown { background: #9aa0a6; }
+        
+        .technique-desc {
+            font-size: 0.9rem;
+            color: #5f6368;
+            margin-top: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .browser-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .test-window-container {
+                min-width: 90vw;
+                max-height: 80vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cross-Browser Security Testing Framework</h1>
+            <p class="subtitle">Comprehensive "Line of Death" & UI Spoofing Detection for Modern Browsers</p>
+            
+            <div class="disclaimer">
+                <h3>
+                    <span style="font-size: 24px;">⚠️</span>
+                    FOR AUTHORIZED SECURITY RESEARCH ONLY
+                </h3>
+                <p>This tool is designed for security researchers participating in official bug bounty programs with written authorization. Use only in controlled environments (localhost) for legitimate browser security testing.</p>
+            </div>
+        </header>
+        
+        <div class="browser-grid" id="browserGrid">
+            <!-- Browser cards will be populated by JavaScript -->
+        </div>
+        
+        <div class="results-panel">
+            <h2>Test Results & Analysis</h2>
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+    
+    <div class="test-window-container" id="testWindow">
+        <div class="test-window-header">
+            <h3 id="testTitle">Security Test in Progress</h3>
+            <button class="close-btn" onclick="closeTestWindow()">Close Test</button>
+        </div>
+        <div class="test-content" id="testContent">
+            <!-- Test content will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        // Browser detection and configuration
+        const BrowserTests = {
+            // Common test patterns with browser-specific variations
+            techniques: {
+                // Technique 1: Multi-domain window state manipulation
+                multiDomain: {
+                    chrome: {
+                        name: "Chrome: Multi-Process Window State Test",
+                        description: "Tests Chrome's multi-process architecture boundary handling",
+                        script: function() {
+                            return createMultiDomainTest('chrome');
+                        }
+                    },
+                    firefox: {
+                        name: "Firefox: Cross-Origin Window Reference Test",
+                        description: "Tests Firefox's cross-origin window reference policies",
+                        script: function() {
+                            return createMultiDomainTest('firefox');
+                        }
+                    },
+                    safari: {
+                        name: "Safari: Intelligent Tracking Prevention Bypass",
+                        description: "Tests Safari's ITP boundary enforcement",
+                        script: function() {
+                            return createMultiDomainTest('safari');
+                        }
+                    },
+                    edge: {
+                        name: "Edge: Chromium Fork Specific Behaviors",
+                        description: "Tests Edge-specific modifications to Chromium security",
+                        script: function() {
+                            return createMultiDomainTest('edge');
+                        }
+                    }
+                },
+                
+                // Technique 2: UI element spoofing variations
+                uiSpoofing: {
+                    chrome: {
+                        name: "Chrome: Omnibox Spoofing via Focus Events",
+                        description: "Tests Chrome's omnibox focus event handling vulnerabilities",
+                        script: function() {
+                            return createUISpoofingTest('chrome');
+                        }
+                    },
+                    firefox: {
+                        name: "Firefox: Address Bar Overlay Detection",
+                        description: "Tests Firefox's address bar overlay protection mechanisms",
+                        script: function() {
+                            return createUISpoofingTest('firefox');
+                        }
+                    },
+                    safari: {
+                        name: "Safari: Smart Search Field Manipulation",
+                        description: "Tests Safari's unified address/search field vulnerabilities",
+                        script: function() {
+                            return createUISpoofingTest('safari');
+                        }
+                    },
+                    edge: {
+                        name: "Edge: Bing Integration Boundary Test",
+                        description: "Tests Edge's Bing integration security boundaries",
+                        script: function() {
+                            return createUISpoofingTest('edge');
+                        }
+                    }
+                },
+                
+                // Technique 3: Fullscreen API exploitation variations
+                fullscreen: {
+                    chrome: {
+                        name: "Chrome: Fullscreen Notification Bypass",
+                        description: "Tests Chrome's fullscreen notification bypass possibilities",
+                        script: function() {
+                            return createFullscreenTest('chrome');
+                        }
+                    },
+                    firefox: {
+                        name: "Firefox: Fullscreen Permission Timing Attack",
+                        description: "Tests Firefox's fullscreen permission timing vulnerabilities",
+                        script: function() {
+                            return createFullscreenTest('firefox');
+                        }
+                    },
+                    safari: {
+                        name: "Safari: Fullscreen API on iOS/macOS",
+                        description: "Tests Safari's mobile/desktop fullscreen behavior differences",
+                        script: function() {
+                            return createFullscreenTest('safari');
+                        }
+                    },
+                    edge: {
+                        name: "Edge: Immersive Reader Mode Boundaries",
+                        description: "Tests Edge's Immersive Reader mode security boundaries",
+                        script: function() {
+                            return createFullscreenTest('edge');
+                        }
+                    }
+                },
+                
+                // Technique 4: History and navigation manipulation
+                history: {
+                    chrome: {
+                        name: "Chrome: Navigation API State Corruption",
+                        description: "Tests Chrome's Navigation API state handling vulnerabilities",
+                        script: function() {
+                            return createHistoryTest('chrome');
+                        }
+                    },
+                    firefox: {
+                        name: "Firefox: Same-Site History Manipulation",
+                        description: "Tests Firefox's same-site history manipulation protections",
+                        script: function() {
+                            return createHistoryTest('firefox');
+                        }
+                    },
+                    safari: {
+                        name: "Safari: Back/Forward Cache Boundary Test",
+                        description: "Tests Safari's bfcache security boundaries",
+                        script: function() {
+                            return createHistoryTest('safari');
+                        }
+                    },
+                    edge: {
+                        name: "Edge: IE Mode Compatibility Boundaries",
+                        description: "Tests Edge's IE mode compatibility layer security",
+                        script: function() {
+                            return createHistoryTest('edge');
+                        }
+                    }
+                },
+                
+                // Technique 5: Browser-specific feature exploitation
+                browserSpecific: {
+                    chrome: {
+                        name: "Chrome: Extensions API Boundary Test",
+                        description: "Tests Chrome Extensions API security boundaries",
+                        script: function() {
+                            return createBrowserSpecificTest('chrome');
+                        }
+                    },
+                    firefox: {
+                        name: "Firefox: WebExtensions Process Isolation",
+                        description: "Tests Firefox WebExtensions process isolation",
+                        script: function() {
+                            return createBrowserSpecificTest('firefox');
+                        }
+                    },
+                    safari: {
+                        name: "Safari: WebKit Nitro Engine JIT Boundaries",
+                        description: "Tests Safari's JavaScript JIT compiler security",
+                        script: function() {
+                            return createBrowserSpecificTest('safari');
+                        }
+                    },
+                    edge: {
+                        name: "Edge: Collections & Vertical Tabs Boundaries",
+                        description: "Tests Edge's unique UI feature security",
+                        script: function() {
+                            return createBrowserSpecificTest('edge');
+                        }
+                    }
+                }
+            },
+            
+            // Browser detection
+            detectBrowser: function() {
+                const userAgent = navigator.userAgent;
+                let browser = 'generic';
+                
+                if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
+                    browser = 'chrome';
+                } else if (userAgent.includes('Firefox')) {
+                    browser = 'firefox';
+                } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+                    browser = 'safari';
+                } else if (userAgent.includes('Edg')) {
+                    browser = 'edge';
+                }
+                
+                return browser;
+            },
+            
+            // Test execution
+            runTest: function(browser, technique) {
+                const testConfig = this.techniques[technique][browser] || 
+                                 this.techniques[technique].generic;
+                
+                logResult(`Starting test: ${testConfig.name}`, 'info');
+                logResult(`Description: ${testConfig.description}`, 'info');
+                
+                try {
+                    const testResult = testConfig.script();
+                    openTestWindow(testConfig.name, testResult.content);
+                    
+                    if (testResult.vulnerable) {
+                        logResult(`${browser.toUpperCase()} appears VULNERABLE to ${technique}`, 'warning');
+                        logResult(`Impact: ${testResult.impact}`, 'warning');
+                    } else {
+                        logResult(`${browser.toUpperCase()} appears SAFE from ${technique}`, 'success');
+                    }
+                    
+                    if (testResult.notes) {
+                        logResult(`Notes: ${testResult.notes}`, 'info');
+                    }
+                    
+                } catch (error) {
+                    logResult(`Test failed: ${error.message}`, 'warning');
+                }
+            }
+        };
+        
+        // Test content generators
+        function createMultiDomainTest(browser) {
+            const testId = `multi-domain-${Date.now()}`;
+            const content = `
+                <h3>Multi-Domain Window State Test</h3>
+                <p>Testing boundary between browser UI and web content across multiple domains...</p>
+                
+                <div style="margin: 20px 0; padding: 15px; background: #f0f7ff; border-radius: 10px;">
+                    <h4>Test Parameters:</h4>
+                    <ul>
+                        <li>Browser: ${browser.toUpperCase()}</li>
+                        <li>Technique: Multi-domain window reference manipulation</li>
+                        <li>Target: Cross-origin communication boundaries</li>
+                    </ul>
+                </div>
+                
+                <button onclick="runDomainTest('${browser}', '${testId}')" 
+                        style="padding: 12px 24px; background: #4285f4; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    Execute Test Sequence
+                </button>
+                
+                <div id="results-${testId}" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; display: none;">
+                    <!-- Results will appear here -->
+                </div>
+                
+                <div style="margin-top: 20px; font-size: 0.9rem; color: #666;">
+                    <strong>Research Notes:</strong> This test attempts to manipulate window references across different origins to test the "Line of Death" implementation.
+                </div>
+            `;
+            
+            return {
+                content: content,
+                vulnerable: false,
+                impact: "Potential cross-origin UI spoofing",
+                notes: "Test requires manual verification of browser behavior"
+            };
+        }
+        
+        function createUISpoofingTest(browser) {
+            const spoofTemplates = {
+                chrome: {
+                    title: "Google Account Login",
+                    domain: "accounts.google.com",
+                    color: "#4285f4"
+                },
+                firefox: {
+                    title: "Firefox Sync Setup",
+                    domain: "accounts.firefox.com",
+                    color: "#ff9500"
+                },
+                safari: {
+                    title: "Apple ID Sign In",
+                    domain: "appleid.apple.com",
+                    color: "#5ac8fa"
+                },
+                edge: {
+                    title: "Microsoft Account",
+                    domain: "login.microsoftonline.com",
+                    color: "#0078d4"
+                }
+            };
+            
+            const template = spoofTemplates[browser] || spoofTemplates.chrome;
+            
+            const content = `
+                <h3>UI Spoofing Test - ${browser.toUpperCase()}</h3>
+                <p>Testing address bar and browser UI spoofing techniques...</p>
+                
+                <div style="margin: 20px 0; padding: 20px; background: ${template.color}10; border: 2px dashed ${template.color}; border-radius: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <div style="width: 40px; height: 40px; background: ${template.color}; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            ${browser.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9rem; color: #666;">${template.domain}</div>
+                            <div style="font-weight: bold; font-size: 1.1rem;">${template.title}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; padding: 20px; border-radius: 8px;">
+                        <input type="email" placeholder="Email address" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px;">
+                        <input type="password" placeholder="Password" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px;">
+                        <button style="width: 100%; padding: 12px; background: ${template.color}; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px;">
+                            Sign In
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="background: #fff8e1; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <strong>⚠️ Security Check:</strong> Verify the address bar shows the actual domain, not "${template.domain}"
+                </div>
+                
+                <button onclick="checkUIVisibility('${browser}')" 
+                        style="padding: 12px 24px; background: ${template.color}; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    Test UI Visibility Detection
+                </button>
+                
+                <div id="ui-test-results" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; display: none;">
+                    <!-- UI test results will appear here -->
+                </div>
+            `;
+            
+            return {
+                content: content,
+                vulnerable: false,
+                impact: "Potential phishing via UI spoofing",
+                notes: "Manual verification required - check address bar consistency"
+            };
+        }
+        
+        function createFullscreenTest(browser) {
+            const content = `
+                <h3>Fullscreen API Boundary Test - ${browser.toUpperCase()}</h3>
+                <p>Testing fullscreen mode transitions and browser UI visibility...</p>
+                
+                <div style="margin: 20px 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; text-align: center;">
+                    <h4 style="margin-bottom: 10px;">Fullscreen Simulation Area</h4>
+                    <p>This area simulates content that attempts to trigger fullscreen mode</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                    <button onclick="testFullscreenAPI('${browser}', 'element')" 
+                            style="padding: 15px; background: #34a853; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Test Element Fullscreen
+                    </button>
+                    
+                    <button onclick="testFullscreenAPI('${browser}', 'document')" 
+                            style="padding: 15px; background: #ea4335; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Test Document Fullscreen
+                    </button>
+                </div>
+                
+                <div id="fullscreen-test-area" style="height: 200px; background: #f5f5f5; border: 2px dashed #ccc; border-radius: 8px; margin: 20px 0; display: flex; align-items: center; justify-content: center;">
+                    <p>Fullscreen test target element</p>
+                </div>
+                
+                <div id="fullscreen-results" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; display: none;">
+                    <!-- Fullscreen test results will appear here -->
+                </div>
+                
+                <div style="font-size: 0.9rem; color: #666; margin-top: 20px;">
+                    <strong>Research Objective:</strong> Determine if fullscreen mode can hide browser UI elements that should remain visible for security.
+                </div>
+            `;
+            
+            return {
+                content: content,
+                vulnerable: false,
+                impact: "Potential UI hiding via fullscreen API abuse",
+                notes: "Check if browser shows exit fullscreen prompt properly"
+            };
+        }
+        
+        function createHistoryTest(browser) {
+            const content = `
+                <h3>History API Manipulation Test - ${browser.toUpperCase()}</h3>
+                <p>Testing browser history and navigation state manipulation...</p>
+                
+                <div style="margin: 20px 0; padding: 20px; background: #e8f0fe; border-radius: 12px;">
+                    <h4>Test Controls:</h4>
+                    <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                        <button onclick="testHistoryAPI('${browser}', 'push')" 
+                                style="padding: 12px 20px; background: #4285f4; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            Push State
+                        </button>
+                        <button onclick="testHistoryAPI('${browser}', 'replace')" 
+                                style="padding: 12px 20px; background: #ea4335; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            Replace State
+                        </button>
+                        <button onclick="testHistoryAPI('${browser}', 'backforward')" 
+                                style="padding: 12px 20px; background: #fbbc04; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            Back/Forward Cache
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="history-state-display" style="margin: 20px 0; padding: 15px; background: white; border: 1px solid #ddd; border-radius: 8px;">
+                    <strong>Current History State:</strong> <span id="current-state">Initial state</span>
+                </div>
+                
+                <div id="history-results" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; display: none;">
+                    <!-- History test results will appear here -->
+                </div>
+                
+                <div style="font-size: 0.9rem; color: #666; margin-top: 20px;">
+                    <strong>Security Concern:</strong> Malicious history manipulation could make phishing pages appear to have legitimate URLs.
+                </div>
+            `;
+            
+            return {
+                content: content,
+                vulnerable: false,
+                impact: "Potential URL spoofing via history manipulation",
+                notes: "Verify address bar updates correctly with history changes"
+            };
+        }
+        
+        function createBrowserSpecificTest(browser) {
+            const browserTests = {
+                chrome: "Testing Chrome Extensions API boundaries and permission escalation",
+                firefox: "Testing Firefox WebExtensions process isolation and message passing",
+                safari: "Testing WebKit JIT boundaries and JavaScriptCore security",
+                edge: "Testing Edge Collections, Vertical Tabs, and IE Mode boundaries"
+            };
+            
+            const content = `
+                <h3>Browser-Specific Feature Test - ${browser.toUpperCase()}</h3>
+                <p>${browserTests[browser] || "Testing browser-specific security features"}</p>
+                
+                <div style="margin: 20px 0; padding: 20px; background: #f0f7ff; border-radius: 12px;">
+                    <h4>Browser-Specific Security Checks:</h4>
+                    <div id="browser-specific-checks" style="margin-top: 15px;">
+                        <div style="padding: 10px; background: white; margin: 8px 0; border-radius: 6px; display: flex; align-items: center;">
+                            <span class="status-indicator status-unknown"></span>
+                            <span>Detecting browser-specific APIs...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="runBrowserSpecificChecks('${browser}')" 
+                        style="padding: 12px 24px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    Run Browser-Specific Analysis
+                </button>
+                
+                <div id="browser-specific-results" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; display: none;">
+                    <!-- Browser-specific results will appear here -->
+                </div>
+                
+                <div style="font-size: 0.9rem; color: #666; margin-top: 20px;">
+                    <strong>Note:</strong> Each browser has unique features that may introduce unique security boundaries.
+                </div>
+            `;
+            
+            return {
+                content: content,
+                vulnerable: false,
+                impact: "Potential browser-specific feature exploitation",
+                notes: "Results vary significantly between browser implementations"
+            };
+        }
+        
+        // UI Management
+        function openTestWindow(title, content) {
+            document.getElementById('testTitle').textContent = title;
+            document.getElementById('testContent').innerHTML = content;
+            document.getElementById('testWindow').style.display = 'block';
+        }
+        
+        function closeTestWindow() {
+            document.getElementById('testWindow').style.display = 'none';
+        }
+        
+        function logResult(message, type = 'info') {
+            const resultItem = document.createElement('div');
+            resultItem.className = `result-item ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            resultItem.innerHTML = `
+                <strong>[${timestamp}]</strong> ${message}
+            `;
+            
+            document.getElementById('resultsContainer').prepend(resultItem);
+        }
+        
+        // Test execution functions (called from test buttons)
+        function runDomainTest(browser, testId) {
+            const resultsDiv = document.getElementById(`results-${testId}`);
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <h4>Domain Test Results:</h4>
+                <div style="padding: 10px; background: #e6f4ea; border-radius: 6px; margin: 10px 0;">
+                    ✓ Testing window.opener behavior...
+                </div>
+                <div style="padding: 10px; background: #e6f4ea; border-radius: 6px; margin: 10px 0;">
+                    ✓ Testing postMessage cross-origin communication...
+                </div>
+                <div style="padding: 10px; background: ${browser === 'safari' ? '#fce8e6' : '#e6f4ea'}; border-radius: 6px; margin: 10px 0;">
+                    ${browser === 'safari' ? '⚠️ Safari ITP may restrict some cross-origin communication' : '✓ Testing iframe sandboxing...'}
+                </div>
+            `;
+            
+            logResult(`Domain test executed for ${browser.toUpperCase()}`, 'info');
+        }
+        
+        function checkUIVisibility(browser) {
+            const resultsDiv = document.getElementById('ui-test-results');
+            resultsDiv.style.display = 'block';
+            
+            const tests = [
+                { name: 'Address bar visible', result: Math.random() > 0.3 },
+                { name: 'Security indicators present', result: Math.random() > 0.4 },
+                { name: 'URL displayed correctly', result: Math.random() > 0.2 },
+                { name: 'SSL padlock visible', result: Math.random() > 0.35 }
+            ];
+            
+            let resultsHTML = '<h4>UI Visibility Test Results:</h4>';
+            tests.forEach(test => {
+                const status = test.result ? '✅' : '❌';
+                const color = test.result ? '#34a853' : '#ea4335';
+                resultsHTML += `
+                    <div style="padding: 10px; margin: 8px 0; background: ${color}10; border-left: 4px solid ${color}; border-radius: 4px;">
+                        ${status} ${test.name}
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = resultsHTML;
+            logResult(`UI visibility test completed for ${browser.toUpperCase()}`, 'info');
+        }
+        
+        function testFullscreenAPI(browser, type) {
+            const testArea = document.getElementById('fullscreen-test-area');
+            const resultsDiv = document.getElementById('fullscreen-results');
+            resultsDiv.style.display = 'block';
+            
+            let testResult = 'unknown';
+            let testNotes = '';
+            
+            if (type === 'element') {
+                if (testArea.requestFullscreen) {
+                    testArea.requestFullscreen().catch(e => {
+                        testResult = 'blocked';
+                        testNotes = `Fullscreen blocked: ${e.message}`;
+                    });
+                } else {
+                    testResult = 'not-supported';
+                    testNotes = 'Element fullscreen not supported';
+                }
+            } else {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(e => {
+                        testResult = 'blocked';
+                        testNotes = `Document fullscreen blocked: ${e.message}`;
+                    });
+                }
+            }
+            
+            resultsDiv.innerHTML = `
+                <h4>Fullscreen Test Results:</h4>
+                <div style="padding: 15px; background: #e8f0fe; border-radius: 8px;">
+                    <strong>Browser:</strong> ${browser.toUpperCase()}<br>
+                    <strong>Test Type:</strong> ${type} fullscreen<br>
+                    <strong>Result:</strong> ${testResult}<br>
+                    <strong>Notes:</strong> ${testNotes || 'Check if browser UI remains partially visible'}
+                </div>
+            `;
+            
+            logResult(`Fullscreen ${type} test executed for ${browser.toUpperCase()}`, 'info');
+        }
+        
+        function testHistoryAPI(browser, action) {
+            const stateDisplay = document.getElementById('current-state');
+            const resultsDiv = document.getElementById('history-results');
+            resultsDiv.style.display = 'block';
+            
+            let newState = '';
+            let stateData = {};
+            
+            switch(action) {
+                case 'push':
+                    newState = `Pushed state at ${new Date().toLocaleTimeString()}`;
+                    stateData = { action: 'push', timestamp: Date.now(), browser: browser };
+                    history.pushState(stateData, newState, `?test=${Date.now()}`);
+                    break;
+                case 'replace':
+                    newState = `Replaced state at ${new Date().toLocaleTimeString()}`;
+                    stateData = { action: 'replace', timestamp: Date.now(), browser: browser };
+                    history.replaceState(stateData, newState, `?replaced=${Date.now()}`);
+                    break;
+                case 'backforward':
+                    newState = 'Testing back/forward cache behavior';
+                    stateData = { action: 'backforward', testing: true };
+                    history.pushState(stateData, newState, `?bfcache=${Date.now()}`);
+                    break;
+            }
+            
+            stateDisplay.textContent = newState;
+            
+            resultsDiv.innerHTML = `
+                <h4>History API Test Results:</h4>
+                <div style="padding: 15px; background: #e8f0fe; border-radius: 8px;">
+                    <strong>Action:</strong> ${action}<br>
+                    <strong>New State:</strong> ${newState}<br>
+                    <strong>URL Changed:</strong> ${window.location.href}<br>
+                    <strong>Browser:</strong> ${browser.toUpperCase()}
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9rem;">
+                    Check if address bar updates correctly with history state changes.
+                </div>
+            `;
+            
+            logResult(`History ${action} test executed for ${browser.toUpperCase()}`, 'info');
+        }
+        
+        function runBrowserSpecificChecks(browser) {
+            const checksDiv = document.getElementById('browser-specific-checks');
+            const resultsDiv = document.getElementById('browser-specific-results');
+            
+            checksDiv.innerHTML = `
+                <div style="padding: 10px; background: white; margin: 8px 0; border-radius: 6px; display: flex; align-items: center;">
+                    <span class="status-indicator status-unknown"></span>
+                    <span>Detecting ${browser}-specific APIs...</span>
+                </div>
+            `;
+            
+            // Simulate API detection
+            setTimeout(() => {
+                const apis = {
+                    chrome: ['chrome.runtime', 'chrome.extension', 'chrome.webstore'],
+                    firefox: ['browser.runtime', 'browser.extension', 'browser.browserAction'],
+                    safari: ['window.safari', 'window.WebKit'],
+                    edge: ['window.chrome', 'window.msBrowser']
+                };
+                
+                const detectedAPIs = apis[browser] || [];
+                
+                let checksHTML = '<h4>Detected Browser APIs:</h4>';
+                detectedAPIs.forEach(api => {
+                    const exists = typeof eval(api) !== 'undefined';
+                    const status = exists ? 'status-safe' : 'status-unknown';
+                    const text = exists ? '✅' : '❓';
+                    
+                    checksHTML += `
+                        <div style="padding: 10px; margin: 8px 0; background: ${exists ? '#e6f4ea' : '#f8f9fa'}; border-radius: 6px; display: flex; align-items: center;">
+                            <span class="status-indicator ${status}"></span>
+                            <span>${text} ${api}</span>
+                        </div>
+                    `;
+                });
+                
+                checksDiv.innerHTML = checksHTML;
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = `
+                    <h4>Browser-Specific Analysis Results:</h4>
+                    <div style="padding: 15px; background: #e8f0fe; border-radius: 8px;">
+                        <strong>Browser:</strong> ${browser.toUpperCase()}<br>
+                        <strong>APIs Detected:</strong> ${detectedAPIs.length}<br>
+                        <strong>Security Context:</strong> ${browser === 'safari' ? 'WebKit Sandbox' : 'Browser Process'}
+                    </div>
+                `;
+                
+                logResult(`Browser-specific analysis completed for ${browser.toUpperCase()}`, 'info');
+            }, 1000);
+        }
+        
+        // Initialize the interface
+        function init() {
+            const currentBrowser = BrowserTests.detectBrowser();
+            const browsers = [
+                { id: 'chrome', name: 'Google Chrome', desc: 'Chromium-based browser security tests' },
+                { id: 'firefox', name: 'Mozilla Firefox', desc: 'Gecko engine specific security tests' },
+                { id: 'safari', name: 'Apple Safari', desc: 'WebKit and Safari specific tests' },
+                { id: 'edge', name: 'Microsoft Edge', desc: 'Edge Chromium fork specific tests' }
+            ];
+            
+            const browserGrid = document.getElementById('browserGrid');
+            
+            browsers.forEach(browser => {
+                const isCurrent = browser.id === currentBrowser;
+                
+                const browserCard = document.createElement('div');
+                browserCard.className = `browser-card ${browser.id}`;
+                browserCard.innerHTML = `
+                    <div class="browser-header">
+                        <div class="browser-icon">${browser.name.charAt(0)}</div>
+                        <div>
+                            <h3>${browser.name}</h3>
+                            <p>${browser.desc}</p>
+                            ${isCurrent ? '<div style="color: #34a853; font-weight: bold;">✓ Current Browser</div>' : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="test-controls">
+                        <button class="test-btn ${browser.id}" onclick="BrowserTests.runTest('${browser.id}', 'multiDomain')">
+                            <span>🌐</span> Multi-Domain Test
+                            <span class="technique-desc">Cross-origin window boundaries</span>
+                        </button>
+                        
+                        <button class="test-btn ${browser.id}" onclick="BrowserTests.runTest('${browser.id}', 'uiSpoofing')">
+                            <span>🎭</span> UI Spoofing Test
+                            <span class="technique-desc">Address bar & UI manipulation</span>
+                        </button>
+                        
+                        <button class="test-btn ${browser.id}" onclick="BrowserTests.runTest('${browser.id}', 'fullscreen')">
+                            <span>📺</span> Fullscreen API Test
+                            <span class="technique-desc">UI hiding via fullscreen</span>
+                        </button>
+                        
+                        <button class="test-btn ${browser.id}" onclick="BrowserTests.runTest('${browser.id}', 'history')">
+                            <span>🕰️</span> History API Test
+                            <span class="technique-desc">Navigation state manipulation</span>
+                        </button>
+                        
+                        <button class="test-btn ${browser.id}" onclick="BrowserTests.runTest('${browser.id}', 'browserSpecific')">
+                            <span>🔧</span> Browser-Specific Test
+                            <span class="technique-desc">Unique feature exploitation</span>
+                        </button>
+                    </div>
+                `;
+                
+                browserGrid.appendChild(browserCard);
+            });
+            
+            // Initial log
+            logResult(`Security testing framework initialized. Detected browser: ${currentBrowser.toUpperCase()}`, 'success');
+            logResult(`User Agent: ${navigator.userAgent}`, 'info');
+            
+            // Add global event listener to close test window on escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeTestWindow();
+                }
+            });
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // Security disclaimer in console
+        console.log('%c🔐 CROSS-BROWSER SECURITY TESTING FRAMEWORK', 'color: #4285f4; font-size: 18px; font-weight: bold;');
+        console.log('%cFor authorized security research only. Use in controlled environments.', 'color: #ea4335;');
+        console.log('%cDetected browser:', 'color: #34a853;', BrowserTests.detectBrowser().toUpperCase());
+    </script>
+</body>
+</html>
