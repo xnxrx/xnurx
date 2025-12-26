@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirect Obfuscation Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <h1>Demo: Redirect Berantai untuk Spoofing</h1>
+    <p>Teknik ini menggunakan beberapa redirect untuk membingungkan korban.</p>
+    
+    <button onclick="startRedirectChain()">Mulai Demo Redirect</button>
+    
+    <script>
+        function startRedirectChain() {
+            // Simpan konten asli
+            const originalContent = document.body.innerHTML;
+            
+            // Tahap 1: Tampilkan loading
+            document.body.innerHTML = `
+                <h2>Loading secure page...</h2>
+                <div style="border: 1px solid #ccc; padding: 20px;">
+                    <p>Redirecting to: <code id="url-display">https://account.google.com</code></p>
+                    <div style="background: #e0e0e0; height: 20px; width: 100%;">
+                        <div id="progress" style="background: green; height: 100%; width: 0%;"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Animasikan progress bar
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                document.getElementById('progress').style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    showSpoofedLogin();
+                }
+            }, 200);
+        }
+        
+        function showSpoofedLogin() {
+            document.body.innerHTML = `
+                <div style="max-width: 500px; margin: 0 auto;">
+                    <div style="display: flex; align-items: center; margin-bottom: 30px;">
+                        <div style="color: #4285F4; font-size: 24px; margin-right: 10px;">G</div>
+                        <div style="color: #EA4335; font-size: 24px; margin-right: 10px;">o</div>
+                        <div style="color: #FBBC05; font-size: 24px; margin-right: 10px;">o</div>
+                        <div style="color: #4285F4; font-size: 24px; margin-right: 10px;">g</div>
+                        <div style="color: #34A853; font-size: 24px; margin-right: 10px;">l</div>
+                        <div style="color: #EA4335; font-size: 24px;">e</div>
+                    </div>
+                    
+                    <h2>Sign in</h2>
+                    <p>to continue to your account</p>
+                    
+                    <input type="email" placeholder="Email or phone" style="width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box;">
+                    <button style="background: #1a73e8; color: white; border: none; padding: 12px; width: 100%; margin: 10px 0;">Next</button>
+                    
+                    <p><small>Forgot email?</small></p>
+                    <hr>
+                    <p><small>Not your computer? Use Guest mode.</small></p>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; margin-top: 30px; border-radius: 5px;">
+                        <strong>⚠️ PERINGATAN DEMO KEAMANAN</strong>
+                        <p>Ini bukan halaman login Google yang sesungguhnya. Ini adalah demonstrasi teknik address bar spoofing.</p>
+                        <p>Periksa selalu URL di address bar browser Anda sebelum memasukkan kredensial.</p>
+                        <button onclick="location.reload()" style="background: #dc3545; color: white; border: none; padding: 10px; margin-top: 10px;">Tutup Demo</button>
+                    </div>
+                </div>
+            `;
+            
+            // Coba manipulasi title berulang (teknik lama)
+            let titles = [
+                "Sign in - Google Accounts",
+                "Verification Required - Google",
+                "Google"
+            ];
+            let titleIndex = 0;
+            
+            setInterval(() => {
+                document.title = titles[titleIndex % titles.length];
+                titleIndex++;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
