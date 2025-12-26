@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Long Subdomain Address Bar Spoofing</title>
+    <style>
+        .truncated { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Long Subdomain Truncation Attack</h1>
+    
+    <div style="background:#ffe6e6; padding:15px; border-left:4px solid red;">
+        <strong>MASIH BEKERJA:</strong> Subdomain panjang menyebabkan truncation di mobile/desktop UI
+    </div>
+    
+    <h3>Test Link (Klik untuk lihat efek):</h3>
+    
+    <div style="background:#f0f0f0; padding:15px; margin:10px 0;">
+        <!-- Link dengan subdomain sangat panjang -->
+        <a href="https://secure-login-verify-account-update-billing-payment-confirmation-success.google.com.user-validation.portal.support.help.center.page.site.com" 
+           target="_blank"
+           style="color:blue; text-decoration:none;">
+           🔗 Klik untuk login ke Google
+        </a>
+        <p><small>Di address bar, hanya bagian akhir yang terlihat</small></p>
+    </div>
+    
+    <button onclick="showAllLinks()">Tampilkan Semua Variasi</button>
+    
+    <div id="linkCollection" style="margin-top:20px; display:none; background:#f8f9fa; padding:20px;">
+        <h3>Koleksi Link Long Subdomain:</h3>
+        
+        <div class="link-item">
+            <h4>Varian 1: Facebook Login Spoof</h4>
+            <a href="https://facebook-com.login.secure.verify.account.confirm.identity.authentication.profile.user.portal.web.app.site.info" 
+               target="_blank">
+               https://facebook-com.login.secure.verify...
+            </a>
+            <p><small>Terlihat seperti: facebook-com.login.secure...</small></p>
+        </div>
+        
+        <div class="link-item">
+            <h4>Varian 2: PayPal Payment</h4>
+            <a href="https://www.paypal.com.payment.secure.checkout.confirm.transaction.success.redirect.return.url.verify.authentication.token.session.user.account.portal.web.app" 
+               target="_blank">
+               https://www.paypal.com.payment.secure...
+            </a>
+        </div>
+        
+        <div class="link-item">
+            <h4>Varian 3: Bank Login (Paling Efektif)</h4>
+            <a href="https://id.verification.secure.login.online.banking.account.management.transfer.payment.bill.confirmation.document.upload.scan.qr.code.verify.identity.authentication.token.session.portal.bankmandiri.co.id.help.support.center" 
+               target="_blank"
+               style="color:green;">
+               🔒 https://id.verification.secure.login...
+            </a>
+            <p class="truncated">UI akan menunjukkan: ...bankmandiri.co.id</p>
+        </div>
+        
+        <div class="link-item">
+            <h4>Varian 4: WhatsApp Web</h4>
+            <a href="https://web.whatsapp.com.scan.qr.code.login.secure.verify.device.authentication.session.token.refresh.reload.connection.established.successful.redirect.return" 
+               target="_blank">
+               https://web.whatsapp.com.scan.qr.code...
+            </a>
+        </div>
+    </div>
+    
+    <h3>Generator Long Domain:</h3>
+    <input type="text" id="baseDomain" placeholder="example.com" value="facebook.com" style="padding:8px; width:200px;">
+    <button onclick="generateLongDomain()">Generate Long Domain</button>
+    
+    <div id="generatedDomain" style="margin-top:15px; padding:15px; background:#e9ecef;"></div>
+    
+    <script>
+    function showAllLinks() {
+        document.getElementById('linkCollection').style.display = 'block';
+    }
+    
+    function generateLongDomain() {
+        const base = document.getElementById('baseDomain').value;
+        const prefixes = [
+            'secure', 'login', 'verify', 'account', 'payment',
+            'update', 'billing', 'confirm', 'identity', 'auth',
+            'portal', 'web', 'app', 'online', 'service',
+            'support', 'help', 'center', 'admin', 'dashboard'
+        ];
+        
+        // Generate random long subdomain
+        let longSubdomain = '';
+        for(let i = 0; i < 15; i++) {
+            const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+            longSubdomain += randomPrefix + '-';
+        }
+        
+        const fullDomain = `https://${longSubdomain}${base}`;
+        
+        document.getElementById('generatedDomain').innerHTML = `
+            <h4>Generated Long Domain:</h4>
+            <a href="${fullDomain}" target="_blank" style="word-break:break-all; display:block;">
+                ${fullDomain}
+            </a>
+            <p><strong>Efek:</strong> Browser akan truncate menjadi: ...${base}</p>
+            <button onclick="copyToClipboard('${fullDomain}')">Copy URL</button>
+        `;
+    }
+    
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert("URL copied to clipboard!");
+        });
+    }
+    </script>
+</body>
+</html>

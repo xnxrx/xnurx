@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Homograph + Long Domain Attack</title>
+    <meta charset="UTF-8">
+    <style>
+        .homograph-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .invisible { color: transparent; }
+    </style>
+</head>
+<body>
+    <h1>🔤 Homograph Attack dengan Long Domain</h1>
+    
+    <div class="homograph-box">
+        <h3>🚨 ATTACK YANG MASIH EFFECTIVE DI MOBILE:</h3>
+        <p>Kombinasi: Homograph character + long subdomain = Perfect spoof</p>
+    </div>
+    
+    <h3>Demo Links (Copy dan test di mobile):</h3>
+    
+    <div style="background:#f8f9fa; padding:20px;">
+        <!-- Cyrillic 'а' (U+0430) bukan Latin 'a' -->
+        <div>
+            <h4>1. Facebook dengan Cyrillic:</h4>
+            <a href="https://www.fаcebook.com.secure.login.verify.account.update.profile.authentication.token.session.management.portal.web.app.support.help.center.info" 
+               target="_blank">
+               https://www.fаcebook.com.secure.login...
+            </a>
+            <p><small>Menggunakan: а = Cyrillic (U+0430)</small></p>
+        </div>
+        
+        <!-- Cyrillic 'с' (U+0441) bukan Latin 'c' -->
+        <div style="margin-top:15px;">
+            <h4>2. Google dengan Cyrillic:</h4>
+            <a href="https://accounts.google.com.secure.verification.login.two-factor.authentication.password.reset.confirm.identity.document.upload.scan.qr.code.session.token.management.portal.web" 
+               target="_blank">
+               https://accounts.google.com.secure...
+            </a>
+            <p><small>Catatan: Google sudah register domain Cyrillic-nya</small></p>
+        </div>
+        
+        <!-- Greek 'ο' (U+03BF) bukan Latin 'o' -->
+        <div style="margin-top:15px;">
+            <h4>3. Microsoft dengan Greek omicron:</h4>
+            <a href="https://lοgin.microsoft.com.account.verify.security.update.billing.payment.method.confirm.identity.authentication.token.session.management.portal.office365.web.app" 
+               target="_blank">
+               https://lοgin.microsoft.com.account...
+            </a>
+            <p><small>ο = Greek omicron (U+03BF), bukan Latin 'o'</small></p>
+        </div>
+    </div>
+    
+    <h3>Homograph Generator:</h3>
+    
+    <input type="text" id="targetUrl" value="https://apple.com" style="padding:8px; width:300px;">
+    <select id="homographType">
+        <option value="cyrillic">Cyrillic</option>
+        <option value="greek">Greek</option>
+        <option value="mixed">Mixed Script</option>
+        <option value="invisible">Zero-Width Chars</option>
+    </select>
+    <button onclick="generateHomograph()">Generate Homograph URL</button>
+    
+    <div id="homographResult" style="margin-top:20px; padding:20px; background:#e9ecef;"></div>
+    
+    <script>
+    const homographMap = {
+        'cyrillic': {
+            'a': 'а', // Cyrillic
+            'c': 'с',
+            'e': 'е',
+            'o': 'о',
+            'p': 'р',
+            'x': 'х',
+            'y': 'у',
+            'i': 'і'
+        },
+        'greek': {
+            'a': 'α',
+            'b': 'β',
+            'e': 'ε',
+            'o': 'ο',
+            'p': 'ρ',
+            'v': 'ν',
+            'x': 'χ',
+            'y': 'υ'
+        }
+    };
+    
+    function generateHomograph() {
+        const url = document.getElementById('targetUrl').value;
+        const type = document.getElementById('homographType').value;
+        
+        try {
+            const urlObj = new URL(url);
+            let hostname = urlObj.hostname;
+            
+            // Apply homograph substitution
+            if (type !== 'invisible') {
+                const map = homographMap[type];
+                for (let char in map) {
+                    const regex = new RegExp(char, 'gi');
+                    hostname = hostname.replace(regex, map[char]);
+                }
+            }
+            
+            // Add long subdomain
+            const longPrefix = 'secure-verify-login-update-billing-payment-confirm-identity-authentication-';
+            const spoofedHostname = longPrefix + hostname;
+            
+            // Build final URL
+            urlObj.hostname = spoofedHostname;
+            
+            const result = document.getElementById('homographResult');
+            result.innerHTML = `
+                <h4>Generated Homograph URL:</h4>
+                <div style="background:white; padding:10px; border:1px solid #ddd;">
+                    <a href="${urlObj.href}" target="_blank" style="word-break:break-all;">
+                        ${urlObj.href}
+                    </a>
+                </div>
+                
+                <div style="margin-top:15px;">
+                    <h5>Analysis:</h5>
+                    <p><strong>Original:</strong> ${url}</p>
+                    <p><strong>Spoofed:</strong> ${urlObj.href}</p>
+                    <p><strong>Displayed as:</strong> ...${hostname} (after truncation)</p>
+                    
+                    ${type === 'invisible' ? `
+                        <p class="invisible">Contains zero-width characters that are invisible</p>
+                    ` : `
+                        <p>Using ${type} characters that look identical to Latin</p>
+                    `}
+                </div>
+                
+                <button onclick="testHomograph('${urlObj.href}')">Test This URL</button>
+                <button onclick="copyHomograph('${urlObj.href}')">Copy URL</button>
+            `;
+            
+        } catch(e) {
+            alert("Invalid URL format");
+        }
+    }
+    
+    function testHomograph(url) {
+        window.open(url, '_blank', 'width=800,height=600');
+    }
+    
+    function copyHomograph(url) {
+        navigator.clipboard.writeText(url);
+        alert("Homograph URL copied to clipboard!\n\nPaste in mobile browser to see truncation effect.");
+    }
+    </script>
+</body>
+</html>
