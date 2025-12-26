@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IDN Homograph Attack - Live Demo</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Unicode Spoofing Attack Demo</h1>
+    
+    <div style="border: 2px solid red; padding: 20px; background: #ffe6e6;">
+        <h2>⚠️ ATTENTION: These attacks STILL WORK in certain conditions</h2>
+    </div>
+    
+    <h3>1. Basic Homograph Links (Click carefully):</h3>
+    <div style="background: #f0f0f0; padding: 15px; margin: 10px 0;">
+        <p>Link yang terlihat sama, tapi berbeda:</p>
+        
+        <!-- Latin characters -->
+        <p>✅ Asli: <a href="https://www.apple.com" target="_blank">https://www.apple.com</a></p>
+        
+        <!-- Mixed script (masih bisa work) -->
+        <p>🚨 Palsu 1: <a href="https://www.аррӏе.com" target="_blank" style="color:red">https://www.аррӏе.com</a></p>
+        <small>Menggunakan Cyrillic: а (U+0430), р (U+0440), ӏ (U+04CF)</small>
+        
+        <p>🚨 Palsu 2: <a href="https://www.аpple.com" target="_blank" style="color:red">https://www.аpple.com</a></p>
+        <small>Hanya huruf 'a' pertama yang Cyrillic</small>
+    </div>
+    
+    <h3>2. Zero-Width Character Attack:</h3>
+    <button onclick="showZeroWidth()">Reveal Zero-Width Characters</button>
+    <div id="zeroWidth" style="display:none; background:#fff3cd; padding:15px; margin:10px 0;">
+        <p>URL dengan zero-width characters: </p>
+        <code id="zeroWidthUrl"></code>
+        <p>Copy URL ini: <span id="invisibleUrl" style="background:yellow; padding:5px;"></span></p>
+        <button onclick="testZeroWidth()">Test URL ini</button>
+    </div>
+    
+    <h3>3. Right-to-Left Override Attack:</h3>
+    <button onclick="testRTLO()">Test RTL Override</button>
+    <div id="rtlDemo" style="display:none; background:#e8f4f8; padding:15px; margin:10px 0;">
+        <p>URL yang menggunakan RTL override character:</p>
+        <code>https://trusted.com‮moc.detsurt//:sptth</code>
+        <p>Di beberapa aplikasi/chat, akan terlihat seperti: <code>https://trusted.com</code></p>
+    </div>
+    
+    <h3>4. Lookalike Domain Generator:</h3>
+    <input type="text" id="targetDomain" placeholder="example.com" value="facebook.com">
+    <button onclick="generateLookalikes()">Generate Lookalikes</button>
+    <div id="lookalikes" style="background:#f8f9fa; padding:15px; margin:10px 0;"></div>
+    
+    <script>
+    // Zero-width character attack
+    function showZeroWidth() {
+        const zeroWidthChar = '\u200B\u200C\u200D\uFEFF';
+        const fakeUrl = `https://facebook${zeroWidthChar}.com`;
+        
+        document.getElementById('zeroWidthUrl').textContent = fakeUrl;
+        document.getElementById('invisibleUrl').textContent = fakeUrl;
+        document.getElementById('zeroWidth').style.display = 'block';
+    }
+    
+    function testZeroWidth() {
+        const zeroWidthChar = '\u200B\u200C\u200D\uFEFF';
+        const fakeUrl = `https://facebook${zeroWidthChar}.com`;
+        alert(`Membuka: ${fakeUrl}\n\nPerhatikan browser address bar!`);
+        window.open(fakeUrl, '_blank');
+    }
+    
+    // RTL Override attack
+    function testRTLO() {
+        const rtlChar = '\u202E'; // Right-to-left override
+        const fakeUrl = `https://trusted.com${rtlChar}moc.detsurt//:sptth`;
+        
+        document.getElementById('rtlDemo').innerHTML = `
+            <p>URL dengan RTL override:</p>
+            <textarea style="width:100%; height:60px;">${fakeUrl}</textarea>
+            <p>Copy dan paste ke notepad/chat untuk melihat efeknya</p>
+            <p>Di beberapa aplikasi akan terlihat seperti: <code>https://trusted.com</code></p>
+        `;
+        document.getElementById('rtlDemo').style.display = 'block';
+    }
+    
+    // Lookalike generator
+    function generateLookalikes() {
+        const target = document.getElementById('targetDomain').value;
+        const lookalikes = {
+            'a': ['а', 'ɑ', 'а', 'ⱥ'], // Cyrillic, Latin, etc
+            'b': ['ƅ', 'Ь', 'Ꮟ', '♭'],
+            'c': ['с', 'ϲ', 'ć', 'ċ'], // Cyrillic 'с'
+            'd': ['ԁ', 'ⅾ', 'ḋ', 'đ'],
+            'e': ['е', 'е', 'ė', 'ё'], // Cyrillic 'е'
+            'g': ['ɡ', 'ց', 'ġ', 'ǥ'],
+            'h': ['һ', 'հ', 'ḣ', 'ħ'],
+            'i': ['і', 'і', 'í', 'ì'], // Cyrillic 'і'
+            'j': ['ј', 'ϳ', 'ĵ', 'ǰ'],
+            'k': ['κ', 'к', 'ḱ', 'ķ'], // Greek 'κ', Cyrillic 'к'
+            'l': ['ӏ', 'Ӏ', 'ł', 'ḻ'], // Cyrillic 'ӏ'
+            'm': ['м', 'ṁ', 'ṃ', 'm'],
+            'n': ['ո', 'ṅ', 'ṇ', 'ń'],
+            'o': ['о', 'ο', 'о', 'ȯ'], // Cyrillic 'о', Greek 'ο'
+            'p': ['р', 'ρ', 'ṗ', 'ṕ'], // Cyrillic 'р', Greek 'ρ'
+            'q': ['ԛ', 'ɋ', 'ʠ', 'q'],
+            'r': ['г', 'ṛ', 'ṝ', 'ŗ'], // Cyrillic 'г'
+            's': ['ѕ', 'ṡ', 'ṣ', 'ś'],
+            't': ['т', 'ṭ', 'ṯ', 'ŧ'], // Cyrillic 'т'
+            'u': ['ս', 'ṳ', 'ụ', 'ů'],
+            'v': ['ν', 'ѵ', 'ṽ', 'ṿ'], // Greek 'ν'
+            'w': ['ԝ', 'ẉ', 'ẇ', 'ŵ'],
+            'x': ['х', 'ẋ', 'ẍ', '×'], // Cyrillic 'х'
+            'y': ['у', 'ý', 'ÿ', 'ŷ'], // Cyrillic 'у'
+            'z': ['ż', 'ẓ', 'ž', 'ź']
+        };
+        
+        let result = `<h4>Lookalikes untuk "${target}":</h4>`;
+        
+        // Generate variations
+        const variations = [];
+        for(let i = 0; i < 3; i++) {
+            let fakeDomain = '';
+            for(let char of target.toLowerCase()) {
+                if(lookalikes[char] && lookalikes[char][i]) {
+                    fakeDomain += lookalikes[char][i];
+                } else {
+                    fakeDomain += char;
+                }
+            }
+            variations.push(fakeDomain);
+        }
+        
+        variations.forEach((domain, idx) => {
+            result += `
+                <div style="margin:5px 0; padding:5px; background:white; border:1px solid #ddd;">
+                    <strong>Varian ${idx+1}:</strong> ${domain}<br>
+                    <small>Punycode: ${punycode.toASCII(domain)}</small><br>
+                    <button onclick="testDomain('${domain}')">Test Domain</button>
+                </div>
+            `;
+        });
+        
+        document.getElementById('lookalikes').innerHTML = result;
+    }
+    
+    function testDomain(domain) {
+        const fullUrl = `https://${domain}`;
+        alert(`Mencoba membuka:\n\n${fullUrl}\n\nPerhatikan bagaimana browser menampilkannya!`);
+        window.open(fullUrl, '_blank');
+    }
+    </script>
+    
+    <!-- Include punycode library for conversion -->
+    <script src="https://cdn.jsdelivr.net/npm/punycode@2.1.1/punycode.js"></script>
+</body>
+</html>
