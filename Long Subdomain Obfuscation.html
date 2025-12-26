@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Subdomain Spoof Test</title>
+</head>
+<body>
+    <h1>Test: Long Subdomain Obfuscation</h1>
+    
+    <button onclick="testLongSubdomain()">Test Subdomain Panjang</button>
+    
+    <script>
+    function testLongSubdomain() {
+        // Membuka tab baru dengan URL subdomain sangat panjang
+        const longUrl = 'https://' + 
+            'secure-verify-login-account-profile-update-billing-' +
+            'password-reset-confirmation-success.google.com.' +
+            'user-validation-center.support.help.portal.page.site.com';
+        
+        const win = window.open(longUrl, '_blank');
+        
+        // Setelah 2 detik, tutup dan tampilkan hasil
+        setTimeout(() => {
+            if (win && !win.closed) {
+                win.close();
+            }
+            
+            alert(`URL dibuka:\n${longUrl}\n\nPerhatikan bagaimana browser menampilkan URL yang sangat panjang.`);
+        }, 2000);
+    }
+    </script>
+</body>
+</html>

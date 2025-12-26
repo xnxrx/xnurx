@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fullscreen UI Test</title>
+    <style>
+        #spoofContent {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            padding-top: 50px;
+        }
+        .fake-url-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #f1f1f1;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            font-family: monospace;
+            z-index: 10000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: Fullscreen Behavior Modern Browser</h1>
+    <button onclick="testFullscreen()">Test Fullscreen</button>
+    
+    <div id="spoofContent">
+        <div class="fake-url-bar">https://account.microsoft.com/login</div>
+        <div style="padding: 50px;">
+            <h2>Microsoft Account Login</h2>
+            <input type="email" placeholder="Email, phone, or Skype"><br><br>
+            <button onclick="alert('Test')">Next</button>
+            <p>Perhatikan: Browser modern biasanya tetap menunjukkan address bar</p>
+        </div>
+    </div>
+    
+    <script>
+    async function testFullscreen() {
+        const elem = document.getElementById('spoofContent');
+        elem.style.display = 'block';
+        
+        try {
+            // Minta fullscreen
+            if (elem.requestFullscreen) {
+                await elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                await elem.webkitRequestFullscreen();
+            }
+            
+            // Cek apakah address bar masih visible
+            setTimeout(() => {
+                alert(`Fullscreen active. Address bar hidden? ${!!document.fullscreenElement}`);
+            }, 1000);
+            
+        } catch (err) {
+            console.log('Fullscreen error:', err);
+            alert('Browser mungkin memerlukan user gesture');
+        }
+    }
+    
+    // Exit fullscreen dengan ESC
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            document.getElementById('spoofContent').style.display = 'none';
+        }
+    });
+    </script>
+</body>
+</html>
