@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Popup Spoof Test</title>
+</head>
+<body>
+    <h1>Test: Window.open() + document.write()</h1>
+    
+    <button onclick="openSpoofedPopup()">Buka Popup</button>
+    
+    <script>
+    function openSpoofedPopup() {
+        // Buka window kosong
+        const win = window.open('about:blank', '_blank', 'width=500,height=400');
+        
+        // Tunggu sebentar lalu isi konten
+        setTimeout(() => {
+            if (win && !win.closed) {
+                win.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Login Required - Google</title>
+                        <style>
+                            body { font-family: Arial; padding: 30px; }
+                            .login-box { 
+                                border: 1px solid #ddd; 
+                                padding: 20px; 
+                                border-radius: 5px;
+                                max-width: 300px;
+                                margin: 0 auto;
+                            }
+                            input { width: 100%; padding: 8px; margin: 5px 0; }
+                            button { background: #4285f4; color: white; border: none; padding: 10px; width: 100%; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="login-box">
+                            <h3 style="color:#4285f4;">Google</h3>
+                            <p>Sign in to continue</p>
+                            <input type="email" placeholder="Email">
+                            <input type="password" placeholder="Password">
+                            <button onclick="alert('Educational demo')">Next</button>
+                            <p style="font-size:12px; color:#666; margin-top:20px;">
+                                ⚠️ Address bar menunjukkan "about:blank"<br>
+                                Ini bukan halaman Google sebenarnya
+                            </p>
+                        </div>
+                    </body>
+                    </html>
+                `);
+            }
+        }, 100);
+    }
+    </script>
+</body>
+</html>
