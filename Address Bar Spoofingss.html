@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Address Bar Spoofing PoC</title>
+</head>
+<body>
+    <h1>Address Bar Spoofing Demo (Edukasi)</h1>
+    <p>Klik tombol di bawah untuk melihat contoh:</p>
+    
+    <button onclick="openSpoofedWindow()">Buka Window Spoofed</button>
+    <button onclick="locationBasedSpoofing()">Spoofing dengan Location</button>
+    
+    <script>
+        // Metode 1: Menggunakan window.open()
+        function openSpoofedWindow() {
+            // Membuka window baru dengan URL asli
+            const newWindow = window.open('about:blank', '_blank');
+            
+            // Setelah window terbuka, manipulasi konten
+            setTimeout(() => {
+                newWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Login - secure-bank.com</title>
+                        <link rel="icon" href="https://www.google.com/s2/favicons?domain=secure-bank.com">
+                    </head>
+                    <body>
+                        <h1 style="color: green;">🔒 secure-bank.com</h1>
+                        <p>Silakan login ke akun Anda:</p>
+                        <input type="text" placeholder="Username"><br><br>
+                        <input type="password" placeholder="Password"><br><br>
+                        <button onclick="alert('Credentials dikirim! (Ini demo)')">Login</button>
+                        <p><small>Ini adalah demo Address Bar Spoofing. Selalu periksa URL di address bar browser Anda.</small></p>
+                    </body>
+                    </html>
+                `);
+                
+                // Coba manipulasi history (tidak bekerja di browser modern)
+                try {
+                    newWindow.history.pushState({}, '', 'https://secure-bank.com/login');
+                } catch(e) {
+                    console.log("Browser modern memblokir manipulasi history cross-origin");
+                }
+            }, 100);
+        }
+        
+        // Metode 2: Menggunakan manipulasi location.hash
+        function locationBasedSpoofing() {
+            // Redirect ke halaman kita sendiri dengan hash yang panjang
+            window.location.href = window.location.origin + window.location.pathname + 
+                '#https://secure-bank.com/login/secure/portal/authentication/verify-user';
+            
+            // Ubah konten halaman
+            document.body.innerHTML = `
+                <h1>🔐 secure-bank.com - Verification Required</h1>
+                <p>Your session has expired. Please re-enter your credentials:</p>
+                <input type="text" placeholder="Email Address" style="width: 300px;"><br><br>
+                <input type="password" placeholder="Password" style="width: 300px;"><br><br>
+                <input type="text" placeholder="Social Security Number" style="width: 300px;"><br><br>
+                <button onclick="alert('Verification submitted! (Ini demo)')">Verify Identity</button>
+                <hr>
+                <p><strong>Perhatian:</strong> URL di address bar menunjukkan teknik spoofing dengan hash. Bagian setelah # bukan domain sebenarnya.</p>
+                <button onclick="location.reload()">Kembali ke halaman asli</button>
+            `;
+        }
+    </script>
+</body>
+</html>
