@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirect Utility</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #333;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    .url-input {
+      width: 100%;
+      padding: 12px;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .btn {
+      background: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: #45a049;
+    }
+    .btn-danger {
+      background: #f44336;
+    }
+    .btn-danger:hover {
+      background: #da190b;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      background: #e8f5e8;
+      border-left: 4px solid #4CAF50;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Window Controller</h2>
+    
+    <div>
+      <label for="targetUrl">Target URL:</label>
+      <input type="text" id="targetUrl" class="url-input" value="https://www.google.com" placeholder="Enter target URL">
+    </div>
+    
+    <div>
+      <label for="displayUrl">Display URL (optional):</label>
+      <input type="text" id="displayUrl" class="url-input" value="https://www.amazon.com" placeholder="Enter URL to display">
+    </div>
+    
+    <div style="margin: 20px 0;">
+      <button class="btn" onclick="initializeWindow()">Initialize Window</button>
+      <button class="btn btn-danger" onclick="closeWindow()">Close Window</button>
+      <button class="btn" onclick="checkStatus()">Check Status</button>
+    </div>
+    
+    <div id="status" class="status"></div>
+    
+    <div style="margin-top: 30px; color: #666; font-size: 14px;">
+      <p><strong>Note:</strong> This utility requires pop-ups to be allowed.</p>
+    </div>
+  </div>
+
+  <script>
+    let controlledWindow = null;
+    let monitorInterval = null;
+    const defaultPort = 82;
+
+    function initializeWindow() {
+      const targetUrl = document.getElementById('targetUrl').value.trim() || 'https://www.google.com';
+      const displayUrl = document.getElementById('displayUrl').value.trim() || targetUrl;
+      
+      try {
+        // Parse URL and use port 82 for origin
+        const url = new URL(targetUrl);
+        const originUrl = `${url.protocol}//${url.hostname}:${defaultPort}`;
+        
+        // Close existing window if open
+        if (controlledWindow && !controlledWindow.closed) {
+          controlledWindow.close();
+        }
+        
+        // Open new window with modified origin
+        controlledWindow = window.open(originUrl, '_blank', 'width=800,height=600');
+        
+        if (!controlledWindow) {
+          showStatus('Error: Popup blocked. Please allow popups for this site.', 'error');
+          return;
+        }
+        
+        // Write custom content to the window
+        controlledWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>${displayUrl}</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  padding: 20px;
+                  background: white;
+                  color: #333;
+                }
+                .header {
+                  background: #f8f9fa;
+                  padding: 15px;
+                  border-left: 4px solid #4CAF50;
+                  margin-bottom: 20px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <h3>Content Display</h3>
+                <p>Displaying content as: <strong>${displayUrl}</strong></p>
+                <p>Actual origin: <strong>${originUrl}</strong></p>
+              </div>
+              <div id="content">
+                <p>Window is being monitored for navigation changes.</p>
+                <p>Time opened: ${new Date().toLocaleTimeString()}</p>
+              </div>
+            </body>
+          </html>
+        `);
+        controlledWindow.document.close();
+        
+        showStatus(`Window initialized successfully. Origin: ${originUrl}`, 'success');
+        
+        // Start monitoring the window
+        startMonitoring();
+        
+      } catch (error) {
+        showStatus(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function startMonitoring() {
+      if (monitorInterval) {
+        clearInterval(monitorInterval);
+      }
+      
+      monitorInterval = setInterval(() => {
+        if (!controlledWindow || controlledWindow.closed) {
+          showStatus('Window has been closed.', 'warning');
+          clearInterval(monitorInterval);
+          return;
+        }
+        
+        try {
+          // Check if window location has changed from our expected origin
+          if (controlledWindow.location.href !== 'about:blank' && 
+              !controlledWindow.location.href.includes(`:${defaultPort}`)) {
+            
+            // Attempt to redirect back to controlled location
+            setTimeout(() => {
+              if (controlledWindow && !controlledWindow.closed) {
+                const url = new URL(document.getElementById('targetUrl').value.trim() || 'https://www.google.com');
+                const originUrl = `${url.protocol}//${url.hostname}:${defaultPort}`;
+                
+                try {
+                  controlledWindow.location.href = originUrl;
+                  showStatus('Navigation detected. Redirecting window...', 'warning');
+                } catch (e) {
+                  // Cross-origin error - use alternative approach
+                  controlledWindow.close();
+                  initializeWindow();
+                }
+              }
+            }, 100);
+          }
+        } catch (error) {
+          // Cross-origin access error occurred
+          if (controlledWindow && !controlledWindow.closed) {
+            try {
+              // Try to redirect using a different approach
+              controlledWindow.location.href = `https://www.google.com:${defaultPort}`;
+            } catch (e) {
+              // If all else fails, close and reopen
+              controlledWindow.close();
+              setTimeout(initializeWindow, 500);
+            }
+          }
+        }
+      }, 150);
+    }
+
+    function closeWindow() {
+      if (controlledWindow && !controlledWindow.closed) {
+        controlledWindow.close();
+        controlledWindow = null;
+      }
+      
+      if (monitorInterval) {
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+      }
+      
+      showStatus('Window closed successfully.', 'info');
+    }
+
+    function checkStatus() {
+      if (!controlledWindow) {
+        showStatus('No active window.', 'info');
+      } else if (controlledWindow.closed) {
+        showStatus('Window is closed.', 'warning');
+        controlledWindow = null;
+        if (monitorInterval) {
+          clearInterval(monitorInterval);
+          monitorInterval = null;
+        }
+      } else {
+        try {
+          const url = controlledWindow.location.href;
+          showStatus(`Window is active. Current URL: ${url}`, 'success');
+        } catch (error) {
+          showStatus('Window is active but cross-origin restrictions prevent URL access.', 'info');
+        }
+      }
+    }
+
+    function showStatus(message, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      statusDiv.textContent = message;
+      statusDiv.style.display = 'block';
+      
+      // Set color based on type
+      const colors = {
+        'success': '#4CAF50',
+        'error': '#f44336',
+        'warning': '#ff9800',
+        'info': '#2196F3'
+      };
+      
+      statusDiv.style.borderLeftColor = colors[type] || colors.info;
+      statusDiv.style.backgroundColor = type === 'success' ? '#e8f5e8' : 
+                                       type === 'error' ? '#ffebee' :
+                                       type === 'warning' ? '#fff8e1' : '#e3f2fd';
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        statusDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (controlledWindow && !controlledWindow.closed) {
+        controlledWindow.close();
+      }
+      if (monitorInterval) {
+        clearInterval(monitorInterval);
+      }
+    });
+
+    // Initialize with default values
+    window.onload = function() {
+      showStatus('Ready to initialize window.', 'info');
+    };
+  </script>
+</body>
+</html>
