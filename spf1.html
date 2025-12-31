@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Speculative Address Bar Inconsistency Demo</title>
+</head>
+<body>
+
+<h3>Speculative Browser Behavior Demo</h3>
+<button onclick="demo()">Run speculative demo</button>
+
+<script>
+let win;
+
+function demo() {
+
+  // Hypothesis:
+  // Browser updates address bar early for navigation UX
+  window.open("https://trusted.example", "specWin");
+
+  // Hypothesis:
+  // Before document commit, window is still scriptable
+  win = window.open("about:blank", "specWin");
+
+  // Hypothesis:
+  // A regression allows DOM mutation before origin lock
+  try {
+    win.document.open();
+    win.document.write(`
+      <h2 style="color:red">SPECULATIVE DEMO</h2>
+      <p>
+        If a regression existed, this content would appear
+        while the address bar still shows a trusted origin.
+      </p>
+    `);
+    win.document.close();
+  } catch (e) {
+    console.log("Blocked by modern browser (expected)");
+  }
+
+  // Hypothesis:
+  // Keep navigation unresolved (non-functional today)
+  setTimeout(() => {
+    try {
+      win.location.href;
+    } catch (e) {}
+  }, 0);
+}
+</script>
+
+<p style="font-size:12px;color:gray">
+This code does not exploit modern browsers.
+It models a hypothetical regression scenario only.
+</p>
+
+</body>
+</html>
