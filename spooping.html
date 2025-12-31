@@ -3,7 +3,7 @@
 </head>
 
 <body>
-    <a href="javascript:window.open('https://www.facebook.com/','facebook');" onclick="startSpoof()">Spoof</a>
+    <a href="javascript:window.open('https://www.apple.com/','x');" onclick="startSpoof()">Spoof</a>
 </body>
     
     <script>
@@ -12,7 +12,7 @@
 
     function race() {
       try {
-        windowSpoof.location.href !== 'facebook';
+        windowSpoof.location.href !== 'about:blank';
       }
       catch (e) {
         windowSpoof.location.href='https://www.google.com/csi';
