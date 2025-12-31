@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unicode URL Spoofing Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(90deg, #60a5fa, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .warning {
+            background: rgba(245, 158, 11, 0.15);
+            border: 2px solid #f59e0b;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+            color: #fbbf24;
+        }
+        
+        .warning strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .demo-section {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-title::before {
+            content: '🔗';
+            font-size: 1.5rem;
+        }
+        
+        .url-container {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 16px;
+        }
+        
+        .url-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .url-part {
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .url-part:hover {
+            transform: translateY(-2px);
+        }
+        
+        .protocol {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid #4ade80;
+        }
+        
+        .domain {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid #60a5fa;
+        }
+        
+        .spoof {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px dashed #f87171;
+            animation: pulse 2s infinite;
+        }
+        
+        .normal {
+            background: rgba(148, 163, 184, 0.2);
+            color: #cbd5e1;
+            border: 1px solid #64748b;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(90deg, #dc2626, #ef4444);
+        }
+        
+        .btn-success {
+            background: linear-gradient(90deg, #059669, #10b981);
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+            justify-content: center;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .info-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid #334155;
+            border-radius: 15px;
+            padding: 25px;
+            transition: transform 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: #60a5fa;
+        }
+        
+        .info-card h3 {
+            color: #60a5fa;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            border: 2px solid #475569;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        
+        .char-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .char-item {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .char-item:hover {
+            border-color: #60a5fa;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .char-display {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .char-info {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        
+        .comparison {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .comparison-box {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid #334155;
+            border-radius: 15px;
+            padding: 30px;
+        }
+        
+        .comparison-box.real {
+            border-color: #10b981;
+        }
+        
+        .comparison-box.fake {
+            border-color: #ef4444;
+        }
+        
+        .comparison-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .comparison-title.real::before {
+            content: '✅';
+        }
+        
+        .comparison-title.fake::before {
+            content: '❌';
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 30px;
+            color: #64748b;
+            border-top: 1px solid #334155;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .demo-section {
+                padding: 25px;
+            }
+            
+            .btn {
+                padding: 14px 24px;
+                font-size: 1rem;
+            }
+            
+            .url-container {
+                padding: 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 Unicode URL Spoofing Demo</h1>
+            <p class="subtitle">Demonstrasi teknik spoofing address bar menggunakan karakter Unicode, homoglyph, dan karakter khusus yang terlihat mirip</p>
+        </header>
+        
+        <div class="warning">
+            <strong>⚠️ PERINGATAN: DEMONSTRASI EDUKASI KEAMANAN</strong>
+            <p>Teknik ini menunjukkan kerentanan dalam interpretasi URL. Gunakan hanya untuk testing keamanan dengan izin.</p>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">Demo Langsung: Spoofing dengan Karakter Unicode</h2>
+            
+            <div class="url-container">
+                <div class="url-display" id="spoofedUrl">
+                    <!-- URL akan diisi oleh JavaScript -->
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" onclick="generateSpoofedURL()">
+                    <span>🔄</span>
+                    Generate Spoofed URL
+                </button>
+                <button class="btn btn-success" onclick="copyToClipboard()">
+                    <span>📋</span>
+                    Copy URL
+                </button>
+                <button class="btn btn-danger" onclick="testInNewTab()">
+                    <span>🔗</span>
+                    Test in New Tab
+                </button>
+                <button class="btn" onclick="showExplanation()">
+                    <span>🔍</span>
+                    Show Analysis
+                </button>
+            </div>
+            
+            <div id="explanation" style="display: none; margin-top: 25px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                <h3>🔍 Analisis URL:</h3>
+                <div id="analysisContent"></div>
+            </div>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-card">
+                <h3><span>🎭</span> Homoglyph Attack</h3>
+                <p>Menggunakan karakter Unicode yang terlihat mirip dengan karakter ASCII:</p>
+                <div class="char-list">
+                    <div class="char-item">
+                        <div class="char-display">a</div>
+                        <div class="char-info">Latin a (U+0061)</div>
+                    </div>
+                    <div class="char-item">
+                        <div class="char-display">а</div>
+                        <div class="char-info">Cyrillic a (U+0430)</div>
+                    </div>
+                    <div class="char-item">
+                        <div class="char-display">ο</div>
+                        <div class="char-info">Greek omicron (U+03BF)</div>
+                    </div>
+                    <div class="char-item">
+                        <div class="char-display">о</div>
+                        <div class="char-info">Cyrillic o (U+043E)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-card">
+                <h3><span>🔤</span> Karakter Khusus</h3>
+                <p>Karakter yang dimanipulasi untuk spoofing:</p>
+                <div class="char-list">
+                    <div class="char-item">
+                        <div class="char-display">＿</div>
+                        <div class="char-info">Fullwidth underscore (U+FF3F)</div>
+                    </div>
+                    <div class="char-item">
+                        <div class="char-display">－</div>
+                        <div class="char-info">Hyphen-minus (U+002D) vs Fullwidth hyphen (U+FF0D)</div>
+                    </div>
+                    <div class="char-item">
+                        <div class="char-display">．</div>
+                        <div class="char-info">Fullwidth period (U+FF0E)</div>
+                    </div>
+                    <div class="char-item">
+                        <div class="char-display">＠</div>
+                        <div class="char-info">Fullwidth commercial at (U+FF20)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison">
+            <div class="comparison-box real">
+                <h3 class="comparison-title real">URL Asli</h3>
+                <div class="code-block">
+https://www.facebook.com<br>
+https://paypal.com/login<br>
+https://accounts.google.com<br>
+https://www.instagram.com<br>
+https://twitter.com/home
+                </div>
+                <p>URL legitimate yang sebenarnya</p>
+            </div>
+            
+            <div class="comparison-box fake">
+                <h3 class="comparison-title fake">URL Spoofed</h3>
+                <div class="code-block" id="spoofedExamples">
+                    <!-- Contoh URL spoofed akan diisi -->
+                </div>
+                <p>URL spoofed yang terlihat mirip</p>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">📝 Generator URL Spoofing</h2>
+            
+            <div style="margin: 25px 0;">
+                <label style="display: block; margin-bottom: 10px; color: #cbd5e1;">Target URL:</label>
+                <input type="text" id="targetUrl" placeholder="https://example.com" 
+                       style="width: 100%; padding: 15px; background: #0f172a; border: 2px solid #475569; border-radius: 8px; color: white; font-size: 16px; margin-bottom: 20px;">
+                
+                <label style="display: block; margin-bottom: 10px; color: #cbd5e1;">Spoofing Level:</label>
+                <select id="spoofLevel" style="width: 100%; padding: 15px; background: #0f172a; border: 2px solid #475569; border-radius: 8px; color: white; font-size: 16px; margin-bottom: 20px;">
+                    <option value="low">Low (homoglyph sederhana)</option>
+                    <option value="medium" selected>Medium (homoglyph + karakter khusus)</option>
+                    <option value="high">High (homoglyph + zero-width chars)</option>
+                    <option value="extreme">Extreme (semua teknik + panjang maksimal)</option>
+                </select>
+                
+                <div class="controls">
+                    <button class="btn" onclick="generateCustomSpoof()">
+                        <span>⚡</span>
+                        Generate Custom Spoof
+                    </button>
+                    <button class="btn btn-success" onclick="copyCustomSpoof()">
+                        <span>📋</span>
+                        Copy Generated URL
+                    </button>
+                </div>
+            </div>
+            
+            <div id="customResult" class="url-container" style="display: none;">
+                <h4 style="margin-bottom: 15px; color: #60a5fa;">Generated Spoofed URL:</h4>
+                <div id="customUrlDisplay" style="font-family: monospace; word-break: break-all; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px;"></div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">🔧 Teknik Spoofing yang Digunakan</h2>
+            
+            <div class="code-block">
+<span style="color: #60a5fa;">// 1. Homoglyph Replacement</span>
+<span style="color: #cbd5e1;">const</span> <span style="color: #f87171;">homoglyphs</span> = {
+    <span style="color: #cbd5e1;">'a'</span>: <span style="color: #cbd5e1;">'а'</span>,  <span style="color: #94a3b8;">// Cyrillic 'a' (U+0430)</span>
+    <span style="color: #cbd5e1;">'e'</span>: <span style="color: #cbd5e1;">'е'</span>,  <span style="color: #94a3b8;">// Cyrillic 'e' (U+0435)</span>
+    <span style="color: #cbd5e1;">'o'</span>: <span style="color: #cbd5e1;">'ο'</span>,  <span style="color: #94a3b8;">// Greek 'omicron' (U+03BF)</span>
+    <span style="color: #cbd5e1;">'c'</span>: <span style="color: #cbd5e1;">'с'</span>,  <span style="color: #94a3b8;">// Cyrillic 's' (U+0441)</span>
+    <span style="color: #cbd5e1;">'p'</span>: <span style="color: #cbd5e1;">'р'</span>,  <span style="color: #94a3b8;">// Cyrillic 'r' (U+0440)</span>
+    <span style="color: #cbd5e1;">'x'</span>: <span style="color: #cbd5e1;">'х'</span>,  <span style="color: #94a3b8;">// Cyrillic 'ha' (U+0445)</span>
+    <span style="color: #cbd5e1;">'y'</span>: <span style="color: #cbd5e1;">'у'</span>,  <span style="color: #94a3b8;">// Cyrillic 'u' (U+0443)</span>
+    <span style="color: #cbd5e1;">'-'</span>: <span style="color: #cbd5e1;">'－'</span>, <span style="color: #94a3b8;">// Fullwidth hyphen (U+FF0D)</span>
+    <span style="color: #cbd5e1;">'.'</span>: <span style="color: #cbd5e1;">'．'</span>, <span style="color: #94a3b8;">// Fullwidth period (U+FF0E)</span>
+    <span style="color: #cbd5e1;">'_'</span>: <span style="color: #cbd5e1;">'＿'</span>, <span style="color: #94a3b8;">// Fullwidth underscore (U+FF3F)</span>
+    <span style="color: #cbd5e1;">'@'</span>: <span style="color: #cbd5e1;">'＠'</span>  <span style="color: #94a3b8;">// Fullwidth commercial at (U+FF20)</span>
+};
+
+<span style="color: #60a5fa;">// 2. Zero-Width Character Injection</span>
+<span style="color: #cbd5e1;">const</span> <span style="color: #f87171;">zeroWidthChars</span> = [
+    <span style="color: #cbd5e1;">'\\u200B'</span>,  <span style="color: #94a3b8;">// Zero-width space</span>
+    <span style="color: #cbd5e1;">'\\u200C'</span>,  <span style="color: #94a3b8;">// Zero-width non-joiner</span>
+    <span style="color: #cbd5e1;">'\\u200D'</span>,  <span style="color: #94a3b8;">// Zero-width joiner</span>
+    <span style="color: #cbd5e1;">'\\uFEFF'</span>   <span style="color: #94a3b8;">// Zero-width no-break space</span>
+];
+
+<span style="color: #60a5fa;">// 3. Long URL Technique</span>
+<span style="color: #cbd5e1;">function</span> <span style="color: #fbbf24;">createLongURL</span>(<span style="color: #f87171;">baseUrl</span>, <span style="color: #f87171;">spoofedDomain</span>) {
+    <span style="color: #cbd5e1;">const</span> <span style="color: #f87171;">padding</span> = <span style="color: #cbd5e1;">'a'.repeat(500)</span>;  <span style="color: #94a3b8;">// Long padding</span>
+    <span style="color: #cbd5e1;">const</span> <span style="color: #f87171;">spoofedPart</span> = <span style="color: #f87171;">applyHomoglyphs</span>(<span style="color: #f87171;">spoofedDomain</span>);
+    <span style="color: #cbd5e1;">return</span> <span style="color: #cbd5e1;">`${baseUrl}/${padding}/login?redirect=${spoofedPart}`</span>;
+}</div>
+        </div>
+        
+        <footer>
+            <p>© 2024 Unicode URL Spoofing Research | Educational Demonstration Only</p>
+            <p>Teknik ini menunjukkan pentingnya verifikasi URL secara hati-hati sebelum mengklik</p>
+        </footer>
+    </div>
+
+    <script>
+        // Karakter homoglyph untuk spoofing
+        const homoglyphs = {
+            // Latin ke Cyrillic/Greek
+            'a': 'а', // Cyrillic 'a' (U+0430)
+            'A': 'А', // Cyrillic 'A' (U+0410)
+            'e': 'е', // Cyrillic 'e' (U+0435)
+            'E': 'Е', // Cyrillic 'E' (U+0415)
+            'o': 'о', // Cyrillic 'o' (U+043E)
+            'O': 'О', // Cyrillic 'O' (U+041E)
+            'c': 'с', // Cyrillic 's' (U+0441)
+            'C': 'С', // Cyrillic 'S' (U+0421)
+            'p': 'р', // Cyrillic 'r' (U+0440)
+            'P': 'Р', // Cyrillic 'R' (U+0420)
+            'x': 'х', // Cyrillic 'ha' (U+0445)
+            'y': 'у', // Cyrillic 'u' (U+0443)
+            
+            // Karakter khusus fullwidth
+            '-': '－', // Fullwidth hyphen (U+FF0D)
+            '.': '．', // Fullwidth period (U+FF0E)
+            '_': '＿', // Fullwidth underscore (U+FF3F)
+            '@': '＠', // Fullwidth commercial at (U+FF20)
+            '/': '／', // Fullwidth solidus (U+FF0F)
+            ':': '：', // Fullwidth colon (U+FF1A)
+            
+            // Homoglyph lainnya
+            'i': 'і', // Latin i ke Cyrillic i (U+0456)
+            'j': 'ј', // Latin j ke Cyrillic je (U+0458)
+            's': 'ѕ', // Latin s ke Cyrillic dze (U+0455)
+            '0': 'Ο', // Digit 0 ke Greek Omicron (U+039F)
+            '1': 'Ӏ', // Digit 1 ke Cyrillic palochka (U+04C0)
+            '3': 'З', // Digit 3 ke Cyrillic ze (U+0417)
+            '8': 'Β', // Digit 8 ke Greek Beta (U+0392)
+        };
+
+        // Karakter zero-width
+        const zeroWidthChars = [
+            '\u200B', // Zero-width space
+            '\u200C', // Zero-width non-joiner
+            '\u200D', // Zero-width joiner
+            '\uFEFF', // Zero-width no-break space
+            '\u2060', // Word joiner
+            '\u2061', // Function application
+            '\u2062', // Invisible times
+            '\u2063', // Invisible separator
+        ];
+
+        // Contoh URL target yang umum
+        const targetURLs = [
+            {
+                real: "https://facebook.com/login",
+                fake: "https://ｆａｃｅｂｏｏｋ．ｃｏｍ/login",
+                description: "Facebook dengan karakter fullwidth"
+            },
+            {
+                real: "https://paypal.com/signin",
+                fake: "https://раураｌ．соｍ/signin",
+                description: "PayPal dengan campuran Cyrillic dan fullwidth"
+            },
+            {
+                real: "https://accounts.google.com",
+                fake: "https://accounts．ｇｏｏｇｌｅ．ｃｏｍ",
+                description: "Google dengan karakter fullwidth"
+            },
+            {
+                real: "https://instagram.com/accounts/login",
+                fake: "https://іnѕtаgrаｍ．ｃｏｍ/accounts/login",
+                description: "Instagram dengan homoglyph Cyrillic"
+            },
+            {
+                real: "https://twitter.com/i/flow/login",
+                fake: "https://ｔｗｉｔｔｅｒ．ｃｏｍ/i/flow/login",
+                description: "Twitter dengan karakter fullwidth"
+            }
+        ];
+
+        // Fungsi untuk menerapkan homoglyph
+        function applyHomoglyphs(text, level = 'medium') {
+            let result = '';
+            
+            for (let char of text) {
+                // Random replacement berdasarkan level
+                const shouldReplace = Math.random() < (level === 'high' ? 0.7 : level === 'extreme' ? 0.9 : 0.4);
+                
+                if (shouldReplace && homoglyphs[char]) {
+                    result += homoglyphs[char];
+                } else {
+                    result += char;
+                }
+                
+                // Tambahkan zero-width characters untuk level tinggi
+                if ((level === 'high' || level === 'extreme') && Math.random() < 0.3) {
+                    const randomZW = zeroWidthChars[Math.floor(Math.random() * zeroWidthChars.length)];
+                    result += randomZW;
+                }
+            }
+            
+            return result;
+        }
+
+        // Buat URL panjang untuk spoofing
+        function createLongURL(domain, path = '') {
+            // Buat padding panjang dengan parameter URL
+            const params = [];
+            
+            // Tambahkan banyak parameter untuk memperpanjang URL
+            for (let i = 0; i < 50; i++) {
+                params.push(`param${i}=${'x'.repeat(20)}`);
+            }
+            
+            const padding = params.join('&');
+            return `https://${domain}/${path}?${padding}&redirect=`;
+        }
+
+        // Generate spoofed URL contoh
+        function generateSpoofedURL() {
+            const randomTarget = targetURLs[Math.floor(Math.random() * targetURLs.length)];
+            const urlDisplay = document.getElementById('spoofedUrl');
+            
+            // Parse URL
+            const url = new URL(randomTarget.fake);
+            
+            // Tampilkan dengan bagian-bagian berwarna
+            urlDisplay.innerHTML = `
+                <span class="url-part protocol">${url.protocol}//</span>
+                <span class="url-part spoof">${applyHomoglyphs(url.hostname, 'medium')}</span>
+                <span class="url-part normal">${url.pathname}</span>
+                ${url.search ? `<span class="url-part normal">${url.search}</span>` : ''}
+            `;
+            
+            // Update contoh di comparison box
+            updateSpoofedExamples();
+            
+            // Simpan URL untuk copy
+            window.currentSpoofedURL = randomTarget.fake;
+            
+            showAnalysis(randomTarget);
+        }
+
+        // Update contoh spoofed
+        function updateSpoofedExamples() {
+            const examplesDiv = document.getElementById('spoofedExamples');
+            let examplesHTML = '';
+            
+            targetURLs.forEach(target => {
+                examplesHTML += `${target.fake}<br>`;
+            });
+            
+            examplesDiv.innerHTML = examplesHTML;
+        }
+
+        // Tampilkan analisis
+        function showAnalysis(target) {
+            const explanationDiv = document.getElementById('explanation');
+            const analysisDiv = document.getElementById('analysisContent');
+            
+            analysisDiv.innerHTML = `
+                <p><strong>URL Asli:</strong> ${target.real}</p>
+                <p><strong>URL Spoofed:</strong> ${target.fake}</p>
+                <p><strong>Teknik yang digunakan:</strong> ${target.description}</p>
+                <div style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                    <strong>Karakter yang dimanipulasi:</strong><br>
+                    ${analyzeCharacters(target.fake)}
+                </div>
+                <p style="margin-top: 15px; color: #fbbf24;">
+                    ⚠️ Perhatikan bahwa URL spoofed terlihat sangat mirip dengan yang asli,
+                    tetapi menggunakan karakter Unicode yang berbeda!
+                </p>
+            `;
+            
+            explanationDiv.style.display = 'block';
+        }
+
+        // Analisis karakter dalam string
+        function analyzeCharacters(str) {
+            let analysis = '';
+            for (let i = 0; i < str.length; i++) {
+                const char = str[i];
+                const code = char.charCodeAt(0).toString(16).toUpperCase();
+                analysis += `"${char}" (U+${code}) `;
+                
+                // Cek jika karakter adalah homoglyph
+                for (const [original, replacement] of Object.entries(homoglyphs)) {
+                    if (replacement === char) {
+                        analysis += `← menggantikan "${original}" `;
+                        break;
+                    }
+                }
+                
+                // Cek jika karakter zero-width
+                if (zeroWidthChars.includes(char)) {
+                    analysis += `[ZERO-WIDTH] `;
+                }
+                
+                analysis += '<br>';
+            }
+            return analysis;
+        }
+
+        // Copy URL ke clipboard
+        function copyToClipboard() {
+            if (!window.currentSpoofedURL) {
+                alert('Generate URL terlebih dahulu!');
+                return;
+            }
+            
+            navigator.clipboard.writeText(window.currentSpoofedURL)
+                .then(() => alert('URL berhasil disalin ke clipboard!'))
+                .catch(err => console.error('Gagal copy:', err));
+        }
+
+        // Test URL di tab baru
+        function testInNewTab() {
+            if (!window.currentSpoofedURL) {
+                alert('Generate URL terlebih dahulu!');
+                return;
+            }
+            
+            const win = window.open('', '_blank');
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Testing Spoofed URL</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; }
+                        .warning { background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                        .url-display { font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
+                    </style>
+                </head>
+                <body>
+                    <h1>🔗 Testing Spoofed URL</h1>
+                    <div class="warning">
+                        <strong>⚠️ PERINGATAN:</strong> Ini adalah halaman simulasi untuk URL spoofed.<br>
+                        Perhatikan address bar di atas. URL menggunakan karakter Unicode khusus.
+                    </div>
+                    <p><strong>URL yang diuji:</strong></p>
+                    <div class="url-display">${window.currentSpoofedURL}</div>
+                    <p><strong>Analisis Karakter:</strong></p>
+                    <div class="url-display" style="font-size: 12px;">
+                        ${analyzeCharacters(window.currentSpoofedURL)}
+                    </div>
+                    <p style="margin-top: 30px;">
+                        <button onclick="window.close()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Close Window
+                        </button>
+                    </p>
+                </body>
+                </html>
+            `);
+            win.document.close();
+        }
+
+        // Generate custom spoof
+        function generateCustomSpoof() {
+            const targetUrl = document.getElementById('targetUrl').value;
+            const spoofLevel = document.getElementById('spoofLevel').value;
+            
+            if (!targetUrl) {
+                alert('Masukkan URL target terlebih dahulu!');
+                return;
+            }
+            
+            try {
+                const url = new URL(targetUrl);
+                let spoofedHostname = applyHomoglyphs(url.hostname, spoofLevel);
+                
+                // Untuk level extreme, buat URL sangat panjang
+                if (spoofLevel === 'extreme') {
+                    const longParams = [];
+                    for (let i = 0; i < 100; i++) {
+                        longParams.push(`p${i}=${'a'.repeat(50)}`);
+                    }
+                    const longPadding = longParams.join('&');
+                    spoofedHostname = `${spoofedHostname}/very/long/path?${longPadding}&actual=`;
+                }
+                
+                const spoofedURL = `${url.protocol}//${spoofedHostname}${url.pathname}${url.search}`;
+                
+                const resultDiv = document.getElementById('customResult');
+                const urlDisplay = document.getElementById('customUrlDisplay');
+                
+                urlDisplay.textContent = spoofedURL;
+                resultDiv.style.display = 'block';
+                
+                // Simpan untuk copy
+                window.customSpoofedURL = spoofedURL;
+                
+                // Scroll ke hasil
+                resultDiv.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                alert('URL tidak valid! Pastikan format URL benar (contoh: https://example.com)');
+            }
+        }
+
+        // Copy custom spoof
+        function copyCustomSpoof() {
+            if (!window.customSpoofedURL) {
+                alert('Generate custom URL terlebih dahulu!');
+                return;
+            }
+            
+            navigator.clipboard.writeText(window.customSpoofedURL)
+                .then(() => alert('Custom URL berhasil disalin ke clipboard!'))
+                .catch(err => console.error('Gagal copy:', err));
+        }
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate contoh pertama
+            generateSpoofedURL();
+            
+            // Isi contoh spoofed
+            updateSpoofedExamples();
+            
+            // Set default target URL
+            document.getElementById('targetUrl').value = 'https://facebook.com/login';
+        });
+    </script>
+</body>
+</html>
