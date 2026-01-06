@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eksperimen Redirect about:blank - Teknik Baru</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: rgba(20, 20, 40, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #4a4a6d;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #7b2cbf;
+        }
+        
+        h1 {
+            color: #9d4edd;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(157, 78, 221, 0.5);
+        }
+        
+        .subtitle {
+            color: #c77dff;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .description {
+            color: #b0b0d0;
+            font-size: 1.1rem;
+            max-width: 900px;
+            margin: 0 auto 20px;
+        }
+        
+        .warning {
+            background-color: rgba(255, 76, 76, 0.15);
+            border: 1px solid #ff4c4c;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .warning h3 {
+            color: #ff9e80;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .success {
+            background-color: rgba(76, 175, 80, 0.15);
+            border: 1px solid #4caf50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .success h3 {
+            color: #80ff80;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .technique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .technique-card {
+            background: linear-gradient(145deg, #252547, #1a1a35);
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            border: 1px solid #3a3a5d;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .technique-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+            border-color: #7b2cbf;
+        }
+        
+        .technique-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #9d4edd, #7b2cbf);
+        }
+        
+        .technique-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .technique-title {
+            font-size: 1.3rem;
+            color: #c77dff;
+            font-weight: 600;
+        }
+        
+        .technique-tag {
+            background-color: #7b2cbf;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .technique-desc {
+            font-size: 0.95rem;
+            color: #a8a8d0;
+            margin-bottom: 15px;
+            min-height: 4rem;
+        }
+        
+        .technique-url {
+            background-color: #0a0a1a;
+            color: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            border: 1px solid #3a3a5d;
+        }
+        
+        .test-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #7b2cbf, #5a189a);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .test-button:hover {
+            background: linear-gradient(to right, #9d4edd, #7b2cbf);
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.6);
+            transform: scale(1.02);
+        }
+        
+        .test-button:active {
+            transform: scale(0.98);
+        }
+        
+        .result-area {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(30, 30, 60, 0.7);
+            border-radius: 10px;
+            border: 1px solid #4a4a6d;
+        }
+        
+        .result-area h3 {
+            color: #9d4edd;
+            margin-bottom: 15px;
+        }
+        
+        .result-log {
+            background-color: #0a0a1a;
+            color: #e0e0ff;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: 1px solid #3a3a5d;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-button {
+            padding: 12px 25px;
+            background-color: #3a3a5d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .control-button:hover {
+            background-color: #4a4a6d;
+            transform: translateY(-2px);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #3a3a5d;
+            color: #8888aa;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .technique-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Animasi untuk hasil */
+        @keyframes highlight {
+            0% { background-color: #7b2cbf; }
+            100% { background-color: #0a0a1a; }
+        }
+        
+        .highlight {
+            animation: highlight 1s ease;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-magic"></i> Eksperimen Redirect about:blank - Teknik Baru</h1>
+            <p class="subtitle">Membuka tab/window baru dengan teknik redirect tersembunyi</p>
+            <p class="description">
+                Klik tombol di bawah untuk mencoba berbagai teknik eksperimental yang membuka tab baru dengan about:blank
+                yang kemudian redirect ke URL target. Teknik ini fokus pada variasi karakter setelah <code>?</code> atau karakter pemisah lain.
+            </p>
+        </header>
+        
+        <div class="warning">
+            <h3><i class="fas fa-exclamation-triangle"></i> Catatan Penting</h3>
+            <p>Beberapa teknik mungkin diblokir oleh browser modern. Untuk hasil terbaik, coba nonaktifkan pemblokir pop-up atau gunakan browser dengan pengaturan keamanan lebih longgar.</p>
+        </div>
+        
+        <div class="success">
+            <h3><i class="fas fa-lightbulb"></i> Konsep Inti</h3>
+            <p>Inti dari teknik ini adalah membuat URL seperti <code>about:blank?.https://example.com</code> yang saat dibuka di tab baru hanya menampilkan <code>https://example.com</code> di address bar. Kita eksperimen dengan berbagai karakter khusus setelah <code>?</code> dan pola lain yang belum umum.</p>
+        </div>
+        
+        <div class="technique-grid">
+            <!-- Teknik 1: ?. (standar) -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 1: ?. (Standar)</div>
+                    <div class="technique-tag">Sudah Diketahui</div>
+                </div>
+                <div class="technique-desc">Menggunakan <code>?.</code> setelah about:blank. Ini adalah teknik dasar yang sudah diketahui.</div>
+                <div class="technique-url">about:blank?.https://meta.com</div>
+                <button class="test-button" onclick="testTechnique1()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 1
+                </button>
+            </div>
+            
+            <!-- Teknik 2: ?| -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 2: ?| (Pipe)</div>
+                    <div class="technique-tag">Eksperimen</div>
+                </div>
+                <div class="technique-desc">Menggunakan karakter pipe <code>|</code> setelah tanda tanya. Karakter pipe kadang diinterpretasikan berbeda oleh browser.</div>
+                <div class="technique-url">about:blank?|https://github.com</div>
+                <button class="test-button" onclick="testTechnique2()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 2
+                </button>
+            </div>
+            
+            <!-- Teknik 3: ?# -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 3: ?# (Hash)</div>
+                    <div class="technique-tag">Eksperimen</div>
+                </div>
+                <div class="technique-desc">Menggunakan tanda hash <code>#</code> setelah tanda tanya. Tanda hash biasanya untuk anchor dalam URL.</div>
+                <div class="technique-url">about:blank?#https://stackoverflow.com</div>
+                <button class="test-button" onclick="testTechnique3()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 3
+                </button>
+            </div>
+            
+            <!-- Teknik 4: ?! -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 4: ?! (Bang)</div>
+                    <div class="technique-tag">Baru</div>
+                </div>
+                <div class="technique-desc">Menggunakan tanda seru <code>!</code> setelah tanda tanya. Tanda seru kadang digunakan dalam konteks shebang.</div>
+                <div class="technique-url">about:blank?!https://news.ycombinator.com</div>
+                <button class="test-button" onclick="testTechnique4()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 4
+                </button>
+            </div>
+            
+            <!-- Teknik 5: ?\ -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 5: ?\ (Backslash)</div>
+                    <div class="technique-tag">Eksperimen Tinggi</div>
+                </div>
+                <div class="technique-desc">Menggunakan backslash <code>\</code> setelah tanda tanya. Backslash adalah escape character di banyak sistem.</div>
+                <div class="technique-url">about:blank?\https://www.wikipedia.org</div>
+                <button class="test-button" onclick="testTechnique5()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 5
+                </button>
+            </div>
+            
+            <!-- Teknik 6: ?/ -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 6: ?/ (Slash)</div>
+                    <div class="technique-tag">Baru</div>
+                </div>
+                <div class="technique-desc">Menggunakan forward slash <code>/</code> setelah tanda tanya. Biasanya tanda tanya dan slash tidak digabungkan dalam URL.</div>
+                <div class="technique-url">about:blank?/https://www.google.com</div>
+                <button class="test-button" onclick="testTechnique6()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 6
+                </button>
+            </div>
+            
+            <!-- Teknik 7: ?: -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 7: ?: (Colon)</div>
+                    <div class="technique-tag">Eksperimen</div>
+                </div>
+                <div class="technique-desc">Menggunakan titik dua <code>:</code> setelah tanda tanya. Titik dua sudah digunakan dalam skema URL (http:).</div>
+                <div class="technique-url">about:blank?:https://www.youtube.com</div>
+                <button class="test-button" onclick="testTechnique7()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 7
+                </button>
+            </div>
+            
+            <!-- Teknik 8: ?& -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 8: ?& (Ampersand)</div>
+                    <div class="technique-tag">Baru</div>
+                </div>
+                <div class="technique-desc">Menggunakan ampersand <code>&</code> setelah tanda tanya. Ampersand biasanya untuk memisahkan parameter query.</div>
+                <div class="technique-url">about:blank?&https://www.reddit.com</div>
+                <button class="test-button" onclick="testTechnique8()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 8
+                </button>
+            </div>
+            
+            <!-- Teknik 9: ?? (Double Question) -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 9: ?? (Double Question)</div>
+                    <div class="technique-tag">Eksperimental</div>
+                </div>
+                <div class="technique-desc">Menggunakan dua tanda tanya <code>??</code>. Mungkin diinterpretasikan sebagai parameter query kosong.</div>
+                <div class="technique-url">about:blank??https://twitter.com</div>
+                <button class="test-button" onclick="testTechnique9()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 9
+                </button>
+            </div>
+            
+            <!-- Teknik 10: ?= -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 10: ?= (Equals)</div>
+                    <div class="technique-tag">Baru</div>
+                </div>
+                <div class="technique-desc">Menggunakan tanda sama dengan <code>=</code> setelah tanda tanya. Biasanya untuk memberi nilai pada parameter query.</div>
+                <div class="technique-url">about:blank?=https://www.netflix.com</div>
+                <button class="test-button" onclick="testTechnique10()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 10
+                </button>
+            </div>
+            
+            <!-- Teknik 11: Karakter Unicode -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 11: ?→ (Unicode)</div>
+                    <div class="technique-tag">Eksperimen Tinggi</div>
+                </div>
+                <div class="technique-desc">Menggunakan karakter Unicode (panah kanan) setelah tanda tanya. Mungkin diinterpretasikan berbeda oleh parser URL.</div>
+                <div class="technique-url">about:blank?→https://www.amazon.com</div>
+                <button class="test-button" onclick="testTechnique11()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 11
+                </button>
+            </div>
+            
+            <!-- Teknik 12: ? (spasi) -->
+            <div class="technique-card">
+                <div class="technique-header">
+                    <div class="technique-title">Teknik 12: ?[spasi] (Space)</div>
+                    <div class="technique-tag">Eksperimen</div>
+                </div>
+                <div class="technique-desc">Menggunakan spasi setelah tanda tanya. Spasi biasanya di-encode sebagai %20 dalam URL.</div>
+                <div class="technique-url">about:blank? https://www.microsoft.com</div>
+                <button class="test-button" onclick="testTechnique12()">
+                    <i class="fas fa-external-link-alt"></i> Coba Teknik 12
+                </button>
+            </div>
+        </div>
+        
+        <div class="result-area">
+            <h3><i class="fas fa-clipboard-check"></i> Hasil Pengujian</h3>
+            <div class="result-log" id="resultLog">Klik tombol di atas untuk mulai menguji teknik. Hasil akan muncul di sini.</div>
+        </div>
+        
+        <div class="controls">
+            <button class="control-button" onclick="testAllTechniques()">
+                <i class="fas fa-play-circle"></i> Uji Semua Teknik
+            </button>
+            <button class="control-button" onclick="clearLog()">
+                <i class="fas fa-trash-alt"></i> Hapus Log
+            </button>
+            <button class="control-button" onclick="openTestPage()">
+                <i class="fas fa-vial"></i> Halaman Uji Eksternal
+            </button>
+        </div>
+        
+        <footer>
+            <p>Eksperimen Redirect about:blank - Teknik Baru &copy; 2023</p>
+            <p><i class="fas fa-code"></i> Dibuat untuk eksplorasi teknik redirect tersembunyi</p>
+        </footer>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('resultLog');
+        let testCount = 0;
+        
+        function logResult(message) {
+            testCount++;
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `${testCount}. [${timestamp}] ${message}\n`;
+            
+            logElement.textContent += logEntry;
+            logElement.classList.add('highlight');
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            setTimeout(() => {
+                logElement.classList.remove('highlight');
+            }, 1000);
+        }
+        
+        function openNewTab(url, techniqueName) {
+            try {
+                const newWindow = window.open(url, '_blank');
+                if (newWindow) {
+                    logResult(`✓ ${techniqueName}: Tab baru berhasil dibuka`);
+                    
+                    // Cek setelah 2 detik apakah redirect berhasil
+                    setTimeout(() => {
+                        try {
+                            // Ini hanya bisa dilakukan jika window masih dari origin yang sama
+                            // Untuk window external, biasanya akan di-block
+                            if (newWindow.location.href !== 'about:blank') {
+                                logResult(`✓ ${techniqueName}: Redirect berhasil ke ${newWindow.location.href}`);
+                            } else {
+                                logResult(`? ${techniqueName}: Masih di about:blank (mungkin diblokir)`);
+                            }
+                        } catch (e) {
+                            // Biasanya akan error karena cross-origin restriction
+                            logResult(`? ${techniqueName}: Tidak bisa memeriksa hasil (keamanan browser)`);
+                        }
+                    }, 2000);
+                    
+                } else {
+                    logResult(`✗ ${techniqueName}: Diblokir oleh pemblokir pop-up`);
+                }
+            } catch (error) {
+                logResult(`✗ ${techniqueName}: Error - ${error.message}`);
+            }
+        }
+        
+        // Teknik 1: ?. (standar)
+        function testTechnique1() {
+            openNewTab('about:blank?.https://meta.com', 'Teknik 1: ?.');
+        }
+        
+        // Teknik 2: ?|
+        function testTechnique2() {
+            openNewTab('about:blank?|https://github.com', 'Teknik 2: ?|');
+        }
+        
+        // Teknik 3: ?#
+        function testTechnique3() {
+            openNewTab('about:blank?#https://stackoverflow.com', 'Teknik 3: ?#');
+        }
+        
+        // Teknik 4: ?!
+        function testTechnique4() {
+            openNewTab('about:blank?!https://news.ycombinator.com', 'Teknik 4: ?!');
+        }
+        
+        // Teknik 5: ?\
+        function testTechnique5() {
+            openNewTab('about:blank?\\https://www.wikipedia.org', 'Teknik 5: ?\\');
+        }
+        
+        // Teknik 6: ?/
+        function testTechnique6() {
+            openNewTab('about:blank?/https://www.google.com', 'Teknik 6: ?/');
+        }
+        
+        // Teknik 7: ?:
+        function testTechnique7() {
+            openNewTab('about:blank?:https://www.youtube.com', 'Teknik 7: ?:');
+        }
+        
+        // Teknik 8: ?&
+        function testTechnique8() {
+            openNewTab('about:blank?&https://www.reddit.com', 'Teknik 8: ?&');
+        }
+        
+        // Teknik 9: ??
+        function testTechnique9() {
+            openNewTab('about:blank??https://twitter.com', 'Teknik 9: ??');
+        }
+        
+        // Teknik 10: ?=
+        function testTechnique10() {
+            openNewTab('about:blank?=https://www.netflix.com', 'Teknik 10: ?=');
+        }
+        
+        // Teknik 11: ?→ (Unicode)
+        function testTechnique11() {
+            openNewTab('about:blank?→https://www.amazon.com', 'Teknik 11: ?→ (Unicode)');
+        }
+        
+        // Teknik 12: ?[spasi]
+        function testTechnique12() {
+            openNewTab('about:blank? https://www.microsoft.com', 'Teknik 12: ?[spasi]');
+        }
+        
+        // Fungsi untuk menguji semua teknik
+        function testAllTechniques() {
+            logResult("=== MEMULAI PENGUJIAN SEMUA TEKNIK ===");
+            
+            const techniques = [
+                {name: 'Teknik 1: ?.', func: testTechnique1},
+                {name: 'Teknik 2: ?|', func: testTechnique2},
+                {name: 'Teknik 3: ?#', func: testTechnique3},
+                {name: 'Teknik 4: ?!', func: testTechnique4},
+                {name: 'Teknik 5: ?\\', func: testTechnique5},
+                {name: 'Teknik 6: ?/', func: testTechnique6},
+                {name: 'Teknik 7: ?:', func: testTechnique7},
+                {name: 'Teknik 8: ?&', func: testTechnique8},
+                {name: 'Teknik 9: ??', func: testTechnique9},
+                {name: 'Teknik 10: ?=', func: testTechnique10},
+                {name: 'Teknik 11: ?→', func: testTechnique11},
+                {name: 'Teknik 12: ?[spasi]', func: testTechnique12},
+            ];
+            
+            // Jalankan setiap teknik dengan delay
+            techniques.forEach((technique, index) => {
+                setTimeout(() => {
+                    logResult(`Menjalankan ${technique.name}...`);
+                    technique.func();
+                }, index * 3000);
+            });
+            
+            logResult(`Semua teknik akan diuji dalam ${techniques.length * 3} detik`);
+        }
+        
+        // Fungsi untuk menghapus log
+        function clearLog() {
+            logElement.textContent = '';
+            testCount = 0;
+            logResult("Log telah dihapus. Mulai pengujian baru.");
+        }
+        
+        // Fungsi untuk membuka halaman uji eksternal
+        function openTestPage() {
+            const testPage = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Halaman Uji Redirect</title>
+                    <meta charset="UTF-8">
+                </head>
+                <body>
+                    <h1>Halaman Uji Redirect</h1>
+                    <p>Halaman ini dibuka untuk menguji teknik redirect.</p>
+                    <p>URL saat ini: <span id="currentUrl"></span></p>
+                    <script>
+                        document.getElementById('currentUrl').textContent = window.location.href;
+                        console.log('Halaman uji terbuka dengan URL:', window.location.href);
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            const newWindow = window.open('about:blank', '_blank');
+            if (newWindow) {
+                newWindow.document.write(testPage);
+                newWindow.document.close();
+                logResult("Halaman uji eksternal dibuka untuk pemeriksaan manual");
+            }
+        }
+        
+        // Inisialisasi
+        logResult("Siap menguji teknik redirect about:blank. Klik tombol untuk mulai.");
+    </script>
+</body>
+</html>
