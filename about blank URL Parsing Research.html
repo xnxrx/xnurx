@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>about:blank ↔ https Experiments</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+  }
+  h2, h3 {
+    margin-top: 30px;
+  }
+  button {
+    font-size: 16px;
+    margin: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .box {
+    background: #fff;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 8px;
+  }
+</style>
+</head>
+
+<body>
+<center>
+
+<h2>about:blank ↔ https — FULL EXPERIMENT SET</h2>
+
+<!-- 1. Basic separators -->
+<div class="box">
+<h3>1️⃣ Basic separators & symbols</h3>
+<button onclick="go('about:blank?https://example.com')">?https</button>
+<button onclick="go('about:blank??https://example.com')">??https</button>
+<button onclick="go('about:blank;https://example.com')">;https</button>
+<button onclick="go('about:blank:#https://example.com')">:#https</button>
+<button onclick="go('about:blank?@https://example.com')">?@https</button>
+<button onclick="go('about:blank?@@https://example.com')">?@@https</button>
+<button onclick="go('about:blank?.https://example.com')">?.https</button>
+<button onclick="go('about:blank?.@https://example.com')">?.@https</button>
+</div>
+
+<!-- 2. Mixed punctuation -->
+<div class="box">
+<h3>2️⃣ Mixed punctuation</h3>
+<button onclick="go('about:blank?:https://example.com')">?:https</button>
+<button onclick="go('about:blank?::https://example.com')">?::https</button>
+<button onclick="go('about:blank?=/https://example.com')">?=/https</button>
+<button onclick="go('about:blank?./https://example.com')">?./https</button>
+</div>
+
+<!-- 3. Encoded -->
+<div class="box">
+<h3>3️⃣ Encoded (between blank & https)</h3>
+<button onclick="go('about:blank?%3Ahttps://example.com')">%3Ahttps</button>
+<button onclick="go('about:blank?%40https://example.com')">%40https</button>
+<button onclick="go('about:blank?%2F%2Fhttps://example.com')">%2F%2Fhttps</button>
+</div>
+
+<!-- 4. Length / stress -->
+<div class="box">
+<h3>4️⃣ Length / repetition (UI stress)</h3>
+<button onclick="go('about:blank?' + ':'.repeat(60) + 'https://example.com')">many :</button>
+<button onclick="go('about:blank?' + '.'.repeat(60) + 'https://example.com')">many .</button>
+<button onclick="go('about:blank?' + 'A'.repeat(400) + 'https://example.com')">many A</button>
+</div>
+
+<!-- 5. Unicode basic -->
+<div class="box">
+<h3>5️⃣ Unicode (basic invisible & direction)</h3>
+<button onclick="go('about:blank?\u200Bhttps://example.com')">ZWSP</button>
+<button onclick="go('about:blank?\u200Chttps://example.com')">ZWNJ</button>
+<button onclick="go('about:blank?\u200Dhttps://example.com')">ZWJ</button>
+<button onclick="go('about:blank?\u2060https://example.com')">Word Joiner</button>
+<button onclick="go('about:blank?\u00A0https://example.com')">NBSP</button>
+<button onclick="go('about:blank?\u202Ahttps://example.com')">LRE</button>
+<button onclick="go('about:blank?\u202Bhttps://example.com')">RLE</button>
+<button onclick="go('about:blank?\u202Ahttps://example.com\u202C')">LRE + PDF</button>
+</div>
+
+<!-- 6. IDN / Homograph -->
+<div class="box">
+<h3>6️⃣ IDN / Homograph targets</h3>
+<button onclick="go('about:blank?https://xn--pple-43d.example')">Punycode</button>
+<button onclick="go('about:blank?https://ｅxample.com')">Fullwidth e</button>
+<button onclick="go('about:blank?https://examρle.com')">Greek rho</button>
+<button onclick="go('about:blank?\u200Bhttps://ｅxample.com')">Unicode + IDN</button>
+</div>
+
+<!-- 7. Extreme Unicode -->
+<div class="box">
+<h3>7️⃣ Unicode EKSTRIM</h3>
+<button onclick="go('about:blank?\u200B\u200B\u200Bhttps://example.com')">ZWSP x3</button>
+<button onclick="go('about:blank?\u202Ehttps://example.com')">RLO</button>
+<button onclick="go('about:blank?\u202Dhttps://example.com')">LRO</button>
+<button onclick="go('about:blank?\u2066https://example.com\u2069')">FSI + PDI</button>
+<button onclick="go('about:blank?\u2067https://example.com\u2069')">RLI + PDI</button>
+<button onclick="go('about:blank?\u2068https://example.com\u2069')">LRI + PDI</button>
+<button onclick="go('about:blank?\uFEFFhttps://example.com')">BOM</button>
+<button onclick="go('about:blank?\u034Fhttps://example.com')">CGJ</button>
+</div>
+
+<!-- 8. Super rare Unicode -->
+<div class="box">
+<h3>8️⃣ Unicode SUPER LANGKA</h3>
+<button onclick="go('about:blank?\u061Chttps://example.com')">ALM</button>
+<button onclick="go('about:blank?\u0640https://example.com')">Tatweel</button>
+<button onclick="go('about:blank?\u070Fhttps://example.com')">Syriac Abbrev</button>
+<button onclick="go('about:blank?\u180Ehttps://example.com')">Mongolian VS</button>
+<button onclick="go('about:blank?\u17B4https://example.com')">Khmer AQ</button>
+<button onclick="go('about:blank?\uFE0Fhttps://example.com')">VS16</button>
+<button onclick="go('about:blank?\uFE00https://example.com')">VS1</button>
+<button onclick="go('about:blank?\u0301https://example.com')">Combining Acute</button>
+<button onclick="go('about:blank?\u0327https://example.com')">Combining Cedilla</button>
+<button onclick="go(tagURL())">Unicode TAG sequence</button>
+<button onclick="go('about:blank?\u2061https://example.com')">Function App</button>
+<button onclick="go('about:blank?\u2062https://example.com')">Invisible Times</button>
+<button onclick="go('about:blank?\u2066\u2067\u2068https://example.com\u2069\u2069\u2069')">
+Bidi isolate stack
+</button>
+<button onclick="go('about:blank?\u061C\u200B\uFEFF\u034Fhttps://example.com')">
+ALM + ZWSP + BOM + CGJ
+</button>
+</div>
+
+<script>
+function go(url) {
+  location.href = url;
+}
+
+/* Unicode TAG characters (U+E0061 .. U+E007F) */
+function tagURL() {
+  const TAG_a   = '\u{E0061}';
+  const TAG_b   = '\u{E0062}';
+  const TAG_END = '\u{E007F}';
+  return 'about:blank?' + TAG_a + TAG_b + TAG_END + 'https://example.com';
+}
+</script>
+
+</center>
+</body>
+</html>
