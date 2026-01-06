@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OAuth Multi Redirect Long URL PoC</title>
+</head>
+<body>
+  <h3>OAuth-like: redirect di tengah & akhir (Fixed)</h3>
+  <button onclick="openLong()">Open New Tab</button>
+
+  <script>
+    function openLong() {
+      const base = "https://auth.example.com/oauth/authorize";
+
+      const redirectMiddle =
+        "https://app.example.com/callback/login/" +
+        "A".repeat(300) +
+        "B".repeat(300) +
+        "C".repeat(300);
+
+      const redirectEnd =
+        "https://final-redirect.example.net/complete/verify/session/" +
+        "D".repeat(400) +
+        "?next=/dashboard";
+
+      const redirectLast =
+        "https://very-far-redirect.example.org/deep/path/level1/level2/level3/" +
+        "E".repeat(500);
+
+      const params =
+        "?client_id=web-client-123" +
+        "&response_type=code" +
+        "&scope=openid%20profile%20email" +
+        "&redirect=" + encodeURIComponent(redirectMiddle) +
+        "&state=STATE_" + "F".repeat(300) +
+        "&nonce=NONCE_" + "G".repeat(300) +
+        "&prompt=consent" +
+        "&redirect_uri=" + encodeURIComponent(redirectEnd) +
+        "&redirect=" + encodeURIComponent(redirectLast);
+
+      window.open(base + params, "_blank");
+    }
+  </script>
+</body>
+</html>
