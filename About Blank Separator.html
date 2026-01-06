@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>about:blank Separator & New Window Lab</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  font-family: monospace;
+  background: #0e0e0e;
+  color: #e0e0e0;
+  padding: 12px;
+}
+h2 { color: #8be9fd; }
+h3 { color: #50fa7b; margin-top: 20px; }
+button {
+  width: 100%;
+  margin: 3px 0;
+  padding: 6px;
+  background: #1e1e1e;
+  color: #fff;
+  border: 1px solid #333;
+}
+button:hover { background: #333; }
+small { color: #aaa; }
+</style>
+</head>
+<body>
+
+<h2>about:blank Separator / Address Bar Parsing Lab</h2>
+<small>
+Tujuan: observasi address bar & origin pada new tab / new window<br>
+Target: Android Browser & WebView
+</small>
+
+<script>
+const TARGET = "https://example.com";
+
+/* ===============================
+   1. DOT-BASED SEPARATORS
+================================ */
+const DOT_TESTS = [
+  "about:blank.example.com",
+  "about:blank..example.com",
+  "about:blank...example.com",
+  "about:blank./example.com",
+  "about:blank.%2Eexample.com",
+  "about:blank.%2e.example.com",
+  "about:blank.example.com/",
+  "about:blank.example.com#"
+];
+
+/* ===============================
+   2. QUESTION MARK SEPARATORS
+================================ */
+const QUERY_TESTS = [
+  "about:blank?example.com",
+  "about:blank??example.com",
+  "about:blank?=example.com",
+  "about:blank?@example.com",
+  "about:blank?//example.com",
+  "about:blank?https://example.com",
+  "about:blank?%2F%2Fexample.com"
+];
+
+/* ===============================
+   3. DOT + QUESTION COMBO
+================================ */
+const COMBO_TESTS = [
+  "about:blank.?example.com",
+  "about:blank?.example.com",
+  "about:blank..?.example.com",
+  "about:blank.?https://example.com",
+  "about:blank?.https://example.com",
+  "about:blank.%2E?example.com",
+  "about:blank?%2Eexample.com"
+];
+
+/* ===============================
+   4. ENCODING VARIANTS
+================================ */
+const ENCODED_TESTS = [
+  "about:blank%3Fexample.com",
+  "about:blank%2Eexample.com",
+  "about:blank%2E%2Eexample.com",
+  "about:blank%3Fhttps://example.com",
+  "about:blank%2E%3Fexample.com"
+];
+
+/* ===============================
+   5. FRAGMENT EDGE CASES
+================================ */
+const FRAGMENT_TESTS = [
+  "about:blank#example.com",
+  "about:blank#?example.com",
+  "about:blank?#example.com",
+  "about:blank#https://example.com",
+  "about:blank?test#example.com"
+];
+
+/* ===============================
+   6. SLASH & AUTHORITY CONFUSION
+================================ */
+const SLASH_TESTS = [
+  "about:blank//example.com",
+  "about:blank///example.com",
+  "about:blank:/example.com",
+  "about:blank:////example.com",
+  "about:blank://example.com"
+];
+
+/* ===============================
+   7. CONTROL / WHITESPACE
+================================ */
+const CONTROL_TESTS = [
+  "about:blank%09example.com",   // tab
+  "about:blank%0Aexample.com",   // newline
+  "about:blank%0Dexample.com",   // CR
+  "about:blank%20example.com"    // space
+];
+
+/* ===============================
+   8. METHOD VARIANTS
+================================ */
+function openWindow(url) {
+  console.log("window.open:", url);
+  window.open(url, "_blank");
+}
+
+function openAnchor(url) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_blank";
+  a.click();
+}
+
+function redirect(url) {
+  console.log("location.href:", url);
+  location.href = url;
+}
+
+function renderGroup(title, list) {
+  document.body.insertAdjacentHTML("beforeend", `<h3>${title}</h3>`);
+  list.forEach(u => {
+    const b1 = document.createElement("button");
+    b1.textContent = "window.open → " + u;
+    b1.onclick = () => openWindow(u);
+
+    const b2 = document.createElement("button");
+    b2.textContent = "anchor _blank → " + u;
+    b2.onclick = () => openAnchor(u);
+
+    document.body.appendChild(b1);
+    document.body.appendChild(b2);
+  });
+}
+
+/* ===============================
+   RENDER ALL TESTS
+================================ */
+renderGroup("DOT‑BASED", DOT_TESTS);
+renderGroup("QUERY‑BASED", QUERY_TESTS);
+renderGroup("DOT + QUERY COMBO", COMBO_TESTS);
+renderGroup("ENCODED VARIANTS", ENCODED_TESTS);
+renderGroup("FRAGMENT CASES", FRAGMENT_TESTS);
+renderGroup("SLASH / AUTHORITY", SLASH_TESTS);
+renderGroup("CONTROL / WHITESPACE", CONTROL_TESTS);
+
+</script>
+
+<hr>
+<small>
+Catat untuk setiap test:<br>
+• address bar tampil apa<br>
+• apakah URL dipotong / disanitasi<br>
+• origin aktual (DevTools / logcat)<br>
+• browser + versi + Android version
+</small>
+
+</body>
+</html>
