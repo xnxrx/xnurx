@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDN/Homograph Spoofing Demo - Educational Only</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 5px solid #f39c12;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .technique {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #2980b9;
+        }
+        
+        .url-display {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 16px;
+            border-radius: 5px;
+            word-break: break-all;
+        }
+        
+        .test-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px 5px 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .test-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .danger {
+            background-color: #e74c3c;
+        }
+        
+        .danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .explanation {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #2ecc71;
+            margin-top: 15px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #ecf0f1;
+        }
+        
+        .unicode-info {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .unicode-table {
+            font-size: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>IDN/Homograph Spoofing Demo - Educational</h1>
+    
+    <div class="warning">
+        <strong>PERINGATAN:</strong> Ini adalah demonstrasi edukasi tentang kerentanan IDN/Homograph. Jangan gunakan teknik ini untuk aktivitas ilegal. Selalu periksa URL dengan hati-hati sebelum memasukkan informasi sensitif.
+    </div>
+    
+    <p>IDN (Internationalized Domain Names) Homograph spoofing adalah teknik di mana karakter Unicode yang terlihat mirip dengan karakter ASCII digunakan untuk membuat domain yang terlihat seperti domain asli. Berikut beberapa teknik yang bisa diujicoba:</p>
+    
+    <div class="technique">
+        <h2>1. Penggantian Karakter ASCII dengan Karakter Unicode yang Mirip</h2>
+        <p>Mengganti huruf Latin dengan karakter Unicode yang terlihat serupa dari alfabet lain.</p>
+        
+        <div class="url-display" id="url1">https://www.metamask.com</div>
+        <button class="test-button" onclick="copyToClipboard('url1')">Salin URL Asli</button>
+        
+        <div class="url-display" id="url1-spoof">https://www.metamask.com</div>
+        <button class="test-button danger" onclick="copyToClipboard('url1-spoof')">Salin URL Spoof (Uji di Tab Baru)</button>
+        
+        <div class="explanation">
+            <strong>Penjelasan:</strong> URL spoof menggunakan huruf Arab "م" (U+0645) sebagai pengganti huruf "m" pada "metamask". Dalam address bar browser modern, mungkin akan muncul sebagai "metamask.com" tergantung pada konfigurasi browser.
+        </div>
+        
+        <div class="unicode-info">
+            Karakter Unicode yang digunakan: 
+            <ul>
+                <li>م - Arabic Letter Meem (U+0645) - digunakan sebagai pengganti "m"</li>
+                <li>ｅ - Fullwidth Latin Small Letter E (U+FF45) - lebar penuh</li>
+                <li>ｔ - Fullwidth Latin Small Letter T (U+FF54) - lebar penuh</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="technique">
+        <h2>2. Penggantian Karakter dengan Aksara Cyrillic</h2>
+        <p>Beberapa huruf Cyrillic terlihat sangat mirip dengan huruf Latin.</p>
+        
+        <div class="url-display" id="url2">https://www.apple.com</div>
+        <button class="test-button" onclick="copyToClipboard('url2')">Salin URL Asli</button>
+        
+        <div class="url-display" id="url2-spoof">https://www.apple.com</div>
+        <button class="test-button danger" onclick="copyToClipboard('url2-spoof')">Salin URL Spoof (Uji di Tab Baru)</button>
+        
+        <div class="explanation">
+            <strong>Penjelasan:</strong> Menggunakan huruf Cyrillic "а" (U+0430) sebagai pengganti "a" Latin, dan "р" (U+0440) sebagai pengganti "p". Perbedaannya hampir tidak terlihat dalam font standar.
+        </div>
+        
+        <div class="unicode-info">
+            Karakter Unicode yang digunakan: 
+            <ul>
+                <li>а - Cyrillic Small Letter A (U+0430) - pengganti "a" Latin</li>
+                <li>р - Cyrillic Small Letter Er (U+0440) - pengganti "p" Latin</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="technique">
+        <h2>3. Penggantian Karakter dengan Aksara Greek</h2>
+        <p>Beberapa huruf Greek juga mirip dengan huruf Latin.</p>
+        
+        <div class="url-display" id="url3">https://www.paypal.com</div>
+        <button class="test-button" onclick="copyToClipboard('url3')">Salin URL Asli</button>
+        
+        <div class="url-display" id="url3-spoof">https://www.paypal.com</div>
+        <button class="test-button danger" onclick="copyToClipboard('url3-spoof')">Salin URL Spoof (Uji di Tab Baru)</button>
+        
+        <div class="explanation">
+            <strong>Penjelasan:</strong> Menggunakan huruf Greek "ρ" (U+03C1) sebagai pengganti "p", dan "α" (U+03B1) sebagai pengganti "a". Bisa sangat membingungkan jika dilihat sekilas.
+        </div>
+        
+        <div class="unicode-info">
+            Karakter Unicode yang digunakan: 
+            <ul>
+                <li>ρ - Greek Small Letter Rho (U+03C1) - pengganti "p"</li>
+                <li>α - Greek Small Letter Alpha (U+03B1) - pengganti "a"</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="technique">
+        <h2>4. Kombinasi Berbagai Aksara</h2>
+        <p>Menggabungkan karakter dari berbagai aksara untuk membuat domain yang menipu.</p>
+        
+        <div class="url-display" id="url4">https://www.microsoft.com</div>
+        <button class="test-button" onclick="copyToClipboard('url4')">Salin URL Asli</button>
+        
+        <div class="url-display" id="url4-spoof">https://www.microsоft.com</div>
+        <button class="test-button danger" onclick="copyToClipboard('url4-spoof')">Salin URL Spoof (Uji di Tab Baru)</button>
+        
+        <div class="explanation">
+            <strong>Penjelasan:</strong> Menggunakan "о" Cyrillic (U+043E) sebagai pengganti "o" Latin pada kata "microsoft". Sangat sulit dibedakan tanpa pemeriksaan seksama.
+        </div>
+    </div>
+    
+    <div class="technique">
+        <h2>5. Penggunaan Karakter Zero-Width</h2>
+        <p>Menyisipkan karakter zero-width (tidak terlihat) untuk membuat URL yang terlihat sama.</p>
+        
+        <div class="url-display" id="url5">https://www.bankofamerica.com</div>
+        <button class="test-button" onclick="copyToClipboard('url5')">Salin URL Asli</button>
+        
+        <div class="url-display" id="url5-spoof">https://www.bankofamerica.com</div>
+        <button class="test-button danger" onclick="copyToClipboard('url5-spoof')">Salin URL Spoof (Uji di Tab Baru)</button>
+        
+        <div class="explanation">
+            <strong>Penjelasan:</strong> Menyisipkan karakter Zero Width Joiner (U+200D) di antara huruf "a" dan "m". Karakter ini tidak terlihat tetapi bisa digunakan untuk membuat domain yang berbeda secara teknis.
+        </div>
+    </div>
+    
+    <div class="technique">
+        <h2>6. Kombinasi dengan Punycode</h2>
+        <p>Menggunakan karakter IDN yang akan dikonversi ke Punycode.</p>
+        
+        <div class="url-display" id="url6">https://www.instagram.com</div>
+        <button class="test-button" onclick="copyToClipboard('url6')">Salin URL Asli</button>
+        
+        <div class="url-display" id="url6-spoof">https://www.instagrám.com</div>
+        <button class="test-button danger" onclick="copyToClipboard('url6-spoof')">Salin URL Spoof (Uji di Tab Baru)</button>
+        
+        <div class="explanation">
+            <strong>Penjelasan:</strong> Menggunakan "á" (a dengan acute) sebagai pengganti "a". Dalam Punycode, ini akan ditampilkan sebagai "xn--instagrm-bva.com" tergantung pada browser.
+        </div>
+    </div>
+    
+    <div class="technique">
+        <h2>Tabel Karakter Homograph Umum</h2>
+        <table>
+            <tr>
+                <th>Karakter Asli (Latin)</th>
+                <th>Karakter Pengganti (Unicode)</th>
+                <th>Nama Karakter</th>
+                <th>Kode Unicode</th>
+            </tr>
+            <tr>
+                <td>a</td>
+                <td class="unicode-table">а</td>
+                <td>Cyrillic Small Letter A</td>
+                <td>U+0430</td>
+            </tr>
+            <tr>
+                <td>c</td>
+                <td class="unicode-table">с</td>
+                <td>Cyrillic Small Letter Es</td>
+                <td>U+0441</td>
+            </tr>
+            <tr>
+                <td>e</td>
+                <td class="unicode-table">е</td>
+                <td>Cyrillic Small Letter Ie</td>
+                <td>U+0435</td>
+            </tr>
+            <tr>
+                <td>o</td>
+                <td class="unicode-table">о</td>
+                <td>Cyrillic Small Letter O</td>
+                <td>U+043E</td>
+            </tr>
+            <tr>
+                <td>p</td>
+                <td class="unicode-table">р</td>
+                <td>Cyrillic Small Letter Er</td>
+                <td>U+0440</td>
+            </tr>
+            <tr>
+                <td>m</td>
+                <td class="unicode-table">м</td>
+                <td>Cyrillic Small Letter Em</td>
+                <td>U+043C</td>
+            </tr>
+            <tr>
+                <td>y</td>
+                <td class="unicode-table">у</td>
+                <td>Cyrillic Small Letter U</td>
+                <td>U+0443</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="technique">
+        <h2>Cara Melindungi Diri dari Serangan Homograph</h2>
+        <ul>
+            <li>Selalu periksa URL dengan seksama sebelum memasukkan informasi sensitif</li>
+            <li>Aktifkan pengaturan IDN di browser Anda untuk menampilkan Punycode</li>
+            <li>Gunakan password manager yang memverifikasi domain</li>
+            <li>Perhatikan sertifikat SSL/HTTPS situs web</li>
+            <li>Bookmark situs penting untuk mengaksesnya dengan aman</li>
+            <li>Browser modern biasanya menampilkan Punycode untuk domain yang mencurigakan</li>
+        </ul>
+    </div>
+    
+    <footer>
+        <p>Demo ini hanya untuk tujuan edukasi dan pengujian keamanan. Selalu gunakan internet dengan bijak dan bertanggung jawab.</p>
+        <p>© 2023 - Demo IDN/Homograph Spoofing - Untuk Edukasi Keamanan Siber</p>
+    </footer>
+
+    <script>
+        // Inisialisasi URL spoof dengan karakter Unicode
+        document.getElementById('url1-spoof').textContent = 'https://www.' + 'm'.replace('m', 'م') + 'etamask.com';
+        document.getElementById('url2-spoof').textContent = 'https://www.' + 'apple'.replace(/a/g, 'а').replace(/p/g, 'р') + '.com';
+        document.getElementById('url3-spoof').textContent = 'https://www.' + 'paypal'.replace(/p/g, 'ρ').replace(/a/g, 'α') + '.com';
+        document.getElementById('url4-spoof').textContent = 'https://www.' + 'microsoft'.replace('o', 'о') + '.com';
+        document.getElementById('url5-spoof').textContent = 'https://www.bankofameri' + String.fromCharCode(8205) + 'ca.com';
+        document.getElementById('url6-spoof').textContent = 'https://www.instagrám.com';
+        
+        // Fungsi untuk menyalin teks ke clipboard
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            // Buat textarea sementara
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            
+            // Pilih dan salin teks
+            textarea.select();
+            document.execCommand('copy');
+            
+            // Hapus textarea
+            document.body.removeChild(textarea);
+            
+            // Tampilkan notifikasi
+            alert('URL telah disalin ke clipboard: \n\n' + text + '\n\nTempel di address bar browser untuk menguji. PERINGATAN: Jangan masukkan informasi sensitif di situs yang tidak terpercaya.');
+        }
+        
+        // Fungsi untuk menguji URL di tab baru
+        function testInNewTab(url) {
+            // PERINGATAN: Ini hanya simulasi untuk demo
+            alert("Untuk keamanan, fungsi ini dinonaktifkan. Anda bisa menyalin URL dan mengetesnya secara manual jika ingin memahami cara kerjanya.");
+            // window.open(url, '_blank'); // Dinonaktifkan untuk keamanan
+        }
+    </script>
+</body>
+</html>
