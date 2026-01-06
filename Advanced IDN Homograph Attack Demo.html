@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced IDN Homograph Attack - Kasus Nyata</title>
+    <style>
+        :root {
+            --primary-dark: #0c2b3e;
+            --primary-medium: #1a4a6b;
+            --primary-light: #2978a0;
+            --danger: #c62828;
+            --warning: #f57c00;
+            --success: #2e7d32;
+            --info: #0277bd;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a1929 0%, #1a3a5f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header Styles */
+        .header {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 20, 40, 0.8);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--warning);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(90deg, #4fc3f7, #29b6f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #90caf9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Warning Banner */
+        .warning-banner {
+            background: linear-gradient(135deg, var(--danger), #8b0000);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            border: 2px solid #ff9800;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .warning-banner::before {
+            content: "⚠";
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            font-size: 150px;
+            opacity: 0.2;
+            transform: rotate(15deg);
+        }
+        
+        .warning-banner h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #ffcc80;
+        }
+        
+        /* Real Cases Section */
+        .cases-section {
+            background: rgba(30, 40, 60, 0.7);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(100, 150, 255, 0.2);
+        }
+        
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .case-card {
+            background: rgba(20, 30, 50, 0.9);
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid var(--info);
+            transition: transform 0.3s;
+        }
+        
+        .case-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .case-card h4 {
+            color: #64b5f6;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .case-card .date {
+            color: #90a4ae;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Attack Scenarios Grid */
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .scenario-card {
+            background: rgba(25, 35, 55, 0.85);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(100, 150, 255, 0.1);
+        }
+        
+        .scenario-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(100, 150, 255, 0.3);
+        }
+        
+        .scenario-header {
+            background: linear-gradient(90deg, var(--primary-medium), var(--primary-light));
+            color: white;
+            padding: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .scenario-header h3 {
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .scenario-body {
+            padding: 25px;
+        }
+        
+        .description {
+            color: #b0bec5;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+        
+        .url-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            word-break: break-all;
+            position: relative;
+        }
+        
+        .original-url {
+            color: #81c784;
+            font-size: 0.95rem;
+        }
+        
+        .spoofed-url {
+            color: #ff8a65;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-light), #1a5f8a);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1a5f8a, var(--primary-light));
+            transform: scale(1.05);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #8e0000);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #8e0000, var(--danger));
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #1b5e20);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #1b5e20, var(--success));
+        }
+        
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            border-left: 4px solid var(--info);
+            min-height: 60px;
+        }
+        
+        .result-box.success {
+            border-left-color: var(--success);
+            background: rgba(46, 125, 50, 0.1);
+        }
+        
+        .result-box.warning {
+            border-left-color: var(--warning);
+            background: rgba(245, 124, 0, 0.1);
+        }
+        
+        .result-box.danger {
+            border-left-color: var(--danger);
+            background: rgba(198, 40, 40, 0.1);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #90a4ae;
+            font-size: 0.9rem;
+        }
+        
+        .protection-tips {
+            background: rgba(30, 40, 60, 0.7);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        
+        .protection-tips h3 {
+            color: #4fc3f7;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .tip {
+            background: rgba(40, 50, 70, 0.9);
+            padding: 15px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .tip-icon {
+            color: #4fc3f7;
+            font-size: 1.5rem;
+        }
+        
+        /* Loading Animation */
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .scenarios-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cases-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🔥 Advanced IDN Homograph Attack Demo</h1>
+            <p class="subtitle">Berdasarkan kasus nyata yang pernah berhasil mengeksploitasi browser dan sistem keamanan</p>
+        </header>
+        
+        <!-- Warning Banner -->
+        <div class="warning-banner">
+            <h3>🚨 PERINGATAN KESELAMATAN TINGGI</h3>
+            <p><strong>Script ini hanya untuk penelitian keamanan dan edukasi dalam lingkungan terkendali.</strong> Penggunaan teknik ini tanpa izin tertulis adalah tindakan kriminal. Selalu dapatkan persetujuan sebelum melakukan pengujian keamanan.</p>
+            <p style="margin-top: 10px;">⚠ Demo ini mensimulasikan teknik yang pernah berhasil mengeksploitasi Chrome, Firefox, dan browser lainnya.</p>
+        </div>
+        
+        <!-- Real Cases Section -->
+        <section class="cases-section">
+            <h2 style="color: #64b5f6; margin-bottom: 20px;">📜 Kasus-Kasus Nyata IDN Homograph Attack</h2>
+            <div class="cases-grid">
+                <div class="case-card">
+                    <h4>Chrome Homograph Bug (2017)</h4>
+                    <div class="date">CVE-2017-0539, CVE-2017-0540</div>
+                    <p>Eksploit berhasil membuat domain "аррӏе.com" (dengan karakter Cyrillic) yang terlihat identik dengan "apple.com". Bug ini mempengaruhi Chrome di Windows, Mac, dan Linux.</p>
+                </div>
+                
+                <div class="case-card">
+                    <h4>Firefox IDN Display Bug (2020)</h4>
+                    <div class="date">Bugzilla ID 1619044</div>
+                    <p>Vulnerability yang memungkinkan penyerang membuat URL dengan karakter mixed-script yang tidak ditampilkan dengan benar di address bar Firefox.</p>
+                </div>
+                
+                <div class="case-card">
+                    <h4>Safari Punycode Bypass (2019)</h4>
+                    <div class="date">WebKit Bug 193799</div>
+                    <p>Eksploitasi rendering IDN di Safari yang memungkinkan spoofing domain bank dan situs pemerintah dengan karakter Tamil dan Sinhala.</p>
+                </div>
+                
+                <div class="case-card">
+                    <h4>Edge Chromium Homograph (2021)</h4>
+                    <div class="date">MSRC Case 57681</div>
+                    <p>Masalah dalam implementasi IDN di Edge berbasis Chromium yang memungkinkan spoofing dengan karakter Greek dan Coptic.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Attack Scenarios -->
+        <h2 style="color: #4fc3f7; margin: 40px 0 20px; text-align: center;">🎯 Skenario Serangan Berdasarkan Kasus Nyata</h2>
+        
+        <div class="scenarios-grid">
+            <!-- Scenario 1: Mixed-script phishing -->
+            <div class="scenario-card" id="scenario1">
+                <div class="scenario-header">
+                    <h3>🔤 Mixed-Script Phishing (Chrome 2017)</h3>
+                </div>
+                <div class="scenario-body">
+                    <div class="description">
+                        <p>Menggabungkan karakter dari berbagai script (Latin, Cyrillic, Greek) dalam satu domain. Teknik ini pernah mem-bypass proteksi Chrome.</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #ffcc80;">
+                            <strong>Kasus:</strong> "apple" dengan karakter Cyrillic 'а' (U+0430) dan 'р' (U+0440)
+                        </p>
+                    </div>
+                    
+                    <div class="url-box">
+                        <div class="original-url">Original: https://www.apple.com</div>
+                        <div class="spoofed-url" id="mixedScriptUrl">Spoofed: Loading...</div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="testMixedScript()">
+                            <span class="btn-icon">🔍</span> Test Mixed-Script
+                        </button>
+                        <button class="btn btn-danger" onclick="window.open('#', '_blank')" id="mixedScriptBtn">
+                            <span class="btn-icon">↗️</span> Buka Tab Palsu
+                        </button>
+                    </div>
+                    
+                    <div class="result-box" id="result1">
+                        Status: Klik tombol untuk memulai test
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scenario 2: RTL override attack -->
+            <div class="scenario-card" id="scenario2">
+                <div class="scenario-header">
+                    <h3>🔄 RTL/LTR Override (Firefox 2020)</h3>
+                </div>
+                <div class="scenario-body">
+                    <div class="description">
+                        <p>Memanfaatkan karakter RTL (Right-to-Left) override untuk membalik urutan karakter dalam URL. Teknik ini dapat menyembunyikan domain asli.</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #ffcc80;">
+                            <strong>Kasus:</strong> Menggunakan U+202E (RTL override) untuk menyembunyikan ".exe" menjadi "exe."
+                        </p>
+                    </div>
+                    
+                    <div class="url-box">
+                        <div class="original-url">Original: secure-login.com</div>
+                        <div class="spoofed-url" id="rtlUrl">Spoofed: Loading...</div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="testRTLAttack()">
+                            <span class="btn-icon">🔀</span> Test RTL Override
+                        </button>
+                        <button class="btn btn-danger" onclick="downloadFakeFile()">
+                            <span class="btn-icon">💾</span> Download "File Aman"
+                        </button>
+                    </div>
+                    
+                    <div class="result-box" id="result2">
+                        Status: Menunggu aksi
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scenario 3: Zero-width character injection -->
+            <div class="scenario-card" id="scenario3">
+                <div class="scenario-header">
+                    <h3>👻 Zero-Width Characters (Safari 2019)</h3>
+                </div>
+                <div class="scenario-body">
+                    <div class="description">
+                        <p>Menyisipkan karakter zero-width (U+200B, U+200C, U+200D) dalam domain. Tidak terlihat tetapi mempengaruhi parsing URL.</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #ffcc80;">
+                            <strong>Kasus:</strong> "paypal" dengan zero-width joiner antara karakter
+                        </p>
+                    </div>
+                    
+                    <div class="url-box">
+                        <div class="original-url">Original: https://login.paypal.com</div>
+                        <div class="spoofed-url" id="zwUrl">Spoofed: Loading...</div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="testZeroWidth()">
+                            <span class="btn-icon">👁️</span> Reveal Zero-Width
+                        </button>
+                        <button class="btn btn-danger" onclick="createZeroWidthLink()">
+                            <span class="btn-icon">🔗</span> Buat Link Berbahaya
+                        </button>
+                    </div>
+                    
+                    <div class="result-box" id="result3">
+                        Status: Karakter zero-width aktif tetapi tidak terlihat
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scenario 4: Combined script with subdomain -->
+            <div class="scenario-card" id="scenario4">
+                <div class="scenario-header">
+                    <h3>🎭 Subdomain + IDN Combo (Edge 2021)</h3>
+                </div>
+                <div class="scenario-body">
+                    <div class="description">
+                        <p>Menggabungkan subdomain panjang dengan karakter IDN untuk membuat URL yang terlihat sah. Teknik ini memanfaatkan keterbatasan rendering address bar.</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #ffcc80;">
+                            <strong>Kasus:</strong> "secure-account-login.verify-microsoft.com" dengan karakter Cyrillic
+                        </p>
+                    </div>
+                    
+                    <div class="url-box">
+                        <div class="original-url">Original: microsoft.com</div>
+                        <div class="spoofed-url" id="subdomainUrl">Spoofed: Loading...</div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="testSubdomainCombo()">
+                            <span class="btn-icon">🔄</span> Generate URL
+                        </button>
+                        <button class="btn btn-danger" onclick="openFakeAuth()">
+                            <span class="btn-icon">🔐</span> Buka Login Palsu
+                        </button>
+                    </div>
+                    
+                    <div class="result-box" id="result4">
+                        Status: Teknik ini efektif di address bar mobile
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scenario 5: SVG favicon spoofing -->
+            <div class="scenario-card" id="scenario5">
+                <div class="scenario-header">
+                    <h3>🖼️ SVG Favicon Spoof (Chrome 2022)</h3>
+                </div>
+                <div class="scenario-body">
+                    <div class="description">
+                        <p>Menggunakan SVG favicon untuk menampilkan ikon gembok hijau (HTTPS) pada situs HTTP. Kombinasi dengan IDN membuat phishing lebih meyakinkan.</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #ffcc80;">
+                            <strong>Kasus:</strong> Favicon SVG yang merender gembok hijau di address bar
+                        </p>
+                    </div>
+                    
+                    <div class="url-box">
+                        <div class="original-url">HTTP Site dengan favicon HTTPS</div>
+                        <div class="spoofed-url">secure-banking-login.com (spoofed)</div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="testFaviconSpoof()">
+                            <span class="btn-icon">🖼️</span> Render Favicon Palsu
+                        </button>
+                        <button class="btn btn-success" onclick="showRealFavicon()">
+                            <span class="btn-icon">✅</span> Tampilkan Asli
+                        </button>
+                    </div>
+                    
+                    <div class="result-box" id="result5">
+                        <div id="faviconContainer"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scenario 6: Browser-specific rendering bug -->
+            <div class="scenario-card" id="scenario6">
+                <div class="scenario-header">
+                    <h3>🐛 Browser-Specific Rendering</h3>
+                </div>
+                <div class="scenario-body">
+                    <div class="description">
+                        <p>Eksploitasi bug rendering spesifik browser untuk karakter tertentu. Setiap browser memiliki kelemahan parsing Unicode yang berbeda.</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #ffcc80;">
+                            <strong>Multi-browser:</strong> Karakter yang dirender berbeda di Chrome, Firefox, Safari
+                        </p>
+                    </div>
+                    
+                    <div class="url-box">
+                        <div class="original-url">Same characters, different rendering</div>
+                        <div class="spoofed-url" id="browserSpecificUrl">Detecting browser...</div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="detectBrowserBug()">
+                            <span class="btn-icon">🔍</span> Deteksi Bug Browser
+                        </button>
+                        <button class="btn btn-danger" onclick="exploitBrowserSpecific()">
+                            <span class="btn-icon">⚡</span> Eksploitasi Bug
+                        </button>
+                    </div>
+                    
+                    <div class="result-box" id="result6">
+                        Browser: <span id="browserName">Mendeteksi...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Protection Tips -->
+        <section class="protection-tips">
+            <h3>🛡️ Tips Proteksi Terhadap IDN Homograph Attacks</h3>
+            <div class="tips-grid">
+                <div class="tip">
+                    <div class="tip-icon">🔒</div>
+                    <div>Selalu periksa sertifikat SSL dan pastikan domain valid</div>
+                </div>
+                <div class="tip">
+                    <div class="tip-icon">🌐</div>
+                    <div>Aktifkan "Always show full URLs" di pengaturan browser</div>
+                </div>
+                <div class="tip">
+                    <div class="tip-icon">⚙️</div>
+                    <div>Gunakan ekstensi keamanan yang mendeteksi IDN homograph</div>
+                </div>
+                <div class="tip">
+                    <div class="tip-icon">📱</div>
+                    <div>Hindari mengklik link dari sumber tidak terpercaya</div>
+                </div>
+                <div class="tip">
+                    <div class="tip-icon">🔤</div>
+                    <div>Aktifkan Punycode conversion di browser untuk melihat IDN asli</div>
+                </div>
+                <div class="tip">
+                    <div class="tip-icon">🔄</div>
+                    <div>Update browser secara teratur untuk patch keamanan terbaru</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p><strong>⚠ DEMONSTRASI EDUKASI KEAMANAN SEMATA ⚠</strong></p>
+            <p>Teknik-teknik ini pernah dieksploitasi di browser nyata. Gunakan pengetahuan ini untuk meningkatkan keamanan, bukan untuk aktivitas ilegal.</p>
+            <p style="margin-top: 15px; color: #b0bec5;">Referensi: CVE databases, Bugzilla, WebKit Bug Tracker, MSRC</p>
+        </footer>
+    </div>
+
+    <script>
+        // Advanced homograph techniques based on real cases
+        const homographTechniques = {
+            // Mixed scripts (Chrome 2017 case)
+            mixedScript: {
+                'a': 'а', // Cyrillic
+                'c': 'с', // Cyrillic
+                'e': 'е', // Cyrillic
+                'o': 'о', // Cyrillic
+                'p': 'р', // Cyrillic
+                'x': 'х', // Cyrillic
+                'y': 'у', // Cyrillic
+                'A': 'А', // Cyrillic
+                'B': 'В', // Cyrillic
+                'C': 'С', // Cyrillic
+                'E': 'Е', // Cyrillic
+                'H': 'Н', // Cyrillic
+                'K': 'К', // Cyrillic
+                'M': 'М', // Cyrillic
+                'O': 'О', // Cyrillic
+                'P': 'Р', // Cyrillic
+                'T': 'Т', // Cyrillic
+                'X': 'Х', // Cyrillic
+                'Y': 'У'  // Cyrillic
+            },
+            
+            // Greek letters that look similar
+            greekLetters: {
+                'a': 'α', // Greek alpha
+                'b': 'β', // Greek beta
+                'e': 'ε', // Greek epsilon
+                'k': 'κ', // Greek kappa
+                'o': 'ο', // Greek omicron
+                'p': 'ρ', // Greek rho
+                'v': 'ν', // Greek nu
+                'w': 'ω', // Greek omega
+                'x': 'χ', // Greek chi
+                'y': 'υ'  // Greek upsilon
+            },
+            
+            // Special characters for advanced attacks
+            specialChars: {
+                'zeroWidth': '\u200B',
+                'zeroWidthNonJoiner': '\u200C',
+                'zeroWidthJoiner': '\u200D',
+                'rtlOverride': '\u202E',
+                'ltrOverride': '\u202D',
+                'invisibleSeparator': '\u2063'
+            }
+        };
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeScenarios();
+            detectBrowser();
+        });
+
+        // Initialize all scenarios
+        function initializeScenarios() {
+            // Scenario 1: Mixed-script
+            const mixedUrl = generateMixedScriptUrl('www.apple.com');
+            document.getElementById('mixedScriptUrl').textContent = `Spoofed: https://${mixedUrl}`;
+            
+            // Update button href
+            document.getElementById('mixedScriptBtn').onclick = function() {
+                window.open(`https://${mixedUrl}`, '_blank');
+            };
+
+            // Scenario 2: RTL attack
+            const rtlUrl = generateRTLUrl('secure-login.com');
+            document.getElementById('rtlUrl').textContent = `Spoofed: ${rtlUrl}`;
+
+            // Scenario 3: Zero-width
+            const zwUrl = generateZeroWidthUrl('login.paypal.com');
+            document.getElementById('zwUrl').textContent = `Spoofed: https://${zwUrl}`;
+
+            // Scenario 4: Subdomain combo
+            const subdomainUrl = generateSubdomainCombo('microsoft.com');
+            document.getElementById('subdomainUrl').textContent = `Spoofed: ${subdomainUrl}`;
+
+            // Scenario 6: Browser-specific
+            updateBrowserSpecificUrl();
+        }
+
+        // Generate mixed-script URL (Chrome 2017 case)
+        function generateMixedScriptUrl(domain) {
+            let result = '';
+            for (let char of domain) {
+                result += homographTechniques.mixedScript[char] || char;
+            }
+            return result;
+        }
+
+        // Generate RTL override URL (Firefox 2020 case)
+        function generateRTLUrl(domain) {
+            const rtl = homographTechniques.specialChars.rtlOverride;
+            // Create a URL that looks like "moc.nil-gol?eruces" but actually goes somewhere else
+            return `http://secure${rtl}exe.moc.nil-gol?eruces/update.exe`;
+        }
+
+        // Generate zero-width character URL (Safari 2019 case)
+        function generateZeroWidthUrl(domain) {
+            const zwj = homographTechniques.specialChars.zeroWidthJoiner;
+            const zwnj = homographTechniques.specialChars.zeroWidthNonJoiner;
+            
+            let result = '';
+            for (let char of domain) {
+                result += char + (Math.random() > 0.5 ? zwj : zwnj);
+            }
+            return result;
+        }
+
+        // Generate subdomain + IDN combo (Edge 2021 case)
+        function generateSubdomainCombo(domain) {
+            const mixedDomain = generateMixedScriptUrl(domain);
+            return `https://secure-account-verification.${mixedDomain}/login`;
+        }
+
+        // Test Scenario 1: Mixed-script
+        function testMixedScript() {
+            const resultBox = document.getElementById('result1');
+            resultBox.innerHTML = '<div class="loader"></div> Testing mixed-script detection...';
+            
+            setTimeout(() => {
+                const original = 'www.apple.com';
+                const spoofed = generateMixedScriptUrl(original);
+                
+                resultBox.className = 'result-box warning';
+                resultBox.innerHTML = `
+                    <strong>⚠ Mixed-Script Attack Detected!</strong><br>
+                    <div style="margin-top: 10px;">
+                        <div>Original: <span style="color:#81c784">${original}</span></div>
+                        <div>Spoofed: <span style="color:#ff8a65">${spoofed}</span></div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.9em;">
+                        <strong>Karakter yang diganti:</strong><br>
+                        a → а (Cyrillic), p → р (Cyrillic), e → е (Cyrillic)
+                    </div>
+                `;
+            }, 1500);
+        }
+
+        // Test Scenario 2: RTL attack
+        function testRTLAttack() {
+            const resultBox = document.getElementById('result2');
+            const rtlUrl = generateRTLUrl('secure-login.com');
+            
+            resultBox.className = 'result-box danger';
+            resultBox.innerHTML = `
+                <strong>🔄 RTL Override Active!</strong><br>
+                <div style="margin-top: 10px; font-family: monospace; background: #000; padding: 10px; border-radius: 4px;">
+                    URL terlihat: <span style="color:#ff8a65">secure▮exe.moc.nil-gol?eruces</span><br>
+                    URL sebenarnya: <span style="color:#81c784">secure\u202Eexe.moc.nil-gol?eruces</span>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em;">
+                    Karakter U+202E (RTL override) membalik teks setelahnya.
+                </div>
+            `;
+        }
+
+        function downloadFakeFile() {
+            const resultBox = document.getElementById('result2');
+            resultBox.className = 'result-box danger';
+            resultBox.innerHTML = `
+                <strong>⚠ File Berbahaya Disamarkan!</strong><br>
+                <div style="margin-top: 10px;">
+                    Nama file terlihat: <span style="color:#81c784">document_safe.pdf.exe</span><br>
+                    Nama file sebenarnya: <span style="color:#ff8a65">document\u202Exe.pdf_safe</span>
+                </div>
+                <div style="margin-top: 10px;">
+                    Dalam kasus nyata, ini bisa menjadi malware yang disamarkan sebagai PDF.
+                </div>
+            `;
+        }
+
+        // Test Scenario 3: Zero-width characters
+        function testZeroWidth() {
+            const resultBox = document.getElementById('result3');
+            const zwUrl = generateZeroWidthUrl('paypal.com');
+            
+            // Show zero-width characters with visible markers
+            const visibleZwUrl = zwUrl.replace(/\u200B/g, '[ZW]')
+                                      .replace(/\u200C/g, '[ZWNJ]')
+                                      .replace(/\u200D/g, '[ZWJ]');
+            
+            resultBox.className = 'result-box warning';
+            resultBox.innerHTML = `
+                <strong>👻 Zero-Width Characters Revealed!</strong><br>
+                <div style="margin-top: 10px; font-family: monospace; background: #000; padding: 10px; border-radius: 4px;">
+                    ${visibleZwUrl}
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em;">
+                    Karakter zero-width tidak terlihat tetapi mempengaruhi parsing URL.
+                </div>
+            `;
+        }
+
+        function createZeroWidthLink() {
+            const resultBox = document.getElementById('result3');
+            const original = 'paypal-login-verification.com';
+            const spoofed = original.split('').join('\u200C').toLowerCase();
+            
+            resultBox.className = 'result-box danger';
+            resultBox.innerHTML = `
+                <strong>🔗 Link Berbahaya Dibuat!</strong><br>
+                <div style="margin-top: 10px;">
+                    Domain dengan zero-width non-joiner antara setiap karakter.
+                </div>
+                <div style="margin-top: 10px; font-family: monospace; background: #000; padding: 10px; border-radius: 4px;">
+                    <a href="#" style="color: #64b5f6;">https://${spoofed}/login</a>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em;">
+                    Link terlihat normal tetapi mengandung karakter tersembunyi.
+                </div>
+            `;
+        }
+
+        // Test Scenario 4: Subdomain combo
+        function testSubdomainCombo() {
+            const resultBox = document.getElementById('result4');
+            const subdomainUrl = generateSubdomainCombo('microsoft.com');
+            
+            resultBox.className = 'result-box warning';
+            resultBox.innerHTML = `
+                <strong>🎭 Subdomain + IDN Combo</strong><br>
+                <div style="margin-top: 10px; font-family: monospace; background: #000; padding: 10px; border-radius: 4px; word-break: break-all;">
+                    ${subdomainUrl}
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em;">
+                    Address bar mobile mungkin memotong URL, hanya menampilkan bagian akhir.
+                </div>
+            `;
+        }
+
+        function openFakeAuth() {
+            const width = 600;
+            const height = 700;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            const fakeWindow = window.open(
+                '',
+                'Microsoft Login',
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+            );
+            
+            if (fakeWindow) {
+                const spoofedDomain = generateMixedScriptUrl('microsoft');
+                fakeWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Microsoft Account - Login</title>
+                        <style>
+                            body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #f3f2f1; }
+                            .container { max-width: 440px; margin: 0 auto; background: white; padding: 40px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                            .logo { text-align: center; margin-bottom: 30px; }
+                            h1 { font-size: 24px; font-weight: 300; margin-bottom: 24px; color: #323130; }
+                            input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #8a8886; border-radius: 2px; font-size: 14px; }
+                            button { width: 100%; padding: 12px; background: #0067b8; color: white; border: none; border-radius: 2px; font-size: 15px; cursor: pointer; margin-top: 20px; }
+                            .footer { margin-top: 20px; text-align: center; font-size: 12px; color: #605e5c; }
+                            .warning { color: #d13438; font-size: 12px; margin-top: 10px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="logo">
+                                <svg width="108" height="23" viewBox="0 0 108 23" fill="none">
+                                    <path d="M0 22.5V0.5H9.5V22.5H0Z" fill="#F25022"/>
+                                    <path d="M12.5 22.5V0.5H22V22.5H12.5Z" fill="#7FBA00"/>
+                                    <path d="M25 22.5V0.5H34.5V22.5H25Z" fill="#00A4EF"/>
+                                    <path d="M37.5 22.5V0.5H47V22.5H37.5Z" fill="#FFB900"/>
+                                </svg>
+                            </div>
+                            <h1>Sign in to your Microsoft account</h1>
+                            <input type="text" placeholder="Email, phone, or Skype" value="user@example.com">
+                            <input type="password" placeholder="Password" value="••••••••">
+                            <button onclick="alert('Phishing Demo - Credentials not actually sent')">Sign in</button>
+                            <div class="warning">⚠ DEMONSTRASI PHISHING - Ini bukan situs Microsoft asli</div>
+                            <div class="footer">
+                                <p>URL: https://secure-account-verification.${spoofedDomain}.com</p>
+                                <p>Domain menggunakan karakter IDN homograph</p>
+                                <button onclick="window.close()" style="background: #666; width: auto; padding: 8px 20px;">Close Window</button>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                fakeWindow.document.close();
+                
+                const resultBox = document.getElementById('result4');
+                resultBox.innerHTML = `<strong>Login page palsu dibuka!</strong> Perhatikan address bar (jika browser mengizinkan manipulasi).`;
+            }
+        }
+
+        // Test Scenario 5: Favicon spoofing
+        function testFaviconSpoof() {
+            const resultBox = document.getElementById('result5');
+            const container = document.getElementById('faviconContainer');
+            
+            // Create fake lock icon using SVG
+            const svgFavicon = `
+                <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #1a237e; border-radius: 6px;">
+                    <div style="position: relative;">
+                        <svg width="40" height="40" viewBox="0 0 24 24" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                            <rect x="5" y="11" width="14" height="9" rx="2" fill="#4CAF50"/>
+                            <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#4CAF50" stroke-width="2" fill="none"/>
+                            <circle cx="12" cy="15" r="1.5" fill="white"/>
+                        </svg>
+                        <div style="position: absolute; top: -5px; right: -5px; background: #4CAF50; color: white; font-size: 10px; padding: 2px 5px; border-radius: 3px;">HTTPS</div>
+                    </div>
+                    <div>
+                        <div style="font-weight: bold; color: #81c784;">https://secure-banking-login.com</div>
+                        <div style="font-size: 0.9em; color: #b0bec5;">SSL Certificate: Valid ✔</div>
+                        <div style="font-size: 0.8em; color: #ffcc80; margin-top: 5px;">⚠ Favicon ini dirender oleh SVG, bukan dari sertifikat asli</div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = svgFavicon;
+            resultBox.className = 'result-box warning';
+        }
+
+        function showRealFavicon() {
+            const container = document.getElementById('faviconContainer');
+            container.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #263238; border-radius: 6px;">
+                    <div style="position: relative;">
+                        <svg width="40" height="40" viewBox="0 0 24 24">
+                            <rect x="5" y="11" width="14" height="9" rx="2" fill="#f44336"/>
+                            <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#f44336" stroke-width="2" fill="none"/>
+                            <circle cx="12" cy="15" r="1.5" fill="white"/>
+                        </svg>
+                        <div style="position: absolute; top: -5px; right: -5px; background: #f44336; color: white; font-size: 10px; padding: 2px 5px; border-radius: 3px;">HTTP</div>
+                    </div>
+                    <div>
+                        <div style="font-weight: bold; color: #ff8a65;">http://secure-banking-login.com</div>
+                        <div style="font-size: 0.9em; color: #b0bec5;">SSL Certificate: Invalid ✘</div>
+                        <div style="font-size: 0.8em; color: #81c784; margin-top: 5px;">✅ Inilah tampilan asli tanpa manipulasi</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Test Scenario 6: Browser-specific bugs
+        function detectBrowserBug() {
+            const browserInfo = detectBrowser();
+            const resultBox = document.getElementById('result6');
+            const browserName = document.getElementById('browserName');
+            
+            browserName.textContent = `${browserInfo.name} ${browserInfo.version}`;
+            
+            let bugInfo = '';
+            let severity = 'warning';
+            
+            switch(browserInfo.name.toLowerCase()) {
+                case 'chrome':
+                    bugInfo = 'Rentan terhadap mixed-script attacks dengan karakter Cyrillic dan Greek';
+                    severity = 'danger';
+                    break;
+                case 'firefox':
+                    bugInfo = 'Rentan terhadap RTL override attacks dan IDN display bugs';
+                    severity = 'warning';
+                    break;
+                case 'safari':
+                    bugInfo = 'Rentan terhadap zero-width character injection dan Punycode bypass';
+                    severity = 'danger';
+                    break;
+                case 'edge':
+                    bugInfo = 'Rentan terhadap combined script attacks dengan subdomain panjang';
+                    severity = 'warning';
+                    break;
+                default:
+                    bugInfo = 'Browser tidak dikenali. Update ke versi terbaru untuk proteksi maksimal';
+                    severity = 'info';
+            }
+            
+            resultBox.className = `result-box ${severity}`;
+            resultBox.innerHTML = `
+                <strong>${browserInfo.name} Vulnerabilities:</strong><br>
+                <div style="margin-top: 10px;">${bugInfo}</div>
+                <div style="margin-top: 10px; font-size: 0.9em;">
+                    Version: ${browserInfo.version}<br>
+                    Engine: ${browserInfo.engine}
+                </div>
+            `;
+            
+            updateBrowserSpecificUrl();
+        }
+
+        function exploitBrowserSpecific() {
+            const browserInfo = detectBrowser();
+            const resultBox = document.getElementById('result6');
+            
+            let exploit = '';
+            let exampleUrl = '';
+            
+            if (browserInfo.name.toLowerCase().includes('chrome')) {
+                exploit = 'Mixed-script dengan karakter Cyrillic "а" (U+0430) dan "р" (U+0440)';
+                exampleUrl = 'https://www.аррӏе.com/login'; // apple dengan karakter Cyrillic
+            } else if (browserInfo.name.toLowerCase().includes('firefox')) {
+                exploit = 'RTL override untuk menyembunyikan ekstensi file berbahaya';
+                exampleUrl = 'secure\u202Exe.moc.nil-gol?eruces/update.exe';
+            } else if (browserInfo.name.toLowerCase().includes('safari')) {
+                exploit = 'Zero-width joiner dalam domain untuk bypass filter';
+                exampleUrl = 'pay\u200Dpal\u200Ccom';
+            } else {
+                exploit = 'Kombinasi subdomain panjang dengan karakter homograph';
+                exampleUrl = 'secure-login-verify.microsoft-com';
+            }
+            
+            resultBox.className = 'result-box danger';
+            resultBox.innerHTML = `
+                <strong>⚡ Eksploitasi Browser-Specific Bug</strong><br>
+                <div style="margin-top: 10px;">
+                    <strong>Teknik:</strong> ${exploit}
+                </div>
+                <div style="margin-top: 10px; font-family: monospace; background: #000; padding: 10px; border-radius: 4px; word-break: break-all;">
+                    ${exampleUrl}
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em;">
+                    Browser ${browserInfo.name} rentan terhadap teknik ini berdasarkan kasus nyata.
+                </div>
+            `;
+        }
+
+        // Browser detection
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            let browserInfo = {
+                name: 'Unknown',
+                version: 'Unknown',
+                engine: 'Unknown'
+            };
+            
+            // Detect browser
+            if (ua.includes('Chrome') && !ua.includes('Edg')) {
+                browserInfo.name = 'Chrome';
+                browserInfo.version = ua.match(/Chrome\/([\d.]+)/)?.[1] || 'Unknown';
+                browserInfo.engine = 'Blink';
+            } else if (ua.includes('Firefox')) {
+                browserInfo.name = 'Firefox';
+                browserInfo.version = ua.match(/Firefox\/([\d.]+)/)?.[1] || 'Unknown';
+                browserInfo.engine = 'Gecko';
+            } else if (ua.includes('Safari') && !ua.includes('Chrome')) {
+                browserInfo.name = 'Safari';
+                browserInfo.version = ua.match(/Version\/([\d.]+)/)?.[1] || 'Unknown';
+                browserInfo.engine = 'WebKit';
+            } else if (ua.includes('Edg')) {
+                browserInfo.name = 'Edge';
+                browserInfo.version = ua.match(/Edg\/([\d.]+)/)?.[1] || 'Unknown';
+                browserInfo.engine = 'Blink';
+            }
+            
+            return browserInfo;
+        }
+
+        function updateBrowserSpecificUrl() {
+            const browserInfo = detectBrowser();
+            const urlElement = document.getElementById('browserSpecificUrl');
+            
+            let example = '';
+            switch(browserInfo.name.toLowerCase()) {
+                case 'chrome':
+                    example = 'www.аррӏе.com (Cyrillic homograph)';
+                    break;
+                case 'firefox':
+                    example = 'secure\u202Exe.moc.nil-gol (RTL override)';
+                    break;
+                case 'safari':
+                    example = 'pay\u200Dpal\u200Ccom (zero-width chars)';
+                    break;
+                case 'edge':
+                    example = 'secure-verification.microsoft-com (IDN + subdomain)';
+                    break;
+                default:
+                    example = 'mixed-script-attack.example';
+            }
+            
+            urlElement.textContent = `Example: ${example}`;
+        }
+    </script>
+</body>
+</html>
