@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Document PiP Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 40px;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Document Picture-in-Picture</h1>
+  <button id="open-pip">Open Site in PiP</button>
+
+  <script>
+    const button = document.getElementById("open-pip");
+
+    button.addEventListener("click", async () => {
+      if (!("documentPictureInPicture" in window)) {
+        alert("Document Picture-in-Picture not supported");
+        return;
+      }
+
+      try {
+        const pipWindow = await documentPictureInPicture.requestWindow({
+          width: 420,
+          height: 300
+        });
+
+        pipWindow.document.write(`
+          <!doctype html>
+          <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>PiP Window</title>
+            <style>
+              html, body {
+                margin: 0;
+                width: 100%;
+                height: 100%;
+                background: #0f172a;
+                color: white;
+                font-family: system-ui, sans-serif;
+              }
+              header {
+                padding: 8px 12px;
+                background: #020617;
+                font-size: 13px;
+              }
+              iframe {
+                width: 100%;
+                height: calc(100% - 36px);
+                border: 0;
+              }
+            </style>
+          </head>
+          <body>
+            <header>https://www.youtube.com/</header>
+<iframe
+  src="https://xnxrx.github.io/xnurx/youtube.html"
+  allow="autoplay; picture-in-picture"
+  allowfullscreen
+></iframe>
+          </body>
+          </html>
+        `);
+
+        pipWindow.document.close();
+      } catch (err) {
+        console.error("Failed to open PiP:", err);
+      }
+    });
+  </script>
+</body>
+</html>
