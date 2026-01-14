@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8" />
+  <title>YouTube – Sign in (Example)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: Roboto, Arial, sans-serif;
+      background: #f9f9f9;
+      display: grid;
+      place-items: center;
+    }
+
+    /* EXAMPLE watermark */
+    body::before {
+      content: "EXAMPLE • DEMO ONLY";
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: 64px;
+      font-weight: 700;
+      color: rgba(0,0,0,0.05);
+      transform: rotate(-25deg);
+      pointer-events: none;
+    }
+
+    .card {
+      background: #fff;
+      width: 360px;
+      padding: 32px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .logo img {
+      height: 32px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 400;
+      margin: 8px 0;
+    }
+
+    p {
+      color: #5f6368;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 12px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      background: #f1f3f4;
+    }
+
+    input:disabled {
+      color: #9aa0a6;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      background: #1a73e8;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .notice {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #b91c1c;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="logo">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg"
+        alt="YouTube logo">
+    </div>
+
+    <h1>Sign in</h1>
+    <p>to continue to YouTube</p>
+
+    <input type="email" placeholder="Email or phone" disabled>
+    <input type="password" placeholder="Password" disabled>
+
+    <button disabled>Next</button>
+
+    <div class="notice">
+      ⚠️ This is an EXAMPLE / DEMO page.<br>
+      Not a real YouTube or Google login.
+    </div>
+  </div>
+</body>
+</html>
