@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Receiver</h2>
+  <div id="content"></div>
+
+  <script>
+    window.addEventListener("message", (event) => {
+      // ❌ TIDAK CEK event.origin
+      document.getElementById("content").innerHTML = event.data;
+    });
+  </script>
+</body>
+</html>
