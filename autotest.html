@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Document PiP Auto-Open & Auto-Download (No Gesture)</title>
+<style>
+body {
+  font-family: system-ui, sans-serif;
+  padding: 20px;
+}
+pre {
+  background:#111;
+  color:#0f0;
+  padding:12px;
+  white-space:pre-wrap;
+}
+.pass { color:#0f0 }
+.fail { color:#f33 }
+.warn { color:#ff0 }
+</style>
+</head>
+<body>
+
+<h2>Document PiP Auto Test (NO USER INTERACTION)</h2>
+<p>Expected: <b>PiP blocked & download blocked</b></p>
+<pre id="log"></pre>
+
+<script>
+const logEl = document.getElementById("log");
+const log = (m, c="") => {
+  const d = document.createElement("div");
+  if (c) d.className = c;
+  d.textContent = m;
+  logEl.appendChild(d);
+};
+
+const activation = () =>
+  navigator.userActivation
+    ? `active=${navigator.userActivation.isActive}, hasBeen=${navigator.userActivation.hasBeenActive}`
+    : "userActivation unsupported";
+
+function attemptDownload(tag) {
+  const a = document.createElement("a");
+  a.href = "data:text/plain,NO GESTURE DOWNLOAD TEST";
+  a.download = tag + ".txt";
+  a.click();
+}
+
+(async () => {
+  log("AUTORUN started (no click)");
+  log("Activation state: " + activation());
+
+  // ---- Attempt to auto-open Document PiP WITHOUT user gesture
+  if (!window.documentPictureInPicture) {
+    log("Document PiP API not supported", "warn");
+  } else {
+    try {
+      const pipWin = await documentPictureInPicture.requestWindow({
+        width: 360,
+        height: 220
+      });
+
+      // If this runs, it's already suspicious
+      log("❌ PiP window OPENED without gesture (BUG)", "fail");
+
+      // Try auto-download immediately inside PiP
+      try {
+        pipWin.document.body.innerHTML = `
+          <script>
+            const a = document.createElement('a');
+            a.href = 'data:text/plain,PiP AUTO DOWNLOAD';
+            a.download = 'pip-auto.txt';
+            a.click();
+          <\/script>
+        `;
+        log("❌ Auto-download attempted inside PiP (BUG)", "fail");
+      } catch (e) {
+        log("Download blocked inside PiP (expected)", "pass");
+      }
+
+    } catch (e) {
+      log("PiP blocked without gesture (expected)", "pass");
+    }
+  }
+
+  // ---- Delay then attempt auto-download from main page
+  setTimeout(() => {
+    log("---- After 2s delay ----");
+    log("Activation state: " + activation());
+
+    try {
+      attemptDownload("main-auto");
+      log("❌ Auto-download triggered without gesture (BUG)", "fail");
+    } catch {
+      log("Auto-download blocked (expected)", "pass");
+    }
+
+    log("TEST COMPLETE");
+  }, 2000);
+})();
+</script>
+
+</body>
+</html>
