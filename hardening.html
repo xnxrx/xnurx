@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Mega Browser Hardening Tester – Advanced</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta http-equiv="Content-Security-Policy"
+content="
+default-src 'self';
+script-src 'self';
+object-src 'none';
+base-uri 'none';
+frame-ancestors 'none';
+">
+
+<style>
+body { background:#020617; color:#e5e7eb; font-family:system-ui; padding:20px }
+h1,h2 { color:#38bdf8 }
+.card { background:#020617; border:1px solid #1e293b; padding:16px; margin-bottom:16px; border-radius:8px }
+.ok { color:#22c55e }
+.warn { color:#facc15 }
+.bad { color:#ef4444 }
+.score { font-size:24px; font-weight:bold }
+</style>
+</head>
+
+<body>
+<h1>🛡️ Mega Browser Hardening Tester (Advanced)</h1>
+<p>Mode: Passive | Read-only | Anti-Exploit</p>
+
+<div id="out"></div>
+
+<script>
+const out = document.getElementById("out");
+let score = 100;
+let findings = [];
+
+function notify(msg, level="warn") {
+  alert(`⚠️ ${msg}`);
+  findings.push({msg, level});
+}
+
+function card(title, html) {
+  const d = document.createElement("div");
+  d.className = "card";
+  d.innerHTML = `<h2>${title}</h2>${html}`;
+  out.appendChild(d);
+}
+
+function bool(v){ return v ? `<span class="ok">OK</span>` : `<span class="bad">FAIL</span>` }
+
+/* =========================
+   1️⃣ Secure Context
+========================= */
+if (!window.isSecureContext) {
+  score -= 20;
+  notify("NOT Secure Context (HTTPS tidak aktif)", "bad");
+}
+card("1️⃣ Secure Context", `
+<ul>
+<li>HTTPS Secure Context: ${bool(window.isSecureContext)}</li>
+</ul>
+`);
+
+/* =========================
+   2️⃣ Trusted Types
+========================= */
+let ttSupported = !!window.trustedTypes;
+if (!ttSupported) {
+  score -= 10;
+  notify("Trusted Types TIDAK tersedia (DOM XSS defense lemah)");
+}
+card("2️⃣ Trusted Types", `
+<ul>
+<li>Trusted Types API: ${bool(ttSupported)}</li>
+</ul>
+`);
+
+/* =========================
+   3️⃣ COOP / COEP / Isolation
+========================= */
+if (!window.crossOriginIsolated) {
+  score -= 15;
+  notify("Cross-Origin Isolation TIDAK aktif (SAB & Spectre defense lemah)");
+}
+card("3️⃣ Cross-Origin Isolation", `
+<ul>
+<li>crossOriginIsolated: ${bool(window.crossOriginIsolated)}</li>
+<li>window.opener null: ${bool(window.opener === null)}</li>
+</ul>
+`);
+
+/* =========================
+   4️⃣ Dangerous API Surface
+========================= */
+const riskyAPIs = {
+  SharedArrayBuffer: !!window.SharedArrayBuffer,
+  WebAssembly: !!window.WebAssembly,
+  Bluetooth: !!navigator.bluetooth,
+  USB: !!navigator.usb,
+  HID: !!navigator.hid
+};
+
+let apiHtml = "<ul>";
+for (const k in riskyAPIs) {
+  if (riskyAPIs[k]) {
+    score -= 3;
+    notify(`High-risk API exposed: ${k}`, "warn");
+  }
+  apiHtml += `<li>${k}: ${bool(!riskyAPIs[k])}</li>`;
+}
+apiHtml += "</ul>";
+card("4️⃣ High-Risk API Exposure", apiHtml);
+
+/* =========================
+   5️⃣ Extension Impact Detector
+========================= */
+/* Heuristik: extension sering override API native */
+function isNative(fn) {
+  return /\[native code\]/.test(Function.prototype.toString.call(fn));
+}
+
+let extensionSignals = [];
+
+if (!isNative(window.fetch)) extensionSignals.push("fetch()");
+if (!isNative(Element.prototype.appendChild)) extensionSignals.push("DOM mutation");
+if (!isNative(console.log)) extensionSignals.push("console");
+
+if (extensionSignals.length > 0) {
+  score -= 10;
+  notify("Kemungkinan EXTENSION memodifikasi environment: " + extensionSignals.join(", "));
+}
+
+card("5️⃣ Extension Impact Detector", `
+<ul>
+<li>Environment Modified: ${extensionSignals.length ? `<span class="bad">YES</span>` : `<span class="ok">NO</span>`}</li>
+<li>Signals: <code>${extensionSignals.join(", ") || "none"}</code></li>
+</ul>
+`);
+
+/* =========================
+   6️⃣ Permission Auto-Granted
+========================= */
+(async ()=>{
+  if (!navigator.permissions) return;
+
+  const perms = ["camera","microphone","geolocation","notifications"];
+  let html = "<ul>";
+  for (const p of perms) {
+    try {
+      const r = await navigator.permissions.query({name:p});
+      if (r.state === "granted") {
+        score -= 5;
+        notify(`Permission AUTO-GRANTED: ${p}`, "warn");
+      }
+      html += `<li>${p}: <code>${r.state}</code></li>`;
+    } catch {
+      html += `<li>${p}: n/a</li>`;
+    }
+  }
+  html += "</ul>";
+  card("6️⃣ Permission State", html);
+})();
+
+/* =========================
+   7️⃣ Storage Surface
+========================= */
+if (localStorage.length > 0) {
+  score -= 5;
+  notify("localStorage berisi data (cek sensitivitas)");
+}
+card("7️⃣ Storage Surface", `
+<ul>
+<li>localStorage present: ${bool(!!window.localStorage)}</li>
+<li>sessionStorage present: ${bool(!!window.sessionStorage)}</li>
+<li>indexedDB present: ${bool(!!window.indexedDB)}</li>
+</ul>
+`);
+
+/* =========================
+   8️⃣ Final Score
+========================= */
+setTimeout(()=>{
+  let level =
+    score >= 85 ? "🟢 STRONG" :
+    score >= 65 ? "🟡 MEDIUM" :
+    "🔴 WEAK";
+
+  card("📊 Hardening Score", `
+<p class="score">${score} / 100</p>
+<p>Status: <b>${level}</b></p>
+<p>Findings: ${findings.length}</p>
+`);
+}, 500);
+
+</script>
+</body>
+</html>
