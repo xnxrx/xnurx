@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universal Payload Escaper</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center">
+
+  <div class="w-full max-w-5xl p-6">
+    <h1 class="text-3xl font-bold mb-2">Universal Payload Escaper</h1>
+    <p class="text-slate-400 mb-6">
+      Multi-context encoder untuk JSON, HTML, JavaScript, dan SQL (testing & security research).
+    </p>
+
+    <div class="mb-4">
+      <label class="block mb-2 text-sm">Context Target</label>
+      <select id="mode" class="w-full p-2 rounded-xl bg-slate-900 border border-slate-700">
+        <option value="json">JSON Body</option>
+        <option value="html">HTML</option>
+        <option value="js">JavaScript String</option>
+        <option value="sql">SQL / NoSQL</option>
+      </select>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block mb-2 text-sm">Input Payload</label>
+        <textarea id="input" class="w-full h-48 p-3 rounded-xl bg-slate-900 border border-slate-700"></textarea>
+      </div>
+
+      <div>
+        <label class="block mb-2 text-sm">Escaped Output</label>
+        <textarea id="output" readonly class="w-full h-48 p-3 rounded-xl bg-slate-900 border border-slate-700"></textarea>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3 mt-4">
+      <button onclick="process()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500">Process</button>
+      <button onclick="copyOutput()" class="px-5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600">Copy</button>
+      <button onclick="clearAll()" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500">Clear</button>
+    </div>
+
+    <div class="mt-8 bg-slate-900 border border-slate-800 rounded-xl p-4 text-sm text-slate-300">
+      <p class="font-semibold mb-2">Security Notes</p>
+      <ul class="list-disc ml-5 space-y-1 text-slate-400">
+        <li>JSON: aman untuk transport & parsing</li>
+        <li>HTML: cegah render & XSS</li>
+        <li>JS: cegah string breakout</li>
+        <li>SQL: hanya untuk testing, bukan proteksi final</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function escapeJSON(v) {
+      return JSON.stringify(v).slice(1, -1);
+    }
+
+    function escapeHTML(v) {
+      return v.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    function escapeJS(v) {
+      return v
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r');
+    }
+
+    function escapeSQL(v) {
+      return v.replace(/'/g, "''");
+    }
+
+    function process() {
+      const input = document.getElementById('input').value;
+      const mode = document.getElementById('mode').value;
+      let out = '';
+
+      if (mode === 'json') out = escapeJSON(input);
+      if (mode === 'html') out = escapeHTML(input);
+      if (mode === 'js') out = escapeJS(input);
+      if (mode === 'sql') out = escapeSQL(input);
+
+      document.getElementById('output').value = out;
+    }
+
+    function copyOutput() {
+      const o = document.getElementById('output');
+      o.select();
+      document.execCommand('copy');
+    }
+
+    function clearAll() {
+      document.getElementById('input').value = '';
+      document.getElementById('output').value = '';
+    }
+  </script>
+
+</body>
+</html>
