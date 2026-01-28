@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Undangan Pernikahan | Sofi & Nur</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --dark: #0f172a;
+  --light: #f8fafc;
+  --accent: #e5b8c6;
+  --gold: #d4af37;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: linear-gradient(160deg, #0f172a, #1e293b);
+  color: var(--light);
+  overflow-x: hidden;
+}
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.hero-box {
+  max-width: 700px;
+  animation: fadeUp 1.8s ease;
+}
+
+.hero span {
+  letter-spacing: 4px;
+  font-size: .9rem;
+  opacity: .8;
+}
+
+.hero h1 {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 3.5rem;
+  margin: 20px 0;
+  color: var(--accent);
+}
+
+.hero p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  opacity: .9;
+}
+
+/* SECTION */
+section {
+  padding: 90px 20px;
+  background: var(--light);
+  color: var(--dark);
+  text-align: center;
+}
+
+.card {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  padding: 50px;
+  border-radius: 30px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.15);
+}
+
+h2 {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 2.4rem;
+  color: var(--gold);
+  margin-bottom: 25px;
+}
+
+.quote {
+  font-style: italic;
+  font-size: 1.1rem;
+  line-height: 2;
+  margin-bottom: 30px;
+}
+
+/* DATE */
+.date {
+  font-size: 1.1rem;
+  line-height: 2;
+}
+
+/* FOOTER */
+footer {
+  padding: 60px 20px;
+  text-align: center;
+  font-size: .9rem;
+  background: linear-gradient(160deg, #020617, #0f172a);
+}
+
+/* ANIMATION */
+@keyframes fadeUp {
+  from {opacity: 0; transform: translateY(40px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-box">
+    <span>WEDDING INVITATION</span>
+    <h1>Sofi & Nur</h1>
+    <p>
+      “Bukan karena bertemu lalu berjodoh,<br>
+      tetapi karena berjodohlah kami dipertemukan.”
+    </p>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<section>
+  <div class="card">
+    <h2>Dengan Cinta</h2>
+    <p class="quote">
+      Dalam setiap doa yang terucap, nama kita selalu berdampingan.<br>
+      Dalam setiap langkah ke depan, kami memilih untuk berjalan bersama.<br><br>
+      Dengan penuh rasa syukur, kami mengundang Anda<br>
+      menjadi saksi janji suci yang akan kami ikrarkan.
+    </p>
+
+    <div class="date">
+      <strong>Sabtu, 20 Juli 2026</strong><br>
+      Pukul 10.00 WIB<br>
+      Ballroom Harmoni, Jakarta
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    Atas doa dan restu Anda,<br>
+    kami ucapkan terima kasih
+  </p>
+  <br>
+  <strong>Sofi & Nur</strong>
+</footer>
+
+</body>
+</html>
