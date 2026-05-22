@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Unicode Browser UI Generator</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI;
+}
+
+body{
+    background:#111;
+    color:white;
+    height:100vh;
+    overflow:hidden;
+}
+
+.toolbar{
+    display:flex;
+    gap:10px;
+    padding:10px;
+    background:#1a1a1a;
+    border-bottom:1px solid #333;
+}
+
+.address{
+    flex:1;
+    background:#222;
+    border:none;
+    padding:12px;
+    color:#0f0;
+    border-radius:12px;
+    outline:none;
+    font-size:15px;
+}
+
+button{
+    background:#333;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#555;
+}
+
+.container{
+    display:flex;
+    width:100%;
+    height:calc(100vh - 60px);
+}
+
+.panel{
+    flex:1;
+    border-right:1px solid #222;
+    position:relative;
+}
+
+iframe{
+    width:100%;
+    height:100%;
+    border:none;
+    background:white;
+}
+
+.preview{
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    background:#000d;
+    color:#0f0;
+    padding:8px;
+    border-radius:10px;
+    font-size:12px;
+    backdrop-filter:blur(10px);
+}
+</style>
+</head>
+
+<body>
+
+<div class="toolbar">
+    <input 
+        id="urlInput" 
+        class="address"
+        value="https://example.com/こんにちは/🔥/🚀"
+    >
+
+    <button onclick="loadSite()">OPEN</button>
+
+    <button onclick="googleSearch()">GOOGLE</button>
+
+    <button onclick="splitToggle()">SPLIT</button>
+</div>
+
+<div class="container">
+
+    <div class="panel">
+        <iframe id="frame1"></iframe>
+        <div class="preview" id="preview1">
+            Preview Panel A
+        </div>
+    </div>
+
+    <div class="panel" id="panel2">
+        <iframe id="frame2"></iframe>
+        <div class="preview" id="preview2">
+            Preview Panel B
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+let split=true;
+
+function normalizeURL(url){
+
+    if(!url.startsWith("http")){
+        return "https://" + url;
+    }
+
+    return url;
+}
+
+function loadSite(){
+
+    let url=document.getElementById("urlInput").value;
+
+    url=normalizeURL(url);
+
+    document.getElementById("frame1").src=url;
+
+    if(split){
+        document.getElementById("frame2").src=url;
+    }
+
+    document.getElementById("preview1").innerHTML=
+        "Loaded:<br>"+url;
+
+    document.getElementById("preview2").innerHTML=
+        "Mirror:<br>"+url;
+}
+
+function googleSearch(){
+
+    let q=document.getElementById("urlInput").value;
+
+    let search=
+        "https://www.google.com/search?q="
+        +encodeURIComponent(q);
+
+    document.getElementById("frame1").src=search;
+
+    if(split){
+        document.getElementById("frame2").src=search;
+    }
+}
+
+function splitToggle(){
+
+    split=!split;
+
+    let panel2=document.getElementById("panel2");
+
+    panel2.style.display=
+        split ? "block":"none";
+}
+
+document.addEventListener("keydown",(e)=>{
+
+    if(e.key==="Enter"){
+        loadSite();
+    }
+
+});
+
+</script>
+
+</body>
+</html>
