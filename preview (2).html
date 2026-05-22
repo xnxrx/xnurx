@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Auto Translate Delay Browser Test</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI;
+}
+
+body{
+    background:#0f1117;
+    overflow:hidden;
+    color:white;
+}
+
+.topbar{
+    height:60px;
+    background:#161b22;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px;
+    border-bottom:1px solid #333;
+}
+
+#url{
+    flex:1;
+    padding:12px;
+    background:#222;
+    border:none;
+    border-radius:12px;
+    color:#00ff88;
+    font-size:15px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:10px;
+    background:#333;
+    color:white;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#555;
+}
+
+.browser{
+    display:flex;
+    height:calc(100vh - 60px);
+}
+
+.panel{
+    flex:1;
+    position:relative;
+}
+
+iframe{
+    width:100%;
+    height:100%;
+    border:none;
+    background:white;
+}
+
+.popup{
+    position:absolute;
+    width:340px;
+    height:240px;
+    top:20px;
+    right:20px;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid #00ff88;
+    background:#000c;
+    display:none;
+    z-index:999;
+    backdrop-filter:blur(12px);
+}
+
+.status{
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    background:#000c;
+    padding:8px 12px;
+    border-radius:10px;
+    color:#0f0;
+    font-size:13px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+
+<input
+id="url"
+value="google.com"
+>
+
+<button onclick="startAutoTranslate()">
+AUTO START
+</button>
+
+</div>
+
+<div class="browser">
+
+<div class="panel">
+
+<iframe id="mainFrame"></iframe>
+
+<div class="popup" id="popup">
+
+<iframe id="translateFrame"></iframe>
+
+</div>
+
+<div class="status" id="status">
+Ready...
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function normalizeURL(url){
+
+    if(!url.startsWith("http")){
+        return "https://" + url;
+    }
+
+    return url;
+}
+
+function startAutoTranslate(){
+
+    let input=document.getElementById("url").value;
+
+    let url=normalizeURL(input);
+
+    let status=document.getElementById("status");
+
+    status.innerHTML=
+    "Opening main page...";
+
+    // buka halaman utama dulu
+    document.getElementById("mainFrame").src=url;
+
+    // delay 5 detik baru translate popup
+    setTimeout(()=>{
+
+        status.innerHTML=
+        "Opening translate popup...";
+
+        let translateURL=
+        "https://translate.google.com/?sl=auto&tl=id&text="
+        +encodeURIComponent(url)
+        +"&op=translate";
+
+        document.getElementById("popup").style.display="block";
+
+        document.getElementById("translateFrame").src=
+        translateURL;
+
+    },5000);
+
+}
+
+</script>
+
+</body>
+</html>
