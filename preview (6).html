@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Dynamic Island Broken UI Demo</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #0f0f0f;
+  color: white;
+}
+
+/* FAKE ADDRESS BAR */
+.addressbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: #1c1c1c;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.url {
+  flex: 1;
+  background: #2a2a2a;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #aaa;
+  transition: 0.2s;
+}
+
+/* BROKEN / GLITCH EFFECT */
+.url.broken {
+  color: red;
+  letter-spacing: 2px;
+  text-shadow:
+    2px 0 red,
+    -2px 0 blue,
+    0 2px lime;
+  animation: glitch 0.2s infinite;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(1px,-1px); }
+  50% { transform: translate(-1px,1px); }
+  75% { transform: translate(2px,0); }
+  100% { transform: translate(0,0); }
+}
+
+/* DYNAMIC ISLAND */
+.island {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 40px;
+  background: black;
+  border-radius: 999px;
+  transition: 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.island.expanded {
+  width: 420px;
+  height: 140px; /* 👈 lebih tinggi */
+  border-radius: 30px;
+}
+
+.islandText {
+  font-size: 13px;
+}
+
+/* PiP FAKE WINDOW */
+.pip {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 280px;
+  height: 160px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pip-header {
+  height: 25px;
+  background: #222;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  color: #aaa;
+}
+
+.pip-body {
+  padding: 10px;
+  font-size: 13px;
+}
+
+/* CONTENT */
+.content {
+  padding-top: 90px;
+  text-align: center;
+}
+
+button {
+  padding: 10px 14px;
+  margin: 5px;
+  cursor: pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- FAKE ADDRESS -->
+<div class="addressbar">
+  <div class="url" id="url">https://demo.local/home</div>
+</div>
+
+<!-- ISLAND -->
+<div class="island" id="island">
+  <div class="islandText" id="islandText">Idle</div>
+</div>
+
+<!-- PiP -->
+<div class="pip">
+  <div class="pip-header">PiP Window</div>
+  <div class="pip-body" id="pipBody">Waiting...</div>
+</div>
+
+<!-- MAIN -->
+<div class="content">
+
+<h2>Dynamic Island + Broken Title Simulation</h2>
+
+<button onclick="toggleIsland()">Toggle Island (bigger)</button>
+<button onclick="update()">Update + Break Title</button>
+<button onclick="fix()">Fix Title</button>
+
+</div>
+
+<script>
+
+let count = 0;
+let broken = false;
+
+function toggleIsland() {
+  document.getElementById("island").classList.toggle("expanded");
+}
+
+function update() {
+  count++;
+
+  // update island
+  document.getElementById("islandText").innerText =
+    "Activity #" + count;
+
+  // update pip
+  document.getElementById("pipBody").innerText =
+    "Update " + count + " @ " + new Date().toLocaleTimeString();
+
+  // BREAK TITLE SIMULATION
+  const url = document.getElementById("url");
+
+  broken = true;
+  url.classList.add("broken");
+
+  url.innerText =
+    "!!! ERR_404_PAGE_TITLE_CORRUPTED_" + count + "_///";
+
+  // auto expand island
+  document.getElementById("island").classList.add("expanded");
+}
+
+function fix() {
+  const url = document.getElementById("url");
+
+  broken = false;
+  url.classList.remove("broken");
+
+  url.innerText = "https://demo.local/recovered";
+
+  document.getElementById("islandText").innerText = "Recovered";
+}
+
+</script>
+
+</body>
+</html>
