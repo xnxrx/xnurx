@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Browser Security Test Suite UI</title>
+
+<style>
+body {
+  font-family: monospace;
+  background: #0b0f14;
+  color: #d0d0d0;
+  padding: 20px;
+}
+
+h1 { color: #00ff99; }
+
+button {
+  padding: 8px 12px;
+  margin: 5px;
+  background: #1c2a38;
+  color: #fff;
+  border: 1px solid #333;
+  cursor: pointer;
+}
+
+button:hover { background:#26394d; }
+
+#grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.card {
+  background: #111823;
+  border: 1px solid #222;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.pass { color: #00ff99; }
+.fail { color: #ff4d4d; }
+.warn { color: #ffcc00; }
+
+iframe {
+  width: 100%;
+  height: 140px;
+  border: 1px solid #333;
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🧪 Browser Security Test Suite (UI Dashboard)</h1>
+
+<button onclick="runAll()">▶ Run All Tests</button>
+<button onclick="clearUI()">🧹 Clear</button>
+
+<div id="grid">
+
+  <div class="card" id="t1">
+    <h3>1. Origin Isolation</h3>
+    <div class="result">NOT RUN</div>
+  </div>
+
+  <div class="card" id="t2">
+    <h3>2. Opener Leak</h3>
+    <div class="result">NOT RUN</div>
+  </div>
+
+  <div class="card" id="t3">
+    <h3>3. iframe Sandbox</h3>
+    <div class="result">NOT RUN</div>
+    <iframe id="frame"></iframe>
+  </div>
+
+  <div class="card" id="t4">
+    <h3>4. Navigation Schemes</h3>
+    <div class="result">NOT RUN</div>
+  </div>
+
+  <div class="card" id="t5">
+    <h3>5. postMessage Boundary</h3>
+    <div class="result">NOT RUN</div>
+    <iframe id="frame2"></iframe>
+  </div>
+
+</div>
+
+<script>
+
+function set(id, status, msg) {
+  const el = document.querySelector("#" + id + " .result");
+  el.innerHTML = `<span class="${status}">${status.toUpperCase()}</span><br>${msg}`;
+}
+
+function clearUI() {
+  document.querySelectorAll(".result").forEach(r => r.innerHTML = "NOT RUN");
+}
+
+/* ---------------- 1 ---------------- */
+function test1() {
+  try {
+    let msg = "origin: " + location.origin;
+
+    try {
+      window.top.location.href;
+      msg += "<br>⚠ top accessible";
+      set("t1", "fail", msg);
+    } catch (e) {
+      msg += "<br>top blocked";
+      set("t1", "pass", msg);
+    }
+
+  } catch (e) {
+    set("t1", "fail", e.message);
+  }
+}
+
+/* ---------------- 2 ---------------- */
+function test2() {
+  let msg = "";
+
+  if (window.opener) {
+    msg = "⚠ opener exists";
+    set("t2", "warn", msg);
+  } else {
+    msg = "no opener";
+    set("t2", "pass", msg);
+  }
+}
+
+/* ---------------- 3 ---------------- */
+function test3() {
+  const f = document.getElementById("frame");
+
+  f.srcdoc = `
+    <html><body>
+    <script>
+      try {
+        parent.location.href;
+        document.body.innerText = "parent accessible (BAD)";
+      } catch(e) {
+        document.body.innerText = "sandbox OK";
+      }
+    <\/script>
+    </body></html>
+  `;
+
+  setTimeout(() => {
+    try {
+      f.contentWindow.location.href;
+      set("t3", "fail", "iframe not isolated");
+    } catch (e) {
+      set("t3", "pass", "iframe isolated");
+    }
+  }, 800);
+}
+
+/* ---------------- 4 ---------------- */
+function test4() {
+  const tests = [
+    "https://example.com",
+    "data:text/html,<h1>ok</h1>",
+    "blob:https://example.com/test"
+  ];
+
+  let msg = "";
+
+  try {
+    location.href = tests[0];
+    msg += "https OK<br>";
+  } catch(e) {
+    msg += "blocked https<br>";
+  }
+
+  try {
+    location.href = tests[1];
+    msg += "data tested<br>";
+  } catch(e) {
+    msg += "data blocked<br>";
+  }
+
+  try {
+    location.href = tests[2];
+    msg += "blob tested";
+  } catch(e) {
+    msg += "blob blocked";
+  }
+
+  set("t4", "pass", msg);
+}
+
+/* ---------------- 5 ---------------- */
+function test5() {
+  const f = document.getElementById("frame2");
+
+  f.srcdoc = `
+    <html><body>
+    <script>
+      window.addEventListener("message", e => {
+        document.body.innerText =
+          "msg: " + JSON.stringify(e.data) +
+          "\\norigin: " + e.origin;
+      });
+    <\/script>
+    READY
+    </body></html>
+  `;
+
+  setTimeout(() => {
+    f.contentWindow.postMessage({test:"hello"}, "*");
+    set("t5", "pass", "message sent (check iframe)");
+  }, 500);
+}
+
+/* ---------------- RUN ALL ---------------- */
+function runAll() {
+  test1();
+  test2();
+  test3();
+  test4();
+  test5();
+}
+
+</script>
+
+</body>
+</html>
