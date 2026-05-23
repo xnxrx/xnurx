@@ -1,0 +1,11 @@
+<button onclick="go()">Open</button>
+
+<script>
+function go() {
+  document.documentElement.requestFullscreen();
+
+  setTimeout(() => {
+    location.href = "https://example.com";
+  }, 50);
+}
+</script>

