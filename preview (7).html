@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Delay Email & Google</title>
+</head>
+<body>
+
+<button onclick="jalankanAksi()">Jalankan</button>
+
+<script>
+function jalankanAksi() {
+  // delay 3 detik (3000 ms)
+  setTimeout(function () {
+    
+    // 1. buka email (mailto)
+    window.location.href = "mailto:test@email.com?subject=Halo&body=Isi pesan";
+
+    // 2. buka google di tab baru
+    window.open("https://www.google.com", "_blank");
+
+  }, 3000);
+}
+</script>
+
+</body>
+</html>
