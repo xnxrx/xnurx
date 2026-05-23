@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>PiP Black Screen Test</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 12px;
+    }
+
+    button {
+      padding: 10px 14px;
+      margin: 6px 0;
+      cursor: pointer;
+    }
+
+    #log {
+      margin-top: 10px;
+      background: #f4f4f4;
+      padding: 10px;
+      white-space: pre-wrap;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Document PiP - Black Screen Test</h2>
+
+<p>Origin: <span id="origin"></span></p>
+
+<button id="open">Open PiP (Black Screen)</button>
+<button id="fill">Toggle Text (Test Render)</button>
+<button id="close">Close PiP</button>
+
+<div id="log"></div>
+
+<script>
+let pipWindow = null;
+let showText = false;
+
+document.getElementById("origin").innerText = window.origin;
+
+function log(msg) {
+  document.getElementById("log").innerText += msg + "\n";
+}
+
+async function openPip() {
+  if (!documentPictureInPicture) {
+    log("❌ Document PiP not supported");
+    return;
+  }
+
+  pipWindow = await documentPictureInPicture.requestWindow();
+
+  pipWindow.resizeTo(500, 350);
+  pipWindow.moveTo(150, 150);
+
+  // FULL BLACK SCREEN BASE
+  pipWindow.document.body.innerHTML = `
+    <style>
+      html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: black;
+        overflow: hidden;
+      }
+
+      #content {
+        color: white;
+        font-family: sans-serif;
+        padding: 10px;
+        font-size: 14px;
+        display: none;
+      }
+    </style>
+
+    <div id="content">
+      PiP Test Content
+    </div>
+  `;
+
+  log("✅ PiP opened (black screen mode)");
+}
+
+function toggleContent() {
+  if (!pipWindow) {
+    log("⚠️ PiP not open");
+    return;
+  }
+
+  showText = !showText;
+
+  const el = pipWindow.document.getElementById("content");
+
+  if (showText) {
+    el.style.display = "block";
+    el.innerText = "Rendered at: " + new Date().toLocaleTimeString();
+    log("👁️ Content shown");
+  } else {
+    el.style.display = "none";
+    log("⬛ Content hidden (black screen)");
+  }
+}
+
+function closePip() {
+  if (pipWindow) {
+    pipWindow.close();
+    pipWindow = null;
+    log("❎ PiP closed");
+  }
+}
+
+document.getElementById("open").addEventListener("click", openPip);
+document.getElementById("fill").addEventListener("click", toggleContent);
+document.getElementById("close").addEventListener("click", closePip);
+</script>
+
+</body>
+</html>
