@@ -1,118 +1,109 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-  <title>Absurd Launcher</title>
-  <style>
-    body {
-      font-family: monospace;
-      background: black;
-      color: lime;
-      padding: 20px;
-    }
-    button {
-      padding: 10px;
-      margin: 5px;
-      cursor: pointer;
-    }
-  </style>
-</head>
 <body>
 
-<h2>⚡ ABSURD WINDOW SYSTEM ⚡</h2>
+<h1>Absurd Window Experiment</h1>
 
-<button onclick="launchA()">Open Portal A</button>
-<button onclick="launchB()">Open Portal B</button>
-<button onclick="launchC()">Chaos Window</button>
+<p>Click to open a “quantum window”.</p>
+
+<button onclick="openChaos()">OPEN VOID WINDOW</button>
 
 <script>
-function fakeAddress() {
-  const junk = [
-    "nxr://quantum-core/index",
-    "memory://overflow/0xAFAFAF",
-    "void://undefined/null",
-    "web+absurd://portal/∆∆∆",
-    "system://dream/state/active"
-  ];
-  return junk[Math.floor(Math.random() * junk.length)];
+function openChaos() {
+    var x = window.open("", "_blank", "width=420,height=320");
+
+    if (!x) {
+        alert("Popup blocked");
+        return;
+    }
+
+    // stage 1: blank loading
+    x.document.write(`
+        <title>LOADING...</title>
+        <body style="background:black;color:lime;font-family:monospace;">
+        <h3>Initializing portal...</h3>
+        </body>
+    `);
+    x.document.close();
+
+    // stage 2: overwrite after delay
+    setTimeout(() => {
+        x.document.open();
+        x.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+<title>VOID://SYSTEM_ACTIVE</title>
+<style>
+body {
+    margin: 0;
+    background: radial-gradient(circle, #111, #000);
+    color: #00ff99;
+    font-family: monospace;
+    overflow: hidden;
 }
 
-function baseContent(title) {
-  return `
-    <html>
-    <head>
-      <title>${title}</title>
-      <style>
-        body {
-          background: #0d0d0d;
-          color: #00ff88;
-          font-family: monospace;
-          padding: 20px;
-        }
-        .bar {
-          background: #111;
-          padding: 10px;
-          border: 1px solid #00ff88;
-          margin-bottom: 20px;
-        }
-        .glitch {
-          animation: flicker 0.2s infinite;
-        }
-        @keyframes flicker {
-          0% {opacity: 1;}
-          50% {opacity: 0.6;}
-          100% {opacity: 1;}
-        }
-      </style>
-    </head>
-    <body>
-
-      <div class="bar">
-        🔗 ADDRESS: ${fakeAddress()}
-      </div>
-
-      <h1 class="glitch">${title}</h1>
-
-      <p>Konten ini sebenarnya berasal dari web kamu, tapi dibungkus dalam "dimensi browser absurd".</p>
-
-      <button onclick="window.close()">Close Reality</button>
-
-      <script>
-        console.log("window initialized:", document.title);
-        setInterval(() => {
-          document.title = "⚡ " + Math.random().toString(36).substring(2,8);
-        }, 800);
-      <\/script>
-
-    </body>
-    </html>
-  `;
+.panel {
+    width: 90%;
+    margin: 20px auto;
+    padding: 15px;
+    border: 1px solid #00ff99;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #00ff99;
 }
 
-function openWindow(html) {
-  const w = window.open("google.com", "_blank", "width=600,height=400");
-
-  if (!w) {
-    alert("Popup blocked!");
-    return;
-  }
-
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
+.glitch {
+    animation: flicker 0.15s infinite;
 }
 
-function launchA() {
-  openWindow(baseContent("PORTAL A - STABLE REALITY"));
+@keyframes flicker {
+    0% {opacity: 1;}
+    50% {opacity: 0.4;}
+    100% {opacity: 1;}
 }
 
-function launchB() {
-  openWindow(baseContent("PORTAL B - BROKEN TIME LOOP"));
+button {
+    padding: 10px;
+    background: black;
+    color: #00ff99;
+    border: 1px solid #00ff99;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="panel">
+    <h2 class="glitch">⚠ VOID INTERFACE ACTIVE ⚠</h2>
+    <p>System: unstable memory loop detected</p>
+    <p id="addr">address://unknown/${Math.random().toString(36).substring(2,8)}</p>
+
+    <button onclick="spawn()">Spawn new window</button>
+    <button onclick="window.close()">Terminate</button>
+</div>
+
+<script>
+function spawn() {
+    const w = window.open("", "_blank", "width=300,height=200");
+    w.document.write("<body style='background:black;color:lime;font-family:monospace;'>recursive node active...</body>");
+    w.document.close();
+
+    setTimeout(() => {
+        w.document.body.innerHTML += "<br>node stabilized: " + Math.random().toString(36);
+    }, 800);
 }
 
-function launchC() {
-  // multi-layer chaos: buka 2 window sekaligus
-  openWindow(baseContent("CHAOS NODE 1"));
-  setTimeout(() => openWindow(baseContent("CHAOS NODE 2")), 300);
+setInterval(() => {
+    document.title = "VOID " + Math.random().toString(36).substring(2,7);
+}, 600);
+<\/script>
+
+</body>
+</html>
+        `);
+        x.document.close();
+    }, 1800);
 }
 </script>
 
