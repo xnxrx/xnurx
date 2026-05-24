@@ -1,16 +1,345 @@
-<html>
-<body>
-<div id="mydiv"
-onmouseover="document.location='http://www.youtube.com/watch?v=oHg5S
-JYRHA0';"
-style="position:absolute;width:2px;height:2px;background:#FFFFFF;bor
-der:0px"></div>
+<!DOCTYPE html>
+<html lang="en">
 
-<br>
-<a href="http://www.yahoo.com" onclick="updatebox(event)"><font
-style="font-family:arial;font-
-size:32px">http://www.yahoo.com</font></a><br>
+<head>
+<meta charset="UTF-8">
+<title>VOID CHAOS ENGINE</title>
+
+<style>
+
+body{
+    margin:0;
+    background:black;
+    color:#00ff99;
+    font-family:monospace;
+    overflow:hidden;
+}
+
+.container{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+}
+
+button{
+    padding:14px 22px;
+    background:black;
+    color:#00ff99;
+    border:1px solid #00ff99;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    box-shadow:0 0 20px #00ff99;
+}
+
+.glitch{
+    animation:flicker .08s infinite;
+}
+
+@keyframes flicker{
+    0%{opacity:1}
+    50%{opacity:.3}
+    100%{opacity:1}
+}
+
+.stream{
+    position:fixed;
+    font-size:12px;
+    pointer-events:none;
+    opacity:.8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1 class="glitch">
+        ⚠ QUANTUM VOID ⚠
+    </h1>
+
+    <p>
+        unstable browser experiment
+    </p>
+
+    <button onclick="openChaos()">
+        OPEN VOID WINDOW
+    </button>
 
 </div>
+
+<script>
+
+const VOID_INTERVALS = [];
+
+function addLoop(fn, speed){
+    VOID_INTERVALS.push(
+        setInterval(fn, speed)
+    );
+}
+
+function randomString(len=8){
+    return Math.random()
+        .toString(36)
+        .substring(2,2+len);
+}
+
+function openChaos(){
+
+    const x = window.open(
+        "about:blank",
+        "_blank",
+        "width=500,height=420"
+    );
+
+    if(!x){
+        alert("Popup blocked");
+        return;
+    }
+
+    x.document.write(`
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>INITIALIZING...</title>
+
+<style>
+
+body{
+    margin:0;
+    background:
+        radial-gradient(circle,#111,#000);
+    color:#00ff99;
+    font-family:monospace;
+    overflow:hidden;
+}
+
+.panel{
+    width:90%;
+    margin:20px auto;
+    padding:15px;
+    border:1px solid #00ff99;
+    border-radius:10px;
+    box-shadow:0 0 20px #00ff99;
+}
+
+button{
+    padding:10px;
+    background:black;
+    color:#00ff99;
+    border:1px solid #00ff99;
+    cursor:pointer;
+    margin-right:10px;
+}
+
+.stream{
+    position:fixed;
+    font-size:12px;
+    pointer-events:none;
+    opacity:.7;
+}
+
+.glitch{
+    animation:flicker .08s infinite;
+}
+
+@keyframes flicker{
+    0%{opacity:1}
+    50%{opacity:.4}
+    100%{opacity:1}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="panel">
+
+<h2 class="glitch">
+⚠ VOID INTERFACE ACTIVE ⚠
+</h2>
+
+<p>
+System: unstable recursive node
+</p>
+
+<p id="addr"></p>
+
+<button onclick="spawn()">
+Spawn Node
+</button>
+
+<button onclick="window.close()">
+Terminate
+</button>
+
+</div>
+
+<script>
+
+const loops = [];
+
+function add(fn,time){
+    loops.push(setInterval(fn,time));
+}
+
+function rand(len=8){
+    return Math.random()
+        .toString(36)
+        .substring(2,2+len);
+}
+
+// address mutation
+add(()=>{
+
+    document.getElementById("addr")
+        .innerHTML =
+        "void://" + rand(12);
+
+},300);
+
+// title mutation
+add(()=>{
+
+    document.title =
+        "VOID_" + rand(6);
+
+},500);
+
+// visual corruption
+add(()=>{
+
+    document.body.style.filter =
+        \`
+        hue-rotate(\${Math.random()*360}deg)
+        blur(\${Math.random()*2}px)
+        contrast(\${1+Math.random()*4})
+        \`;
+
+},120);
+
+// floating text spam
+add(()=>{
+
+    const div =
+        document.createElement("div");
+
+    div.className = "stream";
+
+    div.innerHTML =
+        rand(20);
+
+    div.style.left =
+        Math.random()*window.innerWidth+"px";
+
+    div.style.top =
+        Math.random()*window.innerHeight+"px";
+
+    div.style.color =
+        "hsl(" +
+        Math.random()*360 +
+        ",100%,50%)";
+
+    div.style.transform =
+        "rotate(" +
+        Math.random()*360 +
+        "deg)";
+
+    document.body.appendChild(div);
+
+    if(document.body.children.length > 180){
+
+        document.body.removeChild(
+            document.body.children[3]
+        );
+
+    }
+
+},40);
+
+// console chaos
+add(()=>{
+
+    console.log(
+        "%cVOID://" + rand(12),
+
+        \`
+        color:hsl(\${Math.random()*360},100%,50%);
+        font-size:\${10+Math.random()*30}px;
+        \`
+    );
+
+},100);
+
+// recursive popup
+function spawn(){
+
+    const weirdData = btoa(
+        "<h1>VOID NODE</h1>" +
+        rand(50)
+    );
+
+    const w = window.open(
+        "data:text/html;base64," +
+        weirdData,
+
+        "_blank",
+
+        "width=320,height=220"
+    );
+
+    if(!w) return;
+
+    setTimeout(()=>{
+
+        try{
+
+            w.document.body.style.background =
+                "black";
+
+            w.document.body.style.color =
+                "lime";
+
+            w.document.body.style.fontFamily =
+                "monospace";
+
+            w.document.body.innerHTML +=
+                "<br><br>node stabilized: " +
+                rand(20);
+
+        }catch(e){}
+
+    },700);
+
+}
+
+<\/script>
+
+</body>
+
+</html>
+
+    `);
+
+    x.document.close();
+}
+
+</script>
+
 </body>
 </html>
