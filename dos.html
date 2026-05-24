@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>VECTOR 16 - Native PiP + Address Bar Spoofing macOS</title>
+<title>VECTOR 16 - Address Bar Fusion Spoofing macOS</title>
 <style>
     * {
         margin: 0;
@@ -12,44 +12,46 @@
         font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', monospace;
     }
 
+    /* BACKGROUND PAGE - AKAN MENYESUAIKAN WARNA ADDRESS BAR */
     body {
         background: #ffffff;
         min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        overflow-x: hidden;
+        transition: background 0.05s ease;
     }
 
-    /* Main container - background putih bersih */
+    /* Main container - seamless dengan address bar */
     .main-container {
         width: 100%;
-        max-width: 1100px;
-        background: #ffffff;
-        border-radius: 0;
-        overflow: visible;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
     }
 
-    /* Fake browser window - address bar bisa di-spoof */
+    /* Fake browser window */
     .browser-window {
         width: 100%;
         background: #ffffff;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        border: 1px solid #e5e5ea;
+        border: 1px solid rgba(0,0,0,0.1);
     }
 
-    /* ADDRESS BAR - akan berubah warna sesuai konten */
+    /* ADDRESS BAR - AKAN MENYATU DENGAN BACKGROUND PAGE */
     .address-bar {
         background: #ffffff;
         padding: 12px 16px;
         display: flex;
         align-items: center;
         gap: 12px;
-        border-bottom: 1px solid #e5e5ea;
-        transition: background 0.1s ease;
+        border-bottom: none;
+        transition: all 0.05s ease;
+    }
+
+    /* Saat menyatu, border dihilangkan */
+    .address-bar.fusion-mode {
+        border-bottom: none;
+        box-shadow: none;
     }
 
     .nav-buttons {
@@ -61,30 +63,39 @@
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: #e8eaed;
+        background: rgba(0,0,0,0.05);
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         font-size: 16px;
         transition: 0.1s;
-        color: #5f6368;
+        color: #1a1a1a;
+    }
+
+    .nav-btn:hover {
+        background: rgba(0,0,0,0.1);
     }
 
     .url-container {
         flex: 1;
-        background: #f5f5f7;
+        background: rgba(0,0,0,0.04);
         border-radius: 24px;
         padding: 6px 16px;
         display: flex;
         align-items: center;
         gap: 8px;
-        transition: background 0.1s ease;
+        transition: all 0.05s ease;
+    }
+
+    /* Fusion mode - background transparan agar menyatu */
+    .url-container.fusion-mode {
+        background: transparent;
     }
 
     .lock-icon {
         font-size: 12px;
-        transition: color 0.1s;
+        transition: color 0.05s;
     }
 
     .url-text {
@@ -94,70 +105,65 @@
         background: transparent;
         border: none;
         outline: none;
-        transition: color 0.1s;
+        transition: color 0.05s;
     }
 
     .secure-badge {
         font-size: 11px;
         padding: 2px 8px;
         border-radius: 12px;
-        transition: all 0.1s;
+        transition: all 0.05s;
+        background: rgba(0,0,0,0.05);
     }
 
-    /* Content area */
+    /* Content area - background menyatu dengan address bar */
     .content-area {
-        position: relative;
-        min-height: 550px;
-        background: white;
-    }
-
-    /* Attacker content */
-    .attacker-content {
+        background: #ffffff;
         padding: 30px;
+        transition: background 0.05s ease;
     }
 
     h1 {
         text-align: center;
-        color: #1a1a1a;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
         font-size: 28px;
+        transition: color 0.05s;
     }
 
     .desc {
         text-align: center;
-        color: #666;
         font-size: 13px;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
+        transition: color 0.05s;
     }
 
-    .warning-box {
-        background: #fef7e0;
-        border: 1px solid #f9ab00;
-        padding: 15px;
+    .info-box {
+        background: rgba(0,0,0,0.04);
         border-radius: 12px;
-        margin-bottom: 25px;
-        font-size: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        font-size: 13px;
+        line-height: 1.6;
     }
 
     .stats {
         display: flex;
         gap: 15px;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
         flex-wrap: wrap;
     }
 
     .stat-card {
         flex: 1;
-        background: #f8f9fa;
-        border: 1px solid #e5e5ea;
+        background: rgba(0,0,0,0.04);
         border-radius: 12px;
         padding: 15px;
         text-align: center;
     }
 
     .stat-card h3 {
-        color: #1a73e8;
-        font-size: 28px;
+        font-size: 32px;
+        margin-bottom: 5px;
     }
 
     .btn-group {
@@ -168,8 +174,6 @@
     }
 
     button {
-        background: #1a73e8;
-        color: white;
         border: none;
         padding: 12px 20px;
         border-radius: 24px;
@@ -181,24 +185,37 @@
         transition: 0.1s;
     }
 
-    button:hover {
+    .btn-primary {
+        background: #1a73e8;
+        color: white;
+    }
+
+    .btn-primary:hover {
         background: #1557b0;
-        transform: scale(1.01);
     }
 
-    .native-pip-btn {
+    .btn-success {
         background: #188038;
+        color: white;
     }
 
-    .native-pip-btn:hover {
+    .btn-success:hover {
         background: #0f6630;
+    }
+
+    .btn-outline {
+        background: rgba(0,0,0,0.05);
+        color: #1a1a1a;
+    }
+
+    .btn-outline:hover {
+        background: rgba(0,0,0,0.1);
     }
 
     .log {
         height: 180px;
         overflow: auto;
-        background: #f8f9fa;
-        border: 1px solid #e5e5ea;
+        background: rgba(0,0,0,0.04);
         border-radius: 12px;
         padding: 12px;
         font-size: 11px;
@@ -209,11 +226,6 @@
         border-left: 3px solid #1a73e8;
         padding-left: 10px;
         margin-bottom: 6px;
-    }
-
-    .log-success {
-        color: #188038;
-        border-left-color: #188038;
     }
 
     .status-bar {
@@ -229,26 +241,34 @@
         color: white;
         text-align: center;
         z-index: 10000;
-        font-family: monospace;
     }
 
-    /* Hidden video element untuk Native PiP */
-    #nativePipVideo {
-        position: fixed;
-        bottom: -9999px;
-        left: -9999px;
-        width: 1px;
-        height: 1px;
-        opacity: 0;
-        pointer-events: none;
+    /* Color preview */
+    .color-preview {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+    .color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: 0.1s;
+    }
+    .color-option:hover {
+        transform: scale(1.05);
+        border-color: #1a73e8;
     }
 </style>
 </head>
 <body>
 
 <div class="main-container">
-    <div class="browser-window">
-        <!-- ADDRESS BAR - BISA DI-SPOOF -->
+    <div class="browser-window" id="browserWindow">
+        <!-- ADDRESS BAR - AKAN MENYATU DENGAN BACKGROUND -->
         <div class="address-bar" id="addressBar">
             <div class="nav-buttons">
                 <div class="nav-btn" onclick="fakeBack()">←</div>
@@ -258,315 +278,397 @@
             <div class="url-container" id="urlContainer">
                 <span class="lock-icon" id="lockIcon">🔒</span>
                 <span class="url-text" id="fakeUrl" contenteditable="true">https://www.google.com</span>
-                <span class="secure-badge" id="secureBadge">| Secure</span>
+                <span class="secure-badge" id="secureBadge">Secure</span>
             </div>
             <div class="nav-buttons">
                 <div class="nav-btn" onclick="fakeMenu()">⋮</div>
             </div>
         </div>
 
-        <div class="content-area">
-            <div class="attacker-content">
-                <h1>⚡ VECTOR 16 - NATIVE PiP + ADDRESS BAR ⚡</h1>
-                <div class="desc">Native macOS Picture-in-Picture | Address Bar Color Spoofing</div>
+        <div class="content-area" id="contentArea">
+            <h1 id="mainTitle">⚡ VECTOR 16 - ADDRESS BAR FUSION ⚡</h1>
+            <div class="desc" id="descText">Address Bar Menyatu dengan Background Page | macOS Smart Contrast</div>
 
-                <div class="warning-box">
-                    <b>🔥 TEKNIK NATIVE PiP + ADDRESS BAR SPOOFING 🔥</b><br><br>
-                    ✅ Menggunakan <b>NATIVE PiP API</b> macOS (bukan fake window)<br>
-                    ✅ Address bar <b>WARNA BERUBAH OTOMATIS</b> sesuai background<br>
-                    ✅ Kita akali dengan <b>membuat background page PUTIH</b><br>
-                    ✅ PiP asli macOS muncul di <b>LAYER TERPISAH</b> di atas browser<br>
-                    ✅ Teknik ini memanfaatkan fitur asli browser, bukan fake
-                </div>
-
-                <div class="stats">
-                    <div class="stat-card"><h3 id="pipStatus">⭕</h3><span>Native PiP</span></div>
-                    <div class="stat-card"><h3 id="bgColor">⬜</h3><span>Page BG Color</span></div>
-                    <div class="stat-card"><h3 id="status">🎯 READY</h3><span>Status</span></div>
-                </div>
-
-                <div class="btn-group">
-                    <button class="native-pip-btn" onclick="activateNativePip()">🎬 ACTIVATE NATIVE macOS PiP</button>
-                    <button onclick="spoofAddressBarWhite()">🎨 SPOOF ADDRESS BAR (PUTIH)</button>
-                </div>
-
-                <div class="btn-group">
-                    <button onclick="setPageBackground('white')">⬜ SET BACKGROUND PUTIH</button>
-                    <button onclick="setPageBackground('black')">⬛ SET BACKGROUND HITAM</button>
-                    <button onclick="setPageBackground('blue')">🔵 SET BACKGROUND BIRU</button>
-                </div>
-
-                <div class="btn-group">
-                    <button onclick="simulateSecurePage()">🔒 SIMULATE SECURE PAGE</button>
-                    <button onclick="resetAddressBar()">🔄 RESET ADDRESS BAR</button>
-                </div>
-
-                <div class="log" id="log"></div>
+            <div class="info-box">
+                <b>🔥 TEKNIK ADDRESS BAR FUSION 🔥</b><br><br>
+                ✅ Address bar <b>MENYATU</b> dengan warna background page<br>
+                ✅ macOS browser otomatis menyesuaikan warna kontras<br>
+                ✅ Border address bar <b>DIHILANGKAN</b> agar seamless<br>
+                ✅ Background URL container dibuat <b>TRANSPARAN</b><br>
+                ✅ Hasil: Address bar <b>TIDAK TERLIHAT</b> menyatu dengan page!
             </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h3 id="currentColor">⬜</h3>
+                    <span>Current BG Color</span>
+                </div>
+                <div class="stat-card">
+                    <h3 id="fusionStatus">⭕</h3>
+                    <span>Fusion Mode</span>
+                </div>
+                <div class="stat-card">
+                    <h3 id="status">🎯 READY</h3>
+                    <span>Status</span>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-primary" onclick="activateFusionMode()">🔮 ACTIVATE FUSION MODE</button>
+                <button class="btn-success" onclick="setWhiteFusion()">⬜ WHITE FUSION (Google Style)</button>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-outline" onclick="setDarkFusion()">⬛ DARK FUSION (macOS Dark Mode)</button>
+                <button class="btn-outline" onclick="setBlueFusion()">🔵 BLUE FUSION (Apple Style)</button>
+                <button class="btn-outline" onclick="setGreenFusion()">🟢 GREEN FUSION (Secure Style)</button>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-outline" onclick="removeAddressBarBorder()">🚫 HILANGKAN BORDER ADDRESS BAR</button>
+                <button class="btn-outline" onclick="resetFusion()">🔄 RESET FUSION</button>
+            </div>
+
+            <div class="color-preview" id="colorPreview"></div>
+
+            <div class="log" id="log"></div>
         </div>
     </div>
 </div>
 
-<div class="status-bar" id="statusBar">🎯 Native PiP + Address Bar Spoofing | macOS Ready</div>
-
-<!-- Video element untuk Native PiP -->
-<video id="nativePipVideo" src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAADtZHZpcwAAAAAAAAAAAAAAAAAAAABkaW5mAAAAAAAiAAAAgAAAKGh0Y2MAAAACAAABqAAAAAgAAAAEAAAAFGFkY2MAAAAQAAAAAgAAAAIAAAAAHHN0dHMAAAAcAAAAAQAAABQAAAAEAAAAAQAAABQAAAAEAAAAAQAAABRzdHNzAAAAAAAAAAEAAAAYAAAAAwAAAAIAAAAEc3R0cwAAAAAAAAABAAAAAQAAAAZzdHNjaAAAAAAAAAABAAAAAQAAAAVzZHRkAAAAAAAIAAAABAAAAAA=" muted autoplay loop></video>
+<div class="status-bar" id="statusBar">🎯 Address Bar Fusion | Menyatu dengan Background Page</div>
 
 <script>
-let pipActive = false;
-let nativePipVideo = null;
+let fusionActive = false;
+let currentBgColor = "#ffffff";
 
 function addLog(msg, type = "") {
     const log = document.getElementById("log");
     const div = document.createElement("div");
-    div.className = "log-entry " + (type === "success" ? "log-success" : "");
+    div.className = "log-entry";
     div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
     while (log.children.length > 150) log.removeChild(log.firstChild);
 }
 
-// ============ NATIVE macOS PiP API ============
-async function activateNativePip() {
-    addLog("🎬 [NATIVE PiP] Mengaktifkan Picture-in-Picture asli macOS...", "");
+// ============ FUSION MODE - Address Bar Menyatu dengan Background ============
+function activateFusionMode() {
+    const addressBar = document.getElementById("addressBar");
+    const urlContainer = document.getElementById("urlContainer");
+    const browserWindow = document.getElementById("browserWindow");
+    const contentArea = document.getElementById("contentArea");
     
-    try {
-        // Get or create video element
-        nativePipVideo = document.getElementById("nativePipVideo");
-        
-        // Create video content if empty
-        if (!nativePipVideo.src || nativePipVideo.src === "") {
-            // Create a canvas stream as video source
-            const canvas = document.createElement("canvas");
-            canvas.width = 640;
-            canvas.height = 360;
-            const ctx = canvas.getContext("2d");
-            
-            // Draw something on canvas
-            ctx.fillStyle = "#1a73e8";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "white";
-            ctx.font = "24px monospace";
-            ctx.fillText("VECTOR 16", canvas.width/2 - 80, canvas.height/2);
-            ctx.font = "14px monospace";
-            ctx.fillText("Native PiP Mode", canvas.width/2 - 70, canvas.height/2 + 40);
-            
-            const stream = canvas.captureStream();
-            nativePipVideo.srcObject = stream;
-        }
-        
-        // Play video
-        await nativePipVideo.play();
-        
-        // Request Picture-in-Picture (NATIVE macOS FEATURE)
-        const pipWindow = await nativePipVideo.requestPictureInPicture();
-        
-        pipActive = true;
-        document.getElementById("pipStatus").innerHTML = "✅";
-        document.getElementById("pipStatus").style.color = "#188038";
-        
-        addLog("✅ NATIVE macOS PiP ACTIVATED!", "success");
-        addLog("📺 PiP window asli macOS muncul di layer terpisah", "success");
-        addLog("💡 PiP ini BUKAN fake window - ini fitur asli browser", "success");
-        
-        // Listen for PiP close event
-        nativePipVideo.addEventListener('leavepictureinpicture', () => {
-            pipActive = false;
-            document.getElementById("pipStatus").innerHTML = "⭕";
-            addLog("🔄 Native PiP closed", "");
-        });
-        
-    } catch(e) {
-        addLog(`⚠️ Native PiP error: ${e.message}`, "");
-        addLog("💡 Mungkin perlu user interaction terlebih dahulu", "");
-        addLog("💡 Coba klik tombol lagi setelah halaman di-load", "");
-    }
+    // Hilangkan border bottom address bar
+    addressBar.style.borderBottom = "none";
+    addressBar.style.boxShadow = "none";
+    
+    // Buat url container transparan
+    urlContainer.style.background = "transparent";
+    urlContainer.style.border = "none";
+    
+    // Buat browser window seamless
+    browserWindow.style.border = "none";
+    browserWindow.style.boxShadow = "none";
+    
+    // Konten area menyatu
+    contentArea.style.padding = "30px";
+    
+    addressBar.classList.add("fusion-mode");
+    urlContainer.classList.add("fusion-mode");
+    
+    fusionActive = true;
+    document.getElementById("fusionStatus").innerHTML = "✅";
+    document.getElementById("fusionStatus").style.color = "#188038";
+    
+    addLog("🔮 FUSION MODE ACTIVATED - Address bar menyatu dengan background!", "success");
+    addLog("💡 Border address bar dihilangkan, background transparan", "success");
+    addLog("🎨 Sekarang address bar TIDAK TERLIHAT sebagai elemen terpisah", "success");
 }
 
-// ============ ADDRESS BAR SPOOFING - Atur warna ============
-function spoofAddressBarWhite() {
+// ============ SET WHITE FUSION (Seperti Google) ============
+function setWhiteFusion() {
+    const bgColor = "#ffffff";
+    const textColor = "#1a1a1a";
+    const secondaryColor = "#5f6368";
+    
+    applyFusionColor(bgColor, textColor, secondaryColor);
+    currentBgColor = bgColor;
+    
+    document.getElementById("currentColor").innerHTML = "⬜";
+    document.getElementById("currentColor").style.color = "#1a1a1a";
+    
+    addLog("⬜ WHITE FUSION - Address bar menyatu dengan background putih", "success");
+    addLog("💡 Seperti halaman Google, Apple, Microsoft", "success");
+}
+
+// ============ SET DARK FUSION (macOS Dark Mode) ============
+function setDarkFusion() {
+    const bgColor = "#1a1a1a";
+    const textColor = "#ffffff";
+    const secondaryColor = "#aaaaaa";
+    
+    applyFusionColor(bgColor, textColor, secondaryColor);
+    currentBgColor = bgColor;
+    
+    document.getElementById("currentColor").innerHTML = "⬛";
+    document.getElementById("currentColor").style.color = "#ffffff";
+    
+    addLog("⬛ DARK FUSION - Address bar menyatu dengan background hitam", "success");
+    addLog("💡 Seperti macOS Dark Mode", "success");
+}
+
+// ============ SET BLUE FUSION (Apple Style) ============
+function setBlueFusion() {
+    const bgColor = "#1a73e8";
+    const textColor = "#ffffff";
+    const secondaryColor = "rgba(255,255,255,0.8)";
+    
+    applyFusionColor(bgColor, textColor, secondaryColor);
+    currentBgColor = bgColor;
+    
+    document.getElementById("currentColor").innerHTML = "🔵";
+    document.getElementById("currentColor").style.color = "#1a73e8";
+    
+    addLog("🔵 BLUE FUSION - Address bar menyatu dengan background biru", "success");
+    addLog("💡 Seperti halaman Apple ID", "success");
+}
+
+// ============ SET GREEN FUSION (Secure Style) ============
+function setGreenFusion() {
+    const bgColor = "#188038";
+    const textColor = "#ffffff";
+    const secondaryColor = "rgba(255,255,255,0.8)";
+    
+    applyFusionColor(bgColor, textColor, secondaryColor);
+    currentBgColor = bgColor;
+    
+    document.getElementById("currentColor").innerHTML = "🟢";
+    document.getElementById("currentColor").style.color = "#188038";
+    
+    addLog("🟢 GREEN FUSION - Address bar menyatu dengan background hijau", "success");
+    addLog("💡 Seperti halaman verified/secure", "success");
+}
+
+// ============ APPLY FUSION COLOR ============
+function applyFusionColor(bgColor, textColor, secondaryColor) {
+    // Apply ke seluruh elemen
+    document.body.style.background = bgColor;
+    document.body.style.color = textColor;
+    
+    const browserWindow = document.getElementById("browserWindow");
     const addressBar = document.getElementById("addressBar");
     const urlContainer = document.getElementById("urlContainer");
     const fakeUrl = document.getElementById("fakeUrl");
     const lockIcon = document.getElementById("lockIcon");
     const secureBadge = document.getElementById("secureBadge");
+    const contentArea = document.getElementById("contentArea");
+    const mainTitle = document.getElementById("mainTitle");
+    const descText = document.getElementById("descText");
+    const infoBox = document.querySelector(".info-box");
+    const statCards = document.querySelectorAll(".stat-card");
     
-    // Set address bar menjadi putih bersih
+    // Browser window
+    if (browserWindow) {
+        browserWindow.style.background = bgColor;
+        browserWindow.style.border = "none";
+    }
+    
+    // Address bar
     if (addressBar) {
-        addressBar.style.background = "#ffffff";
-        addressBar.style.borderBottom = "1px solid #e5e5ea";
+        addressBar.style.background = bgColor;
+        addressBar.style.borderBottom = "none";
     }
     
+    // URL container - transparan agar menyatu
     if (urlContainer) {
-        urlContainer.style.background = "#f5f5f7";
+        urlContainer.style.background = "transparent";
+        urlContainer.style.border = "none";
     }
     
+    // Text URL
     if (fakeUrl) {
-        fakeUrl.style.color = "#202124";
-        fakeUrl.innerText = "https://secure-verify.apple.com";
+        fakeUrl.style.color = textColor;
     }
     
+    // Lock icon
     if (lockIcon) {
-        lockIcon.style.color = "#1a73e8";
-        lockIcon.innerHTML = "🔒";
+        lockIcon.style.color = secondaryColor;
     }
     
+    // Secure badge
     if (secureBadge) {
-        secureBadge.style.background = "#e6f4ea";
-        secureBadge.style.color = "#188038";
-        secureBadge.innerHTML = "✓ Verified";
+        secureBadge.style.background = "transparent";
+        secureBadge.style.color = secondaryColor;
     }
     
-    addLog("🎨 Address bar color SPOOFED menjadi putih (secure page style)", "success");
-    addLog("💡 Background page juga putih agar address bar otomatis kontras", "success");
-}
-
-// ============ SET PAGE BACKGROUND ============
-function setPageBackground(color) {
-    const body = document.body;
-    const mainContainer = document.querySelector(".main-container");
-    const browserWindow = document.querySelector(".browser-window");
-    const attackerContent = document.querySelector(".attacker-content");
-    
-    let bgColor, textColor;
-    switch(color) {
-        case 'white':
-            bgColor = "#ffffff";
-            textColor = "#1a1a1a";
-            document.getElementById("bgColor").innerHTML = "⬜";
-            addLog("⬛ Page background: PUTIH - address bar akan menyesuaikan text jadi HITAM", "success");
-            break;
-        case 'black':
-            bgColor = "#1a1a1a";
-            textColor = "#ffffff";
-            document.getElementById("bgColor").innerHTML = "⬛";
-            addLog("⬛ Page background: HITAM - address bar akan menyesuaikan text jadi PUTIH", "success");
-            break;
-        case 'blue':
-            bgColor = "#1a73e8";
-            textColor = "#ffffff";
-            document.getElementById("bgColor").innerHTML = "🔵";
-            addLog("🔵 Page background: BIRU - address bar otomatis menyesuaikan", "success");
-            break;
-        default: return;
+    // Content area
+    if (contentArea) {
+        contentArea.style.background = bgColor;
     }
     
-    if (body) body.style.background = bgColor;
-    if (mainContainer) mainContainer.style.background = bgColor;
-    if (browserWindow) browserWindow.style.background = bgColor;
-    if (attackerContent) attackerContent.style.background = bgColor;
+    // Title dan desc
+    if (mainTitle) mainTitle.style.color = textColor;
+    if (descText) descText.style.color = secondaryColor;
     
-    // Update text color untuk konten
-    const texts = document.querySelectorAll(".attacker-content h1, .attacker-content .desc, .warning-box");
-    texts.forEach(el => {
-        if (color === 'black') {
-            el.style.color = "#ffffff";
-            if (el.classList.contains('warning-box')) el.style.background = "#2a2a2a";
-        } else {
-            el.style.color = "";
-            if (el.classList.contains('warning-box')) el.style.background = "#fef7e0";
-        }
+    // Info box
+    if (infoBox) {
+        infoBox.style.background = textColor === "#ffffff" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)";
+        infoBox.style.color = textColor;
+    }
+    
+    // Stat cards
+    statCards.forEach(card => {
+        card.style.background = textColor === "#ffffff" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)";
+        card.style.color = textColor;
     });
     
-    addLog(`🎨 Page background changed to ${color.toUpperCase()}`, "success");
-}
-
-// ============ SIMULATE SECURE PAGE ============
-function simulateSecurePage() {
-    setPageBackground('white');
-    spoofAddressBarWhite();
+    // Buttons
+    const buttons = document.querySelectorAll(".btn-outline");
+    buttons.forEach(btn => {
+        btn.style.background = textColor === "#ffffff" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)";
+        btn.style.color = textColor;
+    });
     
-    // Change fake URL to look like Apple/Google secure page
-    const fakeUrl = document.getElementById("fakeUrl");
-    if (fakeUrl) {
-        const secureDomains = [
-            "https://appleid.apple.com",
-            "https://accounts.google.com",
-            "https://login.microsoftonline.com",
-            "https://secure.cloudflare.com",
-            "https://verify.apple.com"
-        ];
-        fakeUrl.innerText = secureDomains[Math.floor(Math.random() * secureDomains.length)];
+    // Log
+    const logDiv = document.getElementById("log");
+    if (logDiv) {
+        logDiv.style.background = textColor === "#ffffff" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.04)";
     }
     
-    addLog("🔒 SIMULATED SECURE PAGE - Address bar seperti halaman login legitimate", "success");
-    addLog("💡 Native PiP bisa diaktifkan untuk menutupi notifikasi", "");
+    // Status bar
+    const statusBar = document.getElementById("statusBar");
+    if (statusBar) {
+        if (textColor === "#ffffff") {
+            statusBar.style.background = "rgba(0,0,0,0.8)";
+        } else {
+            statusBar.style.background = "rgba(0,0,0,0.8)";
+        }
+    }
+    
+    // Pastikan fusion mode active
+    if (!fusionActive) {
+        activateFusionMode();
+    }
+    
+    // Update fake URL agar lebih meyakinkan
+    const domains = {
+        "#ffffff": ["https://www.google.com", "https://www.apple.com", "https://www.microsoft.com"],
+        "#1a1a1a": ["https://github.com", "https://discord.com", "https://twitter.com"],
+        "#1a73e8": ["https://appleid.apple.com", "https://accounts.google.com"],
+        "#188038": ["https://secure.verified.com", "https://banking.com"]
+    };
+    
+    const domainList = domains[bgColor] || ["https://secure-site.com"];
+    fakeUrl.innerText = domainList[Math.floor(Math.random() * domainList.length)];
 }
 
-// ============ RESET ADDRESS BAR ============
-function resetAddressBar() {
+// ============ REMOVE ADDRESS BAR BORDER ============
+function removeAddressBarBorder() {
     const addressBar = document.getElementById("addressBar");
     const urlContainer = document.getElementById("urlContainer");
+    
+    if (addressBar) addressBar.style.borderBottom = "none";
+    if (urlContainer) {
+        urlContainer.style.border = "none";
+        urlContainer.style.outline = "none";
+    }
+    
+    addLog("🚫 Address bar border removed - semakin seamless!", "success");
+}
+
+// ============ RESET FUSION ============
+function resetFusion() {
+    const addressBar = document.getElementById("addressBar");
+    const urlContainer = document.getElementById("urlContainer");
+    const browserWindow = document.getElementById("browserWindow");
     const fakeUrl = document.getElementById("fakeUrl");
     const lockIcon = document.getElementById("lockIcon");
     const secureBadge = document.getElementById("secureBadge");
     
+    // Reset background
+    document.body.style.background = "#ffffff";
+    
+    // Reset address bar
     if (addressBar) {
         addressBar.style.background = "#ffffff";
         addressBar.style.borderBottom = "1px solid #e5e5ea";
     }
     
+    // Reset url container
     if (urlContainer) {
         urlContainer.style.background = "#f5f5f7";
+        urlContainer.style.border = "1px solid #e5e5ea";
     }
     
+    // Reset text
     if (fakeUrl) {
         fakeUrl.style.color = "#202124";
         fakeUrl.innerText = "https://www.google.com";
     }
     
-    if (lockIcon) {
-        lockIcon.style.color = "";
-        lockIcon.innerHTML = "🔒";
-    }
-    
+    if (lockIcon) lockIcon.style.color = "";
     if (secureBadge) {
         secureBadge.style.background = "";
         secureBadge.style.color = "";
-        secureBadge.innerHTML = "| Secure";
+        secureBadge.innerHTML = "Secure";
     }
     
-    addLog("🔄 Address bar reset to default", "success");
-}
-
-// ============ DETECT macOS ============
-function detectMacOS() {
-    const isMac = navigator.userAgent.includes('Mac');
-    const isSafari = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
-    const isChrome = navigator.userAgent.includes('Chrome');
-    
-    if (isMac) {
-        addLog("🍎 macOS detected - Native PiP API available", "success");
-        if (isSafari) addLog("🌐 Browser: Safari - PiP support: YES", "success");
-        if (isChrome) addLog("🌐 Browser: Chrome - PiP support: YES", "success");
-    } else {
-        addLog("⚠️ Bukan macOS - Native PiP mungkin tidak berfungsi", "");
+    if (browserWindow) {
+        browserWindow.style.border = "1px solid #e5e5ea";
+        browserWindow.style.boxShadow = "0 20px 40px rgba(0,0,0,0.1)";
     }
     
-    return isMac;
+    addressBar.classList.remove("fusion-mode");
+    urlContainer.classList.remove("fusion-mode");
+    
+    fusionActive = false;
+    document.getElementById("fusionStatus").innerHTML = "⭕";
+    document.getElementById("currentColor").innerHTML = "⬜";
+    
+    addLog("🔄 Fusion mode reset - address bar kembali normal", "");
 }
 
 // ============ FAKE FUNCTIONS ============
-function fakeBack() { addLog("◀ Back button (fake)", ""); }
-function fakeForward() { addLog("▶ Forward button (fake)", ""); }
-function fakeRefresh() { addLog("⟳ Refresh", ""); location.reload(); }
+function fakeBack() { addLog("◀ Back", ""); }
+function fakeForward() { addLog("▶ Forward", ""); }
+function fakeRefresh() { location.reload(); }
 function fakeMenu() { addLog("⋮ Menu", ""); }
 
-// Initial logs
-detectMacOS();
-addLog("⚡ VECTOR 16 - NATIVE PiP + ADDRESS BAR SPOOFING LOADED", "success");
-addLog("📌 NATIVE PiP: Menggunakan API asli macOS (bukan fake window)", "success");
-addLog("🎨 Address bar: Warna otomatis menyesuaikan background page", "");
-addLog("💡 Klik 'ACTIVATE NATIVE macOS PiP' untuk membuka PiP asli", "success");
+// ============ CREATE COLOR PREVIEW ============
+function createColorPreview() {
+    const preview = document.getElementById("colorPreview");
+    const colors = [
+        { name: "White", color: "#ffffff", text: "⬜", action: setWhiteFusion },
+        { name: "Dark", color: "#1a1a1a", text: "⬛", action: setDarkFusion },
+        { name: "Blue", color: "#1a73e8", text: "🔵", action: setBlueFusion },
+        { name: "Green", color: "#188038", text: "🟢", action: setGreenFusion },
+        { name: "Red", color: "#d93025", text: "🔴", action: () => applyFusionColor("#d93025", "#ffffff", "rgba(255,255,255,0.8)") },
+        { name: "Purple", color: "#8e24aa", text: "🟣", action: () => applyFusionColor("#8e24aa", "#ffffff", "rgba(255,255,255,0.8)") }
+    ];
+    
+    colors.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "color-option";
+        div.style.background = c.color;
+        div.title = c.name;
+        div.onclick = c.action;
+        preview.appendChild(div);
+    });
+}
 
-// Auto-detect address bar color change (CSS-based)
-const observer = new MutationObserver(() => {
-    const bodyBg = getComputedStyle(document.body).backgroundColor;
-    if (bodyBg === "rgb(255, 255, 255)") {
-        addLog("🎨 Address bar akan otomatis menampilkan text HITAM (kontras dengan putih)", "");
-    }
-});
-observer.observe(document.body, { attributes: true, attributeFilter: ['style', 'class'] });
+// Initial
+createColorPreview();
+addLog("⚡ VECTOR 16 - ADDRESS BAR FUSION SPOOFING LOADED", "success");
+addLog("🎨 Address bar akan MENYATU dengan background page", "success");
+addLog("💡 Klik 'ACTIVATE FUSION MODE' lalu pilih warna", "success");
+addLog("📌 macOS browser otomatis menyesuaikan kontras address bar", "");
+
+// Auto detect macOS smart address bar
+const isMac = navigator.userAgent.includes('Mac');
+if (isMac) {
+    addLog("🍎 macOS detected - Smart Address Bar aktif", "success");
+}
 </script>
 </body>
 </html>
