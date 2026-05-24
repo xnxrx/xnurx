@@ -1,7 +1,56 @@
-<button onclick="openWin()">Open</button>
+<!doctype html>
+<html>
+<head>
+  <title>Normal Page</title>
+</head>
+<body>
+
+<button onclick="openWin()">Open Experimental Window</button>
 
 <script>
 function openWin() {
-  window.open('https://example.com', '_blank');
+  // ubah title secara dinamis
+  document.title = "⚡ Opening Portal...";
+
+  // log aneh di console
+  console.log("%cNXR EXPERIMENT MODE", "color: red; font-size: 20px; font-weight: bold;");
+
+  // alert awal
+  alert("Preparing new window...");
+
+  // confirm interaktif
+  const ok = confirm("Mau lanjut buka window baru?");
+  if (!ok) {
+    document.title = "Cancelled";
+    return;
+  }
+
+  // efek delay kecil
+  setTimeout(() => {
+    document.title = "🚀 Launching...";
+
+    // buka window baru
+    const win = window.open("https://example.com", "_blank");
+
+    if (!win) {
+      alert("Popup diblok browser!");
+      document.title = "Blocked";
+      return;
+    }
+
+    // coba ubah title lagi setelah buka
+    document.title = "Opened ✔";
+
+    // kirim pesan kecil ke console interval
+    let i = 0;
+    const interval = setInterval(() => {
+      console.log("tick:", i++);
+      if (i > 5) clearInterval(interval);
+    }, 500);
+
+  }, 800);
 }
 </script>
+
+</body>
+</html>
