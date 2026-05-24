@@ -1,79 +1,16 @@
-<!DOCTYPE html>
 <html>
-<head>
-<title>Fullscreen Demo</title>
-<style>
-body{
-    margin:0;
-    background:black;
-    color:lime;
-    font-family:monospace;
-    overflow:hidden;
-}
-
-#fakebar{
-    height:40px;
-    background:#111;
-    border-bottom:1px solid #0f0;
-    display:flex;
-    align-items:center;
-    padding-left:10px;
-}
-
-#content{
-    height:calc(100vh - 40px);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:40px;
-}
-button{
-    position:fixed;
-    top:50px;
-    right:20px;
-    z-index:999;
-}
-</style>
-</head>
 <body>
+<div id="mydiv"
+onmouseover="document.location='http://www.youtube.com/watch?v=oHg5S
+JYRHA0';"
+style="position:absolute;width:2px;height:2px;background:#FFFFFF;bor
+der:0px"></div>
 
-<div id="fakebar">
-    VOID://SYSTEM_KERNEL_𓀐
+<br>
+<a href="http://www.yahoo.com" onclick="updatebox(event)"><font
+style="font-family:arial;font-
+size:32px">http://www.yahoo.com</font></a><br>
+
 </div>
-
-<div id="content">
-    CHAOS MODE
-</div>
-
-<button onclick="hideUI()">ENTER VOID</button>
-
-<script>
-async function hideUI(){
-
-    // fullscreen resmi browser
-    if(document.documentElement.requestFullscreen){
-        await document.documentElement.requestFullscreen();
-    }
-
-    // efek visual absurd
-    setInterval(()=>{
-
-        document.body.style.filter =
-            `
-            hue-rotate(${Math.random()*360}deg)
-            contrast(${1+Math.random()*5})
-            blur(${Math.random()*2}px)
-            `;
-
-        document.title =
-            Math.random().toString(36) +
-            "𓂸" +
-            performance.now();
-
-    },100);
-
-}
-</script>
-
 </body>
 </html>
