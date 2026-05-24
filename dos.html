@@ -3,534 +3,371 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VECTOR 16 - Turbo Fuzzer + Popup Alert</title>
-
+<title>VECTOR 16 - Advanced Spoofing POC</title>
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:monospace;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-body{
-    background:#050505;
-    color:#00ffaa;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-    transition: all 0.3s ease;
-}
+    body {
+        background: #000;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: monospace;
+    }
 
-.container{
-    width:100%;
-    max-width:900px;
-    background:#111;
-    border:1px solid #ff3b30;
-    border-radius:18px;
-    padding:20px;
-    box-shadow:0 0 25px rgba(255,59,48,0.2);
-    transition: all 0.4s;
-}
+    /* Fake browser window */
+    .browser-window {
+        width: 100%;
+        max-width: 1280px;
+        height: 90vh;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 0 50px rgba(0,255,170,0.3);
+        position: relative;
+    }
 
-/* Login mode styles */
-.container.login-mode {
-    max-width: 450px;
-    background: #0a0a0a;
-    border: 1px solid #00ffaa;
-    box-shadow: 0 0 25px rgba(0,255,170,0.2);
-}
+    /* Fake address bar */
+    .address-bar {
+        background: #f1f3f4;
+        padding: 12px 16px;
+        border-bottom: 1px solid #dadce0;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
 
-.container.login-mode h1 {
-    color: #00ffaa;
-    text-shadow: 0 0 10px #00ffaa;
-}
+    .nav-buttons {
+        display: flex;
+        gap: 8px;
+    }
 
-.container.login-mode .desc,
-.container.login-mode .instructions,
-.container.login-mode .stats,
-.container.login-mode .btn-group .google-btn {
-    display: none;
-}
+    .nav-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e8eaed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 18px;
+        transition: 0.2s;
+    }
 
-.container.login-mode .login-form {
-    display: block !important;
-}
+    .nav-btn:hover {
+        background: #dadce0;
+    }
 
-.container.login-mode .btn-group button:first-child {
-    background: #00aa55;
-}
+    .url-container {
+        flex: 1;
+        background: #fff;
+        border-radius: 24px;
+        padding: 6px 16px;
+        border: 1px solid #dadce0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-.login-form {
-    display: none;
-    margin: 20px 0;
-    animation: fadeIn 0.5s;
-}
+    .lock-icon {
+        font-size: 14px;
+    }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    .url-text {
+        flex: 1;
+        font-size: 14px;
+        color: #202124;
+        font-family: monospace;
+    }
 
-.login-card {
-    background: #050505;
-    border: 1px solid #00ffaa55;
-    border-radius: 16px;
-    padding: 25px 20px;
-    text-align: center;
-}
+    .fake-ssl {
+        font-size: 11px;
+        color: #188038;
+    }
 
-.login-card h2 {
-    color: #00ffaa;
-    margin-bottom: 8px;
-    font-size: 24px;
-}
+    /* Content area - overlay technique */
+    .content-area {
+        position: relative;
+        width: 100%;
+        height: calc(100% - 60px);
+        overflow: hidden;
+        background: #fff;
+    }
 
-.login-sub {
-    color: #888;
-    font-size: 12px;
-    margin-bottom: 25px;
-}
+    /* Real iframe target (Google) */
+    .real-iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        opacity: 0.15;
+        pointer-events: none;
+        /* Low opacity agar terlihat transparan */
+    }
 
-.input-group {
-    margin-bottom: 18px;
-    text-align: left;
-}
+    /* Attacker overlay - VECTOR 16 di atas Google */
+    .attacker-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0a0a0a;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+        backdrop-filter: blur(0px);
+        /* Bisa diatur blur */
+    }
 
-.input-group label {
-    display: block;
-    font-size: 12px;
-    margin-bottom: 6px;
-    color: #00ffaa;
-    letter-spacing: 1px;
-}
+    /* Container VECTOR 16 di dalam overlay */
+    .vector-container {
+        width: 95%;
+        max-width: 900px;
+        background: #111;
+        border: 1px solid #ff3b30;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 0 25px rgba(255, 59, 48, 0.2);
+        color: #00ffaa;
+        font-family: monospace;
+        position: relative;
+        z-index: 20;
+        pointer-events: auto;
+        /* Penting: biar bisa interaksi */
+    }
 
-.input-group input {
-    width: 100%;
-    background: #1a1a1a;
-    border: 1px solid #ff3b3088;
-    border-radius: 10px;
-    padding: 12px 14px;
-    color: #00ffaa;
-    font-size: 14px;
-    outline: none;
-    transition: 0.2s;
-}
+    h1 {
+        text-align: center;
+        color: #ff3b30;
+        margin-bottom: 10px;
+        text-shadow: 0 0 10px #ff3b30;
+    }
 
-.input-group input:focus {
-    border-color: #00ffaa;
-    box-shadow: 0 0 8px #00ffaa55;
-}
+    .desc {
+        text-align: center;
+        color: #aaa;
+        margin-bottom: 20px;
+        font-size: 13px;
+    }
 
-.login-btn {
-    width: 100%;
-    background: #ff3b30;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: 0.2s;
-}
+    .instructions {
+        background: #1a1a1a;
+        border: 1px solid #00ffaa44;
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        line-height: 1.7;
+    }
 
-.login-btn:hover {
-    background: #00ffaa;
-    color: black;
-    box-shadow: 0 0 12px #00ffaa;
-}
+    .stats {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
 
-.demo-cred {
-    margin-top: 20px;
-    font-size: 11px;
-    color: #ffcc00;
-    background: #1a1a1a;
-    padding: 8px;
-    border-radius: 8px;
-}
+    .card {
+        flex: 1;
+        min-width: 120px;
+        background: #0a0a0a;
+        border: 1px solid #00ffaa33;
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+    }
 
-.demo-cred span {
-    color: #aaa;
-}
+    .card h2 {
+        color: #ffcc00;
+        font-size: 18px;
+    }
 
-.glow-text {
-    color: #ffcc00;
-}
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
 
-h1{
-    text-align:center;
-    color:#ff3b30;
-    margin-bottom:10px;
-    text-shadow:0 0 10px #ff3b30;
-    transition: 0.3s;
-}
+    button {
+        flex: 1;
+        min-width: 200px;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        background: #ff3b30;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: .2s;
+    }
 
-.desc{
-    text-align:center;
-    color:#aaa;
-    margin-bottom:20px;
-    font-size:13px;
-    line-height:1.6;
-}
+    button:hover {
+        background: #00ffaa;
+        color: black;
+    }
 
-.instructions{
-    background:#1a1a1a;
-    border:1px solid #00ffaa44;
-    padding:12px;
-    border-radius:10px;
-    margin-bottom:20px;
-    font-size:12px;
-    line-height:1.7;
-}
+    .log {
+        height: 250px;
+        overflow: auto;
+        background: black;
+        border: 1px solid #00ffaa;
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 12px;
+    }
 
-.instructions b{
-    color:#ffcc00;
-}
+    .entry {
+        margin-bottom: 6px;
+        border-left: 3px solid #ff3b30;
+        padding-left: 8px;
+    }
 
-.instructions .highlight {
-    color:#00ffaa;
-    background:#00ffaa22;
-    padding:2px 6px;
-    border-radius:6px;
-    font-weight:bold;
-}
+    .success {
+        color: #00ffaa;
+        border-left-color: #00ffaa;
+    }
 
-.stats{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
-    flex-wrap:wrap;
-}
+    .warning {
+        color: #ffcc00;
+    }
 
-.card{
-    flex:1;
-    min-width:120px;
-    background:#0a0a0a;
-    border:1px solid #00ffaa33;
-    border-radius:10px;
-    padding:10px;
-    text-align:center;
-}
+    /* Control panel untuk spoofing */
+    .control-panel {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #1a1a1a;
+        border: 1px solid #ff3b30;
+        border-radius: 12px;
+        padding: 12px;
+        z-index: 100;
+        font-size: 11px;
+        color: #00ffaa;
+        max-width: 250px;
+    }
 
-.card h2{
-    color:#ffcc00;
-    font-size:18px;
-}
+    .control-panel select,
+    .control-panel button {
+        min-width: auto;
+        padding: 6px;
+        font-size: 11px;
+        margin: 5px 0;
+    }
 
-.card span{
-    font-size:11px;
-    color:#aaa;
-}
+    .opacity-slider {
+        width: 100%;
+        margin: 8px 0;
+    }
 
-.btn-group{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:20px;
-}
-
-button{
-    flex:1;
-    min-width:200px;
-    padding:14px;
-    border:none;
-    border-radius:12px;
-    background:#ff3b30;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-    transition:.2s;
-    position:relative;
-    overflow:hidden;
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-button:hover:not(:disabled){
-    background:#00ffaa;
-    color:black;
-    transform: scale(0.98);
-}
-
-.google-btn{
-    background:#0066ff;
-}
-
-.log{
-    height:300px;
-    overflow:auto;
-    background:black;
-    border:1px solid #00ffaa;
-    border-radius:10px;
-    padding:10px;
-    font-size:12px;
-    transition: 0.3s;
-}
-
-.container.login-mode .log {
-    display: none;
-}
-
-.entry{
-    margin-bottom:6px;
-    border-left:3px solid #ff3b30;
-    padding-left:8px;
-    animation: slideIn 0.15s ease;
-}
-
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(-5px);}
-    to { opacity: 1; transform: translateX(0);}
-}
-
-.success{
-    color:#00ffaa;
-    border-left-color:#00ffaa;
-}
-
-.warning {
-    color: #ffaa33;
-    border-left-color: #ffaa33;
-}
-
-.info {
-    color: #88ccff;
-    border-left-color: #88ccff;
-}
-
-.progress-bar-container {
-    width: 100%;
-    background: #1a1a1a;
-    border-radius: 10px;
-    margin-top: 12px;
-    margin-bottom: 8px;
-    height: 6px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    width: 0%;
-    height: 100%;
-    background: #00ffaa;
-    transition: width 0.2s linear;
-    border-radius: 10px;
-}
-
-.fuzzing-progress {
-    font-size: 11px;
-    text-align: center;
-    margin-top: 5px;
-    color: #aaa;
-}
-
-/* Alert custom style */
-.custom-alert {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    animation: fadeIn 0.2s;
-}
-
-.alert-box {
-    background: #0a0a0a;
-    border: 2px solid #ff3b30;
-    border-radius: 20px;
-    padding: 25px 30px;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 0 40px rgba(255,59,48,0.5);
-    animation: bounceIn 0.3s;
-}
-
-@keyframes bounceIn {
-    0% { transform: scale(0.8); opacity: 0; }
-    80% { transform: scale(1.05); }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-.alert-icon {
-    font-size: 48px;
-    margin-bottom: 15px;
-}
-
-.alert-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #ff3b30;
-    margin-bottom: 12px;
-}
-
-.alert-message {
-    color: #00ffaa;
-    font-size: 14px;
-    margin-bottom: 20px;
-    line-height: 1.6;
-}
-
-.alert-button {
-    background: #ff3b30;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 30px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 14px;
-    transition: 0.2s;
-}
-
-.alert-button:hover {
-    background: #00ffaa;
-    color: black;
-    transform: scale(1.05);
-}
+    .status-badge {
+        display: inline-block;
+        background: #ff3b3022;
+        padding: 2px 6px;
+        border-radius: 8px;
+        margin-left: 6px;
+    }
 </style>
 </head>
 <body>
 
-<div class="container" id="mainContainer">
-
-    <h1 id="mainTitle">⚡ VECTOR 16 ⚡</h1>
-
-    <div class="desc">
-        Random Protocol Fuzzer | Auto Google Window + Popup Alerts
-    </div>
-
-    <div class="instructions" id="instructionsPanel">
-        <b>⚡ INSTRUKSI TURBO MODE:</b><br><br>
-        1. Klik tombol <b style="color:#ff3b30">RUN VECTOR 16</b><br>
-        2. 🔥 <span class="highlight">Popup ALERT akan muncul</span> memberitahu setiap tahap<br>
-        3. 🌐 Otomatis membuka Google di <b>NEW WINDOW</b><br>
-        4. ⏱️ Tunggu <b>1 DETIK</b> (alert konfirmasi)<br>
-        5. 🚀 Proses <b>FUZZING berjalan selama 2 DETIK</b><br>
-        6. ✅ Setelah selesai, halaman <b>BERUBAH menjadi LOGIN PAGE</b><br>
-        7. 🔐 Login dengan <b>admin / vector16</b> ➜ buka Google kembali
-    </div>
-
-    <div class="stats" id="statsPanel">
-        <div class="card">
-            <h2 id="count">0</h2>
-            <span>Protocols Generated</span>
+<div class="browser-window">
+    <!-- Fake Address Bar untuk Spoofing -->
+    <div class="address-bar">
+        <div class="nav-buttons">
+            <div class="nav-btn" onclick="refreshPage()">↻</div>
         </div>
-
-        <div class="card">
-            <h2 id="active">READY</h2>
-            <span>Status</span>
+        <div class="url-container">
+            <span class="lock-icon">🔒</span>
+            <span class="url-text" id="fakeUrl">https://www.google.com</span>
+            <span class="fake-ssl">| Aman</span>
+        </div>
+        <div class="nav-buttons">
+            <div class="nav-btn" onclick="openRealGoogle()">⋮</div>
         </div>
     </div>
 
-    <div id="progressArea" style="display:none; margin-top:-5px; margin-bottom:15px;">
-        <div class="progress-bar-container">
-            <div class="progress-fill" id="fuzzProgressFill"></div>
-        </div>
-        <div class="fuzzing-progress" id="fuzzProgressText">Initializing...</div>
-    </div>
-
-    <div class="btn-group">
-        <button id="runButton" onclick="runVectorTurbo()">
-            🚀 RUN VECTOR 16
-        </button>
-
-        <button class="google-btn" id="googleBtn" onclick="manualOpenGoogle()">
-            🌐 BUKA GOOGLE (NEW WINDOW)
-        </button>
-    </div>
-
-    <div class="log" id="log"></div>
-
-    <!-- LOGIN FORM (hidden initially) -->
-    <div class="login-form" id="loginForm">
-        <div class="login-card">
-            <h2>🔐 SECURE GATEWAY</h2>
-            <div class="login-sub">Authenticate after fuzzing</div>
-            
-            <div class="input-group">
-                <label>⚡ USERNAME</label>
-                <input type="text" id="username" placeholder="admin / user" autocomplete="off">
-            </div>
-            
-            <div class="input-group">
-                <label>🔑 PROTOCOL KEY</label>
-                <input type="password" id="password" placeholder="vector16">
-            </div>
-            
-            <button class="login-btn" onclick="handleLoginAfterFuzz()">
-                ▶ AUTHENTICATE & UNLOCK GOOGLE
-            </button>
-            
-            <div class="demo-cred">
-                💡 <span>DEMO CREDENTIAL</span><br>
-                user: <strong class="glow-text">admin</strong> &nbsp;|&nbsp; pass: <strong class="glow-text">vector16</strong>
+    <div class="content-area" id="contentArea">
+        <!-- Real Google iframe (transparan sebagai background) -->
+        <iframe class="real-iframe" id="realIframe" src="https://www.google.com"></iframe>
+        
+        <!-- Attacker Overlay - VECTOR 16 -->
+        <div class="attacker-overlay" id="attackerOverlay">
+            <div class="vector-container">
+                <h1>⚡ VECTOR 16 ⚡</h1>
+                <div class="desc">Random Protocol Fuzzer Demo Page</div>
+                
+                <div class="instructions">
+                    <b>INSTRUKSI SPOOFING:</b><br><br>
+                    1. Ini adalah overlay di atas Google.com<br>
+                    2. Address bar menunjukkan https://www.google.com<br>
+                    3. Kamu BISA klik dan interaksi dengan form di bawah<br>
+                    4. Klik <b style="color:#ff3b30">RUN VECTOR 16</b> untuk fuzzing<br>
+                    5. Setelah selesai, buka Google baru
+                </div>
+                
+                <div class="stats">
+                    <div class="card">
+                        <h2 id="count">0</h2>
+                        <span>Protocols Generated</span>
+                    </div>
+                    <div class="card">
+                        <h2 id="active">READY</h2>
+                        <span>Status</span>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="runBtn" onclick="runFuzzer()">RUN VECTOR 16</button>
+                    <button class="google-btn" onclick="openGoogleTab()">BUKA GOOGLE.COM NEW TAB</button>
+                </div>
+                
+                <div class="log" id="log"></div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Control Panel untuk mengatur overlay -->
+<div class="control-panel" id="controlPanel">
+    <div><b>🎮 SPOOF CONTROL</b></div>
+    <div>Overlay Opacity:</div>
+    <input type="range" class="opacity-slider" id="opacitySlider" min="0" max="1" step="0.05" value="1">
+    <div>
+        <button onclick="toggleOverlayMode()">🔄 Toggle Transparan</button>
+        <button onclick="resetOverlay()">🔧 Reset Overlay</button>
+    </div>
+    <div style="margin-top:8px">
+        <span id="statusText">✅ Interaktif</span>
+        <span class="status-badge">Address Bar Spoof Active</span>
+    </div>
+</div>
+
 <script>
 let generated = 0;
-let isLoginModeActive = false;
+let isFuzzing = false;
 let fuzzerCompleted = false;
-let timeoutIds = [];
-let googleWindowRef = null;
-let isFuzzingRunning = false;
-
-// ============ CUSTOM ALERT POPUP ============
-function showCustomAlert(title, message, icon = "⚡", onClose = null) {
-    return new Promise((resolve) => {
-        // Remove existing alert if any
-        const existingAlert = document.querySelector('.custom-alert');
-        if (existingAlert) existingAlert.remove();
-        
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'custom-alert';
-        alertDiv.innerHTML = `
-            <div class="alert-box">
-                <div class="alert-icon">${icon}</div>
-                <div class="alert-title">${title}</div>
-                <div class="alert-message">${message}</div>
-                <button class="alert-button" id="alertOkBtn">OK</button>
-            </div>
-        `;
-        document.body.appendChild(alertDiv);
-        
-        const okBtn = alertDiv.querySelector('#alertOkBtn');
-        const closeAlert = () => {
-            alertDiv.style.animation = 'fadeOut 0.2s';
-            setTimeout(() => {
-                alertDiv.remove();
-                if (onClose) onClose();
-                resolve();
-            }, 150);
-        };
-        
-        okBtn.addEventListener('click', closeAlert);
-        // Click outside doesn't close, must click OK
-    });
-}
 
 function addLog(msg, type = "") {
-    const logDiv = document.getElementById("log");
-    if (!logDiv) return;
+    const log = document.getElementById("log");
+    if (!log) return;
     const div = document.createElement("div");
     div.className = "entry " + type;
     div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    logDiv.appendChild(div);
-    logDiv.scrollTop = logDiv.scrollHeight;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
 }
 
 function randomString(len) {
@@ -541,289 +378,144 @@ function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function clearTempIframes() {
-    const iframes = document.querySelectorAll('iframe.temp-fuzzer');
-    iframes.forEach(iframe => iframe.remove());
-}
-
-function openGoogleNewWindow() {
-    const features = "noopener,noreferrer,width=1200,height=800,menubar=yes,toolbar=yes,location=yes,status=yes";
-    const newWindow = window.open("https://www.google.com", "_blank", features);
+// Fungsi Fuzzer (tidak freeze)
+async function runFuzzer() {
+    if (isFuzzing) {
+        addLog("Fuzzing sedang berjalan...", "warning");
+        return;
+    }
     
-    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-        addLog("⚠️ Pop-up blocked! Coba izinkan pop-up.", "warning");
-        return null;
-    }
-    addLog("🌐 Google window successfully opened (NEW WINDOW)", "success");
-    return newWindow;
-}
-
-function manualOpenGoogle() {
-    if (!fuzzerCompleted && !isLoginModeActive) {
-        showCustomAlert("⛔ ACCESS DENIED", "Harap klik RUN VECTOR 16 terlebih dahulu untuk mengaktifkan sistem!", "🔒");
-        return;
-    }
-    if (isLoginModeActive && fuzzerCompleted) {
-        showCustomAlert("🔐 LOGIN REQUIRED", "Silakan login melalui formulir untuk membuka Google.com", "📝");
-        return;
-    }
-    openGoogleNewWindow();
-}
-
-async function executeFuzzingWithDuration(durationMs = 2000) {
-    return new Promise((resolve) => {
-        const totalProtocols = 620;
-        let currentIndex = 0;
-        generated = 0;
-        
-        const progressFill = document.getElementById("fuzzProgressFill");
-        const progressText = document.getElementById("fuzzProgressText");
-        const countElem = document.getElementById("count");
-        
-        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789+-.';
-        let intervalId = null;
-        let activeIframes = [];
-        
-        function cleanupCurrentIframes() {
-            activeIframes.forEach(iframe => {
-                if (iframe && iframe.remove) iframe.remove();
-            });
-            activeIframes = [];
-        }
-        
-        function generateOneProtocol() {
-            let protocol = '';
-            const protoLen = randomInt(3, 12);
-            for (let j = 0; j < protoLen; j++) {
-                protocol += chars[Math.floor(Math.random() * chars.length)];
-            }
-            
-            const iframe = document.createElement('iframe');
-            iframe.className = 'temp-fuzzer';
-            iframe.src = `${protocol}://${randomString(8)}.fuzz/`;
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-            activeIframes.push(iframe);
-            
-            const tid = setTimeout(() => {
-                if (iframe && iframe.remove) iframe.remove();
-                const idx = activeIframes.indexOf(iframe);
-                if (idx !== -1) activeIframes.splice(idx, 1);
-            }, 15);
-            timeoutIds.push(tid);
-            
-            generated++;
-            currentIndex++;
-            
-            const percent = Math.min(100, (currentIndex / totalProtocols) * 100);
-            if (progressFill) progressFill.style.width = `${percent}%`;
-            if (progressText) progressText.innerText = `Fuzzing: ${currentIndex}/${totalProtocols} protocols (${Math.floor(percent)}%)`;
-            if (countElem) countElem.innerText = generated;
-            
-            if (currentIndex % 120 === 0 && currentIndex > 0) {
-                addLog(`⚡ Fuzzing progress: ${currentIndex}/${totalProtocols}`, "info");
-            }
-        }
-        
-        const estimatedInterval = durationMs / totalProtocols;
-        const intervalTime = Math.max(2, Math.min(7, estimatedInterval));
-        
-        intervalId = setInterval(() => {
-            if (currentIndex >= totalProtocols) {
-                clearInterval(intervalId);
-                cleanupCurrentIframes();
-                if (progressFill) progressFill.style.width = `100%`;
-                if (progressText) progressText.innerText = `✅ Fuzzing complete! ${generated} protocols.`;
-                addLog(`✅ FUZZING COMPLETE: ${generated} protocols`, "success");
-                resolve();
-            } else {
-                const batchSize = Math.max(1, Math.floor(totalProtocols / (durationMs / intervalTime)));
-                for (let i = 0; i < batchSize && currentIndex < totalProtocols; i++) {
-                    generateOneProtocol();
-                }
-            }
-        }, intervalTime);
-        
-        setTimeout(() => {
-            if (intervalId) {
-                clearInterval(intervalId);
-                cleanupCurrentIframes();
-                resolve();
-            }
-        }, durationMs + 300);
-    });
-}
-
-async function runVectorTurbo() {
-    if (isFuzzingRunning) {
-        showCustomAlert("⏳ PROSES BERJALAN", "Tunggu hingga proses selesai!", "⚙️");
-        return;
-    }
-    if (fuzzerCompleted && isLoginModeActive) {
-        showCustomAlert("🔒 SISTEM TERKUNCI", "Silakan login melalui formulir untuk membuka Google.", "🔐");
-        return;
-    }
     if (fuzzerCompleted) {
-        showCustomAlert("INFO", "Sistem sudah selesai fuzzing. Login form sudah aktif.", "ℹ️");
+        addLog("Fuzzing sudah selesai sebelumnya", "warning");
         return;
     }
     
-    const runBtn = document.getElementById("runButton");
+    isFuzzing = true;
+    const runBtn = document.getElementById("runBtn");
     runBtn.disabled = true;
-    isFuzzingRunning = true;
+    runBtn.textContent = "🔥 RUNNING...";
     
-    const progressArea = document.getElementById("progressArea");
-    progressArea.style.display = "block";
-    const progressFill = document.getElementById("fuzzProgressFill");
-    const progressText = document.getElementById("fuzzProgressText");
-    if (progressFill) progressFill.style.width = "0%";
-    if (progressText) progressText.innerText = "Step 1: Opening Google window...";
+    addLog("VECTOR 16 started...", "success");
+    document.getElementById("active").innerText = "RUNNING";
     
-    addLog("════════════════════════════", "success");
-    addLog("🚀 VECTOR 16 TURBO MODE ACTIVATED", "success");
-    document.getElementById("active").innerText = "OPENING WINDOW";
+    let chars = 'abcdefghijklmnopqrstuvwxyz0123456789+-.';
+    let countTarget = 500; // Lebih ringan biar tidak freeze
     
-    // ALERT 1: Mulai proses
-    await showCustomAlert("🚀 VECTOR 16 TURBO", "Proses akan membuka Google Window, lalu fuzzing 2 detik.\nKlik OK untuk melanjutkan.", "⚡");
-    
-    // Buka Google Window
-    addLog("Membuka Google di new window...");
-    googleWindowRef = openGoogleNewWindow();
-    
-    // ALERT 2: Konfirmasi window terbuka
-    if (googleWindowRef && !googleWindowRef.closed) {
-        await showCustomAlert("🌐 GOOGLE WINDOW TERBUKA", "Jendela Google berhasil dibuka!\nTunggu 1 detik sebelum fuzzing dimulai.", "✅");
-    } else {
-        await showCustomAlert("⚠️ PERINGATAN", "Google window mungkin terblokir pop-up.\nTetap melanjutkan fuzzing.", "⚠️");
+    for (let i = 0; i < countTarget; i++) {
+        let protocol = '';
+        for (let j = 0; j < randomInt(3, 12); j++) {
+            protocol += chars[Math.floor(Math.random() * chars.length)];
+        }
+        
+        // Create lightweight iframe
+        let iframe = document.createElement('iframe');
+        iframe.src = `${protocol}://${randomString(8)}.com/`;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        generated++;
+        
+        // Quick cleanup async
+        setTimeout(() => iframe.remove(), 5);
+        
+        if (i % 80 === 0 && i > 0) {
+            addLog(`Generated ${i} protocols...`, "");
+            await new Promise(r => setTimeout(r, 1)); // Yield thread
+        }
     }
     
-    document.getElementById("active").innerText = "WAITING (1s)";
-    if (progressText) progressText.innerText = "⏳ Menunggu 1 detik sebelum fuzzing...";
-    
-    // ALERT 3: Countdown 1 detik
-    await showCustomAlert("⏱️ SIAP-SIAP", "Fuzzing akan dimulai dalam 1 detik...\nKlik OK untuk lanjut.", "🔥");
-    
-    // Tunggu 1 detik (biar user siap)
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // ALERT 4: Fuzzing dimulai
-    await showCustomAlert("🧪 FUZZING DIMULAI", "Proses random protocol injection akan berjalan selama 2 detik.\nJangan tutup halaman!", "⚙️");
-    
-    addLog("🔥 Memulai PROTOCOL FUZZING (2 detik)...", "info");
-    document.getElementById("active").innerText = "FUZZING (2s)";
-    if (progressText) progressText.innerText = "🧪 Fuzzing protocols... 0%";
-    
-    const fuzzingStart = performance.now();
-    await executeFuzzingWithDuration(2000);
-    const fuzzingDuration = performance.now() - fuzzingStart;
-    
-    addLog(`✅ Fuzzing selesai dalam ${Math.round(fuzzingDuration)}ms | Total: ${generated} protocols`, "success");
-    document.getElementById("active").innerText = "FUZZ DONE";
-    
-    // ALERT 5: Fuzzing selesai
-    await showCustomAlert("✅ FUZZING SELESAI", `Total ${generated} random protocols berhasil di-generate.\nSekarang beralih ke LOGIN PAGE.`, "🎉");
-    
-    setTimeout(() => {
-        clearTempIframes();
-        timeoutIds.forEach(id => clearTimeout(id));
-        timeoutIds = [];
-    }, 100);
-    
+    document.getElementById("count").innerText = generated;
+    addLog(`${countTarget} random protocol injections complete`, "success");
+    document.getElementById("active").innerText = "DONE";
     fuzzerCompleted = true;
-    if (progressText) progressText.innerText = "✨ Transformasi ke Login Gateway...";
     
-    await new Promise(r => setTimeout(r, 400));
-    transformToLoginMode();
+    runBtn.disabled = false;
+    runBtn.textContent = "RUN VECTOR 16";
+    isFuzzing = false;
     
-    setTimeout(() => {
-        progressArea.style.display = "none";
-    }, 800);
-    
-    // ALERT 6: Login mode aktif
-    await showCustomAlert("🔐 LOGIN GATEWAY AKTIF", "Silakan masukkan kredensial untuk membuka Google kembali.\n\nDemo: admin / vector16", "🔑");
-    
-    isFuzzingRunning = false;
+    addLog("✅ Selesai! Sekarang kamu bisa buka Google di tab baru", "success");
 }
 
-function transformToLoginMode() {
-    isLoginModeActive = true;
-    
-    const container = document.getElementById("mainContainer");
-    const mainTitle = document.getElementById("mainTitle");
-    const instructionsPanel = document.getElementById("instructionsPanel");
-    const statsPanel = document.getElementById("statsPanel");
-    const logDiv = document.getElementById("log");
-    const loginFormDiv = document.getElementById("loginForm");
-    const runButton = document.getElementById("runButton");
-    const googleBtn = document.getElementById("googleBtn");
-    const activeStatus = document.getElementById("active");
-    
-    container.classList.add("login-mode");
-    mainTitle.innerHTML = "🔐 VECTOR 16 • AUTHENTICATION";
-    mainTitle.style.color = "#00ffaa";
-    mainTitle.style.textShadow = "0 0 12px #00ffaa";
-    
-    if (instructionsPanel) instructionsPanel.style.display = "none";
-    if (statsPanel) statsPanel.style.display = "none";
-    if (logDiv) logDiv.style.display = "none";
-    if (loginFormDiv) loginFormDiv.style.display = "block";
-    
-    if (runButton) {
-        runButton.innerText = "⟳ SYSTEM LOCKED";
-        runButton.disabled = true;
-        runButton.style.background = "#555";
-    }
-    
-    if (googleBtn) {
-        googleBtn.innerText = "🌐 BUKA GOOGLE (via LOGIN)";
-        googleBtn.style.background = "#3399ff";
-    }
-    
-    if (activeStatus) activeStatus.innerText = "AUTH REQUIRED";
+function openGoogleTab() {
+    addLog("Opening Google in new tab...", "success");
+    window.open("https://www.google.com", "_blank");
 }
 
-async function handleLoginAfterFuzz() {
-    if (!fuzzerCompleted || !isLoginModeActive) {
-        showCustomAlert("❌ AKSES DITOLAK", "Harap jalankan RUN VECTOR 16 terlebih dahulu!", "⛔");
-        return;
-    }
-    
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
-    
-    let isValid = false;
-    if ((username === "admin" && password === "vector16") || (username !== "" && password !== "")) {
-        isValid = true;
-    }
-    
-    if (!isValid) {
-        await showCustomAlert("❌ LOGIN GAGAL", "Kredensial salah!\nGunakan admin / vector16 atau isi kedua field.", "🔒");
-        return;
-    }
-    
-    const loginBtn = document.querySelector(".login-btn");
-    loginBtn.innerText = "✓ AUTHENTICATED • OPENING GOOGLE...";
-    loginBtn.style.background = "#00aa55";
-    loginBtn.disabled = true;
-    
-    await showCustomAlert("✅ AUTHENTIKASI BERHASIL", `Selamat datang, ${username}!\nMembuka Google di new window...`, "🎉");
-    
-    const newGoogleWin = window.open("https://www.google.com", "_blank", "noopener,noreferrer,width=1200,height=800");
-    if (!newGoogleWin) {
-        alert("Izinkan pop-up untuk membuka Google. Klik OK untuk membuka manual.");
-        window.open("https://www.google.com", "_blank");
-    }
-    
-    setTimeout(() => {
-        loginBtn.innerText = "✔ GOOGLE OPENED";
-        const activeSpan = document.getElementById("active");
-        if (activeSpan) activeSpan.innerText = "GOOGLE OPENED";
-    }, 800);
+// Address Bar Spoofing - biar selalu terlihat seperti Google
+function updateFakeUrl(url) {
+    document.getElementById("fakeUrl").innerText = url;
 }
 
-// Initial logs
-addLog("⚡ VECTOR 16 TURBO EDITION WITH POPUP ALERTS READY", "success");
-addLog("Klik RUN VECTOR 16 → Alert popup akan memandu setiap tahap", "info");
+// Refresh fake browser
+function refreshPage() {
+    addLog("Refresh address bar spoof...", "info");
+    updateFakeUrl("https://www.google.com");
+    // Reset iframe Google
+    const iframe = document.getElementById("realIframe");
+    iframe.src = iframe.src;
+}
+
+function openRealGoogle() {
+    window.open("https://www.google.com", "_blank");
+}
+
+// Control overlay opacity
+const opacitySlider = document.getElementById("opacitySlider");
+const attackerOverlay = document.getElementById("attackerOverlay");
+
+opacitySlider.addEventListener("input", function(e) {
+    attackerOverlay.style.opacity = e.target.value;
+    document.getElementById("statusText").innerText = e.target.value == 1 ? "Solid" : e.target.value == 0 ? "Hidden" : "Transparent";
+});
+
+function toggleOverlayMode() {
+    if (attackerOverlay.style.opacity == "0" || attackerOverlay.style.opacity === 0) {
+        attackerOverlay.style.opacity = "1";
+        opacitySlider.value = "1";
+        document.getElementById("statusText").innerText = "Solid";
+        addLog("Overlay mode: SOLID (full visible)", "success");
+    } else if (attackerOverlay.style.opacity == "1") {
+        attackerOverlay.style.opacity = "0.5";
+        opacitySlider.value = "0.5";
+        document.getElementById("statusText").innerText = "Half Transparent";
+        addLog("Overlay mode: TRANSPARENT (lihat Google di belakang)", "info");
+    } else {
+        attackerOverlay.style.opacity = "1";
+        opacitySlider.value = "1";
+        document.getElementById("statusText").innerText = "Solid";
+    }
+}
+
+function resetOverlay() {
+    attackerOverlay.style.opacity = "1";
+    attackerOverlay.style.pointerEvents = "auto";
+    opacitySlider.value = "1";
+    document.getElementById("statusText").innerText = "Interaktif";
+    addLog("Overlay reset - semua interaksi normal kembali", "success");
+}
+
+// Pastikan overlay bisa di-klik dan interaktif
+attackerOverlay.style.pointerEvents = "auto";
+
+// Initial log
+addLog("⚡ VECTOR 16 - Address Bar Spoofing ACTIVE", "success");
+addLog("🔒 Fake URL: https://www.google.com (terlihat di address bar)", "success");
+addLog("✅ Kamu BISA klik tombol dan interaksi dengan form di atas!", "success");
+addLog("💡 Gunakan control panel untuk atur transparansi overlay", "info");
+
+// Prevent iframe dari blocking interaksi
+document.getElementById("realIframe").style.pointerEvents = "none";
+
+// Dynamic fake URL - biar makin meyakinkan
+setInterval(() => {
+    // Simulasi fake URL tetap google.com
+    const currentUrl = document.getElementById("fakeUrl").innerText;
+    if (!currentUrl.includes("google.com")) {
+        document.getElementById("fakeUrl").innerText = "https://www.google.com";
+    }
+}, 1000);
+
+// Handle agar tidak ada yang bisa merubah address bar secara real
+console.log("Spoofing active - address bar showing google.com");
 </script>
 </body>
 </html>
