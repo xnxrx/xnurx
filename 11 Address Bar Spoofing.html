@@ -1,311 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>ABSURD WINDOW.OPEN CHAOS</title>
-
+<title>Fullscreen Demo</title>
 <style>
-html,body{
+body{
     margin:0;
     background:black;
-    overflow:hidden;
+    color:lime;
     font-family:monospace;
-    color:#0f0;
+    overflow:hidden;
 }
 
-canvas{
-    position:fixed;
-    inset:0;
-}
-
-#center{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    text-align:center;
-    z-index:999;
-}
-
-button{
+#fakebar{
+    height:40px;
     background:#111;
-    color:#0f0;
-    border:1px solid #0f0;
-    padding:20px;
-    cursor:pointer;
-    font-size:20px;
+    border-bottom:1px solid #0f0;
+    display:flex;
+    align-items:center;
+    padding-left:10px;
 }
 
-h1{
-    font-size:50px;
-    animation:spin 3s infinite linear;
+#content{
+    height:calc(100vh - 40px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:40px;
 }
-
-@keyframes spin{
-    from{transform:rotate(0deg)}
-    to{transform:rotate(360deg)}
+button{
+    position:fixed;
+    top:50px;
+    right:20px;
+    z-index:999;
 }
 </style>
 </head>
 <body>
 
-<canvas id="c"></canvas>
-
-<div id="center">
-    <h1>𓀐𓂸𓆏 CHAOS ENGINE 𓆉</h1>
-    <button onclick="startChaos()">OPEN THE VOID</button>
+<div id="fakebar">
+    VOID://SYSTEM_KERNEL_𓀐
 </div>
 
+<div id="content">
+    CHAOS MODE
+</div>
+
+<button onclick="hideUI()">ENTER VOID</button>
+
 <script>
-const ctx = c.getContext("2d");
-c.width = innerWidth;
-c.height = innerHeight;
+async function hideUI(){
 
-function matrix(){
-    ctx.fillStyle="rgba(0,0,0,0.05)";
-    ctx.fillRect(0,0,c.width,c.height);
-
-    ctx.fillStyle="#0f0";
-
-    for(let i=0;i<50;i++){
-        ctx.fillText(
-            Math.random().toString(36),
-            Math.random()*c.width,
-            Math.random()*c.height
-        );
+    // fullscreen resmi browser
+    if(document.documentElement.requestFullscreen){
+        await document.documentElement.requestFullscreen();
     }
 
-    requestAnimationFrame(matrix);
-}
-
-matrix();
-
-function cursedDataURL(){
-
-    const weird = unescape("%u2620%u0BF5%u0A9E%u202E");
-
-    const payload = `
-    <html>
-    <body style="background:black;color:lime;font-family:monospace">
-
-    <h1>${weird} DATA://VOID ${Math.random()}</h1>
-
-    <script>
-
-    document.body.innerHTML += "<pre>" + navigator.userAgent + "</pre>";
-
-    setInterval(()=>{
-
-        document.body.innerHTML += (
-            Math.random().toString(36) +
-            "${weird}" +
-            performance.now() +
-            "<br>"
-        );
-
-        document.body.style.transform =
-            "rotate(" + Math.random()*360 + "deg)";
-
-    },10);
-
-    setInterval(()=>{
-        history.pushState(
-            {},
-            "",
-            Math.random().toString(36)
-        );
-    },5);
-
-    </script>
-
-    </body>
-    </html>
-    `;
-
-    return "data:text/html;charset=x-user-defined;base64," +
-        btoa(unescape(encodeURIComponent(payload)));
-}
-
-function weirdFeatureString(){
-
-    return [
-        "width=" + (Math.random()*99999),
-        "height=-99999",
-        "left=Infinity",
-        "top=NaN",
-        "popup=yes",
-        "resizable=maybe",
-        "toolbar=𓂸",
-        "status=🫠"
-    ].join(",");
-}
-
-function recursiveMadness(depth){
-
-    if(depth <= 0) return;
-
-    const target =
-        "𓀀" +
-        Math.random().toString(36) +
-        "\u202E";
-
-    try{
-
-        const w = window.open(
-            cursedDataURL(),
-            target,
-            weirdFeatureString()
-        );
-
-        if(w){
-
-            setTimeout(()=>{
-
-                try{
-                    w.document.write(`
-                    <style>
-                    body{
-                        background:black;
-                        color:red;
-                        font-family:monospace;
-                    }
-                    </style>
-
-                    <h1>
-                    VOID INSTANCE ${depth}
-                    </h1>
-
-                    <script>
-                    setInterval(()=>{
-                        document.body.innerHTML +=
-                        Math.random()+"<br>";
-                    },1)
-                    <\/script>
-                    `);
-                }catch(e){}
-
-            },500);
-
-        }
-
-    }catch(e){
-        console.log(e);
-    }
-
-    setTimeout(()=>{
-        recursiveMadness(depth-1);
-    },100);
-
-}
-
-function garbageEncodingExplosion(){
-
-    const weirdStrings = [
-        "%FF%FE%00%00",
-        "%uFFFF",
-        "%C0%AF",
-        "\u202E",
-        "\u0000",
-        "\uD800",
-        "𓂸",
-        "🫠"
-    ];
-
-    setInterval(()=>{
-
-        const div = document.createElement("div");
-
-        div.innerHTML =
-            weirdStrings[
-                Math.floor(Math.random()*weirdStrings.length)
-            ] +
-            Math.random();
-
-        div.style.position = "absolute";
-        div.style.left = Math.random()*innerWidth + "px";
-        div.style.top = Math.random()*innerHeight + "px";
-        div.style.color =
-            "hsl(" + Math.random()*360 + ",100%,50%)";
-
-        div.style.fontSize =
-            (10 + Math.random()*100) + "px";
-
-        div.style.transform =
-            "rotate(" + Math.random()*360 + "deg)";
-
-        document.body.appendChild(div);
-
-        if(document.body.children.length > 500){
-            document.body.removeChild(
-                document.body.children[5]
-            );
-        }
-
-    },5);
-
-}
-
-function titleCorruption(){
-
-    setInterval(()=>{
-
-        document.title =
-            Math.random()
-            .toString(36)
-            .repeat(5)
-            + "\u202E"
-            + "𓀐𓂸𓆏";
-
-    },50);
-
-}
-
-function startChaos(){
-
-    garbageEncodingExplosion();
-
-    recursiveMadness(15);
-
-    titleCorruption();
-
-    setInterval(()=>{
-
-        try{
-            history.pushState(
-                {},
-                "",
-                "/" + Math.random().toString(36)
-            );
-        }catch(e){}
-
-    },20);
-
+    // efek visual absurd
     setInterval(()=>{
 
         document.body.style.filter =
             `
             hue-rotate(${Math.random()*360}deg)
-            blur(${Math.random()*5}px)
-            invert(${Math.random()})
+            contrast(${1+Math.random()*5})
+            blur(${Math.random()*2}px)
             `;
 
-    },50);
+        document.title =
+            Math.random().toString(36) +
+            "𓂸" +
+            performance.now();
 
-    setInterval(()=>{
-
-        console.log(
-            "%cVOID://ERROR_" +
-            Math.random(),
-            `
-            color:hsl(${Math.random()*360},100%,50%);
-            font-size:${20+Math.random()*50}px;
-            `
-        );
-
-    },10);
+    },100);
 
 }
-
 </script>
 
 </body>
