@@ -1,54 +1,118 @@
 <!doctype html>
 <html>
 <head>
-  <title>Normal Page</title>
+  <title>Absurd Launcher</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: black;
+      color: lime;
+      padding: 20px;
+    }
+    button {
+      padding: 10px;
+      margin: 5px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-<button onclick="openWin()">Open Experimental Window</button>
+<h2>⚡ ABSURD WINDOW SYSTEM ⚡</h2>
+
+<button onclick="launchA()">Open Portal A</button>
+<button onclick="launchB()">Open Portal B</button>
+<button onclick="launchC()">Chaos Window</button>
 
 <script>
-function openWin() {
-  // ubah title secara dinamis
-  document.title = "⚡ Opening Portal...";
+function fakeAddress() {
+  const junk = [
+    "nxr://quantum-core/index",
+    "memory://overflow/0xAFAFAF",
+    "void://undefined/null",
+    "web+absurd://portal/∆∆∆",
+    "system://dream/state/active"
+  ];
+  return junk[Math.floor(Math.random() * junk.length)];
+}
 
-  // log aneh di console
-  console.log("%cNXR EXPERIMENT MODE", "color: red; font-size: 20px; font-weight: bold;");
+function baseContent(title) {
+  return `
+    <html>
+    <head>
+      <title>${title}</title>
+      <style>
+        body {
+          background: #0d0d0d;
+          color: #00ff88;
+          font-family: monospace;
+          padding: 20px;
+        }
+        .bar {
+          background: #111;
+          padding: 10px;
+          border: 1px solid #00ff88;
+          margin-bottom: 20px;
+        }
+        .glitch {
+          animation: flicker 0.2s infinite;
+        }
+        @keyframes flicker {
+          0% {opacity: 1;}
+          50% {opacity: 0.6;}
+          100% {opacity: 1;}
+        }
+      </style>
+    </head>
+    <body>
 
-  // alert awal
-  alert("Preparing new window...");
+      <div class="bar">
+        🔗 ADDRESS: ${fakeAddress()}
+      </div>
 
-  // confirm interaktif
-  const ok = confirm("Mau lanjut buka window baru?");
-  if (!ok) {
-    document.title = "Cancelled";
+      <h1 class="glitch">${title}</h1>
+
+      <p>Konten ini sebenarnya berasal dari web kamu, tapi dibungkus dalam "dimensi browser absurd".</p>
+
+      <button onclick="window.close()">Close Reality</button>
+
+      <script>
+        console.log("window initialized:", document.title);
+        setInterval(() => {
+          document.title = "⚡ " + Math.random().toString(36).substring(2,8);
+        }, 800);
+      <\/script>
+
+    </body>
+    </html>
+  `;
+}
+
+function openWindow(html) {
+  const w = window.open("", "_blank", "width=600,height=400");
+
+  if (!w) {
+    alert("Popup blocked!");
     return;
   }
 
-  // efek delay kecil
-  setTimeout(() => {
-    document.title = "🚀 Launching...";
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
 
-    // buka window baru
-    const win = window.open("https://example.com", "_blank");
+function launchA() {
+  openWindow(baseContent("PORTAL A - STABLE REALITY"));
+}
 
-    if (!win) {
-      alert("Popup diblok browser!");
-      document.title = "Blocked";
-      return;
-    }
+function launchB() {
+  openWindow(baseContent("PORTAL B - BROKEN TIME LOOP"));
+}
 
-    // coba ubah title lagi setelah buka
-    document.title = "Opened ✔";
-
-    // kirim pesan kecil ke console interval
-    let i = 0;
-    const interval = setInterval(() => {
-      console.log("tick:", i++);
-      if (i > 5) clearInterval(interval);
-    }, 500);
-
-  }, 800);
+function launchC() {
+  // multi-layer chaos: buka 2 window sekaligus
+  openWindow(baseContent("CHAOS NODE 1"));
+  setTimeout(() => openWindow(baseContent("CHAOS NODE 2")), 300);
 }
 </script>
 
