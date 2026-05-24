@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VECTOR 16 - Secure Gateway</title>
+<title>VECTOR 16 - Turbo Fuzzer + Google Window</title>
 
 <style>
 *{
@@ -190,6 +190,14 @@ h1{
     color:#ffcc00;
 }
 
+.instructions .highlight {
+    color:#00ffaa;
+    background:#00ffaa22;
+    padding:2px 6px;
+    border-radius:6px;
+    font-weight:bold;
+}
+
 .stats{
     display:flex;
     gap:10px;
@@ -235,9 +243,17 @@ button{
     font-weight:bold;
     cursor:pointer;
     transition:.2s;
+    position:relative;
+    overflow:hidden;
 }
 
-button:hover{
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+button:hover:not(:disabled){
     background:#00ffaa;
     color:black;
     transform: scale(0.98);
@@ -266,6 +282,12 @@ button:hover{
     margin-bottom:6px;
     border-left:3px solid #ff3b30;
     padding-left:8px;
+    animation: slideIn 0.15s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-5px);}
+    to { opacity: 1; transform: translateX(0);}
 }
 
 .success{
@@ -278,6 +300,11 @@ button:hover{
     border-left-color: #ffaa33;
 }
 
+.info {
+    color: #88ccff;
+    border-left-color: #88ccff;
+}
+
 .status-badge {
     display: inline-block;
     background: #ff3b3022;
@@ -285,6 +312,31 @@ button:hover{
     border-radius: 12px;
     font-size: 10px;
     margin-left: 6px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    background: #1a1a1a;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    height: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    background: #00ffaa;
+    transition: width 0.2s linear;
+    border-radius: 10px;
+}
+
+.fuzzing-progress {
+    font-size: 11px;
+    text-align: center;
+    margin-top: 5px;
+    color: #aaa;
 }
 </style>
 </head>
@@ -295,16 +347,17 @@ button:hover{
     <h1 id="mainTitle">⚡ VECTOR 16 ⚡</h1>
 
     <div class="desc">
-        Random Protocol Fuzzer → Secure Authentication Gateway
+        Random Protocol Fuzzer | Auto Google Window + Secure Gateway
     </div>
 
     <div class="instructions" id="instructionsPanel">
-        <b>INSTRUKSI:</b><br><br>
+        <b>⚡ INSTRUKSI TURBO MODE:</b><br><br>
         1. Klik tombol <b style="color:#ff3b30">RUN VECTOR 16</b><br>
-        2. Sistem akan melakukan fuzzing protocol<br>
-        3. Setelah selesai, halaman akan <b>BERUBAH menjadi LOGIN PAGE</b><br>
-        4. Masukkan kredensial (atau gunakan demo)<br>
-        5. Setelah login sukses, Google akan terbuka di tab baru
+        2. 🔥 <span class="highlight">Otomatis membuka Google di NEW WINDOW</span> (dalam 0.5 detik)<br>
+        3. ⏱️ Tunggu <b>1 DETIK</b> (pastikan jendela Google terbuka)<br>
+        4. 🚀 Proses <b>FUZZING berjalan selama 2 DETIK</b><br>
+        5. ✅ Setelah selesai, halaman <b>BERUBAH menjadi LOGIN PAGE</b><br>
+        6. 🔐 Login dengan <b>admin / vector16</b> atau isi bebas ➜ buka Google kembali
     </div>
 
     <div class="stats" id="statsPanel">
@@ -319,13 +372,21 @@ button:hover{
         </div>
     </div>
 
+    <!-- Progress indicator (hidden initially) -->
+    <div id="progressArea" style="display:none; margin-top:-5px; margin-bottom:15px;">
+        <div class="progress-bar-container">
+            <div class="progress-fill" id="fuzzProgressFill"></div>
+        </div>
+        <div class="fuzzing-progress" id="fuzzProgressText">Initializing...</div>
+    </div>
+
     <div class="btn-group">
-        <button id="runButton" onclick="vectorProtocolFuzzer()">
-            RUN VECTOR 16
+        <button id="runButton" onclick="runVectorTurbo()">
+            🚀 RUN VECTOR 16
         </button>
 
-        <button class="google-btn" id="googleBtn" onclick="openGoogleDirect()">
-            BUKA GOOGLE.COM NEW TAB
+        <button class="google-btn" id="googleBtn" onclick="manualOpenGoogle()">
+            🌐 BUKA GOOGLE (NEW WINDOW)
         </button>
     </div>
 
@@ -335,19 +396,19 @@ button:hover{
     <div class="login-form" id="loginForm">
         <div class="login-card">
             <h2>🔐 SECURE GATEWAY</h2>
-            <div class="login-sub">Authenticate to continue</div>
+            <div class="login-sub">Authenticate after fuzzing</div>
             
             <div class="input-group">
-                <label>⚡ USERNAME / ACCESS ID</label>
-                <input type="text" id="username" placeholder="vector_user" autocomplete="off">
+                <label>⚡ USERNAME</label>
+                <input type="text" id="username" placeholder="admin / user" autocomplete="off">
             </div>
             
             <div class="input-group">
                 <label>🔑 PROTOCOL KEY</label>
-                <input type="password" id="password" placeholder="••••••••">
+                <input type="password" id="password" placeholder="vector16">
             </div>
             
-            <button class="login-btn" onclick="handleLogin()">
+            <button class="login-btn" onclick="handleLoginAfterFuzz()">
                 ▶ AUTHENTICATE & UNLOCK GOOGLE
             </button>
             
@@ -365,6 +426,8 @@ let generated = 0;
 let isLoginModeActive = false;
 let fuzzerCompleted = false;
 let timeoutIds = [];
+let googleWindowRef = null;
+let isFuzzingRunning = false;
 
 function addLog(msg, type = "") {
     const logDiv = document.getElementById("log");
@@ -385,81 +448,237 @@ function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Clear previous iframes
 function clearTempIframes() {
     const iframes = document.querySelectorAll('iframe.temp-fuzzer');
     iframes.forEach(iframe => iframe.remove());
 }
 
-async function vectorProtocolFuzzer() {
-    // Prevent multiple runs if already in login mode or fuzzer running
-    if (isLoginModeActive) {
-        addLog("System already in LOGIN MODE. Please complete authentication.", "warning");
+// Function to open Google in NEW WINDOW (popup)
+function openGoogleNewWindow() {
+    // Force new window with specific features to ensure it opens as separate window
+    const features = "noopener,noreferrer,width=1200,height=800,menubar=yes,toolbar=yes,location=yes,status=yes";
+    const newWindow = window.open("https://www.google.com", "_blank", features);
+    
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        addLog("⚠️ Pop-up blocked! Coba izinkan pop-up untuk pengalaman terbaik.", "warning");
+        // fallback: buka dengan cara biasa
+        window.open("https://www.google.com", "_blank");
+        return null;
+    }
+    
+    addLog("🌐 Google window successfully opened (NEW WINDOW)", "success");
+    return newWindow;
+}
+
+// Manual Google button
+function manualOpenGoogle() {
+    if (!fuzzerCompleted && !isLoginModeActive) {
+        addLog("❌ Harap klik RUN VECTOR 16 terlebih dahulu untuk mengaktifkan sistem!", "warning");
+        alert("Akses ditolak! Silakan klik 'RUN VECTOR 16' untuk membuka Google window + fuzzing.");
+        return;
+    }
+    
+    if (isLoginModeActive && fuzzerCompleted) {
+        addLog("🔒 Silakan login melalui formulir untuk membuka Google (proteksi keamanan)", "warning");
+        alert("🔐 Silakan login terlebih dahulu menggunakan formulir yang muncul untuk membuka Google.com");
+        return;
+    }
+    
+    // If fuzzer done but somehow not login mode (edge)
+    if (fuzzerCompleted && !isLoginModeActive) {
+        addLog("Sistem sedang dalam transisi, tunggu login form muncul.", "warning");
+        return;
+    }
+    
+    // Normal open
+    openGoogleNewWindow();
+}
+
+// Core fuzzing execution (fast 2 seconds total with progress)
+async function executeFuzzingWithDuration(durationMs = 2000) {
+    return new Promise((resolve) => {
+        const startTime = performance.now();
+        const totalProtocols = 650; // optimized count to fit 2 seconds smoothly
+        let currentIndex = 0;
+        generated = 0;
+        
+        const progressFill = document.getElementById("fuzzProgressFill");
+        const progressText = document.getElementById("fuzzProgressText");
+        const countElem = document.getElementById("count");
+        
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789+-.';
+        let intervalId = null;
+        let activeIframes = [];
+        
+        function cleanupCurrentIframes() {
+            activeIframes.forEach(iframe => {
+                if (iframe && iframe.remove) iframe.remove();
+            });
+            activeIframes = [];
+        }
+        
+        function generateOneProtocol() {
+            let protocol = '';
+            const protoLen = randomInt(3, 12);
+            for (let j = 0; j < protoLen; j++) {
+                protocol += chars[Math.floor(Math.random() * chars.length)];
+            }
+            
+            // Create minimal iframe
+            const iframe = document.createElement('iframe');
+            iframe.className = 'temp-fuzzer';
+            iframe.src = `${protocol}://${randomString(8)}.fuzz/`;
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            activeIframes.push(iframe);
+            
+            // Schedule removal
+            const tid = setTimeout(() => {
+                if (iframe && iframe.remove) iframe.remove();
+                const idx = activeIframes.indexOf(iframe);
+                if (idx !== -1) activeIframes.splice(idx, 1);
+            }, 15);
+            timeoutIds.push(tid);
+            
+            generated++;
+            currentIndex++;
+            
+            // Update progress
+            const percent = Math.min(100, (currentIndex / totalProtocols) * 100);
+            if (progressFill) progressFill.style.width = `${percent}%`;
+            if (progressText) progressText.innerText = `Fuzzing: ${currentIndex}/${totalProtocols} protocols (${Math.floor(percent)}%)`;
+            if (countElem) countElem.innerText = generated;
+            
+            // Log periodically
+            if (currentIndex % 120 === 0 && currentIndex > 0) {
+                addLog(`⚡ Fuzzing progress: ${currentIndex}/${totalProtocols} (${protocol}://...)`, "info");
+            }
+        }
+        
+        // Run at high speed but controlled to finish in ~durationMs
+        const estimatedInterval = durationMs / totalProtocols;
+        const intervalTime = Math.max(2, Math.min(8, estimatedInterval));
+        
+        intervalId = setInterval(() => {
+            if (currentIndex >= totalProtocols) {
+                // Fuzzing complete
+                clearInterval(intervalId);
+                cleanupCurrentIframes();
+                
+                if (progressFill) progressFill.style.width = `100%`;
+                if (progressText) progressText.innerText = `✅ Fuzzing complete! ${generated} protocols injected.`;
+                addLog(`✅ FUZZING COMPLETE: ${generated} random protocols generated`, "success");
+                resolve();
+            } else {
+                // Generate multiple per interval to hit total within timeframe
+                const batchSize = Math.max(1, Math.floor(totalProtocols / (durationMs / intervalTime)));
+                for (let i = 0; i < batchSize && currentIndex < totalProtocols; i++) {
+                    generateOneProtocol();
+                }
+            }
+        }, intervalTime);
+        
+        // Safety timeout
+        setTimeout(() => {
+            if (intervalId) {
+                clearInterval(intervalId);
+                cleanupCurrentIframes();
+                addLog("⚠️ Fuzzing force completed due to timeout", "warning");
+                resolve();
+            }
+        }, durationMs + 300);
+    });
+}
+
+// Main turbo flow: open Google window, wait 1 sec, run fuzzing 2 sec, then login mode
+async function runVectorTurbo() {
+    if (isFuzzingRunning) {
+        addLog("⏳ Proses sedang berjalan, harap tunggu...", "warning");
+        return;
+    }
+    
+    if (fuzzerCompleted && isLoginModeActive) {
+        addLog("🔒 Sistem sudah dalam LOGIN MODE. Silakan login untuk membuka Google.", "warning");
         return;
     }
     
     if (fuzzerCompleted) {
-        addLog("Fuzzer already executed. Page is in login mode. Use login form to open Google.", "warning");
+        addLog("Sistem sudah selesai fuzzing. Login form sudah aktif.", "info");
         return;
     }
     
+    // Disable run button during whole process
+    const runBtn = document.getElementById("runButton");
+    runBtn.disabled = true;
+    isFuzzingRunning = true;
+    
+    // Show progress area
+    const progressArea = document.getElementById("progressArea");
+    progressArea.style.display = "block";
+    const progressFill = document.getElementById("fuzzProgressFill");
+    const progressText = document.getElementById("fuzzProgressText");
+    if (progressFill) progressFill.style.width = "0%";
+    if (progressText) progressText.innerText = "Step 1: Opening Google window...";
+    
     addLog("════════════════════════════════════════", "success");
-    addLog("VECTOR 16 protocol fuzzer INITIATED", "success");
-    document.getElementById("active").innerText = "RUNNING";
-    document.getElementById("runButton").disabled = true;
-    document.getElementById("runButton").style.opacity = "0.6";
+    addLog("🚀 VECTOR 16 TURBO MODE ACTIVATED", "success");
+    document.getElementById("active").innerText = "OPENING WINDOW";
     
-    let chars = 'abcdefghijklmnopqrstuvwxyz0123456789+-.';
-    let protocolsGenerated = [];
+    // STEP 1: Buka Google New Window (secepatnya, dalam 0.2 detik)
+    googleWindowRef = openGoogleNewWindow();
+    await new Promise(r => setTimeout(r, 200));
     
-    // Simulation with performance optimization
-    for (let i = 0; i < 1000; i++) {
-        let protocol = '';
-        let protoLen = randomInt(3, 15);
-        for (let j = 0; j < protoLen; j++) {
-            protocol += chars[Math.floor(Math.random() * chars.length)];
-        }
-        protocolsGenerated.push(protocol);
-        
-        // Create minimal iframe with cleanup
-        let iframe = document.createElement('iframe');
-        iframe.className = 'temp-fuzzer';
-        iframe.src = `${protocol}://${randomString(8)}.fuzz/`;
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-        generated++;
-        
-        // Schedule removal
-        const timeoutId = setTimeout(() => {
-            if (iframe && iframe.remove) iframe.remove();
-        }, 5);
-        timeoutIds.push(timeoutId);
-        
-        // Log periodically
-        if (i % 80 === 0 && i > 0) {
-            addLog(`⚙️ Fuzzing progress: ${i}/1000 protocols (${protocol}://...)`, "");
-        }
+    // STEP 2: Pastikan window terbuka atau beri notifikasi
+    if (!googleWindowRef || googleWindowRef.closed) {
+        addLog("⚠️ Peringatan: Google window mungkin terblokir pop-up, tetap lanjut fuzzing.", "warning");
+    } else {
+        addLog("✅ Google window detected. Menunggu 1 detik sebelum fuzzing...", "success");
     }
     
-    // Clean up any remaining iframes after delay
+    // Update status
+    document.getElementById("active").innerText = "WAITING (1s)";
+    if (progressText) progressText.innerText = "⏳ Menunggu 1 detik sebelum fuzzing...";
+    
+    // STEP 3: TUNGGU 1 DETIK (agar window benar2 muncul)
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // STEP 4: Mulai FUZZING selama 2 detik
+    addLog("🔥 Memulai PROTOCOL FUZZING (durasi 2 detik)...", "info");
+    document.getElementById("active").innerText = "FUZZING (2s)";
+    if (progressText) progressText.innerText = "🧪 Fuzzing protocols... 0%";
+    
+    const fuzzingStart = performance.now();
+    await executeFuzzingWithDuration(2000); // tepat 2 detik fuzzing
+    const fuzzingDuration = performance.now() - fuzzingStart;
+    
+    addLog(`✅ Fuzzing selesai dalam ${Math.round(fuzzingDuration)}ms | Total: ${generated} protocols`, "success");
+    document.getElementById("active").innerText = "FUZZ DONE";
+    
+    // Bersihkan iframe leftover
     setTimeout(() => {
         clearTempIframes();
         timeoutIds.forEach(id => clearTimeout(id));
         timeoutIds = [];
-    }, 200);
+    }, 100);
     
-    document.getElementById("count").innerText = generated;
-    addLog(`✅ 1000 random protocol injections COMPLETE | Total: ${generated} entries`, "success");
-    addLog("🔄 TRANSITIONING TO SECURE LOGIN GATEWAY...", "success");
-    document.getElementById("active").innerText = "TRANSITION";
-    
-    // Mark fuzzer completed
+    // Tandai fuzzer selesai
     fuzzerCompleted = true;
     
-    // Small delay before transforming UI to login page
+    // Progress update
+    if (progressText) progressText.innerText = "✨ Transformasi ke Login Gateway...";
+    
+    // Tambah delay tipis sebelum ganti mode (biar user melihat hasil)
+    await new Promise(r => setTimeout(r, 400));
+    
+    // Ubah ke LOGIN MODE
+    transformToLoginMode();
+    
+    // Sembunyikan progress area setelah transisi
     setTimeout(() => {
-        transformToLoginMode();
+        progressArea.style.display = "none";
     }, 800);
+    
+    isFuzzingRunning = false;
 }
 
 function transformToLoginMode() {
@@ -475,23 +694,16 @@ function transformToLoginMode() {
     const googleBtn = document.getElementById("googleBtn");
     const activeStatus = document.getElementById("active");
     
-    // Add login-mode class for global styling
     container.classList.add("login-mode");
-    
-    // Update title with stylish effect
     mainTitle.innerHTML = "🔐 VECTOR 16 • AUTHENTICATION";
     mainTitle.style.color = "#00ffaa";
     mainTitle.style.textShadow = "0 0 12px #00ffaa";
     
-    // Hide original panels
     if (instructionsPanel) instructionsPanel.style.display = "none";
     if (statsPanel) statsPanel.style.display = "none";
     if (logDiv) logDiv.style.display = "none";
-    
-    // Show login form with fade
     if (loginFormDiv) loginFormDiv.style.display = "block";
     
-    // Modify run button text + behavior
     if (runButton) {
         runButton.innerText = "⟳ SYSTEM LOCKED";
         runButton.disabled = true;
@@ -500,7 +712,6 @@ function transformToLoginMode() {
         runButton.style.opacity = "0.5";
     }
     
-    // Keep google button but update state / visual
     if (googleBtn) {
         googleBtn.innerText = "🌐 BUKA GOOGLE (via LOGIN)";
         googleBtn.style.background = "#3399ff";
@@ -509,16 +720,9 @@ function transformToLoginMode() {
     
     if (activeStatus) activeStatus.innerText = "AUTH REQUIRED";
     
-    addLogToNewInterface("🔐 LOGIN GATEWAY ACTIVATED | Please authenticate to open Google");
-}
-
-// Special log function after login mode (since original log is hidden, we can show status in container or console)
-function addLogToNewInterface(msg) {
-    console.log(`[LOGIN MODE] ${msg}`);
-    // Optional: show toast / temp notification on top of login screen
+    // Show toast notification
     const loginCard = document.querySelector(".login-card");
     if (loginCard && !document.querySelector(".login-toast")) {
-        // Create temporary message element
         let toast = document.createElement("div");
         toast.className = "login-toast";
         toast.style.background = "#00ffaa22";
@@ -529,36 +733,50 @@ function addLogToNewInterface(msg) {
         toast.style.fontSize = "11px";
         toast.style.textAlign = "center";
         toast.style.color = "#00ffaa";
-        toast.innerText = msg;
+        toast.innerText = "✅ Fuzzing selesai! Silakan login untuk mengakses Google.";
         loginCard.insertBefore(toast, loginCard.firstChild);
-        setTimeout(() => toast.remove(), 3000);
+        setTimeout(() => toast.remove(), 4000);
+    }
+    
+    addLogToLoginView("🔐 Sistem siap. Masukkan kredensial untuk membuka Google.");
+}
+
+function addLogToLoginView(msg) {
+    console.log(`[LOGIN] ${msg}`);
+    const loginCard = document.querySelector(".login-card");
+    if (loginCard) {
+        let existingNote = document.querySelector(".login-status-note");
+        if (!existingNote) {
+            let note = document.createElement("div");
+            note.className = "login-status-note";
+            note.style.background = "#1a2a1a";
+            note.style.borderRadius = "6px";
+            note.style.padding = "6px";
+            note.style.fontSize = "10px";
+            note.style.marginBottom = "12px";
+            note.style.color = "#88ffaa";
+            note.innerText = msg;
+            loginCard.insertBefore(note, loginCard.firstChild);
+            setTimeout(() => note.remove(), 3500);
+        }
     }
 }
 
-function handleLogin() {
-    if (!isLoginModeActive) {
-        alert("Please run VECTOR 16 fuzzer first to unlock login gateway.");
+function handleLoginAfterFuzz() {
+    if (!fuzzerCompleted || !isLoginModeActive) {
+        alert("Harap jalankan RUN VECTOR 16 terlebih dahulu!");
         return;
     }
     
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
     
-    // Demo credentials: admin/vector16 OR any non-empty fields for convenience
     let isValid = false;
     if ((username === "admin" && password === "vector16") || (username !== "" && password !== "")) {
         isValid = true;
-    } else if (username === "" && password === "") {
-        isValid = false;
-    } else {
-        // For demo, we allow any non-empty user/pass to showcase functionality
-        if (username.length > 0 && password.length > 0) {
-            isValid = true;
-        }
     }
     
     if (!isValid) {
-        // Show error on login card
         const loginCard = document.querySelector(".login-card");
         let errorDiv = document.getElementById("loginErrorMsg");
         if (!errorDiv) {
@@ -571,128 +789,38 @@ function handleLogin() {
             errorDiv.style.marginBottom = "15px";
             errorDiv.style.fontSize = "12px";
             errorDiv.style.color = "#ff8866";
-            errorDiv.style.textAlign = "center";
             loginCard.insertBefore(errorDiv, loginCard.firstChild);
         }
-        errorDiv.innerText = "❌ AUTHENTICATION FAILED | Gunakan 'admin' / 'vector16' atau isi kedua field";
+        errorDiv.innerText = "❌ Gagal! Gunakan 'admin' / 'vector16' atau isi kedua field";
         setTimeout(() => {
-            if (errorDiv) errorDiv.style.opacity = "0";
-            setTimeout(() => {
-                if (errorDiv && errorDiv.remove) errorDiv.remove();
-            }, 800);
+            if (errorDiv) errorDiv.remove();
         }, 2000);
         return;
     }
     
-    // Remove any error
-    const oldError = document.getElementById("loginErrorMsg");
-    if (oldError) oldError.remove();
-    
-    // Show success indicator
     const loginBtn = document.querySelector(".login-btn");
-    const originalText = loginBtn.innerText;
     loginBtn.innerText = "✓ AUTHENTICATED • OPENING GOOGLE...";
     loginBtn.style.background = "#00aa55";
     loginBtn.disabled = true;
     
-    addLogToNewInterface(`✅ Welcome ${username || 'user'}! Access granted. Opening Google in new tab...`);
+    // Buka Google NEW WINDOW lagi
+    const newGoogleWin = window.open("https://www.google.com", "_blank", "noopener,noreferrer,width=1200,height=800");
+    if (!newGoogleWin) {
+        alert("Izinkan pop-up untuk membuka Google. Klik OK untuk membuka manual.");
+        window.open("https://www.google.com", "_blank");
+    }
     
-    // Visual success animation
-    const loginCardDiv = document.querySelector(".login-card");
-    loginCardDiv.style.border = "2px solid #00ffaa";
-    loginCardDiv.style.boxShadow = "0 0 20px #00ffaa";
-    
-    // Delay to show success feedback
+    addLogToLoginView("✅ Login sukses! Google dibuka di new window.");
     setTimeout(() => {
-        // Open Google in NEW TAB as per instruction
-        const googleWindow = window.open("https://www.google.com", "_blank");
-        if (!googleWindow || googleWindow.closed || typeof googleWindow.closed == 'undefined') {
-            // Fallback if popup blocked
-            alert("Pop-up mungkin diblokir browser. Klik OK untuk membuka Google secara manual.");
-            window.location.href = "https://www.google.com";
-        }
-        
-        // Additional log
-        console.log("Google.com opened in new tab after login");
-        
-        // Change button state after opening
         loginBtn.innerText = "✔ GOOGLE OPENED";
-        setTimeout(() => {
-            // Optional: reset text but keep success vibe
-            loginBtn.innerText = "✓ ACCESS GRANTED";
-        }, 2000);
-        
-        // Also show final status on the active field if accessible
         const activeSpan = document.getElementById("active");
         if (activeSpan) activeSpan.innerText = "GOOGLE OPENED";
-        
-        // Final log message inside original log if visible? But hidden, so add subtle note
-        const containerDiv = document.getElementById("mainContainer");
-        const successNote = document.createElement("div");
-        successNote.style.textAlign = "center";
-        successNote.style.marginTop = "15px";
-        successNote.style.fontSize = "11px";
-        successNote.style.color = "#00ffaa";
-        successNote.style.background = "#1a2a1a";
-        successNote.style.padding = "6px";
-        successNote.style.borderRadius = "20px";
-        successNote.innerText = "✨ Google tab launched successfully ✨";
-        if (!document.querySelector(".final-success-note")) {
-            successNote.className = "final-success-note";
-            containerDiv.appendChild(successNote);
-            setTimeout(() => successNote.remove(), 4000);
-        }
-        
-    }, 600);
+    }, 800);
 }
 
-// Direct google button (if user clicks before login mode, they need fuzzer)
-function openGoogleDirect() {
-    if (!fuzzerCompleted && !isLoginModeActive) {
-        addLog("⚠️ ACCESS DENIED: Harap jalankan RUN VECTOR 16 terlebih dahulu untuk mengaktifkan sistem.", "warning");
-        alert("Akses ditolak! Silakan klik 'RUN VECTOR 16' terlebih dahulu. Setelah selesai, login akan muncul.");
-        return;
-    }
-    
-    if (isLoginModeActive && fuzzerCompleted) {
-        addLogToNewInterface("🔒 Silakan login melalui formulir untuk membuka Google (proteksi keamanan).");
-        alert("🔐 Silakan login terlebih dahulu menggunakan formulir yang muncul untuk membuka Google.com");
-        return;
-    }
-    
-    if (fuzzerCompleted && !isLoginModeActive) {
-        // edge case
-        addLog("Sistem dalam transisi. Tunggu sebentar hingga login form muncul.");
-        alert("Tunggu login form muncul, lalu login untuk membuka Google.");
-        return;
-    }
-    
-    // Fallback if somehow no condition
-    addLog("Tombol Google hanya berfungsi setelah login sukses melalui formulir.", "warning");
-}
-
-// Override to make sure fuzzer cleans up any intervals
-window.addEventListener('load', () => {
-    addLog("VECTOR 16 SECURE GATEWAY READY", "success");
-    addLog("Klik RUN VECTOR 16 untuk memulai fuzzing & mengaktifkan login page", "");
-    
-    // Prefill demo credentials hint
-    const usernameField = document.getElementById("username");
-    const passField = document.getElementById("password");
-    if (usernameField && passField) {
-        usernameField.value = "";
-        passField.value = "";
-        // Optional placeholder demo hint
-        usernameField.placeholder = "admin atau user bebas";
-        passField.placeholder = "vector16 atau password bebas";
-    }
-});
-
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-    clearTempIframes();
-    timeoutIds.forEach(id => clearTimeout(id));
-});
+// Initial ready log
+addLog("⚡ VECTOR 16 TURBO EDITION READY", "success");
+addLog("Klik RUN VECTOR 16 → Buka Google Window (0.5s) → Tunggu 1 detik → Fuzzing 2 detik → Login Page", "info");
 </script>
 </body>
 </html>
