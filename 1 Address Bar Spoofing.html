@@ -8,14 +8,34 @@
 </head>
 <body>
 
-<p>click on iframe</a></p>
-<span id="originOutput"></span>
+<p>click on iframe</p>
+
+<span id="originOutput"></span><br>
+<span id="titleOutput"></span><br>
+<span id="nxrOutput"></span><br>
 
 <iframe id="testFrame"></iframe>
 
 <script>
-  originOutput.innerText = window.location.origin;
+  // tampilkan origin
+  originOutput.innerText = "Origin: " + window.location.origin;
 
+  // tampilkan title halaman
+  titleOutput.innerText = "Title: " + document.title;
+
+  // fungsi nxr
+  function nxr() {
+    return {
+      title: document.title,
+      origin: window.location.origin
+    };
+  }
+
+  // tampilkan hasil nxr
+  const data = nxr();
+  nxrOutput.innerText = "NXR -> title: " + data.title + ", origin: " + data.origin;
+
+  // iframe
   var frameUrl = 'https://aogarantiza.com/chromium/js-dialog-origin-spoof-frame.html';
   testFrame.src = frameUrl + window.location.search;
 </script>
