@@ -49,9 +49,9 @@ button:hover{
 
 .stream{
     position:fixed;
-    font-size:12px;
     pointer-events:none;
-    opacity:.8;
+    font-size:12px;
+    opacity:.7;
 }
 
 </style>
@@ -62,11 +62,11 @@ button:hover{
 <div class="container">
 
     <h1 class="glitch">
-        ⚠ QUANTUM VOID ⚠
+        ⚠ ABSURD WINDOW EXPERIMENT ⚠
     </h1>
 
     <p>
-        unstable browser experiment
+        Click to open a “quantum window”
     </p>
 
     <button onclick="openChaos()">
@@ -77,26 +77,12 @@ button:hover{
 
 <script>
 
-const VOID_INTERVALS = [];
-
-function addLoop(fn, speed){
-    VOID_INTERVALS.push(
-        setInterval(fn, speed)
-    );
-}
-
-function randomString(len=8){
-    return Math.random()
-        .toString(36)
-        .substring(2,2+len);
-}
-
 function openChaos(){
 
     const x = window.open(
         "about:blank",
         "_blank",
-        "width=500,height=420"
+        "width=420,height=320"
     );
 
     if(!x){
@@ -104,7 +90,54 @@ function openChaos(){
         return;
     }
 
+    // stage 1
     x.document.write(`
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>LOADING...</title>
+
+<style>
+
+body{
+    background:black;
+    color:lime;
+    font-family:monospace;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h3>
+Initializing portal...
+</h3>
+
+</body>
+
+</html>
+
+    `);
+
+    x.document.close();
+
+    // stage 2
+    setTimeout(() => {
+
+        x.document.open();
+
+        x.document.write(`
 
 <!DOCTYPE html>
 
@@ -114,7 +147,7 @@ function openChaos(){
 
 <meta charset="UTF-8">
 
-<title>INITIALIZING...</title>
+<title>VOID SYSTEM ACTIVE</title>
 
 <style>
 
@@ -136,6 +169,16 @@ body{
     box-shadow:0 0 20px #00ff99;
 }
 
+.glitch{
+    animation:flicker .08s infinite;
+}
+
+@keyframes flicker{
+    0%{opacity:1}
+    50%{opacity:.4}
+    100%{opacity:1}
+}
+
 button{
     padding:10px;
     background:black;
@@ -152,16 +195,6 @@ button{
     opacity:.7;
 }
 
-.glitch{
-    animation:flicker .08s infinite;
-}
-
-@keyframes flicker{
-    0%{opacity:1}
-    50%{opacity:.4}
-    100%{opacity:1}
-}
-
 </style>
 
 </head>
@@ -175,13 +208,13 @@ button{
 </h2>
 
 <p>
-System: unstable recursive node
+System: unstable memory loop detected
 </p>
 
 <p id="addr"></p>
 
 <button onclick="spawn()">
-Spawn Node
+Spawn new window
 </button>
 
 <button onclick="window.close()">
@@ -194,8 +227,10 @@ Terminate
 
 const loops = [];
 
-function add(fn,time){
-    loops.push(setInterval(fn,time));
+function addLoop(fn,time){
+    loops.push(
+        setInterval(fn,time)
+    );
 }
 
 function rand(len=8){
@@ -205,36 +240,26 @@ function rand(len=8){
 }
 
 // address mutation
-add(()=>{
+addLoop(()=>{
 
     document.getElementById("addr")
         .innerHTML =
-        "void://" + rand(12);
+        "address://unknown/" +
+        rand(10);
 
 },300);
 
 // title mutation
-add(()=>{
+addLoop(()=>{
 
     document.title =
-        "VOID_" + rand(6);
+        "VOID://" +
+        rand(6);
 
-},500);
+},600);
 
-// visual corruption
-add(()=>{
-
-    document.body.style.filter =
-        \`
-        hue-rotate(\${Math.random()*360}deg)
-        blur(\${Math.random()*2}px)
-        contrast(\${1+Math.random()*4})
-        \`;
-
-},120);
-
-// floating text spam
-add(()=>{
+// floating random text
+addLoop(()=>{
 
     const div =
         document.createElement("div");
@@ -262,7 +287,7 @@ add(()=>{
 
     document.body.appendChild(div);
 
-    if(document.body.children.length > 180){
+    if(document.body.children.length > 150){
 
         document.body.removeChild(
             document.body.children[3]
@@ -272,11 +297,23 @@ add(()=>{
 
 },40);
 
+// random visual corruption
+addLoop(()=>{
+
+    document.body.style.filter =
+        \`
+        hue-rotate(\${Math.random()*360}deg)
+        blur(\${Math.random()*2}px)
+        contrast(\${1+Math.random()*4})
+        \`;
+
+},120);
+
 // console chaos
-add(()=>{
+addLoop(()=>{
 
     console.log(
-        "%cVOID://" + rand(12),
+        "%cVOID://" + rand(10),
 
         \`
         color:hsl(\${Math.random()*360},100%,50%);
@@ -289,23 +326,21 @@ add(()=>{
 // recursive popup
 function spawn(){
 
-    const weirdData = btoa(
-        "<h1>VOID NODE</h1>" +
-        rand(50)
-    );
+    const weird =
+        btoa(
+            "<h1>VOID NODE</h1>" +
+            rand(50)
+        );
 
     const w = window.open(
-        "data:text/html;base64," +
-        weirdData,
-
+        "data:text/html;base64," + weird,
         "_blank",
-
-        "width=320,height=220"
+        "width=300,height=200"
     );
 
     if(!w) return;
 
-    setTimeout(()=>{
+    setTimeout(() => {
 
         try{
 
@@ -319,12 +354,12 @@ function spawn(){
                 "monospace";
 
             w.document.body.innerHTML +=
-                "<br><br>node stabilized: " +
-                rand(20);
+                "<br><br>recursive node active: " +
+                rand(12);
 
         }catch(e){}
 
-    },700);
+    },800);
 
 }
 
@@ -334,9 +369,12 @@ function spawn(){
 
 </html>
 
-    `);
+        `);
 
-    x.document.close();
+        x.document.close();
+
+    },1800);
+
 }
 
 </script>
