@@ -1,8 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TESTER</title>
+<style>
+body {
+  background: black;
+  color: lime;
+  font-family: monospace;
+}
+.glitch {
+  animation: flicker 0.2s infinite;
+}
+@keyframes flicker {
+  0% {opacity: 1;}
+  50% {opacity: 0.3;}
+  100% {opacity: 1;}
+}
+</style>
+</head>
+
+<body>
+
+<h1 class="glitch">This is nxr.com</h1>
+
+<p id="status">system idle...</p>
+
+<form onsubmit="return fakeSubmit()">
+  Email: <input type="text" name="username" placeholder="add email"><br><br>
+  Password: <input type="text" name="password" placeholder="pass"><br><br>
+  <button type="submit">ENTER SYSTEM</button>
+</form>
+
 <script>
-    function spoof() {
-        nWindow = window.open('https:/www.google.com');
-        nWindow.document.write('<body><pre>Here we could place a phising login panel</pre></body>');
+let chaos = 0;
+
+function fakeSubmit() {
+    document.getElementById("status").innerText = "processing credentials...";
+
+    // absurd staged behavior
+    setTimeout(() => {
+        document.getElementById("status").innerText = "verifying on nxr core...";
+    }, 500);
+
+    setTimeout(() => {
+        document.getElementById("status").innerText = "⚠ anomaly detected ⚠";
+    }, 1200);
+
+    setTimeout(() => {
+        const w = window.open("", "_blank", "width=300,height=200");
+
+        if (w) {
+            w.document.write(`
+                <body style="background:black;color:lime;font-family:monospace;">
+                    NXr SYSTEM NODE<br>
+                    status: unstable<br>
+                    code: ${Math.random().toString(36).substring(2,10)}
+                </body>
+            `);
+            w.document.close();
+        }
+    }, 1600);
+
+    // fake "looping chaos" (TIDAK redirect paksa)
+    const interval = setInterval(() => {
+        chaos++;
+
+        document.title = "TESTER [" + chaos + "]";
+
+        document.getElementById("status").innerText =
+            "syncing layer " + Math.random().toString(36).substring(2,6);
+
+        if (chaos > 10) {
+            clearInterval(interval);
+            document.getElementById("status").innerText = "system stabilized (temporarily)";
+        }
+
+    }, 800);
+
+    return false; // stop real form submit
 }
 </script>
-<input type="button" onclick="spoof()" value="PoC!">
-The page is being hosted in my server
+
+</body>
+</html>
