@@ -1,84 +1,311 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>TESTER</title>
+<meta charset="UTF-8">
+<title>ABSURD WINDOW.OPEN CHAOS</title>
+
 <style>
-body {
-  background: black;
-  color: lime;
-  font-family: monospace;
+html,body{
+    margin:0;
+    background:black;
+    overflow:hidden;
+    font-family:monospace;
+    color:#0f0;
 }
-.glitch {
-  animation: flicker 0.2s infinite;
+
+canvas{
+    position:fixed;
+    inset:0;
 }
-@keyframes flicker {
-  0% {opacity: 1;}
-  50% {opacity: 0.3;}
-  100% {opacity: 1;}
+
+#center{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    z-index:999;
+}
+
+button{
+    background:#111;
+    color:#0f0;
+    border:1px solid #0f0;
+    padding:20px;
+    cursor:pointer;
+    font-size:20px;
+}
+
+h1{
+    font-size:50px;
+    animation:spin 3s infinite linear;
+}
+
+@keyframes spin{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
 }
 </style>
 </head>
-
 <body>
 
-<h1 class="glitch">This is nxr.com</h1>
+<canvas id="c"></canvas>
 
-<p id="status">system idle...</p>
-
-<form onsubmit="return fakeSubmit()">
-  Email: <input type="text" name="username" placeholder="add email"><br><br>
-  Password: <input type="text" name="password" placeholder="pass"><br><br>
-  <button type="submit">ENTER SYSTEM</button>
-</form>
+<div id="center">
+    <h1>𓀐𓂸𓆏 CHAOS ENGINE 𓆉</h1>
+    <button onclick="startChaos()">OPEN THE VOID</button>
+</div>
 
 <script>
-let chaos = 0;
+const ctx = c.getContext("2d");
+c.width = innerWidth;
+c.height = innerHeight;
 
-function fakeSubmit() {
-    document.getElementById("status").innerText = "processing credentials...";
+function matrix(){
+    ctx.fillStyle="rgba(0,0,0,0.05)";
+    ctx.fillRect(0,0,c.width,c.height);
 
-    // absurd staged behavior
-    setTimeout(() => {
-        document.getElementById("status").innerText = "verifying on nxr core...";
-    }, 500);
+    ctx.fillStyle="#0f0";
 
-    setTimeout(() => {
-        document.getElementById("status").innerText = "⚠ anomaly detected ⚠";
-    }, 1200);
+    for(let i=0;i<50;i++){
+        ctx.fillText(
+            Math.random().toString(36),
+            Math.random()*c.width,
+            Math.random()*c.height
+        );
+    }
 
-    setTimeout(() => {
-        const w = window.open("g00gole,com:csi", "_blank", "width=300,height=200");
-
-        if (w) {
-            w.document.write(`
-                <body style="background:black;color:lime;font-family:monospace;">
-                    NXr SYSTEM NODE<br>
-                    status: unstable<br>
-                    code: ${Math.random().toString(36).substring(2,10)}
-                </body>
-            `);
-            w.document.close();
-        }
-    }, 1600);
-
-    // fake "looping chaos" (TIDAK redirect paksa)
-    const interval = setInterval(() => {
-        chaos++;
-
-        document.title = "TESTER [" + chaos + "]";
-
-        document.getElementById("status").innerText =
-            "syncing layer " + Math.random().toString(36).substring(2,6);
-
-        if (chaos > 10) {
-            clearInterval(interval);
-            document.getElementById("status").innerText = "system stabilized (temporarily)";
-        }
-
-    }, 800);
-
-    return false; // stop real form submit
+    requestAnimationFrame(matrix);
 }
+
+matrix();
+
+function cursedDataURL(){
+
+    const weird = unescape("%u2620%u0BF5%u0A9E%u202E");
+
+    const payload = `
+    <html>
+    <body style="background:black;color:lime;font-family:monospace">
+
+    <h1>${weird} DATA://VOID ${Math.random()}</h1>
+
+    <script>
+
+    document.body.innerHTML += "<pre>" + navigator.userAgent + "</pre>";
+
+    setInterval(()=>{
+
+        document.body.innerHTML += (
+            Math.random().toString(36) +
+            "${weird}" +
+            performance.now() +
+            "<br>"
+        );
+
+        document.body.style.transform =
+            "rotate(" + Math.random()*360 + "deg)";
+
+    },10);
+
+    setInterval(()=>{
+        history.pushState(
+            {},
+            "",
+            Math.random().toString(36)
+        );
+    },5);
+
+    </script>
+
+    </body>
+    </html>
+    `;
+
+    return "data:text/html;charset=x-user-defined;base64," +
+        btoa(unescape(encodeURIComponent(payload)));
+}
+
+function weirdFeatureString(){
+
+    return [
+        "width=" + (Math.random()*99999),
+        "height=-99999",
+        "left=Infinity",
+        "top=NaN",
+        "popup=yes",
+        "resizable=maybe",
+        "toolbar=𓂸",
+        "status=🫠"
+    ].join(",");
+}
+
+function recursiveMadness(depth){
+
+    if(depth <= 0) return;
+
+    const target =
+        "𓀀" +
+        Math.random().toString(36) +
+        "\u202E";
+
+    try{
+
+        const w = window.open(
+            cursedDataURL(),
+            target,
+            weirdFeatureString()
+        );
+
+        if(w){
+
+            setTimeout(()=>{
+
+                try{
+                    w.document.write(`
+                    <style>
+                    body{
+                        background:black;
+                        color:red;
+                        font-family:monospace;
+                    }
+                    </style>
+
+                    <h1>
+                    VOID INSTANCE ${depth}
+                    </h1>
+
+                    <script>
+                    setInterval(()=>{
+                        document.body.innerHTML +=
+                        Math.random()+"<br>";
+                    },1)
+                    <\/script>
+                    `);
+                }catch(e){}
+
+            },500);
+
+        }
+
+    }catch(e){
+        console.log(e);
+    }
+
+    setTimeout(()=>{
+        recursiveMadness(depth-1);
+    },100);
+
+}
+
+function garbageEncodingExplosion(){
+
+    const weirdStrings = [
+        "%FF%FE%00%00",
+        "%uFFFF",
+        "%C0%AF",
+        "\u202E",
+        "\u0000",
+        "\uD800",
+        "𓂸",
+        "🫠"
+    ];
+
+    setInterval(()=>{
+
+        const div = document.createElement("div");
+
+        div.innerHTML =
+            weirdStrings[
+                Math.floor(Math.random()*weirdStrings.length)
+            ] +
+            Math.random();
+
+        div.style.position = "absolute";
+        div.style.left = Math.random()*innerWidth + "px";
+        div.style.top = Math.random()*innerHeight + "px";
+        div.style.color =
+            "hsl(" + Math.random()*360 + ",100%,50%)";
+
+        div.style.fontSize =
+            (10 + Math.random()*100) + "px";
+
+        div.style.transform =
+            "rotate(" + Math.random()*360 + "deg)";
+
+        document.body.appendChild(div);
+
+        if(document.body.children.length > 500){
+            document.body.removeChild(
+                document.body.children[5]
+            );
+        }
+
+    },5);
+
+}
+
+function titleCorruption(){
+
+    setInterval(()=>{
+
+        document.title =
+            Math.random()
+            .toString(36)
+            .repeat(5)
+            + "\u202E"
+            + "𓀐𓂸𓆏";
+
+    },50);
+
+}
+
+function startChaos(){
+
+    garbageEncodingExplosion();
+
+    recursiveMadness(15);
+
+    titleCorruption();
+
+    setInterval(()=>{
+
+        try{
+            history.pushState(
+                {},
+                "",
+                "/" + Math.random().toString(36)
+            );
+        }catch(e){}
+
+    },20);
+
+    setInterval(()=>{
+
+        document.body.style.filter =
+            `
+            hue-rotate(${Math.random()*360}deg)
+            blur(${Math.random()*5}px)
+            invert(${Math.random()})
+            `;
+
+    },50);
+
+    setInterval(()=>{
+
+        console.log(
+            "%cVOID://ERROR_" +
+            Math.random(),
+            `
+            color:hsl(${Math.random()*360},100%,50%);
+            font-size:${20+Math.random()*50}px;
+            `
+        );
+
+    },10);
+
+}
+
 </script>
 
 </body>
