@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Sign in - Your Account (Educational Demo)</title>
+  <!-- Google Fonts: Product Sans (similar to Google's interface) -->
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 (free icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ffffff;
+      font-family: 'Google Sans', 'Segoe UI', Roboto, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    /* Main card container - exactly like Google's material design */
+    .google-card {
+      max-width: 450px;
+      width: 100%;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 48px 40px 36px;
+      transition: box-shadow 0.2s ease;
+    }
+
+    /* --- FAKE ALERT BANNER - unmistakable warning --- */
+    .warning-banner {
+      background-color: #fef7e0;
+      border-left: 5px solid #f9ab00;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #b06000;
+      font-family: monospace;
+      letter-spacing: 0.3px;
+    }
+
+    .warning-banner i {
+      font-size: 1.3rem;
+      color: #e37400;
+    }
+
+    .warning-banner span {
+      font-weight: 700;
+      text-transform: uppercase;
+      background: #ffecb3;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      margin-left: 6px;
+    }
+
+    .warning-text {
+      line-height: 1.4;
+      font-family: 'Google Sans', monospace;
+    }
+
+    /* Google logo area */
+    .logo-area {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .google-icon {
+      font-size: 2.2rem;
+      display: inline-flex;
+      gap: 8px;
+      background: white;
+      padding: 0 8px;
+    }
+
+    .fake-badge {
+      font-size: 0.7rem;
+      background: #f1f3f4;
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 30px;
+      font-weight: 500;
+      margin-top: 8px;
+      color: #5f6368;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 400;
+      margin: 16px 0 8px 0;
+      color: #202124;
+      text-align: center;
+      font-family: 'Google Sans', Roboto;
+    }
+
+    .sub {
+      text-align: center;
+      color: #5f6368;
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+
+    /* Input group - floating label style (Google inspired) */
+    .input-group {
+      position: relative;
+      margin-bottom: 28px;
+      width: 100%;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 13px 15px;
+      font-size: 1rem;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      outline: none;
+      transition: all 0.2s;
+      font-family: 'Google Sans', Roboto;
+      background: #fff;
+    }
+
+    .input-group input:focus {
+      border-color: #1a73e8;
+      border-width: 2px;
+      padding: 12px 14px;
+    }
+
+    .input-group label {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      padding: 0 5px;
+      color: #5f6368;
+      font-size: 1rem;
+      pointer-events: none;
+      transition: 0.2s ease all;
+    }
+
+    .input-group input:focus ~ label,
+    .input-group input:not(:placeholder-shown) ~ label {
+      top: 0px;
+      font-size: 0.75rem;
+      color: #1a73e8;
+      background: white;
+    }
+
+    /* For email/phone and password fields */
+    .input-group input::placeholder {
+      opacity: 0;
+    }
+
+    /* Forgot email link */
+    .forgot-link {
+      text-align: right;
+      margin-bottom: 24px;
+    }
+
+    .forgot-link a {
+      color: #1a73e8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .forgot-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* Action buttons row */
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .create-account {
+      background: none;
+      border: none;
+      color: #1a73e8;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-family: 'Google Sans', Roboto;
+      transition: background 0.2s;
+    }
+
+    .create-account:hover {
+      background: #e8f0fe;
+    }
+
+    .next-btn {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 9px 24px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      font-family: 'Google Sans', Roboto;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .next-btn:hover {
+      background: #1765cc;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    /* extra separator */
+    .divider {
+      margin: 32px 0 24px;
+      border-top: 1px solid #e8eaed;
+    }
+
+    /* language & help footer (like google) */
+    .footer-links {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.75rem;
+      color: #5f6368;
+      margin-top: 20px;
+    }
+
+    .footer-links a {
+      color: #5f6368;
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* modal / toast for demo feedback */
+    .toast-message {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #202124;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .toast-message.show {
+      opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .google-card {
+        padding: 32px 24px 28px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Additional "NOT GOOGLE" micro text */
+    .security-note {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.7rem;
+      color: #aaadb1;
+      border-top: 1px solid #f1f3f4;
+      padding-top: 20px;
+    }
+
+    .security-note strong {
+      color: #d93025;
+      font-weight: 700;
+    }
+
+    input:focus {
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="google-card">
+  <!-- PROMINENT FAKE WARNING - unmistakable -->
+  <div class="warning-banner">
+    <i class="fas fa-exclamation-triangle"></i>
+    <div class="warning-text">
+      ⚠️ <strong>THIS IS NOT GOOGLE</strong> — Educational simulation only.
+      <span>PHISHING AWARENESS</span>
+    </div>
+  </div>
+
+  <!-- Logo area (styled like Google) -->
+  <div class="logo-area">
+    <div class="google-icon">
+      <i class="fab fa-google" style="color:#4285F4;"></i>
+      <i class="fab fa-google" style="color:#EA4335;"></i>
+      <i class="fab fa-google" style="color:#FBBC05;"></i>
+      <i class="fab fa-google" style="color:#34A853;"></i>
+    </div>
+    <div class="fake-badge">
+      <i class="fas fa-shield-alt"></i> Demo environment
+    </div>
+  </div>
+
+  <h1>Sign in</h1>
+  <div class="sub">to continue to your demo account</div>
+
+  <!-- Form with fake login simulation -->
+  <form id="loginForm">
+    <!-- Email field -->
+    <div class="input-group">
+      <input type="email" id="email" placeholder=" " autocomplete="off" required>
+      <label for="email">Email or phone</label>
+    </div>
+
+    <!-- Password field -->
+    <div class="input-group">
+      <input type="password" id="password" placeholder=" " autocomplete="off" required>
+      <label for="password">Password</label>
+    </div>
+
+    <!-- Forgot email? link -->
+    <div class="forgot-link">
+      <a href="#" id="forgotLink">Forgot email?</a>
+    </div>
+
+    <!-- Action row -->
+    <div class="action-buttons">
+      <button type="button" class="create-account" id="createAccountBtn">Create account</button>
+      <button type="submit" class="next-btn">Next</button>
+    </div>
+  </form>
+
+  <div class="divider"></div>
+
+  <!-- Footer / language selector style (fake google) -->
+  <div class="footer-links">
+    <div>English (United States)</div>
+    <div>
+      <a href="#">Help</a> &nbsp;|&nbsp;
+      <a href="#">Privacy</a> &nbsp;|&nbsp;
+      <a href="#">Terms</a>
+    </div>
+  </div>
+
+  <div class="security-note">
+    🔒 <strong>Educational warning:</strong> This is a fake login page designed to resemble Google's interface. No real data is collected.
+    Your credentials are not stored or sent anywhere.
+  </div>
+</div>
+
+<!-- Toast notifier for demo actions -->
+<div id="demoToast" class="toast-message">
+  <i class="fas fa-info-circle"></i> <span id="toastText"></span>
+</div>
+
+<script>
+  (function() {
+    // DOM elements
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginForm = document.getElementById('loginForm');
+    const createBtn = document.getElementById('createAccountBtn');
+    const forgotLink = document.getElementById('forgotLink');
+    const toast = document.getElementById('demoToast');
+    const toastText = document.getElementById('toastText');
+
+    // Helper: show toast notification for 3 seconds
+    function showToast(message, isError = false) {
+      toastText.innerText = message;
+      toast.classList.add('show');
+      // optional: change icon or color based on type, but simple is fine
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Helper: clear input fields after demo (optional)
+    function resetForm() {
+      emailInput.value = '';
+      passwordInput.value = '';
+      // trigger floating label correction: need to dispatch input event
+      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+      passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    // Simulate "Next" click: educative log + warning demonstration
+    function handleLoginSubmit(event) {
+      event.preventDefault();
+      
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      
+      // Demo validation
+      if (email === "") {
+        showToast("⚠️ Please enter an email (demo mode). No data is saved.", false);
+        emailInput.focus();
+        return;
+      }
+      
+      if (password === "") {
+        showToast("🔐 Password field is required (demo only). No credentials are transmitted.", false);
+        passwordInput.focus();
+        return;
+      }
+      
+      // Show a clear educational message that this is a fake login
+      // In a real phishing scenario, but we make user aware
+      showToast(`🚨 EDUCATIONAL ALERT: This is a fake Google login simulation. Your demo input "${email}" was not sent anywhere. Stay safe!`, false);
+      
+      // Also create a console log for web developers / transparency
+      console.warn("⚠️ [SECURITY DEMO] Fake login attempt. Email:", email, "Password: [REDACTED] - This is a simulation only.");
+      
+      // Optional: display a second more detailed alert after short delay (non-intrusive but informative)
+      setTimeout(() => {
+        const secondMsg = `✅ SIMULATION MODE: Google would normally verify credentials. Remember: never enter real passwords on unfamiliar sites.`;
+        showToast(secondMsg, false);
+      }, 2500);
+      
+      // For ethical simulation, we don't store or send any data. 
+      // We just inform and optionally clear after 3 seconds? 
+      // But for UX, not clearing automatically to allow retry. 
+      // We could also optionally reset but that might confuse: leave as is, highlight warning.
+      
+      // Add extra emphasis: show large warning in toast, also flash warning banner
+      const warningBanner = document.querySelector('.warning-banner');
+      warningBanner.style.transition = 'background 0.2s';
+      warningBanner.style.backgroundColor = '#fff3e0';
+      setTimeout(() => {
+        warningBanner.style.backgroundColor = '#fef7e0';
+      }, 500);
+    }
+    
+    // "Create account" demo action
+    function handleCreateAccount() {
+      showToast("📝 'Create account' is a demo link. Real Google would redirect to sign-up. This is a simulation page.", false);
+      // Additional fun: minor animation on card
+      const card = document.querySelector('.google-card');
+      card.style.transform = 'scale(1.01)';
+      setTimeout(() => { card.style.transform = ''; }, 200);
+    }
+    
+    // Forgot email demo action
+    function handleForgotEmail(e) {
+      e.preventDefault();
+      showToast("🔍 'Forgot email?' demo: In a real Google login, account recovery would be offered. This is a simulation to raise awareness.", false);
+    }
+    
+    // Event listeners
+    loginForm.addEventListener('submit', handleLoginSubmit);
+    createBtn.addEventListener('click', handleCreateAccount);
+    forgotLink.addEventListener('click', handleForgotEmail);
+    
+    // Additional UI improvements: For input floating labels to work properly when fields are autofilled or empty.
+    // We manually sync placeholder visibility so label acts right. Since we use :placeholder-shown, set placeholder to ' ' works fine.
+    // Also force a dummy input event on page load to ensure labels if fields have browser autofill.
+    window.addEventListener('load', () => {
+      if (emailInput.value) {
+        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      if (passwordInput.value) {
+        passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      
+      // Show initial toast for awareness? small note but not intrusive
+      setTimeout(() => {
+        showToast("🔔 This is a simulated Google login page — it's NOT official Google. Educational demo only.", false);
+      }, 800);
+    });
+    
+    // Add extra event logging to emphasize the page's purpose if user tries to click outside
+    document.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        // Only for footer links, we might override the real href to show toast? 
+        // But we want to keep the UI semi-functional but not actually redirect to real Google policies.
+        // For "Help", "Privacy", "Terms" inside footer - we will show a demo toast instead of actual navigation
+        if (link.closest('.footer-links')) {
+          e.preventDefault();
+          const linkText = link.innerText.trim();
+          showToast(`📖 "${linkText}" link is part of this interface clone. Real Google would have official policies. This simulation shows how phishing works.`, false);
+        }
+      });
+    });
+    
+    // Also adds a dynamic message when focusing on password field: small reminder
+    passwordInput.addEventListener('focus', () => {
+      // subtle reminder (optional)
+      const bannerMsg = document.querySelector('.warning-banner .warning-text');
+      // but don't spam too much, just subtle
+    });
+    
+    // For pure fun, also simulate "Next" button with additional console context
+    console.log("%c🚨 STOP! This is a fake Google login page for educational purposes only. Never enter your real credentials on untrusted pages.", "color: red; font-size: 16px; font-weight: bold;");
+    console.log("%cThis interface is designed to mimic Google’s sign-in UI to educate about phishing attacks. No data is stored or sent.", "color: #1a73e8;");
+  })();
+</script>
+</body>
+</html>
