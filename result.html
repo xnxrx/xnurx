@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Scan Result - Shared by User</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0f1e 0%, #0d1a2a 100%);
+            font-family: monospace;
+            padding: 40px;
+            color: #00ff88;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.8);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #00ff88;
+        }
+        h1 { color: #00ff88; }
+        .critical { color: #ff4444; }
+        .warning { color: #ffaa44; }
+        .safe { color: #00ff88; }
+        pre {
+            background: #0a0f1e;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        button {
+            background: #00ff88;
+            color: #0a0f1e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔍 OAuth Security Scan Result</h1>
+    <div id="result"></div>
+    <button onclick="window.location.href='index.html'">← Scan Lagi</button>
+</div>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const data = params.get('data');
+    if (data) {
+        const decoded = JSON.parse(atob(data));
+        document.getElementById('result').innerHTML = `
+            <p><strong>Target URL:</strong> ${decoded.url}</p>
+            <p><strong>Risk Level:</strong> <span class="${decoded.riskLevel.toLowerCase()}">${decoded.riskLevel}</span></p>
+            <p><strong>postMessage Ditemukan:</strong> ${decoded.hasPostMessage ? '✅ YA' : '❌ TIDAK'}</p>
+            <p><strong>Wildcard Target (*):</strong> ${decoded.hasWildcard ? '⚠️ YA (BERBAHAYA!)' : 'TIDAK'}</p>
+            <p><strong>Mengirim location.href:</strong> ${decoded.sendsLocation ? '⚠️ YA (BERBAHAYA!)' : 'TIDAK'}</p>
+            <p><strong>Bisa di-iframe:</strong> ${decoded.canIframe ? '⚠️ YA (Berpotensi)' : 'TIDAK'}</p>
+            <hr>
+            <h3>📋 Rekomendasi:</h3>
+            <pre>${decoded.recommendation}</pre>
+            <p><small>Scan time: ${new Date(decoded.timestamp).toLocaleString()}</small></p>
+        `;
+    }
+</script>
+</body>
+</html>
