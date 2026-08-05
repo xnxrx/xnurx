@@ -1,0 +1,122 @@
+<!-- UXSS: ancestorOrigins bersarang — iframe di dalam iframe; tiap tingkat membaca SELURUH pelapor identitasnya, lalu diuji apakah tingkat tengah bisa memengaruhi apa yang dilihat tingkat terdalam. -->
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>33 — ancestorOrigins bersarang: garis keturunan yang jujur vs yang bisa dipilih</title>
+<style>
+body{font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:16px;background:#0e1116;color:#dfe6ef}
+h2{margin:0 0 12px;font-size:19px;line-height:1.3}
+section{border:1px solid #2a3240;border-radius:8px;padding:10px 12px;margin:10px 0;background:#151a22}
+b.tag{display:inline-block;min-width:74px;color:#7fd1ff}
+button{font:13px system-ui;padding:8px 12px;margin:4px 6px 4px 0;border:1px solid #3a4658;background:#1e2733;color:#e8eef6;border-radius:6px;cursor:pointer}
+button.ctl{border-color:#3f7a55;color:#bfe6c8}
+code{font-family:ui-monospace,Consolas,monospace;color:#ffd79a;word-break:break-all}
+table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12.5px}
+td,th{border:1px solid #2a3240;padding:4px 7px;text-align:left;vertical-align:top;font-family:ui-monospace,Consolas,monospace;word-break:break-all}
+th{color:#7fd1ff;font-family:system-ui}
+caption{text-align:left;color:#ffd79a;padding:4px 0;font-family:system-ui}
+.small{color:#93a2b5;font-size:12.5px}
+.warn{color:#ffb37a}
+.ok{color:#bfe6c8}
+#nest{margin:10px 0}
+</style>
+
+<h2>33 — ancestorOrigins BERSARANG: apakah tingkat terdalam melihat garis keturunan yang JUJUR?</h2>
+
+<section><b class="tag">PAGAR</b> <code>location.ancestorOrigins</code> adalah satu-satunya pelapor identitas yang menyatakan <b>garis keturunan</b>, bukan diri sendiri: daftar origin seluruh browsing context di atas dokumen ini, terurut dari induk terdekat ke paling atas. Kontraknya: daftar itu <b>diturunkan dari struktur pohon yang sebenarnya</b> dan <b>tidak bisa ditulis</b> oleh siapa pun — termasuk oleh tingkat tengah yang membuat tingkat terdalam. Karena itu banyak kode (widget pembayaran, SDK iklan, WebView host) memakainya sebagai gerbang “aku disematkan oleh siapa”.</section>
+
+<section><b class="tag">CELAH</b> Di sebelah <code>ancestorOrigins</code> duduk dua pelapor yang <b>terlihat mirip</b> tetapi sepenuhnya dipilih oleh pembuat: <code>document.referrer</code> (URL dokumen pembuat, bisa dipangkas/dikosongkan) dan <code>window.name</code> (string bebas yang ditetapkan lewat atribut <code>name</code> iframe atau <code>window.open</code>). Berkas ini menaruh ketiganya <b>dalam satu tabel</b> dan menyuruh tingkat TENGAH mencoba memengaruhi apa yang dilihat tingkat TERDALAM. Yang berubah = pelapor yang tak boleh dipercaya; yang tidak berubah = pelapor yang memang mengikat. Kalau <code>ancestorOrigins</code> ikut berubah, itu seam.</section>
+
+<section><b class="tag">INDUK</b>
+<div><code>location.href</code> halaman induk (tingkat 0): <code id="href"></code></div>
+<div><code>window.origin</code> halaman induk: <code id="orig"></code></div>
+</section>
+
+<section><b class="tag">UJI</b>
+<button onclick="build(0)">Bangun sarang NETRAL — tingkat 0 → 1 → 2</button>
+<button onclick="build(1)">MUTASI — tingkat 1 mengganti window.name-nya sendiri lalu memilih nama tingkat 2</button>
+<button class="ctl" onclick="control()">KONTROL — satu iframe saja (tanpa tingkat 2)</button>
+<div class="small">Tiap tingkat mencetak matriks pelapornya di dalam bingkainya sendiri; ringkasan tiga tingkat + vonis muncul di bawah.</div>
+</section>
+
+<div id="nest"></div>
+<div id="out"></div>
+
+<section><b class="tag">ORACLE</b>
+<div><b>SEHARUSNYA (spec):</b> di tingkat 2, <code>ancestorOrigins</code> berisi <b>tepat 2 entri</b> — <code>0:</code> origin tingkat 1, lalu <code>1:</code> origin tingkat 0 — dan karena keduanya dokumen <code>about:blank</code> yang mewarisi, keduanya = origin berkas ini. Nilai itu <b>tidak boleh berubah</b> oleh mutasi tingkat 1. Sebaliknya <code>window.name</code> tingkat 2 <b>memang boleh</b> berubah (pembuat yang memilihnya), dan <code>referrer</code> boleh kosong.</div>
+<div><b>SEAM (temuan) bila:</b> jumlah entri <code>ancestorOrigins</code> berkurang (satu tingkat hilang dari silsilah) · isinya berubah setelah mutasi tingkat 1 · atau memuat origin yang bukan origin nyata dari tingkat di atasnya.</div>
+<div class="ok"><b>SESUAI SPEC</b> adalah hasil yang sah: catat engine + versi, dan catat juga bahwa di <b>Gecko</b> pelapor ini <b>tidak diimplementasi</b> — kode yang menggerbangi keputusan dengan <code>ancestorOrigins</code> di sana gagal-terbuka tanpa suara. Itu temuan sisi-aplikasi, bukan sisi-browser.</div>
+</section>
+
+<section><b class="tag">KONTROL</b> Tombol hijau membangun <b>satu</b> tingkat saja. Bandingkan panjang <code>ancestorOrigins</code>-nya (harus 1 entri) dengan sarang dua tingkat (harus 2). Tanpa baseline ini, “daftarnya benar” hanyalah kesan.</section>
+
+<section class="small"><b class="tag">CATATAN</b> Di <code>file://</code> sebagian browser memberi tiap berkas origin buram sehingga kolom tingkat 1/2 bisa berisi <code>DILARANG</code>; buka lewat <code>https://xnxrx.github.io/xnurx/33.html</code> untuk hasil yang sebenarnya. Tanpa jaringan, tanpa formulir; cookie hanya milik origin sendiri dan ditampilkan terpotong 40 karakter.</section>
+
+<script>
+var store={},mode='NETRAL';
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function table(rows,cap){var h='<table><caption>'+esc(cap)+'</caption><tr><th>pelapor</th><th>nilai</th></tr>',i;for(i=0;i<rows.length;i++)h+='<tr><td>'+esc(rows[i][0])+'</td><td>'+esc(rows[i][1])+'</td></tr>';return h+'</table>';}
+function sty(){return '<style>body{font:13px system-ui;background:#0b0e13;color:#dfe6ef;padding:10px}h3{color:#7fd1ff;margin:0 0 6px}table{border-collapse:collapse;width:100%;margin:6px 0;font-size:12px}td,th{border:1px solid #2a3240;padding:3px 6px;text-align:left;vertical-align:top;font-family:ui-monospace,Consolas,monospace;word-break:break-all}th{color:#7fd1ff;font-family:system-ui}caption{text-align:left;color:#ffd79a;padding:3px 0;font-family:system-ui}.bad{color:#ffb37a}</style>';}
+function probe(){var r=[],D=document,W=window;
+ function t(k,f){var v;try{v=f();}catch(e){v='DILARANG: '+e.name;}if(v===undefined||v===null||v==='')v='(kosong)';r.push([k,String(v)]);}
+ t('location.ancestorOrigins',function(){var a=location.ancestorOrigins,s=[],i;if(!a)return 'tidak didukung (Gecko)';for(i=0;i<a.length;i++)s.push(i+':'+a[i]);return s.length?('['+a.length+' entri] '+s.join(' | ')):'[0 entri] (kosong — dokumen puncak)';});
+ t('document.referrer',function(){return D.referrer;});
+ t('window.name',function(){return W.name;});
+ t('location.href',function(){return location.href;});
+ t('window.origin',function(){return W.origin===undefined?'tidak didukung':W.origin;});
+ t('document.URL',function(){return D.URL;});
+ t('document.baseURI',function(){return D.baseURI;});
+ t('document.domain',function(){return D.domain;});
+ t('window.parent === window',function(){return W.parent===W?'ya (puncak)':'tidak (bersarang)';});
+ t('baca DOM induk',function(){return parent.document.title?('judul induk: '+parent.document.title.substring(0,40)):'(tanpa judul)';});
+ t('URL di error stack',function(){try{null.x;}catch(e){var m=String(e.stack||'').match(/(?:file|https?|blob|data|about):[^\s)]+/);return m?m[0]:'(tak ada URL di stack)';}});
+ t('nama entri performance',function(){if(!W.performance||!performance.getEntriesByType)return 'tidak didukung';var e=performance.getEntriesByType('navigation')[0]||performance.getEntriesByType('resource')[0];return e?e.name:'(tak ada entri)';});
+ t('kunci storage',function(){localStorage.setItem('u33','1');localStorage.removeItem('u33');return 'localStorage terbuka (kunci = origin dokumen)';});
+ t('scope service worker',function(){if(!navigator.serviceWorker)return 'tidak didukung';return navigator.serviceWorker.controller?navigator.serviceWorker.controller.scriptURL:'(tak ada controller)';});
+ t('document.cookie',function(){var c=D.cookie;return c?('['+c.length+' char] '+c.substring(0,40)):'(kosong)';});
+ t('import.meta.url',function(){return 'tidak didukung (skrip klasik, bukan modul)';});
+ return r;}
+function boot(level,mut){var d=document,T=window,f,lib;
+ if(level===1&&mut)window.name='NAMA-BARU-DIPILIH-TINGKAT-1';
+ d.write(sty()+'<h3>tingkat '+level+' — about:blank di dalam '+(level===1?'halaman induk':'tingkat 1')+(mut?' · MODE MUTASI':'')+'</h3>');
+ d.write(table(probe(),'matriks pelapor tingkat '+level));
+ if(level===1){d.write('<iframe name="'+(mut?'NAMA-ANAK-DIPILIH-TINGKAT-1':'anak-netral')+'" src="about:blank" style="width:100%;height:330px;border:1px solid #3a4658;background:#0b0e13"></iframe>');}
+ d.close();
+ try{while(T!==T.parent)T=T.parent;T.collect('L'+level,probe());}catch(e){}
+ if(level===1){f=d.getElementsByTagName('iframe')[0];lib=''+esc+table+probe+sty+boot;
+  setTimeout(function(){var cd;try{cd=f.contentDocument;}catch(e){cd=null;}
+   if(!cd){d.body.innerHTML+='<p class="bad">contentDocument tingkat 2 tidak bisa diakses (origin buram?).</p>';return;}
+   cd.write('<scr'+'ipt>'+lib+';boot(2,'+(mut?1:0)+')</scr'+'ipt>');cd.close();},0);}
+ else{try{T.postMessage('halo-dari-tingkat-2','*');}catch(e){}}}
+function collect(k,rows){store[k]=rows;render();}
+function val(rows,n){var i;if(!rows)return '(belum)';for(i=0;i<rows.length;i++)if(rows[i][0]===n)return rows[i][1];return '—';}
+function render(){var keys=['L0','L1','L2'],names=[],seen={},i,j,rs,h='';
+ for(i=0;i<keys.length;i++){rs=store[keys[i]]||[];for(j=0;j<rs.length;j++)if(!seen[rs[j][0]]){seen[rs[j][0]]=1;names.push(rs[j][0]);}}
+ h+='<table><caption>matriks pelapor TIGA TINGKAT ('+mode+') — tingkat 0 = halaman ini · tingkat 1 = iframe · tingkat 2 = iframe di dalam iframe</caption><tr><th>pelapor</th><th>tingkat 0</th><th>tingkat 1</th><th>tingkat 2</th></tr>';
+ for(i=0;i<names.length;i++){h+='<tr><td>'+esc(names[i])+'</td>';for(j=0;j<3;j++)h+='<td>'+esc(val(store[keys[j]],names[i]))+'</td>';h+='</tr>';}
+ h+='</table>';
+ if(store.MSG)h+=table(store.MSG,'origin pesan postMessage yang diterima tingkat 0 dari tingkat 2');
+ document.getElementById('out').innerHTML=h+verdict();}
+function verdict(){var a2=val(store.L2,'location.ancestorOrigins'),n2=val(store.L2,'window.name'),o0=val(store.L0,'window.origin'),ok;
+ if(!store.L2)return '<p class="warn"><b>VONIS:</b> menunggu tingkat 2 — klik salah satu tombol UJI.</p>';
+ if(a2.indexOf('tidak didukung')===0)return '<p><b>SEHARUSNYA:</b> 2 entri berisi <code>'+esc(o0)+'</code>.<br><b>TERAMATI:</b> '+esc(a2)+'.<br><b>VONIS:</b> <span class="ok">SESUAI SPEC untuk engine ini — bukan temuan browser.</span> Gecko tidak mengimplementasi <code>ancestorOrigins</code>; catat sebagai ilmu-negatif, dan ingat bahwa aplikasi yang menggerbangi keputusan dengannya <b>gagal-terbuka</b> di sini (itu temuan sisi-aplikasi).</p>';
+ ok=a2.indexOf('[2 entri]')===0&&a2.indexOf(o0)>0;
+ return '<p><b>SEHARUSNYA (spec):</b> <code>ancestorOrigins</code> tingkat 2 = <b>2 entri</b>, keduanya <code>'+esc(o0)+'</code> (about:blank mewarisi), dan <b>tidak berubah</b> oleh apa pun yang dilakukan tingkat 1; <code>window.name</code> tingkat 2 <b>boleh</b> dipilih pembuatnya.<br><b>TERAMATI:</b> ancestorOrigins = <code>'+esc(a2)+'</code> · window.name tingkat 2 = <code>'+esc(n2)+'</code>.<br><b>VONIS:</b> '+(ok?'<span class="ok">SESUAI SPEC — bukan temuan.</span> Jalankan kedua tombol berurutan: kalau hanya <code>window.name</code> (dan mungkin <code>referrer</code>) yang bergeser sementara <code>ancestorOrigins</code> tetap, silsilahnya jujur dan yang bisa dipalsukan hanyalah pelapor yang memang bisa ditulis.':'<span class="warn">BERSELISIH — jumlah/isi entri menyimpang. Persempit sampai tersisa satu mekanisme lalu laporkan ke VRP engine terkait.</span>')+'</p>';}
+function build(mut){var box=document.getElementById('nest'),f,lib;
+ mode=mut?'MUTASI':'NETRAL';store={L0:probe()};
+ box.innerHTML='<iframe id="f1" name="'+(mut?'NAMA-L1-DIPILIH-INDUK':'l1-netral')+'" src="about:blank" style="width:100%;height:680px;border:1px solid #3a4658;background:#0b0e13"></iframe>';
+ f=document.getElementById('f1');lib=''+esc+table+probe+sty+boot;render();
+ setTimeout(function(){var cd;try{cd=f.contentDocument;}catch(e){cd=null;}
+  if(!cd){document.getElementById('out').innerHTML='<p class="warn">contentDocument tidak bisa diakses (origin buram di file://?) — buka lewat https.</p>';return;}
+  cd.write('<scr'+'ipt>'+lib+';boot(1,'+(mut?1:0)+')</scr'+'ipt>');cd.close();},0);}
+function control(){var box=document.getElementById('nest'),f,lib;mode='KONTROL 1 TINGKAT';store={L0:probe()};
+ box.innerHTML='<iframe id="f1" name="kontrol" src="about:blank" style="width:100%;height:340px;border:1px solid #3f7a55;background:#0b0e13"></iframe>';
+ f=document.getElementById('f1');lib=''+esc+table+probe+sty;render();
+ setTimeout(function(){var cd;try{cd=f.contentDocument;}catch(e){cd=null;}if(!cd)return;
+  cd.write('<scr'+'ipt>'+lib+';document.write(sty()+"<h3>kontrol — satu tingkat saja</h3>"+table(probe(),"matriks pelapor kontrol"));try{var T=window;while(T!==T.parent)T=T.parent;T.collect("L1",probe());}catch(e){}document.close();</scr'+'ipt>');cd.close();},0);}
+window.onmessage=function(e){store.MSG=[['event.origin',e.origin||'(kosong / opaque)'],['event.data',String(e.data).substring(0,40)],['event.source',e.source?'objek jendela tersedia':'—']];render();};
+try{document.cookie='uxss33=penanda-induk; SameSite=Lax';}catch(e){}
+document.getElementById('href').textContent=location.href;
+document.getElementById('orig').textContent=(window.origin===undefined?'tidak didukung':window.origin);
+store.L0=probe();render();
+</script>

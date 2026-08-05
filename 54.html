@@ -1,0 +1,162 @@
+<!-- UXSS: 31 - SANDBOX + POPUP - iframe ber-sandbox "allow-scripts allow-popups" membuka jendela: apakah jendela hasilnya MEWARISI sandbox, dan apa yang berubah bila ditambah "allow-popups-to-escape-sandbox"? Jendela hasil menjalankan seluruh pelapor identitas dan mengirim matriksnya kembali. -->
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>31 — Sandbox + popup: apakah jendela hasil mewarisi sandbox?</title>
+<style>
+body{font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:16px;background:#0e1116;color:#dfe6ef}
+h2{margin:0 0 12px;font-size:19px;line-height:1.3}
+section{border:1px solid #2a3240;border-radius:8px;padding:10px 12px;margin:10px 0;background:#151a22}
+b.tag{display:inline-block;min-width:92px;color:#7fd1ff;vertical-align:top}
+code{font-family:ui-monospace,Consolas,monospace;color:#ffd79a;word-break:break-all}
+table{border-collapse:collapse;width:100%;margin:6px 0;font-size:12.5px}
+th,td{border:1px solid #2a3240;padding:5px 7px;text-align:left;vertical-align:top}
+th{background:#1a212b;color:#9fd0ff;font-weight:600}
+tr.pick{cursor:pointer}
+tr.pick:hover td{background:#1b232e}
+td.ok{color:#8fe0a8}
+td.bad{color:#ff9d9d;font-weight:600}
+td.wait{color:#ffb37a}
+.small{color:#93a2b5;font-size:12.5px}
+.g{color:#8fe0a8}.r{color:#ff9d9d}
+#frames iframe{width:100%;height:70px;border:1px solid #2a3240;border-radius:4px;background:#10151c;margin:3px 0}
+</style>
+
+<div id="app"></div>
+
+<script type="text/plain" id="probe">
+(function(){
+var LBL=LABEL,TG=TAG,DST=DEST;
+var R=[
+['location.href',function(){return location.href}],
+['location.origin',function(){return location.origin}],
+['self.origin',function(){return self.origin}],
+['document.URL',function(){return document.URL}],
+['document.baseURI',function(){return document.baseURI}],
+['document.domain',function(){return document.domain}],
+['document.referrer',function(){return document.referrer}],
+['window.name',function(){return window.name}],
+['location.ancestorOrigins',function(){return location.ancestorOrigins?Array.prototype.join.call(location.ancestorOrigins,' | '):'tidak didukung'}],
+['URL di stack error',function(){var m=String((new Error).stack).match(/(?:https?|file|blob|about|data):[^ \n)]+/);return m?m[0]:'tidak ada URL di stack'}],
+['nama entri performance',function(){var e=performance.getEntriesByType('navigation')[0]||performance.getEntries()[0];return e?e.name:'tidak ada entri'}],
+['document-uri laporan CSP',function(){return window.__csp||'belum ada pelanggaran CSP'}],
+['scope service worker',function(){return navigator.serviceWorker?'API terjangkau (scope butuh origin ber-tuple)':'tidak didukung'}],
+['storage key localStorage',function(){localStorage.length;return 'BISA - origin ber-tuple'}],
+['document.cookie',function(){var c=document.cookie;return c?'BISA: '+c.slice(0,40):'BISA, kosong'}],
+['import.meta.url',function(){return window.__im||'tidak didukung / modul mati'}],
+['frameElement.sandbox',function(){return frameElement?(frameElement.getAttribute('sandbox')||'(atribut kosong)'):'null - tak terjangkau'}],
+['ada opener',function(){return opener?'ya':'tidak'}],
+['DOM opener',function(){return 'BISA: '+String(opener.document.title).slice(0,40)}],
+['cookie opener',function(){return 'BISA: '+String(opener.document.cookie).slice(0,40)}],
+['bisa buka popup lagi',function(){return typeof open==='function'?'API ada (tidak dipanggil)':'tidak ada'}]
+];
+function g(f){try{var v=f();return (v===''||v==null)?'(kosong)':String(v)}catch(e){return 'DILARANG: '+((e&&e.name)||'Error')}}
+document.addEventListener('securitypolicyviolation',function(e){window.__csp=e.documentURI||e.blockedURI});
+setTimeout(function(){
+var out={},i;for(i=0;i<R.length;i++){out[R[i][0]]=g(R[i][1])}
+try{DST.postMessage({uxss31:TG,label:LBL,rows:out},'*')}catch(e){}
+try{if(typeof SHOW==='function')SHOW(LBL,out)}catch(e){}
+},80);
+})();
+</script>
+
+<script type="text/plain" id="arm">
+(function(){
+var L=LABEL,T=TAG,P=PAGE,w=null;
+document.body.innerHTML='<b>'+L+'</b><br><button id=b>Buka popup</button> <button id=c>Tutup popup</button> <span id=s class=s></span>';
+function g2(f){try{var v=f();return (v===''||v==null)?'(kosong)':String(v)}catch(e){return 'DILARANG: '+((e&&e.name)||'Error')}}
+document.getElementById('b').onclick=function(){
+ try{w=window.open(P+'#popup='+T,'uxsspop_'+T,'width=600,height=660')}catch(e){w=null}
+ var st=w?'objek jendela dikembalikan':'DIBLOKIR: window.open() mengembalikan null';
+ document.getElementById('s').textContent=st;
+ setTimeout(function(){var o={};o['hasil window.open()']=st;
+  o['w.closed']=g2(function(){return w.closed});
+  o['w.location.href (lintas-dokumen)']=g2(function(){return w.location.href});
+  o['w.length']=g2(function(){return w.length});
+  o['w.document.title (lintas-dokumen)']=g2(function(){return 'BISA: '+String(w.document.title).slice(0,40)});
+  try{top.postMessage({uxss31:'pembuka:'+T,label:L+' — dilihat dari iframe pembuka',rows:o},'*')}catch(e){}},1000);
+};
+document.getElementById('c').onclick=function(){try{w.close()}catch(e){}};
+onmessage=function(e){if(e.data&&e.data.uxss31)try{top.postMessage(e.data,'*')}catch(x){}};
+try{top.postMessage({uxss31:'siap:'+T,label:L,rows:{status:'iframe hidup — klik tombolnya'}},'*')}catch(e){}
+})();
+</script>
+
+<script>
+var PROBE=document.getElementById('probe').textContent,ARM=document.getElementById('arm').textContent;
+var ARMS=[['P0','tanpa allow-popups (kontrol negatif)','allow-scripts'],
+['P1','allow-scripts allow-popups','allow-scripts allow-popups'],
+['P2','+ allow-popups-to-escape-sandbox','allow-scripts allow-popups allow-popups-to-escape-sandbox'],
+['P3','kontrol positif: iframe TANPA sandbox','__NOSANDBOX__']];
+var PAGE=location.href.split('#')[0],got={},done=false;
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function cel(r,k){return r&&r[k]!=null?r[k]:'—'}
+function tabel(lbl,rows){var h='<p class="small">'+esc(lbl)+'</p><table><tr><th>pelapor</th><th>nilai</th></tr>';
+ for(var k in rows)h+='<tr><td>'+esc(k)+'</td><td><code>'+esc(rows[k])+'</code></td></tr>';return h+'</table>'}
+
+if(location.hash.indexOf('#popup=')===0){
+ var tg=location.hash.slice(7);
+ document.getElementById('app').innerHTML='<h2>31 — JENDELA HASIL ('+esc(tg)+'): tabel pelapor</h2>'
+  +'<section><b class="tag">JENDELA</b> <code>'+esc(location.href)+'</code><br><span class="small">jendela ini dibuka oleh iframe ber-sandbox lengan '+esc(tg)+'; ia melaporkan dirinya ke halaman pembuka.</span></section>'
+  +'<section><b class="tag">PELAPOR</b><div id="t">membaca…</div></section>'
+  +'<section><b class="tag">TUTUP</b> <button onclick="window.close()">Tutup jendela ini</button></section>';
+ window.SHOW=function(l,out){document.getElementById('t').innerHTML=tabel('dibaca di dalam jendela hasil',out)};
+ var s=document.createElement('script');
+ s.text='var LABEL='+JSON.stringify('popup '+tg)+',TAG='+JSON.stringify('popup:'+tg)+',DEST=(opener||top);'+PROBE;
+ document.body.appendChild(s);
+}else{
+ document.getElementById('app').innerHTML=
+ '<h2>31 — SANDBOX + POPUP: apakah jendela hasil mewarisi sandbox?</h2>'
+ +'<section><b class="tag">INDUK</b> <code>'+esc(location.href)+'</code><br><span class="small">origin induk: <code>'+esc(self.origin)+'</code> &nbsp;•&nbsp; judul induk: <code>'+esc(document.title)+'</code></span></section>'
+ +'<section><b class="tag">PAGAR</b> Spec: konteks penjelajahan <i>auxiliary</i> yang dibuka oleh dokumen ber-sandbox <b>mewarisi</b> flag sandbox pembuatnya — kecuali pembuatnya memegang <code>allow-popups-to-escape-sandbox</code>. Tanpa <code>allow-popups</code>, <code>window.open()</code> harus mengembalikan <code>null</code>. Kalau pewarisan ini bocor, sandbox bisa dilepas hanya dengan membuka jendela.</section>'
+ +'<section><b class="tag">CELAH</b> Jendela hasil dinavigasikan ke <b>halaman ini sendiri</b> (URL nyata, bukan <code>about:blank</code>) lalu ia membaca <b>seluruh</b> pelapor identitas dan mengirimkan tabelnya kembali. Itu memisahkan dua hal yang sering dikira sama: origin buram karena <i>pewarisan about:blank</i> vs origin buram karena <i>flag sandbox</i>. Bila jendela memuat URL nyata dan tetap buram, sandboxnya benar-benar diwariskan.</section>'
+ +'<section><b class="tag">ORACLE</b> Klik tombol di tiap lengan (popup butuh gestur pengguna).<br><b>SEHARUSNYA (per spec):</b> P0 → <code>window.open()</code> = <code>null</code>. P1 → jendela terbuka tetapi <b>ber-sandbox</b>: origin buram, <code>localStorage</code>/<code>cookie</code> DILARANG, DOM pembuka DILARANG. P2 → jendela <b>keluar</b> sandbox: origin ber-tuple, <code>localStorage</code> BISA. P3 → jendela sepenuhnya normal, dan karena pembukanya juga tak ber-sandbox, DOM pembuka BISA.<br><b>TERAMATI:</b> kolom vonis. Cocok = <b>SESUAI SPEC — bukan temuan</b>.</section>'
+ +'<section><b class="tag">MATRIKS</b> <span class="small">klik baris untuk tabel pelapor LENGKAP jendela hasilnya.</span><table id="mx"></table><div id="detail"></div></section>'
+ +'<section><b class="tag">VONIS</b> <span id="vtxt">belum ada popup yang dibuka.</span></section>'
+ +'<section><b class="tag">LENGAN</b><div id="frames"></div></section>';
+ for(var i=0;i<ARMS.length;i++)mk(ARMS[i]);
+ render();
+}
+function mk(a){
+ var h='<meta charset=utf-8><body style="font:12px system-ui;background:#10151c;color:#cfe;margin:4px">'
+  +'<scr'+'ipt>var LABEL='+JSON.stringify(a[0]+' — '+a[1])+',TAG='+JSON.stringify(a[0])+',PAGE='+JSON.stringify(PAGE)+';'+ARM+'<\/scr'+'ipt>';
+ var f=document.createElement('iframe');
+ if(a[2]!=='__NOSANDBOX__')f.setAttribute('sandbox',a[2]);
+ f.setAttribute('srcdoc',h);document.getElementById('frames').appendChild(f);
+}
+function render(){
+ var T=document.getElementById('mx');if(!T)return;
+ var h='<tr><th>lengan</th><th>sandbox iframe</th><th>window.open()</th><th>self.origin jendela</th><th>localStorage</th><th>document.cookie</th><th>DOM opener</th><th>vonis</th></tr>',ada=false,semua=true;
+ for(var i=0;i<ARMS.length;i++){
+  var a=ARMS[i],P=got['popup:'+a[0]],O=got['pembuka:'+a[0]],pr=P&&P.rows,or=O&&O.rows;
+  var eOpen=/allow-popups/.test(a[2])||a[2]==='__NOSANDBOX__';
+  var eStore=(/allow-popups-to-escape-sandbox/.test(a[2])||a[2]==='__NOSANDBOX__');
+  var oBlocked=or&&/^DIBLOKIR/.test(String(or['hasil window.open()']));
+  var oStore=!!pr&&/^BISA/.test(String(pr['storage key localStorage']));
+  var v='belum diuji';
+  if(or||pr){ada=true;
+   if(!eOpen){v=oBlocked?'SESUAI SPEC':'SEAM'}
+   else if(!pr){v=oBlocked?'SEAM':'menunggu laporan jendela'}
+   else{v=(oStore===eStore)?'SESUAI SPEC':'SEAM'}
+   if(v==='SEAM')semua=false;
+  }
+  h+='<tr class="pick" data-a="'+a[0]+'"><td>'+a[0]+'<br><span class="small">'+esc(a[1])+'</span></td><td><code>'+esc(a[2]==='__NOSANDBOX__'?'(tanpa atribut sandbox)':a[2])+'</code></td><td>'+esc(cel(or,'hasil window.open()'))+'</td><td><code>'+esc(cel(pr,'self.origin'))+'</code></td><td>'+esc(cel(pr,'storage key localStorage'))+'</td><td>'+esc(cel(pr,'document.cookie'))+'</td><td>'+esc(cel(pr,'DOM opener'))+'</td><td class="'+(v==='SEAM'?'bad':(v.indexOf('SESUAI')===0?'ok':'wait'))+'">'+v+'</td></tr>';
+ }
+ T.innerHTML=h;
+ var vt=document.getElementById('vtxt');
+ if(!ada){vt.innerHTML='belum ada popup yang dibuka — klik tombol di tiap lengan (popup memerlukan gestur pengguna).';return}
+ vt.innerHTML=semua
+  ?'<span class="g"><b>SESUAI SPEC — bukan temuan (untuk lengan yang sudah diuji).</b></span> Tanpa <code>allow-popups</code> jendela ditolak; dengan <code>allow-popups</code> jendela hasil <b>mewarisi</b> sandbox sehingga tetap ber-origin buram walau memuat URL nyata; <code>allow-popups-to-escape-sandbox</code> melepas pewarisan itu sehingga jendela memperoleh origin ber-tuple. Catatan jujur: bahkan pada P2, DOM pembuka tetap tertutup karena <i>pembukanya</i> masih ber-sandbox — jadi "keluar sandbox" bukan berarti "menembus pembukanya".'
+  :'<span class="r"><b>SEAM.</b></span> Ada lengan yang menyimpang: jendela terbuka padahal <code>allow-popups</code> tak diberikan, atau jendela memperoleh storage/origin ber-tuple padahal sandbox seharusnya diwariskan. Buka detail lengan itu, bandingkan seluruh pelapornya, ambil tangkapan layar, lalu <b>BERHENTI</b> dan laporkan ke VRP browser terkait.';
+}
+document.addEventListener('click',function(e){var n=e.target;while(n&&n.tagName!=='TR')n=n.parentNode;
+ if(!n||!n.getAttribute||!n.getAttribute('data-a'))return;
+ var a=n.getAttribute('data-a'),P=got['popup:'+a],O=got['pembuka:'+a],d=document.getElementById('detail');if(!d)return;
+ var h='';
+ if(O)h+=tabel('Sisi PEMBUKA (dibaca dari dalam iframe ber-sandbox) — '+a,O.rows);
+ if(P)h+=tabel('Sisi JENDELA HASIL (dibaca di dalam popup) — '+a+' · sumber postMessage: '+P.src,P.rows);
+ d.innerHTML=h||'<p class="small">Lengan '+esc(a)+': belum ada laporan. Klik "Buka popup" pada lengan itu.</p>';
+});
+addEventListener('message',function(e){var d=e.data;if(!d||!d.uxss31||!d.rows)return;got[d.uxss31]={label:d.label,rows:d.rows,src:e.origin};render()});
+try{document.cookie='uxsspoc=penanda-jinak; path=/'}catch(e){}
+</script>

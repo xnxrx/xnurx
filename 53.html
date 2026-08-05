@@ -1,0 +1,152 @@
+<!-- UXSS: 30 - SANDBOX BERSARANG - iframe ber-sandbox di dalam iframe ber-sandbox dengan token LEBIH LONGGAR di dalam; tiap tingkat menjalankan seluruh pelapor identitas untuk menguji apakah anak bisa memperoleh izin lebih banyak daripada induknya (spec: tidak, token diwariskan sebagai IRISAN). -->
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>30 — Sandbox bersarang: bisakah anak melebihi induknya?</title>
+<style>
+body{font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:16px;background:#0e1116;color:#dfe6ef}
+h2{margin:0 0 12px;font-size:19px;line-height:1.3}
+section{border:1px solid #2a3240;border-radius:8px;padding:10px 12px;margin:10px 0;background:#151a22}
+b.tag{display:inline-block;min-width:92px;color:#7fd1ff;vertical-align:top}
+code{font-family:ui-monospace,Consolas,monospace;color:#ffd79a;word-break:break-all}
+table{border-collapse:collapse;width:100%;margin:6px 0;font-size:12.5px}
+th,td{border:1px solid #2a3240;padding:5px 7px;text-align:left;vertical-align:top}
+th{background:#1a212b;color:#9fd0ff;font-weight:600}
+tr.pick{cursor:pointer}
+tr.pick:hover td{background:#1b232e}
+td.ok{color:#8fe0a8}
+td.bad{color:#ff9d9d;font-weight:600}
+.small{color:#93a2b5;font-size:12.5px}
+.g{color:#8fe0a8}.r{color:#ff9d9d}
+#frames{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+#frames iframe{width:230px;height:96px;border:1px solid #2a3240;border-radius:4px;background:#10151c}
+</style>
+
+<h2>30 — SANDBOX BERSARANG: token lebih longgar di dalam — naik izin atau tidak?</h2>
+
+<section><b class="tag">INDUK</b> <code id="me">…</code><br>
+<span class="small">origin induk: <code id="meo">…</code> &nbsp;•&nbsp; judul induk: <code id="met">…</code></span></section>
+
+<section><b class="tag">PAGAR</b> Spec HTML: <i>active sandboxing flag set</i> sebuah konteks bersarang adalah <b>gabungan pembatasan</b> milik induknya dengan pembatasan miliknya sendiri — jadi dari sisi izin ia adalah <b>IRISAN</b>. Konsekuensinya: iframe dalam yang menulis <code>allow-same-origin</code> <b>tidak boleh</b> mendapat origin ber-tuple bila salah satu leluhurnya ber-sandbox tanpa token itu. Kalau irisan ini bocor, seluruh pemakaian sandbox berlapis (iklan, widget, editor pratinjau) runtuh.</section>
+
+<section><b class="tag">CELAH</b> Tiap tingkat dites oleh <b>seluruh</b> pelapor identitas sekaligus — <code>location.href</code>, <code>origin</code>, <code>document.URL</code>, <code>baseURI</code>, <code>domain</code>, <code>referrer</code>, <code>window.name</code>, <code>ancestorOrigins</code>, URL di stack error, nama entri <code>performance</code>, <code>document-uri</code> laporan CSP, service worker, storage key, cookie, <code>import.meta.url</code>, <code>frameElement</code>, dan origin sumber <code>postMessage</code> yang dilihat halaman induk. Pewarisan yang bocor jarang bocor di semua pelapor sekaligus; ia bocor di satu pelapor yang <b>berselisih</b> dengan sisanya.</section>
+
+<section><b class="tag">ORACLE</b> Rantai A adalah <b>kontrol</b> (satu tingkat, token longgar). Rantai B dan E menaruh token longgar di <b>dalam</b> leluhur yang ketat.<br>
+<b>SEHARUSNYA (per spec):</b> sebuah tingkat memperoleh origin ber-tuple <b>hanya bila SEMUA</b> token dari luar sampai ke tingkat itu memuat <code>allow-same-origin</code> (dan <code>allow-scripts</code> agar skripnya hidup). Jadi A = akses DOM top <b>BISA</b>; C = <b>BISA</b>; B, D, E = <b>DILARANG</b>.<br>
+<b>TERAMATI:</b> kolom vonis. Bila cocok, hasilnya <b>SESUAI SPEC — bukan temuan</b>; irisan ditegakkan.</section>
+
+<section><b class="tag">MATRIKS</b> <span class="small">satu baris per (rantai × tingkat); klik untuk tabel pelapor LENGKAP tingkat itu.</span>
+<table id="mx"></table>
+<div id="detail"></div>
+</section>
+
+<section><b class="tag">VONIS</b> <span id="vtxt">menunggu laporan dari tiap tingkat…</span></section>
+
+<section><b class="tag">SARANG</b> <span class="small">tiap kotak = tingkat 1 sebuah rantai; iframe tingkat dalam digambar di dalamnya.</span>
+<div id="frames"></div></section>
+
+<script type="text/plain" id="probe">
+(function(){
+var LBL=LABEL,TG=TAG,DST=DEST;
+var R=[
+['location.href',function(){return location.href}],
+['location.origin',function(){return location.origin}],
+['self.origin',function(){return self.origin}],
+['document.URL',function(){return document.URL}],
+['document.baseURI',function(){return document.baseURI}],
+['document.domain',function(){return document.domain}],
+['document.referrer',function(){return document.referrer}],
+['window.name',function(){return window.name}],
+['location.ancestorOrigins',function(){return location.ancestorOrigins?Array.prototype.join.call(location.ancestorOrigins,' | '):'tidak didukung'}],
+['URL di stack error',function(){var m=String((new Error).stack).match(/(?:https?|file|blob|about|data):[^ \n)]+/);return m?m[0]:'tidak ada URL di stack'}],
+['nama entri performance',function(){var e=performance.getEntriesByType('navigation')[0]||performance.getEntries()[0];return e?e.name:'tidak ada entri'}],
+['document-uri laporan CSP',function(){return window.__csp||'belum ada pelanggaran CSP'}],
+['scope service worker',function(){return navigator.serviceWorker?'API terjangkau (scope butuh origin ber-tuple)':'tidak didukung'}],
+['storage key localStorage',function(){localStorage.length;return 'BISA - origin ber-tuple'}],
+['document.cookie',function(){var c=document.cookie;return c?'BISA: '+c.slice(0,40):'BISA, kosong'}],
+['import.meta.url',function(){return window.__im||'tidak didukung / modul mati'}],
+['frameElement.sandbox',function(){return frameElement?(frameElement.getAttribute('sandbox')||'(atribut kosong)'):'null - tak terjangkau'}],
+['DOM induk-langsung',function(){return 'BISA: '+String(parent.document.title).slice(0,40)}],
+['DOM top',function(){return 'BISA: '+String(top.document.title).slice(0,40)}],
+['cookie top',function(){return 'BISA: '+String(top.document.cookie).slice(0,40)}]
+];
+function g(f){try{var v=f();return (v===''||v==null)?'(kosong)':String(v)}catch(e){return 'DILARANG: '+((e&&e.name)||'Error')}}
+document.addEventListener('securitypolicyviolation',function(e){window.__csp=e.documentURI||e.blockedURI});
+try{(new Image).src='pelapor-csp.gif'}catch(e){}
+setTimeout(function(){
+var out={},i;for(i=0;i<R.length;i++){out[R[i][0]]=g(R[i][1])}
+try{DST.postMessage({uxss30:TG,label:LBL,rows:out},'*')}catch(e){}
+try{document.body.insertBefore(document.createTextNode(LBL+' → '+out['self.origin']+' '),document.body.firstChild)}catch(e){}
+},90);
+})();
+</script>
+
+<script type="text/plain" id="nest">
+(function(){
+var C=CHAIN,TG=TAG,LB=LABEL,DP=DEPTH,NS=NEST,PB=PROBE;
+var s=document.createElement('script');
+s.text='var LABEL='+JSON.stringify(LB+' tingkat '+DP)+',TAG='+JSON.stringify(TG+':'+DP)+',DEST=top;'+PB;
+document.body.appendChild(s);
+if(!C.length)return;
+var h='<meta charset=utf-8><meta http-equiv="Content-Security-Policy" content="img-src \'none\'">'
+ +'<body style="font:10px system-ui;background:#0b0e13;color:#cfe;margin:2px;word-break:break-all">'
+ +'<scr'+'ipt type=module>window.__im=import.meta.url<\/scr'+'ipt>'
+ +'<scr'+'ipt>var CHAIN='+JSON.stringify(C.slice(1))+',TAG='+JSON.stringify(TG)+',LABEL='+JSON.stringify(LB)+',DEPTH='+(DP+1)+',NEST='+JSON.stringify(NS)+',PROBE='+JSON.stringify(PB)+';'+NS+'<\/scr'+'ipt>';
+var f=document.createElement('iframe');f.setAttribute('sandbox',C[0]);f.setAttribute('srcdoc',h);
+f.style.cssText='width:96%;height:44px;border:1px dashed #3a4658;background:#080b10';
+document.body.appendChild(f);
+})();
+</script>
+
+<script>
+var PROBE=document.getElementById('probe').textContent,NEST=document.getElementById('nest').textContent;
+var CH=[['A','kontrol: satu tingkat, token longgar',['allow-scripts allow-same-origin allow-popups']],
+['B','luar KETAT, dalam LONGGAR',['allow-scripts','allow-scripts allow-same-origin allow-popups']],
+['C','luar longgar, dalam longgar',['allow-scripts allow-same-origin','allow-scripts allow-same-origin']],
+['D','luar longgar, dalam KETAT',['allow-scripts allow-same-origin','allow-scripts']],
+['E','tiga tingkat: ketat, ketat, LONGGAR',['allow-scripts','allow-scripts','allow-scripts allow-same-origin']]];
+var got={},T=document.getElementById('mx'),D=document.getElementById('detail'),done=false;
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function cel(r,k){return r&&r[k]!=null?r[k]:'—'}
+function mk(c){
+ var h='<meta charset=utf-8><meta http-equiv="Content-Security-Policy" content="img-src \'none\'">'
+  +'<body style="font:10px system-ui;background:#10151c;color:#cfe;margin:2px;word-break:break-all">'
+  +'<scr'+'ipt type=module>window.__im=import.meta.url<\/scr'+'ipt>'
+  +'<scr'+'ipt>var CHAIN='+JSON.stringify(c[2].slice(1))+',TAG='+JSON.stringify(c[0])+',LABEL='+JSON.stringify('rantai '+c[0])+',DEPTH=1,NEST='+JSON.stringify(NEST)+',PROBE='+JSON.stringify(PROBE)+';'+NEST+'<\/scr'+'ipt>';
+ var f=document.createElement('iframe');f.setAttribute('sandbox',c[2][0]);f.setAttribute('srcdoc',h);
+ document.getElementById('frames').appendChild(f);
+}
+function render(){
+ var h='<tr><th>rantai</th><th>tingkat</th><th>token tingkat ini</th><th>self.origin</th><th>DOM induk-langsung</th><th>DOM top</th><th>localStorage</th><th>vonis</th></tr>',semua=true;
+ for(var c=0;c<CH.length;c++){for(var d=1;d<=CH[c][2].length;d++){
+  var key=CH[c][0]+':'+d,G=got[key],r=G&&G.rows,tok=CH[c][2][d-1],ejs=true,eso=true,k;
+  for(k=0;k<d;k++){if(!/allow-scripts/.test(CH[c][2][k]))ejs=false;if(!/allow-same-origin/.test(CH[c][2][k]))eso=false}
+  eso=eso&&ejs;
+  var ojs=!!G,oso=!!r&&/^BISA/.test(String(r['DOM top']));
+  var sesuai=(ojs===ejs)&&(!ejs||oso===eso),v=(done||ojs)?(sesuai?'SESUAI SPEC':'SEAM'):'…';
+  if(done&&!sesuai)semua=false;
+  h+='<tr class="pick" data-k="'+key+'"><td>'+CH[c][0]+(d===1?'<br><span class="small">'+esc(CH[c][1])+'</span>':'')+'</td><td>'+d+'</td><td><code>'+esc(tok)+'</code></td><td><code>'+esc(cel(r,'self.origin'))+'</code></td><td>'+esc(cel(r,'DOM induk-langsung'))+'</td><td>'+esc(cel(r,'DOM top'))+'</td><td>'+esc(cel(r,'storage key localStorage'))+'</td><td class="'+(v==='SEAM'?'bad':'ok')+'">'+v+'</td></tr>';
+ }}
+ T.innerHTML=h;
+ if(done){
+  var B=got['B:2'],E=got['E:3'],naik=(B&&/^BISA/.test(String(B.rows['DOM top'])))||(E&&/^BISA/.test(String(E.rows['DOM top'])));
+  document.getElementById('vtxt').innerHTML=semua
+   ?'<span class="g"><b>SESUAI SPEC — bukan temuan.</b></span> Token <b>diwariskan sebagai irisan</b>: rantai B (tingkat 2) dan E (tingkat 3) menulis <code>allow-same-origin</code> tetapi tetap ber-origin buram karena leluhurnya tidak menulisnya, sedangkan kontrol A dan rantai C — yang seluruh leluhurnya longgar — memang memperoleh origin ber-tuple. Rantai D menunjukkan arah sebaliknya: mengetatkan di dalam <b>selalu</b> berlaku. Anak tidak dapat memperoleh izin lebih banyak daripada induknya.'
+   :'<span class="r"><b>SEAM — irisan token tidak ditegakkan.</b></span> '+(naik?'Sebuah tingkat dalam memperoleh akses DOM top padahal leluhurnya ber-sandbox tanpa <code>allow-same-origin</code>: itu <b>naik izin lewat penyarangan</b>.':'Ada tingkat yang menyimpang dari irisan yang diharapkan.')+' Buka detailnya, catat pelapor mana yang berselisih dengan <code>self.origin</code>, ambil tangkapan layar, lalu <b>BERHENTI</b> dan laporkan ke VRP browser terkait.';
+ }
+}
+T.onclick=function(e){var n=e.target;while(n&&n.tagName!=='TR')n=n.parentNode;if(!n||!n.getAttribute)return;
+ var k=n.getAttribute('data-k'),G=got[k];
+ if(!G){D.innerHTML='<p class="small">'+k+': tidak ada laporan — skrip tingkat itu diblokir (tanpa <code>allow-scripts</code> di suatu leluhur).</p>';return}
+ var h='<p class="small">Tabel pelapor LENGKAP untuk '+esc(k)+'</p><table><tr><th>pelapor</th><th>nilai</th></tr>';
+ for(var x in G.rows)h+='<tr><td>'+esc(x)+'</td><td><code>'+esc(G.rows[x])+'</code></td></tr>';
+ D.innerHTML=h+'<tr><td>sumber pesan postMessage (dilihat top)</td><td><code>'+esc(G.src)+'</code></td></tr></table>';
+};
+addEventListener('message',function(e){var d=e.data;if(!d||!d.uxss30||!d.rows)return;got[d.uxss30]={rows:d.rows,src:e.origin};render()});
+try{document.cookie='uxsspoc=penanda-jinak; path=/'}catch(e){}
+document.getElementById('me').textContent=location.href;
+document.getElementById('meo').textContent=self.origin;
+document.getElementById('met').textContent=document.title;
+for(var i=0;i<CH.length;i++)mk(CH[i]);
+render();setTimeout(function(){done=true;render()},2600);
+</script>

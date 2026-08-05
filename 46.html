@@ -1,0 +1,109 @@
+<!-- UXSS: jalur-lahir "popup about:blank yang ditulisi opener" (window.open + document.write) — dokumen anak MEWARISI principal opener; seluruh pelapor identitas (href/origin/URL/baseURI/domain/referrer/window.name/ancestorOrigins/stack/performance/CSP/SW/storage/postMessage/import.meta/cookie) dibaca SEKALIGUS dan yang dicari adalah pelapor yang BERSELISIH. -->
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>23 — Matriks pelapor identitas: popup about:blank warisan opener</title>
+<style>
+body{font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:16px;background:#0e1116;color:#dfe6ef}
+h2{margin:0 0 12px;font-size:19px;line-height:1.3}
+section{border:1px solid #2a3240;border-radius:8px;padding:10px 12px;margin:10px 0;background:#151a22}
+b.tag{display:inline-block;min-width:92px;color:#7fd1ff}
+button{font:13px system-ui;padding:8px 12px;margin:4px 6px 4px 0;border:1px solid #3a4658;background:#1e2733;color:#e8eef6;border-radius:6px;cursor:pointer}
+button.ctl{border-color:#3f7a55;color:#bfe6c8}
+code{font-family:ui-monospace,Consolas,monospace;color:#ffd79a;word-break:break-all}
+table{border-collapse:collapse;width:100%;margin-top:6px}
+th,td{border:1px solid #2a3240;padding:4px 7px;font-size:12.5px;vertical-align:top;text-align:left}
+th{background:#1b2230;color:#9fd0ff}
+td{font-family:ui-monospace,Consolas,monospace;word-break:break-all}
+td:first-child{color:#7fd1ff;white-space:nowrap;font-family:inherit}
+.small{color:#93a2b5;font-size:12.5px}
+.ok{color:#8fe0a5}.bad{color:#ff9d9d}.warn{color:#ffb37a}
+#vonis>div{margin:4px 0;line-height:1.6}
+</style>
+
+<h2>23 &mdash; POPUP <code>about:blank</code> DITULISI OPENER: matriks pelapor identitas</h2>
+
+<section><b class="tag">PAGAR</b> <code>about:blank</code> tidak punya URL sendiri, jadi dokumennya <b>mewarisi principal (origin) pembuatnya</b>. Ini perilaku spec, bukan bug: opener dan popup memang same-origin dan boleh saling baca. Berkas ini <b>tidak</b> mencari &ldquo;popup bisa membaca opener&rdquo; &mdash; itu baseline yang sudah pasti benar.</section>
+
+<section><b class="tag">CELAH</b> Browser memberi tahu kode tentang identitas lewat <b>belasan jalur berbeda</b>, dan hampir tak ada yang pernah membaca semuanya sekaligus lalu mencari yang <b>berselisih</b>. Di dokumen yang MEWARISI origin, satu pelapor yang menyimpang (mis. <code>location.href</code> berkata <code>about:blank</code> sementara <code>baseURI</code>/<code>referrer</code>/nama entri <code>performance</code>/URL di stack menyebut halaman lain) menandai jalur di mana identitas diturunkan dari sumber yang berbeda &mdash; di situlah bug pewarisan bersembunyi.</section>
+
+<section><b class="tag">UJI</b>
+<button onclick="uji()">Buka popup about:blank + tulisi + kumpulkan matriks</button>
+<button class="ctl" onclick="kontrol()">KONTROL &mdash; mekanisme dilepas (<code>noopener</code>)</button>
+<div class="small">Izinkan popup bila diblokir. Popup <b>tidak</b> menutup sendiri: biarkan terbuka supaya kamu bisa membandingkan address bar-nya dengan nilai yang dilaporkan kode. Tak ada apa pun yang dikirim keluar &mdash; seluruh hasil hanya dicetak di layar.</div>
+</section>
+
+<section><b class="tag">MATRIKS</b>
+<div id="host" class="small">(belum ada hasil &mdash; tekan tombol UJI)</div>
+</section>
+
+<section><b class="tag">VONIS</b>
+<div id="vonis" class="small">(menunggu)</div>
+</section>
+
+<section class="small"><b class="tag">INDUK</b> <code>location.href</code> halaman ini: <code id="href">-</code><br>
+<code>window.origin</code> halaman ini: <code id="orig">-</code></section>
+
+<script>
+var $=function(i){return document.getElementById(i);},got={};
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':'&gt;';});}
+function og(s){s=String(s).replace(/blob:/g,'');var m=/(https?:\/\/[^\/?#\s)'"]+)/i.exec(s);if(m)return m[1].toLowerCase();
+ if(/file:\/\//i.test(s))return 'file://';if(/^about:/i.test(s))return 'about:';return '';}
+function R(w,d,P,PN){var o=[],T=function(n,f){var v;try{v=f();}catch(e){v='GAGAL: '+((e&&e.name)||e);}o.push([n,(v===undefined||v===null||v==='')?'(kosong)':String(v).slice(0,160)]);};
+ T('1 location.href',function(){return d.location.href;});
+ T('2 origin (window.origin)',function(){return ('origin' in w)?w.origin:'tidak didukung';});
+ T('3 document.URL',function(){return d.URL;});
+ T('4 document.baseURI',function(){return d.baseURI;});
+ T('5 document.domain',function(){return d.domain;});
+ T('6 document.referrer',function(){return d.referrer;});
+ T('7 window.name',function(){return w.name;});
+ T('8 location.ancestorOrigins',function(){var a=d.location.ancestorOrigins;return a?(a.length?Array.prototype.join.call(a,' | '):'(daftar kosong)'):'tidak didukung';});
+ T('9 URL frame di stack error',function(){var s=(new Error('probe')).stack;return s?s.replace(/\s+/g,' ').slice(0,160):'tidak didukung';});
+ T('10 nama entri performance',function(){var p=w.performance;if(!p||!p.getEntriesByType)return 'tidak didukung';var e=p.getEntriesByType('navigation')[0]||p.getEntriesByType('resource')[0];return e?e.name:'(tidak ada entri)';});
+ T('11 document-uri laporan CSP',function(){return w.__csp||(('SecurityPolicyViolationEvent' in w)?'(belum terpicu)':'tidak didukung');});
+ T('12 scope service worker',function(){var s=w.navigator.serviceWorker;return s?('API ada; controller='+(s.controller?s.controller.scriptURL:'null')+' (tidak didaftarkan)'):'tidak tersedia (origin opaque / file:)';});
+ T('13 kunci storage',function(){var v=w.localStorage.getItem('uxss_probe');return v?('localStorage TERBACA, penanda induk = '+v):'localStorage terbuka tapi penanda induk TIDAK ada (kunci storage berbeda)';});
+ T('14 origin pengirim postMessage',function(){return w.__pm;});
+ T('15 import.meta.url',function(){return w.__im||'tidak didukung / belum siap';});
+ T('16 document.cookie sendiri',function(){var c=d.cookie;return c?('['+c.length+' char] '+c.slice(0,40)):'(kosong)';});
+ if(P){T('17 BACA '+PN+'.document.title',function(){return P.document.title;});
+  T('18 BACA '+PN+'.document.cookie',function(){var c=P.document.cookie;return c?('['+c.length+' char] '+c.slice(0,40)):'(kosong)';});}
+ return o;}
+function tab(hs,rs){var i,j,n,map=[],names=[],h='<table><tr><th>pelapor</th>';
+ for(i=0;i<rs.length;i++){map[i]={};for(j=0;j<rs[i].length;j++){n=rs[i][j][0];map[i][n]=rs[i][j][1];if(names.indexOf(n)<0)names.push(n);}}
+ for(i=0;i<hs.length;i++)h+='<th>'+esc(hs[i])+'</th>';h+='</tr>';
+ for(j=0;j<names.length;j++){h+='<tr><td>'+esc(names[j])+'</td>';for(i=0;i<rs.length;i++)h+='<td>'+esc(map[i][names[j]]===undefined?'—':map[i][names[j]])+'</td>';h+='</tr>';}
+ return h+'</table>';}
+function boot(ctx,tgt){return 'var CTX="'+ctx+'",TGT='+tgt+',TGTN="'+tgt+'";window.__pm="(tak ada pesan masuk)";'+
+ 'try{(TGT||parent||opener).postMessage({uxssHalo:CTX},"*");}catch(e){}'+
+ 'addEventListener("message",function(e){window.__pm=(e.origin===""?"(string kosong)":e.origin);});'+
+ 'addEventListener("securitypolicyviolation",function(e){window.__csp=e.documentURI+"  [diblokir: "+e.blockedURI+"]";});'+
+ 'setTimeout(function(){var r=R(window,document,TGT,TGTN);document.getElementById("t").innerHTML=tab(["nilai di "+CTX],[r]);'+
+ 'try{(TGT||parent||opener).postMessage({uxss:CTX,rows:r},"*");}catch(e){}},350);';}
+function kid(ctx,tgt){return '<!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="img-src \'none\'">'+
+ '<title>ANAK '+ctx+'</title><style>body{font:12px/1.5 system-ui;margin:8px;background:#0b0e13;color:#dfe6ef}'+
+ 'table{border-collapse:collapse;width:100%}th,td{border:1px solid #2a3240;padding:3px 5px;font-size:11.5px;text-align:left;word-break:break-all}'+
+ 'td{font-family:ui-monospace,Consolas,monospace}td:first-child{color:#7fd1ff;white-space:nowrap;font-family:inherit}</style>'+
+ '<b>DOKUMEN ANAK: '+ctx+'</b><div id="t">(mengumpulkan pelapor...)</div>'+
+ '<scr'+'ipt type="module">try{window.__im=import.meta.url;}catch(e){}</scr'+'ipt>'+
+ '<scr'+'ipt>'+R+'\n'+tab+'\n'+esc+'\n'+boot(ctx,tgt)+'</scr'+'ipt><img src="#csp-probe" alt="" width="1" height="1">';}
+function uji(){var w=window.open('','uxss23');if(!w){$('vonis').innerHTML='<div class="warn">Popup diblokir &mdash; izinkan popup lalu ulangi.</div>';return;}
+ w.document.open();w.document.write(kid('POPUP about:blank','opener'));w.document.close();
+ setTimeout(function(){try{w.postMessage('ping-induk','*');}catch(e){}},150);}
+function kontrol(){var w=window.open('about:blank','_blank','noopener');
+ $('vonis').innerHTML='<div class="ok"><b>KONTROL:</b> dengan <code>noopener</code> handle popup = <code>'+esc(String(w))+'</code> &rarr; tidak ada dokumen yang bisa ditulisi dan tidak ada rantai opener. Mekanismenya memang dilepas; ketiadaan matriks di sini adalah baseline, bukan temuan.</div>';}
+function render(){var hs=['INDUK (halaman ini)'],rs=[R(window,document,null,'')],k;
+ for(k in got){hs.push('ANAK '+k+' (event.origin dilihat induk: '+(got[k].origin||'(string kosong)')+')');rs.push(got[k].rows);}
+ $('host').innerHTML=tab(hs,rs);$('vonis').innerHTML=putus(rs);}
+function putus(rs){var base=og(location.href),i,j,o,seen=[],bad=[];
+ for(i=0;i<rs.length;i++)for(j=0;j<rs[i].length;j++){o=og(rs[i][j][1]);if(o&&seen.indexOf(o)<0){seen.push(o);if(o!==base&&o!=='about:')bad.push(o+' (lewat "'+rs[i][j][0]+'")');}}
+ var v='<div><b>SEHARUSNYA (per spec):</b> popup <code>about:blank</code> mewarisi principal opener &rarr; <code>window.origin</code> anak = origin induk (<code>'+esc(base)+'</code>), <code>location.href</code> anak = <code>about:blank</code>, dan pembacaan <code>opener.document</code> BERHASIL. Semua pelapor lain harus menunjuk origin yang sama, atau <code>about:</code>.</div>';
+ v+='<div><b>TERAMATI:</b> origin yang muncul di seluruh pelapor = <code>'+esc(seen.join('  |  ')||'(tak ada)')+'</code></div>';
+ v+=bad.length?'<div class="bad"><b>BERSELISIH</b> &mdash; ada pelapor yang menyebut origin di luar <code>'+esc(base)+'</code>: '+esc(bad.join(' ; '))+' &rarr; itulah seam-nya. Bandingkan baris tersebut dengan baris 1/2; di dokumen yang mewarisi origin, dua sumber kebenaran yang berbeda = kandidat bug pewarisan.</div>'
+ :'<div class="ok"><b>SESUAI SPEC &mdash; bukan temuan.</b> Seluruh pelapor konsisten dengan <code>'+esc(base)+'</code> (atau <code>about:</code>/opaque yang memang wajar), dan pembacaan lintas-dokumen yang berhasil adalah konsekuensi sah dari pewarisan. Hasil negatif ini valid dan penting: satu jalur-lahir tertutup.</div>';
+ return v;}
+addEventListener('message',function(e){var d=e.data;if(!d)return;if(d.uxssHalo){try{e.source.postMessage('ping-induk','*');}catch(x){}return;}if(!d.rows)return;window.__pm=e.origin||'(string kosong)';got[d.uxss]={rows:d.rows,origin:e.origin};render();});
+try{document.cookie='uxss_marker=INDUK_'+Date.now()+';path=/';}catch(e){}
+try{localStorage.setItem('uxss_probe','INDUK_'+Date.now());}catch(e){}
+window.__pm='(tak ada pesan masuk)';$('href').textContent=location.href;$('orig').textContent=String(('origin' in window)?window.origin:'tidak didukung');
+</script>
