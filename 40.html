@@ -1,96 +1,14 @@
-<!-- MEKANISME: warisan origin bersifat transitif - A membuka B (about:blank), B membuka C (about:blank), dan C mewarisi origin A lewat B, sehingga C masih boleh menyentuh A; yang diuji adalah kecocokan antara origin yang DILAPORKAN C dan akses yang DITEGAKKAN padanya. -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>17 - rantai warisan A - B - C</title>
-<style>
-body{font:15px/1.55 system-ui,sans-serif;margin:0;padding:1rem;background:#fff;color:#111}
-.panel{max-width:760px;margin:0 auto;border:2px solid #a15;border-radius:10px;padding:.9rem}
-h2{font-size:1.05rem;margin:.1rem 0 .6rem}
-.kv{display:grid;grid-template-columns:12rem 1fr;gap:.15rem .6rem;font-size:.88rem;word-break:break-all}
-.kv b{color:#555;font-weight:600}
-code{background:#f2f2f2;padding:.05rem .3rem;border-radius:4px}
-p.o{margin:.25rem 0;font-size:.9rem}
-#verdict{margin:.7rem 0;padding:.55rem .7rem;border-radius:8px;font-weight:700;background:#eee}
-.vuln{background:#fde;color:#a00}.secure{background:#dfe;color:#060}
-button{font:inherit;padding:.45rem .7rem;border:1px solid #888;border-radius:8px;background:#fafafa;cursor:pointer;margin:0 .35rem .35rem 0}
-pre{white-space:pre-wrap;word-break:break-all;font-size:.82rem;background:#f7f7f7;padding:.5rem;border-radius:6px;min-height:1.2rem}
-.note{font-size:.8rem;color:#666}
-@media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}code,pre{background:#242424}#verdict{background:#222}button{background:#222;color:#eee;border-color:#555}.note{color:#999}}
-</style>
-</head>
-<body>
-<div class="panel">
-<h2>17 &middot; rantai warisan: A membuka B (<code>about:blank</code>), B membuka C (<code>about:blank</code>)</h2>
-
-<div class="kv">
-  <b>location.href asli (A)</b><span id="here">...</span>
-  <b>Rantai</b><span>A &rarr; <code>window.open('about:blank')</code> = B &rarr; B menjalankan <code>window.open('about:blank')</code> = C</span>
-  <b>Pertanyaan</b><span>origin apa yang dilaporkan C, dan apakah C masih boleh menyentuh A?</span>
-</div>
-
-<p class="o"><b>RENTAN =</b> C diatribusikan browser ke origin yang BUKAN origin A, tetapi tetap berhasil membaca DOM A (diatribusikan &ne; ditegakkan) - atau, di lengan kontrol, C berhasil menembus dokumen di A yang tidak ikut mewarisi.</p>
-<p class="o"><b>AMAN =</b> konsisten di kedua arah: C diatribusikan ke origin A dan boleh membacanya, ATAU C diatribusikan ke origin lain dan aksesnya ditolak; dan lengan kontrol selalu ditolak.</p>
-<p class="o"><b>Dua sinyal origin:</b> <code>location.origin</code> = kata dokumen tentang dirinya (diserialkan dari URL dokumen semu) &middot; <code>ev.origin</code> = atribusi browser saat pesan diterima. Vonis memakai <code>ev.origin</code> + hasil sentuhan, karena itulah yang ditegakkan.</p>
-
-<p><button id="b1">Jalankan rantai (C menyentuh A)</button><button id="b2">Kontrol (C menyentuh dokumen di A yang tidak mewarisi)</button></p>
-<div id="verdict">verdict: belum dijalankan</div>
-<pre id="log"></pre>
-<iframe id="opaque" sandbox srcdoc="<b>dokumen sandbox di A - origin opaque, tidak ikut mewarisi</b>" style="width:1px;height:1px;border:0;position:absolute;left:-9999px" title="opaque"></iframe>
-<p class="note">Kontrol memakai rantai yang PERSIS sama; satu-satunya variabel yang berubah adalah dokumen tujuan sentuhan - dokumen A sendiri (ikut mewarisi) versus iframe <code>sandbox</code> di dalam A (origin opaque, tidak ikut mewarisi). Popup uji ditutup otomatis. Tidak ada jaringan, tidak ada form, tidak ada data yang dikirim ke mana pun.</p>
-</div>
+<!-- 40 - handle opener setelah anak pindah origin   [UXSS / SOP bypass | macOS: Dia/Arc/Safari macOS]
+     MEKANISME : handle jendela tetap dipegang setelah anak berpindah ke origin korban; yang diuji apa saja yang masih terbaca lewat handle itu.
+     PREDIKAT  : properti navigasi/dokumen anak masih terbaca.
+     AMAN      : pembacaan lintas-origin dilempar SecurityError; baris bukti berkata DIBLOKIR.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>40 handle opener setelah anak pindah origin</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var log=document.getElementById('log'), vd=document.getElementById('verdict');
-document.getElementById('here').textContent=location.href+'   [location.origin = '+(location.origin||'(kosong)')+']';
-function say(c,t){vd.className=c;vd.textContent=t;}
-function add(t){log.textContent+=t+'\n';}
-var arm='chain', got=false, winB=null, winC=null, realOrigin=/^[a-z]+:\/\//.test(String(location.origin));
-window.gotC=function(c,orgB,urlB){
-  add('dokumen-B melapor: location.origin = '+(orgB||'(kosong)')+'   document.URL = '+urlB);
-  if(!c){ say('','dokumen-C tidak terbuka - popup kedua diblokir; izinkan popup untuk halaman ini lalu ulangi.'); return; }
-  winC=c;
-  var target=(arm==='ctrl')?'window.opener.opener.frames[0]':'window.opener.opener';
-  try{
-    c.document.write('<b>dokumen-C (about:blank, dibuka oleh B)</b><script>(function(){var r={org:String(location.origin),url:String(document.URL)};'
-      +'try{r.touch="BISA ("+'+target+'.document.body.textContent.length+" char)";}catch(e){r.touch="DITOLAK "+e.name;}'
-      +'try{window.opener.opener.postMessage(r,"*");}catch(e){}})();<\/script>');
-    c.document.close();
-  }catch(e){ say('','tidak bisa menulis ke dokumen-C ('+e.name+') - tidak didukung di browser ini.'); }
-};
-window.addEventListener('message',function(ev){
-  var d=ev.data; if(!d||typeof d.org!=='string')return; got=true;
-  var oA=String(location.origin), attributed=(String(ev.origin)===oA), touched=d.touch.indexOf('BISA')===0;
-  add('dokumen-A: location.origin = '+(oA||'(kosong)')
-     +'\ndokumen-C: location.origin (kata dokumen) = '+(d.org||'(kosong)')+'\n           ev.origin (atribusi browser)   = '+ev.origin+'\n           document.URL = '+d.url
-     +'\ndokumen-C menyentuh '+(arm==='ctrl'?'iframe sandbox di A':'dokumen A')+' = '+d.touch);
-  if(!realOrigin) add('catatan: di file:// semua dokumen melaporkan "null", jadi uji atribusi hanya bermakna lewat http(s).');
-  if(arm==='ctrl') say(touched?'vuln':'secure', touched
-    ? 'RENTAN - C menembus dokumen sandbox opaque di A yang TIDAK ikut mewarisi origin.'
-    : 'AMAN (kontrol) - batas warisan ditegakkan: sentuhan C ke dokumen di A yang tidak mewarisi ditolak ('+d.touch+').');
-  else if(attributed&&touched) say('secure','AMAN - warisan transitif konsisten: C lahir dari B yang lahir dari A, diatribusikan ke origin A ('+ev.origin+'), dan memang berhak membaca A.');
-  else if(!attributed&&touched) say('vuln','RENTAN - C diatribusikan ke origin "'+ev.origin+'" (bukan origin A) tetapi tetap membaca DOM A: diatribusikan tidak sama dengan ditegakkan.');
-  else if(!attributed&&!touched) say('secure','AMAN - rantai putus dan konsisten: C diatribusikan ke origin lain dan aksesnya ditolak.');
-  else say('','ANOMALI - C diatribusikan ke origin A tetapi aksesnya DITOLAK ('+d.touch+'). Catat dan laporkan.');
-});
-function run(mode){
-  arm=mode; got=false; log.textContent=''; say('','menjalankan lengan: '+mode+' ...');
-  if(mode==='ctrl'&&!window.frames.length){ say('','iframe sandbox tidak tersedia - tidak didukung di browser ini.'); return; }
-  winB=window.open('about:blank','uxss17b','width=390,height=150');
-  if(!winB){ say('','popup diblokir - izinkan popup untuk halaman ini lalu ulangi.'); return; }
-  try{
-    winB.document.write('<b>dokumen-B (about:blank, dibuka oleh A)</b><script>try{opener.gotC(window.open("about:blank","uxss17c","width=390,height=150"),String(location.origin),String(document.URL));}'
-      +'catch(e){opener.gotC(null,"ERR "+e.name,"");}<\/script>');
-    winB.document.close();
-  }catch(e){ say('','tidak bisa menulis ke dokumen-B ('+e.name+') - tidak didukung di browser ini.'); }
-  setTimeout(function(){
-    if(!got) say('','tidak ada laporan dari dokumen-C dalam 1,8 detik - popup terblokir atau tidak didukung di browser ini.');
-    try{ if(winC) winC.close(); }catch(e){} try{ if(winB) winB.close(); }catch(e){}
-  },1800);
-}
-document.getElementById('b1').onclick=function(){run('chain');};
-document.getElementById('b2').onclick=function(){run('ctrl');};
+o.textContent='REAL: '+location.origin;
+function go(){var w=window.open('https://example.com/','x');setTimeout(function(){try{o.textContent='BISA BACA -> UXSS: href='+w.location.href;}catch(e){o.textContent='DIBLOKIR (aman): '+e.name;}},2600);}
 </script>
-</body>
-</html>

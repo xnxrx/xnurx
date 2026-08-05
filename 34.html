@@ -1,64 +1,16 @@
-<!-- MEKANISME: popup about:blank tidak punya URL sendiri sehingga MEWARISI origin opener; opener menulis skrip ke dalamnya, lalu skrip itu mencetak origin warisannya (self.origin) dan mencoba membaca DOM opener. -->
-<meta charset="utf-8">
-<title>11 - popup about:blank mewarisi origin opener</title>
-<style>
-body{font:14px/1.6 system-ui,Segoe UI,sans-serif;margin:16px;max-width:880px;color:#111}
-h2{font-size:19px;margin:0 0 10px}
-.k{border-left:4px solid #888;padding:6px 10px;margin:8px 0;background:#f6f6f6}
-.v{border-left-color:#c62828}.s{border-left-color:#2e7d32}
-code{background:#eee;padding:1px 4px}
-button{font-size:15px;padding:7px 13px;margin:6px 8px 6px 0}
-#out{background:#111;color:#0f0;padding:10px;font:12.5px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;user-select:all;min-height:64px}
-.n{font-size:13px;color:#444}
-</style>
-
-<h2>11 &mdash; POPUP <code>about:blank</code>: origin yang DIWARISI dari opener</h2>
-
-<div class="k">URL asli halaman ini (<code>location.href</code>): <b id="href">-</b></div>
-<div class="k">Origin asli halaman ini (<code>self.origin</code>): <b id="orig">-</b></div>
-<div class="k v"><b>VULNERABLE:</b> <b>ORIGIN YANG DIWARISI popup</b> (<code>self.origin</code>) ternyata milik <b>situs lain</b> &mdash; bukan origin opener di atas. Atau popup berhasil membaca DOM dokumen yang bukan opener-nya. Skrip berjalan dengan origin yang bukan haknya = UXSS.</div>
-<div class="k s"><b>SECURE / BASELINE:</b> <code>self.origin</code> popup <b>SAMA PERSIS</b> dengan origin opener di atas dan pembacaan DOM opener <b>BERHASIL</b>. Ini <b>bukan bug</b> &mdash; <code>about:blank</code> memang mewarisi origin pembuatnya, jadi keduanya same-origin dan saling boleh baca. Yang dicetak adalah <i>fakta pewarisan</i>, bukan pelanggaran.</div>
-
-<button onclick="uji()">Uji (opener menulis skrip ke popup about:blank)</button>
-<button onclick="kontrol()">Kontrol (mekanisme dilepas: <code>noopener</code>)</button>
-
-<p class="n">Izinkan popup bila diblokir; popup menutup sendiri &plusmn;6 detik. Tidak ada apa pun yang dikirim ke luar &mdash; seluruh hasil hanya dicetak di kotak hitam di bawah. Catatan pembacaan: yang otoritatif adalah <code>self.origin</code> (origin efektif dokumen). <code>location.origin</code> ikut dicetak sebagai pembanding, tetapi ia diturunkan dari URL <code>about:blank</code> sehingga wajar berbunyi <code>null</code> walau pewarisannya benar &mdash; jangan pakai nilai itu untuk memvonis.</p>
-
-<div id="out">(belum ada hasil)</div>
-
+<!-- 34 - sandbox allow-scripts + allow-same-origin   [UXSS / SOP bypass | macOS: Dia/Arc/Chrome macOS]
+     MEKANISME : kombinasi dua token sandbox yang saling meniadakan; yang diuji apakah frame tetap dianggap same-origin setelah memuat origin lain.
+     PREDIKAT  : frame ber-sandbox tetap bisa dibaca induk.
+     AMAN      : pembacaan lintas-origin dilempar SecurityError; baris bukti berkata DIBLOKIR.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>34 sandbox allow-scripts + allow-same-origin</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var out=document.getElementById('out'),got=false;
-document.getElementById('href').textContent=location.href;
-document.getElementById('orig').textContent=String(self.origin);
-function log(s){out.textContent=s+"\n"+out.textContent;}
-window.report11=function(r){
-  got=true;
-  var p=String(self.origin),asing=(r.oself!==p&&r.oself!=='null'&&r.oself!=='');
-  var v=asing?'VULNERABLE: popup mewarisi origin ASING ('+r.oself+'), bukan origin opener ('+p+')'
-    :(r.ok===true?'SECURE/BASELINE: popup mewarisi origin opener (pewarisan BENAR) dan baca DOM opener berhasil = memang boleh, bukan bug'
-                 :'CATATAN: popup tidak same-origin dengan opener di sini (akses ditolak) - lebih ketat dari spesifikasi, bukan bug');
-  log('RESULT 11 | popup.href='+r.href+' | ORIGIN YANG DIWARISI popup (self.origin)='+r.oself+' | opener.origin='+p+' | popup.location.origin='+r.oloc+' (turunan URL about:blank, bukan origin efektif) | popup.document.domain="'+r.domain+'" | '+r.read+' | VERDICT='+v+' | '+location.href);
-};
-function uji(){
-  got=false;
-  var w=null;try{w=window.open('','_blank','width=470,height=270');}catch(e){}
-  if(!w){log('RESULT 11 | popup DIBLOKIR browser -> tidak ada hasil. Izinkan popup lalu ulangi. | '+location.href);return;}
-  var s='<meta charset="utf-8"><body style="font:13px/1.5 sans-serif">DEMO &mdash; dokumen popup ini ditulis oleh opener<pre id=p></pre>'
-   +'<script>var r={href:location.href,oself:"",oloc:String(location.origin),domain:"",read:"",ok:null};'
-   +'try{r.oself=String(self.origin)}catch(e){r.oself="(throw "+e.name+")"}'
-   +'try{r.domain=document.domain}catch(e){r.domain="(throw "+e.name+")"}'
-   +'try{r.read="baca opener: title=\''+""+'"+opener.document.title+"\' , body "+opener.document.body.textContent.length+" char";r.ok=true}'
-   +'catch(e){r.read="baca opener DITOLAK: "+(e.name||e.message);r.ok=false}'
-   +'document.getElementById("p").textContent=JSON.stringify(r,null,1);'
-   +'try{opener.report11(r)}catch(e){}<\/script>';
-  try{w.document.write(s);w.document.close();}
-  catch(e){log('RESULT 11 | opener TIDAK BISA menulis dokumen popup: '+(e.name||e.message)+' -> popup bukan same-origin dengan opener. | '+location.href);}
-  setTimeout(function(){if(!got)log('RESULT 11 | popup tidak memanggil balik opener dalam 1500 ms -> skrip popup tak menjangkau opener (origin popup bukan origin opener, atau skrip tak jalan). | '+location.href);},1500);
-  setTimeout(function(){try{w.close()}catch(e){}},6000);
-}
-function kontrol(){
-  var w=null;try{w=window.open('','_blank','noopener');}catch(e){}
-  log('KONTROL 11 | window.open("","_blank","noopener") -> handle='+(w===null?'null':'BUKAN null')+' | VERDICT='+(w===null?'SECURE: tanpa handle, opener tak bisa menulis dokumen popup DAN popup tak punya window.opener -> jalur pewarisan origin tidak bisa dipakai sama sekali':'PERIKSA: dengan noopener handle seharusnya null di browser ini')+' | '+location.href);
-  if(w){try{w.close()}catch(e){}}
-}
+o.textContent='REAL: '+location.origin;
+function rd(w){try{var t=w.document.title;return 'BISA BACA -> UXSS: title="'+t+'"';}catch(e){return 'DIBLOKIR (aman): '+e.name;}}
+var f;
+function go(){f=document.createElement('iframe');f.setAttribute('sandbox','allow-scripts allow-same-origin');f.src='https://example.com/';document.body.appendChild(f);setTimeout(function(){o.textContent=rd(f.contentWindow);},2600);}
 </script>

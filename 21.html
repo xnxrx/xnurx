@@ -1,87 +1,15 @@
-<!-- MEKANISME: OKLUSI — segera setelah masuk fullscreen, halaman menggambar elemen ber-watermark DEMO tepat di wilayah tempat notice fullscreen muncul (atas-tengah), untuk menguji apakah notice dikomposit DI ATAS konten halaman atau bisa tertutup. -->
-<!doctype html>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>38 — Oklusi wilayah notice fullscreen</title>
-<style>
-body{font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:16px;background:#0e1116;color:#dfe6ef}
-h2{margin:0 0 12px;font-size:19px;line-height:1.3}
-section{border:1px solid #2a3240;border-radius:8px;padding:10px 12px;margin:10px 0;background:#151a22}
-b.tag{display:inline-block;min-width:78px;color:#7fd1ff}
-button{font:13px system-ui;padding:8px 12px;margin:4px 6px 4px 0;border:1px solid #3a4658;background:#1e2733;color:#e8eef6;border-radius:6px;cursor:pointer}
-button.ctl{border-color:#3f7a55;color:#bfe6c8}
-code{font-family:ui-monospace,Consolas,monospace;color:#ffd79a;word-break:break-all}
-textarea{width:100%;height:130px;background:#0b0e13;color:#cfeaff;border:1px solid #2a3240;border-radius:6px;padding:8px;font-family:ui-monospace,Consolas,monospace;font-size:12px}
-.small{color:#93a2b5;font-size:12.5px}
-.warn{color:#ffb37a}
-#stage{position:relative;overflow:hidden;background:#05070a;border:1px dashed #3a4658;border-radius:8px;padding:14px;text-align:center;min-height:300px}
-#stage:fullscreen,#stage:-webkit-full-screen{border:0;border-radius:0}
-#over{position:absolute;top:0;left:50%;transform:translateX(-50%);width:76%;max-width:760px;height:120px;background:#23262e;border:1px solid #565b66;border-radius:0 0 12px 12px;box-shadow:0 4px 18px rgba(0,0,0,.6);display:none;z-index:2147483647;color:#e6eaf0;padding-top:10px}
-#over .wm{font:900 26px/1.25 ui-monospace,Consolas,monospace;color:rgba(255,120,120,.30);letter-spacing:6px;user-select:none;pointer-events:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center}
-#over .lbl{position:relative;font-size:13px;color:#cfd6e0}
-#clock{margin-top:150px;font-size:9vmin;font-variant-numeric:tabular-nums;color:#8ef;font-family:ui-monospace,Consolas,monospace}
-#log{max-height:130px;overflow:auto;font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#a9c4dd}
-</style>
-
-<h2>38 — OKLUSI: bisakah halaman menutupi wilayah notice fullscreen?</h2>
-
-<section><b class="tag">PAGAR</b> Ketika chrome browser disembunyikan atas izin user, permukaan browser-controlled yang tersisa cuma <b>NOTICE fullscreen</b> di atas-tengah (+ jalan keluar Esc). Notice itu seharusnya digambar oleh <b>proses browser</b> dan dikomposit <b>di atas</b> seluruh konten halaman, sehingga elemen halaman dengan <code>z-index</code> setinggi apa pun tidak bisa menutupinya. Mozilla membayar kelas &ldquo;notice tertutup / tak teramati&rdquo; (CVE-2021-43538, CVE-2023-37207, MFSA-2024-33 / MFSA-2024-39); Chromium menganggap obfuskasi toast bukan isu keamanan &rarr; <b>laporkan ke Mozilla</b>.</section>
-
-<section><b class="tag">CELAH</b> Pagarnya <b>geometris dan per-permukaan</b>: ia mengandalkan notice berada pada layer di atas konten. Kalau di suatu platform/mode (mobile, kiosk, PWA/WebView, jendela non-standar, atau saat notice dirender di dalam konten) urutan komposit itu tidak dijamin, maka menggambar kotak buram di koordinat yang sama sudah cukup — tanpa satu pun API istimewa. Berkas ini <b>tidak</b> menirukan UI browser: kotaknya jelas ber-watermark <b>DEMO</b> dan bertuliskan bahwa ia elemen halaman.</section>
-
-<section><b class="tag">UJI</b>
-<button onclick="run('OKLUSI-0ms')">Arm UJI — overlay 0&nbsp;ms setelah fullscreen</button>
-<button onclick="run('OKLUSI-150ms')">Arm UJI — overlay 150&nbsp;ms</button>
-<button class="ctl" onclick="run('POLOS')">KONTROL — fullscreen tanpa overlay</button>
-<button onclick="leave()">Keluar fullscreen</button>
-<div class="small">Auto-keluar 6 detik. <b>Esc selalu bekerja.</b> Setelah tiap run, klik verdict di panggung. Ulangi &ge;20 kali per arm supaya hitungannya bermakna.</div>
-</section>
-
-<div id="stage">
-  <div id="over"><div class="wm">DEMO&nbsp;DEMO&nbsp;DEMO</div><div class="lbl">DEMO OVERLAY — ini elemen halaman, <u>bukan</u> UI browser</div></div>
-  <div class="small">panggung fullscreen</div>
-  <div id="clock">0</div>
-  <div class="small">arm: <b id="armlbl">—</b> &nbsp;|&nbsp; location.href asli: <code id="href2"></code></div>
-  <div>
-    <button onclick="vote('NOTICE-TERLIHAT')">Notice TERLIHAT (+1)</button>
-    <button onclick="vote('NOTICE-TERTUTUP')">Notice TERTUTUP (+1)</button>
-    <button onclick="vote('NOTICE-TIDAK-ADA')">Notice TIDAK MUNCUL (+1)</button>
-  </div>
-</div>
-
-<section><b class="tag">ORACLE</b>
-<div><b>BYPASS:</b> pada arm OKLUSI, teks notice tidak terbaca sama sekali karena tertutup kotak DEMO, sedangkan pada KONTROL notice terbaca jelas &rarr; laporkan sebagai <i>bypass-of-fix</i> untuk kelas notice-obscured, sertakan hitungan (mis. &ldquo;tertutup 18/20&rdquo;) dan rekaman layar.</div>
-<div><b>PAGAR MASIH BERLAKU:</b> notice tetap terbaca <b>di atas</b> kotak DEMO pada semua run &rarr; komposit browser menang; catat &ldquo;tertutup 0/20&rdquo; sebagai ilmu-negatif ber-tanggal + versi build.</div>
-<div class="warn">Perkiraan jujur: pada Firefox/Chrome desktop terkini <b>pagar diperkirakan menang</b> (notice = UI proses-browser). Berkas ini bernilai justru sebagai <b>pengukur</b> lintas-platform: mobile, PWA/WebView, jendela pop-up, dan fork (Arc/Brave/Vivaldi/Opera/Samsung) sering tertinggal di belakang.</div>
-</section>
-
-<section><b class="tag">KONTROL</b> Arm hijau memasuki fullscreen dengan overlay dimatikan. Kalau di arm KONTROL pun notice tak terlihat, penyebabnya bukan oklusi (mis. notice memang sudah lewat, atau kebijakan build) — dan angka arm UJI menjadi tak bermakna.</section>
-
-<section><b class="tag">HASIL</b>
-<button onclick="tally={};draw()">Reset hitungan</button>
-<textarea id="tbl" readonly placeholder="hitungan muncul di sini — salin apa adanya ke laporan"></textarea>
-<div class="small">location.href asli: <code id="href"></code></div>
-<div id="log"></div>
-</section>
-
+<!-- 21 - jebakan beforeunload   [address-bar spoofing | macOS: Dia/Arc/Chrome macOS]
+     MEKANISME : dialog beforeunload menahan navigasi TEPAT saat bilah sudah menampilkan tujuan; selama dialog terbuka, dokumen lama masih tampil.
+     PREDIKAT  : bilah sudah menulis https://www.google.com sementara dokumen belum berpindah.
+     AMAN      : bilah tetap di halaman sekarang selama dialog terbuka.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>21 jebakan beforeunload</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var $=function(i){return document.getElementById(i);};
-var stage=$('stage'),over=$('over'),clock=$('clock'),arm='—',t0=0,live=false,tally={},timer=null;
-function fsOn(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
-function enter(el){var f=el.requestFullscreen||el.webkitRequestFullscreen;if(!f){log('API Fullscreen tidak tersedia');return;}
-  try{var p=f.call(el);if(p&&p['catch'])p['catch'](function(e){log('fullscreen DITOLAK ('+e+')');});}catch(e){log('fullscreen DITOLAK ('+e.name+')');}}
-function leave(){var f=document.exitFullscreen||document.webkitExitFullscreen;if(f&&fsOn()){try{f.call(document);}catch(e){}}}
-function paint(){clock.textContent=(performance.now()-t0).toFixed(0)+' ms';if(live)requestAnimationFrame(paint);}
-function run(name){if(live)return;arm=name;$('armlbl').textContent=name;over.style.display='none';t0=performance.now();live=true;enter(stage);paint();
-  if(name.indexOf('OKLUSI')===0){var d=(name.indexOf('150')>0)?150:0;timer=setTimeout(function(){over.style.display='block';log(arm+' | overlay tampil pada '+(performance.now()-t0).toFixed(0)+' ms');},d);}
-  setTimeout(function(){leave();live=false;},6000);}
-function chg(){if(fsOn()){log(arm+' | fullscreen aktif pada '+(performance.now()-t0).toFixed(1)+' ms');}
-  else{live=false;if(timer){clearTimeout(timer);timer=null;}over.style.display='none';log(arm+' | keluar fullscreen');}}
-function vote(v){var k=arm+' :: '+v;tally[k]=(tally[k]||0)+1;draw();}
-function draw(){var s='arm :: verdict\thitungan\n',k,tot={};for(k in tally){s+=k+'\t'+tally[k]+'\n';var a=k.split(' :: ')[0];tot[a]=(tot[a]||0)+tally[k];}
-  for(k in tally){var a2=k.split(' :: ')[0];s+='rasio '+k+' = '+tally[k]+'/'+tot[a2]+'\n';}
-  s+='UA: '+navigator.userAgent+'\nlayar: '+screen.width+'x'+screen.height+' dpr='+(window.devicePixelRatio||1)+'\n';$('tbl').value=s;}
-function log(s){var d=document.createElement('div');d.textContent=s;$('log').appendChild(d);$('log').scrollTop=1e6;}
-document.addEventListener('fullscreenchange',chg);document.addEventListener('webkitfullscreenchange',chg);
-$('href').textContent=location.href;$('href2').textContent=location.href;draw();
+o.textContent='REAL: '+location.origin;
+window.onbeforeunload=function(){return 'x';};
+function go(){location='https://www.google.com/';}
 </script>

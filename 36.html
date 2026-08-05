@@ -1,72 +1,14 @@
-<!-- MEKANISME: URL.createObjectURL membuat dokumen blob: yang MEWARISI origin halaman pembuatnya; skrip di dalam dokumen blob mencetak origin warisan itu (self.origin) dan menguji apakah ia boleh membaca DOM pembuatnya. -->
-<meta charset="utf-8">
-<title>13 - blob: URL mewarisi origin pembuatnya</title>
-<style>
-body{font:14px/1.6 system-ui,Segoe UI,sans-serif;margin:16px;max-width:880px;color:#111}
-h2{font-size:19px;margin:0 0 10px}
-.k{border-left:4px solid #888;padding:6px 10px;margin:8px 0;background:#f6f6f6}
-.v{border-left-color:#c62828}.s{border-left-color:#2e7d32}
-code{background:#eee;padding:1px 4px}
-button{font-size:15px;padding:7px 13px;margin:6px 8px 6px 0}
-#out{background:#111;color:#0f0;padding:10px;font:12.5px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;user-select:all;min-height:64px}
-.n{font-size:13px;color:#444}
-iframe{border:1px dashed #999;margin:4px 8px 4px 0;vertical-align:top;width:330px;height:52px}
-</style>
-
-<h2>13 &mdash; DOKUMEN <code>blob:</code>: origin yang ia bawa dari pembuatnya</h2>
-
-<div class="k">URL asli halaman ini (<code>location.href</code>): <b id="href">-</b></div>
-<div class="k">Origin asli halaman ini (<code>self.origin</code>): <b id="orig">-</b></div>
-<div class="k v"><b>VULNERABLE:</b> dokumen <code>blob:</code> mencetak <b>origin warisan</b> milik <b>situs lain</b> (bukan pembuatnya di atas), <b>atau</b> arm <code>KONTROL</code> (<code>data:text/html</code>, wajib opaque) tetap <b>BERHASIL</b> membaca DOM pembuatnya. Keduanya = skrip berjalan pada origin yang bukan haknya = UXSS.</div>
-<div class="k s"><b>SECURE / BASELINE:</b> arm <code>UJI</code> mencetak <code>blob:&lt;origin-halaman-ini&gt;/&lt;uuid&gt;</code>, <code>self.origin</code> identik dengan pembuat, dan baca DOM pembuat <b>BERHASIL</b> &mdash; itu memang perilaku yang benar (<b>bukan bug</b>). Arm <code>KONTROL</code> mencetak <code>self.origin=null</code> dan baca DOM pembuat <b>DITOLAK</b>.</div>
-
-<button onclick="uji()">Uji (iframe ke <code>blob:</code> buatan halaman ini)</button>
-<button onclick="kontrol()">Kontrol (mekanisme dilepas: skrip sama lewat <code>data:text/html</code>)</button>
-
-<p class="n"><b>Kenapa <code>data:</code> jadi lengan kontrol:</b> isi dokumennya identik byte-per-byte, tetapi <code>data:</code> <b>tidak</b> mewarisi origin pembuat &mdash; ia mendapat <b>opaque origin</b>, jadi pembacaan DOM pembuat harus gagal. Perbedaan satu-satunya antara dua tombol adalah <i>cara dokumen itu diberi origin</i>. Perhatikan juga origin yang <b>tertanam di dalam URL blob</b> itu sendiri. Dari <code>file://</code> sebagian browser menolak memuat <code>blob:null/&hellip;</code> di iframe &mdash; kalau baris hasil berkata &ldquo;tidak ada laporan&rdquo;, ulangi dari http(s). Tidak ada apa pun yang dikirim ke luar.</p>
-
-<div id="frames"></div>
-<div id="out">(belum ada hasil)</div>
-
+<!-- 36 - dokumen data: mencoba baca induk   [UXSS / SOP bypass | macOS: Arc/Dia macOS]
+     MEKANISME : data: seharusnya origin opaque; yang diuji apakah ia justru mewarisi dan bisa membaca ke atas.
+     PREDIKAT  : dokumen data: membaca dokumen induk.
+     AMAN      : pembacaan lintas-origin dilempar SecurityError; baris bukti berkata DIBLOKIR.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>36 dokumen data: mencoba baca induk</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var out=document.getElementById('out'),seen={};
-document.getElementById('href').textContent=location.href;
-document.getElementById('orig').textContent=String(self.origin);
-function log(s){out.textContent=s+"\n"+out.textContent;}
-var ok=!!(window.Blob&&window.URL&&URL.createObjectURL);
-if(!ok)log('CATATAN 13 | Blob/URL.createObjectURL tidak didukung di browser ini -> uji tidak dapat dijalankan.');
-var P='<meta charset="utf-8"><body style="font:12px sans-serif">DEMO dokumen @TAG@<script>'
- +'var r={tag:"@TAG@",href:location.href,oself:"",oloc:String(location.origin),domain:"",read:"",ok:null};'
- +'try{r.oself=String(self.origin)}catch(e){r.oself="(throw "+e.name+")"}'
- +'try{r.domain=document.domain}catch(e){r.domain="(throw "+e.name+")"}'
- +'try{r.read="baca pembuat: title=\''+""+'"+parent.document.title+"\' , body "+parent.document.body.textContent.length+" char";r.ok=true}'
- +'catch(e){r.read="baca pembuat DITOLAK: "+(e.name||e.message);r.ok=false}'
- +'try{parent.postMessage(JSON.stringify(r),"*")}catch(e){}<\/script>';
-function frame(tag,src){
-  seen[tag]=0;
-  var f=document.createElement('iframe');f.src=src;
-  document.getElementById('frames').appendChild(f);
-  setTimeout(function(){if(!seen[tag])log('RESULT 13 | '+tag+' | tidak ada laporan dalam 1800 ms -> dokumen ditolak dimuat atau skripnya tidak berjalan (umum untuk blob:null dari file://).');},1800);
-}
-function uji(){
-  if(!ok){log('RESULT 13 | UJI | tidak didukung di browser ini.');return;}
-  var u;try{u=URL.createObjectURL(new Blob([P.split('@TAG@').join('UJI')],{type:'text/html'}));}
-  catch(e){log('RESULT 13 | UJI | createObjectURL gagal: '+(e.name||e.message));return;}
-  log('CATATAN 13 | blob URL yang dibuat: '+u+' (perhatikan origin yang tertanam di dalamnya)');
-  frame('UJI',u);
-}
-function kontrol(){frame('KONTROL','data:text/html;charset=utf-8,'+encodeURIComponent(P.split('@TAG@').join('KONTROL')));}
-window.addEventListener('message',function(ev){
-  var r;try{r=JSON.parse(ev.data)}catch(e){return}
-  if(!r||!r.tag||!(r.tag in seen))return;
-  seen[r.tag]=1;
-  var p=String(self.origin),asing=(r.oself!==p&&r.oself!=='null'&&r.oself!==''),v;
-  if(r.tag==='UJI')v=asing?'VULNERABLE: dokumen blob mewarisi origin ASING ('+r.oself+'), bukan origin pembuatnya ('+p+')'
-    :(r.ok===true?'SECURE/BASELINE: dokumen blob mewarisi origin pembuatnya dan boleh membacanya (perilaku benar, bukan bug)'
-                 :'CATATAN: dokumen blob tidak same-origin dengan pembuatnya di sini (akses ditolak) - lebih ketat dari spesifikasi, bukan bug');
-  else v=(r.ok===true)?'VULNERABLE: dokumen data: (opaque) BERHASIL membaca DOM pembuatnya'
-                      :'SECURE: dokumen data: mendapat opaque origin, baca DOM pembuat ditolak';
-  var h=String(r.href);if(h.length>72)h=h.slice(0,72)+' ...(dipotong)';
-  log('RESULT 13 | '+r.tag+' | doc.href='+h+' | ORIGIN YANG DIWARISI (self.origin)='+r.oself+' | pembuat.origin='+p+' | doc.location.origin='+r.oloc+' | document.domain="'+r.domain+'" | '+r.read+' | VERDICT='+v+' | '+location.href);
-});
+o.textContent='REAL: '+location.origin;
+function go(){o.textContent='menunggu frame data: ...';var f=document.createElement('iframe');f.src='data:text/html,<script>try{parent.document.title;parent.o.textContent="BISA BACA -> UXSS: data: membaca induk";}catch(e){parent.o.textContent="DIBLOKIR (aman): "+e.name;}<\/script>';document.body.appendChild(f);setTimeout(function(){if(/menunggu/.test(o.textContent))o.textContent='frame data: tidak dimuat sama sekali (aman - navigasi data: diblokir engine)';},2500);}
 </script>

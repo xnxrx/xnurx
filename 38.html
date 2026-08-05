@@ -1,88 +1,14 @@
-<!-- MEKANISME: URL javascript: yang ditugaskan ke location jendela lain tidak melahirkan dokumen baru - ia dieksekusi DI DALAM dokumen yang sudah ada di jendela itu dan memakai origin dokumen tersebut (uxss-forge U2 = momen origin di-update). -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>15 - URL javascript: pada jendela yang dibuka</title>
-<style>
-body{font:15px/1.55 system-ui,sans-serif;margin:0;padding:1rem;background:#fff;color:#111}
-.panel{max-width:780px;margin:0 auto;border:2px solid #a15;border-radius:10px;padding:.9rem}
-h2{font-size:1.05rem;margin:.1rem 0 .6rem}
-.kv{display:grid;grid-template-columns:12rem 1fr;gap:.15rem .6rem;font-size:.88rem;word-break:break-all}
-.kv b{color:#555;font-weight:600}
-code{background:#f2f2f2;padding:.05rem .3rem;border-radius:4px}
-p.o{margin:.25rem 0;font-size:.9rem}
-#verdict{margin:.7rem 0;padding:.55rem .7rem;border-radius:8px;font-weight:700;background:#eee}
-.vuln{background:#fde;color:#a00}.secure{background:#dfe;color:#060}
-button{font:inherit;padding:.45rem .7rem;border:1px solid #888;border-radius:8px;background:#fafafa;cursor:pointer;margin:0 .35rem .35rem 0}
-pre{white-space:pre-wrap;word-break:break-all;font-size:.82rem;background:#f7f7f7;padding:.5rem;border-radius:6px;min-height:1.2rem}
-.note{font-size:.8rem;color:#666}
-@media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}code,pre{background:#242424}#verdict{background:#222}button{background:#222;color:#eee;border-color:#555}.note{color:#999}}
-</style>
-</head>
-<body>
-<div class="panel">
-<h2>15 &middot; URL <code>javascript:</code> pada jendela yang dibuka halaman ini</h2>
-
-<div class="kv">
-  <b>location.href asli</b><span id="here">...</span>
-  <b>Pertanyaan</b><span>dokumen MANA yang menerima URL <code>javascript:</code>, dan origin apa yang dilaporkannya sesudah itu?</span>
-  <b>Alur</b><span>A (halaman ini) &rarr; <code>window.open('about:blank')</code> = dokumen-B, A menulis penanda ke B &rarr; <code>B.location = "javascript:..."</code></span>
-  <b>Dua sinyal origin</b><span><code>location.origin</code> = kata dokumen tentang dirinya (diserialkan dari URL) &middot; <code>ev.origin</code> = atribusi browser saat pesan diterima. Vonis memakai <code>ev.origin</code> + hasil sentuhan, karena itulah yang ditegakkan.</span>
-</div>
-
-<p class="o"><b>RENTAN =</b> kode berjalan di dokumen yang diatribusikan browser ke origin LAIN, tetapi tetap berhasil membaca DOM pembuka (diatribusikan &ne; ditegakkan).</p>
-<p class="o"><b>AMAN =</b> kode berjalan di dokumen yang diatribusikan ke origin pembuka dan memang berhak membacanya - penanda tulisan A masih utuh, jadi tidak ada dokumen baru yang lahir; ATAU URL <code>javascript:</code> tidak dieksekusi sama sekali.</p>
-
-<p><button id="b1">Jalankan (skema javascript:)</button><button id="b2">Kontrol (skema data: - mekanisme dilepas)</button></p>
-<div id="verdict">verdict: belum dijalankan</div>
-<pre id="log"></pre>
-<p class="note">Kontrol memakai alur yang PERSIS sama; satu-satunya variabel yang berubah adalah skema URL yang ditugaskan ke <code>window.location</code>. Perhatikan juga <code>document.URL</code> dokumen-B sesudah eksekusi: ia tetap URL sebelumnya, bukan URL <code>javascript:</code>. Popup uji ditutup otomatis. Tidak ada jaringan, tidak ada form, tidak ada data yang dikirim ke mana pun.</p>
-</div>
+<!-- 38 - pelonggaran document.domain   [UXSS / SOP bypass | macOS: Dia/Arc/Chrome macOS]
+     MEKANISME : mekanisme lama yang sudah dimatikan default; kalau fork masih menghidupkannya, batas origin bisa dilonggarkan sepihak.
+     PREDIKAT  : document.domain masih bisa diubah dan melonggarkan batas.
+     AMAN      : pembacaan lintas-origin dilempar SecurityError; baris bukti berkata DIBLOKIR.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>38 pelonggaran document.domain</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var log=document.getElementById('log'), vd=document.getElementById('verdict');
-document.getElementById('here').textContent=location.href+'   [location.origin = '+(location.origin||'(kosong)')+']';
-function say(c,t){vd.className=c;vd.textContent=t;}
-function add(t){log.textContent+=t+'\n';}
-var PROBE="(function(){var r={url:String(document.URL),org:String(location.origin),body:(document.body?document.body.textContent:'').slice(0,44)};"
- +"try{r.touch='BISA baca DOM pembuka ('+opener.document.body.textContent.length+' char)';}catch(e){r.touch='DITOLAK '+e.name;}"
- +"try{opener.postMessage(r,'*');}catch(e){}})()";
-var arm='js', got=false, win=null, realOrigin=/^[a-z]+:\/\//.test(String(location.origin));
-window.addEventListener('message',function(ev){
-  var d=ev.data; if(!d||typeof d.org!=='string')return; got=true;
-  var oA=String(location.origin), attributed=(String(ev.origin)===oA), touched=d.touch.indexOf('BISA')===0;
-  add('dokumen-B melapor sendiri:\n  document.URL                   = '+d.url+'\n  location.origin (kata dokumen) = '+(d.org||'(kosong)')
-     +'\n  ev.origin (atribusi browser)   = '+ev.origin+'\n  isi dokumen saat kode berjalan = "'+d.body+'"\n  sentuhan ke DOM pembuka        = '+d.touch);
-  if(d.org!==String(ev.origin)) add('catatan: kedua sinyal berbeda - location.origin diserialkan dari URL dokumen semu, sedangkan atribusi browser memakai origin warisan.');
-  if(!realOrigin) add('catatan: di file:// semua dokumen melaporkan "null", jadi uji atribusi hanya bermakna lewat http(s).');
-  if(arm==='js'){
-    if(touched&&attributed) say('secure','AMAN - javascript: dieksekusi DI DALAM dokumen about:blank yang sudah ada (penanda tulisan A masih utuh), diatribusikan ke origin pembuka, dan memang berhak membacanya. Diatribusikan = ditegakkan.');
-    else if(touched&&!attributed) say('vuln','RENTAN - dokumen diatribusikan ke origin "'+ev.origin+'" (bukan origin pembuka) tetapi tetap membaca DOM pembuka: diatribusikan tidak sama dengan ditegakkan.');
-    else say('','ANOMALI - kode berjalan tetapi sentuhannya ditolak ('+d.touch+') walau diatribusikan ke '+ev.origin+'. Catat.');
-  } else {
-    if(touched) say('vuln','RENTAN - dokumen data: (seharusnya origin opaque) berhasil membaca DOM pembuka.');
-    else say('secure','AMAN (kontrol) - dokumen data: diatribusikan ke "'+ev.origin+'" dan sentuhannya ditolak: '+d.touch);
-  }
-});
-function run(which){
-  arm=which; got=false; log.textContent=''; say('','menjalankan lengan: '+which+' ...');
-  win=window.open('about:blank','uxss15','width=440,height=170');
-  if(!win){ say('','popup diblokir - izinkan popup untuk halaman ini lalu ulangi (lengan ini tidak bisa jalan tanpa popup).'); return; }
-  try{ win.document.write('<b>dokumen-B: about:blank buatan halaman A</b>'); win.document.close(); }catch(e){ add('menulis dokumen-B gagal: '+e.name); }
-  try{ add('dokumen-B sebelum navigasi: location.href = '+win.location.href); }catch(e){ add('dokumen-B tak terbaca: '+e.name); }
-  try{ win.location = (which==='js') ? ('javascript:'+PROBE+';void 0')
-       : ('data:text/html,'+encodeURIComponent('<script>'+PROBE+'<\/script>dokumen data: (DEMO)')); }
-  catch(e){ add('penugasan location ditolak: '+e.name); }
-  setTimeout(function(){
-    if(!got) say(which==='js'?'':'secure', which==='js'
-      ? 'tidak ada laporan - URL javascript: tidak dieksekusi di jendela itu, atau tidak didukung di browser ini.'
-      : 'AMAN (kontrol) - tanpa skema javascript:, navigasi frame-teratas ke data: ditolak; tidak ada kode yang berjalan.');
-    try{ if(win) win.close(); }catch(e){}
-  },1400);
-}
-document.getElementById('b1').onclick=function(){run('js');};
-document.getElementById('b2').onclick=function(){run('data');};
+o.textContent='REAL: '+location.origin;
+function go(){var b=document.domain;try{document.domain=b.split('.').slice(-2).join('.');}catch(e){o.textContent='DIBLOKIR (aman): '+e.name;return;}o.textContent=(document.domain!==b)?('BERUBAH '+b+' -> '+document.domain+' | BELUM temuan: masih harus dibuktikan baca lintas-subdomain'):'tidak berubah (aman)';}
 </script>
-</body>
-</html>

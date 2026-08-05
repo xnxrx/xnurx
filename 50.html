@@ -1,104 +1,15 @@
-<!-- UXSS: satu jalur lahir = URL javascript: yang dieksekusi pada jendela yang DIBUKA halaman ini; pertanyaan U2 (kapan/di dokumen MANA origin ditetapkan) dijawab dengan membaca SELURUH pelapor identitas dari dalam dokumen yang menerima eksekusi, plus lengan pembanding di iframe sendiri. -->
-<!doctype html>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>27 - URL javascript: dokumen mana yang menerima eksekusi</title>
-<style>
-body{font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:16px;color:#111;background:#fff;max-width:1180px}
-h2{font-size:19px;margin:0 0 10px;line-height:1.3}
-h3{font-size:14px;margin:16px 0 4px}
-.k{border-left:4px solid #8a94a6;padding:6px 10px;margin:8px 0;background:#f4f6f9}
-.k.s{border-left-color:#2e7d32;background:#f1f8f2}
-.k.v{border-left-color:#c62828;background:#fdf2f2}
-.k.n{border-left-color:#ef6c00;background:#fff8ef}
-table{border-collapse:collapse;width:100%;font:12px/1.45 ui-monospace,Consolas,monospace;margin-top:6px;table-layout:fixed}
-th,td{border:1px solid #ccd3dd;padding:4px 6px;vertical-align:top;word-break:break-all}
-th{background:#eaeef4;text-align:left}
-td.nm{background:#f7f9fc;font-weight:700;width:205px}
-button{font-size:14px;padding:7px 12px;margin:5px 8px 5px 0;cursor:pointer}
-code{background:#eceff3;padding:1px 4px}
-.small{color:#4a5464;font-size:12.5px}
-iframe{width:290px;height:44px;border:1px dashed #9aa3b0;margin:6px 6px 0 0;vertical-align:top}
-</style>
-
-<h2>27 &mdash; URL <code>javascript:</code> pada jendela yang dibuka halaman ini: dokumen MANA yang menerima eksekusinya?</h2>
-
-<div class="k">Halaman INDUK &mdash; <code>location.href</code>: <b id="phref">-</b></div>
-<div class="k">Halaman INDUK &mdash; <code>self.origin</code>: <b id="porig">-</b> &nbsp;&middot;&nbsp; <code>document.cookie</code> (dipotong 40): <b id="pck">-</b></div>
-
-<div class="k s"><b>SEHARUSNYA (per spec):</b> URL <code>javascript:</code> <b>tidak membuat origin baru</b>. Ia dievaluasi <b>di dalam dokumen aktif</b> dari browsing context sasaran. Karena popup dibuka oleh halaman ini sebagai <code>about:blank</code>, dokumen itu <b>mewarisi</b> origin halaman ini &rarr; semua pelapor seharusnya menyebut <b>origin yang sama dengan INDUK</b>, sementara <code>location.href</code> tetap <code>about:blank</code>. Kalau hasil evaluasi berupa <b>string</b>, dokumen <b>diganti</b> (document.write implisit) tetapi <b>URL dan origin dokumen tidak berubah</b>. Karena itu <b>membaca DOM/cookie induk BERHASIL &mdash; itu memang same-origin, bukan bug.</b></div>
-
-<div class="k"><b>YANG DIUJI (U2 = momen origin di-update):</b> empat cara menaruh eksekusi yang sama pada dokumen yang berbeda-beda &mdash; (1) popup <code>about:blank</code> lalu <code>w.location='javascript:...'</code> tanpa mengganti dokumen, (2) sama tetapi <b>mengembalikan string</b> sehingga dokumen diganti, (3) <code>window.open('javascript:...')</code> langsung, (4) <b>pembanding</b>: <code>iframe.src='javascript:...'</code> milik sendiri. Baris <b>INDUK baca w.location.href</b> menjawab &ldquo;dokumen mana&rdquo; dari sisi luar; kolomnya menjawab dari sisi dalam. Perselisihan antara keduanya = seam.</div>
-
-<h3>Jalankan arm (popup butuh gestur &mdash; izinkan pemblokir popup lalu ulangi)</h3>
-<button onclick="a1()">1. POPUP-VOID (about:blank &rarr; javascript: tanpa ganti dokumen)</button>
-<button onclick="a2()">2. POPUP-GANTI (javascript: mengembalikan string &rarr; dokumen diganti)</button>
-<button onclick="a3()">3. POPUP-LANGSUNG (window.open('javascript:...'))</button>
-<button onclick="a4()">4. IFRAME-SRC (pembanding, di halaman ini)</button>
-<div class="small">Jendela yang terbuka boleh langsung ditutup. Laporan dikirim lewat <code>postMessage</code> ke halaman ini; tidak ada apa pun yang keluar dari browser.</div>
-
-<div id="fr"></div>
-
-<h3>TABEL PELAPOR &rarr; NILAI</h3>
-<table id="tb"></table>
-<div id="vd"></div>
-
-<div class="k small"><b>Kalau semua arm melaporkan origin INDUK dan akses lintas-dokumen berhasil, itu SESUAI SPEC</b> &mdash; hasil sah dan penting: pewarisan <code>javascript:</code> di jalur ini utuh. Catat sebagai ilmu-negatif ber-<i>Retest-after</i>.</div>
-
+<!-- 50 - KONTROL: cookie lintas-origin   [UXSS / SOP bypass | macOS: semua macOS]
+     MEKANISME : garis dasar kedua: mencoba membaca cookie origin korban lewat handle frame. Harus selalu ditolak.
+     PREDIKAT  : seharusnya SELALU diblokir.
+     AMAN      : pembacaan lintas-origin dilempar SecurityError; baris bukti berkata DIBLOKIR.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>50 KONTROL: cookie lintas-origin</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var $=function(i){return document.getElementById(i);},ME=String(self.origin),NAMES=[],DATA={},STAT={},WIN={},ARMS=['POPUP-VOID','POPUP-GANTI','POPUP-LANGSUNG','IFRAME-SRC'];
-try{document.cookie='uxss27=marker-demo-lokal;path=/';}catch(e){}
-$('phref').textContent=location.href;$('porig').textContent=ME;$('pck').textContent=(document.cookie||'(kosong)').slice(0,40);
-var C='A("location.href",function(){return location.href});'
-+'A("self.origin",function(){return self.origin});'
-+'A("document.URL",function(){return document.URL});'
-+'A("document.baseURI",function(){return document.baseURI});'
-+'A("document.domain",function(){return document.domain});'
-+'A("document.referrer",function(){return document.referrer});'
-+'A("window.name",function(){return window.name});'
-+'A("location.ancestorOrigins",function(){var o=location.ancestorOrigins;return o?("["+[].join.call(o,", ")+"]"):"tidak didukung"});'
-+'A("URL bingkai di stack error",function(){try{null.x}catch(e){var s=String(e.stack||"");if(!s)return "tidak didukung";return String(s.split("\\n")[1]||s.split("\\n")[0]).replace(/^\\s+/,"").replace(/:\\d+:\\d+\\)?$/,"")}});'
-+'A("nama entri performance",function(){var p=(window.performance&&performance.getEntriesByType)?performance.getEntriesByType("navigation")[0]:null;return p?p.name:"tidak ada entri navigasi"});'
-+'A("storage key (localStorage)",function(){localStorage.setItem("_u27","1");localStorage.removeItem("_u27");return "BOLEH - punya storage key"});'
-+'A("document.cookie (dipotong 40)",function(){var c=document.cookie;return c?("ADA: "+c.slice(0,40)):"(kosong)"});'
-+'A("scope service worker",function(){if(!navigator.serviceWorker)return "tidak tersedia di konteks ini";return "objek ada; scope dasar = "+String(location.href).slice(0,40)});'
-+'A("import.meta.url (modul)",function(){return window.__IM||"modul tidak berjalan / diblokir"});'
-+'A("dokumen sudah diganti?",function(){return document.body&&/DEMO GANTI/.test(document.body.textContent)?"YA - dokumen baru hasil string":"TIDAK - dokumen asli about:blank"});'
-+'A("akses nyata: baca DOM induk",function(){var w=window.opener||window.parent;if(w===window)return "tidak ada induk";return "BERHASIL - title induk: \\""+String(w.document.title).slice(0,34)+"\\""});'
-+'A("akses nyata: baca cookie induk",function(){var w=window.opener||window.parent;if(w===window)return "tidak ada induk";var c=w.document.cookie;return c?("BERHASIL: "+c.slice(0,40)):"BERHASIL (cookie induk kosong)"});';
-function pay(t){return 'var T="'+t+'",R=[];function G(f){try{var v=f();return v===""?"(kosong)":String(v)}catch(e){return "(throw "+e.name+")"}}function A(n,f){R.push([n,G(f)])}'
-+'try{var m=document.createElement("script");m.type="module";m.textContent="window.__IM=import.meta.url";(document.head||document.documentElement).appendChild(m)}catch(e){}'
-+'setTimeout(function(){'+C+'var w=window.opener||window.parent;try{w.postMessage(JSON.stringify({tag:T,rows:R}),"*")}catch(e){}},160);';}
-function doc(t){return '<meta charset="utf-8"><body style="font:12px ui-monospace,monospace">dokumen anak DEMO GANTI '+t+' - boleh ditutup<'+'script>'+pay(t)+'<'+'/script>';}
-function jsv(t){return 'javascript:'+encodeURIComponent('void ((function(){'+pay(t)+'})())');}
-function jsg(t){return 'javascript:'+encodeURIComponent("'"+doc(t).replace(/'/g,"\\'")+"'");}function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}function cut(v){v=String(v);return v.length>110?(v.slice(0,110)+' ...(dipotong, nilai penuh di tooltip)'):v;}
-function arm(t,fn){STAT[t]='menunggu laporan...';try{fn();}catch(e){STAT[t]='GAGAL DIJALANKAN: '+e.name;}render();
-  setTimeout(function(){if(!DATA[t]){STAT[t]='TIDAK ADA LAPORAN (diblokir / skrip tidak berjalan)';render();}},2600);}
-function popup(t,go){var w=window.open('about:blank','uxss27_'+t.replace(/-/g,''),'width=470,height=300');if(!w){STAT[t]='window.open mengembalikan null (pemblokir popup) - izinkan lalu ulangi';return;}WIN[t]=w;try{go(w);}catch(e){STAT[t]='penetapan location ditolak: '+e.name;}}
-function a1(){arm('POPUP-VOID',function(){popup('POPUP-VOID',function(w){w.location=jsv('POPUP-VOID');});});}
-function a2(){arm('POPUP-GANTI',function(){popup('POPUP-GANTI',function(w){w.location=jsg('POPUP-GANTI');});});}
-function a3(){arm('POPUP-LANGSUNG',function(){var w=window.open(jsv('POPUP-LANGSUNG'),'uxss27langsung','width=470,height=300');if(!w){STAT['POPUP-LANGSUNG']='window.open mengembalikan null (pemblokir popup)';}else WIN['POPUP-LANGSUNG']=w;});}
-function a4(){arm('IFRAME-SRC',function(){var f=document.createElement('iframe');f.src=jsv('IFRAME-SRC');$('fr').appendChild(f);});}
-window.addEventListener('message',function(ev){var r;try{r=JSON.parse(ev.data);}catch(e){return;}if(!r||!r.rows)return;
-  r.rows.push(['postMessage ev.origin (dilihat INDUK)',String(ev.origin)]);
-  var u='(tidak ada handle jendela)';if(WIN[r.tag]){try{u=String(WIN[r.tag].location.href);}catch(e){u='(throw '+e.name+' - INDUK tidak boleh membacanya)';}}
-  r.rows.push(['INDUK baca w.location.href',u]);
-  var m={},i;for(i=0;i<r.rows.length;i++){m[r.rows[i][0]]=r.rows[i][1];if(NAMES.indexOf(r.rows[i][0])<0)NAMES.push(r.rows[i][0]);}
-  DATA[r.tag]=m;STAT[r.tag]='LAPORAN DITERIMA';render();});
-function render(){var h='<tr><th>PELAPOR</th>',i,j,a,v;for(j=0;j<ARMS.length;j++)h+='<th>'+ARMS[j]+'</th>';
-  h+='</tr><tr><td class="nm">status arm</td>';for(j=0;j<ARMS.length;j++)h+='<td>'+esc(STAT[ARMS[j]]||'belum dijalankan')+'</td>';h+='</tr>';
-  for(i=0;i<NAMES.length;i++){h+='<tr><td class="nm">'+esc(NAMES[i])+'</td>';
-    for(j=0;j<ARMS.length;j++){a=DATA[ARMS[j]];v=(a&&a[NAMES[i]]!=null)?String(a[NAMES[i]]):'-';h+='<td title="'+esc(v)+'">'+esc(cut(v))+'</td>';}h+='</tr>';}
-  $('tb').innerHTML=h;$('vd').innerHTML=verdict();}
-function verdict(){var s=[],n=[],j,t,d,ada=0,o,rd;
-  for(j=0;j<ARMS.length;j++){d=DATA[ARMS[j]];if(!d)continue;ada++;o=d['self.origin'];rd=d['akses nyata: baca DOM induk']||'';
-    if(o!==ME&&o!=='null')s.push('SEAM: arm '+ARMS[j]+' dieksekusi dengan self.origin='+esc(o)+', berbeda dari origin INDUK ('+esc(ME)+').');
-    if(o!==ME&&/^BERHASIL/.test(rd))s.push('SEAM/UXSS: arm '+ARMS[j]+' ber-origin '+esc(o)+' tetapi BERHASIL membaca DOM induk.');
-    if(o==='null'&&ME!=='null')n.push('CATATAN: arm '+ARMS[j]+' mendapat origin buram ("null") - lebih ketat dari spec, bukan bug.');
-    if(o===ME&&!/^BERHASIL/.test(rd)&&rd.indexOf('tidak ada induk')<0)n.push('INKONSISTENSI: arm '+ARMS[j]+' mengaku ber-origin sama dengan induk tetapi aksesnya ditolak ('+esc(rd)+') - pelapor dan penegak tidak sepakat, layak dicatat.');}
-  t='<div class="k"><b>TERAMATI:</b> ';for(j=0;j<ARMS.length;j++)t+=ARMS[j]+' = '+esc(STAT[ARMS[j]]||'belum dijalankan')+(j<ARMS.length-1?' &middot; ':'');t+='</div>';
-  if(!ada)return t+'<div class="k n"><b>VONIS:</b> belum ada laporan - jalankan arm-nya dulu.</div>';
-  if(s.length)return t+'<div class="k v"><b>VONIS = SEAM:</b><br>'+s.join('<br>')+(n.length?('<br>'+n.join('<br>')):'')+'<br>Screenshot tabel + baris ini, BERHENTI di sini, laporkan ke VRP.</div>';
-  return t+'<div class="k s"><b>VONIS: SESUAI SPEC - bukan temuan.</b> Setiap arm yang benar-benar dieksekusi melaporkan origin yang sama dengan INDUK ('+esc(ME)+'), <code>location.href</code>-nya tetap dokumen sasaran (bukan URL javascript:), dan akses lintas-dokumen berhasil karena memang same-origin. Arm yang tidak menghasilkan laporan = jalur itu diblokir engine.</div>'+(n.length?('<div class="k n">'+n.join('<br>')+'</div>'):'');}
-render();
+o.textContent='REAL: '+location.origin;
+var f;
+function go(){f=document.createElement('iframe');f.src='https://example.com/';document.body.appendChild(f);setTimeout(function(){try{o.textContent='BISA BACA -> UXSS: cookie="'+f.contentDocument.cookie+'"';}catch(e){o.textContent='DIBLOKIR (aman): '+e.name;}},2600);}
 </script>

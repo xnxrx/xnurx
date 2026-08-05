@@ -1,66 +1,16 @@
-<!-- MEKANISME: iframe srcdoc menghasilkan dokumen tanpa URL jaringan sendiri yang MEWARISI origin induk; skrip di dalamnya mencetak origin warisan itu (self.origin) dan mencoba menyentuh DOM induk, lalu arm kedua menambahkan sandbox untuk melihat apa yang berubah. -->
-<meta charset="utf-8">
-<title>12 - iframe srcdoc: origin warisan dan efek sandbox</title>
-<style>
-body{font:14px/1.6 system-ui,Segoe UI,sans-serif;margin:16px;max-width:880px;color:#111}
-h2{font-size:19px;margin:0 0 10px}
-.k{border-left:4px solid #888;padding:6px 10px;margin:8px 0;background:#f6f6f6}
-.v{border-left-color:#c62828}.s{border-left-color:#2e7d32}
-code{background:#eee;padding:1px 4px}
-button{font-size:15px;padding:7px 13px;margin:6px 8px 6px 0}
-#out{background:#111;color:#0f0;padding:10px;font:12.5px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;user-select:all;min-height:64px}
-.n{font-size:13px;color:#444}
-iframe{border:1px dashed #999;margin:4px 8px 4px 0;vertical-align:top;width:330px;height:52px}
-</style>
-
-<h2>12 &mdash; IFRAME <code>srcdoc</code>: origin apa yang dilaporkan skrip di dalamnya</h2>
-
-<div class="k">URL asli halaman ini (<code>location.href</code>): <b id="href">-</b></div>
-<div class="k">Origin asli halaman ini (<code>self.origin</code>): <b id="orig">-</b></div>
-<div class="k v"><b>VULNERABLE:</b> arm <code>UJI</code> mencetak <b>origin warisan</b> milik <b>situs lain</b> (bukan induk di atas), <b>atau</b> arm <code>KONTROL</code> (ber-<code>sandbox="allow-scripts"</code>, wajib opaque origin) tetap <b>BERHASIL</b> membaca DOM induk &mdash; itu lolos sandbox = UXSS.</div>
-<div class="k s"><b>SECURE / BASELINE:</b> arm <code>UJI</code> mencetak <code>self.origin</code> <b>identik</b> dengan induk dan <b>BERHASIL</b> membaca DOM induk (pewarisan yang benar &mdash; <b>bukan bug</b>); arm <code>KONTROL</code> mencetak <code>self.origin=null</code> dan baca DOM induk <b>DITOLAK</b> (<code>SecurityError</code>).</div>
-
-<button onclick="fire('UJI',null)">Uji (srcdoc polos, mewarisi origin induk)</button>
-<button onclick="fire('KONTROL','allow-scripts')">Kontrol (mekanisme dilepas: + <code>sandbox="allow-scripts"</code>)</button>
-
-<p class="n"><b>Apa yang berubah saat <code>sandbox</code> ditambahkan:</b> token <code>allow-same-origin</code> <b>tidak</b> diberikan, sehingga dokumen srcdoc dipaksa ke <b>opaque origin</b> &mdash; ia tidak lagi mewarisi origin induk, dan setiap sentuhan ke <code>parent.document</code> harus melempar <code>SecurityError</code>. Jalankan kedua tombol lalu bandingkan dua baris hasil. Catatan pembacaan: yang otoritatif adalah <code>self.origin</code>; <code>location.origin</code> ikut dicetak sebagai pembanding tetapi diturunkan dari URL <code>about:srcdoc</code> sehingga wajar berbunyi <code>null</code> walau pewarisannya benar. Tidak ada apa pun yang dikirim ke luar.</p>
-
-<div id="frames"></div>
-<div id="out">(belum ada hasil)</div>
-
+<!-- 35 - dokumen blob: membaca frame korban   [UXSS / SOP bypass | macOS: Dia/Arc/Chrome macOS]
+     MEKANISME : blob: mewarisi origin pembuat; dari dalamnya dicoba membaca frame yang memuat origin korban.
+     PREDIKAT  : dokumen blob: menembus batas origin.
+     AMAN      : pembacaan lintas-origin dilempar SecurityError; baris bukti berkata DIBLOKIR.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>35 dokumen blob: membaca frame korban</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var out=document.getElementById('out'),seen={};
-document.getElementById('href').textContent=location.href;
-document.getElementById('orig').textContent=String(self.origin);
-function log(s){out.textContent=s+"\n"+out.textContent;}
-var ok=('srcdoc' in document.createElement('iframe'));
-if(!ok)log('CATATAN 12 | iframe srcdoc tidak didukung di browser ini -> uji tidak dapat dijalankan.');
-var P='<meta charset="utf-8"><body style="font:12px sans-serif">DEMO srcdoc (@TAG@)<script>'
- +'var r={tag:"@TAG@",href:location.href,oself:"",oloc:String(location.origin),domain:"",read:"",ok:null};'
- +'try{r.oself=String(self.origin)}catch(e){r.oself="(throw "+e.name+")"}'
- +'try{r.domain=document.domain}catch(e){r.domain="(throw "+e.name+")"}'
- +'try{r.read="baca induk: title=\''+""+'"+parent.document.title+"\' , body "+parent.document.body.textContent.length+" char";r.ok=true}'
- +'catch(e){r.read="baca induk DITOLAK: "+(e.name||e.message);r.ok=false}'
- +'try{parent.postMessage(JSON.stringify(r),"*")}catch(e){}<\/script>';
-function fire(tag,sb){
-  if(!ok){log('RESULT 12 | '+tag+' | srcdoc tidak didukung di browser ini.');return;}
-  seen[tag]=0;
-  var f=document.createElement('iframe');
-  if(sb!==null)f.setAttribute('sandbox',sb);
-  f.srcdoc=P.split('@TAG@').join(tag);
-  document.getElementById('frames').appendChild(f);
-  setTimeout(function(){if(!seen[tag])log('RESULT 12 | '+tag+' | tidak ada laporan dalam 1500 ms -> skrip srcdoc tidak berjalan atau postMessage diblokir.');},1500);
-}
-window.addEventListener('message',function(ev){
-  var r;try{r=JSON.parse(ev.data)}catch(e){return}
-  if(!r||!r.tag||!(r.tag in seen))return;
-  seen[r.tag]=1;
-  var p=String(self.origin),asing=(r.oself!==p&&r.oself!=='null'&&r.oself!==''),v;
-  if(r.tag==='UJI')v=asing?'VULNERABLE: srcdoc mewarisi origin ASING ('+r.oself+'), bukan origin induk ('+p+')'
-    :(r.ok===true?'SECURE/BASELINE: srcdoc mewarisi origin induk dan boleh membaca DOM induk (perilaku benar, bukan bug)'
-                 :'CATATAN: srcdoc tidak mewarisi origin induk di sini (akses ditolak) - lebih ketat dari spesifikasi, bukan bug');
-  else v=(r.ok===true)?'VULNERABLE: frame ber-sandbox (tanpa allow-same-origin) BERHASIL membaca DOM induk = lolos sandbox'
-                      :'SECURE: sandbox memaksa opaque origin, baca DOM induk ditolak';
-  log('RESULT 12 | '+r.tag+' | srcdoc.href='+r.href+' | ORIGIN YANG DIWARISI (self.origin)='+r.oself+' | induk.origin='+p+' | srcdoc.location.origin='+r.oloc+' (turunan URL about:srcdoc, bukan origin efektif) | document.domain="'+r.domain+'" | '+r.read+' | VERDICT='+v+' | '+location.href);
-});
+o.textContent='REAL: '+location.origin;
+function rd(w){try{var t=w.document.title;return 'BISA BACA -> UXSS: title="'+t+'"';}catch(e){return 'DIBLOKIR (aman): '+e.name;}}
+var f;
+function go(){f=document.createElement('iframe');f.src=URL.createObjectURL(new Blob(['<h3>blob doc</h3>'],{type:'text/html'}));document.body.appendChild(f);setTimeout(function(){try{f.src='https://example.com/';}catch(e){}},300);setTimeout(function(){o.textContent=rd(f.contentWindow);},2600);}
 </script>

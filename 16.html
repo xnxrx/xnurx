@@ -1,63 +1,14 @@
-<!doctype html>
-<!-- MEKANISME: gerbang fullscreen adalah transient activation, bukan "tombol" - tembakkan requestFullscreen dari sumber non-tombol (select mousedown/change, details toggle, label for, kontrol native video) dan catat sumber mana yang lolos. -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>23 - sumber activation non-tombol</title>
-<style>
- body{font:14px/1.55 system-ui,Segoe UI,sans-serif;margin:16px;color:#111;background:#fff}
- code{background:#f1f1f1;padding:1px 4px;word-break:break-all}
- .box{border:1px solid #bbb;padding:10px;margin:10px 0;border-radius:4px}
- .vuln{color:#a00000;font-weight:600}
- .safe{color:#046b04;font-weight:600}
- .src{border:1px dashed #999;padding:8px;margin:6px 0;border-radius:4px}
- button{font:14px system-ui;padding:8px 12px;margin:4px 6px 4px 0}
- #log{white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;max-height:260px;overflow:auto}
- label{cursor:pointer;text-decoration:underline}
-</style>
-
-<h2>23 - fullscreen dipicu dari sumber activation NON-tombol</h2>
-
-<div class="box">
- <div>location.href sebenarnya: <code id="href"></code></div>
- <div class="vuln">RENTAN: sumber NON-tombol tercatat "LOLOS GERBANG" - dokumen masuk fullscreen (address bar dan seluruh chrome hilang, M2) dari interaksi yang tidak dibaca pengguna sebagai permintaan mode. Paling bernilai: <code>&lt;select&gt; mousedown</code>, karena popup widget tingkat-OS masih terbuka tepat saat notice fullscreen dilukis (SUP-C).</div>
- <div class="safe">AMAN: hanya KONTROL A (&lt;button&gt; biasa) yang LOLOS; semua sumber non-tombol DITOLAK (NotAllowedError), dan KONTROL B (tanpa aktivasi) juga ditolak.</div>
-</div>
-
-<div class="box">Klik satu sumber, baca satu baris log, tekan <b>Esc</b>, lanjut ke sumber berikutnya. Laporkan <b>sumber mana</b> yang lolos pada browser + versi + OS mana.</div>
-
-<div class="src">1. <select id="sel"><option>pilih sesuatu...</option><option>opsi A</option><option>opsi B</option></select> &nbsp; <small>(mousedown + change)</small></div>
-<div class="src">2. <details id="det"><summary>buka detail ini (summary -> toggle)</summary>isi detail</details></div>
-<div class="src">3. <input type="checkbox" id="cb" style="position:absolute;left:-9999px"><label for="cb" id="lab">klik LABEL ini (label for= -> checkbox change)</label></div>
-<div class="src">4. kontrol native video (stream dari canvas lokal, nol aset eksternal):<br><video id="vid" controls muted playsinline width="240"></video></div>
-
-<button onclick="ctlA()">KONTROL A: &lt;button&gt; biasa (harus LOLOS)</button>
-<button onclick="ctlB()">KONTROL B: tanpa aktivasi, 1 detik setelah klik (harus DITOLAK)</button>
-
-<div class="box" id="log"></div>
-
+<!-- 16 - homograf IDN (Cyrillic o)   [address-bar spoofing | macOS: Safari/Arc/Dia macOS]
+     MEKANISME : huruf Latin diganti homoglif Cyrillic pada label yang ditampilkan bilah.
+     PREDIKAT  : label terbaca "google" padahal titik kode berbeda.
+     AMAN      : browser menampilkan bentuk punycode untuk campuran skrip.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>16 homograf IDN (Cyrillic o)</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var el=document.documentElement;
-document.getElementById('href').textContent=location.href;
-function log(s){var d=document.getElementById('log');d.textContent+=s+'\n';d.scrollTop=d.scrollHeight;}
-function fsOn(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
-function attempt(src){
-  if(fsOn()){log(src+': sudah fullscreen - tekan Esc dulu');return;}
-  var r=el.requestFullscreen||el.webkitRequestFullscreen;
-  if(!r){log('fullscreen tidak didukung di browser ini');return;}
-  var p;try{p=r.call(el);}catch(e){log(src+' -> DITOLAK sinkron ('+e.name+') = gerbang bekerja');return;}
-  if(p&&p['catch'])p['catch'](function(e){log(src+' -> DITOLAK ('+e.name+') = gerbang bekerja');});
-  setTimeout(function(){log(src+' -> '+(fsOn()?'LOLOS GERBANG: fullscreen AKTIF, chrome hilang':'tidak aktif'));},400);
-}
-function on(id,ev,label){var n=document.getElementById(id);if(n)n.addEventListener(ev,function(){attempt(label);});}
-on('sel','mousedown','1a select mousedown (widget native terbuka = SUP-C)');
-on('sel','change','1b select change');
-on('det','toggle','2  details/summary toggle');
-on('cb','change','3  label for -> checkbox change');
-on('vid','play','4  kontrol native video (play)');
-(function(){var c=document.createElement('canvas'),v=document.getElementById('vid');
- c.width=160;c.height=90;c.getContext('2d').fillRect(0,0,160,90);
- if(c.captureStream&&v){try{v.srcObject=c.captureStream(1);}catch(e){log('video: srcObject gagal ('+e.name+')');}}
- else log('video: canvas.captureStream tidak didukung di browser ini');})();
-function ctlA(){attempt('KONTROL A tombol biasa');}
-function ctlB(){log('KONTROL B: menunggu 1 detik agar aktivasi kedaluwarsa...');setTimeout(function(){attempt('KONTROL B tanpa aktivasi');},1000);}
+o.textContent='REAL: '+location.origin;
+function go(){history.pushState({},'','/g\u043Eogle.com/account');o.textContent='REAL masih: '+location.origin;}
 </script>

@@ -1,97 +1,16 @@
-<!-- MEKANISME: registerProtocolHandler menukar satu prompt sesaat dengan atribusi PERMANEN — sesudah diizinkan, setiap tautan skema itu (permukaan S21/S30) menyebut situs pendaftar, dan entrinya hidup di pembukuan browser, bukan di halaman. -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>28 — Squat pendaftaran handler protokol</title>
-<style>
-body{font:15px/1.55 system-ui,"Segoe UI",sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
-h2{font-size:1.05rem;margin:.2rem auto .8rem;max-width:760px}
-.box{border:2px solid #d33;border-radius:10px;padding:.8rem;max-width:760px;margin:0 auto 1rem}
-.kv{display:grid;grid-template-columns:11rem 1fr;gap:.2rem .6rem;font-size:.9rem}
-.kv b{color:#555;font-weight:600}
-.real{color:#0a7;word-break:break-all;font-family:ui-monospace,Consolas,monospace}
-button{font:inherit;padding:.45rem .8rem;border:1px solid #888;border-radius:8px;background:#fafafa;cursor:pointer;margin:.15rem}
-pre{background:#f4f4f4;border-radius:8px;padding:.6rem;white-space:pre-wrap;word-break:break-word;font-size:.82rem;max-width:760px;margin:.6rem auto}
-.oracle{max-width:760px;margin:1rem auto;font-size:.86rem;border-top:1px dashed #999;padding-top:.6rem}
-.v{color:#c00;font-weight:700}.s{color:#080;font-weight:700}
-.acts{max-width:760px;margin:0 auto}
-code{background:#eee;padding:.05rem .25rem;border-radius:4px}
-@media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}pre{background:#242424}code{background:#2b2b2b}}
-</style>
-</head>
-<body>
-
-<h2>28 — Squat pendaftaran handler: satu prompt, atribusi permanen</h2>
-
-<div class="box">
-  <div class="kv">
-    <b>URL nyata halaman ini</b><span class="real" id="here">…</span>
-    <b>Origin nyata</b><span class="real" id="top">…</span>
-    <b>Skema didaftarkan</b><span class="real" id="scheme">…</span>
-    <b>URL handler</b><span class="real" id="handler">…</span>
-    <b>Yang diuji</b><span>Bunyi prompt — apakah ia menyebut origin di atas <b>dan</b> menjelaskan bahwa keputusan ini
-      <b>bertahan</b>? Sesudah itu, seluruh tautan skema tersebut akan diatribusikan ke situs ini, di permukaan yang
-      tak lagi menampilkan address bar.</span>
-  </div>
-</div>
-
-<div class="acts">
-  <button id="run">Daftarkan skema demo (prompt akan muncul)</button>
-  <button id="ctrl">Lengan KONTROL: handler lintas-origin (harus DITOLAK)</button>
-  <button id="rev">Coba cabut (unregister)</button>
-</div>
-
-<p class="acts" style="font-size:.88rem">Uji atribusi sesudah mengizinkan:
-  <a id="testlink" href="#">(tautan uji akan muncul di sini)</a></p>
-
-<pre id="log">(belum dijalankan)</pre>
-
-<div class="oracle">
-  <p><span class="v">VULNERABLE bila:</span> pendaftaran diterima <b>tanpa</b> prompt atau tanpa gestur; atau prompt
-  tidak menyebut origin pendaftar; atau prompt tidak mengungkap bahwa keputusan ini permanen; atau entri tetap hidup
-  sesudah data situs dihapus / sesudah kamu mencabutnya lewat UI.</p>
-  <p><span class="s">SECURE bila:</span> prompt menyebut origin di panel atas beserta skemanya, entri muncul di daftar
-  handler dengan origin yang sama, dan pencabutan lewat setelan benar-benar menghapusnya.</p>
-  <p><b>Baseline aman (lengan kontrol):</b> tombol kedua memanggil API yang sama dengan satu-satunya perubahan
-  URL handler menunjuk ke origin lain (<code>example.com</code>). Panggilan itu <b>wajib</b> melempar
-  <code>SecurityError</code>. Kalau ia justru berhasil, penjagaannya sendiri yang bocor.</p>
-  <p><b>Cara mencabut (lakukan sesudah memotret):</b> Chrome/Edge/Opera → <code>chrome://settings/handlers</code>,
-  hapus entri untuk origin ini. Firefox → <code>about:preferences#general</code> → Aplikasi, cari skema
-  <span class="real" id="scheme2">…</span> dan setel kembali ke “Tanya”/hapus. Berkas ini sengaja memakai skema
-  <code>web+demo…</code> yang tidak dipakai aplikasi apa pun, jadi mencabutnya tidak merusak apa-apa.</p>
-</div>
-
+<!-- 43 - about:blank BERSARANG di frame korban   [UXSS / SOP bypass | macOS: Dia/Arc/Chrome macOS]
+     MEKANISME : frame anak about:blank di dalam frame lintas-origin: yang diuji origin siapa yang diwarisi frame cucu.
+     PREDIKAT  : cucu bisa dibaca dari puncak.
+     AMAN      : pembacaan lintas-origin dilempar SecurityError; baris bukti berkata DIBLOKIR.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>43 about:blank BERSARANG di frame korban</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var L=document.getElementById('log'),SCHEME='web+demopoc';
-function log(s){L.textContent+=s+'\n';}
-var HANDLER=location.href.split('#')[0].split('?')[0]+'?handled=%s';
-document.getElementById('here').textContent=location.href;
-document.getElementById('top').textContent=location.origin||'null (file://)';
-document.getElementById('scheme').textContent=SCHEME;
-document.getElementById('scheme2').textContent=SCHEME;
-document.getElementById('handler').textContent=HANDLER;
-var a=document.getElementById('testlink');a.href=SCHEME+':halo-ini-demo';a.textContent=SCHEME+':halo-ini-demo';
-var API=!!(navigator.registerProtocolHandler);
-log('navigator.registerProtocolHandler: '+(API?'tersedia':'TIDAK tersedia — tidak didukung di browser ini'));
-var SECURE=(typeof isSecureContext!=='undefined')?isSecureContext:(location.protocol==='https:');
-if(!SECURE)log('CATATAN: origin ini bukan konteks aman (mis. file://); pendaftaran kemungkinan besar ditolak — buka berkas ini lewat https untuk arm penuh.');
-function reg(url,label){
-  if(!API){log(label+': dilewati — API tidak didukung di browser ini');return;}
-  try{navigator.registerProtocolHandler(SCHEME,url,'PoC 28 DEMO');
-      log(label+': panggilan DITERIMA tanpa pengecualian. Amati prompt: origin apa yang disebut, dan apakah kata "permanen"/"selalu" muncul?');}
-  catch(e){log(label+': DITOLAK -> '+e.name+': '+e.message);}
-}
-document.getElementById('run').onclick=function(){L.textContent='';
-  log('mendaftarkan '+SCHEME+' -> '+HANDLER);reg(HANDLER,'DAFTAR');
-  log('sesudah mengizinkan, klik tautan uji di atas; ia harus mendarat kembali di origin ini dengan ?handled=…');};
-document.getElementById('ctrl').onclick=function(){L.textContent='';
-  log('KONTROL: satu-satunya perubahan = URL handler menunjuk origin LAIN (harus melempar SecurityError).');
-  reg('https://example.com/?q=%s','KONTROL lintas-origin');};
-document.getElementById('rev').onclick=function(){L.textContent='';
-  if(navigator.unregisterProtocolHandler){try{navigator.unregisterProtocolHandler(SCHEME,HANDLER);log('unregisterProtocolHandler dipanggil untuk '+SCHEME+' — periksa daftar handler untuk memastikan entri benar-benar hilang.');}catch(e){log('cabut gagal -> '+e.name+': '+e.message);}}
-  else log('unregisterProtocolHandler tidak didukung di browser ini — cabut lewat setelan handler (lihat panduan di bawah).');};
+o.textContent='REAL: '+location.origin;
+function rd(w){try{var t=w.document.title;return 'BISA BACA -> UXSS: title="'+t+'"';}catch(e){return 'DIBLOKIR (aman): '+e.name;}}
+var f;
+function go(){f=document.createElement('iframe');f.src='https://example.com/';document.body.appendChild(f);setTimeout(function(){try{o.textContent=(f.contentWindow.length?rd(f.contentWindow[0]):'tidak ada frame cucu');}catch(e){o.textContent='DIBLOKIR (aman): '+e.name;}},2600);}
 </script>
-</body>
-</html>

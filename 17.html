@@ -1,56 +1,14 @@
-<!doctype html>
-<!-- MEKANISME: window.open dengan toolbar=no,location=no,menubar=no,resizable=no - bukan memalsukan origin, melainkan menghapus permukaan yang menyebutnya (M2); judul & isi jendela 100% milik halaman. -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>24 - popup chrome-less</title>
-<style>
- body{font:14px/1.55 system-ui,Segoe UI,sans-serif;margin:16px;color:#111;background:#fff}
- code{background:#f1f1f1;padding:1px 4px;word-break:break-all}
- .box{border:1px solid #bbb;padding:10px;margin:10px 0;border-radius:4px}
- .vuln{color:#a00000;font-weight:600}
- .safe{color:#046b04;font-weight:600}
- button{font:14px system-ui;padding:8px 12px;margin:4px 6px 4px 0}
- #log{white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;max-height:220px;overflow:auto}
-</style>
-
-<h2>24 - popup dengan window features: identitas origin apa yang tersisa?</h2>
-
-<div class="box">
- <div>location.href sebenarnya (halaman pembuat): <code id="href"></code></div>
- <div>fitur yang diminta: <code id="feat"></code></div>
- <div class="vuln">RENTAN: jendela popup tampil TANPA satu pun teks origin/URL milik browser, sementara judul ("google.com") dan seluruh isinya dikendalikan halaman - tidak ada permukaan yang bisa membantah label palsu.</div>
- <div class="safe">AMAN: browser tetap memaksa menampilkan origin/URL pada popup (mis. "about:blank" atau chip origin) meskipun <code>location=no</code> diminta.</div>
-</div>
-
-<div class="box">Isi popup mencetak <b>location.href-nya sendiri</b>, jadi satu tangkapan layar (popup + halaman ini) sudah cukup: bandingkan apa yang TERLIHAT sebagai identitas jendela dengan apa yang TERCETAK di dalamnya. Catat persis string origin yang masih terlihat, plus browser + versi + OS.</div>
-
-<button onclick="go(FEAT,'VEKTOR (chrome-less)')">Jalankan: popup dengan fitur di atas</button>
-<button onclick="go('','KONTROL (tanpa fitur, mekanisme dihilangkan)')">KONTROL: window.open tanpa fitur apa pun</button>
-<button onclick="shut()">Tutup popup</button>
-
-<div class="box" id="log"></div>
-
+<!-- 17 - pembalikan arah RTL   [address-bar spoofing | macOS: Safari/Arc macOS]
+     MEKANISME : karakter kontrol bidi membalik urutan tampilan segmen URL tanpa mengubah nilai yang diparse.
+     PREDIKAT  : urutan yang terbaca manusia berbeda dari urutan yang diparse mesin.
+     AMAN      : browser menetralkan kontrol bidi di dalam URL.
+     ETIKA     : browser & mesin sendiri. Nol form, nol kredensial, nol fetch/beacon, nol resource luar.
+                 "www.google.com" = label tak-berbahaya; example.com = origin uji (IANA reserved).
+                 Berhenti di predikat -> screenshot -> lapor VRP. Bukan kit phishing. -->
+<meta charset="utf-8"><title>17 pembalikan arah RTL</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var FEAT='toolbar=no,location=no,menubar=no,status=no,resizable=no,width=460,height=430';
-var w=null;
-document.getElementById('href').textContent=location.href;
-document.getElementById('feat').textContent=FEAT;
-function log(s){var d=document.getElementById('log');d.textContent+=s+'\n';d.scrollTop=d.scrollHeight;}
-function go(feat,label){
-  if(!window.open){log('window.open tidak didukung di browser ini');return;}
-  w=window.open('','',feat);
-  if(!w){log(label+': popup DIBLOKIR - izinkan popup untuk halaman ini lalu ulangi');return;}
-  try{
-    w.document.write('<!doctype html><meta charset="utf-8"><title>google.com</title>'+
-      '<body style="font:14px/1.55 system-ui;margin:14px">'+
-      '<h3 style="color:#a00">DEMO RISET - jendela ini TIDAK memuat google.com</h3>'+
-      '<div>location.href jendela ini: <code>'+w.location.href+'</code></div>'+
-      '<div>dibuat oleh: <code>'+location.href+'</code></div>'+
-      '<div>fitur diminta: <code>'+(feat||'(tidak ada)')+'</code></div>'+
-      '<p><b>Pertanyaan:</b> identitas origin apa yang masih terlihat pada jendela ini?</p>');
-    w.document.close();
-  }catch(e){log(label+': tidak bisa menulis ke popup ('+e.name+') - coba buka berkas ini lewat http(s), bukan file://');return;}
-  log(label+' dibuka; judulnya "google.com". Bandingkan yang TERLIHAT dengan location.href yang tercetak di dalamnya.');
-}
-function shut(){try{if(w&&!w.closed){w.close();log('popup ditutup');}}catch(e){log('gagal menutup: '+e.name);}}
+o.textContent='REAL: '+location.origin;
+function go(){history.pushState({},'','/'+decodeURIComponent('%E2%80%AE')+'moc.elgoog.www/');o.textContent='REAL masih: '+location.origin;}
 </script>
