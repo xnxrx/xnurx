@@ -1,0 +1,179 @@
+<!-- KONSTRUKSI: bukan resource yang hidup melewati navigasi, melainkan kebalikannya — DOKUMEN yang bertahan (bfcache) sementara OTORITASNYA dicabut; yang diukur adalah UMUR KEBENARAN, dan mode kegagalannya "BASI", bukan "PALSU". -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>50 — Jendela kebangkitan</title>
+<style>
+body{font:15px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
+.wrap{max-width:960px;margin:0 auto}
+h2{font-size:1.1rem;margin:.2rem 0 .7rem;line-height:1.35}
+.box{border:1px solid #ccc;border-left:5px solid #888;border-radius:8px;padding:.6rem .8rem;margin:.55rem 0}
+.box>b:first-child{display:block;font-size:.75rem;letter-spacing:.09em;color:#666;margin-bottom:.25rem}
+.q{border-left-color:#d33;background:#fff8f8}.m{border-left-color:#36c}.o{border-left-color:#e90}
+.k{border-left-color:#0a7;background:#f4fbf7}.j{border-left-color:#606}
+code{background:#f1f1f1;padding:.05rem .3rem;border-radius:4px;font-size:.9em;word-break:break-all}
+table{border-collapse:collapse;width:100%;font:12px/1.4 ui-monospace,Consolas,monospace;margin-top:.4rem}
+th,td{border:1px solid #ccc;padding:3px 6px;text-align:left;vertical-align:top}
+th{background:#f3f3f3}
+button{font:inherit;padding:.4rem .7rem;margin:.15rem .3rem .15rem 0;border:1px solid #999;border-radius:7px;background:#fafafa;cursor:pointer}
+textarea{width:100%;height:130px;font:11px/1.4 ui-monospace,Consolas,monospace;padding:.4rem;box-sizing:border-box}
+.no{color:#a00}.ok{color:#070}.mut{color:#777;font-size:.86rem}
+.big{font:600 15px/1.5 ui-monospace,Consolas,monospace}
+a{color:#36c;font-weight:600}
+@media(prefers-color-scheme:dark){body{background:#161616;color:#eaeaea}.box{border-color:#3a3a3a}
+ code,th{background:#2a2a2a}td,th,table{border-color:#3a3a3a}.k{background:#12211a}.q{background:#221414}
+ button,textarea{background:#242424;color:#eee;border-color:#555}.mut,.box b{color:#9a9a9a}.no{color:#ff9a9a}.ok{color:#7ddba0}a{color:#7aa6ff}}
+</style>
+</head>
+<body><div class="wrap">
+
+<h2>50 — JENDELA KEBANGKITAN: umur kebenaran pada dokumen yang dihidupkan lagi</h2>
+
+<div class="box q"><b>PERTANYAAN YANG BELUM PERNAH DIAJUKAN</b>
+Setelah dokumen dibangunkan dari bfcache, <b>berapa lama ia terus melaporkan kebenaran yang sudah KEDALUWARSA
+selama ia beku</b> — dan pelapor mana yang <b>tidak pernah</b> menyegarkan?
+<div class="mut" style="margin-top:.35rem">Korpus sudah menyapu “resource yang hidup melewati navigasi” (TTS, MediaSession, notifikasi, unduhan): di situ
+RESOURCE-nya bertahan sementara dokumennya mati. Di sini persis kebalikannya — <b>DOKUMEN</b> yang bertahan
+sementara <b>OTORITASNYA dicabut</b>. Yang diukur bukan umur resource melainkan <b>umur kebenaran</b>: jarak antara
+saat cookie/DB/cache/izin dihapus dan saat dokumen berhenti mempercayainya.</div>
+</div>
+
+<p class="mut">URL asli halaman ini saat dimuat: <code id="h0">…</code></p>
+
+<div class="box m"><b>CARA UKUR (ter-skrip, satu berkas, tiga lengan)</b>
+<b>Arm-1</b> <code>?arm=1</code> melahirkan otoritas milik sendiri (cookie, database IndexedDB, entri CacheStorage)
+dan <b>menggenggam handle-nya di dalam dokumen</b> (koneksi IDB terbuka, objek <code>Cache</code>, objek
+<code>PermissionStatus</code>), memotret nilai dasar, lalu menavigasi ke <b>Arm-2</b> supaya masuk bfcache.
+<b>Arm-2</b>, same-origin dari berkas yang sama, <b>menghancurkan otoritas itu secara terprogram</b>, lalu memanggil
+<code>history.back()</code>. Dokumen Arm-1 bangun; sampler 100&nbsp;ms mencatat untuk tiap pelapor berapa ms setelah
+<code>pageshow</code> ia mencerminkan kebenaran <b>baru</b> — atau <code>NEVER</code>.
+<p style="margin:.45rem 0 0">
+<button id="go">JALANKAN LENGAN BFCACHE</button>
+<button id="gon">LENGAN BFCACHE, HANDLE DILEPAS</button>
+<button id="goc">JALANKAN LENGAN KONTROL (tanpa pembekuan)</button>
+<button id="rst">BERSIHKAN ARTEFAK &amp; RESET</button>
+</p>
+<div class="mut" id="st">siap.</div>
+</div>
+
+<div class="box o"><b>ORACLE — dua kolom yang tidak boleh dicampur</b>
+<ul style="margin:.3rem 0 0;padding-left:1.1rem">
+<li><b>CACHED-IN-DOCUMENT</b> (handle yang digenggam Arm-1). Masih menjawab <code>ADA</code> setelah pencabutan ⇒
+<b>otoritas hidup lebih lama dari pencabutannya</b> ⇒ inilah kolom yang bisa jadi temuan.</li>
+<li><b>RE-DERIVED-AT-USE</b> (dibaca ulang dari nol tiap dipakai). Masih menjawab <code>ADA</code> ⇒ penghapusannya
+yang gagal, bukan jendela basi. Kalau menjawab <code>TIDAK</code> ⇒ <b>imun, bukan temuan</b> — dan itu wajib
+ditulis.</li>
+<li><b>Angka utama:</b> <code>W_stale</code> = t_refresh terbesar (ms) · <code>N_never</code> = jumlah pelapor yang
+tak pernah disegarkan · status <code>pageshow.persisted</code>.</li>
+<li><b>Matriks mutasi → mengusir/tidak.</b> Kalau <code>deleteDatabase</code> menemui <code>blocked</code> karena
+koneksi Arm-1 masih hidup, atau dokumen ternyata diusir dari bfcache, <b>matriks itulah hasil utamanya</b> —
+tulis apa adanya, jangan dipaksa jadi temuan. Lengan ketiga <b>“HANDLE DILEPAS”</b> menjalankan urutan yang
+persis sama tetapi menutup koneksi IDB <i>sebelum</i> membeku: kalau lengan itu ber-<code>persisted = true</code>
+sementara lengan normal tidak, <b>menggenggam handle itulah yang mengusir dokumen dari bfcache</b> — dan itu
+jawaban ber-angka atas “apa yang membuat jendela basi ini mustahil”, yang justru menjelaskan mengapa kolom
+CACHED-IN-DOCUMENT sering kosong.</li>
+</ul>
+</div>
+
+<div class="box k"><b>LENGAN KONTROL WAJIB</b>
+Urutan yang identik <b>tanpa pembekuan</b>: Arm-2 tidak memanggil <code>history.back()</code> melainkan memuat
+dokumen Arm-1 yang <b>baru</b>. Dokumen baru tak punya handle apa pun, jadi kontrol hanya bisa bicara tentang kolom
+RE-DERIVED — dan itulah gunanya: ia memberi <b>lantai keterlambatan async biasa</b>. Tanpa kontrol ini, setiap
+<code>t_refresh</code> beberapa ratus milidetik akan salah dibaca sebagai “jendela basi”.
+</div>
+
+<div class="box j"><b>HASIL</b>
+<p class="big" id="hd">(belum ada run)</p>
+<table><thead><tr><th>pelapor</th><th>jenis</th><th>nilai Arm-1</th><th>nilai sekarang</th><th>t_refresh (ms)</th><th>vonis</th></tr></thead><tbody id="tb"></tbody></table>
+<p class="mut" id="mut"></p>
+</div>
+
+<div class="box"><b>SALIN APA ADANYA (TSV)</b>
+<textarea id="tsv" readonly></textarea>
+</div>
+
+<div class="box k"><b>BATAS / ETIKA</b>
+Semua otoritas yang dilahirkan dan dihancurkan adalah <b>milik berkas ini sendiri</b> di origin-nya sendiri
+(<code>rr50</code>). Tanpa form, tanpa input kredensial, tanpa fetch/XHR/WebSocket/beacon ke kolektor mana pun,
+tanpa aset eksternal, tanpa obfuskasi, tanpa peniruan merek. Sampler berhenti sendiri pada <b>5 detik</b>. Lengan
+izin (pencabutan manual di setelan situs) sengaja <b>tidak</b> di-otomasi dan hanya muncul sebagai satu baris yang
+ditandai terpisah. Tombol <b>BERSIHKAN</b> menghapus semua artefak. ServiceWorker dan salinan lintas-situs
+<b>dicoret dari lingkup</b>: keduanya tidak bisa dilahirkan dari satu berkas tunggal, dan berpura-pura sebaliknya
+akan membuat tabel ini berbohong.
+</div>
+
+<script>
+(function(){
+var HREF0=location.href,K='rr50',CAP=5000,STEP=100,H={},timer=0;
+function $(i){return document.getElementById(i)}function st(s){$('st').textContent=s}
+function SS(k,v){try{return v===undefined?sessionStorage.getItem(K+'.'+k):(sessionStorage.setItem(K+'.'+k,v),v)}catch(e){return null}}
+function qp(k){var m=new RegExp('[?&]'+k+'=([^&]*)').exec(location.search);return m?m[1]:''}
+var arm=qp('arm'),ctl=qp('ctl')==='1',fresh=qp('fresh')==='1',nohold=qp('nohold')==='1',base0=location.href.split('?')[0].split('#')[0];
+var P=[
+['document.cookie (baca ulang)','R',function(cb){cb(document.cookie.indexOf(K)<0?'TIDAK':'ADA')}],
+['indexedDB.databases()','R',function(cb){if(!self.indexedDB||!indexedDB.databases)return cb('n/a');indexedDB.databases().then(function(l){var s='TIDAK',i;for(i=0;i<l.length;i++)if(l[i].name===K)s='ADA';cb(s)},function(){cb('err')})}],
+['koneksi IDB terbuka (digenggam Arm-1)','C',function(cb){if(!H.db)return cb('n/a');try{var r=H.db.transaction('s','readonly').objectStore('s').get(1);r.onsuccess=function(){cb(r.result?'ADA':'TIDAK')};r.onerror=function(){cb('err')}}catch(e){cb('err:'+e.name)}}],
+['caches.keys()','R',function(cb){if(!self.caches)return cb('n/a');caches.keys().then(function(l){cb(l.indexOf(K)<0?'TIDAK':'ADA')},function(){cb('err')})}],
+['handle Cache (digenggam Arm-1)','C',function(cb){if(!H.cache)return cb('n/a');H.cache.match(K+'-marker').then(function(r){cb(r?'ADA':'TIDAK')},function(e){cb('err')})}],
+['permissions.query(geolocation)','R',function(cb){if(!navigator.permissions)return cb('n/a');navigator.permissions.query({name:'geolocation'}).then(function(p){cb(p.state)},function(){cb('n/a')})}],
+['PermissionStatus.state (digenggam Arm-1) [lengan manual]','C',function(cb){cb(H.perm?H.perm.state:'n/a')}],
+['storage.estimate().usage','R',function(cb){if(!navigator.storage||!navigator.storage.estimate)return cb('n/a');navigator.storage.estimate().then(function(e){cb(Math.round((e.usage||0)/1024)+' KiB')},function(){cb('n/a')})}],
+['serviceWorker.controller [di luar lingkup]','R',function(cb){cb(navigator.serviceWorker&&navigator.serviceWorker.controller?'ADA':'TIDAK')}]];
+function snap(cb){var out=[],n=0,done=0,i;function hit(){if(!done&&n>=P.length){done=1;cb(out)}}
+ for(i=0;i<P.length;i++)(function(i){try{P[i][2](function(v){if(out[i]===undefined){out[i]=String(v);n++;hit()}})}catch(e){out[i]='err';n++;hit()}})(i);
+ setTimeout(function(){if(!done){done=1;for(var j=0;j<P.length;j++)if(out[j]===undefined)out[j]='timeout';cb(out)}},1500)}
+function create(cb){var jobs=1;function fin(){if(--jobs<=0)cb()}
+ try{document.cookie=K+'=1;path=/;max-age=1800'+(location.protocol==='https:'?';secure':'')}catch(e){}
+ if(self.caches){jobs++;caches.open(K).then(function(c){H.cache=c;return c.put(new Request(K+'-marker'),new Response('x'))}).then(fin,fin)}
+ if(self.indexedDB){jobs++;var q=indexedDB.open(K,1);q.onupgradeneeded=function(){q.result.createObjectStore('s')};
+  q.onsuccess=function(){H.db=q.result;var t=H.db.transaction('s','readwrite');t.objectStore('s').put({v:1},1);t.oncomplete=fin;t.onerror=fin};q.onerror=fin}
+ if(navigator.permissions)try{jobs++;navigator.permissions.query({name:'geolocation'}).then(function(p){H.perm=p;fin()},fin)}catch(e){fin()}
+ fin()}
+function destroy(cb){var log=[],jobs=1;function fin(){if(--jobs<=0){SS('mut',log.join(' | '));cb(log)}}
+ try{document.cookie=K+'=;path=/;max-age=0';log.push('cookie:dihapus')}catch(e){log.push('cookie:gagal')}
+ if(self.caches){jobs++;caches.delete(K).then(function(o){log.push('cache:'+(o?'dihapus':'tak ada'));fin()},function(){log.push('cache:gagal');fin()})}
+ if(self.indexedDB){jobs++;var r=indexedDB.deleteDatabase(K);r.onsuccess=function(){log.push('idb:dihapus');fin()};
+  r.onerror=function(){log.push('idb:gagal');fin()};r.onblocked=function(){log.push('idb:BLOCKED — koneksi Arm-1 masih hidup');fin()}}
+ fin()}
+function nrr(){try{var e=performance.getEntriesByType('navigation')[0],r=e&&e.notRestoredReasons,a=[],i;
+ if(!r)return ' [notRestoredReasons: tidak didukung di browser ini]';
+ if(r.reasons)for(i=0;i<r.reasons.length;i++)a.push(r.reasons[i].reason);return ' [notRestoredReasons: '+(a.join(',')||'-')+']'}catch(x){return ''}}
+function measure(tag){var base=null,first=[],t0=performance.now();try{base=JSON.parse(SS('base')||'null')}catch(e){}
+ (function tick(){snap(function(v){var el=performance.now()-t0,i;
+  for(i=0;i<P.length;i++)if(first[i]===undefined&&base&&v[i]!==base[i]&&v[i]!=='n/a'&&v[i]!=='timeout')first[i]=Math.round(el);
+  show(tag,base,v,first,el);if(el<CAP)timer=setTimeout(tick,STEP)})})()}
+function show(tag,base,v,first,el){var h='',x='pelapor\tjenis\tarm1\tsekarang\tt_refresh_ms\tvonis\n',i,W=0,NV=0,vd;
+ for(i=0;i<P.length;i++){var b=base?base[i]:'?',n=v[i],t=first[i],na=(n==='n/a'||n==='timeout');
+  if(na)vd=(P[i][1]==='C')?'handle tidak ada di dokumen ini (tak dibekukan, atau API tak didukung)':'tidak didukung di browser ini';
+  else if(t!==undefined){vd='disegarkan';if(t>W)W=t}
+  else if(b===n&&b==='ADA'){vd=P[i][1]==='C'?'BASI — handle hidup lebih lama dari pencabutan':'TIDAK TERHAPUS';NV++}
+  else{vd=(b===n)?'tak berubah (tak ada yang dicabut untuk baris ini)':'berubah';if(b===n)NV++}
+  h+='<tr><td>'+P[i][0]+'</td><td>'+(P[i][1]==='C'?'CACHED-IN-DOCUMENT':'RE-DERIVED-AT-USE')+'</td><td>'+b+'</td><td>'+n+'</td><td>'+(na?'—':(t===undefined?'<b>NEVER</b>':t))+'</td><td>'+(vd.indexOf('BASI')===0?'<b class="no">'+vd+'</b>':vd)+'</td></tr>';
+  x+=P[i][0]+'\t'+P[i][1]+'\t'+b+'\t'+n+'\t'+(na?'-':(t===undefined?'NEVER':t))+'\t'+vd+'\n'}
+ $('tb').innerHTML=h;
+ $('hd').innerHTML=tag+'<br>W_stale = <b>'+W+'</b> ms &nbsp;·&nbsp; N_never = <b>'+NV+'</b> &nbsp;·&nbsp; jendela sampel = '+Math.round(el)+' / '+CAP+' ms';
+ $('mut').textContent='mutasi Arm-2: '+(SS('mut')||'(belum dijalankan)');
+ $('tsv').value='# '+tag+'\n# W_stale='+W+'\tN_never='+NV+'\n# mutasi\t'+(SS('mut')||'-')+'\n'+x+'# href_asli\t'+HREF0+'\n# ua\t'+navigator.userAgent+'\n'}
+function begin(){st('Arm-1: melahirkan otoritas…');create(function(){snap(function(v){SS('base',JSON.stringify(v));
+ if(nohold){try{if(H.db)H.db.close()}catch(e){}H.db=null;H.cache=null;H.perm=null}
+ st('Arm-1: artefak dibuat'+(nohold?' (handle DILEPAS sebelum beku)':'')+', menuju Arm-2 dalam 400 ms…');setTimeout(function(){location.href=base0+'?arm=2'+(ctl?'&ctl=1':'')+(nohold?'&nohold=1':'')},400)})})}
+$('h0').textContent=HREF0;$('go').onclick=function(){SS('phase','');location.href=base0+'?arm=1'};
+$('goc').onclick=function(){SS('phase','');location.href=base0+'?arm=1&ctl=1'};
+$('gon').onclick=function(){SS('phase','');location.href=base0+'?arm=1&nohold=1'};
+$('rst').onclick=function(){try{document.cookie=K+'=;path=/;max-age=0'}catch(e){}if(self.caches)caches.delete(K);if(self.indexedDB)indexedDB.deleteDatabase(K);SS('phase','');SS('base','');SS('mut','');st('artefak dibersihkan.')};
+if(arm==='2'){st('Arm-2: menghancurkan otoritas…');destroy(function(l){st('Arm-2: '+l.join(' | ')+' — kembali dalam 700 ms');
+ setTimeout(function(){if(ctl)location.replace(base0+'?arm=1&ctl=1&fresh=1');else history.back()},700)})}
+window.addEventListener('pageshow',function(e){if(arm!=='1')return;var ph=SS('phase')||'';
+ if(e.persisted){SS('phase','done');measure('DIPULIHKAN DARI BFCACHE (pageshow.persisted = true)'+(nohold?' — handle DILEPAS sebelum beku':' — handle DIGENGGAM saat beku'))}
+ else if(fresh){SS('phase','done');measure('DOKUMEN BARU — LENGAN KONTROL, tanpa pembekuan')}
+ else if(ph==='awaiting'){SS('phase','done');measure('DOKUMEN DIMUAT ULANG — BFCACHE TIDAK DIPAKAI'+(nohold?' walau handle DILEPAS':' saat handle DIGENGGAM')+nrr())}
+ else{SS('phase','awaiting');begin()}});
+window.addEventListener('pagehide',function(){if(timer)clearTimeout(timer)});
+if(!arm)st('siap — pilih satu lengan. Halaman ini tidak menahanmu: satu Back selalu keluar.');
+})();
+</script>
+
+<p class="mut"><a href="./50.html">↺ kembali ke hub berkas ini</a></p>
+</div></body></html>

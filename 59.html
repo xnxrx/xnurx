@@ -1,0 +1,191 @@
+<!-- KONSTRUKSI: browser punya serializer identitas KEDUA yang hanya hidup ketika sesuatu GAGAL — laporan pelanggaran CSP; berkas ini memicu SATU pelanggaran jinak yang identik dari ~10 konstruksi dokumen anak yang mewarisi kebijakan, lalu mengukur DOKUMEN MANA yang disalahkan dan pelanggaran mana yang tidak terlihat oleh siapa pun. -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="script-src 'unsafe-inline' blob:; img-src 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>47 — Jalur-gagal: matriks atribusi pelanggaran CSP</title>
+<style>
+ body{font:15px/1.55 system-ui,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
+ .wrap{max-width:980px;margin:0 auto}
+ h2{font-size:1.12rem;margin:.2rem 0 .8rem;line-height:1.35}
+ .box{border:1px solid #ccc;border-left:5px solid #888;border-radius:8px;padding:.6rem .8rem;margin:.55rem 0}
+ .box>b:first-child{display:block;font-size:.78rem;letter-spacing:.09em;color:#666;margin-bottom:.25rem}
+ .tanya{border-left-color:#606;background:#faf7ff}.pagar{border-left-color:#0a7}.celah{border-left-color:#d33}
+ .uji{border-left-color:#36c}.oracle{border-left-color:#e90}.kontrol{border-left-color:#777}.hasil{border-left-color:#606}
+ .safe{border-left-color:#0a7;background:#f4fbf7}
+ code{background:#f1f1f1;padding:.05rem .3rem;border-radius:4px;font-size:.9em;word-break:break-all}
+ pre{background:#f7f7f7;border-radius:6px;padding:.6rem;overflow:auto;font-size:.78rem;margin:.3rem 0 0;
+     white-space:pre;max-height:22rem;line-height:1.35}
+ button{font:inherit;padding:.45rem .8rem;margin:.15rem .3rem .15rem 0;border:1px solid #999;border-radius:7px;background:#fafafa;cursor:pointer}
+ .note{font-size:.85rem;color:#666}
+ .jujur{border:1px dashed #b00;border-radius:8px;padding:.6rem .8rem;font-size:.88rem;margin-top:1rem}
+ @media(prefers-color-scheme:dark){body{background:#161616;color:#eaeaea}.box{border-color:#3a3a3a}
+  .tanya{background:#1b1626}.safe{background:#12211a}code{background:#2a2a2a}pre{background:#202020}
+  button{background:#242424;color:#eee;border-color:#555}.note,.box b{color:#9a9a9a}}
+</style>
+</head>
+<body><div class="wrap">
+
+<h2>47 — JALUR-GAGAL: ketika pelanggaran dilaporkan, dokumen MANA yang disalahkan — dan berapa pelanggaran yang tidak dilihat siapa pun?</h2>
+
+<div class="box tanya"><b>PERTANYAAN YANG BELUM PERNAH DIAJUKAN</b>
+Browser punya <b>jalur penulisan identitas kedua</b> yang hanya hidup ketika sesuatu <b>GAGAL</b>: laporan
+pelanggaran kebijakan. Jalur itu ditulis, disensor, dan dipelihara terpisah dari jalur sukses.
+Pertanyaannya: <b>apakah serializer jalur-gagal sepakat dengan serializer jalur-sukses, dan ke arah mana ia
+salah?</b> Korban temuannya bukan pengguna dan bukan pemeriksa otorisasi, melainkan <b>MESIN PERTAHANAN</b>
+yang mempercayai laporan browser untuk tahu siapa yang melanggar.
+<p class="note" style="margin:.4rem 0 0">URL asli halaman ini: <code id="href">…</code></p>
+</div>
+
+<div class="box pagar"><b>PAGAR</b>
+CSP diwariskan ke dokumen ber-skema lokal (<code>srcdoc</code>, <code>about:blank</code>, <code>blob:</code>,
+<code>data:</code>) justru supaya tak ada celah bebas-kebijakan. Setiap pelanggaran melahirkan
+<code>SecurityPolicyViolationEvent</code> yang membawa <code>documentURI</code>, <code>sourceFile</code>,
+<code>blockedURI</code>, dan <code>lineNumber</code>. Tim keamanan memakai angka-angka itu untuk memutuskan
+apakah rollout Trusted Types / CSP sudah aman.
+</div>
+
+<div class="box celah"><b>CELAH</b>
+Karena jalur-gagal dirancang untuk <b>memangkas</b> identitas (supaya laporan tidak jadi kanal kebocoran
+lintas-origin), ia punya kelas bug yang tidak punya analog di jalur sukses: <b>MIS-ATTRIBUTE</b> — pelanggaran
+dokumen C dilaporkan sebagai dokumen D≠C (induk, <code>about:blank</code>, atau kosong) sehingga telemetri
+menyalahkan pihak yang keliru — dan <b>INVISIBLE</b> — pelanggaran benar-benar terjadi, tapi <b>nol pengamat</b>
+melihatnya di mana pun. <code>I</code> adalah hasil yang lebih kuat: itu daftar <b>titik buta telemetri CSP</b>
+tempat injeksi terbatas bisa bersembunyi selama rollout.
+</div>
+
+<div class="box uji"><b>UJI</b>
+Berkas ini mengirim CSP <b>enforcing</b> lewat <code>&lt;meta&gt;</code>:
+<code>script-src 'unsafe-inline' blob:; img-src 'none'</code>. Dari tiap konstruksi dokumen anak dipicu
+<b>satu pelanggaran jinak yang identik</b>: memuat gambar. Dua gambar dipakai — satu URL relatif ber-token unik
+(agar pengamat di dokumen atas bisa meng-atribusi baris) dan satu GIF 1×1 <code>data:</code> (oracle pewarisan:
+kalau ia <b>termuat</b>, kebijakan tidak diwarisi). Baris Worker memakai kanal berbeda (<code>eval</code>),
+dan kolom KANAL menyebutkannya.
+<p><button id="re">Render ulang</button></p>
+<p class="note">Karena <code>img-src 'none'</code> memblokir sebelum jaringan disentuh, gambar ber-token unik
+itu <b>tidak pernah menjadi request</b> selama kebijakan diwarisi; kalau tidak diwarisi, ia hanya menyentuh
+origin berkas ini sendiri.</p>
+</div>
+
+<div class="box oracle"><b>ORACLE</b>
+Tiap sel diklasifikasikan: <b>EXACT</b> (documentURI = URL dokumen yang benar-benar melanggar) ·
+<b>TERPANGKAS-COCOK</b> (laporan hanya menyebut <i>skema</i>, dan skemanya masih milik si pelanggar) ·
+<b>TERPANGKAS-BEDA</b> (hanya skema, dan skemanya <b>bukan</b> milik si pelanggar) ·
+<b>MIS:INDUK</b> · <b>MIS:ABOUT-BLANK</b> · <b>MIS:KOSONG</b> · <b>MIS:LAIN</b> · <b>HANYA-DI-ATAS</b> ·
+<b>INVISIBLE</b> · <b>TIDAK-DIWARISI</b>.
+Angka headline: <b>M</b> = sel MIS-ATTRIBUTE + TERPANGKAS-BEDA (tiap satu = kandidat pemalsuan atribusi
+terhadap kontrol defensif) · <b>I</b> = sel INVISIBLE (tiap satu = titik buta telemetri) ·
+<b>S</b> = sel TERPANGKAS-COCOK (identitas dipangkas jadi skema; <b>ini yang normal terjadi di
+<code>file://</code></b>, jadi jalankan juga dari <code>https://</code> supaya tabelnya berdaya-beda) ·
+<b>N</b> = sel yang kebijakannya tidak diwarisi sama sekali.
+</div>
+
+<div class="box kontrol"><b>KONTROL (wajib)</b>
+Pelanggaran identik dipicu juga di <b>dokumen atas</b>. Baris itu harus <b>EXACT</b> (di <code>https://</code>)
+atau <b>TERPANGKAS-COCOK</b> (di <code>file://</code>, karena browser memang memangkas identitas skema non-http
+di jalur laporan). Kalau baris kontrol jatuh ke kelas lain, seluruh tabel tidak bisa ditafsirkan dan tidak boleh
+dilaporkan — semua kelainan diukur relatif terhadap baseline yang sama, di build yang sama.
+</div>
+
+<div class="box hasil"><b>HASIL 1 — MATRIKS ATRIBUSI (salin apa adanya)</b><pre id="tab">…</pre></div>
+<div class="box hasil"><b>HASIL 2 — ANGKA HEADLINE</b><pre id="num">…</pre></div>
+<div class="box hasil"><b>HASIL 3 — PENGAMAT DI DOKUMEN ATAS (event mentah + ReportingObserver)</b><pre id="obs">…</pre></div>
+
+<div class="box safe"><b>BATAS KEAMANAN BERKAS INI</b>
+Tanpa <code>&lt;form&gt;</code>, tanpa kredensial, tanpa fetch/XHR/WebSocket/beacon ke kolektor mana pun, tanpa
+cookie orang lain, tanpa peniruan merek, tanpa obfuskasi. Pelanggaran yang dipicu adalah memuat gambar 1×1 dan
+memanggil <code>eval('1+1')</code> di dalam Worker — keduanya jinak dan keduanya diblokir oleh kebijakan berkas
+ini sendiri. Semua dokumen anak lahir dari berkas ini, tinggal di <code>iframe</code> 10×10 px, dan sensus
+berhenti sendiri setelah 3 detik.
+</div>
+
+<div class="jujur"><b>JUJUR — M = I = 0 tetap hasil yang sah.</b>
+Kalau setiap pelanggaran diatribusikan tepat dan terlihat oleh pengamat yang benar, halaman ini akan
+mengatakannya: kedua serializer sudah selaras, dan korpus di bawah menjadi <b>korpus regresi</b> untuk mengunci
+perilaku itu. Yang layak dikirim ke vendor hanyalah sel ber-angka: satu baris MIS-ATTRIBUTE yang bisa
+di-reproduksi, atau satu baris INVISIBLE yang menunjukkan telemetri buta di konstruksi dokumen tertentu.
+</div>
+
+<script>
+var T0=Date.now(),TEV=[],RO=[],ROWS=[],SEEN={},TOPURL=document.URL,
+ GIF='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+document.getElementById('href').textContent=location.href;
+document.addEventListener('securitypolicyviolation',function(e){TEV.push({doc:e.documentURI||'(kosong)',blk:e.blockedURI||'(kosong)',src:e.sourceFile||'(kosong)',ln:e.lineNumber,ms:Date.now()-T0})});
+try{new ReportingObserver(function(l){for(var i=0;i<l.length;i++){var b=l[i].body||{};
+ RO.push(l[i].type+' | url='+(l[i].url||'(kosong)')+' | blocked='+(b.blockedURL||b.blockedURI||'(kosong)')+' | src='+(b.sourceFile||'(kosong)'))}},
+ {types:['csp-violation'],buffered:true}).observe()}catch(e){RO.push('ReportingObserver TIDAK DIDUKUNG di browser ini')}
+function P47(id,uq,gif){var ev=[],url='?',img='?',done=0;
+ try{url=document.URL}catch(e){}
+ try{document.addEventListener('securitypolicyviolation',function(e){ev.push({doc:e.documentURI||'(kosong)',src:e.sourceFile||'(kosong)',blk:e.blockedURI||'(kosong)',ln:e.lineNumber,dir:e.effectiveDirective||e.violatedDirective||'(kosong)'})})}catch(e){}
+ var fin=function(){if(done)return;done=1;setTimeout(function(){try{top.postMessage({t:'v47',id:id,uq:uq,url:url,img:img,ev:ev,ch:'img-src'},'*')}catch(e){}},250)};
+ try{var a=new Image();a.onerror=function(){};a.src='./c47-'+uq+'.gif'}catch(e){}
+ try{var b=new Image();b.onload=function(){img='LOAD';fin()};b.onerror=function(){img='BLOCK';fin()};b.src=gif}catch(e){img='THROW:'+e.name}
+ setTimeout(fin,1200);}
+function W47(){var n=0,k='?';try{self.addEventListener('securitypolicyviolation',function(){n++})}catch(e){}
+ try{k=(0,eval)('1+1')===2?'EVAL-OK':'EVAL-ANEH'}catch(e){k='THROW:'+e.name}
+ setTimeout(function(){postMessage({k:k,ev:n})},300);}
+window.PROBE=function(id,uq){return '<body><script>('+P47.toString()+')('+JSON.stringify(id)+','+JSON.stringify(uq)+','+JSON.stringify(GIF)+')<\/script>'};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;')}
+function frame(sandbox,go){var f=document.createElement('iframe');f.style.cssText='position:absolute;left:-9999px;width:10px;height:10px;border:0';
+ if(sandbox!==null)f.setAttribute('sandbox',sandbox);document.body.appendChild(f);try{go(f)}catch(e){}}
+function build(){
+ frame(null,function(f){f.srcdoc=PROBE('02 srcdoc','02')});
+ frame(null,function(f){f.src='about:blank';f.onload=function(){if(f.w)return;f.w=1;try{var d=f.contentDocument;d.open();d.write(PROBE('03 about:blank + document.write','03'));d.close()}catch(e){}}});
+ frame(null,function(f){f.src=URL.createObjectURL(new Blob([PROBE('04 blob:','04')],{type:'text/html'}))});
+ frame(null,function(f){f.src='data:text/html;charset=utf-8,'+encodeURIComponent(PROBE('05 data:','05'))});
+ frame('allow-scripts',function(f){f.srcdoc=PROBE('06 sandbox opaque (allow-scripts)','06')});
+ frame('allow-scripts allow-same-origin',function(f){f.srcdoc=PROBE('07 sandbox + allow-same-origin [KONTROL-2]','07')});
+ frame(null,function(f){f.src=URL.createObjectURL(new Blob(['<body><iframe srcdoc="'+esc(PROBE('08 blob > srcdoc (bersarang)','08'))+'"></iframe>'],{type:'text/html'}))});
+ frame(null,function(f){f.src='javascript:top.PROBE("09 javascript: URL","09")'});
+ try{var w=new Worker(URL.createObjectURL(new Blob(['('+W47.toString()+')()'],{type:'text/javascript'})));
+  w.onmessage=function(e){take({id:'10 Worker (blob)',uq:'10',url:'(worker)',img:e.data.k==='EVAL-OK'?'LOAD':'BLOCK',ev:e.data.ev?[{doc:'(worker: hanya hitungan)',src:'(kosong)',blk:'eval',ln:0,dir:'script-src'}]:[],ch:'eval'})}}
+ catch(e){take({id:'10 Worker (blob)',uq:'10',url:'(worker)',img:'THROW:'+e.name,ev:[],ch:'eval'})}
+ P47('01 TOP (kontrol)','01',GIF);}
+function take(r){if(SEEN[r.id])return;SEEN[r.id]=1;ROWS.push(r);render()}
+window.addEventListener('message',function(e){var d=e.data;if(!d||d.t!=='v47')return;take(d)});
+function topSaw(uq){var n=0,i;for(i=0;i<TEV.length;i++)if(String(TEV[i].blk).indexOf('c47-'+uq)>=0)n++;return n}
+function klass(r){if(r.img==='LOAD')return 'TIDAK-DIWARISI';
+ if(!r.ev.length)return topSaw(r.uq)?'HANYA-DI-ATAS':'INVISIBLE';
+ if(r.ch==='eval')return 'EXACT';
+ var d=String(r.ev[0].doc),u=String(r.url);
+ if(d===u)return 'EXACT';
+ if(/^[a-z][a-z0-9+.-]*$/.test(d))return u.indexOf(d+':')===0?'TERPANGKAS-COCOK':'TERPANGKAS-BEDA';
+ if(d===TOPURL)return 'MIS:INDUK';
+ if(d.indexOf('about:blank')===0)return 'MIS:ABOUT-BLANK';
+ if(d==='(kosong)')return 'MIS:KOSONG';
+ return 'MIS:LAIN';}
+function cut(s,n){s=String(s);return s.length>n?s.slice(0,n-1)+'…':s}
+function pad(s,n){s=String(s);while(s.length<n)s+=' ';return s}
+function render(){var i,r,k,M=0,I=0,N=0,S=0,s='';
+ ROWS.sort(function(x,y){return x.id<y.id?-1:1});
+ s+='LEGENDA kolom "waris": BLOCK = resource diblokir (kebijakan BERLAKU di dokumen itu) · LOAD = resource termuat (kebijakan TIDAK diwarisi).\n\n';
+ s+=pad('DOKUMEN',42)+pad('KANAL',9)+pad('waris',9)+pad('ev@anak',8)+pad('documentURI',34)+pad('sourceFile',30)+pad('blockedURI',20)+pad('ev@atas',8)+'KELAS\n';
+ for(i=0;i<ROWS.length;i++){r=ROWS[i];k=klass(r);if(k.indexOf('MIS:')===0||k==='TERPANGKAS-BEDA')M++;
+  if(k==='INVISIBLE')I++;if(k==='TIDAK-DIWARISI')N++;if(k==='TERPANGKAS-COCOK')S++;
+  s+=pad(cut(r.id,41),42)+pad(r.ch,9)+pad(r.img,9)+pad(r.ev.length,8)+
+   pad(cut(r.ev.length?r.ev[0].doc:'-',33),34)+pad(cut(r.ev.length?r.ev[0].src:'-',29),30)+
+   pad(cut(r.ev.length?r.ev[0].blk:'-',19),20)+pad(topSaw(r.uq),8)+k+'\n';}
+ document.getElementById('tab').textContent=s+'\n('+ROWS.length+' konstruksi dokumen; kolom ev@anak = jumlah SecurityPolicyViolationEvent yang dilihat dokumen itu sendiri)';
+ var ctl='(baris kontrol belum tiba)';for(i=0;i<ROWS.length;i++)if(ROWS[i].uq==='01')ctl=klass(ROWS[i]);
+ s='KONTROL (dokumen atas)      : '+ctl+'   <- harus EXACT (https) atau TERPANGKAS-COCOK (file://)\n'+
+   'M (MIS-ATTRIBUTE)           : '+M+'\n'+
+   'I (INVISIBLE)               : '+I+'\n'+
+   'S (identitas dipangkas)     : '+S+'\n'+
+   'N (kebijakan tidak diwarisi): '+N+'\n'+
+   'Event dilihat dokumen atas  : '+TEV.length+'\n';
+ if(!M&&!I&&!N)s+='\nTIDAK ADA SEAM: setiap pelanggaran diatribusikan tepat (atau dipangkas secara konsisten) dan terlihat\noleh pengamat yang benar. => kedua serializer selaras; korpus ini dilaporkan sebagai KORPUS REGRESI,\nbukan sebagai temuan.\n';
+ if(S&&!M)s+='\nCATATAN: S>0 dengan M=0 berarti jalur-gagal memangkas identitas menjadi SKEMA saja. Itu perilaku\nnormal untuk skema non-http; ulangi dari https:// sebelum menyimpulkan apa pun.\n';
+ document.getElementById('num').textContent=s;
+ s='securitypolicyviolation yang dilihat DOKUMEN ATAS ('+TEV.length+'):\n';
+ for(i=0;i<TEV.length;i++)s+='  +'+pad(TEV[i].ms+'ms',8)+' doc='+pad(cut(TEV[i].doc,40),41)+' blocked='+pad(cut(TEV[i].blk,26),27)+' src='+cut(TEV[i].src,40)+'\n';
+ if(!TEV.length)s+='  (kosong)\n';
+ s+='\nReportingObserver di dokumen atas ('+RO.length+'):\n';
+ for(i=0;i<RO.length;i++)s+='  '+RO[i]+'\n';
+ if(!RO.length)s+='  (kosong — tidak satu pun laporan sampai ke ReportingObserver)\n';
+ document.getElementById('obs').textContent=s;}
+document.getElementById('re').onclick=render;
+build();setTimeout(render,1500);setTimeout(render,3000);
+</script>
+</div></body></html>
