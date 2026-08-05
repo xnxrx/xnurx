@@ -1,0 +1,30 @@
+<!-- SF-DIA-09 | GENOME A=- B=location.href ke host ASLI C=gestur klik + jeda 1500ms D=S14 MediaSession / Now Playing macOS E=- F=WebAudio MediaStream G=luar-browser (Control Center / lock screen) X=dia-macos
+     KELAS    : atribusi yang KELUAR dari browser. Kartu Now Playing macOS dibaca di tempat yang tidak punya
+                address bar sama sekali - jadi tidak ada apa pun di sana yang bisa membantah teks pilihan penyerang.
+     PREDIKAT : Control Center / Now Playing menampilkan judul yang dipilih halaman ini (www.google.com) dan
+                terus menampilkannya SETELAH dokumen pembuatnya ditinggalkan.
+     ORACLE   : Run 09 -> buka Control Center macOS -> baca kartu Now Playing -> tab pindah ke google.com asli ->
+                buka Control Center lagi. Judul masih sama = atribusi hidup lebih lama dari dokumennya. Screenshot.
+     EXPECTED-SECURE: kartu hilang / metadata di-reset saat dokumen pembuatnya di-unload, atau kartu menyebut
+                origin sebenarnya di samping judul.
+     KONTROL  : tombol CONTROL = pasang metadata TANPA berpindah halaman (lihat bentuk jujurnya dulu).
+     CATATAN  : nada 220 Hz pelan sengaja dipakai karena kartu Now Playing hanya muncul untuk media yang "audible".
+                Kecilkan volume sistem sebelum menjalankan. Artist sengaja menyebut PoC + origin asli.
+     STATUS   : HIPOTESIS - belum diuji di Dia. -->
+<meta charset="utf-8"><title>09 MediaSession Now Playing attribution</title>
+<h3>09 &mdash; kartu Now Playing yang hidup lebih lama dari dokumennya</h3>
+<button onclick="run(1)">Run 09</button> <button onclick="run(0)">CONTROL (tanpa pindah halaman)</button>
+<pre id="p"></pre>
+<script>
+document.getElementById('p').textContent =
+  'REAL origin : ' + location.origin + '\nKecilkan volume dulu. Lalu buka Control Center > Now Playing.';
+function run(nav){
+  var ac = new AudioContext(), dst = ac.createMediaStreamDestination();
+  var o = ac.createOscillator(), g = ac.createGain();
+  o.frequency.value = 220; g.gain.value = 0.03; o.connect(g); g.connect(dst); o.start();
+  var a = new Audio(); a.srcObject = dst.stream; a.loop = true; a.play();
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: 'www.google.com', artist: 'PoC riset - origin asli: ' + location.origin });
+  if (nav) setTimeout(function(){ location.href = 'https://www.google.com/'; }, 1500);
+}
+</script>

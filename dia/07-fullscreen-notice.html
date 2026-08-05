@@ -1,0 +1,31 @@
+<!-- SF-DIA-07 | GENOME A=- B=- C=gestur klik D=S9 fullscreen notice E=tabrakan-notice (blind-the-guard) F=- G=desktop-fullscreen X=dia-macos
+     GROUNDING: CVE-2025-13132 (Dia <1.6, High 7.5, frozzipies) = "situs bisa masuk fullscreen TANPA toast notifikasi".
+                Fix-nya = toast dimunculkan. Pertanyaan yang belum dijawab fix mana pun: toast itu bertahan berapa lama,
+                dan apakah ia masih terbaca kalau ADA UI lain yang muncul di detik yang sama.
+     ALAT INI = INSTRUMEN UKUR, bukan pajangan. Dua lengan, satu variabel:
+                BASELINE = fullscreen saja.   TABRAKAN = fullscreen + prompt izin di frame yang sama.
+     PREDIKAT : pada lengan TABRAKAN, toast fullscreen tidak muncul / muncul jauh lebih singkat / tertutup,
+                sehingga tidak ada lagi yang membantah UI yang digambar halaman.
+     ORACLE   : jalankan BASELINE, hitung berapa detik toast terbaca (stopwatch HP). Lalu TABRAKAN, ukur lagi.
+                Vonis harus BER-ANGKA ("baseline 3 s, tabrakan 0 s dari 5 percobaan"), bukan kesan.
+     EXPECTED-SECURE: toast muncul dengan dwell yang sama di kedua lengan; jalan keluar (Esc) selalu tersedia.
+     SENGAJA TIDAK ADA: bar palsu / logo / tiruan UI merek apa pun. Yang diuji notice-nya, bukan seberapa mirip
+                gambar palsunya. Menggambar chrome palsu di sini hanya menambah kerajinan phishing, bukan bukti bug.
+     KELUAR   : tekan Esc kapan saja.
+     STATUS   : HIPOTESIS - belum diuji di Dia. -->
+<meta charset="utf-8"><title>07 fullscreen notice dwell</title>
+<h3>07 &mdash; ukur dwell toast fullscreen (tetangga CVE-2025-13132)</h3>
+<button onclick="run(0)">BASELINE (fullscreen saja)</button>
+<button onclick="run(1)">TABRAKAN (fullscreen + prompt)</button>
+<pre id="p"></pre>
+<script>
+var el = document.getElementById('p');
+el.textContent = 'REAL origin : ' + location.origin + '\nEsc = keluar fullscreen. Catat dwell toast per lengan.';
+document.addEventListener('fullscreenchange', function(){
+  el.textContent += '\nfullscreenchange @ ' + Math.round(performance.now()) + ' ms, state=' + !!document.fullscreenElement;
+});
+function run(collide){
+  document.documentElement.requestFullscreen();
+  if (collide) navigator.geolocation.getCurrentPosition(function(){}, function(){});
+}
+</script>

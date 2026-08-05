@@ -1,0 +1,27 @@
+<!-- SF-DIA-05 | GENOME A=dead-port(DROP)+arm-ulang B=window.open('')+replace C=klik-manual-tester D=S3 gembok + S4 page-info bubble E=- F=document.write G=desktop-popup X=dia-macos
+     DELTA vs 03: bukan teks bar yang dibaca, tapi KLAIM KEAMANAN di sebelahnya. Bar bisa saja benar sementara
+                  chip gembok / bubble "Connection is secure" di-render dari state navigasi yang lain.
+                  Ini permukaan yang paling jarang diperiksa saat sebuah fix bar dikirim.
+     PREDIKAT : chip gembok + bubble info-situs menyatakan sambungan aman ke www.google.com untuk sebuah dokumen
+                yang bukan google.com dan yang koneksinya bahkan belum pernah terbentuk.
+     ORACLE   : Run 05 -> di jendela kecil klik ikon gembok / info-situs -> baca host + kalimat status di bubble
+                -> bandingkan dengan panel -> screenshot. (Klik dilakukan tester; halaman tidak mengotomasi apa pun.)
+     EXPECTED-SECURE: bubble menyebut about:blank / origin induk, atau menolak menampilkan status "secure"
+                selama tidak ada koneksi yang commit.
+     KONTROL  : 00-control.html (port hidup: bubble harus menyebut google.com yang ASLI, dan isinya memang Google).
+     STATUS   : HIPOTESIS - belum diuji di Dia. -->
+<meta charset="utf-8"><title>05 lock chip + page-info claim</title>
+<h3>05 &mdash; gembok &amp; bubble info-situs saat navigasi menggantung</h3>
+<button onclick="run()">Run 05</button>
+<pre id="p"></pre>
+<script>
+var T = 'https://www.google.com:9090/';
+document.getElementById('p').textContent =
+  'REAL origin : ' + location.origin + '\nREAL href   : ' + location.href +
+  '\nLangkah: klik ikon gembok / info-situs di jendela kecil, lalu baca host + status di bubble.';
+function run(){
+  var w = window.open('', '', 'width=520,height=640,left=200,top=120');
+  w.document.write('<h3>Klik gembok di jendela ini. Dokumen ini milik ' + location.origin + '</h3>');
+  setInterval(function(){ w.location.replace(T); }, 9800);
+}
+</script>

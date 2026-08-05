@@ -1,0 +1,94 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Dia (macOS) - origin-display probe set</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+ body{font:15px/1.55 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;max-width:980px;margin:32px auto;padding:0 18px;color:#111;background:#fff}
+ h1{font-size:22px;margin:0 0 4px} h2{font-size:16px;margin:28px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}
+ table{border-collapse:collapse;width:100%;font-size:13px} td,th{border:1px solid #ddd;padding:6px 8px;vertical-align:top;text-align:left}
+ th{background:#f6f6f6} code{background:#f2f2f2;padding:1px 4px;border-radius:3px}
+ .w{background:#fff8e1;border-left:4px solid #f0ad4e;padding:10px 12px;margin:14px 0}
+ .n{color:#666;font-size:13px} a{color:#0645ad}
+ @media (prefers-color-scheme:dark){body{background:#111;color:#eee}th{background:#1c1c1c}td,th{border-color:#333}code{background:#1c1c1c}.w{background:#2a2312}a{color:#7fb2ff}}
+</style>
+
+<h1>Dia (macOS) &mdash; origin-display probe set</h1>
+<p class="n">10 arm + 1 lengan kontrol. Tiap file = <b>satu mekanisme</b>, punya predikat, oracle, dan perilaku-aman-yang-diharapkan
+sendiri. Ini instrumen ukur untuk browser milik sendiri, bukan kit phishing.</p>
+
+<div class="w">
+<b>Etika &mdash; tidak bisa ditawar.</b> Jalankan hanya di mesin &amp; browser sendiri. Tidak ada satu pun file di sini yang
+memuat form, kolom kredensial, <code>fetch</code>/beacon/WebSocket, service worker, atau tiruan identitas organisasi.
+Label <code>www.google.com</code> dipakai sebagai <i>string tak-berbahaya</i>. Berhenti di <b>predikat</b>
+(tampilan &ne; kenyataan) &rarr; screenshot &rarr; laporkan. Jangan pernah diarahkan ke pengguna lain.
+</div>
+
+<h2>Kenapa arm-arm ini, bukan yang lain</h2>
+<p>Dia sudah menerbitkan dua perbaikan di kelas ini &mdash; dan sebuah patch adalah oracle gratis:</p>
+<table>
+<tr><th>Referensi</th><th>Isi</th><th>Fixed</th><th>Yang ia tinggalkan terbuka</th></tr>
+<tr><td><b>CVE-2025-15032</b><br><span class="n">High 7.4</span></td>
+    <td>situs bisa membuka jendela <i>custom-size</i> yang bilah URL-nya tidak menampilkan <code>about:blank</code></td>
+    <td>Dia &ge; 1.9.0</td>
+    <td>fix menyentuh <b>bilah</b>. Permukaan tetangga di jendela yang sama &mdash; prompt izin, dialog JS, gembok/page-info,
+        atribusi unduhan &mdash; tidak otomatis ikut. Juga: pin itu untuk state <i>sudah commit</i>; navigasi <i>pending</i> state lain.</td></tr>
+<tr><td><b>CVE-2025-13132</b><br><span class="n">High 7.5</span></td>
+    <td>situs bisa masuk fullscreen tanpa toast notifikasi &rarr; UI palsu tak terbantah</td>
+    <td>Dia &ge; 1.6</td>
+    <td>fix memunculkan toast, tapi tidak menjawab <b>berapa lama</b> toast terbaca dan apakah ia bertahan saat ada UI
+        lain muncul bersamaan.</td></tr>
+</table>
+<p class="n">Sumber: <a href="https://www.diabrowser.com/security/bulletins">diabrowser.com/security/bulletins</a>.
+Aturan emas: <b>fix dibuat per-PERMUKAAN, cacatnya per-INVARIAN</b> &rarr; tebakan pertama selalu permukaan tetangga
+yang tidak ikut dipaku.</p>
+
+<h2>Arm</h2>
+<table>
+<tr><th>#</th><th>Permukaan yang dibaca</th><th>Predikat</th><th>Tier</th></tr>
+<tr><td><a href="01-sametab-permission-port.html">01</a></td><td>prompt izin + bilah URL (tab yang sama)</td>
+    <td>port 1:1 dari PoC iOS-Chrome: prompt/bilah menyebut google.com saat navigasi menggantung</td><td>T1 transfer platform</td></tr>
+<tr><td><a href="02-customwin-permission.html">02</a></td><td>prompt izin di jendela custom-size</td>
+    <td>jendela tanpa origin yang bisa membantah, tapi tetap boleh meminta izin</td><td>T2</td></tr>
+<tr><td><a href="03-pending-vs-blankpin.html">03</a></td><td>bilah URL jendela custom-size</td>
+    <td>pin <code>about:blank</code> berlaku untuk commit &mdash; berlaku juga untuk <i>pending</i>?</td><td>T2 patch-probe</td></tr>
+<tr><td><a href="04-jsdialog-origin.html">04</a></td><td>baris atribusi dialog JS</td>
+    <td>dialog menyebut host yang menggantung, bukan pemanggilnya</td><td>T2</td></tr>
+<tr><td><a href="05-lock-pageinfo.html">05</a></td><td>chip gembok + bubble info-situs</td>
+    <td>klaim &quot;sambungan aman&quot; untuk koneksi yang belum pernah terbentuk</td><td>T2</td></tr>
+<tr><td><a href="06-download-attribution.html">06</a></td><td>daftar unduhan (&quot;downloaded from&quot;)</td>
+    <td>atribusi salah yang <b>bertahan</b> setelah jendelanya tutup</td><td>T2</td></tr>
+<tr><td><a href="07-fullscreen-notice.html">07</a></td><td>toast fullscreen</td>
+    <td>dwell toast menyusut/hilang saat UI lain muncul bersamaan (blind-the-guard)</td><td>T3</td></tr>
+<tr><td><a href="08-tts-crossnav.html">08</a></td><td>audio Web Speech</td>
+    <td>suara origin A masih jalan saat browser menampilkan B, tanpa penyebut siapa pun (uji fork patch-lag)</td><td>T2</td></tr>
+<tr><td><a href="09-mediasession-nowplaying.html">09</a></td><td>Now Playing macOS / Control Center</td>
+    <td>atribusi keluar dari browser, ke tempat yang tidak punya bilah URL sama sekali</td><td>T2/T3</td></tr>
+<tr><td><a href="10-dia-ai-context.html">10</a></td><td><b>khas Dia</b>: chip konteks sidebar AI / bilah-URL-sekaligus-prompt / Memory</td>
+    <td>asisten menyebut halaman ini google.com sambil membaca isi penyerang</td><td>T3 &#127820; turunan-sendiri</td></tr>
+<tr><td><a href="00-control.html">00</a></td><td colspan="3"><b>KONTROL</b> &mdash; port hidup, commit datang, dokumen tertimpa.
+    Kalau arm ini juga &quot;berhasil&quot;, pembacaanmu salah dan temuan dibatalkan.</td></tr>
+</table>
+
+<h2>Cara menjalankan</h2>
+<ol>
+<li>Buka di <b>Dia (macOS)</b>. Catat versi persisnya (Dia &rarr; About) &mdash; tanpa versi, hasilnya tidak bisa dipakai.</li>
+<li>Jalankan <b>00-control.html</b> dulu. Kalau kontrol ikut &quot;berhasil&quot;, berhenti: setup-nya yang salah.</li>
+<li>Baru jalankan arm-nya satu per satu. Satu arm = satu variabel.</li>
+<li>Knob port: <code>:9090</code> harus <b>di-DROP</b> (paket dibuang &rarr; menggantung lama). Kalau muncul error page
+    seketika, port itu <b>me-REFUSE</b> &rarr; ganti <code>:8443</code>/<code>:8080</code>/<code>:82</code>.
+    Salah pilih di sini = vonis &quot;tidak rentan&quot; yang palsu.</li>
+<li>Bukti = <b>screenshot bilah/permukaan</b> berdampingan dengan panel origin asli (video untuk 07/08/09).</li>
+<li>Hasil <b>negatif juga dicatat</b> (arm + versi + tanggal). Sel mati hari ini adalah baseline untuk rilis berikutnya.</li>
+</ol>
+
+<h2>Melaporkan</h2>
+<p>Program: <b>HackerOne &mdash; <a href="https://hackerone.com/bcny">hackerone.com/bcny</a></b> (The Browser Company / Dia).
+Baca policy &amp; scope-nya sebelum submit. Kelas = <i>origin/UI spoofing</i> (CWE-451/290). Bingkai laporannya sebagai
+<b>&quot;permukaan X menyebut origin A sementara dokumen yang meminta adalah B&quot;</b>, sertakan lengan kontrol, versi Dia,
+dan perilaku-aman yang diharapkan. Kalau arm-mu adalah tetangga dari CVE-2025-15032 / CVE-2025-13132, katakan itu:
+laporan <i>bypass-of-fix</i> ditriase lebih cepat.</p>
+
+<h2>Belum dikerjakan (utang riset)</h2>
+<p class="n">document-PiP (jendela selalu-di-atas) &middot; mode standalone/PWA &middot; notifikasi OS lintas-navigasi &middot;
+dropdown autofill &middot; share/print sheet &middot; skema internal <code>dia://</code> &middot; atribusi di panel split
+(kalau ada) &middot; ikon &amp; judul tab. Tiap permukaan baru melahirkan satu kolom varian baru.</p>
