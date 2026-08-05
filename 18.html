@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- MEKANISME: documentPictureInPicture.requestWindow() = jendela always-on-top TANPA permukaan origin (M2); diuji apakah ia bertahan setelah dokumen pembuatnya dinavigasikan (lifetime lintas-navigasi, S8). -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>25 - Document Picture-in-Picture tanpa label origin</title>
+<style>
+ body{font:14px/1.55 system-ui,Segoe UI,sans-serif;margin:16px;color:#111;background:#fff}
+ code{background:#f1f1f1;padding:1px 4px;word-break:break-all}
+ .box{border:1px solid #bbb;padding:10px;margin:10px 0;border-radius:4px}
+ .vuln{color:#a00000;font-weight:600}
+ .safe{color:#046b04;font-weight:600}
+ button{font:14px system-ui;padding:8px 12px;margin:4px 6px 4px 0}
+ #log{white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;max-height:220px;overflow:auto}
+</style>
+
+<h2>25 - Document Picture-in-Picture: jendela mengambang tanpa label origin</h2>
+
+<div class="box">
+ <div>location.href sebenarnya: <code id="href"></code></div>
+ <div>Dukungan Document PiP: <code id="sup"></code></div>
+ <div class="vuln">RENTAN: jendela PiP tetap mengambang di atas jendela lain SETELAH opener dinavigasikan, isinya sepenuhnya HTML halaman, dan tidak ada satu pun permukaan browser yang menyebut origin pembuatnya (M2). Pencacah "hidup" akan MEMBEKU saat dokumen pembuat mati - jendela yang masih ada dengan pencacah beku = jendela tanpa origin yang hidup lebih lama dari origin-nya.</div>
+ <div class="safe">AMAN: PiP ikut tertutup saat opener dinavigasikan, ATAU browser menampilkan label origin pada jendela PiP.</div>
+</div>
+
+<div class="box">Urutan: (1) buka PiP - (2) navigasikan opener (ke <code>about:blank</code>, offline; tekan Back untuk kembali) - (3) tangkap layar: PiP masih ada? pencacahnya beku di detik berapa? Catat browser + versi + OS.</div>
+
+<button onclick="pip()">1. Buka jendela Document PiP</button>
+<button onclick="nav()">2. Navigasikan opener ke about:blank (uji umur)</button>
+<button onclick="ctl()">KONTROL: popup biasa (mekanisme chrome-less dihilangkan)</button>
+<button onclick="shut()">Tutup PiP / popup</button>
+
+<div class="box" id="log"></div>
+
+<script>
+var pw=null,cw=null,ok=('documentPictureInPicture' in window);
+document.getElementById('href').textContent=location.href;
+document.getElementById('sup').textContent=ok?'ada (documentPictureInPicture)':'TIDAK DIDUKUNG DI BROWSER INI - butuh Chrome/Edge desktop 116+ pada konteks aman';
+function log(s){var d=document.getElementById('log');d.textContent+=s+'\n';d.scrollTop=d.scrollHeight;}
+function body(w,judul){return '<h3 style="color:#a00;font:700 15px system-ui">'+judul+'</h3>'+
+  '<div style="font:13px system-ui">location.href jendela ini: <code>'+w.location.href+'</code></div>'+
+  '<div style="font:13px system-ui">dibuat oleh: <code>'+location.href+'</code></div>'+
+  '<div style="font:700 15px ui-monospace,monospace" id="alive">hidup 0.0 detik</div>';}
+function clock(w){var t=Date.now();setInterval(function(){try{var n=w.document.getElementById('alive');
+  if(n)n.textContent='hidup '+((Date.now()-t)/1000).toFixed(1)+' detik';}catch(e){}},100);}
+function pip(){
+  if(!ok){log('Document Picture-in-Picture tidak didukung di browser ini - tidak ada yang bisa diuji di berkas ini.');return;}
+  documentPictureInPicture.requestWindow({width:430,height:230}).then(function(w){
+    pw=w;w.document.body.style.font='14px system-ui';
+    w.document.body.innerHTML=body(w,'DEMO RISET - jendela ini tidak punya label origin');clock(w);
+    log('PiP terbuka. Lanjut ke tombol 2.');
+  })['catch'](function(e){log('PiP gagal: '+e.name+' - '+e.message);});
+}
+function ctl(){
+  cw=window.open('','','width=430,height=230');
+  if(!cw){log('KONTROL: popup diblokir - izinkan popup lalu ulangi');return;}
+  cw.document.write('<!doctype html><meta charset="utf-8"><title>kontrol</title><body>');
+  cw.document.body.innerHTML=body(cw,'KONTROL - jendela biasa, permukaan URL-nya tetap ada');clock(cw);
+  log('KONTROL dibuka: jendela ini mempertahankan permukaan origin miliknya.');
+}
+function nav(){log('menavigasikan opener dalam 1 detik - tekan Back untuk kembali');setTimeout(function(){location.assign('about:blank');},1000);}
+function shut(){try{if(pw&&!pw.closed)pw.close();if(cw&&!cw.closed)cw.close();log('ditutup');}catch(e){log('gagal menutup: '+e.name);}}
+</script>

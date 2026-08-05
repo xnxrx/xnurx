@@ -1,0 +1,71 @@
+<!doctype html>
+<!-- MEKANISME: fullscreen menghapus seluruh chrome; yang diukur BUKAN kemiripan bar palsu (ember F, nilai nol) melainkan DWELL notice fullscreen (S9) dalam milidetik terhadap lengan kontrol. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>22 - dwell notice fullscreen</title>
+<style>
+ body{font:14px/1.55 system-ui,Segoe UI,sans-serif;margin:16px;color:#111;background:#fff}
+ code{background:#f1f1f1;padding:1px 4px;word-break:break-all}
+ .box{border:1px solid #bbb;padding:10px;margin:10px 0;border-radius:4px}
+ .vuln{color:#a00000;font-weight:600}
+ .safe{color:#046b04;font-weight:600}
+ button{font:14px system-ui;padding:8px 12px;margin:4px 6px 4px 0}
+ #fakebar{display:none;position:fixed;top:0;left:0;right:0;z-index:9;background:#eceff1;border-bottom:1px solid #b0bec5;font:13px system-ui;padding:7px 10px}
+ #wm{color:#a00000;font-weight:700}
+ #ms{position:fixed;right:14px;bottom:14px;z-index:10;font:700 42px ui-monospace,Consolas,monospace;background:#000;color:#0f0;padding:4px 12px;border-radius:4px}
+ #log{white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;max-height:230px;overflow:auto}
+</style>
+
+<div id="fakebar">&#128274; https://google.com &nbsp;&nbsp; <span id="wm">[DEMO RISET - baris ini DIGAMBAR OLEH HALAMAN, bukan oleh browser]</span></div>
+
+<h2>22 - fullscreen + chrome palsu (watermark DEMO), tetapi yang diukur adalah NOTICE-nya</h2>
+
+<div class="box">
+ <div>location.href sebenarnya: <code id="href"></code></div>
+ <div class="vuln">RENTAN: fullscreen aktif (chrome browser hilang) DAN notice/toast fullscreen tidak pernah teramati, atau dwell-nya jauh lebih pendek daripada lengan KONTROL pada browser+versi yang sama - sehingga tidak tersisa satu pun permukaan origin milik browser.</div>
+ <div class="safe">AMAN: notice muncul, menyebut origin/state, dan dwell-nya sama dengan lengan KONTROL (mis. ~3000-4000 ms di Firefox; transien tapi terbaca di Chrome).</div>
+</div>
+
+<div class="box">
+ <b>Bug-nya ada di NOTICE (permukaan S9), BUKAN pada gambar bar palsu.</b> Halaman memang boleh menggambar apa saja di viewport-nya - itu kerajinan delivery bernilai nol dan tidak boleh dilaporkan. Yang dilaporkan hanyalah angka dwell yang terukur.
+</div>
+
+<div class="box">
+ <b>CARA UKUR (satu tangkapan layar tidak cukup untuk dwell - rekam layar):</b><br>
+ 1. Mulai rekam layar / screenshot beruntun.<br>
+ 2. Tekan tombol lengan VEKTOR. Pencacah ms hijau di pojok kanan-bawah di-nol-kan tepat pada event <code>fullscreenchange</code>.<br>
+ 3. Pada rekaman, baca angka pencacah di frame PERTAMA notice terlihat dan di frame TERAKHIR notice terlihat. <b>dwell = selisih keduanya.</b><br>
+ 4. Ulangi dengan lengan KONTROL untuk baseline. Catat browser + versi + OS.<br>
+ 5. Keluar dengan Esc kapan saja.
+</div>
+
+<button onclick="go(1)">Jalankan lengan VEKTOR (bar palsu digambar)</button>
+<button onclick="go(0)">KONTROL: fullscreen polos (mekanisme dihilangkan)</button>
+
+<div id="ms">--</div>
+<div class="box" id="log"></div>
+
+<script>
+var el=document.documentElement,t0=0,raf=0;
+document.getElementById('href').textContent=location.href;
+function log(s){var d=document.getElementById('log');d.textContent+=s+'\n';d.scrollTop=d.scrollHeight;}
+function fsOn(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
+function tick(){document.getElementById('ms').textContent=(performance.now()-t0).toFixed(0)+' ms';raf=requestAnimationFrame(tick);}
+function mark(x){setTimeout(function(){if(fsOn())log('penanda t='+x+' ms - notice masih terlihat di rekaman? (ya/tidak)');},x);}
+function change(){
+  if(fsOn()){t0=performance.now();log('MASUK fullscreen  t=0  ('+new Date().toISOString()+')');tick();
+    var m=[150,400,800,1500,2500,4000];for(var i=0;i<m.length;i++)mark(m[i]);}
+  else{if(raf)cancelAnimationFrame(raf);log('KELUAR fullscreen  t='+(performance.now()-t0).toFixed(0)+' ms');
+    document.getElementById('fakebar').style.display='none';}
+}
+document.addEventListener('fullscreenchange',change);
+document.addEventListener('webkitfullscreenchange',change);
+function go(fake){
+  var r=el.requestFullscreen||el.webkitRequestFullscreen;
+  if(!r||!window.performance||!window.requestAnimationFrame){log('tidak didukung di browser ini');return;}
+  document.getElementById('fakebar').style.display=fake?'block':'none';
+  log(fake?'--- lengan VEKTOR (bar palsu digambar) ---':'--- lengan KONTROL (tanpa bar palsu) ---');
+  var p;try{p=r.call(el);}catch(e){log('fullscreen ditolak: '+e.name);return;}
+  if(p&&p['catch'])p['catch'](function(e){log('fullscreen ditolak: '+e.name+' - butuh gestur pengguna');});
+}
+</script>

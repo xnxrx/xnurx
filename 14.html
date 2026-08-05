@@ -1,0 +1,89 @@
+<!-- MEKANISME: metadata MediaSession dirender di permukaan OS (kartu now-playing / lock screen) yang sengaja dipisah dari tab; kalau sesi media tak diakhiri saat dokumen pembuatnya pergi, kartu OS tetap membawa judul milik dokumen yang sudah tiada. -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>21 — MediaSession: kartu OS bertahan setelah dokumennya pergi</title>
+<style>
+  *{box-sizing:border-box}
+  body{font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
+  .p{border:2px solid #d33;border-radius:12px;padding:.9rem 1rem;max-width:720px;margin:0 auto}
+  h2{font-size:1.08rem;margin:.1rem 0 .6rem}
+  .kv{display:grid;grid-template-columns:10rem 1fr;gap:.28rem .7rem;font-size:.9rem}
+  .kv b{color:#555;font-weight:600}
+  code{background:#f2f2f2;padding:.08rem .32rem;border-radius:4px;word-break:break-all}
+  .vuln{color:#d33;font-weight:700}.sec{color:#0a7;font-weight:700}
+  button{font:inherit;padding:.5rem .9rem;border:1px solid #888;border-radius:9px;background:#fafafa;cursor:pointer;margin:.15rem .3rem .15rem 0}
+  button.k{background:#d33;color:#fff;border-color:#b22}
+  pre{font:12.5px/1.5 ui-monospace,Consolas,monospace;background:#0d1117;color:#c9d1d9;border-radius:9px;padding:.6rem .7rem;white-space:pre-wrap;min-height:4.5rem;margin:.7rem 0 0}
+  .n{font-size:.82rem;color:#777}
+  @media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}code{background:#2a2a2a}}
+</style>
+</head>
+<body>
+<div class="p">
+  <h2>21 — MediaSession: kartu OS / lock-screen bertahan setelah dokumennya pergi</h2>
+
+  <div class="kv">
+    <b>URL asli halaman</b><span class="sec" id="real">…</span>
+    <b>Tujuan navigasi</b><span><code>https://example.com/</code> (2,5 detik setelah nada mulai)</span>
+    <b>Audio</b><span>nada 220 Hz nyaris senyap yang dibangkitkan AudioContext — tanpa berkas audio</span>
+    <b>Dukungan API</b><span id="sup">…</span>
+    <b>Tempat melihat</b><span>flyout media Windows / Control Center macOS / notifikasi media Android / lock screen</span>
+  </div>
+
+  <p style="margin:.8rem 0 .2rem">
+    <button class="k" id="vulnBtn">Jalankan: pasang metadata → navigasi</button>
+    <button id="ctlBtn">KONTROL: sama, tapi metadata dilepas saat pagehide</button>
+    <button id="stopBtn">Stop / bersihkan</button>
+  </p>
+
+  <p class="n" style="margin:.2rem 0 0">
+    <b>VULNERABLE:</b> kartu OS masih menulis judul <code>DEMO PoC …</code> milik halaman ini padahal tab sudah
+    berada di <code>example.com</code> — atribusi media menunjuk dokumen yang sudah tidak ada.<br>
+    <b>SECURE:</b> kartu OS hilang (atau berganti mengikuti dokumen baru) segera setelah navigasi commit.<br>
+    <b>Baseline aman</b> = tombol KONTROL: mekanisme dihapus lewat
+    <code>pagehide → metadata=null, playbackState="none"</code>. Bandingkan kartu OS pada kedua jalur.
+  </p>
+
+  <pre id="log"></pre>
+  <p class="n">Metadata sengaja menyebut dirinya DEMO dan mencantumkan asal sebenarnya; tidak ada artwork,
+     tidak meniru layanan mana pun.</p>
+</div>
+
+<script>
+var DEST = "https://example.com/", ctx = null, osc = null, el = null;
+function $(i){ return document.getElementById(i); }
+function log(s){ $("log").textContent += s + "\n"; }
+function AC(){ return window.AudioContext || window.webkitAudioContext; }
+function ok(){ return !!(AC() && navigator.mediaSession && window.MediaMetadata); }
+function stopAll(){
+  try { if (osc) osc.stop(); if (el) el.pause(); if (ctx) ctx.close(); } catch (e) {}
+  osc = null; el = null; ctx = null;
+  if (navigator.mediaSession){ navigator.mediaSession.metadata = null; navigator.mediaSession.playbackState = "none"; }
+  log("dibersihkan: audio berhenti, metadata dilepas.");
+}
+function run(bind){
+  if (!ok()){ log("tidak didukung di browser ini (AudioContext / MediaSession / MediaMetadata)"); return; }
+  ctx = new (AC())(); osc = ctx.createOscillator();
+  var g = ctx.createGain(); g.gain.value = 0.004; osc.frequency.value = 220;
+  var out = ctx.createMediaStreamDestination(); osc.connect(g); g.connect(out); osc.start();
+  el = document.createElement("audio"); el.srcObject = out.stream; el.loop = true; el.style.display = "none";
+  document.body.appendChild(el);
+  var pr = el.play(); if (pr && pr["catch"]) pr["catch"](function(e){ log("pemutaran ditolak: " + e.name + " — klik tombol sekali lagi"); });
+  navigator.mediaSession.metadata = new MediaMetadata({ title: "DEMO PoC - kartu ini dibuat halaman lain",
+    artist: "riset spoofing (DEMO)", album: "asal sebenarnya: " + location.href });
+  navigator.mediaSession.playbackState = "playing";
+  if (bind){ window.addEventListener("pagehide", stopAll); log("[control] pagehide -> metadata dilepas (mekanisme dihapus)"); }
+  else       log("[vuln] sesi media tidak diikat ke lifecycle dokumen");
+  setTimeout(function(){ log("navigasi ke " + DEST + " sekarang"); location.href = DEST; }, 2500);
+}
+$("real").textContent = location.href;
+$("sup").textContent = ok() ? "AudioContext + MediaSession tersedia" : "tidak didukung di browser ini";
+$("vulnBtn").onclick = function(){ run(false); };
+$("ctlBtn").onclick  = function(){ run(true); };
+$("stopBtn").onclick = stopAll;
+</script>
+</body>
+</html>

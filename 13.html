@@ -1,0 +1,83 @@
+<!-- MEKANISME: utterance Web Speech dibuat origin A lalu halaman bernavigasi pergi; kalau audio tak diikat ke lifecycle dokumen, suara terus berbunyi di atas dokumen B dan didengar sebagai milik B. -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>20 — Web Speech: audio hidup lebih lama dari dokumennya</title>
+<style>
+  *{box-sizing:border-box}
+  body{font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
+  .p{border:2px solid #d33;border-radius:12px;padding:.9rem 1rem;max-width:720px;margin:0 auto}
+  h2{font-size:1.08rem;margin:.1rem 0 .6rem}
+  .kv{display:grid;grid-template-columns:10rem 1fr;gap:.28rem .7rem;font-size:.9rem}
+  .kv b{color:#555;font-weight:600}
+  code{background:#f2f2f2;padding:.08rem .32rem;border-radius:4px;word-break:break-all}
+  .vuln{color:#d33;font-weight:700}.sec{color:#0a7;font-weight:700}
+  button{font:inherit;padding:.5rem .9rem;border:1px solid #888;border-radius:9px;background:#fafafa;cursor:pointer;margin:.15rem .3rem .15rem 0}
+  button.k{background:#d33;color:#fff;border-color:#b22}
+  pre{font:12.5px/1.5 ui-monospace,Consolas,monospace;background:#0d1117;color:#c9d1d9;border-radius:9px;padding:.6rem .7rem;white-space:pre-wrap;min-height:4.5rem;margin:.7rem 0 0}
+  .n{font-size:.82rem;color:#777}
+  @media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}code{background:#2a2a2a}}
+</style>
+</head>
+<body>
+<div class="p">
+  <h2>20 — Web Speech: apakah audio hidup lebih lama dari dokumen pembuatnya</h2>
+
+  <div class="kv">
+    <b>URL asli halaman</b><span class="sec" id="real">…</span>
+    <b>Tujuan navigasi</b><span><code>https://example.com/</code> (3 detik setelah bicara)</span>
+    <b>Dukungan API</b><span id="sup">…</span>
+    <b>Cara menyimak</b><span>naikkan volume, klik tombol merah, <b>dengarkan ±10 detik</b> setelah halaman berpindah</span>
+  </div>
+
+  <p style="margin:.8rem 0 .2rem">
+    <button class="k" id="vulnBtn">Jalankan: bicara → navigasi (tanpa ikatan lifecycle)</button>
+    <button id="ctlBtn">KONTROL: sama, tapi batal otomatis saat pagehide</button>
+    <button id="cancelBtn">Batal / hentikan suara</button>
+  </p>
+
+  <p class="n" style="margin:.2rem 0 0">
+    <b>VULNERABLE:</b> suara masih terdengar setelah address bar menunjukkan <code>example.com</code> —
+    audio milik halaman ini di-atribusi ke dokumen lain.<br>
+    <b>SECURE:</b> suara berhenti tepat saat navigasi commit; tak ada satu kata pun terdengar di
+    <code>example.com</code>.<br>
+    <b>Baseline aman</b> = tombol KONTROL: mekanisme (ketiadaan ikatan lifecycle) dihapus dengan
+    <code>pagehide → speechSynthesis.cancel()</code>; itulah perilaku yang seharusnya bawaan browser.
+  </p>
+
+  <pre id="log"></pre>
+  <p class="n">Kalimat yang diucapkan hanya menyatakan dirinya demo riset; tidak meniru organisasi mana pun
+     dan tidak meminta apa pun. Setelah berpindah, hentikan dengan menutup tab.</p>
+</div>
+
+<script>
+var LINE = "Ini demonstrasi riset keamanan. Suara ini dibuat oleh halaman sebelumnya, bukan oleh situs yang sekarang terlihat di layar. ";
+var DEST = "https://example.com/", timer = null;
+function $(i){ return document.getElementById(i); }
+function log(s){ $("log").textContent += s + "\n"; }
+function ok(){ return !!(window.speechSynthesis && window.SpeechSynthesisUtterance); }
+function stopAll(){ if (timer) { clearInterval(timer); timer = null; } if (ok()) speechSynthesis.cancel(); log("dibatalkan / suara dihentikan."); }
+function run(bind){
+  if (!ok()){ log("tidak didukung di browser ini (Web Speech API)"); return; }
+  speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(LINE + LINE + LINE + LINE);
+  u.rate = 0.95; speechSynthesis.speak(u);
+  if (bind){ window.addEventListener("pagehide", function(){ speechSynthesis.cancel(); });
+             log("[control] pagehide -> speechSynthesis.cancel() dipasang (mekanisme dihapus)"); }
+  else       log("[vuln] tidak ada ikatan lifecycle; audio dibiarkan apa adanya");
+  var n = 3;
+  timer = setInterval(function(){
+    if (n <= 0){ clearInterval(timer); timer = null; log("navigasi ke " + DEST + " sekarang"); location.href = DEST; return; }
+    log("navigasi dalam " + n + " detik ..."); n--;
+  }, 1000);
+}
+$("real").textContent = location.href;
+$("sup").textContent = ok() ? "Web Speech tersedia" : "tidak didukung di browser ini";
+$("vulnBtn").onclick = function(){ run(false); };
+$("ctlBtn").onclick  = function(){ run(true); };
+$("cancelBtn").onclick = stopAll;
+</script>
+</body>
+</html>
