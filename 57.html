@@ -1,119 +1,26 @@
-<!-- UXSS: window.name sebagai identitas yang bertahan — nama di-set di dokumen #1, jendela dinavigasi, lalu SELURUH pelapor dibaca ulang di dokumen #2; hanya satu pelapor yang masih milik dokumen lama. -->
-<!doctype html>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>34 — window.name: pelapor yang hidup lebih lama dari dokumennya</title>
-<style>
-body{font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:16px;background:#0e1116;color:#dfe6ef}
-h2{margin:0 0 12px;font-size:19px;line-height:1.3}
-section{border:1px solid #2a3240;border-radius:8px;padding:10px 12px;margin:10px 0;background:#151a22}
-b.tag{display:inline-block;min-width:74px;color:#7fd1ff}
-button{font:13px system-ui;padding:8px 12px;margin:4px 6px 4px 0;border:1px solid #3a4658;background:#1e2733;color:#e8eef6;border-radius:6px;cursor:pointer}
-button.ctl{border-color:#3f7a55;color:#bfe6c8}
-code{font-family:ui-monospace,Consolas,monospace;color:#ffd79a;word-break:break-all}
-table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12.5px}
-td,th{border:1px solid #2a3240;padding:4px 7px;text-align:left;vertical-align:top;font-family:ui-monospace,Consolas,monospace;word-break:break-all}
-th{color:#7fd1ff;font-family:system-ui}
-caption{text-align:left;color:#ffd79a;padding:4px 0;font-family:system-ui}
-.small{color:#93a2b5;font-size:12.5px}
-.warn{color:#ffb37a}
-.ok{color:#bfe6c8}
-</style>
-
-<div id="app">
-<h2>34 — window.name SEBAGAI IDENTITAS YANG BERTAHAN: satu pelapor yang masih milik dokumen lama</h2>
-
-<section><b class="tag">PAGAR</b> Semua pelapor identitas seharusnya <b>mati bersama dokumennya</b>: begitu jendela dinavigasi, <code>location.href</code>, <code>document.URL</code>, <code>baseURI</code>, <code>referrer</code>, entri <code>performance</code>, dan URL di error-stack semuanya berganti mengikuti dokumen baru. <code>window.name</code> tidak: ia properti <b>browsing context</b> (jendelanya), bukan dokumen — maka ia menyeberangi navigasi. Justru karena itu Chrome dan Firefox sejak 2019–2021 <b>mengosongkan</b> <code>window.name</code> pada navigasi top-level yang berpindah situs; sisa umurnya yang sah tinggal navigasi <b>same-origin</b>, dan itulah yang diuji di sini.</section>
-
-<section><b class="tag">CELAH</b> Kelas bug “resource-lifetime melewati navigasi” lahir persis dari asimetri ini: sebuah kapabilitas/atribusi ditetapkan oleh dokumen A, lalu tetap hidup ketika dokumen B menempati jendela yang sama — dan permukaan yang menampilkannya (atau kode yang membacanya) mengira ia milik B. <code>window.name</code> adalah bentuk paling murni dan paling mudah diamati dari asimetri itu, karena ia bisa dibaca dari JavaScript biasa. Yang dibuktikan berkas ini bukan “name bertahan” (itu spec), melainkan <b>tabel selisihnya</b>: berapa banyak pelapor yang berganti, dan tepatnya mana yang tidak.</section>
-
-<section><b class="tag">INDUK</b>
-<div><code>location.href</code> halaman induk: <code id="href"></code></div>
-<div><code>window.origin</code> halaman induk: <code id="orig"></code></div>
-<div><code>window.name</code> halaman induk: <code id="nm"></code></div>
-</section>
-
-<section><b class="tag">UJI</b>
-<button onclick="run()">Jalankan — buka jendela, set nama, lalu navigasikan jendela itu ke origin sendiri</button>
-<button class="ctl" onclick="control()">KONTROL — jendela tanpa nama, langsung dinavigasi</button>
-<div class="small">Urutan: (1) jendela baru berisi <code>about:blank</code> yang ditulisi → matriks pelapor dokumen&nbsp;#1 · (2) dokumen&nbsp;#1 menetapkan <code>window.name</code> lalu menavigasi jendelanya ke <b>URL berkas ini</b> · (3) dokumen&nbsp;#2 (berkas ini sendiri) mengenali nama yang bertahan dan mencetak matriksnya. Izinkan popup.</div>
-</section>
-
-<div id="out"></div>
-
-<section><b class="tag">ORACLE</b>
-<div><b>SEHARUSNYA (spec):</b> <code>window.name</code> dokumen&nbsp;#2 = <code>IDENTITAS-BERTAHAN-34</code> (sama dengan dokumen&nbsp;#1), sementara <b>seluruh</b> pelapor berbasis dokumen berganti dari <code>about:blank</code> ke URL berkas ini.</div>
-<div><b>SEAM (temuan) bila:</b> ada pelapor <b>lain</b> yang ikut bertahan padahal dokumennya sudah diganti (mis. <code>referrer</code>/<code>baseURI</code>/entri <code>performance</code> masih menyebut dokumen lama), atau sebaliknya <code>window.name</code> hilang pada navigasi <b>same-origin</b> (itu penyimpangan, walau arahnya lebih aman).</div>
-<div class="ok"><b>SESUAI SPEC</b> adalah hasil yang sah. Pertanyaan lanjutan yang <b>tidak bisa</b> dijawab satu berkas: apakah fork/browser mobile masih membawa <code>window.name</code> melewati hop <b>lintas-origin</b> top-level? Kalau iya, kanal identitas itu hidup lebih lama dari dokumennya — jembatan langsung ke kelas cross-navigation resource-lifetime pada address-bar spoofing.</div>
-</section>
-
-<section><b class="tag">KONTROL</b> Dokumen&nbsp;#2 dinavigasi ke <b>URL yang sama persis</b> dengan halaman induk. URL-nya identik, tetapi halaman berperilaku berbeda — cabang “mode anak” dipilih <b>semata-mata</b> oleh <code>window.name</code> yang bertahan, bukan oleh URL. Membuka berkas ini langsung selalu memberi mode induk. Tombol hijau menjalankan urutan yang sama <b>tanpa</b> menetapkan nama: dokumen&nbsp;#2 harus muncul sebagai halaman induk biasa.</section>
-
-<section class="small"><b class="tag">CATATAN</b> Di <code>file://</code> sebagian browser memakai origin buram, sehingga laporan balik dari popup bisa tertulis <code>DILARANG</code>; matriks tetap tercetak di dalam popup itu sendiri. Untuk hasil sebenarnya buka <code>https://xnxrx.github.io/xnurx/34.html</code>. Tanpa jaringan, tanpa formulir; cookie hanya milik origin sendiri, ditampilkan terpotong 40 karakter.</section>
-</div>
-
+<!-- 57 - popup lahir dari iframe ber-sandbox (origin opaque)   [UXSS popup | U1=popup U2=pewarisan origin opaque | T3 | macOS: Dia/Arc/Safari/Chrome]
+     GERBANG YANG DISERANG : origin opaque sandbox + allow-popups-to-escape-sandbox (gerbang paling sering longgar)
+     DI MANA PALING MUNGKIN TEMBUS : fork yang tertinggal patch (Dia/Arc/Brave/Vivaldi/Opera/Samsung),
+                 WebView & in-app browser, build lama, atau konteks ber-sandbox/ekstensi. Di Chrome/Safari
+                 terbaru yang sehat, jawaban BLOCKED adalah jawaban yang BENAR - catat versinya, jangan dipaksa.
+     MEKANISME : yang membuka popup bukan halaman ini melainkan iframe ber-sandbox TANPA allow-same-origin, jadi pembuatnya ber-origin opaque. Yang diuji: apa yang diwarisi popup itu, dan apakah opaque tetap opaque setelah ia berpindah ke situs korban.
+     PREDIKAT  : popup keturunan opaque tetap bisa dibaca oleh pembuatnya.
+     AMAN      : akses lintas-origin ditolak SecurityError; baris bukti berkata BLOCKED.
+     ANTI-FP   : vonis HANYA dari pembacaan isi korban (judul/origin yang dilaporkan sendiri).
+                 "berhasil menulis" ke dokumen kosong awal BUKAN bukti - itu memang dokumen kita.
+                 Kontrol batch = 64.html; kalau 64 ikut CROSSED, semua hasil batch ini batal.
+     ETIKA     : browser & mesin sendiri. Korban = example.com (IANA reserved). Nol form, nol kredensial,
+                 nol fetch/beacon, nol resource luar. Berhenti di predikat -> screenshot -> lapor VRP. -->
+<meta charset="utf-8"><title>57 popup lahir dari iframe ber-sandbox (origin opaque)</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var TAG='IDENTITAS-BERTAHAN-34',store={};
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function table(rows,cap){var h='<table><caption>'+esc(cap)+'</caption><tr><th>pelapor</th><th>nilai</th></tr>',i;for(i=0;i<rows.length;i++)h+='<tr><td>'+esc(rows[i][0])+'</td><td>'+esc(rows[i][1])+'</td></tr>';return h+'</table>';}
-function sty(){return '<style>body{font:13px system-ui;background:#0e1116;color:#dfe6ef;padding:12px}h3{color:#7fd1ff}table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12px}td,th{border:1px solid #2a3240;padding:4px 6px;text-align:left;vertical-align:top;font-family:ui-monospace,Consolas,monospace;word-break:break-all}th{color:#7fd1ff;font-family:system-ui}caption{text-align:left;color:#ffd79a;padding:4px 0;font-family:system-ui}.bad{color:#ffb37a}</style>';}
-function probe(){var r=[],D=document,W=window;
- function t(k,f){var v;try{v=f();}catch(e){v='DILARANG: '+e.name;}if(v===undefined||v===null||v==='')v='(kosong)';r.push([k,String(v)]);}
- t('window.name',function(){return W.name;});
- t('location.href',function(){return location.href;});
- t('window.origin',function(){return W.origin===undefined?'tidak didukung':W.origin;});
- t('document.URL',function(){return D.URL;});
- t('document.baseURI',function(){return D.baseURI;});
- t('document.domain',function(){return D.domain;});
- t('document.referrer',function(){return D.referrer;});
- t('location.ancestorOrigins',function(){var a=location.ancestorOrigins,s=[],i;if(!a)return 'tidak didukung (Gecko)';for(i=0;i<a.length;i++)s.push(i+':'+a[i]);return s.length?s.join(' | '):'[0 entri] (dokumen puncak)';});
- t('URL di error stack',function(){try{null.x;}catch(e){var m=String(e.stack||'').match(/(?:file|https?|blob|data|about):[^\s)]+/);return m?m[0]:'(tak ada URL di stack)';}});
- t('nama entri performance',function(){if(!W.performance||!performance.getEntriesByType)return 'tidak didukung';var e=performance.getEntriesByType('navigation')[0]||performance.getEntriesByType('resource')[0];return e?e.name:'(tak ada entri)';});
- t('history.length',function(){return String(history.length);});
- t('kunci storage',function(){localStorage.setItem('u34','1');localStorage.removeItem('u34');return 'localStorage terbuka (kunci = origin dokumen)';});
- t('scope service worker',function(){if(!navigator.serviceWorker)return 'tidak didukung';return navigator.serviceWorker.controller?navigator.serviceWorker.controller.scriptURL:'(tak ada controller)';});
- t('document.cookie',function(){var c=D.cookie;return c?('['+c.length+' char] '+c.substring(0,40)):'(kosong)';});
- t('import.meta.url',function(){return 'tidak didukung (skrip klasik, bukan modul)';});
- return r;}
-function boot(url,setname){var d=document;
- if(setname)window.name='IDENTITAS-BERTAHAN-34';
- d.write(sty()+'<h3>dokumen #1 — about:blank yang ditulisi induk'+(setname?' · window.name SUDAH di-set':' · KONTROL, nama TIDAK di-set')+'</h3>');
- d.write(table(probe(),'matriks pelapor dokumen #1 (sebelum navigasi)'));
- d.write('<p>Jendela ini akan dinavigasi ke <b>'+url.replace(/</g,'&lt;')+'</b> dalam 1,5 detik. Perhatikan: URL-nya sama persis dengan halaman induk.</p>');
- d.close();
- try{window.opener.collect(setname?'doc1':'kontrol1',probe());}catch(e){}
- setTimeout(function(){location.href=url;},1500);}
-function collect(k,rows){store[k]=rows;render();}
-function val(rows,n){var i;if(!rows)return '(belum)';for(i=0;i<rows.length;i++)if(rows[i][0]===n)return rows[i][1];return '—';}
-function render(){var keys=['A','doc1','doc2'],names=[],seen={},i,j,rs,a,b,h='';
- for(i=0;i<keys.length;i++){rs=store[keys[i]]||[];for(j=0;j<rs.length;j++)if(!seen[rs[j][0]]){seen[rs[j][0]]=1;names.push(rs[j][0]);}}
- h+='<table><caption>matriks pelapor — A = halaman induk · dok#1 = about:blank yang ditulisi · dok#2 = dokumen setelah navigasi (jendela yang SAMA)</caption><tr><th>pelapor</th><th>A (induk)</th><th>dok #1</th><th>dok #2</th><th>dok#1 → dok#2</th></tr>';
- for(i=0;i<names.length;i++){a=val(store.doc1,names[i]);b=val(store.doc2,names[i]);
-  h+='<tr><td>'+esc(names[i])+'</td>';for(j=0;j<3;j++)h+='<td>'+esc(val(store[keys[j]],names[i]))+'</td>';
-  h+='<td>'+(!store.doc2?'—':(a===b?'<b class="warn">BERTAHAN</b>':'berganti'))+'</td></tr>';}
- h+='</table>';
- if(store.kontrol1)h+=table(store.kontrol1,'KONTROL — dokumen #1 tanpa window.name');
- document.getElementById('out').innerHTML=h+verdict();}
-function verdict(){var n1=val(store.doc1,'window.name'),n2=val(store.doc2,'window.name'),u1=val(store.doc1,'location.href'),u2=val(store.doc2,'location.href'),ok;
- if(!store.doc2)return '<p class="warn"><b>VONIS:</b> menunggu dokumen #2 — klik UJI, izinkan popup, dan biarkan jendela itu bernavigasi sendiri.</p>';
- ok=(n1===n2)&&(n2.indexOf('IDENTITAS-BERTAHAN-34')===0)&&(u1!==u2);
- return '<p><b>SEHARUSNYA (spec):</b> <code>window.name</code> milik browsing context, jadi ia <b>bertahan</b> melewati navigasi same-origin; semua pelapor milik dokumen harus <b>berganti</b> (<code>'+esc(u1)+'</code> → <code>'+esc(u2)+'</code>).<br><b>TERAMATI:</b> name dok#1 = <code>'+esc(n1)+'</code> · name dok#2 = <code>'+esc(n2)+'</code>; kolom terakhir menandai tiap pelapor yang <b>BERTAHAN</b>.<br><b>VONIS:</b> '+(ok?'<span class="ok">SESUAI SPEC — bukan temuan.</span> Kalau kolom terakhir menandai <b>BERTAHAN</b> hanya pada <code>window.name</code> (dan pada baris yang memang tak terkait dokumen seperti kunci storage/cookie karena origin-nya sama), maka batas umur pelapor ditegakkan dengan benar. Setiap baris <b>BERTAHAN</b> lain yang menyebut dokumen lama = seam yang layak dipersempit dan dilaporkan.':'<span class="warn">BERSELISIH — periksa baris mana yang menyimpang, minimalkan berkas ini sampai tersisa satu mekanisme, lalu laporkan sebagai kelas cross-navigation lifetime.</span>')+'</p>';}
-function anak(){document.getElementById('app').innerHTML='<h2>34 — DOKUMEN #2 (mode anak): dokumen baru, nama lama</h2>'+
- '<p class="small">Cabang ini dipilih <b>hanya</b> karena <code>window.name</code> bertahan melewati navigasi — URL-nya identik dengan halaman induk.</p>'+
- '<p><code>location.href</code> dokumen ini: <code>'+esc(location.href)+'</code><br><code>window.name</code>: <code>'+esc(window.name)+'</code></p>'+
- table(probe(),'matriks pelapor dokumen #2 (setelah navigasi)')+
- '<p class="warn">Satu-satunya pelapor yang tidak ikut berganti adalah <code>window.name</code>: ia milik JENDELA, bukan dokumen.</p>';
- try{window.opener.collect('doc2',probe());}catch(e){document.getElementById('app').innerHTML+='<p class="warn">Tidak bisa melapor ke induk (origin buram di file://) — bandingkan kedua tabel secara manual.</p>';}}
-function run(){var w,lib;try{document.cookie='uxss34=penanda; SameSite=Lax';}catch(e){}
- store={A:probe()};w=window.open('about:blank','jendela_uji_34');
- if(!w){document.getElementById('out').innerHTML='<p class="warn">Popup diblokir — izinkan popup untuk origin ini lalu ulangi.</p>';return;}
- lib=''+esc+table+probe+sty+boot;w.document.write('<scr'+'ipt>'+lib+';boot('+JSON.stringify(location.href.split('#')[0])+',1)</scr'+'ipt>');w.document.close();render();}
-function control(){var w,lib;store={A:probe()};w=window.open('about:blank','jendela_kontrol_34');
- if(!w){document.getElementById('out').innerHTML='<p class="warn">Popup diblokir.</p>';return;}
- lib=''+esc+table+probe+sty+boot;w.document.write('<scr'+'ipt>'+lib+';boot('+JSON.stringify(location.href.split('#')[0])+',0)</scr'+'ipt>');w.document.close();render();}
-if(window.name===TAG&&window.opener){anak();}
-else{document.getElementById('href').textContent=location.href;
- document.getElementById('orig').textContent=(window.origin===undefined?'tidak didukung':window.origin);
- document.getElementById('nm').textContent=window.name||'(kosong)';
- store.A=probe();render();}
+var V='https://example.com/';var o;function say(s){o=o||document.getElementById('o');o.textContent=s;}
+function rd(w){try{var t=w.document.title;return 'CROSSED -> baca judul lintas-origin: "'+t+'"';}catch(e){return 'BLOCKED (aman): '+e.name;}}
+addEventListener('load',function(){say('REAL: '+location.origin+' | siap');});
+function go(){var f=document.createElement('iframe');
+f.setAttribute('sandbox','allow-scripts allow-popups allow-popups-to-escape-sandbox');
+f.srcdoc="<script>var w=open('"+V+"','y');setTimeout(function(){var r;try{r='CROSSED -> \''+w.document.title+'\'';}catch(e){r='BLOCKED (aman): '+e.name;}parent.postMessage(r,'*');},3000);<\/script>";
+document.body.appendChild(f);addEventListener('message',function(e){say('dari frame opaque: '+e.data);});
+say('frame ber-sandbox membuka popup...');}
 </script>

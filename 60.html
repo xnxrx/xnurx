@@ -1,192 +1,25 @@
-<!-- KONSTRUKSI: satu komit navigasi same-document diperlakukan sebagai TRANSISI ber-stempel-waktu, bukan sebagai keadaan — 22 pelapor identitas in-page di-sampel lewat MessageChannel dan yang dicatat adalah KAPAN masing-masing pertama berubah, sehingga lahir objek yang belum ada di korpus mana pun: urutan-komit ber-angka. -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>49 — Kronograf komit</title>
-<style>
-body{font:15px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
-.wrap{max-width:960px;margin:0 auto}
-h2{font-size:1.1rem;margin:.2rem 0 .7rem;line-height:1.35}
-.box{border:1px solid #ccc;border-left:5px solid #888;border-radius:8px;padding:.6rem .8rem;margin:.55rem 0}
-.box>b:first-child{display:block;font-size:.75rem;letter-spacing:.09em;color:#666;margin-bottom:.25rem}
-.q{border-left-color:#d33;background:#fff8f8}.m{border-left-color:#36c}.o{border-left-color:#e90}
-.k{border-left-color:#0a7;background:#f4fbf7}.j{border-left-color:#606}
-code{background:#f1f1f1;padding:.05rem .3rem;border-radius:4px;font-size:.9em;word-break:break-all}
-table{border-collapse:collapse;width:100%;font:12px/1.4 ui-monospace,Consolas,monospace;margin-top:.4rem}
-th,td{border:1px solid #ccc;padding:3px 6px;text-align:left;vertical-align:top}
-th{background:#f3f3f3}
-button{font:inherit;padding:.35rem .6rem;margin:.15rem .3rem .15rem 0;border:1px solid #999;border-radius:7px;background:#fafafa;cursor:pointer}
-input{font:inherit;width:4rem;padding:.2rem .3rem;border:1px solid #999;border-radius:5px}
-textarea{width:100%;height:160px;font:11px/1.4 ui-monospace,Consolas,monospace;padding:.4rem;box-sizing:border-box}
-.no{color:#a00}.ok{color:#070}.mut{color:#777;font-size:.86rem}
-#t1,#t2{position:absolute;left:-9999px;outline-style:none}
-#t1:target,#t2:target{outline-style:dashed}
-#rel{display:none}
-@media(prefers-color-scheme:dark){body{background:#161616;color:#eaeaea}.box{border-color:#3a3a3a}
- code,th{background:#2a2a2a}td,th,table{border-color:#3a3a3a}.k{background:#12211a}.q{background:#221414}
- button,input,textarea{background:#242424;color:#eee;border-color:#555}.mut,.box b{color:#9a9a9a}.no{color:#ff9a9a}.ok{color:#7ddba0}}
-</style>
-</head>
-<body><div class="wrap">
-
-<h2>49 — KRONOGRAF KOMIT: fan-out satu komit navigasi</h2>
-
-<div class="box q"><b>PERTANYAAN YANG BELUM PERNAH DIAJUKAN</b>
-Komit navigasi diperlakukan semua orang sebagai <b>satu titik waktu</b>. Berapa milidetik sebenarnya jarak antara
-pelapor identitas yang berganti <b>PALING AWAL</b> dan yang <b>PALING AKHIR</b> di dalam komit yang sama?
-<div class="mut" style="margin-top:.35rem">Seluruh korpus spoofing bertanya <i>“permukaan apa yang bisa dibohongi”</i> dan selalu butuh knob cara-hang.
-Berkas ini tidak menggantungkan navigasi apa pun dan tidak menyentuh knob itu sama sekali: ia mengganti
-<b>satuan pengamatan</b> dari keadaan menjadi transisi ber-stempel-waktu.</div>
-</div>
-
-<p class="mut">URL asli halaman ini saat dimuat: <code id="h0">…</code><br>URL saat ini: <code id="hnow">…</code></p>
-
-<div class="box m"><b>CARA UKUR</b>
-Sampler <code>MessageChannel</code> (ping-pong task, bebas clamp 4&nbsp;ms) membaca <b>22 pelapor identitas in-page</b>
-setiap putaran dan menstempel <code>performance.now()</code> saat <b>masing-masing</b> pertama kali berubah nilai.
-Nol waktu = saat fungsi pemicu <b>return</b>. Lingkup satu berkas = <b>transisi same-document saja</b>.
-<span class="mut">Karena itu <code>navigation.navigate()</code> di sini menargetkan <b>fragmen</b>: memanggilnya ke path/query lain
-<b>tanpa</b> <code>intercept()</code> adalah navigasi <b>cross-document</b> — dokumennya dibuang dan tidak ada yang
-tersisa untuk di-sampel. Pemicu ke-5 memakai URL non-fragmen justru karena <code>intercept()</code>-lah yang
-menjadikannya same-document; itu juga yang membuat kedua pemicu itu layak dibandingkan.</span>
-<p style="margin:.4rem 0 0"><b>Batas resolusi yang harus kamu baca lebih dulu:</b> pemicu bersifat sinkron, jadi setiap pelapor yang
-di-update <i>di dalam task yang sama</i> terbaca pada pembacaan pertama sesudah <code>return</code> dan Δt-nya
-praktis nol. Yang bisa dibedakan hanyalah pelapor yang menunggu <b>task/microtask berikutnya</b> — dispatch event
-(<code>popstate</code>/<code>hashchange</code>), recalc gaya, atau penyelesaian handler
-<code>navigation.intercept</code>. Kolom <code>tick_mean</code> adalah lantai resolusi itu; <b>W_komit di bawah
-<code>tick_mean</code> berarti “tidak terukur”, bukan “nol”.</b></p>
-<p style="margin:.4rem 0 0">
-Ulangi tiap pemicu <input id="reps" type="number" value="20" min="1" max="40">× &nbsp;
-<button id="b0">pushState</button><button id="b1">replaceState</button><button id="b2">fragmen</button>
-<button id="b3">navigate (fragmen)</button><button id="b4">navigate + intercept</button><button id="b5">history.back</button>
-</p>
-<div class="mut" id="st">siap. Satu klik = satu batch ber-batas 5 detik; <b>klik berulang menumpuk sampel</b> pada pemicu
-yang sama. Pemicu traversal (<code>history.back</code>) dibatasi laju oleh browser sendiri, jadi wajar kalau run
-yang selesai lebih sedikit dari yang diminta — itu perilaku browser, bukan cacat berkas ini; klik lagi untuk
-menambah n.</div>
-</div>
-
-<div class="box o"><b>ORACLE — apa yang dihitung sebagai hasil</b>
-<ul style="margin:.3rem 0 0;padding-left:1.1rem">
-<li><b>W_komit</b> = Δt pelapor terakhir − Δt pelapor pertama, per run, lalu mean/sd atas seluruh run.</li>
-<li><b>BERTUKAR = YA</b> — peringkat pelapor itu tidak sama di semua run. <b>Ini satu-satunya kolom yang bisa
-menjadi bug</b>: urutan yang tidak deterministik berarti ada window yang lebarnya ditentukan penjadwalan,
-bukan spesifikasi.</li>
-<li><b>NEVER</b> — pelapor tak pernah mencerminkan navigasi ini. Wajib dibelah dua: <b>dijanjikan tetap = ya</b>
-(<code>document.referrer</code>, <code>PerfNavTiming.name</code>, <code>location.origin</code>,
-<code>isSecureContext</code>, <code>performance.timeOrigin</code> — tetap <b>diukur</b>, tidak diasumsikan; kalau
-salah satunya justru berubah, <i>itu</i> temuannya) versus <b>dijanjikan tetap = tidak</b> ⇒ inilah daftar pelapor
-yang <b>tidak boleh dipercaya aplikasi SPA</b> setelah rute berganti.</li>
-<li><b>Hasil “W = 0 untuk seluruh pelapor JS” adalah hasil yang sah</b> dan harus ditulis apa adanya: artinya
-seluruh perselisihan identitas hidup <b>di luar renderer</b> (proses browser, UI, jaringan), dan tabel ini menjadi
-baseline yang mem-vonis patch berikutnya.</li>
-</ul>
-</div>
-
-<div class="box k"><b>KONTROL BAWAAN</b>
-Lima pelapor yang <b>tidak boleh berubah</b> ikut di setiap run (<code>location.origin</code>,
-<code>document.referrer</code>, <code>PerfNavTiming.name</code>, <code>isSecureContext</code>,
-<code>performance.timeOrigin</code>). Kalau salah satunya ikut ber-Δt, sampler-nya yang salah — buang sesi itu.
-Kolom <code>tick_mean</code> adalah kontrol kedua: ia mengukur alat, bukan browser.
-</div>
-
-<div class="box j"><b>RINGKASAN PER PEMICU</b>
-<table><thead><tr><th>pemicu</th><th>run</th><th>W_komit mean (ms)</th><th>sd</th><th>tick_mean (ms)</th></tr></thead><tbody id="sm"></tbody></table>
-<p id="vd" style="margin:.5rem 0 0">(belum ada data)</p>
-</div>
-
-<div class="box"><b>PELAPOR — PEMICU TERPILIH</b>
-<table><thead><tr><th>pelapor</th><th>didukung</th><th>Δt mean (ms)</th><th>sd</th><th>berubah</th><th>rank</th><th>bertukar</th><th>dijanjikan tetap</th></tr></thead><tbody id="tb"></tbody></table>
-</div>
-
-<div class="box"><b>SALIN APA ADANYA (TSV)</b>
-<textarea id="tsv" readonly></textarea>
-</div>
-
-<div class="box k"><b>BATAS / ETIKA / DI LUAR LINGKUP</b>
-Tanpa form, tanpa input kredensial, tanpa fetch/XHR/WebSocket/beacon, tanpa cookie yang dibaca, tanpa aset
-eksternal, tanpa obfuskasi, tanpa peniruan merek apa pun. Batch <code>pushState</code> menambah entri riwayat lalu
-<b>memulihkannya sendiri</b> (<code>history.go(-n)</code>) sehingga satu Back tetap membawamu keluar; pemicu
-fragmen dan <code>navigate</code> memakai <i>replace</i> sehingga tidak menambah entri sama sekali; pemicu
-<code>history.back</code> mendorong satu entri lalu menariknya kembali (net nol). Setiap batch berhenti sendiri
-pada 5 detik.
-<p style="margin:.4rem 0 0"><b>Sengaja DI LUAR lingkup satu berkas</b> (disebut, tidak dipakai diam-diam):
-<code>chrome.webNavigation.*.timeStamp</code> (jam proses-browser, butuh ekstensi MV3), heartbeat ke server sendiri
-(stempel jam server pada <code>Origin</code>/<code>Sec-Fetch-Site</code>), dan <code>getDisplayMedia</code> 60&nbsp;fps
-untuk menarik baris UI (omnibox/gembok) ke tabel yang sama. Tanpa ketiganya, berkas ini hanya bisa berkata sesuatu
-tentang <b>renderer</b> — dan mengatakannya dengan jujur.</p>
-</div>
-
-<a id="rel" href="">rel</a><div id="t1"></div><div id="t2"></div>
-
+<!-- 60 - rantai redirect lintas-origin di tengah jalan   [UXSS popup | U1=popup U2=pemrakarsa vs tujuan di tengah rantai | T2 | macOS: Dia/Arc/Safari/Chrome]
+     GERBANG YANG DISERANG : pemeriksaan origin pada hop DI TENGAH rantai redirect (bukan navigasi pertama)
+     DI MANA PALING MUNGKIN TEMBUS : fork yang tertinggal patch (Dia/Arc/Brave/Vivaldi/Opera/Samsung),
+                 WebView & in-app browser, build lama, atau konteks ber-sandbox/ekstensi. Di Chrome/Safari
+                 terbaru yang sehat, jawaban BLOCKED adalah jawaban yang BENAR - catat versinya, jangan dipaksa.
+     MEKANISME : popup mendarat lebih dulu di dokumen kita yang lalu me-refresh dirinya ke situs korban. Origin berpindah DI TENGAH rantai navigasi, bukan di awal - titik yang sering luput karena pemeriksaan dilakukan pada navigasi pertama.
+     PREDIKAT  : handle mempertahankan akses melewati hop lintas-origin di tengah rantai.
+     AMAN      : akses lintas-origin ditolak SecurityError; baris bukti berkata BLOCKED.
+     ANTI-FP   : vonis HANYA dari pembacaan isi korban (judul/origin yang dilaporkan sendiri).
+                 "berhasil menulis" ke dokumen kosong awal BUKAN bukti - itu memang dokumen kita.
+                 Kontrol batch = 64.html; kalau 64 ikut CROSSED, semua hasil batch ini batal.
+     ETIKA     : browser & mesin sendiri. Korban = example.com (IANA reserved). Nol form, nol kredensial,
+                 nol fetch/beacon, nol resource luar. Berhenti di predikat -> screenshot -> lapor VRP. -->
+<meta charset="utf-8"><title>60 rantai redirect lintas-origin di tengah jalan</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-(function(){
-var HREF0=location.href,WIN=60,DEAD=5000,added=0,res={},cur=-1,busy=0;
-function $(i){return document.getElementById(i)}
-function NV(){return (typeof navigation!=='undefined'&&navigation)?navigation:null}
-function EN(k){var n=NV();return n&&n.currentEntry?n.currentEntry[k]:null}
-var AN=$('rel'),TG=$('t1');
-var R=[
-['location.href',function(){return location.href},0],['location.pathname',function(){return location.pathname},0],
-['location.search',function(){return location.search},0],['location.hash',function(){return location.hash},0],
-['location.origin',function(){return location.origin},1],['document.URL',function(){return document.URL},0],
-['document.documentURI',function(){return document.documentURI},0],['document.baseURI',function(){return document.baseURI},0],
-['document.referrer',function(){return document.referrer},1],['history.state',function(){return JSON.stringify(history.state)},0],
-['history.length',function(){return history.length},0],['a href="" (resolusi relatif)',function(){return AN.href},0],
-[':target (selector matching)',function(){var t=document.querySelector(':target');return t?t.id:'-'},0],['getComputedStyle(:target)',function(){return getComputedStyle(TG).outlineStyle},0],
-['navigation.currentEntry.url',function(){return EN('url')},0],['navigation.currentEntry.key',function(){return EN('key')},0],
-['navigation.currentEntry.id',function(){return EN('id')},0],['navigation.currentEntry.index',function(){return EN('index')},0],
-['navigation.canGoBack',function(){var n=NV();return n?n.canGoBack:null},0],['PerfNavTiming.name',function(){var e=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];return e?e.name:null},1],
-['isSecureContext',function(){return isSecureContext},1],['performance.timeOrigin',function(){return performance.timeOrigin},1]];
-function rd(i){try{var v=R[i][1]();return v==null?null:''+v}catch(e){return null}}
-var ic=false,nav0=NV();function hasNav(){var n=NV();return !!(n&&n.navigate)}
-if(nav0&&nav0.addEventListener)nav0.addEventListener('navigate',function(e){if(ic&&e.canIntercept&&!e.hashChange){try{e.intercept({handler:function(){return new Promise(function(r){setTimeout(r,20)})}})}catch(x){}}});
-var T=[
-['pushState',function(n){history.pushState({n:n},'','?cg='+n);added++},null,null],
-['replaceState',function(n){history.replaceState({n:n},'','?cg='+n)},null,null],
-['fragmen (location.replace)',function(n){location.replace('#t'+(n%2+1))},null,null],
-['navigation.navigate (fragmen, replace)',function(n){NV().navigate('#t'+(n%2+1),{history:'replace'})},hasNav,null],
-['navigation.navigate + intercept 20ms',function(n){ic=true;NV().navigate('?iv='+n,{history:'replace'})},hasNav,null],
-['history.back (setelah 1 pushState)',function(){history.back()},null,function(){history.pushState({b:1},'','?bk=1')}]];
-function one(ti,n,cb){var t=T[ti];if(t[2]&&!t[2]()){cb(null);return}
- if(t[3]){try{t[3]()}catch(e){}}
- setTimeout(function(){var base=[],seen=[],i,ret=0,fired=0,tk=[],last=0,ch=new MessageChannel();
-  for(i=0;i<R.length;i++){base[i]=rd(i);seen[i]=null}
-  ch.port1.onmessage=function(){var now=performance.now(),j,v;
-   if(!fired){fired=1;try{t[1](n)}catch(e){}now=ret=performance.now()}else tk.push(now-last);
-   last=now;
-   for(j=0;j<R.length;j++)if(seen[j]===null&&base[j]!==null){v=rd(j);if(v!==base[j])seen[j]=now-ret}
-   if(now-ret<WIN){ch.port2.postMessage(0)}else{ch.port1.onmessage=null;ic=false;cb(seen,tk)}};
-  ch.port2.postMessage(0)},12)}
-function clean(){if(added>0){var n=added;added=0;try{history.go(-n)}catch(e){}}}
-function batch(ti){if(busy)return;busy=1;cur=ti;
- var want=Math.max(1,Math.min(40,+$('reps').value||20)),D=res[ti]||(res[ti]={runs:[],tk:[],want:0}),dead=performance.now()+DEAD,k=0;D.want+=want;
- (function nx(){if(k>=want||D.unsup||performance.now()>dead){busy=0;clean();
-   $('st').textContent='batch selesai: +'+k+' run — total '+D.runs.length+'/'+D.want+' pada "'+T[ti][0]+'"'+(performance.now()>dead?' (dihentikan oleh batas 5 detik; klik lagi untuk menambah sampel)':'')+(D.unsup?' — tidak didukung di browser ini':'');render();return}
-  k++;one(ti,D.runs.length+1,function(s,tk){if(s){D.runs.push(s);D.tk=D.tk.concat(tk||[])}else D.unsup=1;render();setTimeout(nx,6)})})()}
-function avg(a){var s=0,i;for(i=0;i<a.length;i++)s+=a[i];return a.length?s/a.length:0}
-function sd(a,m){var s=0,i;for(i=0;i<a.length;i++)s+=(a[i]-m)*(a[i]-m);return a.length?Math.sqrt(s/a.length):0}function f(x){return (Math.round(x*1000)/1000).toFixed(3)}
-function render(){var i,ti,D,h='',s='',x='',W,rk,ch,sm,ss,r,e,u,lo,hi,seam=0,ran=0;
- for(ti=0;ti<T.length;ti++){D=res[ti];if(!D)continue;ran++;W=[];ch=[];sm=[];ss=[];rk=[];
-  for(r=0;r<D.runs.length;r++){e=D.runs[r];u=[];lo=1e9;hi=-1;
-   for(i=0;i<R.length;i++)if(e[i]!==null){if(e[i]<lo)lo=e[i];if(e[i]>hi)hi=e[i];if(u.indexOf(e[i])<0)u.push(e[i])}
-   if(hi>=0)W.push(hi-lo);u.sort(function(a,b){return a-b});
-   for(i=0;i<R.length;i++)if(e[i]!==null){ch[i]=(ch[i]||0)+1;sm[i]=(sm[i]||0)+e[i];ss[i]=(ss[i]||0)+e[i]*e[i];(rk[i]=rk[i]||{})[u.indexOf(e[i])]=1}}
-  D.ch=ch;D.sm=sm;D.ss=ss;D.rk=rk;D.wm=avg(W);D.ws=sd(W,D.wm);D.tick=avg(D.tk);if(D.runs.length&&D.wm>D.tick)seam++;
-  s+='<tr><td>'+T[ti][0]+'</td><td>'+(D.unsup?'<span class="no">tidak didukung di browser ini</span>':D.runs.length+'/'+D.want)+'</td><td>'+(D.unsup?'—':f(D.wm))+'</td><td>'+(D.unsup?'—':f(D.ws))+'</td><td>'+f(D.tick)+'</td></tr>';
-  x+='# pemicu\t'+T[ti][0]+'\tn='+D.runs.length+'\tW_komit_mean='+f(D.wm)+'\tsd='+f(D.ws)+'\ttick_mean='+f(D.tick)+(D.unsup?'\tTIDAK_DIDUKUNG':'')+'\npelapor\tdt_mean_ms\tdt_sd\tn_berubah\tn_run\trank_set\tbertukar\tdijanjikan_tetap\n';
-  for(i=0;i<R.length;i++){var c=ch[i]||0,mm=c?sm[i]/c:0,sv=c?Math.sqrt(Math.max(0,ss[i]/c-mm*mm)):0,ks=rk[i]?Object.keys(rk[i]):[];
-   x+=R[i][0]+'\t'+(c?f(mm):'NEVER')+'\t'+(c?f(sv):'-')+'\t'+c+'\t'+D.runs.length+'\t'+(ks.length?ks.join(','):'-')+'\t'+(ks.length>1?'YA':'tidak')+'\t'+(R[i][2]?'ya':'tidak')+'\n'}
-  x+='\n'}
- D=res[cur];
- if(D)for(i=0;i<R.length;i++){var c2=D.ch[i]||0,m2=c2?D.sm[i]/c2:0,s2=c2?Math.sqrt(Math.max(0,D.ss[i]/c2-m2*m2)):0,k2=D.rk[i]?Object.keys(D.rk[i]):[],ok=rd(i)!==null;
-  h+='<tr><td>'+R[i][0]+'</td><td>'+(ok?'ya':'<span class="no">tidak didukung di browser ini</span>')+'</td><td>'+(c2?f(m2):(ok?'<b>NEVER</b>':'—'))+'</td><td>'+(c2?f(s2):'—')+'</td><td>'+c2+'/'+D.runs.length+'</td><td>'+(k2.length?k2.join(','):'—')+'</td><td>'+(k2.length>1?'<b class="no">YA</b>':'tidak')+'</td><td>'+(R[i][2]?'ya':'<b>tidak</b>')+'</td></tr>'}
- $('tb').innerHTML=h;$('sm').innerHTML=s;$('hnow').textContent=location.href;$('tsv').value=x+'# href_asli\t'+HREF0+'\n# href_kini\t'+location.href+'\n# ua\t'+navigator.userAgent+'\n';
- $('vd').innerHTML=ran?(seam?'<b class="no">ADA SEAM TERUKUR</b> pada '+seam+' pemicu — W_komit rata-rata melampaui resolusi sampler. Periksa baris <b>bertukar = YA</b>: itu titik non-determinisme, satu-satunya bagian yang bisa menjadi bug.':'<b class="ok">SEPAKAT DALAM BATAS RESOLUSI</b> — W_komit ≤ tick_mean pada semua pemicu yang dijalankan. Seluruh pelapor JS berganti di dalam task yang sama; perselisihan identitas, kalau ada, hidup DI LUAR renderer. Ini hasil yang sah: tabel di bawah adalah baseline regresi untuk mem-vonis patch berikutnya.'):'(belum ada data)'}
-$('h0').textContent=HREF0;render();
-for(var b=0;b<6;b++)(function(i){$('b'+i).onclick=function(){batch(i)}})(b);
-})();
+var V='https://example.com/';var o;function say(s){o=o||document.getElementById('o');o.textContent=s;}
+function rd(w){try{var t=w.document.title;return 'CROSSED -> baca judul lintas-origin: "'+t+'"';}catch(e){return 'BLOCKED (aman): '+e.name;}}
+addEventListener('load',function(){say('REAL: '+location.origin+' | siap');});
+var w;
+function go(){var b=new Blob(['<meta http-equiv="refresh" content="1;url='+V+'"><h3>hop 1 (milik pembuka)</h3>'],{type:'text/html'});
+w=window.open(URL.createObjectURL(b),'x','width=520,height=620');
+setTimeout(function(){say(rd(w));},5000);}
 </script>
-</div></body></html>

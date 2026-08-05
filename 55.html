@@ -1,117 +1,29 @@
-<!-- UXSS: rantai opener A->B->C — dua dokumen about:blank berturut-turut yang ditulisi; SELURUH pelapor identitas dibaca sekaligus di tiga tingkat dan dicari yang berselisih. -->
-<!doctype html>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>32 — Rantai opener A→B→C: identitas dari siapa-membuat-siapa</title>
-<style>
-body{font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:16px;background:#0e1116;color:#dfe6ef}
-h2{margin:0 0 12px;font-size:19px;line-height:1.3}
-section{border:1px solid #2a3240;border-radius:8px;padding:10px 12px;margin:10px 0;background:#151a22}
-b.tag{display:inline-block;min-width:74px;color:#7fd1ff}
-button{font:13px system-ui;padding:8px 12px;margin:4px 6px 4px 0;border:1px solid #3a4658;background:#1e2733;color:#e8eef6;border-radius:6px;cursor:pointer}
-button.ctl{border-color:#3f7a55;color:#bfe6c8}
-code{font-family:ui-monospace,Consolas,monospace;color:#ffd79a;word-break:break-all}
-table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12.5px}
-td,th{border:1px solid #2a3240;padding:4px 7px;text-align:left;vertical-align:top;font-family:ui-monospace,Consolas,monospace;word-break:break-all}
-th{color:#7fd1ff;font-family:system-ui}
-caption{text-align:left;color:#ffd79a;padding:4px 0;font-family:system-ui}
-.small{color:#93a2b5;font-size:12.5px}
-.warn{color:#ffb37a}
-.ok{color:#bfe6c8}
-</style>
-
-<h2>32 — RANTAI OPENER A → B → C: identitas yang berasal dari SIAPA-MEMBUAT-SIAPA</h2>
-
-<section><b class="tag">PAGAR</b> Dokumen <code>about:blank</code> tidak punya origin sendiri: ia <b>mewarisi</b> origin dokumen yang membuatnya (spec HTML, <i>“inherit the origin from the initiator”</i>). Pagar yang diuji di sini: pewarisan itu harus <b>konsisten dan transitif</b> — B mewarisi dari A, C mewarisi dari B, sehingga C tetap same-origin dengan A dan <code>opener.opener.document</code> boleh dibaca. Kalau pewarisan tergelincir di tingkat kedua, yang lahir adalah UXSS (dokumen memegang origin yang bukan haknya) atau kebalikannya (akses sah ditolak).</section>
-
-<section><b class="tag">CELAH</b> Browser memberi tahu kode tentang identitas lewat <b>belasan pelapor</b>: <code>location.href</code>, <code>origin</code>, <code>document.URL</code>, <code>baseURI</code>, <code>domain</code>, <code>referrer</code>, <code>window.name</code>, <code>ancestorOrigins</code>, URL di dalam error-stack, nama entri <code>performance</code>, kunci storage, scope service worker, origin pesan <code>postMessage</code>. Hampir tak ada kode yang membaca <b>semuanya sekaligus</b> lalu mencari yang <b>berselisih</b>. Pada dokumen yang <b>mewarisi</b> origin, perselisihan itulah tempat bug pewarisan bersembunyi — tiap pelapor diisi jalur kode yang berbeda (URL dokumen vs origin efektif vs URL pembuat), dan patch biasanya dipasang per-pelapor, bukan per-invarian.</section>
-
-<section><b class="tag">INDUK</b>
-<div><code>location.href</code> halaman induk (A): <code id="href"></code></div>
-<div><code>window.origin</code> halaman induk (A): <code id="orig"></code></div>
-<div>penanda DOM milik A: <b><span id="marker">PENANDA-INDUK-A</span></b></div>
-</section>
-
-<section><b class="tag">UJI</b>
-<button onclick="run()">Jalankan rantai — A membuka B, lalu B membuka C</button>
-<button class="ctl" onclick="control()">KONTROL — buka about:blank polos (tanpa ditulisi)</button>
-<div class="small">Dua popup akan terbuka. Izinkan popup untuk origin ini. Tiap dokumen mencetak matriks pelapornya <b>di jendelanya sendiri</b>; ringkasan tiga tingkat muncul di bawah, di halaman ini.</div>
-</section>
-
-<div id="out"></div>
-
-<section><b class="tag">ORACLE</b>
-<div><b>SEHARUSNYA (spec):</b> di B dan C, <code>location.href</code> = <code>about:blank</code> <b>tetapi</b> <code>origin</code> = origin A; <code>baseURI</code> mengikuti URL pembuat; <code>opener.opener.document</code> boleh dibaca dari C.</div>
-<div><b>SEAM (temuan) bila:</b> <code>origin</code> C ≠ <code>origin</code> A · akses <code>opener.opener</code> ditolak padahal origin sama (pewarisan putus di tingkat ke-2) · <b>atau</b> akses diizinkan padahal salah satu pelapor menyebut origin lain (pewarisan terlalu longgar).</div>
-<div class="ok"><b>SESUAI SPEC</b> adalah hasil yang sah dan penting: ia menjadi ilmu-negatif ber-tanggal untuk engine + versi yang diuji.</div>
-</section>
-
-<section><b class="tag">KONTROL</b> Tombol hijau membuka <code>about:blank</code> yang <b>tidak</b> ditulisi. Dokumen itu tetap mewarisi origin, tetapi tanpa skrip di dalamnya — pembanding untuk memastikan yang mengubah matriks adalah <b>penulisan dokumen</b>, bukan sekadar tindakan membuka jendela.</section>
-
-<section class="small"><b class="tag">CATATAN</b> Di <code>file://</code> sebagian browser memperlakukan tiap berkas sebagai origin buram, sehingga kolom B/C bisa terisi <code>DILARANG</code>. Itu bukan temuan — buka lewat <code>https://xnxrx.github.io/xnurx/32.html</code> untuk pengujian yang sebenarnya. Berkas ini tidak mengirim apa pun ke jaringan; cookie hanya dibaca dari origin-nya sendiri dan ditampilkan terpotong 40 karakter.</section>
-
+<!-- 55 - Navigation API intercept ke tujuan lintas-origin   [UXSS popup | U1=popup U2=commit + Navigation API | T3 | macOS: Dia/Arc/Safari/Chrome]
+     GERBANG YANG DISERANG : pembatasan Navigation API: canIntercept WAJIB false untuk tujuan lintas-origin
+     DI MANA PALING MUNGKIN TEMBUS : fork yang tertinggal patch (Dia/Arc/Brave/Vivaldi/Opera/Samsung),
+                 WebView & in-app browser, build lama, atau konteks ber-sandbox/ekstensi. Di Chrome/Safari
+                 terbaru yang sehat, jawaban BLOCKED adalah jawaban yang BENAR - catat versinya, jangan dipaksa.
+     MEKANISME : di dalam popup MILIK KITA dipasang listener navigate; lalu popup itu dinavigasikan ke situs korban. Untuk tujuan lintas-origin canIntercept WAJIB false - kalau engine keliru memberi true, URL berpindah ke korban sementara dokumen kita tetap hidup.
+     PREDIKAT  : canIntercept bernilai true untuk tujuan lintas-origin (URL korban + dokumen kita).
+     AMAN      : akses lintas-origin ditolak SecurityError; baris bukti berkata BLOCKED.
+     ANTI-FP   : vonis HANYA dari pembacaan isi korban (judul/origin yang dilaporkan sendiri).
+                 "berhasil menulis" ke dokumen kosong awal BUKAN bukti - itu memang dokumen kita.
+                 Kontrol batch = 64.html; kalau 64 ikut CROSSED, semua hasil batch ini batal.
+     ETIKA     : browser & mesin sendiri. Korban = example.com (IANA reserved). Nol form, nol kredensial,
+                 nol fetch/beacon, nol resource luar. Berhenti di predikat -> screenshot -> lapor VRP. -->
+<meta charset="utf-8"><title>55 Navigation API intercept ke tujuan lintas-origin</title>
+<button onclick="go()" style="font:16px system-ui;padding:12px 22px">RUN</button>
+<p id="o" style="font:12px ui-monospace,monospace;color:#555"></p>
 <script>
-var store={};
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function table(rows,cap){var h='<table><caption>'+esc(cap)+'</caption><tr><th>pelapor</th><th>nilai</th></tr>',i;for(i=0;i<rows.length;i++)h+='<tr><td>'+esc(rows[i][0])+'</td><td>'+esc(rows[i][1])+'</td></tr>';return h+'</table>';}
-function sty(){return '<style>body{font:13px system-ui;background:#0e1116;color:#dfe6ef;padding:12px}h3{color:#7fd1ff}table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12px}td,th{border:1px solid #2a3240;padding:4px 6px;text-align:left;vertical-align:top;font-family:ui-monospace,Consolas,monospace;word-break:break-all}th{color:#7fd1ff;font-family:system-ui}caption{text-align:left;color:#ffd79a;padding:4px 0;font-family:system-ui}.bad{color:#ffb37a}</style>';}
-function probe(){var r=[],D=document,W=window;
- function t(k,f){var v;try{v=f();}catch(e){v='DILARANG: '+e.name;}if(v===undefined||v===null||v==='')v='(kosong)';r.push([k,String(v)]);}
- t('location.href',function(){return location.href;});
- t('window.origin',function(){return W.origin===undefined?'tidak didukung':W.origin;});
- t('location.origin',function(){return location.origin;});
- t('document.URL',function(){return D.URL;});
- t('document.baseURI',function(){return D.baseURI;});
- t('document.domain',function(){return D.domain;});
- t('document.referrer',function(){return D.referrer;});
- t('window.name',function(){return W.name;});
- t('location.ancestorOrigins',function(){var a=location.ancestorOrigins,s=[],i;if(!a)return 'tidak didukung (Gecko)';for(i=0;i<a.length;i++)s.push(i+':'+a[i]);return s.join(' | ');});
- t('URL di error stack',function(){try{null.x;}catch(e){var m=String(e.stack||'').match(/(?:file|https?|blob|data|about):[^\s)]+/);return m?m[0]:'(tak ada URL di stack)';}});
- t('nama entri performance',function(){if(!W.performance||!performance.getEntriesByType)return 'tidak didukung';var e=performance.getEntriesByType('navigation')[0]||performance.getEntriesByType('resource')[0];return e?e.name:'(tak ada entri)';});
- t('kunci storage',function(){localStorage.setItem('u32','1');localStorage.removeItem('u32');return 'localStorage terbuka (kunci = origin dokumen)';});
- t('scope service worker',function(){if(!navigator.serviceWorker)return 'tidak didukung';return navigator.serviceWorker.controller?navigator.serviceWorker.controller.scriptURL:'(tak ada controller)';});
- t('document.cookie',function(){var c=D.cookie;return c?('['+c.length+' char] '+c.substring(0,40)):'(kosong)';});
- t('import.meta.url',function(){return 'tidak didukung (skrip klasik, bukan modul)';});
- return r;}
-function boot(level){var d=document,A=null,w,lib,rows;
- d.write(sty()+'<h3>tingkat '+level+' — dokumen about:blank, dibuat oleh tingkat '+(level==='B'?'A':'B')+'</h3>');
- d.write(table(probe(),'matriks pelapor tingkat '+level));
- try{A=window.opener;while(A&&A.opener)A=A.opener;}catch(e){A=null;}
- try{A.collect(level,probe());}catch(e){}
- if(level==='B'){w=window.open('about:blank','tingkat_C');
-  if(!w){d.write('<p class="bad">popup C diblokir — izinkan popup lalu ulangi.</p>');}
-  else{lib=''+esc+table+probe+sty+boot;w.document.write('<scr'+'ipt>'+lib+';boot("C")</scr'+'ipt>');w.document.close();}}
- else{rows=[];
-  rows.push(['window.opener (B)',window.opener?'ada':'tidak ada']);
-  rows.push(['window.opener.opener (A)',(function(){try{return window.opener.opener?'ada':'tidak ada';}catch(e){return 'DILARANG: '+e.name;}})()]);
-  rows.push(['baca DOM A (#marker)',(function(){try{return A.document.getElementById('marker').textContent;}catch(e){return 'DILARANG: '+e.name;}})()]);
-  rows.push(['baca cookie A',(function(){try{var c=A.document.cookie;return c?('['+c.length+' char] '+c.substring(0,40)):'(kosong)';}catch(e){return 'DILARANG: '+e.name;}})()]);
-  rows.push(['A.location.href',(function(){try{return A.location.href;}catch(e){return 'DILARANG: '+e.name;}})()]);
-  d.write(table(rows,'akses lintas-dokumen C → A (dua tingkat ke atas)'));
-  try{A.collect('AKSES',rows);A.postMessage('halo-dari-tingkat-C','*');}catch(e){}}
- d.close();}
-function collect(k,rows){store[k]=rows;render();}
-function val(rows,n){var i;if(!rows)return '(belum)';for(i=0;i<rows.length;i++)if(rows[i][0]===n)return rows[i][1];return '—';}
-function render(){var keys=['A','B','C'],names=[],seen={},i,j,rs,h='';
- for(i=0;i<keys.length;i++){rs=store[keys[i]]||[];for(j=0;j<rs.length;j++)if(!seen[rs[j][0]]){seen[rs[j][0]]=1;names.push(rs[j][0]);}}
- h+='<table><caption>matriks pelapor TIGA TINGKAT — A = halaman ini · B = about:blank dibuka A · C = about:blank dibuka B</caption><tr><th>pelapor</th><th>A</th><th>B</th><th>C</th></tr>';
- for(i=0;i<names.length;i++){h+='<tr><td>'+esc(names[i])+'</td>';for(j=0;j<3;j++)h+='<td>'+esc(val(store[keys[j]],names[i]))+'</td>';h+='</tr>';}
- h+='</table>';
- if(store.AKSES)h+=table(store.AKSES,'akses lintas-dokumen C → A');
- if(store.MSG)h+=table(store.MSG,'origin pesan postMessage yang diterima A dari C');
- document.getElementById('out').innerHTML=h+verdict();}
-function verdict(){var oA=val(store.A,'window.origin'),oC=val(store.C,'window.origin'),ak=val(store.AKSES,'baca DOM A (#marker)'),ok;
- if(!store.C)return '<p class="warn"><b>VONIS:</b> menunggu tingkat C — klik tombol UJI dan izinkan popup.</p>';
- ok=(oC===oA)&&ak.indexOf('PENANDA-INDUK-A')===0;
- return '<p><b>SEHARUSNYA (spec):</b> C mewarisi origin B, B mewarisi origin A ⇒ <code>origin</code> C = <code>'+esc(oA)+'</code> sementara <code>location.href</code> C tetap <code>about:blank</code>; <code>opener.opener.document</code> boleh dibaca.<br><b>TERAMATI:</b> origin C = <code>'+esc(oC)+'</code> · baca DOM A = <code>'+esc(ak)+'</code>.<br><b>VONIS:</b> '+(ok?'<span class="ok">SESUAI SPEC — bukan temuan.</span> Pewarisan transitif utuh dua tingkat; selisih href-vs-origin di atas memang diwajibkan spec, jadi ia bukan seam.':'<span class="warn">BERSELISIH — persempit berkas ini sampai tersisa satu mekanisme, lalu laporkan ke VRP engine terkait.</span>')+'</p>';}
-function run(){var w,lib;try{document.cookie='uxss32=penanda-induk; SameSite=Lax';}catch(e){}
- store={A:probe()};w=window.open('about:blank','tingkat_B');
- if(!w){document.getElementById('out').innerHTML='<p class="warn">Popup diblokir — izinkan popup untuk origin ini lalu ulangi.</p>';return;}
- lib=''+esc+table+probe+sty+boot;w.document.write('<scr'+'ipt>'+lib+';boot("B")</scr'+'ipt>');w.document.close();render();}
-function control(){var w=window.open('about:blank','kontrol_polos');if(!w){document.getElementById('out').innerHTML='<p class="warn">Popup diblokir.</p>';return;}
- store={A:probe(),B:[['(kontrol)','about:blank dibuka tanpa ditulisi — tak ada skrip di dalamnya, jadi tak ada pelapor yang membaca dirinya sendiri']]};render();}
-window.onmessage=function(e){store.MSG=[['event.origin',e.origin||'(kosong / opaque)'],['event.data',String(e.data).substring(0,40)],['event.source',e.source?'objek jendela tersedia':'—']];render();};
-document.getElementById('href').textContent=location.href;
-document.getElementById('orig').textContent=(window.origin===undefined?'tidak didukung':window.origin);
-store.A=probe();render();
+var V='https://example.com/';var o;function say(s){o=o||document.getElementById('o');o.textContent=s;}
+function rd(w){try{var t=w.document.title;return 'CROSSED -> baca judul lintas-origin: "'+t+'"';}catch(e){return 'BLOCKED (aman): '+e.name;}}
+addEventListener('load',function(){say('REAL: '+location.origin+' | siap');});
+function go(){window.open(location.pathname+'?child=1','x','width=520,height=620');
+say('popup anak dibuka; hasil dilaporkan balik ke sini');}
+if(location.search.indexOf('child=1')>=0){addEventListener('load',function(){
+var r='navigation API tidak ada di engine ini';
+try{navigation.addEventListener('navigate',function(e){r='canIntercept='+e.canIntercept+' -> '+(e.canIntercept?'BAHAYA: lintas-origin bisa di-intercept':'aman');
+try{if(e.canIntercept)e.intercept({handler:function(){return new Promise(function(){});}});}catch(x){}});}catch(x){}
+setTimeout(function(){try{opener.document.getElementById('o').textContent=r;}catch(x){}document.title=r;},1200);
+setTimeout(function(){location=V;},1500);});}
 </script>
