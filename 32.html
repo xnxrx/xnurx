@@ -1,0 +1,156 @@
+<!-- MEKANISME: skip back-flood diterapkan per-ALAT dan hanya pada konsumen UI, sehingga alat pengisi riwayat yang berbeda (pushState / replaceState / location.hash) dan konsumen programatik history.go(-1) dapat menembus pagar yang sama. -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>44 — Varian alat pengisi riwayat vs skip</title>
+<style>
+ body{font:15px/1.55 system-ui,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
+ .wrap{max-width:820px;margin:0 auto}
+ h2{font-size:1.12rem;margin:.2rem 0 .8rem;line-height:1.35}
+ .box{border:1px solid #ccc;border-left:5px solid #888;border-radius:8px;padding:.6rem .8rem;margin:.55rem 0}
+ .box>b:first-child{display:block;font-size:.78rem;letter-spacing:.09em;color:#666;margin-bottom:.25rem}
+ .pagar{border-left-color:#0a7}.celah{border-left-color:#d33}.uji{border-left-color:#36c}
+ .oracle{border-left-color:#e90}.kontrol{border-left-color:#777}.hasil{border-left-color:#606}
+ code{background:#f1f1f1;padding:.05rem .3rem;border-radius:4px;font-size:.9em;word-break:break-all}
+ pre{background:#f7f7f7;border-radius:6px;padding:.6rem;overflow:auto;font-size:.84rem;margin:.3rem 0 0;white-space:pre}
+ button{font:inherit;padding:.45rem .8rem;margin:.15rem .3rem .15rem 0;border:1px solid #999;border-radius:7px;background:#fafafa;cursor:pointer}
+ .note{font-size:.85rem;color:#666}
+ .jujur{border:1px dashed #b00;border-radius:8px;padding:.6rem .8rem;font-size:.88rem;margin-top:1rem}
+ a{color:#36c}
+ @media(prefers-color-scheme:dark){body{background:#161616;color:#eaeaea}.box{border-color:#3a3a3a}
+  code{background:#2a2a2a}pre{background:#202020}button{background:#242424;color:#eee;border-color:#555}
+  .note,.box b{color:#9a9a9a}a{color:#7aa6ff}}
+</style>
+</head>
+<body><div class="wrap">
+
+<h2>44 — Varian alat: pushState vs replaceState vs location.hash vs history.go(-1) — mana yang lolos skip?</h2>
+<p class="note">URL asli halaman ini: <code id="href">…</code></p>
+
+<div class="box pagar"><b>PAGAR</b>
+Skip berbasis-gesture untuk entri <i>same-document</i> tanpa aktivasi user:
+Chromium <code>should_skip_on_back_forward_ui_</code> · Gecko <code>nsISHEntry::hasUserInteraction</code> (FF 79+) ·
+WebKit <code>HistoryItem::wasCreatedByJSWithoutUserInteraction</code>. Di samping itu, Gecko punya
+<b>rate-limiter</b> untuk API History (ekor CVE-2020-26963 / CVE-2021-43545) yang membatasi berapa cepat entri
+boleh ditambahkan.
+</div>
+
+<div class="box celah"><b>CELAH</b>
+Dua bentuk pagar, dua cara ia bisa tidak menjangkau:
+<ol style="margin:.35rem 0 0;padding-left:1.2rem">
+ <li><b>Per-ALAT.</b> Bendera skip dipasang di jalur pembuatan entri. <code>pushState</code> jelas ter-cover —
+ tetapi apakah navigasi <b>fragmen</b> (<code>location.hash=…</code>), yang lahir dari jalur navigasi biasa dan
+ bukan dari API History, mendapat bendera yang sama? Rate-limiter juga sering hanya memagari nama-fungsi yang
+ disebutkan namanya.</li>
+ <li><b>Per-KONSUMEN.</b> Nama benderanya sendiri berbunyi <i>back_forward_<b>UI</b></i>. Kalau skip hanya
+ dievaluasi untuk tombol Back di chrome browser, maka <code>history.go(-1)</code> <b>programatik</b> menelusuri
+ daftar yang sama tanpa melewati apa pun ⇒ satu daftar riwayat, dua konsumen, dua jawaban berbeda.</li>
+</ol>
+<code>replaceState</code> ada di tabel sebagai <b>alat-kontrol</b>: ia tidak menambah entri sama sekali, jadi
+barisnya wajib menunjukkan “entri +0 / keluar 1”.
+</div>
+
+<div class="box uji" id="hub"><b>UJI</b>
+Klik satu mode → halaman ini memuat dirinya sebagai lengan mode itu → <b>keluar dari dokumen</b>
+(mode p/r/h: tekan Back; mode g: klik tombol <code>history.go(-1)</code> berulang) → angkanya tercatat sendiri.
+<b>Ulangi tiap mode 20×.</b>
+<p>
+ <button id="bp">p — 50× pushState</button>
+ <button id="br">r — 50× replaceState (kontrol alat)</button>
+ <button id="bh">h — 50× location.hash</button>
+ <button id="bg">g — flood pushState, keluar via history.go(-1)</button>
+ <button id="bc">KONTROL — tanpa pengisian</button>
+ <button id="bR">Reset hasil</button>
+</p>
+</div>
+
+<div class="box uji" id="armbox"><b>LENGAN AKTIF</b>
+<pre id="live">…</pre>
+<p>
+ <button id="goBtn">history.go(-1)</button>
+ <a id="exit" href="#">keluar tanpa mencatat run ini</a>
+</p>
+<p class="note">Semua loop dibatasi 50 iterasi. Tidak ada jendela yang dibuka, tidak ada jaringan yang disentuh,
+Esc tidak pernah diblokir.</p>
+</div>
+
+<div class="box oracle"><b>ORACLE</b>
+Per baris tabel: <code>entri +N/50</code> (berapa banyak yang benar-benar masuk riwayat — sisa = ditelan
+rate-limiter/error) dan <code>langkah keluar</code> (berapa Back/go(-1) sampai dokumen ditinggalkan).
+<ul style="margin:.35rem 0 0;padding-left:1.1rem">
+ <li><b>PAGAR MASIH BERLAKU</b> untuk sebuah alat: entri +50 tetapi <b>langkah keluar = 1</b> (dituang, lalu
+ dilewati seluruhnya).</li>
+ <li><b>BYPASS BERHASIL</b>: ada alat dengan entri +50 <b>dan</b> langkah keluar ≈ 51, sementara alat lain di
+ tabel yang sama = 1 ⇒ pagar tidak menjangkau alat itu. Barisnya sendiri yang jadi laporanmu.</li>
+ <li><b>BYPASS PER-KONSUMEN</b>: baris <code>p</code> = 1 tetapi baris <code>g</code> ≈ 51 pada riwayat yang
+ identik ⇒ skip hanya berlaku untuk UI, bukan untuk <code>history.go()</code>.</li>
+ <li><b>CELAH RATE-LIMITER</b>: satu alat menunjukkan entri +50/50 sementara alat lain terpotong (mis. +50 vs +20
+ dengan error &gt; 0) ⇒ limiter tidak mencakup alat itu — inilah jalur yang secara historis dibayar Mozilla.</li>
+</ul>
+</div>
+
+<div class="box kontrol"><b>KONTROL</b>
+Mode KONTROL memuat lengan yang sama <b>tanpa pengisian riwayat</b>: harus <code>entri +0</code> dan
+<b>1</b> langkah keluar. Baris <code>r</code> (replaceState) adalah kontrol kedua di dalam tabel yang sama.
+Kalau salah satu dari keduanya &gt; 1, pengukurannya cacat — jangan baca baris lain.
+</div>
+
+<div class="box hasil"><b>HASIL (tabel yang bisa disalin)</b>
+<pre id="res">…</pre>
+<p class="note">Kosong terus di <code>file://</code> = penyimpanan sesi diblokir; pakai angka yang tercetak di
+lengan, atau jalankan dari <code>https://</code>.</p>
+</div>
+
+<div class="jujur"><b>JUJUR — kemungkinan besar sebagian besar tabel ini berakhir “pagar menang”</b>
+(atau lebih tepat: tak ada garansi yang pecah, karena mengisi riwayat memang legal). Hanya dua sel yang layak
+dikirim ke vendor: <b>(a)</b> alat yang lolos rate-limiter yang seharusnya membatasinya, dan <b>(b)</b>
+inkonsistensi UI vs <code>history.go()</code> pada riwayat yang sama. Sel lain = data pelengkap, bukan temuan.
+</div>
+
+<script>
+var base = location.href.split('#')[0].split('?')[0];
+var NAMES = { p: 'pushState    ', r: 'replaceState ', h: 'location.hash', g: 'go(-1) progr.', c: 'KONTROL      ' };
+var m = /mode=([prhgc])/.exec(location.search), mode = m ? m[1] : '';
+document.getElementById('href').textContent = location.href;
+function S(k, v) { try { return v === undefined ? sessionStorage.getItem(k) : (sessionStorage.setItem(k, v), v); } catch (e) { return null; } }
+function out(id, t) { document.getElementById(id).textContent = t; }
+var FILL = { p: function (j) { history.pushState({ j: j }, '', '#f' + j); }, r: function (j) { history.replaceState({ j: j }, '', '#r' + j); },
+             h: function (j) { location.hash = 'h' + j; }, g: function (j) { history.pushState({ j: j }, '', '#g' + j); }, c: function () {} };
+if (!mode) {
+  document.getElementById('armbox').style.display = 'none';
+  var pend = S('p44'), log = S('l44') || '', i, p, k, a, tr, s = 'alat          | entri +N/50 | error | langkah keluar        | terperangkap\n';
+  if (pend && location.hash != '#abort') { log = log ? log + '\n' + pend : pend; S('l44', log); }
+  S('p44', '');
+  var rows = log ? log.split('\n') : [], acc = {};
+  for (i = 0; i < rows.length; i++) { p = rows[i].split(':'); a = acc[p[0]] = acc[p[0]] || { s: [] }; a.s.push(+p[1]); a.ad = +p[2]; a.er = +p[3]; }
+  for (k in acc) { a = acc[k]; tr = 0;
+    for (i = 0; i < a.s.length; i++) { if (a.s[i] > 1) tr++; }
+    s += NAMES[k] + ' |     +' + a.ad + '     |   ' + a.er + '   | [' + a.s.join(', ') + '] | ' + tr + '/' + a.s.length + '\n'; }
+  out('res', rows.length ? s : '(belum ada run - jalankan tiap mode 20x)');
+  var nav = function (x) { return function () { location.href = base + '?mode=' + x; }; };
+  document.getElementById('bp').onclick = nav('p'); document.getElementById('br').onclick = nav('r');
+  document.getElementById('bh').onclick = nav('h'); document.getElementById('bg').onclick = nav('g');
+  document.getElementById('bc').onclick = nav('c');
+  document.getElementById('bR').onclick = function () { S('l44', ''); out('res', '(direset)'); };
+  window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
+} else {
+  document.getElementById('hub').style.display = 'none';
+  var n = 0, errs = 0, before = history.length, j;
+  for (j = 0; j < 50; j++) { try { FILL[mode](j); } catch (e2) { errs++; } }
+  var added = history.length - before;
+  var save = function () { S('p44', mode + ':' + (n + 1) + ':' + added + ':' + errs); };
+  var show = function () { out('live', 'MODE ' + mode + ' (' + NAMES[mode] + ')' + (mode == 'g' ? ' - keluar dengan tombol go(-1)' : ' - tekan Back sampai keluar') +
+    '\nentri benar-benar bertambah : ' + added + ' / 50   (error/ditolak: ' + errs + ')' +
+    '\nhistory.length              : ' + history.length +
+    '\nlangkah mundur sejauh ini   : ' + n +
+    '\n=> kalau keluar sekarang, langkah keluar = ' + (n + 1)); };
+  save(); show();
+  window.addEventListener('popstate', function () { n++; save(); show(); });
+  document.getElementById('goBtn').style.display = (mode == 'g') ? 'inline-block' : 'none';
+  document.getElementById('goBtn').onclick = function () { history.go(-1); };
+  document.getElementById('exit').href = base + '#abort';
+}
+</script>
+</div></body></html>

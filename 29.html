@@ -1,0 +1,129 @@
+<!-- MEKANISME: empat cara berbeda menahan navigasi tetap PENDING (port menggantung, 204 No Content, IP tak-terutekan, rantai redirect) diukur berdampingan — pagar "navigasi selalu cepat selesai" ditembus oleh cara mana? -->
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>41 — Bandingkan cara menahan navigasi</title>
+<style>
+body{background:#0f1115;color:#dfe4ec;font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:18px 20px;max-width:1000px}
+h2{font-size:19px;margin:0 0 2px}
+.sec{border:1px solid #2a3140;border-left:3px solid #4b7bec;border-radius:6px;padding:10px 12px;margin:10px 0;background:#151922}
+.sec b{color:#8ab4ff;letter-spacing:.06em}
+.ctl{border-left-color:#2ecc71}.ctl b{color:#6ee7a0}
+.warn{border-left-color:#e0a13a}.warn b{color:#f0c674}
+table{border-collapse:collapse;width:100%;font:12px/1.4 ui-monospace,Consolas,monospace;margin-top:8px}
+th,td{border:1px solid #2a3140;padding:4px 7px;text-align:left;vertical-align:top}
+th{background:#1b2130}
+.hit{color:#ff8f8f;font-weight:700}.ok{color:#6ee7a0}.mut{color:#8b95a7}
+button{background:#243049;color:#dfe4ec;border:1px solid #3d557f;border-radius:5px;padding:7px 12px;font-size:13px;cursor:pointer;margin:3px 4px 3px 0}
+button.stop{background:#4a2330;border-color:#7f3d4d}
+input{background:#0b0e14;color:#dfe4ec;border:1px solid #2a3140;border-radius:4px;padding:4px 6px;width:80px}
+textarea{width:100%;height:130px;background:#0b0e14;color:#9fb4d8;border:1px solid #2a3140;border-radius:5px;font:11px/1.4 ui-monospace,Consolas,monospace;padding:6px;box-sizing:border-box}
+code{color:#f0c674}
+</style>
+
+<h2>41 — BANDINGKAN CARA HANG: port · 204 · IP tak-terutekan · rantai redirect</h2>
+<div class="mut">location.href asli halaman ini: <code id="href"></code></div>
+
+<div class="sec"><b>PAGAR</b><br>
+Sama seperti berkas 40: address bar melukis URL <i>pending</i>, dan pagarnya adalah <b>asumsi</b> bahwa navigasi
+selalu cepat commit atau cepat gagal sehingga bar melukis ulang (jendela ≈ 0&nbsp;ms). Browser tidak punya pengecekan
+"apakah jendela ini terlalu panjang?" — ia hanya menunggu jaringan.
+<span class="mut">[keluarga bug: <i>pending navigation entry URL spoof</i>; nomor bug tidak dikutip — UNVERIFIED]</span>
+</div>
+
+<div class="sec"><b>CELAH</b><br>
+Kalau pagarnya cuma asumsi waktu, maka <b>setiap cara memperpanjang <i>pending</i></b> adalah kandidat, dan cara-cara itu
+melewati jalur kode yang berbeda:
+<ul style="margin:6px 0 0 18px;padding:0">
+<li><b>M1 port menggantung</b> <code>https://www.google.com:4444/</code> — TCP di-drop diam; berhenti karena timeout soket.</li>
+<li><b>M2 204 No Content</b> <code>https://www.google.com/generate_204</code> — respons SAH dan cepat, tetapi <b>tidak pernah commit dokumen</b>: navigasi dibatalkan di lapisan HTTP, bukan lapisan jaringan. Jendelanya bisa tak terbatas <i>tanpa</i> menunggu timeout apa pun.</li>
+<li><b>M3 IP tak-terutekan</b> <code>http://192.0.2.1/</code> — TEST-NET-1 (RFC 5737), dijamin tak dipakai siapa pun; menguji apakah jendela ditentukan host, bukan port.</li>
+<li><b>M4 rantai redirect</b> <code>http://google.com/</code> — beberapa hop (http→https, apex→www); commit tertunda tapi <i>terbatas</i>: seberapa besar tundaannya?</li>
+</ul>
+Bentuk pagarnya <b>per-jalur</b>, sedangkan cacatnya <b>per-invarian</b> ("bar melukis sesuatu yang belum jadi").
+Jadi tebakan pertama selalu: jalur tetangga yang tidak ikut dipagari.
+</div>
+
+<div class="sec"><b>UJI</b><br>
+Satu popup aktif pada satu waktu; tiap probe ditutup otomatis saat commit atau saat mencapai cap.
+<div style="margin-top:6px">
+cap (ms) <input id="cap" type="number" value="8000" min="1000" max="15000">
+&nbsp; ulangi tiap metode <input id="runs" type="number" value="3" min="1" max="20">×
+</div>
+<div style="margin-top:6px">
+<button id="bd">BANGUN ANTREAN</button>
+<button id="st1">LANGKAH (1 probe per klik)</button>
+<button id="auto">AUTO (butuh izin popup)</button>
+<button id="hl" class="stop">HENTIKAN</button>
+<button id="cl" class="stop">TUTUP POPUP</button>
+</div>
+<div class="mut" style="margin-top:6px" id="st">siap. LANGKAH aman dari popup-blocker; AUTO memerlukan izin popup untuk origin ini.</div>
+</div>
+
+<div class="sec warn"><b>ORACLE</b><br>
+<b>BYPASS (jendela ada):</b> <code>HANG(cap)</code> — sampai cap tercapai, <code>w.document</code> masih bisa diakses opener
+(dokumen belum commit) padahal address bar melukis URL tujuan.<br>
+<b>PAGAR MASIH BERLAKU:</b> <code>COMMIT</code> dengan ms terbatas &lt;&lt; cap.<br>
+<b>Yang paling menarik justru M2:</b> kalau 204 memberi <code>HANG(cap)</code> <u>tanpa</u> menunggu timeout jaringan,
+jendelanya murah dan panjang — itu perbedaan kelas, bukan perbedaan angka.<br>
+<b>Batas kejujuran:</b> JS tak bisa membaca address bar. Berkas ini mengukur syarat perlunya. Untuk tiap metode
+yang HANG, ambil <b>screenshot address bar</b>. Kalau bar menunjukkan <code>about:blank</code> atau URL sebelumnya
+(bukan URL tujuan), tulis itu: pagarnya menang di browser tersebut, dan angkanya tetap berguna sebagai data.
+</div>
+
+<div class="sec ctl"><b>KONTROL</b><br>
+<b>C1</b> <code>https://www.google.com/</code> — URL yang commit normal. Harus <code>COMMIT</code>, ms kecil dan terbatas.
+Kalau kontrol ikut menggantung, jaringanmu yang bermasalah; hasil sesi itu tidak sah.
+</div>
+
+<table><thead><tr><th>metode</th><th>URL</th><th>ms (median)</th><th>min/maks</th><th>n</th><th>verdict</th><th>klasifikasi</th></tr></thead><tbody id="tb"></tbody></table>
+
+<div class="mut" style="margin-top:10px">Hasil siap-salin (TSV):</div>
+<textarea id="tsv" readonly></textarea>
+
+<div class="sec"><b>BATAS / ETIKA</b><br>
+Hanya navigasi GET biasa ke host publik / alamat dokumentasi RFC 5737. Tidak ada form, input kredensial,
+fetch/XHR/WebSocket/beacon, cookie-stealing, maupun peniruan organisasi. Satu popup pada satu waktu, tombol tutup selalu ada,
+tiap loop ber-cap. <code>google.com</code> hanya label URL yang tak berbahaya. <code>generate_204</code> adalah endpoint publik
+yang sudah lazim dipakai deteksi captive-portal; permintaannya GET polos tanpa payload.
+</div>
+
+<script>
+var M=[{id:'M1',n:'port menggantung',u:'https://www.google.com:4444/'},
+       {id:'M2',n:'204 No Content',u:'https://www.google.com/generate_204'},
+       {id:'M3',n:'IP tak-terutekan (TEST-NET-1)',u:'http://192.0.2.1/'},
+       {id:'M4',n:'rantai redirect',u:'http://google.com/'},
+       {id:'C1',n:'KONTROL commit normal',u:'https://www.google.com/',c:1}];
+var pop=null,halt=false,rows={},queue=[],qi=0;
+function $(i){return document.getElementById(i)}
+function med(a){var b=a.slice().sort(function(x,y){return x-y});return b.length?b[b.length>>1]:0}
+function mn(a){return Math.min.apply(null,a)}function mx(a){return Math.max.apply(null,a)}
+function probe(u,cap,cb){var w=null;try{w=window.open(u,'probe','width=460,height=320')}catch(e){}
+ if(!w){cb(-1,'POPUP-DIBLOKIR');return}pop=w;var t0=Date.now();
+ var iv=setInterval(function(){var el=Date.now()-t0,c=false;
+  try{if(!w.document)c=true}catch(e){c=true}
+  if(w.closed){clearInterval(iv);pop=null;cb(el,'DITUTUP-USER');return}
+  if(c||el>=cap){clearInterval(iv);try{w.close()}catch(e){}pop=null;cb(el,c?'COMMIT':'HANG(cap)')}},25)}
+function render(){var h='',t='metode\turl\tms_median\tmin\tmaks\tn\tverdict\tklasifikasi\n',i,k;
+ for(i=0;i<M.length;i++){var m=M[i],R=rows[m.id];if(!R)continue;var v=[];for(k in R.v)v.push(k+' x'+R.v[k]);
+  var md=med(R.ms),hang=(R.v['HANG(cap)']||0)>0,cls=hang?'JENDELA DESYNC':'commit / gagal-cepat (aman)';
+  h+='<tr><td>'+m.id+' '+m.n+(m.c?' <span class="ok">(KONTROL)</span>':'')+'</td><td>'+m.u+'</td><td>'+md+'</td><td>'+
+   mn(R.ms)+' / '+mx(R.ms)+'</td><td>'+R.ms.length+'</td><td>'+v.join(' ')+'</td><td class="'+(hang?'hit':'ok')+'">'+cls+'</td></tr>';
+  t+=m.id+'\t'+m.u+'\t'+md+'\t'+mn(R.ms)+'\t'+mx(R.ms)+'\t'+R.ms.length+'\t'+v.join(' ')+'\t'+cls+'\n'}
+ $('tb').innerHTML=h;$('tsv').value=t+'# '+navigator.userAgent+'\n'}
+function build(){var n=Math.min(20,Math.max(1,+$('runs').value||3)),r,i;queue=[];qi=0;rows={};halt=false;
+ for(r=0;r<n;r++)for(i=0;i<M.length;i++)queue.push(M[i]);
+ render();$('st').textContent='antrean dibangun: '+queue.length+' probe.'}
+function step(auto){if(pop){$('st').textContent='popup masih terbuka — tutup dulu.';return}
+ if(!queue.length)build();
+ if(halt||qi>=queue.length){$('st').textContent='selesai '+qi+'/'+queue.length+' — BANGUN ANTREAN untuk mengulang.';return}
+ var cap=Math.min(15000,Math.max(1000,+$('cap').value||8000)),m=queue[qi++];
+ $('st').textContent='menguji '+m.id+' '+m.n+' — '+qi+'/'+queue.length+' (cap '+cap+' ms)';
+ probe(m.u,cap,function(ms,vd){var R=rows[m.id]||(rows[m.id]={ms:[],v:{}});R.ms.push(ms);R.v[vd]=(R.v[vd]||0)+1;render();
+  if(auto&&!halt)setTimeout(function(){step(true)},350);
+  else $('st').textContent=m.id+' -> '+ms+' ms '+vd+'  ('+qi+'/'+queue.length+') — klik LANGKAH lagi.'})}
+$('href').textContent=location.href;
+$('bd').onclick=build;$('st1').onclick=function(){step(false)};$('auto').onclick=function(){halt=false;step(true)};
+$('hl').onclick=function(){halt=true;$('st').textContent='dihentikan pada '+qi+'/'+queue.length+'.'};
+$('cl').onclick=function(){if(pop){try{pop.close()}catch(e){}pop=null}$('st').textContent='popup ditutup.'};
+</script>

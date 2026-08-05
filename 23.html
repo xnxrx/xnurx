@@ -1,0 +1,139 @@
+<!-- MEKANISME: pagar kursor kustom Chromium bersifat GEOMETRIS (fallback hanya bila cursor rect meluap keluar frame rect); popup <select> native digambar DI ATAS konten tapi pointer tetap DI DALAM frame rect, jadi tak ada kondisi yang memicu fallback dan tak ada supresi bespoke seperti pada permission prompt. -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>31 — popup &lt;select&gt; native vs kursor kustom ber-hotspot jauh</title>
+<style>
+  *{box-sizing:border-box}
+  body{font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
+  .p{border:2px solid #d33;border-radius:12px;padding:.9rem 1rem;max-width:860px;margin:0 auto}
+  h2{font-size:1.08rem;margin:.1rem 0 .7rem}
+  .kv{display:grid;grid-template-columns:7.5rem 1fr;gap:.3rem .7rem;font-size:.9rem}
+  .kv b{color:#555;font-weight:600}
+  code{background:#f2f2f2;padding:.08rem .32rem;border-radius:4px;word-break:break-all}
+  .sec{color:#0a7;font-weight:700}.vuln{color:#d33;font-weight:700}
+  button{font:inherit;padding:.45rem .8rem;border:1px solid #888;border-radius:9px;background:#fafafa;cursor:pointer;margin:.15rem .3rem .15rem 0}
+  button.k{background:#d33;color:#fff;border-color:#b22}
+  .zone{margin:.9rem 0;border:2px dashed #d33;border-radius:10px;padding:1.6rem 1rem;background:#fff7f7;text-align:center}
+  .ctl{position:fixed;right:0;bottom:0;width:92px;height:60px;border:2px solid #0a7;border-radius:10px 0 0 0;background:#eafff6;font-size:.72rem;padding:.25rem;text-align:center;z-index:9}
+  select{font:inherit;padding:.35rem .5rem}
+  pre{font:12.5px/1.5 ui-monospace,Consolas,monospace;background:#0d1117;color:#c9d1d9;border-radius:9px;padding:.6rem .7rem;white-space:pre-wrap;margin:.7rem 0 0}
+  .n{font-size:.83rem;color:#777}
+  .big{font:700 20px/1.3 ui-monospace,Consolas,monospace}
+  @media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}code{background:#2a2a2a}
+    .zone{background:#241a1a}.ctl{background:#12291f}}
+</style>
+<style id="sty"></style>
+</head>
+<body>
+<div class="p">
+  <h2>31 — popup <code>&lt;select&gt;</code> native + kursor kustom 100&nbsp;DIP ber-hotspot jauh</h2>
+
+  <div class="kv">
+    <b>URL asli</b><span class="sec" id="real">…</span>
+
+    <b>PAGAR</b><span>Chromium: <code>kMaximumCursorDIPSize</code> = 128 DIP (<code>ui/base/cursor/cursor.cc</code>)
+      <i>dan</i> <code>kMaximumCursorSizeWithoutFallback</code> = 32 DIP (<code>event_handler.cc</code>, lahir dari
+      crbug&nbsp;880863): kursor &gt;32&nbsp;DIP diganti kursor default <b>bila cursor rect tidak sepenuhnya termuat
+      di frame rect</b>. Terpisah dari itu, Chromium <b>mematikan</b> kursor kustom selama <b>permission prompt</b>
+      tampil (commit 5608bda8, crbug&nbsp;1385714). Gecko: <code>ShouldBlockCustomCursor</code> sejak FF67
+      (CVE-2019-11695), regresi CVE-2022-45418, pernah dilewati dengan menyibukkan content-process (CVE-2020-15654).</span>
+
+    <b>CELAH</b><span>Pagar itu <b>geometris</b>, bukan per-permukaan: ia hanya menangkap kursor yang <b>meluap keluar</b>
+      frame. Popup <code>&lt;select&gt;</code> native meng-komposit <b>di atas</b> konten sementara pointer tetap
+      <b>di dalam</b> frame rect &rArr; syarat fallback tak pernah terpenuhi. Fakta bahwa permission prompt butuh
+      supresi <b>bespoke</b> sendiri membuktikan supresi itu <b>tidak diwarisi</b> permukaan lain. Bentuk-patch
+      <b>F6</b> (fix per-permukaan, cacat per-invarian) di <code>spoof-patchbypass.md</code>.</span>
+
+    <b>UJI</b><span>Gerakkan pointer di kotak merah (koordinat terbaca hidup) &rarr; buka popup
+      <code>&lt;select&gt;</code> &rarr; catat apakah panah DEMO ber-offset masih terlukis di atas daftar opsi.
+      Ulangi <b>20&times;</b>, tekan tombol vonis tiap kali.</span>
+
+    <b>ORACLE</b><span><span class="vuln">BYPASS</span> = panah DEMO (dengan cincin merah di titik pointer
+      sebenarnya) <b>masih terlukis di atas popup</b> &rArr; yang dilihat user dan yang di-hit-test terpisah sejauh
+      offset yang tercetak di bawah.<br>
+      <span class="sec">PAGAR MASIH BERLAKU</span> = begitu popup terbuka kursor kembali menjadi panah sistem biasa
+      (atau kursor kustom hilang seluruhnya).</span>
+
+    <b>KONTROL</b><span>Kotak hijau di pojok kanan-bawah layar memakai kursor <b>120 DIP</b> yang cursor rect-nya
+      <b>pasti meluap</b> keluar viewport &rArr; Chromium <b>wajib</b> fallback ke panah default. Kalau di sana pun
+      panah DEMO muncul, yang kamu lihat bukan mekanisme ini &mdash; bacaanmu salah.</span>
+  </div>
+
+  <div class="zone" id="zone">
+    <p style="margin:.2rem 0 .8rem"><b>Zona uji</b> — jauhkan pointer dari tepi jendela agar cursor rect tetap termuat.</p>
+    <select id="sel">
+      <option>— pilih opsi demo —</option>
+      <option>Opsi A (inert)</option>
+      <option>Opsi B (inert)</option>
+      <option>Opsi C (inert)</option>
+      <option>Opsi D (inert)</option>
+      <option>Opsi E (inert)</option>
+    </select>
+  </div>
+
+  <div id="pos" class="n">gerakkan pointer di zona uji…</div>
+  <div id="rect" class="n">&nbsp;</div>
+  <div id="ev" class="n">&nbsp;</div>
+
+  <p style="margin:.8rem 0 .2rem">
+    <button class="k" id="yes">Vonis: panah DEMO MASIH terlukis di atas popup</button>
+    <button id="no">Vonis: kursor kembali default (pagar bekerja)</button>
+    <button id="rst">Reset hitungan</button>
+  </p>
+  <div>Kursor kustom bertahan di atas popup: <span class="big" id="score">0 / 0</span>
+    <span class="n">&nbsp;(target N=20; laporkan angka ini, bukan kesan)</span></div>
+
+  <pre id="log"></pre>
+  <p class="n"><b>Perkiraan jujur:</b> di Chromium desktop popup <code>&lt;select&gt;</code> dirender browser di luar
+    proses konten dan pada banyak build kursor memang kembali default begitu popup terbuka &mdash; kemungkinan besar
+    <b>pagar menang</b>. Nilai berkas ini ada pada <b>angkanya</b> (p, offset px, jumlah event), bukan pada klaim.
+    Kalibrasi: Chromium menilai seluruh kelas pointer-misattribution <b>Low&nbsp;(S3)</b>. Panah dan teks DEMO
+    adalah gambar buatan halaman, tidak meniru organisasi mana pun; tidak ada form, jaringan, atau navigasi.</p>
+</div>
+
+<div class="ctl" id="ctl">KONTROL<br>kursor 120 DIP<br>(harus default)</div>
+
+<script>
+var SZ = 100, HOT = 4, AX = 62, AY = 58, trials = 0, hits = 0, mm = 0, t0 = 0, live = false;
+function $(i){ return document.getElementById(i); }
+function svg(sz, ax, ay){
+  return "<svg xmlns='http://www.w3.org/2000/svg' width='" + sz + "' height='" + sz + "'>" +
+    "<circle cx='4' cy='4' r='3.5' fill='none' stroke='red' stroke-width='1.5'/>" +
+    "<g transform='translate(" + ax + "," + ay + ") scale(1.7)'><polygon points='0,0 0,18 5,13 8,21 12,19 9,12 16,12' fill='black' stroke='white' stroke-width='1'/></g>" +
+    "<text x='" + ax + "' y='" + (sz - 3) + "' font-size='11' fill='red' font-family='sans-serif'>DEMO</text></svg>";
+}
+function cur(sz, ax, ay){ return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg(sz, ax, ay)) + '") ' + HOT + ' ' + HOT + ', auto'; }
+function score(){ $("score").textContent = hits + " / " + trials + (trials ? "   p=" + (hits / trials).toFixed(2) : ""); }
+function tally(ok){ trials++; if (ok){ hits++; } score(); log((ok ? "[bypass] " : "[pagar ] ") + "percobaan #" + trials); }
+function log(s){ $("log").textContent += s + "\n"; }
+function move(e){
+  var l = e.clientX - HOT, t = e.clientY - HOT,
+      fit = (l >= 0 && t >= 0 && l + SZ <= window.innerWidth && t + SZ <= window.innerHeight);
+  $("pos").textContent = "pointer nyata (" + e.clientX + "," + e.clientY + ")   panah tergambar kira-kira (" +
+    (e.clientX + AX - HOT) + "," + (e.clientY + AY - HOT) + ")   offset +" + (AX - HOT) + "," + (AY - HOT) + " px";
+  $("rect").textContent = "cursor rect " + Math.round(l) + "," + Math.round(t) + " " + SZ + "x" + SZ + " -> " +
+    (fit ? "TERMUAT di frame rect (aturan 32-DIP tidak memicu fallback)" : "MELUAP (Chromium wajib fallback ke default)");
+  if (live){ mm++; }
+}
+function opened(){ live = true; mm = 0; t0 = Date.now(); $("ev").textContent = "popup dibuka — menghitung event…"; }
+function closed(){
+  if (!live){ return; }
+  live = false;
+  $("ev").textContent = "popup terbuka " + (Date.now() - t0) + " ms; mousemove yang tetap sampai ke halaman selama itu: " + mm;
+}
+$("real").textContent = location.href;
+$("sty").textContent = ".zone,.zone *{cursor:" + cur(SZ, AX, AY) + "}\n.ctl{cursor:" + cur(120, 84, 80) + "}";
+$("zone").addEventListener("mousemove", move);
+$("sel").addEventListener("mousedown", opened);
+$("sel").addEventListener("change", closed);
+$("sel").addEventListener("blur", closed);
+window.addEventListener("keyup", function(e){ if (e.key === "Escape"){ closed(); } });
+$("yes").onclick = function(){ tally(true); };
+$("no").onclick = function(){ tally(false); };
+$("rst").onclick = function(){ trials = 0; hits = 0; score(); $("log").textContent = ""; };
+</script>
+</body>
+</html>
