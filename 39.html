@@ -1,0 +1,101 @@
+<!-- MEKANISME: dokumen data:text/html lahir dengan origin OPAQUE (bukan warisan pembuatnya), dan jalur kelahirannya menentukan apakah ia boleh lahir sama sekali - iframe diizinkan, window.open dan <a target=_blank> ditolak di frame teratas. -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>16 - dokumen data: dan origin kelahirannya</title>
+<style>
+body{font:15px/1.55 system-ui,sans-serif;margin:0;padding:1rem;background:#fff;color:#111}
+.panel{max-width:760px;margin:0 auto;border:2px solid #a15;border-radius:10px;padding:.9rem}
+h2{font-size:1.05rem;margin:.1rem 0 .6rem}
+.kv{display:grid;grid-template-columns:12rem 1fr;gap:.15rem .6rem;font-size:.88rem;word-break:break-all}
+.kv b{color:#555;font-weight:600}
+code{background:#f2f2f2;padding:.05rem .3rem;border-radius:4px}
+p.o{margin:.25rem 0;font-size:.9rem}
+#verdict{margin:.7rem 0;padding:.55rem .7rem;border-radius:8px;font-weight:700;background:#eee}
+.vuln{background:#fde;color:#a00}.secure{background:#dfe;color:#060}.ctrl{background:#eef;color:#005}
+button{font:inherit;padding:.45rem .7rem;border:1px solid #888;border-radius:8px;background:#fafafa;cursor:pointer;margin:0 .35rem .35rem 0}
+pre{white-space:pre-wrap;word-break:break-all;font-size:.82rem;background:#f7f7f7;padding:.5rem;border-radius:6px;min-height:1.2rem}
+.note{font-size:.8rem;color:#666}
+@media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}code,pre{background:#242424}#verdict{background:#222}.ctrl{background:#223;color:#cce}button{background:#222;color:#eee;border-color:#555}.note{color:#999}}
+</style>
+</head>
+<body>
+<div class="panel">
+<h2>16 &middot; dokumen <code>data:text/html</code> - origin apa yang ia laporkan, dan bisakah ia menyentuh pembuatnya?</h2>
+
+<div class="kv">
+  <b>location.href asli</b><span id="here">...</span>
+  <b>Tiga jalur lahir</b><span><code>&lt;iframe src=data:&gt;</code> &middot; <code>window.open(data:)</code> &middot; <code>&lt;a href=data: target=_blank&gt;</code></span>
+  <b>Primitif baca</b><span>anak mencoba <code>pembuat.document.body.textContent.length</code> - hanya panjangnya, tidak ada isi yang dikirim ke mana pun</span>
+</div>
+
+<p class="o"><b>RENTAN =</b> dokumen <code>data:</code> diatribusikan browser ke origin halaman ini (<code>ev.origin</code>), atau berhasil membaca DOM pembuatnya.</p>
+<p class="o"><b>AMAN =</b> dokumen <code>data:</code> diatribusikan ke <code>null</code> (opaque) DAN sentuhannya ditolak <code>SecurityError</code>; jalur frame-teratas (<code>window.open</code> / <code>target=_blank</code>) bahkan ditolak sebelum dokumen sempat lahir.</p>
+<p class="o"><b>Baseline aman:</b> buka berkas ini apa adanya lalu tekan tombol 1 - hasil benar adalah <code>ev.origin = null</code> + <code>DITOLAK SecurityError</code>. Tombol Kontrol memakai <code>srcdoc</code>, yang memang mewarisi origin, semata untuk membuktikan alat ukurnya hidup; hasilnya sengaja bukan vonis keamanan.</p>
+
+<p>
+<button id="b1">1 iframe data:</button>
+<button id="b2">2 window.open(data:)</button>
+<button id="b3">3 a target=_blank</button>
+<button id="b4">Kontrol: srcdoc (mekanisme data: dilepas)</button>
+</p>
+<div id="verdict">verdict: belum dijalankan</div>
+<pre id="log"></pre>
+<iframe id="sink" style="width:1px;height:1px;border:0;position:absolute;left:-9999px" title="sink"></iframe>
+<p class="note">Tidak ada jaringan, tidak ada form, tidak ada kredensial, tidak ada data yang dikirim ke mana pun. Jendela uji ditutup otomatis.</p>
+</div>
+<script>
+var log=document.getElementById('log'), vd=document.getElementById('verdict'), sink=document.getElementById('sink');
+document.getElementById('here').textContent=location.href+'   [location.origin = '+(location.origin||'(kosong)')+']';
+function say(c,t){vd.className=c;vd.textContent=t;}
+function add(t){log.textContent+=t+'\n';}
+var PROBE="(function(){var to=window.opener||window.parent,r={org:String(location.origin),url:String(document.URL).slice(0,52),via:(window.opener?'popup':'iframe')};"
+ +"try{r.touch='BISA baca DOM pembuat ('+to.document.body.textContent.length+' char)';}catch(e){r.touch='DITOLAK '+e.name;}"
+ +"try{to.postMessage(r,'*');}catch(e){}})()";
+var BODY='<script>'+PROBE+'<\/script>dokumen anak (DEMO)';
+var DATAURL='data:text/html,'+encodeURIComponent(BODY);
+var arm='iframe', got=false, realOrigin=/^[a-z]+:\/\//.test(String(location.origin));
+window.addEventListener('message',function(ev){
+  var d=ev.data; if(!d||typeof d.org!=='string')return; got=true;
+  add('dokumen anak ('+d.via+') melapor:\n  location.origin (kata dokumen) = '+(d.org||'(kosong/null)')+'\n  ev.origin (atribusi browser)   = '+ev.origin
+     +'\n  document.URL                   = '+d.url+'\n  sentuhan ke DOM pembuat        = '+d.touch);
+  var oA=String(location.origin), attributed=realOrigin&&(String(ev.origin)===oA), touched=d.touch.indexOf('BISA')===0;
+  if(arm==='ctrl'){ say('ctrl','KONTROL-HIDUP (bukan vonis keamanan) - dokumen srcdoc diatribusikan browser ke origin pembuat ('+ev.origin+') dan probe berhasil membacanya, jadi alat ukurnya berfungsi. Perhatikan location.origin-nya tetap "'+(d.org||'null')+'" karena diserialkan dari URL about:srcdoc - yang ditegakkan adalah atribusi, bukan string itu. Karena itu hasil DITOLAK pada lengan data: adalah sifat nyata, bukan probe rusak.'); return; }
+  if(attributed||touched) say('vuln','RENTAN - dokumen data: diatribusikan ke "'+ev.origin+'" dengan sentuhan='+d.touch+'. Dokumen data: seharusnya opaque dan tidak boleh menyentuh pembuatnya.');
+  else say('secure','AMAN - dokumen data: diatribusikan ke "'+ev.origin+'" dan melaporkan location.origin "'+(d.org||'null')+'" (opaque, bukan warisan), dan sentuhannya ditolak: '+d.touch);
+});
+function run(mode){
+  arm=mode; got=false; log.textContent=''; say('','menjalankan jalur: '+mode+' ...');
+  if(mode==='iframe'||mode==='ctrl'){
+    if(mode==='ctrl'){ if(!('srcdoc' in sink)){ say('','srcdoc tidak didukung di browser ini.'); return; } sink.removeAttribute('src'); sink.srcdoc=BODY+' [srcdoc]'; }
+    else { sink.removeAttribute('srcdoc'); sink.src=DATAURL; }
+  } else if(mode==='open'){
+    var w=window.open(DATAURL,'uxss16','width=440,height=150');
+    if(!w){ say('','popup diblokir - izinkan popup untuk halaman ini lalu ulangi.'); return; }
+    setTimeout(function(){
+      try{ var h=String(w.location.href);
+        add('window.open(data:) -> w.location.href = '+h.slice(0,60)+(h.indexOf('data:')===0?'   => data: DIIZINKAN di frame teratas (tidak lazim, catat)':'   => navigasi data: DITOLAK, jendela tetap about:blank')); }
+      catch(e){ add('window.open(data:) -> w.location tak terbaca ('+e.name+') => jendela berada di origin lain'); }
+      try{ w.close(); }catch(e){}
+    },800);
+  } else {
+    var a=document.createElement('a'); a.href=DATAURL; a.target='_blank'; a.textContent='.';
+    document.body.appendChild(a); a.click(); a.parentNode.removeChild(a);
+    add('<a href=data: target=_blank> diklik. Dua aturan berlaku di jalur ini: (1) larangan navigasi frame-teratas ke data: yang sama seperti window.open, dan (2) target=_blank modern implisit rel=noopener sehingga dokumen anak tidak punya handle window.opener untuk melapor balik.');
+  }
+  setTimeout(function(){
+    if(got) return;
+    if(mode==='iframe') say('secure','AMAN - tidak ada laporan: dokumen data: tidak dieksekusi di iframe (diblokir), atau tidak didukung di browser ini.');
+    else if(mode==='ctrl') say('','kontrol tidak melapor - srcdoc atau skripnya tidak didukung di browser ini.');
+    else say('secure','AMAN - tidak ada laporan dari jalur frame-teratas: navigasi ke data: ditolak sebelum dokumen sempat lahir.');
+  },1500);
+}
+document.getElementById('b1').onclick=function(){run('iframe');};
+document.getElementById('b2').onclick=function(){run('open');};
+document.getElementById('b3').onclick=function(){run('anchor');};
+document.getElementById('b4').onclick=function(){run('ctrl');};
+</script>
+</body>
+</html>

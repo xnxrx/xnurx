@@ -1,0 +1,112 @@
+<!-- MEKANISME: harness dua-vonis — satu primitif (pewarisan origin oleh about:blank/blob:/data:) dinilai serentak oleh DUA kelas: atribusi origin yang DITAMPILKAN dan pewarisan SOP yang MENGATUR, ditampilkan berdampingan. -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>30 — Harness dua-vonis: atribusi vs SOP</title>
+<style>
+body{font:15px/1.55 system-ui,"Segoe UI",sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
+h2{font-size:1.05rem;margin:.2rem auto .8rem;max-width:860px}
+.box{border:2px solid #d33;border-radius:10px;padding:.8rem;max-width:860px;margin:0 auto 1rem}
+.kv{display:grid;grid-template-columns:11rem 1fr;gap:.2rem .6rem;font-size:.9rem}
+.kv b{color:#555;font-weight:600}
+.real{color:#0a7;word-break:break-all;font-family:ui-monospace,Consolas,monospace}
+button{font:inherit;padding:.45rem .8rem;border:1px solid #888;border-radius:8px;background:#fafafa;cursor:pointer;margin:.15rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;max-width:860px;margin:.6rem auto}
+.two section{border:1px solid #999;border-radius:8px;padding:.5rem}
+.two h3{font-size:.9rem;margin:.1rem 0 .4rem}
+pre{background:#f4f4f4;border-radius:8px;padding:.5rem;white-space:pre-wrap;word-break:break-word;font-size:.8rem;margin:0}
+.oracle{max-width:860px;margin:1rem auto;font-size:.86rem;border-top:1px dashed #999;padding-top:.6rem}
+.v{color:#c00;font-weight:700}.s{color:#080;font-weight:700}
+.acts{max-width:860px;margin:0 auto}
+.fr{width:100%;height:60px;border:1px solid #999;border-radius:6px;margin:.2rem 0;background:#fff}
+code{background:#eee;padding:.05rem .25rem;border-radius:4px}
+@media(max-width:640px){.two{grid-template-columns:1fr}}
+@media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}pre{background:#242424}code{background:#2b2b2b}}
+</style>
+</head>
+<body>
+
+<h2>30 — Harness dua-vonis: satu jalan, dua kelas sekaligus</h2>
+
+<div class="box">
+  <div class="kv">
+    <b>URL nyata halaman ini</b><span class="real" id="here">…</span>
+    <b>Origin yang MENGATUR</b><span class="real" id="top">…</span>
+    <b>Primitif tunggal</b><span>Dokumen yang <b>mewarisi</b> origin pembuatnya tetapi <b>ditampilkan</b> dengan URL
+      yang bukan origin itu: <code>about:blank</code>, <code>blob:</code>, dan sebagai pembanding <code>data:</code>
+      (opaque, tidak mewarisi).</span>
+    <b>Dua vonis</b><span>KIRI = apa yang <b>ditampilkan</b> permukaan · KANAN = apa yang <b>mengatur</b> keamanan.
+      Satu klik mengisi keduanya.</span>
+  </div>
+</div>
+
+<div class="acts">
+  <button id="run">Jalankan harness (about:blank + blob: + data:)</button>
+  <button id="ctrl">Lengan KONTROL: hanya data: (pewarisan dihapus)</button>
+</div>
+
+<div class="two">
+  <section><h3>VONIS A — ATRIBUSI ORIGIN (tampilan)</h3><pre id="A">(belum dijalankan)</pre></section>
+  <section><h3>VONIS B — PEWARISAN SOP (mesin)</h3><pre id="B">(belum dijalankan)</pre></section>
+</div>
+<div class="acts" id="slot"></div>
+
+<div class="oracle">
+  <p><span class="v">VULNERABLE (kelas atribusi) bila:</span> ada baris KIRI berbunyi DIVERGEN — permukaan menampilkan
+  <code>about:blank</code>/<code>blob:</code>/kosong sementara dokumen itu sepenuhnya dapat diskrip oleh origin di panel
+  atas. Potret address bar jendela sembulan: ia menyebut sesuatu yang bukan origin yang memerintah dokumen tersebut.</p>
+  <p><span class="v">VULNERABLE (kelas SOP) bila:</span> baris <code>data:</code> di KANAN berbunyi WARIS — origin
+  opaque semestinya TERBLOKIR untuk pembacaan lintas-dokumen.</p>
+  <p><span class="s">SECURE bila:</span> KANAN menunjukkan <code>data:</code> TERBLOKIR, dan setiap dokumen yang dapat
+  diskrip oleh origin ini juga <b>menampilkan</b> origin ini pada permukaan yang menyebutnya.</p>
+  <p><b>Baseline aman (lengan kontrol):</b> tombol kedua menjalankan jalur yang sama dengan satu-satunya perubahan
+  hanya memakai <code>data:</code> — pewarisan origin dihapus. Kedua vonis harus terbaca SECURE. Jika lengan kontrol
+  pun DIVERGEN/WARIS, penyebabnya bukan pewarisan melainkan sesuatu yang lebih dalam.</p>
+  <p><b>Kenapa ini metode, bukan sekadar skenario:</b> vonis kiri dan kanan dihasilkan oleh <b>satu</b> primitif dan
+  <b>satu</b> gestur. Setiap kali sebuah jalur pewarisan origin baru muncul, tempelkan ke harness ini dan dapatkan dua
+  peluang temuan dari satu unit kerja.</p>
+</div>
+
+<script>
+var A=document.getElementById('A'),B=document.getElementById('B'),SLOT=document.getElementById('slot'),win=null;
+function pa(s){A.textContent+=s+'\n';}function pb(s){B.textContent+=s+'\n';}
+function shown(w){try{return w.location.href;}catch(e){return '(tak terbaca lintas-origin)';}}
+function judge(label,w,expectInherit){
+  var readable=false,o='(terblokir)';
+  try{readable=!!(w.document&&w.document.body!==undefined);o=w.location.origin||'null';}catch(e){readable=false;}
+  var disp=shown(w),gov=location.origin||'null';
+  pb(label+': '+(readable?'WARIS — dokumen ini diatur oleh '+gov+' (origin dilaporkan: '+o+')':'TERBLOKIR — origin opaque/berbeda')+(expectInherit?'':'  << baris pembanding'));
+  pa(label+': ditampilkan "'+disp+'" | mengatur "'+gov+'" -> '+((readable&&disp.indexOf(gov)<0)?'DIVERGEN':'konsisten'));
+}
+function run(full){
+  A.textContent='';B.textContent='';SLOT.innerHTML='';
+  pa('origin yang mengatur: '+(location.origin||'null'));pb('origin yang mengatur: '+(location.origin||'null'));
+  if(full){
+    var f=document.createElement('iframe');f.className='fr';f.src='about:blank';
+    f.onload=function(){judge('iframe about:blank',f.contentWindow,true);};SLOT.appendChild(f);
+    try{var url=URL.createObjectURL(new Blob(['<body style="font:12px sans-serif;margin:6px">frame blob: — HTML jinak, tanpa skrip</body>'],{type:'text/html'}));
+      var b=document.createElement('iframe');b.className='fr';b.src=url;b.onload=function(){judge('iframe blob:',b.contentWindow,true);};SLOT.appendChild(b);}
+    catch(e){pa('blob: tidak didukung di browser ini');pb('blob: tidak didukung di browser ini');}
+  }
+  var d=document.createElement('iframe');d.className='fr';
+  d.src='data:text/html,'+encodeURIComponent('<body style="font:12px sans-serif;margin:6px">frame data: — origin opaque</body>');
+  d.onload=function(){judge('iframe data:',d.contentWindow,false);};SLOT.appendChild(d);
+  if(full){
+    win=window.open('about:blank','_blank','width=520,height=260');
+    if(!win){pa('jendela sembulan diblokir — izinkan sembulan lalu ulangi');pb('jendela sembulan diblokir');return;}
+    win.document.write('<title>DEMO PoC 30</title><body style="font:16px system-ui;margin:14px">'+
+      '<p><b>DEMO</b> — jendela ini ditulis oleh pembukanya.</p><p>Address bar menampilkan: <b>about:blank</b></p>'+
+      '<p>Origin yang mengatur dokumen ini: <b>'+(location.origin||'null')+'</b></p>');
+    win.document.close();judge('jendela about:blank',win,true);
+    pa('>> potret address bar jendela sembulan dan bandingkan dengan baris di atas.');
+  }else pa('KONTROL: about:blank/blob: dihapus, hanya data: yang dijalankan.');
+}
+document.getElementById('here').textContent=location.href;
+document.getElementById('top').textContent=location.origin||'null (file://)';
+document.getElementById('run').onclick=function(){run(true);};
+document.getElementById('ctrl').onclick=function(){run(false);};
+</script>
+</body>
+</html>

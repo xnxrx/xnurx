@@ -1,0 +1,69 @@
+<!-- MEKANISME: sandbox="allow-scripts allow-same-origin" mengembalikan DUA hal yang tadinya dicabut sekaligus - eksekusi skrip dan origin asli - sehingga skrip di dalam frame berjalan dengan origin induk dan menjangkau DOM induk, termasuk atribut sandbox pada elemen iframe-nya sendiri. -->
+<meta charset="utf-8">
+<title>14 - sandbox allow-scripts + allow-same-origin meniadakan sandbox</title>
+<style>
+body{font:14px/1.6 system-ui,Segoe UI,sans-serif;margin:16px;max-width:880px;color:#111}
+h2{font-size:19px;margin:0 0 10px}
+.k{border-left:4px solid #888;padding:6px 10px;margin:8px 0;background:#f6f6f6}
+.v{border-left-color:#c62828}.s{border-left-color:#2e7d32}
+code{background:#eee;padding:1px 4px}
+button{font-size:15px;padding:7px 13px;margin:6px 8px 6px 0}
+#out{background:#111;color:#0f0;padding:10px;font:12.5px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;user-select:all;min-height:64px}
+.n{font-size:13px;color:#444}
+#mark{border:1px solid #c62828;padding:4px 8px;margin:8px 0;background:#fff4f4;font-size:13px}
+iframe{border:1px dashed #999;margin:4px 8px 4px 0;vertical-align:top;width:330px;height:52px}
+</style>
+
+<h2>14 &mdash; <code>sandbox="allow-scripts allow-same-origin"</code>: permukaan lolosnya</h2>
+
+<div class="k">URL asli halaman ini (<code>location.href</code>): <b id="href">-</b></div>
+<div class="k">Origin asli halaman ini (<code>self.origin</code>): <b id="orig">-</b></div>
+<div class="k v"><b>VULNERABLE (bug BROWSER):</b> arm <code>KONTROL</code> &mdash; yang hanya punya <code>allow-scripts</code> dan karena itu wajib ber-<b>opaque origin</b> (<code>self.origin=null</code>) &mdash; tetap <b>BERHASIL</b> membaca atau menulis DOM induk. Itu lolos sandbox sungguhan.</div>
+<div class="k s"><b>SECURE:</b> arm <code>KONTROL</code> mencetak <code>self.origin=null</code> dan aksesnya <b>DITOLAK</b> (<code>SecurityError</code>). Arm <code>UJI</code> boleh saja berhasil menyentuh DOM induk &mdash; itu <b>sesuai spesifikasi</b>, bukan bug browser, melainkan cacat <b>konfigurasi situs</b> yang memasang kedua token pada konten tak-tepercaya.</div>
+
+<button onclick="fire('UJI','allow-scripts allow-same-origin')">Uji (dua token: allow-scripts + allow-same-origin)</button>
+<button onclick="fire('KONTROL','allow-scripts')">Kontrol (mekanisme dilepas: tanpa allow-same-origin)</button>
+
+<div id="mark">penanda induk: <i>belum disentuh siapa pun</i></div>
+
+<p class="n"><b>Kenapa dua token itu saling meniadakan sandbox:</b> <code>allow-same-origin</code> mengembalikan <i>origin asli</i> (frame tidak lagi opaque &mdash; lihat <code>self.origin</code> pada baris hasil), <code>allow-scripts</code> mengembalikan <i>eksekusi skrip</i>. Sendiri-sendiri tidak berbahaya: skrip pada origin opaque tidak bisa menyentuh apa pun, dan origin asli tanpa skrip tidak bisa berbuat apa-apa. Digabung, skrip di dalam frame berjalan <b>dengan origin induk</b> &mdash; jadi ia boleh membaca dan menulis DOM induk, termasuk <b>menghapus atribut <code>sandbox</code> pada elemen iframe-nya sendiri</b> lalu memuat ulang dirinya tanpa pembatas apa pun. Sandbox-nya tinggal nama. Demo ini hanya <i>melaporkan</i> bahwa atribut itu terjangkau; ia tidak menghapusnya. Tidak ada apa pun yang dikirim ke luar.</p>
+
+<div id="frames"></div>
+<div id="out">(belum ada hasil)</div>
+
+<script>
+var out=document.getElementById('out'),seen={};
+document.getElementById('href').textContent=location.href;
+document.getElementById('orig').textContent=String(self.origin);
+function log(s){out.textContent=s+"\n"+out.textContent;}
+var ok=('sandbox' in document.createElement('iframe'))&&('srcdoc' in document.createElement('iframe'));
+if(!ok)log('CATATAN 14 | atribut sandbox/srcdoc tidak didukung di browser ini -> uji tidak dapat dijalankan.');
+var P='<meta charset="utf-8"><body style="font:12px sans-serif">DEMO frame @TAG@<script>'
+ +'var r={tag:"@TAG@",href:location.href,oself:"",read:"",reach:"",ok:null};'
+ +'try{r.oself=String(self.origin)}catch(e){r.oself="(throw "+e.name+")"}'
+ +'try{r.read="baca induk: title=\''+""+'"+parent.document.title+"\'";'
+ +'var m=parent.document.getElementById("mark");if(m)m.textContent="penanda induk: DITULIS OLEH FRAME BER-SANDBOX (@TAG@)";'
+ +'var el=parent.document.getElementById("f-@TAG@");'
+ +'r.reach=el?("elemen iframe-nya sendiri terjangkau, sandbox=\''+""+'"+el.getAttribute("sandbox")+"\' -> boleh dihapus lalu frame dimuat ulang tanpa sandbox"):"elemen iframe sendiri tidak ditemukan";'
+ +'r.ok=true}catch(e){r.read="akses induk DITOLAK: "+(e.name||e.message);r.ok=false}'
+ +'try{parent.postMessage(JSON.stringify(r),"*")}catch(e){}<\/script>';
+function fire(tag,sb){
+  if(!ok){log('RESULT 14 | '+tag+' | sandbox/srcdoc tidak didukung di browser ini.');return;}
+  seen[tag]=0;
+  var f=document.createElement('iframe');f.id='f-'+tag;f.setAttribute('sandbox',sb);
+  f.srcdoc=P.split('@TAG@').join(tag);
+  document.getElementById('frames').appendChild(f);
+  setTimeout(function(){if(!seen[tag])log('RESULT 14 | '+tag+' | tidak ada laporan dalam 1500 ms -> skrip frame tidak berjalan atau postMessage diblokir.');},1500);
+}
+window.addEventListener('message',function(ev){
+  var r;try{r=JSON.parse(ev.data)}catch(e){return}
+  if(!r||!r.tag||!(r.tag in seen))return;
+  seen[r.tag]=1;
+  var v;
+  if(r.tag==='UJI')v=(r.ok===true)?'PERMUKAAN LOLOS TERBUKA (sesuai spesifikasi): frame ber-sandbox punya origin induk dan menguasai DOM induk -> temuan tingkat SITUS, bukan bug browser'
+                                  :'browser ini lebih ketat dari spesifikasi: dua token pun tidak memberi akses induk';
+  else v=(r.ok===true)?'VULNERABLE: frame TANPA allow-same-origin (wajib opaque) berhasil menyentuh DOM induk = lolos sandbox sungguhan -> STOP, laporkan'
+                      :'SECURE: opaque origin ditegakkan, akses induk ditolak';
+  log('RESULT 14 | '+r.tag+' | sandbox="'+(r.tag==='UJI'?'allow-scripts allow-same-origin':'allow-scripts')+'" | frame self.origin='+r.oself+' | induk.origin='+String(self.origin)+' | '+r.read+' | '+r.reach+' | VERDICT='+v+' | '+location.href);
+});
+</script>

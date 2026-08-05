@@ -1,0 +1,104 @@
+<!-- MEKANISME: izin diminta oleh sebuah frame, lalu origin frame itu DIUBAH selagi prompt masih terbuka — pertanyaannya bukan "prompt menyebut siapa", melainkan entri SETELAN PER-SITUS akhirnya mendarat di origin mana (BRG-02, L2 persistensi). -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>27 — Mis-delivery izin: prompt vs entri setelan</title>
+<style>
+body{font:15px/1.55 system-ui,"Segoe UI",sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
+h2{font-size:1.05rem;margin:.2rem auto .8rem;max-width:760px}
+.box{border:2px solid #d33;border-radius:10px;padding:.8rem;max-width:760px;margin:0 auto 1rem}
+.kv{display:grid;grid-template-columns:11rem 1fr;gap:.2rem .6rem;font-size:.9rem}
+.kv b{color:#555;font-weight:600}
+.real{color:#0a7;word-break:break-all;font-family:ui-monospace,Consolas,monospace}
+button{font:inherit;padding:.45rem .8rem;border:1px solid #888;border-radius:8px;background:#fafafa;cursor:pointer;margin:.15rem}
+pre{background:#f4f4f4;border-radius:8px;padding:.6rem;white-space:pre-wrap;word-break:break-word;font-size:.82rem;max-width:760px;margin:.6rem auto}
+.oracle{max-width:760px;margin:1rem auto;font-size:.86rem;border-top:1px dashed #999;padding-top:.6rem}
+.v{color:#c00;font-weight:700}.s{color:#080;font-weight:700}
+.fr{width:100%;height:92px;border:1px solid #999;border-radius:6px;margin:.3rem 0;background:#fff}
+.acts{max-width:760px;margin:0 auto}
+code{background:#eee;padding:.05rem .25rem;border-radius:4px}
+@media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}pre{background:#242424}code{background:#2b2b2b}}
+</style>
+</head>
+<body>
+
+<h2>27 — Mis-delivery izin: prompt menyebut X, entri setelan mendarat di mana?</h2>
+
+<div class="box">
+  <div class="kv">
+    <b>URL nyata halaman ini</b><span class="real" id="here">…</span>
+    <b>Origin nyata (top)</b><span class="real" id="top">…</span>
+    <b>Alur</b><span>Frame meminta izin <b>Notifikasi</b> (jinak — berkas ini tidak pernah membuat notifikasi).
+      350&nbsp;ms kemudian origin frame itu <b>diubah</b> menjadi <code>data:</code> (opaque) selagi prompt masih terbuka.
+      Lalu kamu menjawab prompt.</span>
+    <b>Yang dibandingkan</b><span>(1) teks prompt · (2) origin frame saat kamu menjawab · (3) <b>entri di setelan izin per-situs</b></span>
+  </div>
+</div>
+
+<div class="acts">
+  <button id="run">Jalankan (frame → minta izin → origin ditukar)</button>
+  <button id="ctrl">Lengan KONTROL: minta dari top-level, tanpa pertukaran</button>
+  <button id="stat">Baca status izin sekarang</button>
+</div>
+
+<div class="acts" id="slot"></div>
+<pre id="log">(belum dijalankan)</pre>
+
+<div class="oracle">
+  <p><b>Setelah menjawab, buka daftar pembukuan browser dan bandingkan:</b><br>
+  Chrome/Edge/Opera: <code>chrome://settings/content/notifications</code> — Firefox:
+  <code>about:preferences#privacy</code> → Izin → Notifikasi → Setelan — Safari: Pengaturan → Situs Web → Notifikasi.</p>
+  <p><span class="v">VULNERABLE bila:</span> entri yang tercatat di setelan <b>bukan</b> origin yang disebut prompt —
+  mis. tercatat untuk origin frame yang baru (opaque/<code>data:</code>), untuk origin lain, atau izin tersimpan padahal
+  frame sudah bernavigasi sebelum kamu menjawab. Kapabilitas persisten mendarat di origin yang salah.</p>
+  <p><span class="s">SECURE bila:</span> prompt dibatalkan saat frame bernavigasi, <b>atau</b> entri setelan tercatat
+  tepat untuk <span class="real" id="expect">…</span> — sama persis dengan yang disebut prompt.</p>
+  <p><b>Baseline aman (lengan kontrol):</b> tombol kedua meminta izin dari dokumen top-level tanpa frame dan tanpa
+  pertukaran origin. Entri setelan wajib sama persis dengan origin di panel atas. Kalau kontrol pun meleset, temuannya
+  bukan pertukaran origin melainkan pembukuan izin itu sendiri.</p>
+  <p><b>Cara mencabut:</b> pada halaman setelan di atas, hapus entri untuk origin ini (Chrome: ikon tempat sampah;
+  Firefox: “Hapus Situs Web”). Prompt akan bisa muncul lagi setelahnya.</p>
+</div>
+
+<script>
+var L=document.getElementById('log'),SLOT=document.getElementById('slot');
+function log(s){L.textContent+=s+'\n';}
+function orig(w){try{return w.location.origin||'null';}catch(e){return '(terblokir/opaque)';}}
+document.getElementById('here').textContent=location.href;
+document.getElementById('top').textContent=location.origin||'null (file://)';
+document.getElementById('expect').textContent=location.origin||'null (file://)';
+var SECURE=(typeof isSecureContext!=='undefined')?isSecureContext:(location.protocol==='https:');
+var OK=(typeof Notification!=='undefined')&&('requestPermission' in Notification)&&SECURE;
+function req(w,label,after){
+  if(!OK){log(label+': tidak didukung di browser ini / konteks ini (butuh https + Notification API)');return;}
+  if(w.Notification.permission!=='default'){log(label+': status sudah "'+w.Notification.permission+'" — hapus dulu entri di setelan supaya prompt muncul lagi');return;}
+  log(label+': meminta izin dari origin '+orig(w)+' — prompt semestinya menyebut nama itu');
+  function done(r){log(label+': dijawab "'+r+'"; origin frame SAAT DIJAWAB = '+orig(w)+'; Notification.permission (top) = '+Notification.permission);
+    log('>> sekarang buka setelan izin per-situs dan baca origin mana yang tercatat.');}
+  try{var p=w.Notification.requestPermission(done);if(p&&p.then)p.then(done,function(e){log(label+': ditolak API -> '+e);});}
+  catch(e){log(label+': ERROR -> '+e.name+': '+e.message);}
+  if(after)after();
+}
+document.getElementById('run').onclick=function(){
+  L.textContent='';SLOT.innerHTML='';
+  var f=document.createElement('iframe');f.className='fr';
+  f.srcdoc='<body style="font:12px sans-serif;margin:6px"><button id="b">Klik DI DALAM frame untuk meminta izin</button><p id="p">frame srcdoc — origin diwarisi dari halaman induk</p></body>';
+  f.onload=function(){
+    log('frame terpasang; origin dilaporkan frame = '+orig(f.contentWindow)+' (URL "about:srcdoc" berseri null) — origin EFEKTIF = warisan induk, jadi prompt semestinya menyebut '+(location.origin||'null'));
+    try{f.contentDocument.getElementById('b').onclick=function(){
+      req(f.contentWindow,'FRAME',function(){setTimeout(function(){
+        f.src='data:text/html,'+encodeURIComponent('<body style="font:12px sans-serif;margin:6px">frame ini sudah BERPINDAH origin (data:, opaque) selagi prompt terbuka</body>');
+        log('… origin frame DITUKAR ke data: (opaque) selagi prompt masih terbuka');},350);});
+    };}catch(e){log('induk tak bisa menyentuh frame ('+e.name+')');}
+  };
+  SLOT.appendChild(f);
+};
+document.getElementById('ctrl').onclick=function(){L.textContent='';SLOT.innerHTML='';
+  log('KONTROL: mekanisme (frame + pertukaran origin) DIHAPUS.');req(window,'KONTROL top-level');};
+document.getElementById('stat').onclick=function(){
+  log('status izin notifikasi untuk '+(location.origin||'null')+': '+(OK?Notification.permission:'tidak didukung di browser ini / konteks ini'));};
+</script>
+</body>
+</html>
