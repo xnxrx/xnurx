@@ -1,0 +1,12 @@
+<!doctype html><meta charset=utf-8><title>victim</title>
+<body style="font:15px system-ui;padding:1.2rem;background:#eef7ee">
+<h1>VICTIM origin</h1>
+<p>my real origin: <code id=oo></code></p>
+<p>marker (same-origin code only):</p>
+<pre id=m style="font-size:1.1rem;background:#fff;padding:.6rem;border-radius:6px"></pre>
+<script>
+var M='VICTIM-MARKER-'+Math.floor(Date.now()/1000);
+document.getElementById('m').textContent=M;
+document.getElementById('oo').textContent=location.origin;
+document.title=M;
+</script>
