@@ -1,0 +1,89 @@
+<!-- MEKANISME: RESET BERULANG — maksimum 5 siklus keluar-masuk fullscreen (dengan tombol STOP) untuk mengukur apakah notice muncul PENUH tiap siklus, MEMENDEK, atau HILANG setelah siklus pertama; verdict dicatat per-siklus sebagai angka. -->
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>39 — Reset berulang notice fullscreen (maks 5 siklus)</title>
+<style>
+body{font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:16px;background:#0e1116;color:#dfe6ef}
+h2{margin:0 0 12px;font-size:19px;line-height:1.3}
+section{border:1px solid #2a3240;border-radius:8px;padding:10px 12px;margin:10px 0;background:#151a22}
+b.tag{display:inline-block;min-width:78px;color:#7fd1ff}
+button{font:13px system-ui;padding:8px 12px;margin:4px 6px 4px 0;border:1px solid #3a4658;background:#1e2733;color:#e8eef6;border-radius:6px;cursor:pointer}
+button.ctl{border-color:#3f7a55;color:#bfe6c8}
+button.stop{border-color:#8a4040;color:#ffbcbc}
+code{font-family:ui-monospace,Consolas,monospace;color:#ffd79a;word-break:break-all}
+textarea{width:100%;height:150px;background:#0b0e13;color:#cfeaff;border:1px solid #2a3240;border-radius:6px;padding:8px;font-family:ui-monospace,Consolas,monospace;font-size:12px}
+.small{color:#93a2b5;font-size:12.5px}
+.warn{color:#ffb37a}
+#stage{position:relative;background:#05070a;border:1px dashed #3a4658;border-radius:8px;padding:16px;text-align:center;min-height:280px}
+#stage:fullscreen,#stage:-webkit-full-screen{border:0;border-radius:0}
+#clock{font-size:10vmin;font-variant-numeric:tabular-nums;color:#8ef;font-family:ui-monospace,Consolas,monospace}
+#gate{display:none;margin-top:8px}
+#log{max-height:150px;overflow:auto;font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#a9c4dd}
+</style>
+
+<h2>39 — RESET BERULANG: apakah notice muncul penuh di setiap siklus fullscreen?</h2>
+
+<section><b class="tag">PAGAR</b> Notice fullscreen (+ jalan keluar Esc) adalah satu-satunya permukaan browser-controlled yang tersisa setelah chrome disembunyikan. Kontraknya: <b>setiap kali</b> dokumen masuk fullscreen, user diberi tahu — bukan hanya pada kali pertama. Mozilla membayar kelas &ldquo;notice tertutup / tak teramati&rdquo; (CVE-2021-43538, CVE-2023-37207, MFSA-2024-33 / MFSA-2024-39). Pagar kedua yang ikut teruji di sini: <b>transient user activation</b> — masuk fullscreen tanpa gestur baru seharusnya <b>ditolak</b>.</section>
+
+<section><b class="tag">CELAH</b> Notice adalah <b>state ber-timer per-permukaan</b>, dan state ber-timer punya kondisi awal. Kalau timer/penanda &ldquo;sudah pernah ditampilkan&rdquo; tidak di-reset pada exit yang cepat, siklus ke-2 dan seterusnya bisa memberi notice yang <b>lebih pendek</b> atau <b>tidak sama sekali</b>, padahal transisi ke fullscreen tetap terjadi. Ini bentuk-patch F6 (fix dipasang pada satu permukaan/satu jalur; invariannya lebih luas). Batas keras berkas ini: <b>maks 5 siklus</b>, ada tombol STOP, tanpa loop tak terbatas.</section>
+
+<section><b class="tag">UJI</b>
+<button onclick="start('GESTUR')">Arm UJI — 5 siklus, tiap siklus dengan klik verdict (gestur baru)</button>
+<button onclick="start('AUTO')">Arm UJI — 5 siklus tanpa gestur baru</button>
+<button class="ctl" onclick="control()">KONTROL — 1&times; fullscreen polos (baseline dwell)</button>
+<button class="stop" onclick="halt()">STOP</button>
+<div class="small">Tiap siklus: masuk fullscreen &asymp;2,6&nbsp;detik lalu keluar. Mode GESTUR menunggu klik verdict-mu (klik itulah gestur untuk siklus berikutnya). Mode AUTO sengaja tidak memberi gestur baru — penolakan di situ adalah pagar aktivasi yang <b>bekerja</b>, dan itu tetap dicatat. <b>Esc selalu bekerja.</b></div>
+</section>
+
+<div id="stage">
+  <div class="small">panggung fullscreen — siklus <b id="cyc">0/5</b></div>
+  <div id="clock">0 ms</div>
+  <div class="small">location.href asli: <code id="href2"></code></div>
+  <div id="gate">
+    <div class="small">Verdict untuk siklus barusan:</div>
+    <button onclick="rec('PENUH');next()">Notice PENUH</button>
+    <button onclick="rec('PENDEK');next()">Notice MEMENDEK</button>
+    <button onclick="rec('HILANG');next()">Notice TIDAK MUNCUL</button>
+  </div>
+</div>
+
+<section><b class="tag">ORACLE</b>
+<div><b>BYPASS:</b> siklus 1 = PENUH, tetapi siklus 2..5 = PENDEK atau HILANG sementara fullscreen tetap aktif &rarr; kontrak &ldquo;beri tahu setiap kali&rdquo; pecah. Laporkan per-siklus (mis. &ldquo;PENUH 1/5, PENDEK 1/5, HILANG 3/5, diulang 4 kali run&rdquo;) sebagai <i>bypass-of-fix</i> ke Mozilla.</div>
+<div><b>PAGAR MASIH BERLAKU:</b> semua siklus yang benar-benar masuk fullscreen memberi notice PENUH; siklus tanpa gestur ditolak dan tercatat <b>DITOLAK</b> &rarr; dua pagar (notice + aktivasi) utuh.</div>
+<div class="warn">Perkiraan jujur: kemungkinan besar mode AUTO akan <b>DITOLAK</b> di semua browser modern (aktivasi dikonsumsi), dan mode GESTUR memberi notice penuh tiap siklus. Nilai berkas ini adalah <b>angka per-siklus</b> — dan celah nyatanya, kalau ada, biasanya ada di fork/mobile/PWA, bukan di desktop Firefox terbaru.</div>
+</section>
+
+<section><b class="tag">KONTROL</b> Tombol hijau melakukan <b>satu</b> masuk-fullscreen polos tanpa siklus apa pun. Bandingkan panjang notice pada KONTROL dengan notice pada siklus 2..5; tanpa baseline ini, &ldquo;memendek&rdquo; hanyalah kesan.</section>
+
+<section><b class="tag">HASIL</b>
+<button onclick="res=[];draw()">Reset hitungan</button>
+<textarea id="tbl" readonly placeholder="hasil per-siklus muncul di sini — salin apa adanya ke laporan"></textarea>
+<div class="small">location.href asli: <code id="href"></code></div>
+<div id="log"></div>
+</section>
+
+<script>
+var $=function(i){return document.getElementById(i);};
+var stage=$('stage'),clock=$('clock'),MAX=5,cyc=0,mode='GESTUR',stopped=false,res=[],t0=0,live=false;
+function fsOn(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
+function enter(el){var f=el.requestFullscreen||el.webkitRequestFullscreen;if(!f){log('API Fullscreen tidak tersedia');return;}
+  try{var p=f.call(el);if(p&&p['catch'])p['catch'](function(){log('siklus '+cyc+': DITOLAK — butuh gestur baru (pagar aktivasi bekerja)');rec('DITOLAK');});}
+  catch(e){log('siklus '+cyc+': DITOLAK ('+e.name+')');rec('DITOLAK');}}
+function leave(){var f=document.exitFullscreen||document.webkitExitFullscreen;if(f&&fsOn()){try{f.call(document);}catch(e){}}}
+function paint(){clock.textContent=(performance.now()-t0).toFixed(0)+' ms';if(live)requestAnimationFrame(paint);}
+function start(m){mode=m;cyc=0;stopped=false;$('gate').style.display='none';log('=== mulai arm '+m+' (maks '+MAX+' siklus) ===');next();}
+function next(){$('gate').style.display='none';if(stopped||cyc>=MAX){log('=== selesai ('+cyc+' siklus) ===');draw();return;}
+  cyc++;$('cyc').textContent=cyc+'/'+MAX;t0=performance.now();live=true;log('siklus '+cyc+': masuk fullscreen');enter(stage);paint();
+  setTimeout(function(){leave();live=false;setTimeout(function(){if(stopped)return;if(mode==='AUTO'){next();}else{$('gate').style.display='block';}},700);},2600);}
+function control(){stopped=true;mode='KONTROL';cyc=0;$('cyc').textContent='kontrol';t0=performance.now();live=true;log('KONTROL: 1x fullscreen polos');enter(stage);paint();setTimeout(function(){leave();live=false;},5000);}
+function halt(){stopped=true;live=false;leave();$('gate').style.display='none';log('DIHENTIKAN oleh user pada siklus '+cyc);draw();}
+function rec(v){res.push([mode,cyc,v]);draw();}
+function log(s){var d=document.createElement('div');d.textContent=s;$('log').appendChild(d);$('log').scrollTop=1e6;}
+function draw(){var s='arm\tsiklus\tverdict\n',i,c={};for(i=0;i<res.length;i++){s+=res[i][0]+'\t'+res[i][1]+'\t'+res[i][2]+'\n';var k=res[i][0]+' '+res[i][2];c[k]=(c[k]||0)+1;}
+  for(var k2 in c){s+='hitungan '+k2+' = '+c[k2]+'/'+res.length+'\n';}
+  s+='UA: '+navigator.userAgent+'\n';$('tbl').value=s;}
+document.addEventListener('fullscreenchange',function(){if(!fsOn()){live=false;}});
+document.addEventListener('webkitfullscreenchange',function(){if(!fsOn()){live=false;}});
+$('href').textContent=location.href;$('href2').textContent=location.href;draw();
+</script>

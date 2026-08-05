@@ -1,0 +1,80 @@
+<!-- MEKANISME: ukur DWELL notice fullscreen — jam milidetik presisi tinggi dimulai tepat pada requestFullscreen sehingga durasi notice bisa dihitung frame-per-frame dari rekaman layar dan dilaporkan sebagai ANGKA, bukan kesan. -->
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>37 — Pengukur dwell notice fullscreen</title>
+<style>
+body{font:14px/1.55 system-ui,Segoe UI,Arial,sans-serif;margin:0;padding:16px;background:#0e1116;color:#dfe6ef}
+h2{margin:0 0 12px;font-size:19px;line-height:1.3}
+section{border:1px solid #2a3240;border-radius:8px;padding:10px 12px;margin:10px 0;background:#151a22}
+b.tag{display:inline-block;min-width:78px;color:#7fd1ff}
+button{font:13px system-ui;padding:8px 12px;margin:4px 6px 4px 0;border:1px solid #3a4658;background:#1e2733;color:#e8eef6;border-radius:6px;cursor:pointer}
+button.ctl{border-color:#3f7a55;color:#bfe6c8}
+code{font-family:ui-monospace,Consolas,monospace;color:#ffd79a;word-break:break-all}
+textarea{width:100%;height:150px;background:#0b0e13;color:#cfeaff;border:1px solid #2a3240;border-radius:6px;padding:8px;font-family:ui-monospace,Consolas,monospace;font-size:12px}
+input[type=number]{width:110px;padding:6px;background:#0b0e13;color:#cfeaff;border:1px solid #2a3240;border-radius:6px}
+.small{color:#93a2b5;font-size:12.5px}
+.warn{color:#ffb37a}
+#stage{position:relative;background:#05070a;border:1px dashed #3a4658;border-radius:8px;padding:18px;text-align:center;min-height:230px}
+#clock{font-size:13vmin;font-variant-numeric:tabular-nums;letter-spacing:2px;color:#8ef;font-family:ui-monospace,Consolas,monospace}
+#stage:fullscreen,#stage:-webkit-full-screen{display:flex;flex-direction:column;justify-content:center;border:0;border-radius:0}
+#log{max-height:150px;overflow:auto;font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#a9c4dd}
+</style>
+
+<h2>37 — UKUR DWELL: berapa milidetik notice fullscreen benar-benar terlihat?</h2>
+
+<section><b class="tag">PAGAR</b> Setelah halaman menyembunyikan chrome browser lewat Fullscreen API (atas gestur user), satu-satunya permukaan yang masih dikuasai browser adalah <b>NOTICE fullscreen</b> (&ldquo;… is now full screen — press Esc to exit&rdquo;) plus jalan keluar <b>Esc</b>. Notice itu pagar terakhir terhadap spoofing address-bar di dalam fullscreen. Mozilla membayar kelas &ldquo;notice tertutup / tak teramati&rdquo; (CVE-2021-43538, CVE-2023-37207, MFSA-2024-33 / MFSA-2024-39). Chromium menyatakan obfuskasi toast bukan isu keamanan &rarr; <b>laporkan hasil berkas ini ke Mozilla</b>.</section>
+
+<section><b class="tag">CELAH</b> Notice punya <b>DURASI</b> (timer) dan <b>POSISI</b> (atas-tengah). Pagar berbentuk <i>waktu</i>, bukan <i>konsen</i>: ia dianggap cukup kalau manusia sempat membaca. Kalau jendela tampilnya lebih pendek dari waktu baca, pagar gugur secara praktis walau kodenya berjalan sempurna. Berkas ini tidak berpura-pura memperpendeknya — ia <b>MENGUKUR</b>-nya, dan menyediakan satu arm yang menekan compositor (repaint churn) untuk melihat apakah halaman bisa menggeser angkanya.</section>
+
+<section><b class="tag">UJI</b>
+<button onclick="run('CHURN')">Arm UJI — fullscreen + repaint churn</button>
+<button class="ctl" onclick="run('POLOS')">KONTROL — fullscreen polos</button>
+<button onclick="leave()">Keluar fullscreen</button>
+<div class="small">Rekam layar (60&nbsp;fps kalau bisa). Jam besar di panggung mulai dari 0 pada saat klik. Dari rekaman, baca angka jam pada frame <b>terakhir</b> notice masih terlihat &rarr; itulah dwell dalam ms. Tiap arm auto-keluar setelah 9 detik; <b>Esc selalu bekerja</b>.</div>
+</section>
+
+<div id="stage">
+  <div class="small">panggung fullscreen — jam ms sejak klik</div>
+  <div id="clock">0</div>
+  <div class="small">arm: <b id="armlbl">—</b></div>
+  <div class="small">location.href asli: <code id="href2"></code></div>
+</div>
+
+<section><b class="tag">ORACLE</b>
+<div><b>BYPASS / relevan:</b> dwell arm <b>CHURN</b> konsisten lebih pendek dari <b>KONTROL</b> (selisih di luar noise, terulang pada &ge;3 pengukuran) &rarr; durasi notice bisa dipengaruhi halaman.</div>
+<div><b>PAGAR MASIH BERLAKU:</b> kedua arm menghasilkan dwell yang sama dalam &plusmn;1 frame &rarr; timer notice hidup di proses browser dan halaman tak menyentuhnya.</div>
+<div class="warn">Perkiraan jujur: <b>kemungkinan besar pagar menang</b> — timer notice tidak dijadwalkan oleh halaman. Nilai berkas ini terletak pada <b>angka dwell absolutnya</b> (dan pada perbandingan lintas-browser/lintas-versi), bukan pada klaim bypass.</div>
+</section>
+
+<section><b class="tag">KONTROL</b> Tombol hijau memasuki fullscreen tanpa manipulasi apa pun. Semua pengukuran arm UJI hanya berarti bila dibandingkan dengan deret KONTROL yang diambil pada build, OS, dan skala tampilan yang sama.</section>
+
+<section><b class="tag">HASIL</b>
+<div>dwell terbaca dari rekaman: <input id="ms" type="number" min="1" step="1" placeholder="mis. 780"> <button onclick="record()">Catat pengukuran</button> <button onclick="rows=[];draw()">Reset</button></div>
+<textarea id="tbl" readonly placeholder="hasil muncul di sini — salin apa adanya ke laporan"></textarea>
+<div class="small">location.href asli: <code id="href"></code></div>
+<div id="log"></div>
+</section>
+
+<script>
+var $=function(i){return document.getElementById(i);};
+var stage=$('stage'),clock=$('clock'),arm='',t0=0,live=false,rows=[],churn=null;
+function fsOn(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
+function enter(el){var f=el.requestFullscreen||el.webkitRequestFullscreen;if(!f){log('API Fullscreen tidak tersedia di browser ini');return;}
+  try{var p=f.call(el);if(p&&p['catch'])p['catch'](function(e){log('permintaan fullscreen DITOLAK ('+e+')');});}catch(e){log('permintaan fullscreen DITOLAK ('+e.name+')');}}
+function leave(){var f=document.exitFullscreen||document.webkitExitFullscreen;if(f&&fsOn()){try{f.call(document);}catch(e){}}}
+function paint(){clock.textContent=(performance.now()-t0).toFixed(0);if(live)requestAnimationFrame(paint);}
+function run(name){if(live)return;arm=name;$('armlbl').textContent=name;t0=performance.now();live=true;enter(stage);paint();
+  if(name==='CHURN'){var n=0;churn=setInterval(function(){n++;stage.style.letterSpacing=(n%2?'0px':'0.35px');if(n>240&&churn){clearInterval(churn);churn=null;}},16);}
+  setTimeout(leave,9000);setTimeout(function(){live=false;if(churn){clearInterval(churn);churn=null;}},9600);}
+function chg(){if(fsOn()){log(arm+' | fullscreen aktif pada '+(performance.now()-t0).toFixed(1)+' ms setelah klik');}
+  else{live=false;if(churn){clearInterval(churn);churn=null;}log(arm+' | keluar fullscreen pada '+(performance.now()-t0).toFixed(1)+' ms');}}
+function log(s){var d=document.createElement('div');d.textContent=s;$('log').appendChild(d);$('log').scrollTop=1e6;}
+function record(){var v=parseFloat($('ms').value);if(!(v>0)){log('isi angka ms hasil rekaman dulu');return;}rows.push([arm||'?',v]);$('ms').value='';draw();}
+function draw(){var s='arm\tdwell_ms\n',i,g={},k;for(i=0;i<rows.length;i++){s+=rows[i][0]+'\t'+rows[i][1]+'\n';(g[rows[i][0]]=g[rows[i][0]]||[]).push(rows[i][1]);}
+  for(k in g){var a=g[k],sum=0,mn=1e9,mx=0,j;for(j=0;j<a.length;j++){sum+=a[j];mn=Math.min(mn,a[j]);mx=Math.max(mx,a[j]);}
+    s+='['+k+'] n='+a.length+' rata2='+(sum/a.length).toFixed(0)+'ms min='+mn+'ms max='+mx+'ms\n';}
+  s+='UA: '+navigator.userAgent+'\n';$('tbl').value=s;}
+document.addEventListener('fullscreenchange',chg);document.addEventListener('webkitfullscreenchange',chg);
+$('href').textContent=location.href;$('href2').textContent=location.href;draw();
+</script>

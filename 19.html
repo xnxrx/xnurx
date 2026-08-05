@@ -1,0 +1,141 @@
+<!-- MEKANISME: satu gesture, lalu window.open ditunda 0/100/300/1000/3000 ms — mengukur berapa lama transient user activation masih dibelanjakan, dan apakah popup kedua dari gesture yang SAMA masih lolos (activation tidak dikonsumsi). -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>34 — Matriks penundaan: window.open setelah satu klik</title>
+<style>
+body{font:15px/1.55 system-ui,"Segoe UI",sans-serif;margin:0;padding:1rem;color:#111;background:#fff}
+h2{font-size:1.05rem;margin:.2rem auto .8rem;max-width:820px}
+h3{font-size:.92rem;margin:1rem auto .3rem;max-width:820px;letter-spacing:.04em}
+.box{border:2px solid #d33;border-radius:10px;padding:.8rem;max-width:820px;margin:0 auto 1rem}
+.kv{display:grid;grid-template-columns:11rem 1fr;gap:.2rem .6rem;font-size:.9rem}
+.kv b{color:#555;font-weight:600}
+.real{color:#0a7;word-break:break-all;font-family:ui-monospace,Consolas,monospace}
+button{font:inherit;padding:.4rem .7rem;border:1px solid #888;border-radius:8px;background:#fafafa;cursor:pointer;margin:.15rem}
+table{border-collapse:collapse;max-width:820px;margin:.4rem auto;width:100%;font-size:.88rem}
+th,td{border:1px solid #bbb;padding:.35rem .5rem;text-align:left}
+th{background:#f0f0f0}
+tr.ctl td{background:#eef6ee}
+pre{background:#f4f4f4;border-radius:8px;padding:.6rem;white-space:pre-wrap;word-break:break-word;font-size:.8rem;max-width:820px;margin:.6rem auto;max-height:16rem;overflow:auto}
+.sum{font-family:ui-monospace,Consolas,monospace;font-size:.78rem;background:#fffbe6;border:1px solid #e0d08a;border-radius:8px;padding:.5rem;max-width:820px;margin:.4rem auto;word-break:break-all}
+.sec{max-width:820px;margin:0 auto;font-size:.87rem}
+.v{color:#c00;font-weight:700}.s{color:#080;font-weight:700}
+.acts{max-width:820px;margin:.4rem auto}
+@media(prefers-color-scheme:dark){body{background:#161616;color:#eee}.kv b{color:#aaa}pre{background:#242424}th{background:#2a2a2a}tr.ctl td{background:#1e2a1e}.sum{background:#2b2716;border-color:#6b5f2a}table,th,td{border-color:#555}}
+</style>
+</head>
+<body>
+
+<h2>34 — MATRIKS PENUNDAAN: satu klik, <code>window.open</code> pada 0 / 100 / 300 / 1000 / 3000 ms</h2>
+
+<div class="box">
+  <div class="kv">
+    <b>URL nyata halaman ini</b><span class="real" id="here">…</span>
+    <b>Kelas</b><span>bypass-of-mitigation — <i>activation-consumption accounting</i> (address-bar-spoofing.md §3.14b)</span>
+  </div>
+</div>
+
+<h3>PAGAR</h3>
+<div class="sec">
+<p>Popup blocker menuntut <b>transient user activation</b>. Di Chromium umur token itu konstanta
+<code>kActivationLifespan = 5 detik</code> (<code>blink/…/user_activation_state.cc</code>) dan
+<code>window.open()</code> memanggil <b>ConsumeTransientUserActivation</b> — artinya satu gesture semestinya
+membeli <b>satu</b> popup saja. Gecko memagari dari sisi lain: <code>dom.disable_open_during_load</code>,
+daftar <code>dom.popup_allowed_events</code>, batas jumlah <code>dom.popup_maximum</code> (20), dan
+<code>dom.disable_open_click_delay</code> (default 1000 ms) yang memutus hubungan klik→popup setelah
+tenggat tersebut. HTML Standard: “consume user activation”.</p>
+</div>
+
+<h3>CELAH</h3>
+<div class="sec">
+<p>Pagarnya berbentuk <b>boolean berbatas waktu</b>, bukan “panggilan harus berada di dalam task handler”.
+Selama flag masih hidup, penyerang boleh <b>MENUNDA</b> aksinya lewat <code>setTimeout</code> sampai layar
+dekoy selesai terlukis — race berubah jadi eksploit deterministik. Dua sisi yang diukur berkas ini:
+(a) <b>panjang jendela</b> nyata per engine (apakah 1000 ms Gecko / 5 dtk Chromium benar-benar ditegakkan),
+(b) <b>konsumsi</b>: apakah popup ke-2..ke-5 dari gesture yang SAMA juga lolos. Bila (b) lolos, akuntansi
+konsumsi tidak berlaku pada jalur tertunda — itulah selnya.</p>
+</div>
+
+<h3>UJI</h3>
+<div class="acts">
+  <button id="b0">uji sel 0 ms</button><button id="b1">uji sel 100 ms</button><button id="b2">uji sel 300 ms</button><button id="b3">uji sel 1000 ms</button><button id="b4">uji sel 3000 ms</button>
+  <br>
+  <button id="burst"><b>BURST</b> — semua 5 sel dari SATU klik (uji konsumsi)</button>
+  <button id="closeall">tutup semua popup</button>
+  <button id="reset">reset hitungan</button>
+</div>
+<div class="sec"><p><b>Jalankan N kali:</b> klik tombol baris yang sama <b>20×</b> (atau BURST 20×). Kolom
+“berhasil / percobaan” langsung menjadi angka yang bisa disalin, mis. <i>“300 ms: 7/20”</i>. Jangan laporkan
+“kadang jalan” — laporkan pecahannya. Maksimum <b>5 popup</b> terbuka serentak; tiap popup tertutup otomatis
+setelah 0,7 dtk.</p></div>
+
+<table>
+<tr><th>Sel</th><th>Penundaan setelah gesture</th><th>Berhasil / percobaan</th><th></th></tr>
+<tr><td>A</td><td>0 ms (langsung di handler)</td><td id="c0">0/0</td><td>baseline sel</td></tr>
+<tr><td>B</td><td>100 ms</td><td id="c1">0/0</td><td>—</td></tr>
+<tr><td>C</td><td>300 ms</td><td id="c2">0/0</td><td>cukup untuk melukis dekoy</td></tr>
+<tr><td>D</td><td>1000 ms</td><td id="c3">0/0</td><td>batas <code>dom.disable_open_click_delay</code> (Gecko)</td></tr>
+<tr><td>E</td><td>3000 ms</td><td id="c4">0/0</td><td>di bawah 5 dtk lifespan (Chromium)</td></tr>
+<tr class="ctl"><td>K</td><td><b>KONTROL — tanpa gesture sama sekali</b> (timer 1,5 dtk setelah muat)</td><td id="c5">0/0</td><td>harus 0/N</td></tr>
+</table>
+
+<div class="sum" id="sum">…</div>
+<pre id="log">(belum dijalankan)</pre>
+
+<h3>ORACLE</h3>
+<div class="sec">
+<p><span class="v">BYPASS BERHASIL bila:</span> sel dengan penundaan besar tetap <b>DIIZINKAN</b> melewati batas
+resmi engine (mis. Gecko meloloskan 3000 ms padahal <code>dom.disable_open_click_delay</code> = 1000 ms),
+<b>atau</b> BURST menghasilkan lebih dari satu popup dari satu gesture (konsumsi tidak terjadi),
+<b>atau</b> log menunjukkan <code>userActivation.isActive=false</code> tetapi popup tetap terbuka —
+flag sudah mati sementara sink masih membelanjakannya.</p>
+<p><span class="s">PAGAR MASIH BERLAKU bila:</span> hanya sel 0 ms (dan mungkin sel pendek) yang lolos, BURST
+menghasilkan tepat satu popup, sel di luar lifespan <b>DIBLOKIR</b>, dan baris KONTROL tetap 0/N.</p>
+<p><b>Jujur:</b> pada Chromium kemungkinan besar sel 0–3000 ms <b>memang lolos</b> — itu spesifikasi
+(5 dtk transient activation), <b>bukan</b> bug, dan melaporkannya apa adanya = ember F. Nilai berkas ini ada pada
+<b>dua</b> angka: kolom BURST (konsumsi) dan selisih antar-engine pada sel 1000/3000 ms. Tanpa salah satu dari
+keduanya menyimpang, hasil yang benar untuk dilaporkan adalah <i>“pagar bekerja”</i>.</p>
+</div>
+
+<h3>KONTROL</h3>
+<div class="sec">
+<p>Baris <b>K</b> memanggil <code>window.open</code> yang sama <b>tanpa gesture apa pun</b>, 1,5 dtk setelah
+halaman dimuat (sebelum klik pertama — jangan klik apa pun dulu). Bila baris K juga berhasil, yang kamu ukur
+BUKAN mekanisme ini: popup blocker sedang dimatikan di profil/lingkunganmu, dan seluruh tabel tak bernilai.</p>
+</div>
+
+<script>
+var D=[0,100,300,1000,3000,0],OK=[0,0,0,0,0,0],NN=[0,0,0,0,0,0],W=[],CL=0,
+    L=document.getElementById('log'),SM=document.getElementById('sum');
+document.getElementById('here').textContent=location.href;
+function log(s){L.textContent+=s+'\n';L.scrollTop=L.scrollHeight;}
+function act(){var u=navigator.userActivation;return u?'isActive='+u.isActive+' hasBeenActive='+u.hasBeenActive:'userActivation: tak didukung';}
+function paint(){var t='34/popup-delay | '+navigator.userAgent+' |';
+  for(var i=0;i<6;i++){document.getElementById('c'+i).textContent=OK[i]+'/'+NN[i];if(i<5)t+=' '+D[i]+'ms='+OK[i]+'/'+NN[i];}
+  SM.textContent=t+' | kontrol-tanpa-gesture='+OK[5]+'/'+NN[5];}
+function reap(){for(var i=W.length-1;i>=0;i--){var c=true;try{c=W[i].closed;}catch(e){}if(c)W.splice(i,1);}}
+function fire(i,t0,tag){reap();
+  if(W.length>=5){log(tag+': DILEWATI — batas 5 popup serentak tercapai');return;}
+  var dt=Math.round(performance.now()-t0),w=null;
+  try{w=window.open('','_blank','width=340,height=170');}catch(e){}
+  if(w){W.push(w);
+    try{w.document.write('<title>DEMO</title><body style="font:13px system-ui;padding:10px">DEMO &mdash; jendela riset PoC. Tertutup otomatis.</body>');}catch(e){}
+    setTimeout(function(){try{w.close();}catch(e){}},700);}
+  NN[i]++;if(w)OK[i]++;paint();
+  log(tag+' | penundaan '+D[i]+'ms (terukur '+dt+'ms) -> '+(w?'DIIZINKAN':'DIBLOKIR')+' | '+act());}
+function cell(i){var t0=performance.now();CL++;
+  log('--- klik #'+CL+' | sel tunggal '+D[i]+'ms | saat klik: '+act());
+  setTimeout(function(){fire(i,t0,'SEL '+D[i]+'ms');},D[i]);}
+for(var k=0;k<5;k++)(function(i){document.getElementById('b'+i).onclick=function(){cell(i);};})(k);
+document.getElementById('burst').onclick=function(){var t0=performance.now();CL++;
+  log('--- klik #'+CL+' | BURST: 5 sel dari SATU gesture | saat klik: '+act());
+  for(var i=0;i<5;i++)(function(i){setTimeout(function(){fire(i,t0,'BURST '+D[i]+'ms');},D[i]);})(i);};
+document.getElementById('closeall').onclick=function(){for(var i=0;i<W.length;i++){try{W[i].close();}catch(e){}}W=[];reap();log('tutup-semua dijalankan');};
+document.getElementById('reset').onclick=function(){for(var i=0;i<6;i++){OK[i]=0;NN[i]=0;}CL=0;L.textContent='';paint();};
+setTimeout(function(){log('KONTROL: window.open TANPA gesture apa pun (1,5 dtk setelah muat).');fire(5,performance.now(),'KONTROL');},1500);
+paint();
+</script>
+</body>
+</html>
