@@ -1,0 +1,30 @@
+<!-- 38 | W3 x W10  KUANTITAS (BOUNDED) x WAKTU EKSTREM - banjir history lalu back kilat | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "omnibox selalu menyusul entri history yang aktif"
+     IDE  omnibox dan session-history adalah dua pembukuan yang diperbarui di jalur berbeda.
+     Isi history dengan 200 entri (bounded), lalu panggil back() secepat mungkin berturut-turut.
+     Kalau pembukuan omnibox tertinggal di belakang pembukuan dokumen, maka ada jendela waktu
+     di mana bar mencetak entri LAIN daripada dokumen yang sedang tampil - dan panjang jendela
+     itu bisa kita perlebar dengan menambah beban.
+     YANG DIUKUR  selisih antara location.href yang dibaca JS dan entri yang tampak di bar (mata),
+     plus panjang jendelanya dalam ms.
+     EXPECTED-SECURE  keduanya selalu sinkron; selisih = 0 ms.
+     BOUNDED: 200 entri, satu putaran. Semua same-origin, nol request. -->
+<button onclick="go()">Run 38</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  for (var i = 0; i < 200; i++) history.pushState({ i: i }, '', '#e' + i);
+  var t0 = performance.now(), n = 0, log = [];
+  var id = setInterval(function () {
+    history.back(); n++;
+    log.push('back#' + n + '  t=' + Math.round(performance.now() - t0) + 'ms  href=' + location.hash);
+    if (n >= 40) {
+      clearInterval(id);
+      g.textContent = 'REAL ORIGIN: ' + location.origin + '\n' + log.slice(-12).join('\n') +
+        '\n\nBandingkan hash terakhir di atas dgn yang tertulis di address bar SEKARANG.' +
+        '\nBeda = dua pembukuan tidak sinkron = jendela spoofing yang terukur.';
+    }
+  }, 5);
+}
+</script>

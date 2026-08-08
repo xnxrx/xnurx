@@ -1,0 +1,126 @@
+<!-- 50 | PROTOKOL HASIL ABU-ABU - mengubah "kadang jalan" jadi ANGKA | [1-CLICK]
+     *** FILE TERPENTING DARI SELURUH 50. ***
+     Hampir semua ide gila di 31-49 akan memberi hasil ABU-ABU. Mayoritas orang membuangnya.
+     Justru karena dibuang, di situlah yang tersisa.
+     Aturannya: hasil flaky BUKAN kegagalan - itu bug yang JENDELANYA BELUM DIUKUR.
+
+     EMPAT NILAI, BUKAN DUA. Alat ukur yang salah lebih berbahaya daripada tidak punya alat ukur.
+     Tiga jebakan yang sengaja ditutup di sini, karena ketiganya membuat orang melaporkan bug yang tidak ada:
+       (a) exception != temuan. Melempar biasanya berarti PERTAHANAN BEKERJA -> kolom THREW.
+       (b) origin "null"/"" != penyeberangan. about:blank & sandbox memang begitu -> kolom OPAQUE.
+       (c) membaca SEBELUM dokumen selesai dimuat = membaca dokumen yang salah -> semua predikat
+           lintas-origin di sini MENUNGGU load dulu, dan menyerah kalau tidak pernah selesai.
+     HIT hanya dihitung kalau kita benar-benar mendapat nilai konkret yang seharusnya tak boleh terbaca.
+
+     BACA p SEPERTI INI:
+       p = 1.0        deterministik   -> gerbang normal, lapor
+       0 < p < 1      FLAKY           -> PALING BERHARGA. ada variabel tersembunyi.
+                                         curigai berurutan: fokus jendela · tab latar · beban CPU/GC ·
+                                         urutan microtask · cache dingin/panas. UJI SATU PER SATU,
+                                         lalu LEBARKAN jendelanya sampai p mendekati 1.0
+       p = 1/20 lalu hilang  ONCE     -> catat kondisinya selengkap mungkin
+       p = 0          belum tersentuh -> GANTI OPERATOR, jangan menaikkan "kekuatan"
+     Laporkan dengan angkanya: "3 dari 20 di Chrome X/Win; dgn tab di latar naik jadi 9 dari 20".
+
+     Baris [popup] butuh gestur asli. Popup diblokir -> dicap BLOCKED-POPUP, BUKAN p=0. -->
+<button id=go>Jalankan N=20</button>
+<label style="font:13px system-ui;margin-left:10px"><input type=checkbox id=load> tambah beban (lebarkan jendela)</label>
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<script>
+var B = 'https://example.com/';   // origin KEDUA — ganti ke milikmu kalau example.com menolak di-frame
+var OPAQUE = 'OPAQUE', POPUP = 'POPUP';
+
+// HIT = kita benar-benar membaca nilai lintas-origin yang konkret.
+// lempar OPAQUE = hasilnya null/kosong (normal, bukan penyeberangan). lempar lain = ditolak engine.
+function crossOK(v) { if (!v || v === 'null' || v === location.origin) throw OPAQUE; return true; }
+function frame(src) {
+  return new Promise(function (res) {
+    var f = document.createElement('iframe');
+    f.style.cssText = 'width:1px;height:1px;border:0';
+    var done = false, fin = function () { if (!done) { done = true; res(f); } };
+    f.onload = fin; setTimeout(fin, 2500);          // menyerah kalau tak pernah selesai
+    f.src = src; document.body.appendChild(f);
+  });
+}
+
+var T = [
+  { n: 'open("") href BUKAN about:blank', pop: 1, f: function () {
+      var w = window.open('', '', 'width=200,height=120'); if (!w) throw POPUP;
+      var v = w.location.href; w.close(); return v !== 'about:blank'; } },
+
+  { n: 'write ke jendela TERTUTUP diterima', pop: 1, f: function () {
+      var w = window.open('', '', 'width=200,height=120'); if (!w) throw POPUP;
+      w.close(); w.document.write('x'); return true; } },
+
+  { n: 'URL tujuan dibaca ULANG (>1 toString)', pop: 1, f: function () {
+      var n = 0, w = window.open('', '', 'width=200,height=120'); if (!w) throw POPUP;
+      w.location = { toString: function () { n++; return 'about:blank'; } }; w.close(); return n > 1; } },
+
+  { n: 'handle dangling baca origin LINTAS-origin', f: function () {
+      var f0 = document.createElement('iframe'); document.body.appendChild(f0);
+      var dangling = f0.contentWindow;                       // handle ke dokumen LAMA
+      return frame(B).then(function () { return null; }).then(function () {
+        f0.src = B;
+        return new Promise(function (r) { f0.onload = r; setTimeout(r, 2500); });
+      }).then(function () {
+        try { return crossOK(dangling.location.origin); }    // handle lama, dokumen sudah menyeberang
+        finally { f0.remove(); }
+      }); } },
+
+  { n: 'origin BERUBAH di kedalaman frame 8', f: function () {
+      var h = document.createElement('iframe'); document.body.appendChild(h);
+      try {
+        var w = h.contentWindow;
+        for (var i = 0; i < 8; i++) { var d = w.document; var f = d.createElement('iframe'); d.body.appendChild(f); w = f.contentWindow; }
+        var o = w.location.origin;
+        if (!o || o === 'null') throw OPAQUE;                // about:blank opaque = NORMAL, bukan temuan
+        return o !== location.origin;
+      } finally { h.remove(); } } },
+
+  { n: 'dua pandangan TAK SEPAKAT (document vs location)', f: function () {
+      return frame(B).then(function (f) {
+        var a, b;
+        try { f.contentWindow.document.title; a = 1; } catch (e) { a = 0; }
+        try { f.contentWindow.location.href; b = 1; } catch (e) { b = 0; }
+        f.remove(); return a !== b;                          // satu lolos satu ditolak = mustahil
+      }); } }
+];
+
+var rows;
+function paint() { g.textContent = rows.join('\n'); }
+async function run() {
+  go.disabled = true;
+  var N = 20;
+  rows = ['REAL ORIGIN: ' + location.origin, 'N = ' + N + '   beban: ' + (load.checked ? 'ON' : 'off'), '',
+    'HIT    = benar-benar membaca nilai yang tak boleh terbaca',
+    'THREW  = ditolak engine  (pertahanan bekerja — BUKAN temuan)',
+    'OPAQUE = hasilnya null/kosong (normal untuk about:blank/sandbox — BUKAN temuan)', ''];
+  paint();
+  for (var t of T) {
+    var hit = 0, threw = 0, opaque = 0, pop = 0;
+    for (var i = 0; i < N; i++) {
+      if (load.checked) { var junk = []; for (var k = 0; k < 8000; k++) junk.push({ k: k }); junk.length = 0; }
+      try { if (await t.f()) hit++; }
+      catch (e) { if (e === POPUP) pop++; else if (e === OPAQUE) opaque++; else threw++; }
+    }
+    var v;
+    if (pop === N) v = 'BLOCKED-POPUP -> izinkan popup, ulangi. BUKAN p=0.';
+    else if (opaque === N) v = 'selalu OPAQUE -> perilaku normal, catat ilmu-negatif';
+    else if (threw === N) v = 'selalu DITOLAK engine -> aman, catat ilmu-negatif';
+    else if (hit === N) v = 'DETERMINISTIK -> gerbang normal, lapor';
+    else if (hit === 0) v = 'belum tersentuh -> GANTI OPERATOR';
+    else if (hit === 1) v = 'ONCE -> catat kondisinya selengkap mungkin';
+    else v = '*** FLAKY: PALING BERHARGA -> cari variabel tersembunyi ***';
+    rows.push('HIT ' + String(hit).padStart(2) + '  THREW ' + String(threw).padStart(2) +
+      '  OPAQUE ' + String(opaque).padStart(2) + '   ' + t.n.padEnd(40) + v);
+    paint();
+  }
+  rows.push('', 'Baris FLAKY: centang "tambah beban", jalankan lagi, lihat p naik atau tidak.',
+    'Variabel lain, uji SATU PER SATU: tab di LATAR · jendela tidak fokus · CPU throttle 6x',
+    'di DevTools · profil bersih · cache dingin · DPI/ukuran layar berbeda.',
+    'Catat tiap baris HIT>0 ke weird-journal — baris HIT>0 tidak pernah dihapus.');
+  paint(); go.disabled = false;
+}
+go.onclick = run;
+g.textContent = 'REAL ORIGIN: ' + location.href + '\n\nKlik untuk menjalankan 6 predikat x 20 kali (butuh ~1 menit).\nIzinkan popup dulu, kalau tidak 3 baris pertama jadi BLOCKED-POPUP.';
+</script>

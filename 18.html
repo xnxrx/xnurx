@@ -1,0 +1,25 @@
+<!-- 18 | UXSS ORACLE - carrier: javascript: / srcdoc / write ke frame yang sudah lintas-origin | [1-CLICK]
+     Melengkapi 17.html. 17 menguji BAGAIMANA dokumen lahir; 18 menguji BAGAIMANA kode dikirim.
+     Empat carrier ditembak ke frame yang sudah pindah ke origin lain. Semuanya HARUS gagal.
+     Yang menarik bukan "gagal" - tapi CARA gagalnya: exception vs diam-diam-no-op vs sebagian jalan.
+     Kegagalan diam-diam adalah tempat fork (Arc/Brave/Edge/Samsung) sering tertinggal dari upstream,
+     karena patch dipasang di satu jalur dan tidak di kembarnya.
+     EXPECTED-SECURE  keempat baris BLOCKED. Satu baris EXECUTED = UXSS -> screenshot -> STOP -> VRP. -->
+<button onclick="go()">Run 18</button>
+<pre id=o style="font:12px/1.6 monospace"></pre>
+<script>
+var B = 'https://example.com/';           // ganti ke origin KEDUA milikmu bila perlu
+var TAG = location.origin, out = [];
+function log(a, v) { out.push((v === 'BLOCKED' ? '  OK ' : '  CROSSED <== ') + a + ' : ' + v); o.textContent = 'TAG: ' + TAG + '\n\n' + out.join('\n'); }
+function go() {
+  var f = document.createElement('iframe'); f.src = B; f.style.cssText = 'width:1px;height:1px;border:0';
+  document.body.appendChild(f);
+  setTimeout(function () {
+    [['javascript: URI', function () { f.src = 'javascript:parent.postMessage("x","*")'; return f.contentWindow.document; }],
+     ['srcdoc swap', function () { f.srcdoc = '<script>parent.postMessage("x","*")<\/script>'; return f.contentWindow.document.body; }],
+     ['document.write', function () { f.contentWindow.document.write('x'); return 1; }],
+     ['name+open reuse', function () { f.name = 'v'; return window.open('', 'v').document.body; }]
+    ].forEach(function (t) { var v; try { v = t[1]() ? 'EXECUTED' : 'BLOCKED'; } catch (e) { v = 'BLOCKED'; } log(t[0], v); });
+  }, 1500);
+}
+</script>

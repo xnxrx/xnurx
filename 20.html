@@ -1,0 +1,29 @@
+<!-- 20 | UXSS ORACLE - origin diturunkan ULANG saat back/forward & bfcache | [NO-CLICK]
+     Lengan terakhir, dan sumbu yang paling sering luput.
+     IDE  origin sebuah dokumen tidak cuma ditulis SEKALI saat lahir. Ia diturunkan ULANG tiap kali
+     browser memulihkan dokumen dari entri session-history atau dari bfcache. Jalur "memulihkan"
+     itu kode yang BERBEDA dari jalur "memuat pertama kali" - dan jauh lebih jarang diuji siapa pun.
+     CARA  rantai pushState + traversal back/forward diputar terus, sambil origin & jumlah entri
+     dibaca ulang tiap putaran. Yang dicari: origin yang BERGESER tanpa navigasi jaringan apa pun.
+     EXPECTED-SECURE  origin identik di setiap sampel; drift = 0.
+     Semua same-origin, nol request keluar, aman diputar berapa lama pun. Tutup tab untuk berhenti. -->
+<pre id=o style="font:12px/1.6 monospace"></pre>
+<script>
+var base = location.origin, n = 0, drift = 0, seen = {};
+setInterval(function () {
+  n++;
+  history.pushState({ n: n }, '', '#step' + n);
+  if (n % 4 === 0) history.back();
+  if (n % 7 === 0) history.forward();
+  seen[location.origin] = 1;
+  if (location.origin !== base) drift++;
+  o.textContent = 'ORIGIN AWAL : ' + base +
+    '\nORIGIN KINI : ' + location.origin +
+    '\nputaran     : ' + n + '   entri history: ' + history.length +
+    '\norigin unik : ' + Object.keys(seen).join(' , ') +
+    '\nDRIFT       : ' + drift +
+    '\n\n' + (drift ? 'CROSSED -> origin bergeser TANPA navigasi jaringan -> screenshot, STOP, lapor VRP'
+                    : 'OK - origin stabil di seluruh traversal');
+}, 250);
+addEventListener('pageshow', function (e) { if (e.persisted) drift += 0; });
+</script>

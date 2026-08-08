@@ -1,0 +1,95 @@
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>batch20 — origin / address-bar / fullscreen / UXSS oracles</title>
+<style>
+body{font:15px/1.55 system-ui;margin:0;background:#0d1117;color:#c9d1d9}
+header{padding:18px 16px;border-bottom:1px solid #30363d}
+h1{margin:0 0 4px;font-size:18px}
+p.sub{margin:0;color:#8b949e;font-size:13px}
+ul{list-style:none;margin:0;padding:8px}
+li a{display:flex;gap:10px;align-items:baseline;padding:11px 12px;margin:6px 0;border:1px solid #30363d;border-radius:10px;text-decoration:none;color:#c9d1d9;background:#161b22}
+li a:hover{border-color:#58a6ff}
+b{min-width:26px;color:#58a6ff;font-variant-numeric:tabular-nums}
+i{font-style:normal;font-size:11px;padding:2px 7px;border-radius:20px;border:1px solid #30363d;color:#8b949e;white-space:nowrap}
+.n{color:#3fb950;border-color:#238636}
+.c{color:#d29922;border-color:#9e6a03}
+.k{color:#f85149;border-color:#8b2a25}
+.b{color:#a371f7;border-color:#6e40c9}
+.w{color:#db6d28;border-color:#9e4a06}
+h2{margin:18px 16px 0;font-size:13px;color:#8b949e;text-transform:uppercase;letter-spacing:.08em}
+span{color:#8b949e;font-size:13px}
+footer{padding:14px 16px;border-top:1px solid #30363d;color:#8b949e;font-size:12px}
+#o{font:12px monospace;color:#3fb950;padding:0 16px}
+</style>
+<header>
+  <h1>batch20 — 20 percobaan origin / address-bar / fullscreen / UXSS</h1>
+  <p class="sub">Artefak riset untuk browser SENDIRI. Bukan kit phishing: nol form kredensial, nol fetch/XHR/beacon, nol peniruan merek. Tiap file mencetak origin aslinya.</p>
+</header>
+<p id="o"></p>
+<ul id="l"></ul>
+<footer>
+  Kontrol wajib: <b>3</b> dipasangkan dengan <b>1</b> dan <b>2</b>. Kalau kontrol ikut "berhasil", pembacaanmu salah — jangan dilapor.<br>
+  Alur: jalankan → screenshot permukaan yang bohong + panel origin asli → catat browser+versi+OS → <b>STOP</b> → lapor ke VRP (Chrome / Mozilla / Apple / Arc).
+</footer>
+<script>
+var D = [
+ [1,'n','nav-timing HOLD, port di-DROP','omnibox'],
+ [2,'c','popup never-commit (replace loop)','omnibox popup'],
+ [3,'c','LENGAN KONTROL untuk 1 & 2 — port hidup','baseline'],
+ [4,'c','aktivasi dari &lt;select&gt; natif, bukan tombol','omnibox'],
+ [5,'n','pemicu visibilitychange (balik ke tab)','omnibox'],
+ [6,'c','HOLD tanpa jaringan: window.stop()','omnibox'],
+ [7,'c','HOLD via skema tak dikenal (nol app terbuka)','omnibox'],
+ [8,'n','path menyamar jadi host + elision layar sempit','strip URL mobile'],
+ [9,'n','RTL override + confusable Cyrillic','host-label + judul tab'],
+ [10,'c','fullscreen + chrome digambar sendiri','toast fullscreen'],
+ [11,'k','fullscreen + keyboard-lock: butakan pembantahnya','toast + Esc'],
+ [12,'n','topologi chrome: standalone / PWA / sidebar','strip origin non-omnibox'],
+ [13,'c','popup chromeless','chrome popup'],
+ [14,'c','baris origin di dialog JS (srcdoc / blob)','js-dialog'],
+ [15,'c','notifikasi OS — atribusi di luar browser','panel OS'],
+ [16,'k','FUSI: suara TTS hidup lebih lama dari dokumennya','omnibox + audio'],
+ [17,'n','UXSS oracle — pewarisan origin (3 lengan)','oracle'],
+ [18,'c','UXSS oracle — carrier javascript:/srcdoc/write','oracle'],
+ [19,'n','UXSS oracle — inkonsistensi DUA pandangan','oracle'],
+ [20,'n','UXSS oracle — origin diturunkan ulang di back/forward','oracle'],
+ [21,'b','dokumen yang TIDAK PERNAH punya URL — nol navigasi','omnibox KOSONG'],
+ [22,'b','jalur-lahir beda: &lt;a target=_blank&gt;','omnibox KOSONG'],
+ [23,'b','membilas bar lewat navigasi yang dibatalkan','omnibox KOSONG'],
+ [24,'b','Document Picture-in-Picture — jendela tanpa bar','PALING SEGAR'],
+ [25,'b','blob: yang URL-nya dicabut di tengah pemuatan','omnibox KOSONG'],
+ [26,'b','chrome didorong keluar layar (top negatif)','geometri'],
+ [27,'b','dikosongkan oleh ELISI di jendela ultra-sempit','strip URL'],
+ [28,'b','dipasang sbg app: standalone + controls-overlay','tanpa omnibox'],
+ [29,'b','bar mobile mengkerut lalu DIKUNCI','bar HP'],
+ [30,'n','ALAT UKUR + KONTROL untuk 21–29','angka, bukan kesan'],
+ [31,'w','W1×W2 · DOM ditulis oleh dokumen yang sudah mati','bar kosong'],
+ [32,'w','W4×W6 · handle dangling disentuh dari handler load','UXSS'],
+ [33,'w','W5 · URL yang MENAVIGASI saat dibaca (toString)','TOCTOU tipe'],
+ [34,'w','W5 · Proxy dicabut di tengah pemakaian','URL setengah jadi'],
+ [35,'w','W7 · dua requestFullscreen dalam satu task','toast'],
+ [36,'w','W6×W7 · fullscreen reentran, toast ditelan','toast'],
+ [37,'w','W3 · kedalaman frame 1→32 (bounded, diukur)','pewarisan origin'],
+ [38,'w','W3×W10 · 200 entri history lalu back kilat','bar tertinggal'],
+ [39,'w','W8 · tukar nama jendela antara cek dan pakai','TOCTOU API'],
+ [40,'w','W9×W1 · primitif HOLD dijalankan DI DALAM PiP','tanpa omnibox'],
+ [41,'w','W9×W2 · beraksi saat tab beku print-preview','jendela lebar'],
+ [42,'w','W10 · lima jangkar waktu, cari yang menyimpang','peta timing'],
+ [43,'w','W11 · frame/opener yang menunjuk dirinya sendiri','cek A==B'],
+ [44,'w','W11×W3 · blob yang melahirkan blob (3 tingkat)','jejak pewarisan'],
+ [45,'w','W12 · state spoof dibangkitkan bfcache','bar vs dokumen'],
+ [46,'w','W12×W4 · pakai jendela SETELAH ditutup','slot nama'],
+ [47,'w','UXSS · origin-sanitizer melewati mati→bangkit','bfcache'],
+ [48,'w','UXSS · intercept SETELAH commit, 3 pandangan','Navigation API'],
+ [49,'w','UXSS · dua origin diperebutkan bersamaan','origin race'],
+ [50,'n','⭐ RUNNER N=20 — ubah "kadang jalan" jadi angka p','WAJIB']
+];
+document.getElementById('o').textContent = 'ORIGIN HALAMAN INI: ' + location.origin;
+document.getElementById('l').innerHTML = D.map(function(d){
+  var tag = d[1]==='n' ? 'NO-CLICK' : d[1]==='k' ? 'BRUTAL' : d[1]==='b' ? 'BAR KOSONG' : d[1]==='w' ? 'WEIRD' : '1-CLICK';
+  var head = d[0]===1  ? '<h2>A · spoofing: bar berbohong</h2>'
+           : d[0]===17 ? '<h2>B · UXSS: oracle lintas-origin</h2>'
+           : d[0]===21 ? '<h2>C · bar KOSONG: tidak ada yang bisa membantahmu</h2>'
+           : d[0]===31 ? '<h2>D · weird-lab: operator W1–W12, hasil abu-abu diukur pakai 50</h2>' : '';
+  return head+'<li><a href="'+d[0]+'.html"><b>'+d[0]+'</b><i class="'+d[1]+'">'+tag+'</i>'+d[2]+' <span>· '+d[3]+'</span></a></li>';
+}).join('');
+</script>

@@ -1,0 +1,22 @@
+<!-- 31 | W1 x W2  URUTAN SALAH x SAAT SEKARAT | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "yang menulis DOM anak masih hidup saat menulisnya"
+     IDE GILA  buka tab kosong, lalu tulis isinya DARI DALAM pagehide MILIK PENULISNYA -
+     yaitu pada milidetik ketika opener sendiri sedang dibongkar. Anak menerima DOM dari
+     dokumen yang secara resmi sudah tidak ada. Siapa yang jadi pemilik dokumen itu, dan
+     URL siapa yang dicetak omnibox untuk dokumen yang penulisnya sudah mati?
+     Ini bukan varian dari 21: di 21 penulisnya hidup. Bedanya cuma SATU, dan satu itu waktunya.
+     KEMUNGKINAN ABU-ABU TINGGI -> kalau kadang jalan, jangan buang: ukur pakai 50.html.
+     EXPECTED-SECURE  anak tetap about:blank/origin opener, atau penulisan ditolak sama sekali. -->
+<button onclick="go()">Run 31</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+var w;
+function go() {
+  w = window.open('', '', 'width=820,height=520');
+  addEventListener('pagehide', function () {
+    try { w.document.write('<h2 style="font:20px system-ui">Ditulis oleh dokumen yang SUDAH MATI</h2>'); } catch (e) { }
+  });
+  location.href = location.href + '?reload=' + Date.now();
+}
+</script>

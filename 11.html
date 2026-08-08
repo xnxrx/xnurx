@@ -1,0 +1,21 @@
+<!-- 11 | fullscreen bypass - BUTAKAN PENGAMATNYA (keyboard-lock + notice-collision) | [1-CLICK]
+     GENOME  D=fullscreen-toast  E=keyboard-lock + notice-collision  C=click
+     MEKANISME  10.html menggambar bar palsu. Yang ini menyerang ALAT BANTAHNYA:
+       (a) keyboard.lock() menahan Esc -> jalan keluar refleks pengguna dijegal
+       (b) satu notice kedua (PiP/izin) sengaja dipanggil bersamaan supaya toast fullscreen
+           bertabrakan dan terpotong / hilang lebih cepat
+     Yang diukur = BERAPA DETIK toast bertahan, dibanding baseline 10.html di build yang sama.
+     Ini "ukur amplifier"-nya, bukan meledakkannya.
+     EXPECTED-SECURE  toast tak bisa ditabrak, dan Esc-ditahan justru MEMUNCULKAN notice tambahan.
+     KELUAR  TAHAN Esc 2 detik (Chrome membebaskan lock), atau tutup tab. -->
+<button onclick="go()">Run 11 (keluar: TAHAN Esc 2 detik)</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  document.documentElement.requestFullscreen().then(function () {
+    navigator.keyboard && navigator.keyboard.lock && navigator.keyboard.lock(['Escape']);
+    document.title = 'https://www.google.com';
+  });
+}
+</script>

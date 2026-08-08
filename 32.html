@@ -1,0 +1,28 @@
+<!-- 32 | W4 x W6  KONTEKS MATI x REENTRANSI | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "handle ke dokumen lama tidak dipakai lagi setelah src ditukar"
+     IDE GILA  simpan contentWindow sebuah frame, lalu tukar src-nya. Handle lama kini menunjuk
+     dokumen DANGLING. Lalu, DARI DALAM handler load dokumen BARU, sentuh handle LAMA.
+     Jadi dokumen baru sedang lahir sementara kita memaksa browser melayani dokumen yang
+     seharusnya sudah dikubur - dua dokumen hidup di satu slot, di milidetik yang sama.
+     Ini kombinasi yang menghasilkan FuzzOrigin: origin ditulis ulang saat ada dua kandidat.
+     YANG DIBACA  origin handle lama vs origin frame sekarang. Beda = dua bagian browser tak sepakat.
+     EXPECTED-SECURE  handle lama netral/BLOCKED, tak pernah mengembalikan origin dokumen baru. -->
+<button onclick="go()">Run 32</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var f = document.createElement('iframe'); f.src = 'about:blank'; document.body.appendChild(f);
+  var dangling = f.contentWindow, n = 0, out = [];
+  f.onload = function () {
+    n++;
+    var a, b;
+    try { a = dangling.location.href; } catch (e) { a = 'BLOCKED'; }
+    try { b = f.contentWindow.location.href; } catch (e) { b = 'BLOCKED'; }
+    out.push('load#' + n + '  handle-lama=' + a + '   frame-kini=' + b + (a !== b && a !== 'BLOCKED' ? '   <== TIDAK SEPAKAT' : ''));
+    g.textContent = 'REAL ORIGIN: ' + location.origin + '\n\n' + out.join('\n');
+    if (n < 4) f.src = n % 2 ? '30.html' : 'about:blank';
+  };
+  f.src = '30.html';
+}
+</script>

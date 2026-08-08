@@ -1,0 +1,26 @@
+<!-- 45 | W12  HIDUP LAGI - state spoof yang dibangkitkan bfcache | [NO-CLICK setelah 1 navigasi]
+     ASUMSI YANG DILANGGAR  "yang sudah ditinggalkan tetap ditinggalkan"
+     IDE GILA  bfcache membekukan halaman UTUH - DOM, timer, variabel - lalu menghidupkannya
+     lagi persis seperti semula saat pengguna menekan Back. Yang TIDAK ikut dibekukan adalah
+     pembukuan UI browser, karena ia sudah berpindah ke halaman lain.
+     Jadi: siapkan state spoof, tinggalkan halaman, lalu Back. Halaman kembali dalam keadaan
+     "sudah ter-spoof" tanpa satu baris kode pun berjalan lagi - sementara bar baru saja
+     dihitung ulang untuk halaman yang berbeda. Dua pembukuan dipulihkan dari titik yang berbeda.
+     CARA UJI  klik Siapkan -> klik Pergi -> tekan tombol BACK browser. Baca bar saat kembali.
+     EXPECTED-SECURE  pemulihan bfcache selalu menghitung ulang bar dari dokumen yang dipulihkan. -->
+<button onclick="prep()">1. Siapkan state</button> <button onclick="leave()">2. Pergi</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+var armed = false;
+function draw(t) { g.textContent = 'REAL ORIGIN: ' + location.origin + '\n' + t; }
+draw('belum disiapkan');
+function prep() { armed = true; document.title = 'https://www.google.com'; draw('state SIAP. Sekarang klik Pergi, lalu tekan BACK.'); }
+function leave() { location.href = '30.html?dari=45'; }
+addEventListener('pageshow', function (e) {
+  draw('pageshow  persisted(bfcache) = ' + e.persisted +
+    '\nstate masih terpasang = ' + armed +
+    '\n\n' + (e.persisted && armed
+      ? 'DIPULIHKAN dari bfcache dgn state utuh -> baca address bar SEKARANG, screenshot.'
+      : 'dimuat ulang biasa (bukan bfcache) -> coba lagi, jangan reload manual.'));
+});
+</script>

@@ -1,0 +1,21 @@
+<!-- 28 | BAR KOSONG - dipasang sebagai APLIKASI (standalone / window-controls-overlay) | [NO-CLICK]
+     Ini satu-satunya jalur di daftar ini yang menghapus omnibox SECARA SAH - dan justru
+     karena sah, ia jarang diperiksa. Setelah dipasang, jendela tidak punya address bar;
+     yang tersisa hanya strip judul tipis. Dengan window-controls-overlay, konten kita
+     bahkan boleh menggambar DI DALAM strip judul itu lewat env(titlebar-area-*).
+     Pertanyaan riset: sesudah dipasang, di mana lagi origin disebut, dan bisakah tempat itu
+     kita cat sendiri? Kalau jawabannya "tidak ada / bisa" -> permukaan tanpa pembantah.
+     CARA UJI  Chrome desktop -> menu -> Install / Add to desktop -> buka dari shortcut -> buka file ini.
+     EXPECTED-SECURE  ada satu tempat menyebut origin yang TIDAK bisa digambari konten halaman. -->
+<link rel="manifest" href="manifest.webmanifest">
+<style>#tb{position:fixed;left:env(titlebar-area-x,0);top:env(titlebar-area-y,0);width:env(titlebar-area-width,100%);height:env(titlebar-area-height,34px);background:#f1f3f4;font:12px system-ui;line-height:34px;padding-left:12px;-webkit-app-region:drag}</style>
+<div id=tb>🔒 https://www.google.com &nbsp;<small>[strip PALSU digambar halaman — riset]</small></div>
+<pre id=g style="font:12px monospace;margin-top:46px"></pre>
+<script>
+var modes = ['browser', 'minimal-ui', 'standalone', 'fullscreen', 'window-controls-overlay'];
+g.textContent = 'REAL ORIGIN : ' + location.href +
+  '\ndisplay-mode: ' + modes.filter(function (m) { return matchMedia('(display-mode:' + m + ')').matches; }).join(', ') +
+  '\nchrome tegak: ' + (outerHeight - innerHeight) + 'px   (kecil = strip tipis, 0 = tidak ada)' +
+  '\nWCO aktif   : ' + (navigator.windowControlsOverlay ? navigator.windowControlsOverlay.visible : 'API tidak ada') +
+  '\n\nDi mode browser biasa angka chrome besar. Pasang sebagai app, buka lagi, bandingkan.';
+</script>

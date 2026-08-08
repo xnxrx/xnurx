@@ -1,0 +1,19 @@
+{
+  "name": "batch20 origin-surface research",
+  "short_name": "batch20",
+  "description": "Self-contained browser origin-display research PoCs. Research artifact, not a phishing kit.",
+  "start_url": "28.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%230d1117'/%3E%3Ctext x='96' y='128' font-size='96' text-anchor='middle' fill='%2358a6ff' font-family='monospace'%3E20%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

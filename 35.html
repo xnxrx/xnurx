@@ -1,0 +1,27 @@
+<!-- 35 | W7  SIMULTANITAS - dua requestFullscreen dalam satu task | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "satu waktu hanya satu elemen bisa masuk fullscreen"
+     IDE GILA  tembak DUA permintaan fullscreen ke DUA elemen berbeda di task yang sama,
+     sebelum yang pertama sempat selesai. Spesifikasi mengatur pemenangnya, tapi yang kita
+     incar bukan pemenangnya - melainkan TOAST-nya. Toast "You are in full screen" adalah
+     satu-satunya pembantah kelas ini. Kalau dua transisi saling menimpa, toast bisa
+     dianggap sudah ditampilkan padahal transisi yang benar-benar terjadi adalah yang kedua.
+     YANG DIUKUR  berapa promise yang resolve, berapa event fullscreenchange, dan (mata)
+     berapa kali toast muncul. Tiga angka yang harus konsisten. Kalau tidak, itu temuannya.
+     EXPECTED-SECURE  tepat satu transisi, tepat satu toast.  KELUAR  Esc. -->
+<button onclick="go()">Run 35 (Esc untuk keluar)</button>
+<div id=a style="padding:10px;background:#eef">elemen A</div>
+<div id=b style="padding:10px;background:#efe">elemen B</div>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+var ok = 0, no = 0, ev = 0;
+document.addEventListener('fullscreenchange', function () { ev++; draw(); });
+function draw() {
+  g.textContent = 'REAL ORIGIN: ' + location.origin + '\npromise resolve : ' + ok + '\npromise reject  : ' + no +
+    '\nfullscreenchange: ' + ev + '\n\nHitung dgn mata: toast muncul berapa kali? Harus = jumlah transisi.';
+}
+function go() {
+  a.requestFullscreen().then(function () { ok++; draw(); }, function () { no++; draw(); });
+  b.requestFullscreen().then(function () { ok++; draw(); }, function () { no++; draw(); });
+}
+</script>

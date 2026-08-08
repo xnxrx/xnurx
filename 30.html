@@ -1,0 +1,33 @@
+<!-- 30 | ALAT UKUR + LENGAN KONTROL untuk seluruh keluarga 21-29 | [NO-CLICK]
+     Tanpa file ini, "bar-nya kosong" cuma kesan. Dengan file ini, ia jadi ANGKA - dan triager
+     membaca angka, bukan kesan.
+     DUA FUNGSI:
+     (1) ALAT UKUR - cetak geometri chrome jendela saat ini. Buka file ini DI DALAM jendela hasil
+         21..29 (tempel URL-nya) lalu bandingkan angkanya dengan baseline di bawah.
+     (2) LENGAN KONTROL - tombolnya membuka jendela dengan URL NORMAL dan ukuran normal.
+         Bar jendela itu HARUS terisi jelas. Kalau kontrol ini pun tampak kosong,
+         yang kamu lihat adalah kebiasaan browsermu, bukan temuan -> JANGAN dilapor.
+     File ini juga jadi sasaran 27.html (jendela sempit), jadi ia mencetak lebarnya sendiri. -->
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<button onclick="ctl()">Buka lengan KONTROL (URL normal, ukuran normal)</button>
+<script>
+var modes = ['browser', 'minimal-ui', 'standalone', 'fullscreen', 'window-controls-overlay'];
+function draw() {
+  g.textContent =
+    'URL PENUH   : ' + location.href +
+    '\nORIGIN      : ' + location.origin +
+    '\npanjang URL : ' + location.href.length + ' karakter' +
+    '\n\n-- geometri jendela ini --' +
+    '\nouter       : ' + outerWidth + ' x ' + outerHeight +
+    '\ninner       : ' + innerWidth + ' x ' + innerHeight +
+    '\nCHROME TEGAK: ' + (outerHeight - innerHeight) + ' px   <== 0 berarti nol chrome' +
+    '\nposisi layar: x=' + screenX + ' y=' + screenY + '   <== y negatif = chrome keluar layar' +
+    '\nlayar       : ' + screen.width + ' x ' + screen.height + '  avail ' + screen.availWidth + ' x ' + screen.availHeight +
+    '\ndisplay-mode: ' + modes.filter(function (m) { return matchMedia('(display-mode:' + m + ')').matches; }).join(', ') +
+    '\nopener      : ' + (window.opener ? 'ADA' : 'tidak ada') +
+    '\n\nBASELINE tab biasa desktop: chrome tegak ~80-130px, y >= 0.' +
+    '\nAngka jauh di bawah itu = permukaan origin sedang tidak ada di layar.';
+}
+draw(); setInterval(draw, 1000);
+function ctl() { window.open(location.href + '?kontrol=1', '', 'width=980,height=640,left=80,top=80'); }
+</script>

@@ -1,0 +1,19 @@
+<!-- 13 | origin spoof - POPUP CHROMELESS | [1-CLICK]
+     GENOME  G=chromeless popup  B=window.open + features  E=bar digambar  C=click
+     MEKANISME  jendela yang dibuka dengan fitur ukuran sering kehilangan sebagian chrome.
+     Aturannya beda per engine/OS: sebagian memaksa strip origin tetap ada, sebagian tidak.
+     Perbedaan aturan itu = permukaan. Anak jendela menggambar bar sendiri dan mencetak
+     origin ASLI-nya di badan, jadi satu screenshot memuat kebohongan dan kebenarannya.
+     EXPECTED-SECURE  setiap popup, seberapa pun kecilnya, tetap menampilkan origin yang tak bisa ditulisi.
+     Nol navigasi keluar: anak jendela adalah about:blank yang mewarisi origin ini. -->
+<button onclick="go()">Run 13</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var w = window.open('', '', 'width=460,height=300,toolbar=no,menubar=no,location=no,status=no');
+  w.document.write(
+    '<div style="font:12px system-ui;background:#f1f3f4;padding:6px;border-radius:12px">🔒 https://www.google.com</div>' +
+    '<h3>BAR DI ATAS PALSU</h3><p style="font:12px monospace">origin asli anak jendela: ' + w.location.origin + '</p>');
+}
+</script>

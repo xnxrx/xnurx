@@ -1,0 +1,31 @@
+<!-- 42 | W10  WAKTU EKSTREM - lima jangkar waktu yang berbeda, diukur satu per satu | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "delay-nya wajar, jadi cukup diuji di satu titik waktu"
+     IDE  ini bukan satu eksploit, ini PETA. Primitif yang sama (buka jendela, tulis DOM,
+     mulai navigasi) ditembakkan dari LIMA jangkar waktu yang secara internal berbeda jauh:
+       0ms task · microtask · rAF tunggal · rAF ganda · rAF tripel
+     rAF ganda/tripel jatuh tepat di sekitar batas commit-render - titik yang hampir tak pernah
+     dipakai orang karena tidak intuitif, dan justru karena itu jarang di-harden.
+     Yang dicari: adakah SATU jangkar yang hasilnya berbeda dari empat lainnya. Itu jangkarnya.
+     Hasilnya kemungkinan besar ABU-ABU -> jangan disimpulkan, ukur pakai 50.html.
+     EXPECTED-SECURE  kelima jangkar berperilaku identik.  BOUNDED: 5 jendela, sekali jalan. -->
+<button onclick="go()">Run 42 (buka 5 jendela kecil)</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function shot(label, i) {
+  var w = window.open('', '', 'width=340,height=200,left=' + (30 + i * 350) + ',top=' + (60 + i * 40));
+  if (!w) return;
+  w.document.write('<div style="font:13px system-ui;padding:8px"><b>' + label + '</b><br>' + location.origin + '</div>');
+  w.location = 'https://www.google.com:82';
+}
+function go() {
+  setTimeout(function () { shot('0ms task', 0); }, 0);
+  Promise.resolve().then(function () { shot('microtask', 1); });
+  requestAnimationFrame(function () { shot('rAF x1', 2); });
+  requestAnimationFrame(function () { requestAnimationFrame(function () { shot('rAF x2', 3); }); });
+  requestAnimationFrame(function () { requestAnimationFrame(function () { requestAnimationFrame(function () { shot('rAF x3', 4); }); }); });
+  g.textContent = 'REAL ORIGIN: ' + location.origin +
+    '\n\nBaca omnibox KELIMA jendela. Catat mana yang berbeda dari yang lain.' +
+    '\nSatu jangkar menyimpang = itu jangkar yang belum di-harden.';
+}
+</script>

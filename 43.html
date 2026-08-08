@@ -1,0 +1,30 @@
+<!-- 43 | W11  REFERENSI DIRI - dokumen yang menunjuk dirinya sendiri | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "sebuah objek menunjuk ke objek LAIN"
+     IDE GILA  tiga bentuk referensi-diri sekaligus, semuanya dibatasi:
+       (a) frame yang src-nya adalah halaman ini sendiri (dibatasi kedalaman 3 lewat parameter)
+       (b) window.open('', '_self') -> jendela yang opener-nya dirinya sendiri
+       (c) frame yang name-nya sama dengan target navigasinya
+     Pemeriksaan keamanan browser hampir selalu ditulis dalam bentuk "bandingkan A dengan B".
+     Kalau A dan B adalah objek yang SAMA, cabang mana yang diambil? Sebagian pemeriksaan
+     memberi jawaban "sama = aman" - dan itu kesimpulan yang benar untuk kasus normal,
+     tapi menjadi celah saat identitas keduanya kita paksa berimpit.
+     EXPECTED-SECURE  opener !== self, dan kedalaman rekursi dihentikan bersih tanpa kebingungan origin. -->
+<button onclick="go()">Run 43</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+var d = +(new URLSearchParams(location.search).get('d') || 0);
+g.textContent = 'REAL ORIGIN: ' + location.origin + '\nkedalaman diri: ' + d +
+  '\nopener === self ? ' + (window.opener === window) +
+  '\nparent === self ? ' + (window.parent === window) +
+  '\ntop === self ?    ' + (window.top === window);
+if (d > 0 && d < 3) { var f = document.createElement('iframe'); f.src = '43.html?d=' + (d + 1); f.style.cssText = 'width:99%;height:150px'; document.body.appendChild(f); }
+function go() {
+  var f = document.createElement('iframe'); f.name = 'diri'; f.src = '43.html?d=1';
+  f.style.cssText = 'width:99%;height:200px'; document.body.appendChild(f);
+  try { window.open('', '_self'); } catch (e) { }
+  setTimeout(function () {
+    g.textContent += '\n\nsetelah open(_self): opener===self ? ' + (window.opener === window) +
+      '\nKalau berubah jadi true, identitas jendela sudah berimpit -> uji ulang 39.html di state ini.';
+  }, 400);
+}
+</script>

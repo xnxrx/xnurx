@@ -1,0 +1,26 @@
+<!-- 24 | BAR KOSONG - Document Picture-in-Picture | [1-CLICK]  *** PALING SEGAR ***
+     Ini jawaban paling langsung untuk "UI kita tanpa address bar", dan permukaan paling muda
+     di seluruh daftar: Document PiP (Chrome 116+) membuka jendela SUNGGUHAN, selalu-di-atas,
+     yang merender DOM APA PUN - dan dirancang TANPA omnibox karena ditujukan untuk UI video-call.
+     Kenapa ini bernilai: seluruh kelas spoofing selama ini berdebat soal "bar-nya bohong".
+     Di sini tidak ada bar untuk dibohongi. Pertanyaannya jadi: masih adakah SATU permukaan
+     yang menyebut origin jendela ini, dan bisakah permukaan itu ditutupi / dipersempit / didorong keluar?
+     YANG DICATAT  (a) adakah teks origin di jendela PiP? (b) di mana persisnya? (c) terpotong di lebar berapa?
+     EXPECTED-SECURE  origin selalu tampil, tak bisa ditutupi konten, tak hilang di ukuran minimum.
+     Angka geometri dicetak supaya laporanmu berisi UKURAN, bukan kesan. -->
+<button onclick="go()">Run 24 (Chrome 116+)</button>
+<p id=r></p><pre id=g style="font:12px monospace"></pre>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  if (!window.documentPictureInPicture) { g.textContent = 'API tidak ada di browser ini -> catat sbg ilmu-negatif.'; return; }
+  documentPictureInPicture.requestWindow({ width: 420, height: 260 }).then(function (w) {
+    w.document.body.style.cssText = 'margin:0;font:14px system-ui';
+    w.document.body.innerHTML = '<div style="padding:14px"><b>UI penuh, tanpa address bar.</b>' +
+      '<p style="font:12px">origin asli: ' + location.origin + ' &mdash; PoC riset</p></div>';
+    g.textContent = 'PiP outer=' + w.outerWidth + 'x' + w.outerHeight +
+      '  inner=' + w.innerWidth + 'x' + w.innerHeight +
+      '\ntinggi chrome PiP = ' + (w.outerHeight - w.innerHeight) + 'px  (0 = nol chrome sama sekali)';
+  });
+}
+</script>

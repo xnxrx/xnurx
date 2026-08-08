@@ -1,0 +1,16 @@
+<!-- 9 | origin spoof - RTL override + confusable di dalam URL | [NO-CLICK]
+     GENOME  B=pushState + U+202E/confusable  C=onload  D=S1 host-label & full-strip
+     MEKANISME  omnibox merender teks Unicode dengan aturan BIDI. Satu U+202E membalik urutan
+     tampilan segmen sesudahnya, jadi urutan yang DIBACA manusia != urutan yang DIPAKAI browser.
+     Confusable Cyrillic (a e o c) menambah lapisan kedua: dua string beda byte, sama rupa.
+     EXPECTED-SECURE  omnibox menetralkan BIDI di strip URL dan/atau memaksa punycode.
+     Nol navigasi, nol request - murni representasi. -->
+<p id=r></p>
+<script>
+var rtl = '‮';
+history.pushState({}, '', '/pay/' + rtl + 'gnindis/moc.elgoog.www//:sptth');
+var el = document.getElementById('r');
+el.textContent = 'REAL ORIGIN: ' + location.origin;
+document.title = 'аррӏе.com';  // confusable, hanya label
+</script>
+<h2>Baca strip URL + judul tab. Keduanya bohong, origin di atas yang benar.</h2>

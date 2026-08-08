@@ -1,0 +1,21 @@
+<!-- 23 | BAR KOSONG - MEMBILAS bar lewat navigasi yang dibatalkan | [1-CLICK]
+     Ini pertanyaan yang beda dari 21/22, dan pertanyaan inilah yang mahal:
+     kalau omnibox terlanjur menulis sesuatu, apakah PEMBATALAN navigasi MEMBILASNYA jadi kosong,
+     atau MENGEMBALIKANNYA ke nilai sebelumnya?
+     Membilas jadi kosong = bug. Sebab kita bisa memilih kapan pembilasan itu terjadi, dan
+     DOM kita tetap utuh di layar - jadi hasilnya UI penuh tanpa atribusi apa pun.
+     URUTAN  tab tanpa URL -> tulis DOM -> mulai navigasi -> bunuh sebelum commit -> baca bar.
+     EXPECTED-SECURE  bar kembali ke about:blank / origin opener, tidak pernah jadi kosong.
+     Port 82 dipilih karena paketnya DI-DROP (pending panjang), bukan di-RST (commit error instan). -->
+<button onclick="go()">Run 23</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN (opener): ' + location.href;
+function go() {
+  var w = window.open('', '', 'width=900,height=620');
+  w.document.write('<h2 style="font:20px system-ui">DOM bertahan. Bar-nya menulis apa sekarang?</h2>' +
+    '<p style="font:13px system-ui">ditulis oleh ' + location.origin + '</p>');
+  setTimeout(function () { w.location = 'https://www.google.com:82'; }, 400);
+  setTimeout(function () { w.stop(); }, 900);
+}
+</script>

@@ -1,0 +1,26 @@
+<!-- 36 | W6 x W7  REENTRANSI x SIMULTANITAS | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "sebuah operasi tidak memanggil dirinya sendiri dari dalam handlernya"
+     IDE GILA  keluar dari fullscreen lalu MASUK LAGI, dipicu dari dalam handler fullscreenchange
+     itu sendiri, berulang - tapi DIBATASI 8 putaran (bounded, bukan flood).
+     Kenapa: toast biasanya ditampilkan pada transisi "masuk". Kalau masuk-keluar-masuk terjadi
+     lebih cepat dari umur toast, browser bisa menganggap "sudah pernah menampilkan toast untuk
+     sesi fullscreen ini" - dan kita berakhir di fullscreen TANPA toast sama sekali.
+     Itu tepatnya yang membuat 10.html/11.html naik kelas: bar palsu tanpa satu pun pembantah.
+     YANG DIUKUR  jumlah transisi vs jumlah toast yang benar-benar terlihat mata.
+     EXPECTED-SECURE  setiap masuk-fullscreen = satu toast, tanpa kecuali.  KELUAR  Esc / tutup tab. -->
+<button onclick="go()">Run 36 (8 putaran, Esc untuk keluar)</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+var n = 0, MAX = 8;
+document.addEventListener('fullscreenchange', function () {
+  n++;
+  g.textContent = 'REAL ORIGIN: ' + location.origin + '\ntransisi: ' + n + ' / ' + MAX +
+    '\nfullscreen sekarang: ' + !!document.fullscreenElement +
+    '\n\nHitung dgn mata: toast muncul berapa kali dari ' + Math.ceil(n / 2) + ' kali masuk?';
+  if (n >= MAX) return;
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen().catch(function () { });
+});
+function go() { document.documentElement.requestFullscreen(); }
+</script>

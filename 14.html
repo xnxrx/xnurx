@@ -1,0 +1,20 @@
+<!-- 14 | origin spoof - BARIS ORIGIN DI DIALOG JS | [1-CLICK]
+     GENOME  D=S6 js-dialog  F=srcdoc / blob (dokumen tanpa origin jaringan)  C=click
+     MEKANISME  alert/confirm menampilkan baris "situs ini berkata". Baris itu dihitung dari
+     origin dokumen PEMANGGIL. Dokumen yang lahir tanpa origin jaringannya sendiri (srcdoc, blob)
+     bisa membuat baris itu kosong, terpotong, atau diwarisi - sementara isi pesan dikendalikan penuh.
+     Isi pesan sengaja diisi teks yang menyamar jadi atribusi supaya terlihat mana yang bisa dibaca ulang.
+     EXPECTED-SECURE  dialog selalu menyebut origin sebenarnya, tak bisa kosong, tak bisa didorong keluar layar.
+     Tiga varian dijalankan berurutan: top-level, srcdoc, blob. -->
+<button onclick="go()">Run 14 (3 dialog berurutan)</button>
+<p id=r></p><iframe id=f srcdoc="<script>onmessage=function(){alert('DIALOG DARI SRCDOC\n\nBaris origin di atas menyebut apa?')}<\/script>" style="width:1px;height:1px;border:0"></iframe>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  alert('DIALOG 1 / top-level\n\nCatat baris origin yang browser tulis di atas pesan ini.');
+  document.getElementById('f').contentWindow.postMessage('x', '*');
+  var b = URL.createObjectURL(new Blob(["<script>alert('DIALOG 3 / blob:\\n\\nBaris origin menyebut apa sekarang?')<\/script>"], { type: 'text/html' }));
+  var i = document.createElement('iframe'); i.src = b; i.style.cssText = 'width:1px;height:1px;border:0';
+  document.body.appendChild(i);
+}
+</script>

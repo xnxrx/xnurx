@@ -1,0 +1,32 @@
+<!-- 40 | W9 x W1  MODE SALAH x URUTAN SALAH - primitif HOLD dijalankan DI DALAM PiP | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "primitif ini sudah diuji" - ya, diuji di TAB. Belum pernah di PiP.
+     IDE GILA  seluruh kelas nav-timing (file 1-7) diuji orang di tab biasa. Document PiP adalah
+     jenis jendela yang berbeda secara struktural: tanpa omnibox, tanpa tab, umurnya terikat
+     dokumen pembuatnya. Apa yang terjadi kalau kita menjalankan navigasi-yang-tak-pernah-commit
+     DI DALAM jendela yang bahkan tidak punya tempat untuk mencetak URL?
+     Tiga hasil menarik, semua layak dicatat: (a) PiP menolak navigasi = batas yang bagus,
+     (b) PiP ikut ternavigasi dan mati = lifetime bug, (c) PiP bertahan dgn DOM kita dan
+     jendela induk yang ternavigasi = UI persisten tanpa atribusi apa pun.
+     EXPECTED-SECURE  navigasi di dalam PiP ditolak atau menutup PiP dengan bersih. -->
+<button onclick="go()">Run 40 (Chrome 116+)</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  if (!window.documentPictureInPicture) { g.textContent = 'API tidak ada -> catat ilmu-negatif.'; return; }
+  documentPictureInPicture.requestWindow({ width: 460, height: 300 }).then(function (w) {
+    w.document.body.innerHTML = '<div style="font:14px system-ui;padding:12px"><b>HOLD dijalankan di dalam PiP</b>' +
+      '<p style="font:12px">origin induk: ' + location.origin + '</p></div>';
+    var alive = 0;
+    try { w.location.href = 'https://www.google.com:82'; } catch (e) { alive = -1; }
+    var id = setInterval(function () {
+      alive++;
+      var st; try { st = w.closed ? 'TERTUTUP' : 'HIDUP, DOM=' + (w.document.body.textContent.length > 10 ? 'utuh' : 'kosong'); }
+      catch (e) { st = 'BLOCKED'; }
+      g.textContent = 'REAL ORIGIN: ' + location.origin + '\ndetik ke-' + alive + ' : PiP ' + st +
+        '\n\nHIDUP + DOM utuh setelah navigasi = UI persisten tanpa permukaan origin.';
+      if (alive > 8) clearInterval(id);
+    }, 1000);
+  });
+}
+</script>

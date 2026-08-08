@@ -1,0 +1,19 @@
+<!-- 22 | BAR KOSONG - jalur-lahir BEDA: anchor target=_blank | [1-CLICK]
+     Sama tujuannya dengan 21, beda CARA TAB ITU LAHIR - dan itu yang penting.
+     window.open() dan <a target=_blank> masuk lewat jalur kode yang berbeda di dalam browser.
+     Patch untuk salah satunya sering tidak dipasang di yang lain, terutama di FORK
+     (Arc / Brave / Edge / Vivaldi / Samsung / Opera). Ini jalur termurah menuju n-day-jadi-0-day.
+     TAMBAHAN  tab ini lahir TANPA opener-reference dari sisi HTML biasa, jadi kita ambil
+     handle-nya lewat window.open bernama-sama - trik lama yang jarang di-review ulang.
+     EXPECTED-SECURE  identik dengan jalur window.open. Kalau BEDA, perbedaannya itulah temuannya. -->
+<a href="about:blank" target="tabX" onclick="setTimeout(go,120)">Run 22 (buka tab)</a>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN (opener): ' + location.href;
+function go() {
+  var w = window.open('', 'tabX');
+  w.document.write('<h2 style="font:20px system-ui">Lahir lewat &lt;a target=_blank&gt;</h2>' +
+    '<p style="font:13px system-ui">Bandingkan omnibox tab ini dengan hasil 21.html. Sama atau beda?</p>' +
+    '<p style="font:12px monospace">opener: ' + location.origin + '</p>');
+}
+</script>

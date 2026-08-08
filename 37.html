@@ -1,0 +1,34 @@
+<!-- 37 | W3  KUANTITAS MUSTAHIL (BOUNDED) - kedalaman frame bersarang | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "jumlah dokumen bersarang yang wajar"
+     IDE  bukan flood - PENGUKURAN. Bangun sarang about:blank sedalam 1,2,4,8,16,32 (berhenti di 32),
+     lalu di tiap kedalaman tanyakan: apakah dokumen terdalam masih mewarisi origin yang benar,
+     dan pada kedalaman berapa browser mulai memotong / salah menghitung / menyerah.
+     Doktrin dos.md berlaku penuh: ukur BIAYA PER UNIT lalu EKSTRAPOLASI - jangan diledakkan.
+     Kalau ada kedalaman K di mana origin berubah, itu bukan DoS, itu UXSS: batas struktur
+     dipakai sebagai jalan keluar dari pewarisan origin.
+     EXPECTED-SECURE  origin identik di semua kedalaman, atau pembuatan ditolak bersih di batas.
+     BOUNDED KERAS: maksimum 32, sekali jalan, tanpa loop tak berujung. -->
+<button onclick="go()">Run 37 (maks kedalaman 32)</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var out = ['REAL ORIGIN: ' + location.origin, ''];
+  var host = document.createElement('iframe'); host.style.cssText = 'width:1px;height:1px;border:0';
+  document.body.appendChild(host);
+  var w = host.contentWindow, depth = 0, t0 = performance.now();
+  [1, 2, 4, 8, 16, 32].forEach(function (target) {
+    while (depth < target) {
+      try {
+        var d = w.document; var f = d.createElement('iframe'); d.body.appendChild(f);
+        w = f.contentWindow; depth++;
+      } catch (e) { out.push('kedalaman ' + depth + ': DITOLAK -> ' + e.name); return; }
+    }
+    var o; try { o = w.location.origin; } catch (e) { o = 'BLOCKED'; }
+    out.push('kedalaman ' + String(target).padStart(2) + '  origin=' + o +
+      (o !== location.origin ? '   <== BERUBAH, ini temuan' : '') +
+      '   biaya=' + Math.round(performance.now() - t0) + 'ms');
+    g.textContent = out.join('\n');
+  });
+}
+</script>

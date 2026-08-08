@@ -1,0 +1,19 @@
+<!-- 21 | BAR KOSONG - dokumen yang tidak pernah punya URL | [1-CLICK]
+     TARGET KELAS  omnibox KOSONG (bukan about:blank, bukan origin) sementara DOM kita terender penuh.
+     IDE  omnibox mencetak URL dokumen. Dokumen initial-empty TIDAK PUNYA URL: ia tak pernah
+     dimuat dari mana pun. Jadi jangan menavigasi ke mana pun sama sekali - itu justru
+     yang selama ini merusak percobaan orang. Nol navigasi = nol URL = nol yang bisa dicetak.
+     PREDIKAT  omnibox kosong / hanya placeholder, halaman penuh UI kita.
+     EXPECTED-SECURE  omnibox menulis about:blank ATAU origin opener - tidak pernah kosong.
+     CATAT PERSIS  kosong-total | about:blank | origin opener | placeholder pencarian. Empat vonis beda. -->
+<button onclick="go()">Run 21</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN (opener): ' + location.href;
+function go() {
+  var w = window.open('', '', 'width=900,height=620');
+  w.document.write('<h2 style="font:20px system-ui">UI ini milik ' + location.origin + '</h2>' +
+    '<p style="font:13px system-ui">Nol navigasi terjadi. Apa yang tertulis di omnibox jendela ini?</p>' +
+    '<p style="font:12px monospace">w.location.href = ' + w.location.href + '</p>');
+}
+</script>

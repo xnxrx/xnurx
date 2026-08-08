@@ -1,0 +1,18 @@
+<!-- 12 | origin spoof - TOPOLOGI CHROME (standalone / PWA / sidebar) | [NO-CLICK deteksi, 1-CLICK spoof]
+     GENOME  G=topologi chrome (bukan top-omnibox)  D=strip origin standalone  C=onload
+     MEKANISME  seluruh kelas ini mengasumsikan omnibox ada DI ATAS dan selebar layar.
+     Di display-mode standalone (PWA), Arc/Vivaldi (tab vertikal), atau jendela terpisah,
+     identitas ditaruh di tempat yang BEDA SECARA STRUKTURAL - sering hanya strip tipis,
+     kadang tanpa strip sama sekali. Halaman bisa membaca mode itu, lalu menggambar yang cocok.
+     EXPECTED-SECURE  setiap topologi tetap punya satu tempat yang menyebut origin & tak bisa ditutupi.
+     File ini MELAPORKAN topologi yang terdeteksi - itu peta serangannya. -->
+<p id=r></p><p id=m></p>
+<button onclick="document.getElementById('bar').style.display='block'">Gambar bar untuk topologi ini</button>
+<div id=bar style="display:none;font:12px system-ui;background:#e8eaed;padding:6px">🔒 https://www.google.com &nbsp; [PALSU - riset]</div>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+var modes = ['standalone', 'minimal-ui', 'fullscreen', 'browser', 'window-controls-overlay'];
+document.getElementById('m').textContent = 'display-mode aktif: ' +
+  modes.filter(function (x) { return matchMedia('(display-mode:' + x + ')').matches; }).join(',') +
+  ' | outerHeight-innerHeight = ' + (outerHeight - innerHeight) + 'px (kecil = chrome tipis/absen)';
+</script>

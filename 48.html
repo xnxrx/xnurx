@@ -1,0 +1,39 @@
+<!-- 48 | UXSS + W1  URUTAN SALAH - mencegat navigasi SETELAH ia terlanjur commit | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "intercept dipanggil sebelum navigasi selesai"
+     IDE GILA  Navigation API memberi halaman hak mencegat navigasinya sendiri. Aturannya:
+     panggil intercept() SELAMA event navigate. Kita simpan event-nya, biarkan selesai,
+     lalu panggil intercept() setelahnya - dari luar jendela waktu yang sah.
+     Sekaligus dijalankan replaceState di titik-titik urutan yang salah.
+     Yang dicari bukan "berhasil mencegat", tapi apakah kedua PANDANGAN jendela ini
+     (objek Location vs objek document vs entri navigation) jadi tidak sepakat.
+     Ketidaksepakatan itu sendiri yang bernilai - ia berarti dua bagian browser memegang
+     jawaban berbeda untuk pertanyaan "dokumen ini milik siapa".
+     EXPECTED-SECURE  intercept di luar jendela melempar InvalidStateError, ketiga pandangan tetap sinkron. -->
+<button onclick="go()">Run 48</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+var log = ['REAL ORIGIN: ' + location.origin, ''];
+function P() {
+  var a, b, c;
+  try { a = location.href; } catch (e) { a = 'X'; }
+  try { b = document.URL; } catch (e) { b = 'X'; }
+  try { c = navigation && navigation.currentEntry ? navigation.currentEntry.url : 'n/a'; } catch (e) { c = 'X'; }
+  return [a, b, c];
+}
+function go() {
+  if (!window.navigation) { log.push('Navigation API tidak ada -> catat ilmu-negatif.'); g.textContent = log.join('\n'); return; }
+  var saved = null;
+  navigation.addEventListener('navigate', function (e) { saved = e; });
+  navigation.navigate(location.pathname + '#a');
+  setTimeout(function () {
+    try { saved.intercept({ handler: function () { return Promise.resolve(); } }); log.push('intercept SETELAH commit : DITERIMA  <== urutan tidak ditegakkan'); }
+    catch (e) { log.push('intercept SETELAH commit : ditolak -> ' + e.name); }
+    try { history.replaceState({}, '', '#b'); } catch (e) { }
+    var v = P();
+    log.push('', 'location.href        : ' + v[0], 'document.URL         : ' + v[1], 'navigation.currentEntry: ' + v[2]);
+    var same = v[0] === v[1] && (v[2] === 'n/a' || v[2] === v[0]);
+    log.push('', same ? 'ketiga pandangan SEPAKAT (aman)' : 'TIDAK SEPAKAT <== dua bagian browser beda jawaban, ini temuan');
+    g.textContent = log.join('\n');
+  }, 300);
+}
+</script>

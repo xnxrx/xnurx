@@ -1,0 +1,22 @@
+<!-- 25 | BAR KOSONG - sumber URL yang DIHAPUS di tengah pemuatan | [1-CLICK]
+     Sumbu baru: bukan "jangan pernah punya URL" (21) dan bukan "batalkan navigasi" (23),
+     tapi "punya URL lalu URL itu BERHENTI ADA".
+     blob: URL hidup di tabel dalam-memori browser. revokeObjectURL menghapus entrinya.
+     Kalau kita menghapusnya SELAGI pemuatan berjalan, browser memegang string URL yang
+     sudah tidak menunjuk apa pun. Bagaimana omnibox mencetak URL yang sumbernya lenyap?
+     Kandidat vonis: kosong | blob:origin/uuid (padahal isi sudah bukan itu) | error page.
+     Vonis kedua justru lebih menarik dari kosong - bar mencetak URL yang sudah tidak valid.
+     EXPECTED-SECURE  navigasi gagal bersih dan bar mencetak keadaan yang benar. -->
+<button onclick="go()">Run 25</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var u = URL.createObjectURL(new Blob(['<h2 style="font:20px system-ui">isi dari blob yang lalu dicabut</h2>'], { type: 'text/html' }));
+  var w = window.open(u, '', 'width=900,height=560');
+  setTimeout(function () { URL.revokeObjectURL(u); }, 60);
+  setTimeout(function () {
+    try { w.document.write('<h2 style="font:20px system-ui">DOM diganti setelah URL-nya dicabut</h2><p style="font:12px monospace">' + location.origin + '</p>'); } catch (e) { }
+  }, 500);
+}
+</script>

@@ -1,0 +1,22 @@
+<!-- 17 | UXSS ORACLE - pewarisan origin dokumen tanpa origin-jaringan | [NO-CLICK]
+     Kenapa ini "oracle", bukan "exploit": alert(1) hanya membuktikan KODE BERJALAN, bukan bahwa ia
+     berjalan di origin LAIN. Jadi tiap skrip uji diberi tag origin tempat ia DIAMBIL, lalu saat
+     dieksekusi tag itu dibandingkan dengan origin eksekusi. Tidak sama = penyeberangan. Nol tebakan.
+     TIGA LENGAN (wajib, kalau salah satu hilang hasilnya tak terbaca):
+       INHERIT  dokumen initial-empty (<iframe> tanpa src) - HARUS mewarisi origin ini  -> EQUAL = normal
+       OPAQUE   sandbox tanpa allow-same-origin - HARUS tetap opaque                    -> BLOCKED = normal
+       CONTROL  frame lintas-origin sungguhan - HARUS ditolak                           -> BLOCKED = normal
+     Ada satu baris CROSSED = kirim ke VRP. Semua normal = build ini sehat, catat sbg ilmu-negatif. -->
+<pre id=o style="font:12px/1.6 monospace"></pre>
+<script>
+var B = 'https://example.com/';           // ganti ke origin KEDUA milikmu bila example.com menolak di-frame
+var TAG = location.origin, out = [];
+function say(a, v, ok) { out.push((v === ok ? '  OK    ' : '  CROSSED  <== ') + a + ' : ' + v); o.textContent = 'TAG (origin file ini): ' + TAG + '\n\n' + out.join('\n'); }
+function probe(f, arm, ok) { var v; try { v = f() === TAG ? 'EQUAL' : 'DIFFERENT'; } catch (e) { v = 'BLOCKED'; } say(arm, v, ok); }
+var a = document.createElement('iframe'); document.body.appendChild(a);
+probe(function () { return a.contentWindow.location.origin; }, 'INHERIT initial-empty-document', 'EQUAL');
+var b = document.createElement('iframe'); b.sandbox = 'allow-scripts'; b.srcdoc = '<p>x'; document.body.appendChild(b);
+b.onload = function () { probe(function () { return b.contentWindow.document.body.textContent && b.contentWindow.location.origin; }, 'OPAQUE sandboxed srcdoc', 'BLOCKED'); };
+var c = document.createElement('iframe'); c.src = B; c.style.cssText = 'width:1px;height:1px;border:0'; document.body.appendChild(c);
+setTimeout(function () { probe(function () { return c.contentWindow.document.body.textContent; }, 'CONTROL cross-origin read', 'BLOCKED'); }, 1500);
+</script>

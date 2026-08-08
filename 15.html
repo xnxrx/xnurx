@@ -1,0 +1,22 @@
+<!-- 15 | origin spoof - ATRIBUSI YANG KELUAR DARI BROWSER (Notification OS) | [1-CLICK + izin]
+     GENOME  D=notifikasi OS  E=atribusi hidup lebih lama dari tab-nya  C=click
+     MEKANISME  notifikasi dirender oleh SISTEM OPERASI, di tempat yang tidak punya address bar.
+     Yang menyebut asal-usul cuma satu baris kecil - dan judul/badan sepenuhnya milik penyerang.
+     Lebih jauh: notifikasi BERTAHAN setelah tab ditutup, jadi atribusinya hidup lebih lama
+     dari satu-satunya permukaan yang bisa membantahnya.
+     YANG DIUKUR  apakah baris asal terpotong di panel OS, dan apakah judul bisa menyamar jadi baris asal.
+     EXPECTED-SECURE  origin selalu tampil penuh & tak bisa didorong keluar oleh teks kita.
+     Izin diminta eksplisit; cabut lagi lewat setelan situs. Nol data dikirim ke mana pun. -->
+<button onclick="go()">Run 15 (minta izin notifikasi)</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  Notification.requestPermission().then(function (p) {
+    if (p !== 'granted') return;
+    new Notification('https://www.google.com', {
+      body: 'Baris asal di panel OS menyebut apa? Origin asli: ' + location.origin + ' (PoC riset)'
+    });
+  });
+}
+</script>

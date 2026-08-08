@@ -1,0 +1,27 @@
+<!-- 27 | BAR KOSONG - dikosongkan oleh ELISI, bukan oleh bug | [1-CLICK]
+     Sumbu ketujuh dan yang paling sering berhasil di HP: bar-nya ada, URL-nya ada,
+     tapi yang TERLIHAT nol. Omnibox memotong URL panjang agar muat. Kalau jendelanya
+     sangat sempit dan path-nya sangat panjang, bagian yang tersisa bisa tinggal elipsis.
+     Beda dari 8.html: 8 membuat potongan yang tersisa TERBACA SEBAGAI HOST LAIN,
+     sementara 27 membuat yang tersisa TIDAK TERBACA SAMA SEKALI. Dua vonis berbeda.
+     Yang dicari: pada lebar berapa piksel eTLD+1 berhenti ditampilkan? Itu satu ANGKA,
+     dan angka itulah isi laporannya.
+     EXPECTED-SECURE  eTLD+1 adalah bagian TERAKHIR yang dikorbankan, di lebar berapa pun. -->
+<button onclick="go()">Run 27</button>
+<p id=r></p><pre id=g style="font:12px monospace"></pre>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var pad = 'segment'.padEnd(60, 'x');
+  var deep = '/' + [pad, pad, pad, pad, pad, pad].join('/') + '/masuk';
+  var W = [420, 320, 260, 200, 160];
+  W.forEach(function (w, i) {
+    setTimeout(function () {
+      window.open(location.pathname.replace(/[^/]*$/, '') + '30.html' + deep.replace(/\//g, '%2F') + '?w=' + w,
+        'lebar' + w, 'width=' + w + ',height=380,left=' + (60 + i * 30) + ',top=' + (60 + i * 30));
+    }, i * 350);
+  });
+  g.textContent = 'Lima jendela dibuka dgn lebar ' + W.join(' / ') + ' px.\n' +
+    'Catat: di lebar berapa host asli BERHENTI terlihat di omnibox?\nItu angka yang masuk laporan.';
+}
+</script>

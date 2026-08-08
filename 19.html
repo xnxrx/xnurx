@@ -1,0 +1,27 @@
+<!-- 19 | UXSS ORACLE - INKONSISTENSI DUA PANDANGAN | [NO-CLICK]
+     Ini oracle yang paling produktif dan paling jarang dipakai orang.
+     IDE  satu jendela punya BEBERAPA pandangan tentang origin-nya (objek Location, objek document,
+     entri session-history, lapisan penampil). Masing-masing dihitung di jalur kode berbeda dan
+     DIPERBARUI PADA MOMEN BERBEDA. Jadi kita tidak perlu satu pemeriksaan pun gagal - kita cari
+     SELISIH WAKTU antar-pemeriksaan.
+     CARA  frame digiring bolak-balik antar origin sambil dua pandangan disampel berdampingan tiap 60ms.
+     Kombinasi MUSTAHIL = dua bagian browser tidak sepakat:
+       document.title terbaca TAPI location.href ditolak   -> mustahil kalau keduanya sinkron
+       location.href terbaca TAPI document ditolak         -> idem
+     Keunggulannya: selalu keluar ANGKA yang bisa dikutip di laporan, walau nol bug.
+     EXPECTED-SECURE  mustahil = 0 selamanya. -->
+<pre id=o style="font:12px/1.6 monospace"></pre>
+<script>
+var B = 'https://example.com/';           // origin kedua
+var n = 0, bad = 0, f = document.createElement('iframe');
+f.style.cssText = 'width:1px;height:1px;border:0'; document.body.appendChild(f);
+setInterval(function () { f.src = (n % 2 ? B : location.href.replace(/[^/]*$/, '17.html')) + '#' + n; n++; }, 300);
+setInterval(function () {
+  var t, l;
+  try { t = !!f.contentWindow.document.title || true; } catch (e) { t = false; }
+  try { l = !!f.contentWindow.location.href; } catch (e) { l = false; }
+  if (t !== l) bad++;
+  o.textContent = 'ORIGIN ASLI: ' + location.origin + '\nsampel: ' + n + '\nkombinasi MUSTAHIL (title!=location): ' + bad +
+    '\n\n' + (bad ? 'CROSSED -> screenshot, catat browser+versi+OS, STOP, lapor VRP' : 'OK - dua pandangan sinkron');
+}, 60);
+</script>

@@ -1,0 +1,13 @@
+<!-- 8 | origin spoof - PATH yang menyamar jadi HOST (elision/truncation) | [NO-CLICK]
+     GENOME  B=pushState (same-origin, nol navigasi)  C=onload  D=S1 + strip URL mobile
+     MEKANISME  yang menentukan keamanan adalah eTLD+1, yang TERLIHAT adalah potongan strip.
+     pushState menaruh string mirip-URL di PATH; layar sempit meng-elide bagian depan sehingga
+     yang tersisa terbaca sebagai host lain. Nol request, nol navigasi lintas-origin.
+     CARA UJI  buka di HP, atau DevTools -> device toolbar (lebar <=400px), lalu baca strip URL.
+     EXPECTED-SECURE  eTLD+1 asli tetap ditonjolkan / tidak pernah ter-elide. -->
+<p id=r></p>
+<script>
+history.pushState({}, '', '/'.repeat(1) + 'account'.padStart(90, 'x') + '/https://www.google.com/signin');
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.origin + '  |  full: ' + location.href;
+</script>
+<h2>Lihat strip URL di layar sempit, bukan di layar lebar.</h2>

@@ -1,0 +1,27 @@
+<!-- 47 | UXSS + W2 x W12  origin-sanitizer yang bertahan melewati KEMATIAN dan KEBANGKITAN | [1-CLICK lalu BACK]
+     ASUMSI YANG DILANGGAR  "origin sebuah dokumen dihitung ulang dengan benar saat ia dipulihkan"
+     TEKNIK  origin-sanitizer: skrip diberi TAG berisi origin tempat ia diambil. Saat dieksekusi,
+     tag dibandingkan dengan origin eksekusi. Tidak sama = kode dari origin A berjalan di origin B
+     = definisi UXSS. Tidak ada tebakan, tidak ada false positive.
+     KEGILAANNYA  assert-nya tidak dijalankan sekarang. Ia dipasang di pagehide (saat dokumen
+     sekarat) dan dibaca lagi setelah bfcache membangkitkan dokumen. Jadi tag dibuat di satu
+     kehidupan dan diperiksa di kehidupan berikutnya. Jalur "pulihkan" adalah kode yang
+     BERBEDA dari jalur "muat pertama kali", dan jauh lebih jarang diperiksa siapa pun.
+     CARA UJI  klik Pergi -> tekan BACK. Baca verdict.
+     EXPECTED-SECURE  TAG === origin di setiap kehidupan; drift selalu 0. -->
+<button onclick="location.href='30.html?dari=47'">Pergi (lalu tekan BACK)</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+var TAG = location.origin, lives = 0, drift = 0, log = [];
+function check(when) {
+  lives++;
+  var now = location.origin;
+  if (now !== TAG) drift++;
+  log.push('kehidupan ' + lives + ' (' + when + ')  TAG=' + TAG + '  origin=' + now + (now !== TAG ? '   <== CROSSED' : '   OK'));
+  g.textContent = log.join('\n') + '\n\nDRIFT: ' + drift +
+    (drift ? '\nCROSSED -> screenshot, catat engine+versi+OS, STOP, lapor VRP' : '\nbelum ada penyeberangan');
+}
+check('muat');
+addEventListener('pagehide', function () { try { check('pagehide'); } catch (e) { } });
+addEventListener('pageshow', function (e) { check('pageshow persisted=' + e.persisted); });
+</script>

@@ -1,0 +1,16 @@
+<!-- 3 | LENGAN KONTROL untuk 1.html dan 2.html | [1-CLICK]
+     Sama persis TAPI port HIDUP (443) -> commit datang -> dokumen penyerang tertimpa halaman asli.
+     BACA HASILNYA BEGINI:
+       3 tertimpa halaman asli  = bagus, mekanisme 1/2 memang HOLD-nya yang bekerja
+       3 IKUT bertahan spoof    = kontrol GAGAL -> yang kamu lihat bukan mekanisme ini -> JANGAN dilapor
+     Tanpa file ini, angka 1 dan 2 tidak bisa dibaca. Jalankan selalu berpasangan. -->
+<button onclick="go()">Run kontrol 3</button>
+<p id=r></p>
+<script>
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var w = window.open('', '');
+  w.document.write('<h3>Kalau tulisan ini BERTAHAN, kontrol gagal &mdash; ' + location.origin + '</h3>');
+  setInterval(function () { w.location.replace('https://www.google.com/'); }, 9800);
+}
+</script>
