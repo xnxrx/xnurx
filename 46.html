@@ -1,34 +1,34 @@
-<!-- 46 | W12 x W4  HIDUP LAGI x KONTEKS MATI - pakai jendela SETELAH ditutup | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "yang sudah ditutup tidak bisa dipakai lagi"
-     IDE GILA  close() menutup jendela, tapi VARIABEL JS yang memegangnya tetap ada. Objek itu
-     jadi batu nisan: masih bisa disentuh, sudah tidak menunjuk apa pun.
-     Kita tulis DOM ke batu nisan itu, lalu buka lagi jendela dengan NAMA YANG SAMA.
-     Kalau browser memakai ulang slot bernama yang sudah mati, DOM yang kita tulis ke jendela
-     mati bisa muncul di jendela yang baru - dokumen yang lahir sudah berisi tulisan dari
-     dokumen yang sudah dikubur, tanpa navigasi apa pun yang bisa dicatat bar.
-     YANG DIBACA  w.closed, apakah write ke jendela tertutup melempar, dan apakah jendela
-     bernama-sama yang baru mewarisi apa pun.
-     EXPECTED-SECURE  setiap operasi ke jendela tertutup adalah no-op bersih; slot nama tidak diwarisi. -->
-<button onclick="go()">Run 46</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 46 | PAKET BUKTI — apa yang harus ada di screenshot supaya laporan tidak ditutup | [NO-CLICK]
+     File ini tidak menyerang apa pun. Ia mencegah kerja bagus dibuang karena buktinya kurang.
+     Laporan spoofing paling sering ditutup bukan karena bug-nya tidak ada, tapi karena
+     screenshotnya tidak memuat KEDUA sisi predikat sekaligus.
+     Halaman ini mencetak, dalam satu blok yang muat di satu screenshot, semua yang dibutuhkan
+     triager: origin asli, waktu, engine, versi, platform, geometri jendela. Buka file ini
+     BERDAMPINGAN dengan permukaan yang bohong, lalu ambil SATU screenshot yang memuat keduanya. -->
+<pre id=g style="font:13px/1.8 monospace;background:#111;color:#0f0;padding:14px;border-radius:8px"></pre>
+<h3 style="font:15px system-ui">Checklist sebelum submit</h3>
+<ol style="font:13px/1.8 system-ui">
+<li>Screenshot memuat <b>permukaan yang bohong</b> DAN <b>blok hijau di atas</b> dalam satu gambar.</li>
+<li>Lengan <b>KONTROL</b> sudah dijalankan di sesi yang sama (12.html untuk 1–11, 3.html untuk keluarga lama).</li>
+<li>Kalau hasilnya kadang-kadang: sudah diukur <b>N=20</b> pakai 50.html, dan ditulis angkanya — bukan "kadang berhasil".</li>
+<li>Sudah ditulis satu kalimat: <i>"garansi browser apa yang dilanggar?"</i> Tak terjawab = jangan submit.</li>
+<li>Sudah dicoba di ≥2 mesin (22.html) supaya bisa menulis "rentan di X, tidak di Y".</li>
+<li>PoC-nya <b>benign</b>: nol form kredensial, nol beacon, nol peniruan merek.</li>
+</ol>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  var out = ['REAL ORIGIN: ' + location.origin, ''];
-  var w = window.open('', 'nisan', 'width=520,height=320');
-  w.document.write('<h3 style="font:16px system-ui">hidup</h3>');
-  w.close();
-  out.push('setelah close(): w.closed = ' + w.closed);
-  try { w.document.write('<h3>ditulis SETELAH ditutup</h3>'); out.push('write ke jendela mati : DITERIMA (tidak melempar)'); }
-  catch (e) { out.push('write ke jendela mati : ditolak -> ' + e.name); }
-  try { out.push('href jendela mati     : ' + w.location.href); } catch (e) { out.push('href jendela mati     : BLOCKED'); }
-  setTimeout(function () {
-    var n = window.open('', 'nisan', 'width=520,height=320,left=560');
-    var txt; try { txt = n.document.body ? n.document.body.textContent.trim() : ''; } catch (e) { txt = 'BLOCKED'; }
-    out.push('', 'jendela baru bernama sama, isi awal = ' + JSON.stringify(txt));
-    out.push(txt ? '<== MEWARISI isi dari jendela yang sudah mati, ini temuan' : 'bersih (aman)');
-    g.textContent = out.join('\n');
-  }, 700);
-  g.textContent = out.join('\n');
+function draw() {
+  var d = new Date();
+  g.textContent =
+    'ORIGIN ASLI : ' + location.href +
+    '\nWAKTU       : ' + d.toISOString() + '  (' + d.toString().slice(0, 33) + ')' +
+    '\nUA          : ' + navigator.userAgent +
+    '\nPLATFORM    : ' + navigator.platform + '   bahasa ' + navigator.language +
+    '\nLAYAR       : ' + screen.width + 'x' + screen.height + ' @' + devicePixelRatio + 'x' +
+    '\nJENDELA     : outer ' + outerWidth + 'x' + outerHeight + '  inner ' + innerWidth + 'x' + innerHeight +
+    '\nCHROME TEGAK: ' + (outerHeight - innerHeight) + 'px    posisi ' + screenX + ',' + screenY +
+    '\nFULLSCREEN  : ' + !!document.fullscreenElement + '   display-mode: ' +
+    (['browser', 'minimal-ui', 'standalone', 'fullscreen', 'window-controls-overlay']
+      .filter(function (m) { return matchMedia('(display-mode:' + m + ')').matches; }).join(',') || '-');
 }
+draw(); setInterval(draw, 1000);
 </script>

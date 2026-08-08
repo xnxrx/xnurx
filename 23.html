@@ -1,21 +1,35 @@
-<!-- 23 | BAR KOSONG - MEMBILAS bar lewat navigasi yang dibatalkan | [1-CLICK]
-     Ini pertanyaan yang beda dari 21/22, dan pertanyaan inilah yang mahal:
-     kalau omnibox terlanjur menulis sesuatu, apakah PEMBATALAN navigasi MEMBILASNYA jadi kosong,
-     atau MENGEMBALIKANNYA ke nilai sebelumnya?
-     Membilas jadi kosong = bug. Sebab kita bisa memilih kapan pembilasan itu terjadi, dan
-     DOM kita tetap utuh di layar - jadi hasilnya UI penuh tanpa atribusi apa pun.
-     URUTAN  tab tanpa URL -> tulis DOM -> mulai navigasi -> bunuh sebelum commit -> baca bar.
-     EXPECTED-SECURE  bar kembali ke about:blank / origin opener, tidak pernah jadi kosong.
-     Port 82 dipilih karena paketnya DI-DROP (pending panjang), bukan di-RST (commit error instan). -->
-<button onclick="go()">Run 23</button>
-<p id=r></p>
+<!-- 23 | macOS/Safari · fullscreen JS vs fullscreen OS — dua jalur, dua pembantah berbeda | [1-CLICK]
+     Di Mac ada DUA fullscreen yang berbeda secara mendasar, dan orang sering mencampurnya:
+       (a) fullscreen JS  requestFullscreen() — dipicu halaman, Safari menampilkan notice
+       (b) fullscreen OS  tombol hijau / Ctrl+Cmd+F — dipicu PENGGUNA, TIDAK ada notice,
+           dan toolbar Safari AUTO-HIDE: ia baru muncul kalau kursor didorong ke tepi atas
+     Jalur (b) tidak bisa dipicu halaman — tapi halaman bisa memanfaatkannya kalau pengguna
+     sudah berada di sana. Dan di (b) tidak ada address bar di layar sama sekali,
+     tanpa notice apa pun, tanpa batas waktu.
+     PERTANYAAN RISET  di fullscreen OS, bisakah halaman menahan toolbar agar tidak muncul
+     saat kursor ke tepi atas — mis. dengan menangkap pointer, memasang overlay di tepi,
+     atau membuat kompositor sibuk? Kalau ya, satu-satunya jalan pengguna melihat origin tertutup.
+     PROSEDUR  1) uji (a), catat notice-nya  2) masuk fullscreen OS sendiri, klik tombol kedua,
+     lalu dorong kursor ke tepi atas dan catat apakah toolbar tetap muncul.
+     EXPECTED-SECURE  toolbar SELALU muncul saat kursor ke tepi atas, apa pun yang dilakukan halaman. -->
+<button onclick="js()">(a) fullscreen JS</button>
+<button onclick="probe()">(b) sudah di fullscreen OS — mulai probe tepi atas</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<div id=edge style="display:none;position:fixed;top:0;left:0;right:0;height:120px;background:rgba(0,0,0,.04);z-index:9"></div>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN (opener): ' + location.href;
-function go() {
-  var w = window.open('', '', 'width=900,height=620');
-  w.document.write('<h2 style="font:20px system-ui">DOM bertahan. Bar-nya menulis apa sekarang?</h2>' +
-    '<p style="font:13px system-ui">ditulis oleh ' + location.origin + '</p>');
-  setTimeout(function () { w.location = 'https://www.google.com:82'; }, 400);
-  setTimeout(function () { w.stop(); }, 900);
+var hits = 0;
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function js() { document.documentElement.requestFullscreen().catch(function (e) { g.textContent += '\nDITOLAK: ' + e.name; }); }
+function probe() {
+  edge.style.display = 'block';
+  addEventListener('mousemove', function (e) { if (e.clientY < 60) hits++; }, { passive: true });
+  setInterval(function () {
+    g.textContent = 'REAL ORIGIN: ' + location.origin +
+      '\nfullscreen JS aktif : ' + !!document.fullscreenElement +
+      '\nviewport            : ' + innerWidth + 'x' + innerHeight +
+      '\nkursor menyentuh tepi atas: ' + hits + ' kali' +
+      '\n\nSetiap kali kursor ke tepi atas: TOOLBAR MUNCUL atau tidak?' +
+      '\nKalau tidak muncul padahal kursor sudah di sana = tidak ada jalan melihat origin.';
+  }, 600);
 }
 </script>

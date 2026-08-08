@@ -1,26 +1,31 @@
-<!-- 29 | BAR KOSONG - bar mobile yang MENGKERUT lalu DIKUNCI | [NO-CLICK, buka di HP]
-     Di HP address bar menyusut sendiri saat halaman digulir - itu fitur, bukan bug.
-     Yang diuji: setelah mengkerut, bisakah halaman MENAHANNYA supaya tidak mengembang lagi,
-     lalu menggambar bar palsu di ruang yang ditinggalkannya?
-     Mekanisme penahannya bukan CSS: setiap kali browser mendekati batas atas dokumen -
-     satu-satunya kondisi yang memunculkan bar asli kembali - kita dorong balik scroll-nya.
-     Itu sebabnya halaman ini sengaja dibuat sangat panjang.
-     YANG DIUKUR  berapa lama bar asli bertahan tidak muncul (detik), dan apakah ia
-     tetap bisa dipanggil paksa. Angka itu isi laporannya.
-     EXPECTED-SECURE  bar selalu bisa dipanggil kembali oleh gestur pengguna, halaman tak bisa mencegah.
-     KELUAR  tutup tab. Nol form, nol jaringan. -->
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<div style="position:fixed;top:0;left:0;right:0;font:12px system-ui;background:#f1f3f4;padding:7px;z-index:9">🔒 https://www.google.com <small>[PALSU — riset]</small></div>
-<div style="height:6000px;padding-top:44px;font:14px system-ui">Gulir ke bawah. Bar asli akan mengkerut, lalu ditahan.<pre id=g style="font:12px monospace"></pre></div>
+<!-- 29 | macOS/WebKit · bfcache Safari sangat agresif — bar dan dokumen dipulihkan dari SUMBER BERBEDA | [1-CLICK lalu BACK]
+     Safari menyimpan halaman utuh di bfcache jauh lebih sering daripada Chrome: DOM, timer,
+     variabel, semuanya dibekukan dan dihidupkan lagi apa adanya saat Back.
+     Tapi bar TIDAK ikut dibekukan bersama dokumen — ia dihitung ulang dari entri session-history.
+     Jadi saat Back, dua hal dipulihkan dari dua tempat yang berbeda, oleh kode yang berbeda.
+     Kalau keduanya bisa tidak sepakat walau sesaat, itu jendela yang tidak butuh jaringan sama sekali.
+     Diperkuat: sebelum pergi, halaman ini memasang state yang mudah dikenali (judul + DOM),
+     jadi saat kembali kamu bisa melihat langsung apakah yang muncul adalah dokumen LAMA
+     sementara bar sudah menghitung sesuatu yang lain.
+     PROSEDUR  klik Pergi -> tunggu halaman tujuan tampil -> tekan BACK -> baca bar & layar bersamaan.
+     EXPECTED-SECURE  saat kembali, bar dan dokumen selalu menunjuk hal yang sama. -->
+<h2 id=h style="font:20px system-ui">HALAMAN A — state akan dibekukan</h2>
+<button onclick="prep()">1. pasang state</button>
+<button onclick="location.href='2.html?block=1200&via=bfcache'">2. Pergi (lalu tekan BACK)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-var t0 = Date.now(), maxH = innerHeight;
-scrollTo(0, 900);
-addEventListener('scroll', function () { if (scrollY < 300) scrollTo(0, 900); }, { passive: true });
-setInterval(function () {
-  maxH = Math.max(maxH, innerHeight);
-  g.textContent = 'REAL ORIGIN : ' + location.href +
-    '\ninnerHeight : ' + innerHeight + '  (maks terlihat: ' + maxH + ')' +
-    '\ndelta bar   : ' + (maxH - innerHeight) + 'px   (0 = bar asli sedang tersembunyi)' +
-    '\ntertahan    : ' + Math.round((Date.now() - t0) / 1000) + ' detik';
-}, 500);
+var armed = false, t0 = Date.now();
+function draw(x) {
+  g.textContent = 'REAL ORIGIN: ' + location.href + '\nstate terpasang: ' + armed +
+    '\numur dokumen  : ' + Math.round((Date.now() - t0) / 1000) + ' detik' + (x ? '\n\n' + x : '');
+}
+draw('');
+function prep() { armed = true; h.textContent = 'HALAMAN A — STATE TERPASANG (tandai ini)'; h.style.color = '#b00'; draw(''); }
+addEventListener('pageshow', function (e) {
+  draw('pageshow persisted(bfcache) = ' + e.persisted +
+    '\nstate masih ada = ' + armed +
+    '\n\n' + (e.persisted
+      ? 'DIPULIHKAN dari bfcache. Umur dokumen di atas TIDAK di-reset = dokumen lama.\nBaca bar SEKARANG: ia menunjuk halaman ini, atau masih 2.html?'
+      : 'dimuat ulang biasa — Safari tidak memakai bfcache di sini. Catat sbg ilmu-negatif.'));
+});
 </script>

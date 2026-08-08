@@ -1,30 +1,37 @@
-<!-- 39 | W8  TUKAR IDENTITAS DI TENGAH (TOCTOU tingkat-API) | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "objek yang browser PERIKSA adalah objek yang kemudian ia PAKAI"
-     IDE GILA  jendela bernama bisa direbut: window.open('', 'nama') mengembalikan jendela LAMA
-     kalau namanya cocok. Jadi kita ganti name sebuah jendela SETELAH browser memeriksanya tapi
-     SEBELUM ia memakainya. Pemeriksaan keamanan mengukur satu jendela, tindakan mengenai jendela lain.
-     Ini kelas yang sama dengan TOCTOU di filesystem, dipindah ke tabel nama jendela browser -
-     tempat yang hampir tidak pernah di-review karena dianggap fitur kuno.
-     YANG DIBACA  apakah handle hasil open bernama-sama mengembalikan dokumen dgn origin berbeda.
-     EXPECTED-SECURE  penamaan tidak pernah menyeberangkan origin; handle selalu cocok dgn yang diperiksa. -->
-<button onclick="go()">Run 39</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 39 | weird-lab W6 x W7 · fullscreen reentran + serentak, versi WebKit | [1-CLICK]
+     Ulangan file 35/36 lama tapi diarahkan ke WebKit, karena implementasi fullscreen Safari
+     ditulis terpisah dari Blink dan notice-nya berbeda bentuk & durasi.
+     W6 reentransi : requestFullscreen dipanggil DARI DALAM handler fullscreenchange
+     W7 simultan   : dua elemen memintanya di task yang sama
+     Yang diincar bukan "berhasil fullscreen" — melainkan apakah jumlah NOTICE yang muncul
+     bisa lebih sedikit dari jumlah transisi. Notice adalah satu-satunya pembantah untuk
+     seluruh keluarga fake-chrome; setiap transisi yang lolos tanpa notice adalah satu
+     kesempatan menggambar bar palsu tanpa dibantah.
+     BOUNDED: 8 transisi lalu berhenti. Esc kapan saja.
+     EXPECTED-SECURE  jumlah notice == jumlah masuk-fullscreen, tanpa kecuali. -->
+<button onclick="go()">Run 39 (Esc untuk keluar)</button>
+<div id=a style="padding:14px;background:#eef;font:14px system-ui">A</div>
+<div id=b style="padding:14px;background:#efe;font:14px system-ui">B</div>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href;
+var n = 0, MAX = 8, ok = 0, no = 0;
+function draw() {
+  g.textContent = 'REAL ORIGIN: ' + location.href +
+    '\ntransisi        : ' + n + ' / ' + MAX +
+    '\npromise resolve : ' + ok + '   reject: ' + no +
+    '\nmasuk-fullscreen: ' + Math.ceil(n / 2) +
+    '\n\nHITUNG DGN MATA: notice muncul berapa kali?' +
+    '\nKurang dari jumlah masuk-fullscreen = ada transisi tanpa pembantah.';
+}
+draw();
+document.addEventListener('fullscreenchange', function () {
+  n++; draw();
+  if (n >= MAX) return;
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.getElementById(n % 4 < 2 ? 'a' : 'b').requestFullscreen().then(function () { ok++; draw(); }, function () { no++; draw(); });
+});
 function go() {
-  var out = ['REAL ORIGIN: ' + location.origin, ''];
-  var a = window.open('', 'slot', 'width=520,height=340');
-  a.document.write('<h3 style="font:16px system-ui">jendela A</h3>');
-  var before; try { before = a.location.origin; } catch (e) { before = 'BLOCKED'; }
-  a.name = 'slot2';                                   // identitas ditukar SETELAH diperiksa
-  var b = window.open('', 'slot', 'width=520,height=340,left=560');
-  b.document.write('<h3 style="font:16px system-ui">jendela B (nama yang sama)</h3>');
-  var after; try { after = b.location.origin; } catch (e) { after = 'BLOCKED'; }
-  out.push('origin sebelum tukar-nama : ' + before);
-  out.push('origin sesudah tukar-nama : ' + after);
-  out.push('a === b ?                 : ' + (a === b));
-  out.push('', a === b ? 'slot dipakai ulang -> periksa apakah DOM A tertimpa B tanpa navigasi'
-                       : 'slot terpisah -> catat, lalu ulangi sambil menukar name di timing berbeda (10.html/50.html)');
-  g.textContent = out.join('\n');
+  a.requestFullscreen().then(function () { ok++; draw(); }, function () { no++; draw(); });
+  b.requestFullscreen().then(function () { ok++; draw(); }, function () { no++; draw(); });
 }
 </script>

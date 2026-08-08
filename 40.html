@@ -1,32 +1,25 @@
-<!-- 40 | W9 x W1  MODE SALAH x URUTAN SALAH - primitif HOLD dijalankan DI DALAM PiP | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "primitif ini sudah diuji" - ya, diuji di TAB. Belum pernah di PiP.
-     IDE GILA  seluruh kelas nav-timing (file 1-7) diuji orang di tab biasa. Document PiP adalah
-     jenis jendela yang berbeda secara struktural: tanpa omnibox, tanpa tab, umurnya terikat
-     dokumen pembuatnya. Apa yang terjadi kalau kita menjalankan navigasi-yang-tak-pernah-commit
-     DI DALAM jendela yang bahkan tidak punya tempat untuk mencetak URL?
-     Tiga hasil menarik, semua layak dicatat: (a) PiP menolak navigasi = batas yang bagus,
-     (b) PiP ikut ternavigasi dan mati = lifetime bug, (c) PiP bertahan dgn DOM kita dan
-     jendela induk yang ternavigasi = UI persisten tanpa atribusi apa pun.
-     EXPECTED-SECURE  navigasi di dalam PiP ditolak atau menutup PiP dengan bersih. -->
-<button onclick="go()">Run 40 (Chrome 116+)</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 40 | UXSS oracle WebKit · origin-sanitizer 3 lengan | [NO-CLICK]
+     Kenapa oracle dan bukan exploit: alert(1) hanya membuktikan KODE BERJALAN, bukan bahwa ia
+     berjalan di origin LAIN. Jadi tiap pemeriksaan diberi TAG origin tempat ia dibuat, lalu
+     dibandingkan dgn origin eksekusi. Tidak sama = penyeberangan. Nol tebakan, nol false positive.
+     TIGA LENGAN — tanpa ketiganya hasilnya tak terbaca:
+       INHERIT  dokumen initial-empty  -> HARUS mewarisi origin ini   (EQUAL = normal)
+       OPAQUE   sandbox tanpa allow-same-origin -> HARUS opaque       (BLOCKED = normal)
+       CONTROL  frame lintas-origin sungguhan -> HARUS ditolak        (BLOCKED = normal)
+     Diarahkan ke WebKit karena Site Isolation Safari berbeda dari Chrome: pemisahan proses
+     per-origin tidak seketat Blink, jadi himpunan yang lolos bisa berbeda.
+     Satu baris CROSSED = screenshot, catat versi Safari + macOS, STOP, lapor ke Apple.
+     Semua OK = build sehat -> catat sebagai ilmu-negatif ber-Retest-after. -->
+<pre id=o style="font:12px/1.6 monospace"></pre>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  if (!window.documentPictureInPicture) { g.textContent = 'API tidak ada -> catat ilmu-negatif.'; return; }
-  documentPictureInPicture.requestWindow({ width: 460, height: 300 }).then(function (w) {
-    w.document.body.innerHTML = '<div style="font:14px system-ui;padding:12px"><b>HOLD dijalankan di dalam PiP</b>' +
-      '<p style="font:12px">origin induk: ' + location.origin + '</p></div>';
-    var alive = 0;
-    try { w.location.href = 'https://www.google.com:82'; } catch (e) { alive = -1; }
-    var id = setInterval(function () {
-      alive++;
-      var st; try { st = w.closed ? 'TERTUTUP' : 'HIDUP, DOM=' + (w.document.body.textContent.length > 10 ? 'utuh' : 'kosong'); }
-      catch (e) { st = 'BLOCKED'; }
-      g.textContent = 'REAL ORIGIN: ' + location.origin + '\ndetik ke-' + alive + ' : PiP ' + st +
-        '\n\nHIDUP + DOM utuh setelah navigasi = UI persisten tanpa permukaan origin.';
-      if (alive > 8) clearInterval(id);
-    }, 1000);
-  });
-}
+var B = 'https://example.com/';        // ganti ke origin KEDUA milikmu bila perlu
+var TAG = location.origin, out = [];
+function say(a, v, ok) { out.push((v === ok ? '  OK       ' : '  CROSSED <== ') + a + ' : ' + v); o.textContent = 'TAG: ' + TAG + '\n\n' + out.join('\n'); }
+function probe(f, arm, ok) { var v; try { v = f() === TAG ? 'EQUAL' : 'DIFFERENT'; } catch (e) { v = 'BLOCKED'; } say(arm, v, ok); }
+var a = document.createElement('iframe'); document.body.appendChild(a);
+probe(function () { return a.contentWindow.location.origin; }, 'INHERIT initial-empty', 'EQUAL');
+var b = document.createElement('iframe'); b.sandbox = 'allow-scripts'; b.srcdoc = '<p>x'; document.body.appendChild(b);
+b.onload = function () { probe(function () { return b.contentWindow.document.body && b.contentWindow.location.origin; }, 'OPAQUE sandbox', 'BLOCKED'); };
+var c = document.createElement('iframe'); c.src = B; c.style.cssText = 'width:1px;height:1px;border:0'; document.body.appendChild(c);
+setTimeout(function () { probe(function () { return c.contentWindow.document.body.textContent; }, 'CONTROL cross-origin', 'BLOCKED'); }, 1800);
 </script>

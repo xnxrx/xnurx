@@ -1,19 +1,31 @@
-<!-- 21 | BAR KOSONG - dokumen yang tidak pernah punya URL | [1-CLICK]
-     TARGET KELAS  omnibox KOSONG (bukan about:blank, bukan origin) sementara DOM kita terender penuh.
-     IDE  omnibox mencetak URL dokumen. Dokumen initial-empty TIDAK PUNYA URL: ia tak pernah
-     dimuat dari mana pun. Jadi jangan menavigasi ke mana pun sama sekali - itu justru
-     yang selama ini merusak percobaan orang. Nol navigasi = nol URL = nol yang bisa dicetak.
-     PREDIKAT  omnibox kosong / hanya placeholder, halaman penuh UI kita.
-     EXPECTED-SECURE  omnibox menulis about:blank ATAU origin opener - tidak pernah kosong.
-     CATAT PERSIS  kosong-total | about:blank | origin opener | placeholder pencarian. Empat vonis beda. -->
-<button onclick="go()">Run 21</button>
-<p id=r></p>
+<!-- 21 | ⭐⭐ Arc (macOS) · SIDEBAR DISEMBUNYIKAN = tidak ada address bar sama sekali | [NO-CLICK]
+     INI KANDIDAT TERKUAT UNTUK "BAR HILANG" DI MAC, dan ia bukan bug — ia fitur.
+     Arc menaruh identitas di SIDEBAR VERTIKAL, bukan di strip horizontal di atas. Sidebar itu
+     bisa disembunyikan (Cmd+S), dan dalam keadaan itu jendela menampilkan konten penuh
+     TANPA satu pun teks origin di layar.
+     Seluruh kelas spoofing selama ini mengasumsikan omnibox ada DI ATAS dan selebar layar.
+     Asumsi itu tidak berlaku di sini, jadi semua aturan geometrisnya berubah — dan Arc
+     sudah ada di scope engagement KB-mu (targets/arc/), jadi ini sah diuji.
+     PERTANYAAN RISET  saat sidebar tersembunyi, adakah SATU tempat yang masih menyebut origin?
+     Kalau tidak ada, berapa lama keadaan itu bisa bertahan, dan apakah halaman bisa
+     MEMPERTAHANKANNYA (mis. dgn menahan fokus / mencegah hover ke tepi)?
+     EXPECTED-SECURE  ada satu permukaan yang menyebut origin dan tak bisa disembunyikan halaman.
+     ETIKA  instance Arc milikmu sendiri. Tekan Cmd+S untuk mengembalikan sidebar kapan saja. -->
+<h2 style="font:20px system-ui">Tekan <b>Cmd + S</b> untuk menyembunyikan sidebar Arc.</h2>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN (opener): ' + location.href;
-function go() {
-  var w = window.open('', '', 'width=900,height=620');
-  w.document.write('<h2 style="font:20px system-ui">UI ini milik ' + location.origin + '</h2>' +
-    '<p style="font:13px system-ui">Nol navigasi terjadi. Apa yang tertulis di omnibox jendela ini?</p>' +
-    '<p style="font:12px monospace">w.location.href = ' + w.location.href + '</p>');
+var ua = navigator.userAgent;
+function draw() {
+  g.textContent =
+    'REAL ORIGIN  : ' + location.href +
+    '\nArc terdeteksi: ' + (/Arc\//.test(ua) ? 'YA' : 'tidak dari UA (Arc sering menyamar sbg Chrome — cek manual)') +
+    '\nviewport     : ' + innerWidth + 'x' + innerHeight +
+    '\nouter        : ' + outerWidth + 'x' + outerHeight +
+    '\nchrome tegak : ' + (outerHeight - innerHeight) + 'px' +
+    '\nchrome datar : ' + (outerWidth - innerWidth) + 'px   <== ini yang menyusut saat sidebar disembunyikan' +
+    '\n\nCatat angka SEBELUM dan SESUDAH Cmd+S. Selisih pada "chrome datar" = lebar sidebar.' +
+    '\nKalau sesudahnya 0: tidak ada permukaan origin di layar sama sekali.' +
+    '\n\nLalu jawab: masih ada tempat lain yang menyebut origin? (hover tepi? shortcut? menu?)';
 }
+draw(); setInterval(draw, 700);
 </script>

@@ -1,30 +1,32 @@
-<!-- 43 | W11  REFERENSI DIRI - dokumen yang menunjuk dirinya sendiri | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "sebuah objek menunjuk ke objek LAIN"
-     IDE GILA  tiga bentuk referensi-diri sekaligus, semuanya dibatasi:
-       (a) frame yang src-nya adalah halaman ini sendiri (dibatasi kedalaman 3 lewat parameter)
-       (b) window.open('', '_self') -> jendela yang opener-nya dirinya sendiri
-       (c) frame yang name-nya sama dengan target navigasinya
-     Pemeriksaan keamanan browser hampir selalu ditulis dalam bentuk "bandingkan A dengan B".
-     Kalau A dan B adalah objek yang SAMA, cabang mana yang diambil? Sebagian pemeriksaan
-     memberi jawaban "sama = aman" - dan itu kesimpulan yang benar untuk kasus normal,
-     tapi menjadi celah saat identitas keduanya kita paksa berimpit.
-     EXPECTED-SECURE  opener !== self, dan kedalaman rekursi dihentikan bersih tanpa kebingungan origin. -->
+<!-- 43 | weird-lab W4 x W6 · handle DANGLING disentuh dari dalam handler load (jalur WebKit) | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "handle ke dokumen lama tidak dipakai lagi setelah src ditukar"
+     Simpan contentWindow sebuah frame, lalu tukar src-nya. Handle lama kini menunjuk dokumen
+     DANGLING. Lalu, DARI DALAM handler load dokumen BARU, sentuh handle LAMA.
+     Dokumen baru sedang lahir sementara kita memaksa browser melayani dokumen yang seharusnya
+     sudah dikubur — dua dokumen hidup di satu slot, di milidetik yang sama.
+     Ini kombinasi yang melahirkan kelas FuzzOrigin: origin ditulis ulang saat ada dua kandidat.
+     Diarahkan ke WebKit karena manajemen dokumen Safari berbeda struktur dari Blink.
+     YANG DIBACA  origin handle lama vs origin frame sekarang. Beda = dua bagian tak sepakat.
+     BOUNDED: 6 pertukaran lalu berhenti.
+     EXPECTED-SECURE  handle lama netral/BLOCKED, tak pernah mengembalikan origin dokumen baru. -->
 <button onclick="go()">Run 43</button>
 <pre id=g style="font:12px/1.6 monospace"></pre>
 <script>
-var d = +(new URLSearchParams(location.search).get('d') || 0);
-g.textContent = 'REAL ORIGIN: ' + location.origin + '\nkedalaman diri: ' + d +
-  '\nopener === self ? ' + (window.opener === window) +
-  '\nparent === self ? ' + (window.parent === window) +
-  '\ntop === self ?    ' + (window.top === window);
-if (d > 0 && d < 3) { var f = document.createElement('iframe'); f.src = '43.html?d=' + (d + 1); f.style.cssText = 'width:99%;height:150px'; document.body.appendChild(f); }
+g.textContent = 'REAL ORIGIN: ' + location.href;
 function go() {
-  var f = document.createElement('iframe'); f.name = 'diri'; f.src = '43.html?d=1';
-  f.style.cssText = 'width:99%;height:200px'; document.body.appendChild(f);
-  try { window.open('', '_self'); } catch (e) { }
-  setTimeout(function () {
-    g.textContent += '\n\nsetelah open(_self): opener===self ? ' + (window.opener === window) +
-      '\nKalau berubah jadi true, identitas jendela sudah berimpit -> uji ulang 39.html di state ini.';
-  }, 400);
+  var f = document.createElement('iframe'); f.style.cssText = 'width:1px;height:1px;border:0';
+  document.body.appendChild(f);
+  var dangling = f.contentWindow, n = 0, out = [];
+  f.onload = function () {
+    n++;
+    var a, b;
+    try { a = dangling.location.href; } catch (e) { a = 'BLOCKED'; }
+    try { b = f.contentWindow.location.href; } catch (e) { b = 'BLOCKED'; }
+    out.push('load#' + n + '  lama=' + String(a).slice(-28) + '  kini=' + String(b).slice(-28) +
+      (a !== b && a !== 'BLOCKED' ? '  <== TIDAK SEPAKAT' : ''));
+    g.textContent = 'REAL ORIGIN: ' + location.origin + '\n\n' + out.join('\n');
+    if (n < 6) f.src = n % 2 ? '30.html' : 'about:blank';
+  };
+  f.src = '30.html';
 }
 </script>

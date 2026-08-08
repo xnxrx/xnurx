@@ -1,27 +1,37 @@
-<!-- 47 | UXSS + W2 x W12  origin-sanitizer yang bertahan melewati KEMATIAN dan KEBANGKITAN | [1-CLICK lalu BACK]
-     ASUMSI YANG DILANGGAR  "origin sebuah dokumen dihitung ulang dengan benar saat ia dipulihkan"
-     TEKNIK  origin-sanitizer: skrip diberi TAG berisi origin tempat ia diambil. Saat dieksekusi,
-     tag dibandingkan dengan origin eksekusi. Tidak sama = kode dari origin A berjalan di origin B
-     = definisi UXSS. Tidak ada tebakan, tidak ada false positive.
-     KEGILAANNYA  assert-nya tidak dijalankan sekarang. Ia dipasang di pagehide (saat dokumen
-     sekarat) dan dibaca lagi setelah bfcache membangkitkan dokumen. Jadi tag dibuat di satu
-     kehidupan dan diperiksa di kehidupan berikutnya. Jalur "pulihkan" adalah kode yang
-     BERBEDA dari jalur "muat pertama kali", dan jauh lebih jarang diperiksa siapa pun.
-     CARA UJI  klik Pergi -> tekan BACK. Baca verdict.
-     EXPECTED-SECURE  TAG === origin di setiap kehidupan; drift selalu 0. -->
-<button onclick="location.href='30.html?dari=47'">Pergi (lalu tekan BACK)</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 47 | MATRIKS INDUK macOS — konteks x mesin, yang kosong itulah pekerjaanmu | [NO-CLICK]
+     Kelas ini tidak dimenangkan dengan satu file jenius. Ia dimenangkan dengan matriks yang
+     terisi, karena vonis "tidak rentan" tanpa menyebut mesin & versi tidak berarti apa-apa.
+     Kolom = permukaan tempat origin BISA hilang atau berbohong di macOS.
+     Baris = mesin yang benar-benar ada di laptopmu.
+     Sel BLOCKED tidak pernah dihapus — catat MEKANISME pemblokirnya, itu peta hardening,
+     dan peta itu menunjukkan sumbu mana yang masih terbuka. -->
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-var TAG = location.origin, lives = 0, drift = 0, log = [];
-function check(when) {
-  lives++;
-  var now = location.origin;
-  if (now !== TAG) drift++;
-  log.push('kehidupan ' + lives + ' (' + when + ')  TAG=' + TAG + '  origin=' + now + (now !== TAG ? '   <== CROSSED' : '   OK'));
-  g.textContent = log.join('\n') + '\n\nDRIFT: ' + drift +
-    (drift ? '\nCROSSED -> screenshot, catat engine+versi+OS, STOP, lapor VRP' : '\nbelum ada penyeberangan');
-}
-check('muat');
-addEventListener('pagehide', function () { try { check('pagehide'); } catch (e) { } });
-addEventListener('pageshow', function (e) { check('pageshow persisted=' + e.persisted); });
+g.textContent =
+  'UA: ' + navigator.userAgent + '\n\n' +
+  'PERMUKAAN (kolom):\n' +
+  '  C1 commit-vs-paint (1,3)        C2 beforeunload (13,14)     C3 unduhan-abort (15)\n' +
+  '  C4 swipe-back gestur (30)       C5 fullscreen notice (23,39) C6 PWA/Add-to-Dock (8,24)\n' +
+  '  C7 PiP (7,36)                   C8 popup chromeless (25)     C9 domain-only+IDN (18,20,33)\n' +
+  '  C10 halaman error (26)          C11 in-app/WKWebView (10,28) C12 UXSS oracle (40,41)\n' +
+  '\n' +
+  'mesin      versi   C1  C2  C3  C4  C5  C6  C7  C8  C9  C10 C11 C12\n' +
+  'Safari     ____    __  __  __  __  __  __  --  __  __  __  __  __\n' +
+  'Arc        ____    __  __  __  --  __  __  __  __  __  __  __  __\n' +
+  'Chrome     ____    __  __  __  --  __  __  __  __  __  __  __  __\n' +
+  'Brave      ____    __  __  __  --  __  __  __  __  __  __  __  __\n' +
+  'Firefox    ____    __  __  __  --  __  __  --  __  __  __  __  __\n' +
+  'Slack/app  ____    __  __  __  --  --  --  --  --  __  __  __  __\n' +
+  '\n' +
+  'isi sel: SPOOFED / INERT / BLOCKED / INCONCLUSIVE / -- (tidak berlaku)\n' +
+  '\n' +
+  'URUTAN BIAYA-TERMURAH DI MAC:\n' +
+  '  1. Arc      — fork Chromium, patch-lag paling besar\n' +
+  '  2. Safari   — jalur kode sendiri, tak pernah menerima patch Chrome\n' +
+  '  3. app WKWebView/Electron (Slack, Notion, Discord) — bounty terpisah\n' +
+  '  4. Brave / Vivaldi\n' +
+  '  5. Chrome   — paling keras, kerjakan terakhir\n' +
+  '\n' +
+  'Satu sel SPOOFED -> langsung sweep-sibling: ganti SATU knob (cara-hang / pemicu /\n' +
+  'permukaan / topologi) untuk mengubah satu bug jadi satu FAMILI, bukan satu laporan.';
 </script>

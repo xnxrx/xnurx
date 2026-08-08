@@ -1,39 +1,31 @@
-<!-- 48 | UXSS + W1  URUTAN SALAH - mencegat navigasi SETELAH ia terlanjur commit | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "intercept dipanggil sebelum navigasi selesai"
-     IDE GILA  Navigation API memberi halaman hak mencegat navigasinya sendiri. Aturannya:
-     panggil intercept() SELAMA event navigate. Kita simpan event-nya, biarkan selesai,
-     lalu panggil intercept() setelahnya - dari luar jendela waktu yang sah.
-     Sekaligus dijalankan replaceState di titik-titik urutan yang salah.
-     Yang dicari bukan "berhasil mencegat", tapi apakah kedua PANDANGAN jendela ini
-     (objek Location vs objek document vs entri navigation) jadi tidak sepakat.
-     Ketidaksepakatan itu sendiri yang bernilai - ia berarti dua bagian browser memegang
-     jawaban berbeda untuk pertanyaan "dokumen ini milik siapa".
-     EXPECTED-SECURE  intercept di luar jendela melempar InvalidStateError, ketiga pandangan tetap sinkron. -->
-<button onclick="go()">Run 48</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 48 | JURNAL — tanpa ini, hasil abu-abu hilang tiap sesi | [NO-CLICK]
+     Aturan yang paling sering dilanggar orang, dan yang paling mahal:
+     hasil "kadang jalan" BUKAN kegagalan — itu bug yang jendelanya belum diukur.
+     Skrip yang jalan 1 dari 20 kali hampir selalu berarti ada VARIABEL TERSEMBUNYI.
+     Mayoritas orang membuangnya; karena itulah ia masih tersisa untukmu.
+     Baris dengan p>0 TIDAK PERNAH DIHAPUS — ia dibangkitkan lagi saat versi engine berubah. -->
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<textarea id=t rows=10 style="width:100%;font:12px monospace" placeholder="tempel barismu di sini, lalu Salin"></textarea>
+<button onclick="navigator.clipboard&&navigator.clipboard.writeText(t.value)">Salin jurnal</button>
 <script>
-var log = ['REAL ORIGIN: ' + location.origin, ''];
-function P() {
-  var a, b, c;
-  try { a = location.href; } catch (e) { a = 'X'; }
-  try { b = document.URL; } catch (e) { b = 'X'; }
-  try { c = navigation && navigation.currentEntry ? navigation.currentEntry.url : 'n/a'; } catch (e) { c = 'X'; }
-  return [a, b, c];
-}
-function go() {
-  if (!window.navigation) { log.push('Navigation API tidak ada -> catat ilmu-negatif.'); g.textContent = log.join('\n'); return; }
-  var saved = null;
-  navigation.addEventListener('navigate', function (e) { saved = e; });
-  navigation.navigate(location.pathname + '#a');
-  setTimeout(function () {
-    try { saved.intercept({ handler: function () { return Promise.resolve(); } }); log.push('intercept SETELAH commit : DITERIMA  <== urutan tidak ditegakkan'); }
-    catch (e) { log.push('intercept SETELAH commit : ditolak -> ' + e.name); }
-    try { history.replaceState({}, '', '#b'); } catch (e) { }
-    var v = P();
-    log.push('', 'location.href        : ' + v[0], 'document.URL         : ' + v[1], 'navigation.currentEntry: ' + v[2]);
-    var same = v[0] === v[1] && (v[2] === 'n/a' || v[2] === v[0]);
-    log.push('', same ? 'ketiga pandangan SEPAKAT (aman)' : 'TIDAK SEPAKAT <== dua bagian browser beda jawaban, ini temuan');
-    g.textContent = log.join('\n');
-  }, 300);
-}
+g.textContent =
+  'FORMAT SATU BARIS PER PERCOBAAN:\n' +
+  '  tanggal | file | operator | ide 1-kalimat | p (x/20) | engine+versi+OS | variabel dicurigai | status\n' +
+  '\nstatus: dropped · widening (sedang dilebarkan) · deterministic (naik ke gerbang normal) · parked\n' +
+  '\nCARA MEMBACA p:\n' +
+  '  p = 1.0        deterministik   -> gerbang normal, lapor\n' +
+  '  0 < p < 1      FLAKY           -> PALING BERHARGA, lanjut ke langkah berikut\n' +
+  '  p = 1/20 sekali  ONCE          -> catat kondisinya selengkap mungkin\n' +
+  '  p = 0          belum tersentuh -> GANTI OPERATOR, jangan menaikkan "kekuatan"\n' +
+  '\nKALAU FLAKY, CARI VARIABEL TERSEMBUNYI — uji SATU PER SATU, jangan sekaligus:\n' +
+  '  beban CPU/GC · jumlah frame hidup · status FOKUS jendela · tab latar vs depan\n' +
+  '  urutan microtask vs task · cache dingin/panas · ukuran layar/DPI · profil bersih\n' +
+  '\nLALU LEBARKAN JENDELANYA sampai p mendekati 1.0:\n' +
+  '  tambah beban render · tambah frame · CPU throttle di DevTools · jalankan di tab latar\n' +
+  '  PoC flaky tidak bisa dilaporkan; PoC deterministik dari ide yang SAMA adalah bug.\n' +
+  '\nVONIS JUJUR: kalau p tetap rendah tapi reprodusibel, laporkan DENGAN ANGKANYA\n' +
+  '  "berhasil 3 dari 20 pada Safari X / macOS Y; dgn tab di latar naik jadi 9 dari 20"\n' +
+  '  Kejujuran itu yang membedakan laporan yang ditriase serius dari yang ditutup not-reproducible.';
+t.value = new Date().toISOString().slice(0, 10) + ' | __.html | W_ | ' +
+  ' | __/20 | ' + navigator.userAgent.slice(0, 40) + ' | ? | widening';
 </script>

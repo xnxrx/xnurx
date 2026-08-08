@@ -1,30 +1,30 @@
-<!-- 38 | W3 x W10  KUANTITAS (BOUNDED) x WAKTU EKSTREM - banjir history lalu back kilat | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "omnibox selalu menyusul entri history yang aktif"
-     IDE  omnibox dan session-history adalah dua pembukuan yang diperbarui di jalur berbeda.
-     Isi history dengan 200 entri (bounded), lalu panggil back() secepat mungkin berturut-turut.
-     Kalau pembukuan omnibox tertinggal di belakang pembukuan dokumen, maka ada jendela waktu
-     di mana bar mencetak entri LAIN daripada dokumen yang sedang tampil - dan panjang jendela
-     itu bisa kita perlebar dengan menambah beban.
-     YANG DIUKUR  selisih antara location.href yang dibaca JS dan entri yang tampak di bar (mata),
-     plus panjang jendelanya dalam ms.
-     EXPECTED-SECURE  keduanya selalu sinkron; selisih = 0 ms.
-     BOUNDED: 200 entri, satu putaran. Semua same-origin, nol request. -->
-<button onclick="go()">Run 38</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 38 | weird-lab W2 x W12 · membuka jendela DARI DALAM pagehide, lalu dibangkitkan bfcache | [1-CLICK]
+     Dua operator aneh digabung — dan kombinasi dua operator jauh lebih subur dari satu.
+     W2 saat-sekarat  : jendela dibuka pada milidetik ketika pembukanya sedang dibongkar
+     W12 hidup lagi   : lalu pembukanya DIHIDUPKAN KEMBALI utuh oleh bfcache saat Back
+     Yang diuji: setelah pembuka mati lalu hidup lagi, apakah handle ke jendela anak masih
+     menunjuk objek yang sama? Kalau ya, ada dokumen yang openernya sempat tidak ada lalu
+     kembali ada — keadaan yang tidak pernah terjadi di alur normal, dan karena itu jarang diuji.
+     Safari relevan khusus di sini karena bfcache-nya jauh lebih agresif dari Chrome.
+     PROSEDUR  klik Run -> halaman pergi -> tekan BACK -> baca laporan.
+     EXPECTED-SECURE  handle mati bersih; tak ada dokumen yang openernya bangkit kembali. -->
+<button onclick="go()">Run 38 (lalu tekan BACK)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  for (var i = 0; i < 200; i++) history.pushState({ i: i }, '', '#e' + i);
-  var t0 = performance.now(), n = 0, log = [];
-  var id = setInterval(function () {
-    history.back(); n++;
-    log.push('back#' + n + '  t=' + Math.round(performance.now() - t0) + 'ms  href=' + location.hash);
-    if (n >= 40) {
-      clearInterval(id);
-      g.textContent = 'REAL ORIGIN: ' + location.origin + '\n' + log.slice(-12).join('\n') +
-        '\n\nBandingkan hash terakhir di atas dgn yang tertulis di address bar SEKARANG.' +
-        '\nBeda = dua pembukuan tidak sinkron = jendela spoofing yang terukur.';
-    }
-  }, 5);
-}
+var child = null;
+function draw(x) { g.textContent = 'REAL ORIGIN: ' + location.href + '\n' + (x || ''); }
+draw('klik Run, lalu tekan BACK saat halaman berpindah.');
+addEventListener('pagehide', function () {
+  try { child = window.open('', 'anak-sekarat', 'width=420,height=260'); if (child) child.document.write('<b style="font:14px system-ui">dibuka oleh dokumen yang sedang mati</b>'); } catch (e) { }
+});
+addEventListener('pageshow', function (e) {
+  var s;
+  try { s = child ? (child.closed ? 'TERTUTUP' : 'MASIH HIDUP — handle bertahan melewati kematian pembukanya') : 'null'; }
+  catch (err) { s = 'BLOCKED (' + err.name + ')'; }
+  draw('pageshow persisted(bfcache) = ' + e.persisted +
+    '\nhandle anak = ' + s +
+    '\n\n"MASIH HIDUP" + persisted=true berarti opener mati lalu bangkit,' +
+    '\nsementara anaknya tak pernah tahu. Uji lalu: bisa ditulisi lagi? origin-nya apa?');
+});
+function go() { location.href = '31.html'; }
 </script>

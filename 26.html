@@ -1,29 +1,31 @@
-<!-- 26 | BAR KOSONG - dorong chrome-nya KELUAR LAYAR | [1-CLICK]
-     Sumbu geometri, bukan sumbu parser. Bar tidak dibohongi dan tidak dihilangkan -
-     ia digeser ke koordinat yang tidak terlihat mata, sementara area konten tetap di layar.
-     Browser modern MENJEPIT koordinat popup supaya ini gagal. Justru itu yang diuji:
-     berapa nilai jepitannya, apakah jepitan itu dihitung terhadap layar atau terhadap
-     jendela induk, dan apakah setiap FORK memasang jepitan yang sama.
-     moveTo/moveBy dipanggil SETELAH jendela lahir - jalur kode berbeda dari fitur di window.open,
-     dan jalur kedua ini yang lebih sering lupa dijepit.
-     EXPECTED-SECURE  posisi akhir dijepit sehingga chrome selalu ada di dalam layar.
-     Angka posisi dicetak supaya laporannya berisi ukuran, bukan kesan. -->
-<button onclick="go()">Run 26</button>
-<p id=r></p><pre id=g style="font:12px monospace"></pre>
+<!-- 26 | macOS · halaman ERROR sebagai permukaan — apa yang bar tulis saat tak ada dokumen? | [1-CLICK]
+     Pertanyaan yang belum dijawab di seluruh korpus: kalau navigasi GAGAL, dokumen tak lahir.
+     Jadi bar menulis apa? URL yang gagal? URL sebelumnya? Kosong?
+     Enam bentuk kegagalan yang jalur kodenya BERBEDA-BEDA di dalam engine:
+       DNS tidak ada        · koneksi ditolak (RST)    · koneksi di-drop (timeout)
+       TLS tidak cocok      · skema tak dikenal        · blob: yang sudah dicabut
+     Masing-masing dibuka di tabnya sendiri. Yang dicari bukan "error" — semua akan error.
+     Yang dicari: apakah ADA SATU bentuk kegagalan yang meninggalkan bar dalam keadaan
+     berbeda dari yang lain. Bentuk yang menyimpang itulah jalur yang belum di-harden.
+     Bonus: pada halaman error, coba tekan Back — bar dan konten dipulihkan dari sumber berbeda.
+     EXPECTED-SECURE  keenam bentuk meninggalkan bar dalam keadaan yang sama & jujur. -->
+<button onclick="go()">Run 26 (6 tab)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+g.textContent = 'REAL ORIGIN: ' + location.href;
 function go() {
-  var w = window.open('', '', 'width=760,height=520,top=-120,left=40');
-  w.document.write('<h2 style="font:19px system-ui">Chrome jendela ini ada di atas garis layar?</h2>' +
-    '<p style="font:12px monospace">' + location.origin + '</p>');
-  var a = w.screenY;
-  setTimeout(function () {
-    try { w.moveTo(40, -120); } catch (e) { }
-    setTimeout(function () {
-      g.textContent = 'screenY diminta = -120\nscreenY setelah window.open  = ' + a +
-        '\nscreenY setelah moveTo()     = ' + w.screenY +
-        '\n\nnilai negatif = jepitan gagal = chrome keluar layar';
-    }, 250);
-  }, 250);
+  var b = URL.createObjectURL(new Blob(['<h3>blob</h3>'], { type: 'text/html' }));
+  URL.revokeObjectURL(b);
+  var U = [['DNS tidak ada', 'https://tidak-ada-' + Math.floor(performance.now()) + '.invalid/'],
+  ['koneksi ditolak', 'https://127.0.0.1:1/'],
+  ['koneksi di-drop', 'https://192.0.2.1/'],
+  ['TLS tidak cocok', 'https://expired.badssl.com/'],
+  ['skema tak dikenal', 'xnurx-noop://hold'],
+  ['blob dicabut', b]];
+  U.forEach(function (u, i) { setTimeout(function () { window.open(u[1], '_blank'); }, i * 600); });
+  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n6 tab dibuka:\n' +
+    U.map(function (u, i) { return '  ' + (i + 1) + '. ' + u[0].padEnd(20) + u[1]; }).join('\n') +
+    '\n\nUntuk TIAP tab catat: bar menulis apa? URL yang gagal / URL lama / kosong?' +
+    '\nLalu tekan Back di tab itu dan catat lagi. Yang menyimpang = jalurnya.';
 }
 </script>

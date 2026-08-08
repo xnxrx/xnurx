@@ -1,27 +1,33 @@
-<!-- 35 | W7  SIMULTANITAS - dua requestFullscreen dalam satu task | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "satu waktu hanya satu elemen bisa masuk fullscreen"
-     IDE GILA  tembak DUA permintaan fullscreen ke DUA elemen berbeda di task yang sama,
-     sebelum yang pertama sempat selesai. Spesifikasi mengatur pemenangnya, tapi yang kita
-     incar bukan pemenangnya - melainkan TOAST-nya. Toast "You are in full screen" adalah
-     satu-satunya pembantah kelas ini. Kalau dua transisi saling menimpa, toast bisa
-     dianggap sudah ditampilkan padahal transisi yang benar-benar terjadi adalah yang kedua.
-     YANG DIUKUR  berapa promise yang resolve, berapa event fullscreenchange, dan (mata)
-     berapa kali toast muncul. Tiga angka yang harus konsisten. Kalau tidak, itu temuannya.
-     EXPECTED-SECURE  tepat satu transisi, tepat satu toast.  KELUAR  Esc. -->
-<button onclick="go()">Run 35 (Esc untuk keluar)</button>
-<div id=a style="padding:10px;background:#eef">elemen A</div>
-<div id=b style="padding:10px;background:#efe">elemen B</div>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 35 | ⭐ macOS/Safari · dialog Safari MENGUNCI seluruh jendela — bukan cuma tab | [1-CLICK]
+     Perbedaan perilaku yang nyata antara Safari dan Chrome, dan jarang dipakai orang.
+     Di Chrome, dialog JS bersifat per-tab: tab lain tetap hidup. Di Safari, dialog dari
+     sebuah halaman menghalangi interaksi dengan JENDELA-nya secara lebih luas.
+     Artinya: selama dialog terbuka, pengguna tidak bisa mengklik address bar, tidak bisa
+     membuka menu, tidak bisa memeriksa apa pun. Satu-satunya jalan adalah menutup dialog.
+     Gabungkan dengan file 13 (bar berganti selama dialog) dan hasilnya: keadaan bar-vs-layar
+     yang salah, DAN pengguna tidak punya alat untuk memeriksanya selama keadaan itu berlangsung.
+     Ini bukan menambah "cara membohongi bar" — ini MENGURANGI alat pembantahnya.
+     DIBATASI: 3 dialog, lalu berhenti. Tekan Cancel/OK untuk keluar kapan saja.
+     EXPECTED-SECURE  address bar tetap bisa diklik & diperiksa selama dialog terbuka. -->
+<button onclick="go()">Run 35 (3 dialog berurutan)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href;
-var ok = 0, no = 0, ev = 0;
-document.addEventListener('fullscreenchange', function () { ev++; draw(); });
-function draw() {
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\npromise resolve : ' + ok + '\npromise reject  : ' + no +
-    '\nfullscreenchange: ' + ev + '\n\nHitung dgn mata: toast muncul berapa kali? Harus = jumlah transisi.';
-}
+g.textContent = 'REAL ORIGIN: ' + location.href +
+  '\n\nSaat tiap dialog terbuka, COBA: klik address bar, buka menu, ganti tab.' +
+  '\nMana yang masih bisa? Catat.';
 function go() {
-  a.requestFullscreen().then(function () { ok++; draw(); }, function () { no++; draw(); });
-  b.requestFullscreen().then(function () { ok++; draw(); }, function () { no++; draw(); });
+  var n = 0;
+  (function next() {
+    if (n >= 3) { g.textContent += '\n\nselesai.'; return; }
+    n++;
+    setTimeout(function () {
+      confirm('DIALOG ' + n + ' dari 3\n\nSelagi kotak ini terbuka:\n' +
+        '  - bisakah kamu mengklik address bar?\n' +
+        '  - bisakah kamu membuka menu?\n' +
+        '  - bisakah kamu berpindah tab?\n\n' +
+        'Origin asli halaman ini: ' + location.origin);
+      next();
+    }, 400);
+  })();
 }
 </script>

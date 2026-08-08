@@ -1,26 +1,37 @@
-<!-- 45 | W12  HIDUP LAGI - state spoof yang dibangkitkan bfcache | [NO-CLICK setelah 1 navigasi]
-     ASUMSI YANG DILANGGAR  "yang sudah ditinggalkan tetap ditinggalkan"
-     IDE GILA  bfcache membekukan halaman UTUH - DOM, timer, variabel - lalu menghidupkannya
-     lagi persis seperti semula saat pengguna menekan Back. Yang TIDAK ikut dibekukan adalah
-     pembukuan UI browser, karena ia sudah berpindah ke halaman lain.
-     Jadi: siapkan state spoof, tinggalkan halaman, lalu Back. Halaman kembali dalam keadaan
-     "sudah ter-spoof" tanpa satu baris kode pun berjalan lagi - sementara bar baru saja
-     dihitung ulang untuk halaman yang berbeda. Dua pembukuan dipulihkan dari titik yang berbeda.
-     CARA UJI  klik Siapkan -> klik Pergi -> tekan tombol BACK browser. Baca bar saat kembali.
-     EXPECTED-SECURE  pemulihan bfcache selalu menghitung ulang bar dari dokumen yang dipulihkan. -->
-<button onclick="prep()">1. Siapkan state</button> <button onclick="leave()">2. Pergi</button>
+<!-- 45 | weird-lab W1 x W8 · pakai SEBELUM diberi, dan tukar identitas di antara cek dan pakai | [1-CLICK]
+     Dua operator yang menyerang URUTAN, bukan nilai.
+     W1 urutan salah   : panggil kapabilitas SEBELUM syaratnya dipenuhi — fullscreen tanpa gestur,
+                          exitFullscreen saat belum fullscreen, close() lalu pakai
+     W8 tukar identitas: ganti name/src sebuah jendela ANTARA saat browser memeriksanya dan
+                          saat ia memakainya (TOCTOU di tabel nama jendela)
+     Jendela bernama bisa direbut: window.open('', 'nama') mengembalikan jendela LAMA kalau
+     namanya cocok. Kita ganti nama SETELAH pemeriksaan, SEBELUM pemakaian.
+     Ini kelas TOCTOU filesystem yang dipindah ke tabel nama jendela — bagian yang dianggap
+     fitur kuno dan hampir tidak pernah di-review ulang.
+     EXPECTED-SECURE  kapabilitas menolak dgn bersih saat urutannya salah; penamaan tak pernah
+     menyeberangkan origin; handle selalu cocok dengan yang diperiksa. -->
+<button onclick="go()">Run 45</button>
 <pre id=g style="font:12px/1.6 monospace"></pre>
 <script>
-var armed = false;
-function draw(t) { g.textContent = 'REAL ORIGIN: ' + location.origin + '\n' + t; }
-draw('belum disiapkan');
-function prep() { armed = true; document.title = 'https://www.google.com'; draw('state SIAP. Sekarang klik Pergi, lalu tekan BACK.'); }
-function leave() { location.href = '30.html?dari=45'; }
-addEventListener('pageshow', function (e) {
-  draw('pageshow  persisted(bfcache) = ' + e.persisted +
-    '\nstate masih terpasang = ' + armed +
-    '\n\n' + (e.persisted && armed
-      ? 'DIPULIHKAN dari bfcache dgn state utuh -> baca address bar SEKARANG, screenshot.'
-      : 'dimuat ulang biasa (bukan bfcache) -> coba lagi, jangan reload manual.'));
-});
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var out = ['REAL ORIGIN: ' + location.origin, ''];
+  function t(n, f) { try { var r = f(); out.push(n.padEnd(38) + ' -> ' + (r === undefined ? 'diterima' : r)); } catch (e) { out.push(n.padEnd(38) + ' -> DITOLAK ' + e.name); } }
+  t('exitFullscreen saat belum fullscreen', function () { document.exitFullscreen(); });
+  t('requestFullscreen tanpa gestur baru', function () { document.body.requestFullscreen(); });
+  var a = window.open('', 'slot', 'width=460,height=280');
+  if (!a) { out.push('popup diblokir — sisanya dilewati'); g.textContent = out.join('\n'); return; }
+  a.document.write('<b style="font:14px system-ui">jendela A</b>');
+  var before; try { before = a.location.origin; } catch (e) { before = 'BLOCKED'; }
+  a.name = 'slot2';                                   // identitas ditukar SETELAH diperiksa
+  var b = window.open('', 'slot', 'width=460,height=280,left=500');
+  var after; try { after = b.location.origin; } catch (e) { after = 'BLOCKED'; }
+  out.push('origin sebelum tukar-nama'.padEnd(38) + ' -> ' + before);
+  out.push('origin sesudah tukar-nama'.padEnd(38) + ' -> ' + after);
+  out.push('a === b'.padEnd(38) + ' -> ' + (a === b));
+  a.close();
+  t('write ke jendela yang sudah ditutup', function () { a.document.write('x'); });
+  out.push('', 'Baris "diterima" pada operasi yang seharusnya ditolak = urutan tidak ditegakkan.');
+  g.textContent = out.join('\n');
+}
 </script>

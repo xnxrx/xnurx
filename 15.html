@@ -1,22 +1,26 @@
-<!-- 15 | origin spoof - ATRIBUSI YANG KELUAR DARI BROWSER (Notification OS) | [1-CLICK + izin]
-     GENOME  D=notifikasi OS  E=atribusi hidup lebih lama dari tab-nya  C=click
-     MEKANISME  notifikasi dirender oleh SISTEM OPERASI, di tempat yang tidak punya address bar.
-     Yang menyebut asal-usul cuma satu baris kecil - dan judul/badan sepenuhnya milik penyerang.
-     Lebih jauh: notifikasi BERTAHAN setelah tab ditutup, jadi atribusinya hidup lebih lama
-     dari satu-satunya permukaan yang bisa membantahnya.
-     YANG DIUKUR  apakah baris asal terpotong di panel OS, dan apakah judul bisa menyamar jadi baris asal.
-     EXPECTED-SECURE  origin selalu tampil penuh & tak bisa didorong keluar oleh teks kita.
-     Izin diminta eksplisit; cabut lagi lewat setelan situs. Nol data dikirim ke mana pun. -->
-<button onclick="go()">Run 15 (minta izin notifikasi)</button>
-<p id=r></p>
+<!-- 15 | ⭐ F1 · navigasi yang berakhir jadi UNDUHAN — bar wajib mundur, apakah selalu? | [1-CLICK]
+     Ini bentuk kedua dari "navigasi dibatalkan setelah bar berganti", dan yang paling
+     mudah ditemukan di dunia nyata.
+     MEKANISME  kalau respons membawa Content-Disposition: attachment (atau tipe yang tak bisa
+     dirender), browser MEMBATALKAN navigasi dan menyerahkannya ke pengelola unduhan.
+     Dokumen tujuan tidak pernah lahir - halaman lama tetap di layar. Tapi omnibox sudah
+     sempat menulis URL tujuan di titik commit, jadi ia harus MUNDUR lagi.
+     Jalur mundur itu kode terpisah dari jalur maju, dan jauh lebih jarang diuji.
+     KENAPA INI YANG PALING BERNILAI  kamu tidak perlu mengendalikan situs korban. Kamu hanya
+     perlu SATU URL di origin korban yang menghasilkan unduhan - PDF, zip, lampiran, export CSV.
+     Situs besar penuh URL semacam itu. Kalau bar tersangkut di sana, bar menulis korban
+     sementara layar menampilkan halamanmu.
+     ETIKA  ini GET biasa ke berkas publik, satu kali - sama seperti mengklik tautan unduh.
+     Jangan arahkan ke host yang tidak boleh kamu sentuh. Batalkan unduhannya setelah diuji.
+     EXPECTED-SECURE  bar kembali ke halaman ini begitu navigasi dibatalkan. -->
+<h2 style="font:20px system-ui">HALAMAN PENYERANG</h2>
+<input id=t value="probe.bin" style="width:340px;font:13px monospace">
+<button onclick="location.href=t.value.trim()">Navigasi ke URL unduhan</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  Notification.requestPermission().then(function (p) {
-    if (p !== 'granted') return;
-    new Notification('https://www.google.com', {
-      body: 'Baris asal di panel OS menyebut apa? Origin asli: ' + location.origin + ' (PoC riset)'
-    });
-  });
-}
+g.textContent = 'REAL ORIGIN: ' + location.href +
+  '\n\nprobe.bin = berkas kecil di repo ini (kontrol same-origin).' +
+  '\nLalu ganti dengan URL unduhan di origin lain, mis. sebuah .pdf dgn attachment.' +
+  '\n\nSetelah unduhan muncul: BACA OMNIBOX. Menulis URL tujuan atau kembali ke sini?' +
+  '\nTersangkut di URL tujuan = temuan penuh.';
 </script>

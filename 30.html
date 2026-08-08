@@ -1,33 +1,24 @@
-<!-- 30 | ALAT UKUR + LENGAN KONTROL untuk seluruh keluarga 21-29 | [NO-CLICK]
-     Tanpa file ini, "bar-nya kosong" cuma kesan. Dengan file ini, ia jadi ANGKA - dan triager
-     membaca angka, bukan kesan.
-     DUA FUNGSI:
-     (1) ALAT UKUR - cetak geometri chrome jendela saat ini. Buka file ini DI DALAM jendela hasil
-         21..29 (tempel URL-nya) lalu bandingkan angkanya dengan baseline di bawah.
-     (2) LENGAN KONTROL - tombolnya membuka jendela dengan URL NORMAL dan ukuran normal.
-         Bar jendela itu HARUS terisi jelas. Kalau kontrol ini pun tampak kosong,
-         yang kamu lihat adalah kebiasaan browsermu, bukan temuan -> JANGAN dilapor.
-     File ini juga jadi sasaran 27.html (jendela sempit), jadi ia mencetak lebarnya sendiri. -->
+<!-- 30 | ⭐⭐ macOS/Safari · GESTUR SWIPE-BACK — jendela yang panjangnya dikendalikan JARI | [1-CLICK lalu SWIPE]
+     INI PALING MACOS DARI SEMUANYA, dan mekanismenya persis yang kita cari.
+     Saat kamu menggeser dua jari ke kanan di trackpad, Safari menampilkan PRATINJAU HIDUP
+     halaman sebelumnya sambil menggesernya masuk. Selama gestur berlangsung, layar sudah
+     menampilkan halaman LAMA sementara navigasinya BELUM di-commit.
+     Yang membuat ini istimewa: panjang jendelanya bukan ditentukan jaringan, bukan ditentukan
+     paint, tapi ditentukan SEBERAPA LAMBAT JARI PENGGUNA BERGERAK. Tahan jari di tengah
+     dan jendelanya bertahan selama itu. Itu jendela terpanjang di seluruh batch ini.
+     YANG DICATAT  selama swipe ditahan setengah jalan: bar menulis halaman mana?
+     Yang sedang terlihat, atau yang sedang ditinggalkan? Lalu batalkan swipe (lepas balik
+     ke kiri) — apakah bar kembali dengan benar?
+     PROSEDUR  klik Pergi -> di halaman tujuan SWIPE DUA JARI KE KANAN dan TAHAN -> baca bar.
+     EXPECTED-SECURE  bar hanya berganti setelah gestur diselesaikan dan navigasi di-commit. -->
+<h2 style="font:20px system-ui;color:#b00">HALAMAN A — ini yang akan muncul saat kamu swipe</h2>
+<button onclick="location.href='31.html'">Pergi ke B (lalu swipe dua jari ke kanan, TAHAN)</button>
 <pre id=g style="font:12px/1.7 monospace"></pre>
-<button onclick="ctl()">Buka lengan KONTROL (URL normal, ukuran normal)</button>
 <script>
-var modes = ['browser', 'minimal-ui', 'standalone', 'fullscreen', 'window-controls-overlay'];
-function draw() {
-  g.textContent =
-    'URL PENUH   : ' + location.href +
-    '\nORIGIN      : ' + location.origin +
-    '\npanjang URL : ' + location.href.length + ' karakter' +
-    '\n\n-- geometri jendela ini --' +
-    '\nouter       : ' + outerWidth + ' x ' + outerHeight +
-    '\ninner       : ' + innerWidth + ' x ' + innerHeight +
-    '\nCHROME TEGAK: ' + (outerHeight - innerHeight) + ' px   <== 0 berarti nol chrome' +
-    '\nposisi layar: x=' + screenX + ' y=' + screenY + '   <== y negatif = chrome keluar layar' +
-    '\nlayar       : ' + screen.width + ' x ' + screen.height + '  avail ' + screen.availWidth + ' x ' + screen.availHeight +
-    '\ndisplay-mode: ' + modes.filter(function (m) { return matchMedia('(display-mode:' + m + ')').matches; }).join(', ') +
-    '\nopener      : ' + (window.opener ? 'ADA' : 'tidak ada') +
-    '\n\nBASELINE tab biasa desktop: chrome tegak ~80-130px, y >= 0.' +
-    '\nAngka jauh di bawah itu = permukaan origin sedang tidak ada di layar.';
-}
-draw(); setInterval(draw, 1000);
-function ctl() { window.open(location.href + '?kontrol=1', '', 'width=980,height=640,left=80,top=80'); }
+g.textContent = 'REAL ORIGIN: ' + location.href +
+  '\n\n1. klik Pergi' +
+  '\n2. di halaman B: geser DUA JARI ke kanan di trackpad, dan TAHAN di tengah' +
+  '\n3. sambil ditahan: BACA ADDRESS BAR — menulis A atau B?' +
+  '\n4. batalkan swipe (dorong balik ke kiri) dan baca bar lagi' +
+  '\n\nBar menulis B sementara layar menampilkan A = jendela yang panjangnya kamu kendalikan.';
 </script>

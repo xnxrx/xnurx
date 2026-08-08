@@ -1,34 +1,26 @@
-<!-- 37 | W3  KUANTITAS MUSTAHIL (BOUNDED) - kedalaman frame bersarang | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "jumlah dokumen bersarang yang wajar"
-     IDE  bukan flood - PENGUKURAN. Bangun sarang about:blank sedalam 1,2,4,8,16,32 (berhenti di 32),
-     lalu di tiap kedalaman tanyakan: apakah dokumen terdalam masih mewarisi origin yang benar,
-     dan pada kedalaman berapa browser mulai memotong / salah menghitung / menyerah.
-     Doktrin dos.md berlaku penuh: ukur BIAYA PER UNIT lalu EKSTRAPOLASI - jangan diledakkan.
-     Kalau ada kedalaman K di mana origin berubah, itu bukan DoS, itu UXSS: batas struktur
-     dipakai sebagai jalan keluar dari pewarisan origin.
-     EXPECTED-SECURE  origin identik di semua kedalaman, atau pembuatan ditolak bersih di batas.
-     BOUNDED KERAS: maksimum 32, sekali jalan, tanpa loop tak berujung. -->
-<button onclick="go()">Run 37 (maks kedalaman 32)</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 37 | macOS · permukaan di mana atribusi tinggal FAVICON + JUDUL, tanpa URL | [NO-CLICK]
+     Ada beberapa tempat di macOS di mana pengguna memilih halaman TANPA melihat URL sama sekali:
+       tab overview Safari (Cmd+Shift+\)   · Tab Groups   · pinned tab (favicon saja)
+       Mission Control / Stage Manager     · pengalih aplikasi Cmd+Tab (untuk app Dock)
+     Di semua itu yang menyebut halaman hanyalah FAVICON dan JUDUL — dan keduanya
+     sepenuhnya dikendalikan halaman, tanpa filter apa pun.
+     Jadi ini bukan spoof address bar; ini spoof di permukaan yang MENGGANTIKAN address bar
+     saat pengguna sedang memilih. Sering luput karena semua orang menatap omnibox.
+     File ini mengganti judul & favicon berkala ke bentuk yang menyamar jadi atribusi sistem,
+     supaya kamu bisa melihat langsung seberapa jauh permukaan itu bisa dibentuk.
+     EXPECTED-SECURE  permukaan pemilih tetap menyebut origin, atau judul/favicon disaring. -->
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<h2 style="font:19px system-ui">Buka tab overview (Cmd+Shift+\), lalu Mission Control. Apa yang menyebut halaman ini?</h2>
+<link id=ic rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23fff'/%3E%3Ctext y='12' x='2' font-size='11'%3E%F0%9F%94%92%3C/text%3E%3C/svg%3E">
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  var out = ['REAL ORIGIN: ' + location.origin, ''];
-  var host = document.createElement('iframe'); host.style.cssText = 'width:1px;height:1px;border:0';
-  document.body.appendChild(host);
-  var w = host.contentWindow, depth = 0, t0 = performance.now();
-  [1, 2, 4, 8, 16, 32].forEach(function (target) {
-    while (depth < target) {
-      try {
-        var d = w.document; var f = d.createElement('iframe'); d.body.appendChild(f);
-        w = f.contentWindow; depth++;
-      } catch (e) { out.push('kedalaman ' + depth + ': DITOLAK -> ' + e.name); return; }
-    }
-    var o; try { o = w.location.origin; } catch (e) { o = 'BLOCKED'; }
-    out.push('kedalaman ' + String(target).padStart(2) + '  origin=' + o +
-      (o !== location.origin ? '   <== BERUBAH, ini temuan' : '') +
-      '   biaya=' + Math.round(performance.now() - t0) + 'ms');
-    g.textContent = out.join('\n');
-  });
-}
+var T = ['https://www.google.com', 'google.com — Sign in', '🔒 google.com', 'Safari', location.host], i = 0;
+setInterval(function () {
+  document.title = T[i % T.length]; i++;
+  g.textContent = 'REAL ORIGIN : ' + location.href +
+    '\njudul saat ini: ' + JSON.stringify(document.title) +
+    '\nfavicon      : gembok (data: URI, digambar halaman)' +
+    '\n\nDi tab overview / Tab Group / pinned tab / Mission Control:' +
+    '\n  apakah ada SATU pun tempat yang menyebut ' + location.host + '?' +
+    '\n  kalau tidak ada, pengguna memilih halaman berdasarkan teks yang KITA tulis.';
+}, 2500);
 </script>

@@ -1,32 +1,38 @@
-<!-- 33 | W5  TIPE SALAH - URL yang MENAVIGASI saat DIBACA | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "membaca sebuah URL adalah operasi yang tidak punya efek samping"
-     IDE GILA  location dan window.open menerima string. Tapi kalau diberi OBJEK, browser harus
-     memanggil toString/Symbol.toPrimitive dulu. Kita taruh efek samping DI DALAM konversi itu:
-     saat browser sedang menghitung "URL mana yang dituju", kita sudah menavigasi ke tempat lain.
-     Jadi keputusan tujuan dan tindakan menuju terjadi pada state yang berbeda - TOCTOU
-     di lapisan konversi tipe, bukan di lapisan jaringan. Hampir tak ada yang menguji lapisan ini.
-     YANG DIBACA  URL akhir yang dicetak omnibox vs URL yang benar-benar dimuat.
-     EXPECTED-SECURE  konversi dilakukan sekali, di awal, dan navigasi kedua membatalkan yang pertama secara utuh. -->
-<button onclick="go()">Run 33</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 33 | label domain diisi karakter yang MERENDER KOSONG | [1-CLICK]
+     Konsekuensi ketiga dari file 18. Kalau yang tampil cuma label domain, maka "bar kosong"
+     tidak menuntut bug apa pun — cukup label yang secara visual tidak menampilkan apa-apa.
+     Enam kelas karakter yang lebar-rendernya nol atau menyerupai spasi. Sebagian akan ditolak
+     filter IDN dan jatuh ke punycode (itu perilaku yang BENAR); yang dicari adalah kelas yang LOLOS.
+       U+3164 Hangul filler   · U+2800 Braille blank   · U+00A0 nbsp
+       U+200B/200C/200D ZW    · U+FEFF BOM             · U+1160 Jungseong filler
+     Diuji dua tempat: sebagai SUBDOMAIN (paling mungkin lolos) dan sebagai PATH
+     (selalu lolos, tapi di Safari path tak terlihat — jadi ini sekaligus menguji klaim file 18).
+     EXPECTED-SECURE  semua kelas ini jatuh ke punycode di label domain, dan terlihat di path. -->
+<button onclick="sub()">uji di SUBDOMAIN</button>
+<button onclick="path()">uji di PATH (pushState, nol request)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
+var C = [['Hangul filler U+3164', 'ㅤ'], ['Braille blank U+2800', '⠀'], ['nbsp U+00A0', ' '],
+['zero-width U+200B', '​'], ['BOM U+FEFF', '﻿'], ['Jungseong U+1160', 'ᅠ']];
 g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  var hits = 0;
-  var evil = {
-    toString: function () {
-      hits++;
-      if (hits === 1) { try { w.location = 'about:blank'; } catch (e) { } }
-      return 'https://www.google.com:82/';
-    }
-  };
-  var w = window.open('', '', 'width=820,height=520');
-  w.document.write('<h2 style="font:19px system-ui">tujuan dihitung sambil berpindah</h2>');
-  try { w.location = evil; } catch (e) { }
-  setTimeout(function () {
-    var v; try { v = w.location.href; } catch (e) { v = 'BLOCKED'; }
-    g.textContent = 'REAL ORIGIN: ' + location.origin + '\ntoString dipanggil ' + hits + ' kali\nw.location.href = ' + v +
-      '\n\nlebih dari 1 kali = URL dibaca ulang setelah state berubah';
-  }, 1200);
+function sub() {
+  C.forEach(function (c, i) {
+    setTimeout(function () { window.open('https://' + c[1].repeat(12) + '.example.com/', '_blank'); }, i * 500);
+  });
+  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n6 tab dibuka, tiap subdomain = 12x karakter kosong.' +
+    '\n\nUntuk tiap tab: label domain terlihat KOSONG, atau jadi xn--?' +
+    '\nKosong = kelas itu lolos filter IDN di mesin ini.';
+}
+function path() {
+  var i = 0;
+  var id = setInterval(function () {
+    if (i >= C.length) { clearInterval(id); return; }
+    var c = C[i++];
+    history.pushState({}, '', '/' + c[1].repeat(40) + 'x');
+    g.textContent = 'REAL ORIGIN: ' + location.origin + '\nsekarang: ' + c[0] +
+      '\npanjang path: ' + location.pathname.length + ' karakter' +
+      '\n\nBaca bar. Terlihat kosong? Atau path memang tidak ditampilkan sama sekali' +
+      '\n(kalau begitu, klaim file 18 terkonfirmasi di mesin ini).';
+  }, 2500);
 }
 </script>

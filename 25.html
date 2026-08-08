@@ -1,22 +1,38 @@
-<!-- 25 | BAR KOSONG - sumber URL yang DIHAPUS di tengah pemuatan | [1-CLICK]
-     Sumbu baru: bukan "jangan pernah punya URL" (21) dan bukan "batalkan navigasi" (23),
-     tapi "punya URL lalu URL itu BERHENTI ADA".
-     blob: URL hidup di tabel dalam-memori browser. revokeObjectURL menghapus entrinya.
-     Kalau kita menghapusnya SELAGI pemuatan berjalan, browser memegang string URL yang
-     sudah tidak menunjuk apa pun. Bagaimana omnibox mencetak URL yang sumbernya lenyap?
-     Kandidat vonis: kosong | blob:origin/uuid (padahal isi sudah bukan itu) | error page.
-     Vonis kedua justru lebih menarik dari kosong - bar mencetak URL yang sudah tidak valid.
-     EXPECTED-SECURE  navigasi gagal bersih dan bar mencetak keadaan yang benar. -->
-<button onclick="go()">Run 25</button>
-<p id=r></p>
+<!-- 25 | macOS · jendela popup — Safari vs Arc vs Chrome memberi chrome yang BERBEDA | [1-CLICK]
+     Aturan "fitur mana yang dihormati window.open" berbeda per mesin, dan tidak pernah
+     diselaraskan. Safari, Arc, Brave, Chrome masing-masing memutuskan sendiri berapa banyak
+     chrome yang tersisa dan seberapa kecil jendela boleh dibuat.
+     Perbedaan aturan itu SENDIRI adalah permukaan: kalau satu mesin menyisakan jendela tanpa
+     teks origin di ukuran yang mesin lain menolaknya, itu selisih yang bisa dilaporkan.
+     Enam kombinasi fitur x satu pengukuran geometri, dibuka berurutan lalu ditutup sendiri.
+     Anak jendela mencetak origin ASLI-nya di badan, jadi satu screenshot memuat
+     kebohongan dan kebenarannya sekaligus.
+     EXPECTED-SECURE  setiap popup, ukuran & fitur apa pun, tetap menampilkan origin yang tak bisa ditulisi. -->
+<button onclick="go()">Run 25 (6 popup berurutan)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+var F = ['width=520,height=320',
+  'width=520,height=320,location=no,toolbar=no,menubar=no,status=no',
+  'width=200,height=140',
+  'width=120,height=90',
+  'width=520,height=320,left=-400,top=-200',
+  'width=520,height=320,popup=yes'];
+var out = [];
+g.textContent = 'REAL ORIGIN: ' + location.href;
 function go() {
-  var u = URL.createObjectURL(new Blob(['<h2 style="font:20px system-ui">isi dari blob yang lalu dicabut</h2>'], { type: 'text/html' }));
-  var w = window.open(u, '', 'width=900,height=560');
-  setTimeout(function () { URL.revokeObjectURL(u); }, 60);
-  setTimeout(function () {
-    try { w.document.write('<h2 style="font:20px system-ui">DOM diganti setelah URL-nya dicabut</h2><p style="font:12px monospace">' + location.origin + '</p>'); } catch (e) { }
-  }, 500);
+  out = ['REAL ORIGIN: ' + location.origin, ''];
+  F.forEach(function (f, i) {
+    setTimeout(function () {
+      var w = window.open('', 'p' + i, f);
+      if (!w) { out.push(String(i + 1).padStart(2) + '. DIBLOKIR  ' + f); g.textContent = out.join('\n'); return; }
+      w.document.write('<div style="font:12px system-ui;padding:8px"><b>popup ' + (i + 1) + '</b><br>origin asli: ' + location.origin + '</div>');
+      setTimeout(function () {
+        out.push(String(i + 1).padStart(2) + '. chrome ' + String(w.outerHeight - w.innerHeight).padStart(3) + 'px' +
+          '  posisi ' + w.screenX + ',' + w.screenY + '  ukuran ' + w.outerWidth + 'x' + w.outerHeight + '   ' + f);
+        g.textContent = out.join('\n') + '\n\nchrome ~0 atau posisi negatif = origin tidak ada di layar.';
+        w.close();
+      }, 1400);
+    }, i * 1900);
+  });
 }
 </script>

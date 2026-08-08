@@ -1,26 +1,39 @@
-<!-- 36 | W6 x W7  REENTRANSI x SIMULTANITAS | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "sebuah operasi tidak memanggil dirinya sendiri dari dalam handlernya"
-     IDE GILA  keluar dari fullscreen lalu MASUK LAGI, dipicu dari dalam handler fullscreenchange
-     itu sendiri, berulang - tapi DIBATASI 8 putaran (bounded, bukan flood).
-     Kenapa: toast biasanya ditampilkan pada transisi "masuk". Kalau masuk-keluar-masuk terjadi
-     lebih cepat dari umur toast, browser bisa menganggap "sudah pernah menampilkan toast untuk
-     sesi fullscreen ini" - dan kita berakhir di fullscreen TANPA toast sama sekali.
-     Itu tepatnya yang membuat 10.html/11.html naik kelas: bar palsu tanpa satu pun pembantah.
-     YANG DIUKUR  jumlah transisi vs jumlah toast yang benar-benar terlihat mata.
-     EXPECTED-SECURE  setiap masuk-fullscreen = satu toast, tanpa kecuali.  KELUAR  Esc / tutup tab. -->
-<button onclick="go()">Run 36 (8 putaran, Esc untuk keluar)</button>
-<pre id=g style="font:12px/1.6 monospace"></pre>
+<!-- 36 | macOS/Safari · VIDEO Picture-in-Picture — jendela melayang tanpa origin | [1-CLICK]
+     Safari tidak punya Document PiP (file 7 mati di sini), tapi punya VIDEO PiP: jendela
+     melayang selalu-di-atas, di luar semua jendela browser, tanpa satu pun teks origin.
+     Isinya memang terbatas pada video — jadi pertanyaannya bukan "bisa render UI apa saja"
+     melainkan: seberapa jauh sebuah <video> bisa dijadikan permukaan penipuan?
+     Video adalah kanvas: frame-nya bisa dihasilkan dari <canvas> lewat captureStream(),
+     dan canvas bisa menggambar APA SAJA — termasuk tiruan panel sistem. Jadi jendela
+     melayang tanpa atribusi itu bisa menampilkan gambar sewenang-wenang.
+     YANG DICATAT  (a) apakah PiP menerima stream dari canvas? (b) adakah teks origin di
+     jendela PiP? (c) apakah ia bertahan setelah tab asalnya ditutup?
+     (c) yang paling penting: atribusi yang hidup lebih lama dari jendelanya.
+     EXPECTED-SECURE  jendela PiP menyebut origin sumbernya, dan mati bersama tab asalnya. -->
+<button onclick="go()">Run 36</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<canvas id=c width=480 height=270 style="border:1px solid #ccc;max-width:100%"></canvas>
+<video id=v muted playsinline style="display:none"></video>
 <script>
 g.textContent = 'REAL ORIGIN: ' + location.href;
-var n = 0, MAX = 8;
-document.addEventListener('fullscreenchange', function () {
-  n++;
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\ntransisi: ' + n + ' / ' + MAX +
-    '\nfullscreen sekarang: ' + !!document.fullscreenElement +
-    '\n\nHitung dgn mata: toast muncul berapa kali dari ' + Math.ceil(n / 2) + ' kali masuk?';
-  if (n >= MAX) return;
-  if (document.fullscreenElement) document.exitFullscreen();
-  else document.documentElement.requestFullscreen().catch(function () { });
-});
-function go() { document.documentElement.requestFullscreen(); }
+function go() {
+  var x = c.getContext('2d'), t = 0;
+  setInterval(function () {
+    t++;
+    x.fillStyle = '#f1f3f4'; x.fillRect(0, 0, 480, 270);
+    x.fillStyle = '#202124'; x.font = '15px -apple-system,system-ui';
+    x.fillText('digambar oleh canvas — bukan UI sistem', 16, 40);
+    x.fillText('origin asli: ' + location.origin, 16, 70);
+    x.fillText('frame ' + t, 16, 100);
+  }, 200);
+  try {
+    v.srcObject = c.captureStream(5);
+    v.play().then(function () { return v.requestPictureInPicture ? v.requestPictureInPicture() : Promise.reject('API tidak ada'); })
+      .then(function (w) {
+        g.textContent = 'REAL ORIGIN: ' + location.origin +
+          '\nPiP aktif: ' + w.width + 'x' + w.height +
+          '\n\nCATAT: (a) ada teks origin di jendela PiP? (b) tutup TAB ini — PiP bertahan?';
+      }, function (e) { g.textContent = 'REAL ORIGIN: ' + location.origin + '\nPiP ditolak: ' + e; });
+  } catch (e) { g.textContent = 'captureStream gagal: ' + e.name; }
+}
 </script>

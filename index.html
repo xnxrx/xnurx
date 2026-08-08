@@ -15,21 +15,24 @@ i{font-style:normal;font-size:11px;padding:2px 7px;border-radius:20px;border:1px
 .k{color:#f85149;border-color:#8b2a25}
 .b{color:#a371f7;border-color:#6e40c9}
 .w{color:#db6d28;border-color:#9e4a06}
+.m{color:#2f81f7;border-color:#1f6feb}
 h2{margin:18px 16px 0;font-size:13px;color:#8b949e;text-transform:uppercase;letter-spacing:.08em}
 span{color:#8b949e;font-size:13px}
 footer{padding:14px 16px;border-top:1px solid #30363d;color:#8b949e;font-size:12px}
 #o{font:12px monospace;color:#3fb950;padding:0 16px}
 </style>
 <header>
-  <h1>batch20 — 20 percobaan origin / address-bar / fullscreen / UXSS</h1>
+  <h1>batch20 — 50 percobaan origin / address-bar / fullscreen / UXSS · edisi macOS</h1>
   <p class="sub">Artefak riset untuk browser SENDIRI. Bukan kit phishing: nol form kredensial, nol fetch/XHR/beacon, nol peniruan merek. Tiap file mencetak origin aslinya.</p>
-  <p class="sub" style="margin-top:8px;color:#a371f7"><b>Revisi 2026:</b> file 1–12 ditulis ulang di sumbu yang masih hidup. Keluarga <code>setInterval(location=…)</code> (13–16, 21–23) menyerang URL <i>pending</i> — invarian yang ditutup Chrome ~76 di tingkat arsitektur; dipertahankan sebagai probe untuk <b>fork &amp; WebView</b>, bukan untuk Chrome desktop.</p>
+  <p class="sub" style="margin-top:8px;color:#a371f7"><b>Revisi penuh 2026 · macOS.</b> Seluruh keluarga <code>setInterval(location=…)</code> dibuang — ia menyerang URL <i>pending</i>, invarian yang ditutup Chrome ~76 di tingkat arsitektur, jadi menambah variannya hanya menambah kegagalan. Penggantinya tiga sumbu yang masih hidup: <b>jendela commit-vs-paint</b> (1–3), <b>navigasi yang dibatalkan setelah bar berganti</b> (13–17), dan <b>permukaan macOS tempat origin memang tak pernah ditampilkan</b> (18–37).</p>
+  <p class="sub" style="margin-top:6px;color:#2f81f7">Urutan biaya-termurah di Mac: <b>Arc</b> (patch-lag terbesar) → <b>Safari</b> (jalur kode sendiri) → <b>app WKWebView/Electron</b> (bounty terpisah) → Brave/Vivaldi → Chrome terakhir.</p>
 </header>
 <p id="o"></p>
 <ul id="l"></ul>
 <footer>
-  Kontrol wajib: <b>3</b> dipasangkan dengan <b>1</b> dan <b>2</b>. Kalau kontrol ikut "berhasil", pembacaanmu salah — jangan dilapor.<br>
-  Alur: jalankan → screenshot permukaan yang bohong + panel origin asli → catat browser+versi+OS → <b>STOP</b> → lapor ke VRP (Chrome / Mozilla / Apple / Arc).
+  <b>Mulai dari 18</b> (kenapa Safari mengubah semuanya) → <b>3</b> dan <b>13</b> (dua sumbu terkuat) → <b>30</b> (paling macOS) → <b>21</b> (Arc, bar hilang total).<br>
+  Kontrol wajib: <b>12</b> untuk file 1–11, <b>46</b> sebelum submit apa pun, <b>50</b> untuk apa pun yang hasilnya "kadang jalan".<br>
+  Alur: jalankan → screenshot permukaan yang bohong + panel origin asli dalam SATU gambar → catat mesin+versi+OS → <b>STOP</b> → lapor (Apple / Chrome VRP / Mozilla / Arc / vendor app).
 </footer>
 <script>
 var D = [
@@ -45,53 +48,53 @@ var D = [
  [10,'n','in-app browser / WebView — di sini kelas ini HIDUP','Meta/TikTok/LINE'],
  [11,'b','jendela SUPRESI toast fullscreen (bukan keyboard-lock)','angka ms'],
  [12,'n','KONTROL SILANG K1/K2/K3 untuk 1–11','wajib sebelum lapor'],
- [13,'c','popup chromeless','chrome popup'],
- [14,'c','baris origin di dialog JS (srcdoc / blob)','js-dialog'],
- [15,'c','notifikasi OS — atribusi di luar browser','panel OS'],
- [16,'k','FUSI: suara TTS hidup lebih lama dari dokumennya','omnibox + audio'],
- [17,'n','UXSS oracle — pewarisan origin (3 lengan)','oracle'],
- [18,'c','UXSS oracle — carrier javascript:/srcdoc/write','oracle'],
- [19,'n','UXSS oracle — inkonsistensi DUA pandangan','oracle'],
- [20,'n','UXSS oracle — origin diturunkan ulang di back/forward','oracle'],
- [21,'b','dokumen yang TIDAK PERNAH punya URL — nol navigasi','omnibox KOSONG'],
- [22,'b','jalur-lahir beda: &lt;a target=_blank&gt;','omnibox KOSONG'],
- [23,'b','membilas bar lewat navigasi yang dibatalkan','omnibox KOSONG'],
- [24,'b','Document Picture-in-Picture — jendela tanpa bar','PALING SEGAR'],
- [25,'b','blob: yang URL-nya dicabut di tengah pemuatan','omnibox KOSONG'],
- [26,'b','chrome didorong keluar layar (top negatif)','geometri'],
- [27,'b','dikosongkan oleh ELISI di jendela ultra-sempit','strip URL'],
- [28,'b','dipasang sbg app: standalone + controls-overlay','tanpa omnibox'],
- [29,'b','bar mobile mengkerut lalu DIKUNCI','bar HP'],
- [30,'n','ALAT UKUR + KONTROL untuk 21–29','angka, bukan kesan'],
- [31,'w','W1×W2 · DOM ditulis oleh dokumen yang sudah mati','bar kosong'],
- [32,'w','W4×W6 · handle dangling disentuh dari handler load','UXSS'],
- [33,'w','W5 · URL yang MENAVIGASI saat dibaca (toString)','TOCTOU tipe'],
- [34,'w','W5 · Proxy dicabut di tengah pemakaian','URL setengah jadi'],
- [35,'w','W7 · dua requestFullscreen dalam satu task','toast'],
- [36,'w','W6×W7 · fullscreen reentran, toast ditelan','toast'],
- [37,'w','W3 · kedalaman frame 1→32 (bounded, diukur)','pewarisan origin'],
- [38,'w','W3×W10 · 200 entri history lalu back kilat','bar tertinggal'],
- [39,'w','W8 · tukar nama jendela antara cek dan pakai','TOCTOU API'],
- [40,'w','W9×W1 · primitif HOLD dijalankan DI DALAM PiP','tanpa omnibox'],
- [41,'w','W9×W2 · beraksi saat tab beku print-preview','jendela lebar'],
- [42,'w','W10 · lima jangkar waktu, cari yang menyimpang','peta timing'],
- [43,'w','W11 · frame/opener yang menunjuk dirinya sendiri','cek A==B'],
- [44,'w','W11×W3 · blob yang melahirkan blob (3 tingkat)','jejak pewarisan'],
- [45,'w','W12 · state spoof dibangkitkan bfcache','bar vs dokumen'],
- [46,'w','W12×W4 · pakai jendela SETELAH ditutup','slot nama'],
- [47,'w','UXSS · origin-sanitizer melewati mati→bangkit','bfcache'],
- [48,'w','UXSS · intercept SETELAH commit, 3 pandangan','Navigation API'],
- [49,'w','UXSS · dua origin diperebutkan bersamaan','origin race'],
- [50,'n','⭐ RUNNER N=20 — ubah "kadang jalan" jadi angka p','WAJIB']
+ [13,'b','⭐ dialog beforeunload — bar berganti sebelum kamu memutuskan','abort #1'],
+ [14,'b','beforeunload di-arm ulang — jendela diperpanjang','abort #1b'],
+ [15,'b','⭐ navigasi jadi UNDUHAN — bar wajib mundur, selalu?','abort #2'],
+ [16,'b','window.stop() disapu di 12 titik waktu','abort #3'],
+ [17,'b','skema diserahkan ke OS lalu gagal','abort #4'],
+ [18,'m','⭐⭐ Safari menampilkan HANYA domain — panen konsekuensinya','baca ini dulu'],
+ [19,'m','label domain didorong keluar oleh subdomain panjang','elisi'],
+ [20,'m','kebijakan IDN Safari ≠ Chrome','punycode'],
+ [21,'m','⭐⭐ Arc: sidebar disembunyikan = nol address bar','Cmd+S'],
+ [22,'m','fork patch-lag — matriks yang harus diisi','jangan vonis 1 mesin'],
+ [23,'m','fullscreen JS vs fullscreen OS (toolbar auto-hide)','macOS'],
+ [24,'m','⭐ Safari Add to Dock — nol bar, permanen','6 jalur keluar-scope'],
+ [25,'m','popup: Safari/Arc/Chrome beri chrome berbeda','6 kombinasi'],
+ [26,'m','halaman ERROR sebagai permukaan — 6 bentuk gagal','bar menulis apa'],
+ [27,'m','pushState di popup about:blank','URL utk dokumen tak-dimuat'],
+ [28,'m','WKWebView di app desktop (Slack/Notion/Discord)','bounty terpisah'],
+ [29,'m','bfcache Safari — bar & dokumen dari sumber beda','tekan BACK'],
+ [30,'m','⭐⭐ swipe-back trackpad — jendela dikendalikan JARI','paling macOS'],
+ [31,'n','pasangan 30 (halaman B hitam)','—'],
+ [32,'m','skema data:/blob:/javascript: — WebKit beda aturan','tanpa host'],
+ [33,'m','label domain diisi karakter render-KOSONG','6 kelas'],
+ [34,'m','ambang panjang: kapan bar menyerah','sapuan 100→512rb'],
+ [35,'m','dialog Safari mengunci jendela — kurangi alat pembantah','bukan menambah tipu'],
+ [36,'m','video PiP: jendela melayang tanpa origin','canvas→stream'],
+ [37,'m','tab overview / Mission Control: favicon+judul saja','tanpa URL'],
+ [38,'w','W2×W12 buka jendela dari pagehide + bangkit bfcache','weird'],
+ [39,'w','W6×W7 fullscreen reentran+serentak (WebKit)','notice < transisi?'],
+ [40,'n','UXSS oracle WebKit — 3 lengan','origin-sanitizer'],
+ [41,'n','UXSS oracle — inkonsistensi dua pandangan','selisih waktu'],
+ [42,'w','W5 tujuan berubah selagi dibaca (toString/toPrimitive)','TOCTOU tipe'],
+ [43,'w','W4×W6 handle dangling dari handler load','FuzzOrigin'],
+ [44,'w','W3×W11 kedalaman sarang + referensi diri (bounded)','opaque≠temuan'],
+ [45,'w','W1×W8 pakai-sebelum-diberi + tukar identitas','urutan'],
+ [46,'n','⭐ PAKET BUKTI — apa yang harus ada di screenshot','sebelum submit'],
+ [47,'n','MATRIKS INDUK macOS: konteks × mesin','yang kosong = kerjamu'],
+ [48,'n','JURNAL + protokol p','flaky ≠ gagal'],
+ [49,'b','⭐⭐ RANTAI: 18 + 13 + 25 digabung','laporan penuh'],
+ [50,'n','⭐ RUNNER N=20 — ubah "kadang jalan" jadi angka','WAJIB']
 ];
 document.getElementById('o').textContent = 'ORIGIN HALAMAN INI: ' + location.origin;
 document.getElementById('l').innerHTML = D.map(function(d){
-  var tag = d[1]==='n' ? 'NO-CLICK' : d[1]==='k' ? 'BRUTAL' : d[1]==='b' ? 'BAR KOSONG' : d[1]==='w' ? 'WEIRD' : '1-CLICK';
+  var tag = d[1]==='n' ? 'NO-CLICK' : d[1]==='k' ? 'BRUTAL' : d[1]==='b' ? 'BAR KOSONG' : d[1]==='w' ? 'WEIRD' : d[1]==='m' ? 'macOS' : '1-CLICK';
   var head = d[0]===1  ? '<h2>A · 2026 SUMBU HIDUP — mulai dari sini (3 dan 1 dulu)</h2>'
-           : d[0]===13 ? '<h2>B · klasik — MATI di Chrome desktop, hidup di fork &amp; WebView (regression probe)</h2>'
-           : d[0]===17 ? '<h2>C · UXSS: oracle lintas-origin</h2>'
-           : d[0]===21 ? '<h2>D · bar KOSONG: tidak ada yang bisa membantahmu</h2>'
-           : d[0]===31 ? '<h2>E · weird-lab: operator W1–W12, hasil abu-abu diukur pakai 50</h2>' : '';
+           : d[0]===13 ? '<h2>B · navigasi DIBATALKAN setelah bar terlanjur berganti</h2>'
+           : d[0]===18 ? '<h2>C · macOS: Safari · Arc · WKWebView</h2>'
+           : d[0]===38 ? '<h2>D · weird-lab + oracle UXSS</h2>'
+           : d[0]===46 ? '<h2>E · bukti, matriks, jurnal, rantai</h2>' : '';
   return head+'<li><a href="'+d[0]+'.html"><b>'+d[0]+'</b><i class="'+d[1]+'">'+tag+'</i>'+d[2]+' <span>· '+d[3]+'</span></a></li>';
 }).join('');
 </script>

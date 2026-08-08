@@ -1,21 +1,31 @@
-<!-- 28 | BAR KOSONG - dipasang sebagai APLIKASI (standalone / window-controls-overlay) | [NO-CLICK]
-     Ini satu-satunya jalur di daftar ini yang menghapus omnibox SECARA SAH - dan justru
-     karena sah, ia jarang diperiksa. Setelah dipasang, jendela tidak punya address bar;
-     yang tersisa hanya strip judul tipis. Dengan window-controls-overlay, konten kita
-     bahkan boleh menggambar DI DALAM strip judul itu lewat env(titlebar-area-*).
-     Pertanyaan riset: sesudah dipasang, di mana lagi origin disebut, dan bisakah tempat itu
-     kita cat sendiri? Kalau jawabannya "tidak ada / bisa" -> permukaan tanpa pembantah.
-     CARA UJI  Chrome desktop -> menu -> Install / Add to desktop -> buka dari shortcut -> buka file ini.
-     EXPECTED-SECURE  ada satu tempat menyebut origin yang TIDAK bisa digambari konten halaman. -->
-<link rel="manifest" href="manifest.webmanifest">
-<style>#tb{position:fixed;left:env(titlebar-area-x,0);top:env(titlebar-area-y,0);width:env(titlebar-area-width,100%);height:env(titlebar-area-height,34px);background:#f1f3f4;font:12px system-ui;line-height:34px;padding-left:12px;-webkit-app-region:drag}</style>
-<div id=tb>🔒 https://www.google.com &nbsp;<small>[strip PALSU digambar halaman — riset]</small></div>
-<pre id=g style="font:12px monospace;margin-top:46px"></pre>
+<!-- 28 | macOS · WKWebView di dalam APLIKASI DESKTOP — bar tak pernah ada sejak awal | [NO-CLICK]
+     Sisi Mac dari file 10. Di macOS bukan cuma in-app browser ponsel: Slack, Notion, Discord,
+     Spotify, Figma, dan hampir semua aplikasi Electron/WKWebView menampilkan halaman web
+     DI DALAM jendela aplikasi yang tidak punya address bar sama sekali.
+     Pratinjau tautan, kartu unfurl, panel bantuan, halaman OAuth — semuanya konten web
+     tanpa satu pun permukaan yang menyebut origin. Dan pemilik aplikasinya punya program
+     bounty sendiri, terpisah dari vendor browser.
+     Jadi PoC yang "gagal" di Safari belum tentu gagal — ia mungkin diuji di jendela yang salah.
+     CARA UJI  tempel tautan file ini ke Slack/Discord/Notion milikmu sendiri, buka DARI DALAM
+     aplikasinya, baca laporan di bawah, lalu buka 13.html dan 3.html dari tempat yang sama.
+     EXPECTED-SECURE  setiap penampil web di dalam aplikasi menyebut origin & tak bisa ditulisi halaman. -->
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<p style="font:13px system-ui">Lalu dari tempat yang sama: <a href="13.html">13</a> · <a href="15.html">15</a> · <a href="3.html">3</a></p>
 <script>
-var modes = ['browser', 'minimal-ui', 'standalone', 'fullscreen', 'window-controls-overlay'];
-g.textContent = 'REAL ORIGIN : ' + location.href +
-  '\ndisplay-mode: ' + modes.filter(function (m) { return matchMedia('(display-mode:' + m + ')').matches; }).join(', ') +
-  '\nchrome tegak: ' + (outerHeight - innerHeight) + 'px   (kecil = strip tipis, 0 = tidak ada)' +
-  '\nWCO aktif   : ' + (navigator.windowControlsOverlay ? navigator.windowControlsOverlay.visible : 'API tidak ada') +
-  '\n\nDi mode browser biasa angka chrome besar. Pasang sebagai app, buka lagi, bandingkan.';
+var ua = navigator.userAgent;
+var apps = [['Slack', /Slack/i], ['Discord', /Discord/i], ['Notion', /Notion/i], ['Figma', /Figma/i],
+['Spotify', /Spotify/i], ['Electron', /Electron/i], ['WKWebView', /AppleWebKit/.test(ua) && !/Safari\/\d/.test(ua) ? /./ : /$^/]];
+var hit = apps.filter(function (a) { return a[1].test(ua); }).map(function (a) { return a[0]; });
+g.textContent =
+  'REAL ORIGIN : ' + location.href +
+  '\nterdeteksi  : ' + (hit.length ? hit.join(', ') : 'browser biasa') +
+  '\nchrome tegak: ' + (outerHeight - innerHeight) + 'px   (0 = tidak ada chrome sama sekali)' +
+  '\nviewport    : ' + innerWidth + 'x' + innerHeight +
+  '\nUA          : ' + ua +
+  '\n\nLIHAT KE ATAS JENDELA dan catat:' +
+  '\n  1. ada teks URL / nama domain?' +
+  '\n  2. ada gembok / indikator https?' +
+  '\n  3. bisa diklik untuk melihat alamat lengkap?' +
+  '\n  4. ada tombol "buka di browser"? apakah ia menampilkan URL sebelum membuka?' +
+  '\n\nSemua jawaban "tidak" = konten web tanpa atribusi, di dalam aplikasi ber-bounty sendiri.';
 </script>

@@ -1,22 +1,23 @@
-<!-- 31 | W1 x W2  URUTAN SALAH x SAAT SEKARAT | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "yang menulis DOM anak masih hidup saat menulisnya"
-     IDE GILA  buka tab kosong, lalu tulis isinya DARI DALAM pagehide MILIK PENULISNYA -
-     yaitu pada milidetik ketika opener sendiri sedang dibongkar. Anak menerima DOM dari
-     dokumen yang secara resmi sudah tidak ada. Siapa yang jadi pemilik dokumen itu, dan
-     URL siapa yang dicetak omnibox untuk dokumen yang penulisnya sudah mati?
-     Ini bukan varian dari 21: di 21 penulisnya hidup. Bedanya cuma SATU, dan satu itu waktunya.
-     KEMUNGKINAN ABU-ABU TINGGI -> kalau kadang jalan, jangan buang: ukur pakai 50.html.
-     EXPECTED-SECURE  anak tetap about:blank/origin opener, atau penulisan ditolak sama sekali. -->
-<button onclick="go()">Run 31</button>
-<p id=r></p>
+<!-- 31 | pasangan 30 — halaman B, sengaja dibuat sangat berbeda secara visual | [NO-CLICK]
+     Halaman ini harus BEDA TOTAL dari 30.html supaya saat swipe ditahan kamu bisa memastikan
+     dengan satu pandangan halaman mana yang sedang terlihat.
+     Ia juga menambah satu sumbu: rantai history diperdalam, sehingga swipe-back bisa diulang
+     beberapa kali berturut-turut. Kalau jendelanya ada, ia bisa dirantai — dan rantai
+     memperpanjang total waktu "bar tidak cocok dengan layar".
+     EXPECTED-SECURE  di setiap tingkat rantai, bar dan layar tetap sepakat. -->
+<body style="background:#101;color:#0f0;font:15px system-ui;padding:20px">
+<h2 style="color:#0f0">HALAMAN B — hitam, jelas berbeda dari A</h2>
+<button onclick="deep()">perdalam history (untuk swipe berantai)</button>
+<a href="30.html" style="color:#6cf;margin-left:10px">kembali ke A lewat tautan</a>
+<pre id=g style="font:12px/1.7 monospace;color:#0f0"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
-var w;
-function go() {
-  w = window.open('', '', 'width=820,height=520');
-  addEventListener('pagehide', function () {
-    try { w.document.write('<h2 style="font:20px system-ui">Ditulis oleh dokumen yang SUDAH MATI</h2>'); } catch (e) { }
-  });
-  location.href = location.href + '?reload=' + Date.now();
+var n = 0;
+function draw() {
+  g.textContent = 'REAL ORIGIN : ' + location.href +
+    '\nentri history: ' + history.length + '  (kedalaman ditambah: ' + n + ')' +
+    '\n\nSWIPE DUA JARI KE KANAN dan TAHAN. Layar akan menampilkan halaman putih (A).' +
+    '\nSambil ditahan, baca address bar. Ia menulis A atau B?';
 }
+draw();
+function deep() { for (var i = 0; i < 5; i++) { history.pushState({}, '', '#d' + (++n)); } draw(); }
 </script>

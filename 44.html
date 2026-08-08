@@ -1,28 +1,35 @@
-<!-- 44 | W11 x W3  REFERENSI DIRI x KUANTITAS (BOUNDED) - blob yang melahirkan blob | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "rantai asal-usul dokumen itu pendek dan bisa ditelusuri"
-     IDE GILA  blob: adalah dokumen tanpa origin jaringan - ia MEWARISI. Sekarang buat blob
-     yang isinya membuat blob berikutnya, tiga tingkat (bounded, berhenti sendiri).
-     Pertanyaannya: pada tingkat ketiga, dari mana persisnya origin diwarisi - dari pembuat
-     langsungnya, atau dari akar rantai? Kalau kedua jawaban itu bisa berbeda,
-     berarti ada tingkat di mana pewarisan "kehilangan jejak" - dan dokumen yang kehilangan
-     jejak asalnya adalah dokumen yang tidak bisa diatribusikan oleh permukaan mana pun.
-     Setiap tingkat mencetak origin-nya sendiri, jadi rantai lengkapnya terlihat di satu layar.
-     EXPECTED-SECURE  ketiga tingkat mencetak origin yang identik dengan halaman ini.
-     BOUNDED KERAS: 3 tingkat, URL dicabut sesudah dipakai. -->
-<button onclick="go()">Run 44</button>
+<!-- 44 | weird-lab W3 (BOUNDED) x W11 · kedalaman sarang + referensi diri | [1-CLICK]
+     Dua operator digabung, keduanya dibatasi keras.
+     W3 kuantitas mustahil : sarang about:blank sedalam 1,2,4,8,16,32 — berhenti di 32
+     W11 referensi diri    : di tiap kedalaman, frame juga diminta mem-frame dokumen ini sendiri
+     Doktrin dos.md berlaku penuh: ukur BIAYA PER UNIT lalu EKSTRAPOLASI — jangan diledakkan.
+     Ini bukan uji DoS. Yang dicari: adakah kedalaman K di mana origin BERUBAH, atau di mana
+     pemeriksaan "A sama dengan B" mengambil cabang yang salah karena A dan B jadi objek yang sama.
+     Origin "null" DIABAIKAN dan tidak dihitung sbg penyeberangan — about:blank & sandbox memang
+     begitu, dan menghitungnya sbg temuan adalah kesalahan pembacaan yang paling umum di kelas ini.
+     EXPECTED-SECURE  origin identik di semua kedalaman, atau pembuatan ditolak bersih di batas. -->
+<button onclick="go()">Run 44 (maks kedalaman 32)</button>
 <pre id=g style="font:12px/1.6 monospace"></pre>
 <script>
 g.textContent = 'REAL ORIGIN: ' + location.href;
 function go() {
-  var body = function (n) {
-    return '<pre style="font:12px monospace">tingkat ' + n + ' origin = ' + '\'+location.origin+\'' + '</pre>' +
-      (n < 3 ? '<script>var b=URL.createObjectURL(new Blob(["<pre>tingkat ' + (n + 1) +
-        ' origin = "+location.origin+"<\\/pre>"],{type:"text/html"}));' +
-        'var f=document.createElement("iframe");f.src=b;f.style.cssText="width:99%;height:60px";document.body.appendChild(f);<\/script>' : '');
-  };
-  var u = URL.createObjectURL(new Blob(['<script>document.write(\'' + body(1) + '\')<\/script>'], { type: 'text/html' }));
-  var f = document.createElement('iframe'); f.src = u; f.style.cssText = 'width:99%;height:220px'; document.body.appendChild(f);
-  setTimeout(function () { URL.revokeObjectURL(u); }, 3000);
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n\nBandingkan origin tingkat 1/2/3 di bawah.\nAda satu yang beda = jejak pewarisan putus di situ.';
+  var out = ['REAL ORIGIN: ' + location.origin, ''];
+  var host = document.createElement('iframe'); host.style.cssText = 'width:1px;height:1px;border:0';
+  document.body.appendChild(host);
+  var w = host.contentWindow, depth = 0, t0 = performance.now();
+  [1, 2, 4, 8, 16, 32].forEach(function (target) {
+    while (depth < target) {
+      try { var d = w.document, f = d.createElement('iframe'); d.body.appendChild(f); w = f.contentWindow; depth++; }
+      catch (e) { out.push('kedalaman ' + depth + ': DITOLAK -> ' + e.name); return; }
+    }
+    var o, self;
+    try { o = w.location.origin; } catch (e) { o = 'BLOCKED'; }
+    try { self = (w.parent === w) + '/' + (w.top === w); } catch (e) { self = 'BLOCKED'; }
+    var verdict = (o === 'null' || o === '') ? '  (opaque — normal, bukan temuan)'
+      : (o !== location.origin ? '   <== BERUBAH, ini temuan' : '');
+    out.push('kedalaman ' + String(target).padStart(2) + '  origin=' + o + '  parent==self/top==self: ' + self +
+      '  biaya=' + Math.round(performance.now() - t0) + 'ms' + verdict);
+    g.textContent = out.join('\n');
+  });
 }
 </script>

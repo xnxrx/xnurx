@@ -1,27 +1,33 @@
-<!-- 41 | W9 x W2  MODE SALAH x SAAT SEKARAT - beraksi saat tab DIBEKUKAN print-preview | [1-CLICK]
-     ASUMSI YANG DILANGGAR  "halaman tidak melakukan apa-apa selama dialog cetak terbuka"
-     IDE GILA  window.print() menahan eksekusi halaman di banyak engine - tab membeku sampai
-     dialog ditutup. Yang membeku itu HALAMAN. Yang TIDAK ikut membeku: timer yang sudah
-     terlanjur dijadwalkan, jendela lain, dan pembukuan UI browser.
-     Jadi kita jadwalkan pengecatan bar palsu + navigasi HOLD, lalu langsung membekukan diri.
-     Saat pengguna menutup dialog, halaman melanjutkan dari state yang tidak konsisten.
-     Ini "saat sekarat" versi yang dikendalikan pengguna - jendela waktunya selebar
-     berapa lama dialog cetak dibiarkan terbuka, artinya BISA DILEBARKAN SESUKA HATI.
-     EXPECTED-SECURE  membekukan diri tidak mengubah apa pun yang UI browser tampilkan.
-     KELUAR  tutup dialog cetak (Esc / Cancel). Tidak ada yang benar-benar dicetak. -->
-<button onclick="go()">Run 41 (dialog cetak terbuka — tekan Cancel)</button>
+<!-- 41 | UXSS oracle WebKit · INKONSISTENSI DUA PANDANGAN | [NO-CLICK]
+     Oracle paling produktif dan paling jarang dipakai, diarahkan ke WebKit.
+     IDE  satu jendela punya beberapa pandangan tentang origin-nya (objek Location, objek
+     document, entri session-history, lapisan penampil). Masing-masing dihitung di jalur kode
+     berbeda dan DIPERBARUI PADA MOMEN BERBEDA. Jadi kita tidak perlu satu pemeriksaan pun
+     gagal — kita cari SELISIH WAKTU antar-pemeriksaan.
+     Frame digiring bolak-balik antar origin sambil dua pandangan disampel tiap 60 ms.
+     Kombinasi MUSTAHIL = dua bagian browser tidak sepakat:
+       document terbaca TAPI location ditolak, atau sebaliknya.
+     Keunggulannya: selalu keluar ANGKA yang bisa dikutip, bahkan saat nol bug — dan selisih
+     itu justru MELEBAR di fork, karena patch dipasang di satu jalur dan tidak di kembarnya.
+     BOUNDED: 30 putaran lalu berhenti sendiri.
+     EXPECTED-SECURE  mustahil = 0 selamanya. -->
 <pre id=g style="font:12px/1.6 monospace"></pre>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  var w = window.open('', '', 'width=820,height=520');
-  w.document.write('<h2 style="font:19px system-ui">jendela ini disiapkan sebelum induknya beku</h2>');
-  setTimeout(function () { try { w.location = 'https://www.google.com:82'; } catch (e) { } }, 50);
-  var t0 = Date.now();
-  print();
+var B = 'https://example.com/';
+var f = document.createElement('iframe'); f.style.cssText = 'width:1px;height:1px;border:0';
+document.body.appendChild(f);
+var n = 0, bad = 0, done = 0;
+var a = setInterval(function () { n++; f.src = (n % 2 ? B : '30.html') + '#' + n; if (n >= 30) { clearInterval(a); done = 1; } }, 300);
+var b = setInterval(function () {
+  var t, l;
+  try { f.contentWindow.document.title; t = 1; } catch (e) { t = 0; }
+  try { f.contentWindow.location.href; l = 1; } catch (e) { l = 0; }
+  if (t !== l) bad++;
   g.textContent = 'REAL ORIGIN: ' + location.origin +
-    '\nhalaman beku selama : ' + (Date.now() - t0) + ' ms' +
-    '\n\nSemakin lama dialog dibiarkan terbuka, semakin lebar jendelanya.' +
-    '\nBaca omnibox jendela anak SEKARANG, lalu bandingkan dgn 23.html.';
-}
+    '\nputaran     : ' + n + ' / 30' +
+    '\nkombinasi MUSTAHIL (document vs location): ' + bad +
+    '\n\n' + (bad ? 'CROSSED -> screenshot, catat Safari+macOS versi, STOP, lapor Apple'
+      : done ? 'dua pandangan sinkron sepanjang 30 putaran — catat sbg ilmu-negatif' : 'berjalan...');
+  if (done && n >= 30) clearInterval(b);
+}, 60);
 </script>
