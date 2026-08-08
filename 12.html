@@ -1,18 +1,31 @@
-<!-- 12 | origin spoof - TOPOLOGI CHROME (standalone / PWA / sidebar) | [NO-CLICK deteksi, 1-CLICK spoof]
-     GENOME  G=topologi chrome (bukan top-omnibox)  D=strip origin standalone  C=onload
-     MEKANISME  seluruh kelas ini mengasumsikan omnibox ada DI ATAS dan selebar layar.
-     Di display-mode standalone (PWA), Arc/Vivaldi (tab vertikal), atau jendela terpisah,
-     identitas ditaruh di tempat yang BEDA SECARA STRUKTURAL - sering hanya strip tipis,
-     kadang tanpa strip sama sekali. Halaman bisa membaca mode itu, lalu menggambar yang cocok.
-     EXPECTED-SECURE  setiap topologi tetap punya satu tempat yang menyebut origin & tak bisa ditutupi.
-     File ini MELAPORKAN topologi yang terdeteksi - itu peta serangannya. -->
-<p id=r></p><p id=m></p>
-<button onclick="document.getElementById('bar').style.display='block'">Gambar bar untuk topologi ini</button>
-<div id=bar style="display:none;font:12px system-ui;background:#e8eaed;padding:6px">🔒 https://www.google.com &nbsp; [PALSU - riset]</div>
+<!-- 12 | 2026 · KONTROL SILANG untuk 1-11 — supaya angka jendela tidak salah dibaca | [1-CLICK]
+     Tanpa file ini, "jendela 800 ms" bisa saja cuma laptopmu sedang sibuk.
+     Tiga lengan kontrol, dijalankan berurutan, semuanya ke tujuan yang SAMA:
+       K1  tujuan cepat, tanpa blokir            -> jendela HARUS ~0 ms   (dasar)
+       K2  tujuan ter-prerender                  -> jendela HARUS ~0 ms   (paint sudah selesai duluan)
+       K3  tujuan diblokir 3 detik               -> jendela HARUS ~3000 ms (mekanisme bekerja)
+     Baca hasilnya begini:
+       K1 dan K2 kecil, K3 besar        -> mekanismenya nyata, angka 3.html boleh dipercaya
+       K1 juga besar                    -> mesinmu lambat/sibuk, SEMUA angka tidak sah, ulangi
+       K3 kecil                         -> browser menahan bar sampai paint = kelas ini mati di sini
+     Aturan yang tidak boleh dilanggar: jangan pernah melaporkan angka dari 3.html tanpa
+     menjalankan file ini di sesi yang SAMA, di mesin yang SAMA, dalam beberapa menit yang sama. -->
+<script type="speculationrules">
+{"prerender":[{"urls":["2.html?block=0&via=K2"]}]}
+</script>
+<button onclick="run(0,'K1')">K1 · tanpa blokir</button>
+<button onclick="run(0,'K2')">K2 · ter-prerender</button>
+<button onclick="run(3000,'K3')">K3 · blokir 3 detik</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
-var modes = ['standalone', 'minimal-ui', 'fullscreen', 'browser', 'window-controls-overlay'];
-document.getElementById('m').textContent = 'display-mode aktif: ' +
-  modes.filter(function (x) { return matchMedia('(display-mode:' + x + ')').matches; }).join(',') +
-  ' | outerHeight-innerHeight = ' + (outerHeight - innerHeight) + 'px (kecil = chrome tipis/absen)';
+var L = JSON.parse(sessionStorage.kontrol || '{}');
+function draw() {
+  var k = Object.keys(L);
+  g.textContent = 'REAL ORIGIN: ' + location.href + '\n\n' +
+    (k.length ? k.map(function (x) { return x + ' : ' + L[x] + ' ms'; }).join('\n') : 'belum ada hasil — jalankan K1, K2, K3 lalu kembali (Back) tiap kali.') +
+    '\n\nSAH bila: K1 dan K2 kecil, K3 ~3000. K1 besar = mesin sibuk, semua angka batal.';
+}
+draw();
+function run(ms, tag) { sessionStorage.t0 = Date.now(); sessionStorage.tag = tag; location.href = '2.html?block=' + ms + '&via=' + tag; }
+if (sessionStorage.gapBack) { L[sessionStorage.tag] = sessionStorage.gapBack; sessionStorage.kontrol = JSON.stringify(L); delete sessionStorage.gapBack; draw(); }
 </script>

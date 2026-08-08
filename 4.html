@@ -1,19 +1,35 @@
-<!-- 4 | address-bar spoof - SUMBER ACTIVATION = <select> | [1-CLICK, bukan tombol]
-     GENOME  A=dead-port  B=location=  C=select/change  D=S1  F=document.write
-     KENAPA INI BEDA  knob C biasanya cuma "ada gesture / tidak". Di sini gesture-nya datang dari
-     widget NATIF (<select>) yang membuka popup OS. Beberapa engine memperlakukan aktivasi dari
-     menu natif berbeda dari klik biasa - itulah sel genome yang jarang diuji.
-     PREDIKAT  sama dgn 1.html. EXPECTED-SECURE  sama. KONTROL  3.html -->
-<select onchange="go()">
-  <option>-- pilih untuk menjalankan --</option>
-  <option>Jalankan 4</option>
-</select>
-<p id=r></p>
+<!-- 4 | 2026 · jalur BROWSER-INITIATED lewat noopener | [1-CLICK]
+     ASUMSI YANG DIUJI  "renderer tidak boleh mendorong URL pending ke bar" - benar, TAPI aturan itu
+     berlaku untuk navigasi yang dimulai RENDERER. Tidak semua navigasi begitu.
+     window.open(url, '_blank', 'noopener') memutus hubungan opener, dan di beberapa jalur
+     navigasinya diserahkan ke PROSES BROWSER, bukan renderer. Kalau benar, tab baru itu
+     kembali masuk kategori yang BOLEH menampilkan URL pending - karena belum ada yang commit.
+     Ini bukan varian dari file lama: yang diganti bukan cara-hang, tapi SIAPA YANG MEMULAI navigasi.
+     Tiga jalur ditembak berdampingan supaya bisa dibandingkan langsung:
+       (a) window.open biasa      (renderer-initiated)
+       (b) window.open + noopener (kandidat browser-initiated)
+       (c) <a rel=noopener target=_blank>
+     YANG DIBACA  ketiga tab: mana yang menampilkan URL tujuan padahal belum ada yang commit?
+     Kalau (b) atau (c) berbeda dari (a) -> perbedaan itu temuannya.
+     EXPECTED-SECURE  ketiganya berperilaku sama. -->
+<button onclick="go()">Run 4 (buka 3 tab)</button>
+<a id=lnk href="https://www.google.com:81/" target="_blank" rel="noopener" style="font:13px system-ui;margin-left:8px">(c) buka via anchor rel=noopener</a>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+var T = 'https://www.google.com:81/';   // port yang paketnya di-DROP -> pending panjang
+g.textContent = 'REAL ORIGIN: ' + location.href;
 function go() {
-  document.write('<h2>SPOOFED via &lt;select&gt; &mdash; bukan google.com</h2>');
-  location = 'https://www.google.com:82';
-  setInterval(function () { location = 'https://www.google.com:82'; }, 9800);
+  var a = window.open(T, '_blank');
+  var b = window.open(T, '_blank', 'noopener');
+  g.textContent = 'REAL ORIGIN: ' + location.origin +
+    '\ntujuan: ' + T +
+    '\n\n(a) window.open biasa      -> opener ' + (a ? 'ADA' : 'null') +
+    '\n(b) window.open + noopener -> opener ' + (b ? 'ADA' : 'null (browser-initiated?)') +
+    '\n(c) anchor rel=noopener    -> klik link di atas' +
+    '\n\nBandingkan omnibox KETIGA tab. Sama = aturan seragam.' +
+    '\nBeda = ada jalur yang masih menampilkan URL pending -> itu pintunya.' +
+    '\n\nCATATAN: kalau ketiganya langsung error-page, port ' + T.split(":")[2] +
+    '\nme-RST (bukan drop) di jaringanmu. Ganti ke 81/444/4444/8081 dan ulangi -' +
+    '\nDROP memberi pending panjang, RST memberi commit instan. Ini knob penentu.';
 }
 </script>

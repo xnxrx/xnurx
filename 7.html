@@ -1,20 +1,34 @@
-<!-- 7 | address-bar spoof - HOLD pakai SKEMA TAK DIKENAL | [1-CLICK]
-     GENOME  A=unknown-scheme abort  B=location=  C=click  D=S1  F=document.write
-     KENAPA INI BEDA  browser mencoba menyerahkan skema asing ke OS, gagal, lalu MEMBATALKAN navigasi.
-     Pembatalan itu terjadi di jalur kode yang berbeda dari timeout jaringan - dan jalur itu
-     sering lupa mengembalikan omnibox. Skema sengaja dibuat tidak ada supaya NOL aplikasi terbuka.
-     EXPECTED-SECURE  omnibox tidak berubah sama sekali oleh navigasi yang dibatalkan. KONTROL  3.html -->
-<button onclick="go()">Run 7</button>
-<p id=r></p>
+<!-- 7 | 2026 · label origin di Document PiP — dipersempit sampai hilang | [1-CLICK]
+     Document PiP adalah jendela nyata tanpa address bar. Satu-satunya yang menyebut origin
+     adalah strip judul kecil di atasnya. Jadi pertanyaannya bukan "bisakah bar dihilangkan"
+     (sudah hilang by design) melainkan: BERAPA LEBAR strip itu berhenti menyebut origin?
+     Jendela PiP dibuka berulang dengan lebar menurun (bounded: 6 ukuran, berhenti sendiri).
+     Di tiap ukuran dicetak geometrinya, dan kamu catat dengan mata: pada lebar berapa
+     teks origin mulai terpotong, dan pada lebar berapa ia hilang sama sekali.
+     Kalau ada lebar di mana konten masih terbaca penuh tapi origin sudah tidak -> itu angka
+     yang masuk laporan, dan itu bentuk temuan yang sama persis dgn elisi omnibox di HP.
+     EXPECTED-SECURE  origin adalah hal TERAKHIR yang dikorbankan; di ukuran minimum pun ia utuh,
+     atau jendela menolak dibuat lebih kecil dari batas yang masih memuatnya. -->
+<button onclick="go()">Run 7 (6 ukuran menurun)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+g.textContent = 'REAL ORIGIN: ' + location.href;
+var W = [640, 480, 360, 280, 200, 150], i = 0, out = [];
 function go() {
-  document.write('<h2>SPOOFED via skema asing &mdash; bukan google.com</h2>');
-  location = 'https://www.google.com/';
-  setTimeout(function () { location = 'xnurx-noop-scheme://hold'; }, 30);
-  setInterval(function () {
-    location = 'https://www.google.com/';
-    setTimeout(function () { location = 'xnurx-noop-scheme://hold'; }, 30);
-  }, 4000);
+  if (!window.documentPictureInPicture) { g.textContent = 'API tidak ada -> catat ilmu-negatif.'; return; }
+  i = 0; out = ['REAL ORIGIN: ' + location.origin, '']; step();
+}
+function step() {
+  if (i >= W.length) { out.push('', 'Catat: lebar berapa origin mulai terpotong? lebar berapa ia hilang?'); g.textContent = out.join('\n'); return; }
+  var w = W[i];
+  documentPictureInPicture.requestWindow({ width: w, height: 200, disallowReturnToOpener: false }).then(function (p) {
+    p.document.body.style.cssText = 'margin:0;font:13px system-ui';
+    p.document.body.innerHTML = '<div style="padding:10px">lebar diminta <b>' + w + '</b>px<br>' +
+      '<span style="font:11px monospace">origin asli: ' + location.origin + '</span></div>';
+    out.push('lebar ' + String(w).padStart(4) + ' -> outer ' + p.outerWidth + 'x' + p.outerHeight +
+      '  chrome tegak ' + (p.outerHeight - p.innerHeight) + 'px');
+    g.textContent = out.join('\n') + '\n\n>> LIHAT strip judul PiP sekarang. Origin masih terbaca?';
+    setTimeout(function () { p.close(); i++; setTimeout(step, 400); }, 2200);
+  }, function (e) { out.push('lebar ' + w + ' -> DITOLAK (' + e.name + ')'); i++; step(); });
 }
 </script>

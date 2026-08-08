@@ -23,6 +23,7 @@ footer{padding:14px 16px;border-top:1px solid #30363d;color:#8b949e;font-size:12
 <header>
   <h1>batch20 — 20 percobaan origin / address-bar / fullscreen / UXSS</h1>
   <p class="sub">Artefak riset untuk browser SENDIRI. Bukan kit phishing: nol form kredensial, nol fetch/XHR/beacon, nol peniruan merek. Tiap file mencetak origin aslinya.</p>
+  <p class="sub" style="margin-top:8px;color:#a371f7"><b>Revisi 2026:</b> file 1–12 ditulis ulang di sumbu yang masih hidup. Keluarga <code>setInterval(location=…)</code> (13–16, 21–23) menyerang URL <i>pending</i> — invarian yang ditutup Chrome ~76 di tingkat arsitektur; dipertahankan sebagai probe untuk <b>fork &amp; WebView</b>, bukan untuk Chrome desktop.</p>
 </header>
 <p id="o"></p>
 <ul id="l"></ul>
@@ -32,18 +33,18 @@ footer{padding:14px 16px;border-top:1px solid #30363d;color:#8b949e;font-size:12
 </footer>
 <script>
 var D = [
- [1,'n','nav-timing HOLD, port di-DROP','omnibox'],
- [2,'c','popup never-commit (replace loop)','omnibox popup'],
- [3,'c','LENGAN KONTROL untuk 1 & 2 — port hidup','baseline'],
- [4,'c','aktivasi dari &lt;select&gt; natif, bukan tombol','omnibox'],
- [5,'n','pemicu visibilitychange (balik ke tab)','omnibox'],
- [6,'c','HOLD tanpa jaringan: window.stop()','omnibox'],
- [7,'c','HOLD via skema tak dikenal (nol app terbuka)','omnibox'],
- [8,'n','path menyamar jadi host + elision layar sempit','strip URL mobile'],
- [9,'n','RTL override + confusable Cyrillic','host-label + judul tab'],
- [10,'c','fullscreen + chrome digambar sendiri','toast fullscreen'],
- [11,'k','fullscreen + keyboard-lock: butakan pembantahnya','toast + Esc'],
- [12,'n','topologi chrome: standalone / PWA / sidebar','strip origin non-omnibox'],
+ [1,'b','⭐ jendela COMMIT-vs-PAINT — mesin utama 2026','bar benar, layar lama'],
+ [2,'n','halaman tujuan yang memblokir paint-nya sendiri','pasangan 1/12'],
+ [3,'b','⭐ bar menulis SITUS ORANG, layar halaman KITA','yang kamu minta'],
+ [4,'b','jalur browser-initiated lewat noopener','URL pending'],
+ [5,'b','Speculation Rules / prerender — aktivasi atomik?','surface 2023+'],
+ [6,'b','toast fullscreen menyebut origin SIAPA? (opaque)','salah-atribusi'],
+ [7,'b','label origin Document PiP dipersempit sampai hilang','elisi PiP'],
+ [8,'b','PWA standalone — 6 jalur keluar-scope','nol omnibox'],
+ [9,'n','INVENTARIS: konteks mana yang bar-nya NOL di build INI','ukur dulu'],
+ [10,'n','in-app browser / WebView — di sini kelas ini HIDUP','Meta/TikTok/LINE'],
+ [11,'b','jendela SUPRESI toast fullscreen (bukan keyboard-lock)','angka ms'],
+ [12,'n','KONTROL SILANG K1/K2/K3 untuk 1–11','wajib sebelum lapor'],
  [13,'c','popup chromeless','chrome popup'],
  [14,'c','baris origin di dialog JS (srcdoc / blob)','js-dialog'],
  [15,'c','notifikasi OS — atribusi di luar browser','panel OS'],
@@ -86,10 +87,11 @@ var D = [
 document.getElementById('o').textContent = 'ORIGIN HALAMAN INI: ' + location.origin;
 document.getElementById('l').innerHTML = D.map(function(d){
   var tag = d[1]==='n' ? 'NO-CLICK' : d[1]==='k' ? 'BRUTAL' : d[1]==='b' ? 'BAR KOSONG' : d[1]==='w' ? 'WEIRD' : '1-CLICK';
-  var head = d[0]===1  ? '<h2>A · spoofing: bar berbohong</h2>'
-           : d[0]===17 ? '<h2>B · UXSS: oracle lintas-origin</h2>'
-           : d[0]===21 ? '<h2>C · bar KOSONG: tidak ada yang bisa membantahmu</h2>'
-           : d[0]===31 ? '<h2>D · weird-lab: operator W1–W12, hasil abu-abu diukur pakai 50</h2>' : '';
+  var head = d[0]===1  ? '<h2>A · 2026 SUMBU HIDUP — mulai dari sini (3 dan 1 dulu)</h2>'
+           : d[0]===13 ? '<h2>B · klasik — MATI di Chrome desktop, hidup di fork &amp; WebView (regression probe)</h2>'
+           : d[0]===17 ? '<h2>C · UXSS: oracle lintas-origin</h2>'
+           : d[0]===21 ? '<h2>D · bar KOSONG: tidak ada yang bisa membantahmu</h2>'
+           : d[0]===31 ? '<h2>E · weird-lab: operator W1–W12, hasil abu-abu diukur pakai 50</h2>' : '';
   return head+'<li><a href="'+d[0]+'.html"><b>'+d[0]+'</b><i class="'+d[1]+'">'+tag+'</i>'+d[2]+' <span>· '+d[3]+'</span></a></li>';
 }).join('');
 </script>

@@ -1,21 +1,32 @@
-<!-- 11 | fullscreen bypass - BUTAKAN PENGAMATNYA (keyboard-lock + notice-collision) | [1-CLICK]
-     GENOME  D=fullscreen-toast  E=keyboard-lock + notice-collision  C=click
-     MEKANISME  10.html menggambar bar palsu. Yang ini menyerang ALAT BANTAHNYA:
-       (a) keyboard.lock() menahan Esc -> jalan keluar refleks pengguna dijegal
-       (b) satu notice kedua (PiP/izin) sengaja dipanggil bersamaan supaya toast fullscreen
-           bertabrakan dan terpotong / hilang lebih cepat
-     Yang diukur = BERAPA DETIK toast bertahan, dibanding baseline 10.html di build yang sama.
-     Ini "ukur amplifier"-nya, bukan meledakkannya.
-     EXPECTED-SECURE  toast tak bisa ditabrak, dan Esc-ditahan justru MEMUNCULKAN notice tambahan.
-     KELUAR  TAHAN Esc 2 detik (Chrome membebaskan lock), atau tutup tab. -->
-<button onclick="go()">Run 11 (keluar: TAHAN Esc 2 detik)</button>
-<p id=r></p>
+<!-- 11 | 2026 · toast fullscreen: mengukur JENDELA SUPRESI (menggantikan ide keyboard-lock yang SALAH ARAH)
+     KOREKSI  versi sebelumnya memakai keyboard.lock() untuk menahan Esc. Itu keliru:
+     Chrome menampilkan notice PERSISTEN justru ketika keyboard di-lock. Sumbu itu MENAIKKAN
+     kecurigaan, bukan menurunkannya. Dibuang, diganti knob yang benar.
+     KNOB YANG BENAR  banyak engine tidak menampilkan toast lagi kalau kamu masuk-fullscreen
+     LAGI segera setelah keluar - dianggap masih sesi yang sama. Kalau jendela supresi itu ada,
+     maka masuk-fullscreen KEDUA berlangsung TANPA satu pun pembantah di layar.
+     Yang dicari bukan "toast bisa disembunyikan" tapi BERAPA MILIDETIK jeda maksimum yang
+     masih menghasilkan supresi. Itu angka, dan angka itu isi laporannya.
+     PROSEDUR  masuk -> keluar -> tunggu D ms -> masuk lagi -> catat: toast muncul lagi atau tidak.
+     D diuji menurun: 3000, 2000, 1000, 500, 200, 0. Bounded, berhenti sendiri.
+     EXPECTED-SECURE  toast muncul di SETIAP masuk-fullscreen, berapa pun jedanya.  KELUAR  Esc. -->
+<button onclick="go()">Run 11 (6 putaran — pelototi toast tiap kali)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
+var D = [3000, 2000, 1000, 500, 200, 0], i = 0, out = [];
+g.textContent = 'REAL ORIGIN: ' + location.href + '\n\nTiap putaran: catat TOAST MUNCUL atau TIDAK.';
+function say() { g.textContent = 'REAL ORIGIN: ' + location.origin + '\n\n' + out.join('\n') + '\n\nCatat manual: putaran mana toast berhenti muncul? Itu batas supresinya.'; }
+function go() { i = 0; out = []; cycle(); }
+function cycle() {
+  if (i >= D.length) { out.push('selesai.'); say(); return; }
+  var d = D[i];
   document.documentElement.requestFullscreen().then(function () {
-    navigator.keyboard && navigator.keyboard.lock && navigator.keyboard.lock(['Escape']);
-    document.title = 'https://www.google.com';
-  });
+    out.push('putaran ' + (i + 1) + ' — MASUK (jeda sebelumnya ' + d + ' ms)  >> toast muncul?'); say();
+    setTimeout(function () {
+      document.exitFullscreen().then(function () {
+        setTimeout(function () { i++; cycle(); }, d);
+      });
+    }, 2500);
+  }).catch(function (e) { out.push('putaran ' + (i + 1) + ' DITOLAK: ' + e.name + ' (butuh gestur — klik tombol lagi)'); say(); });
 }
 </script>

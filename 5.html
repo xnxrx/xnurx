@@ -1,17 +1,26 @@
-<!-- 5 | address-bar spoof - PEMICU visibilitychange | [NO-CLICK]
-     GENOME  A=dead-port  B=location=  C=visibilitychange (kembali ke tab)  D=S1  F=document.write
-     CARA UJI  buka file ini -> pindah ke tab lain -> KEMBALI ke tab ini. Nol klik di halaman.
-     KENAPA INI BEDA  spoof dicat tepat saat tab jadi terlihat lagi, momen ketika omnibox
-     sedang di-repaint. Lengan waktu ini beda dari onload/klik.
-     EXPECTED-SECURE  omnibox tetap jujur setelah tab kembali aktif. KONTROL  3.html -->
-<h3>Pindah ke tab lain, lalu kembali ke sini.</h3>
-<p id=r></p>
+<!-- 5 | 2026 · SPECULATION RULES / prerender — apakah bar dan konten bertukar di detik yang SAMA? | [1-CLICK]
+     SURFACE BARU (2023+), hampir tak ada di korpus spoofing mana pun.
+     Prerender melukis dokumen tujuan DI LATAR sebelum pengguna pergi ke sana. Saat aktivasi,
+     browser harus menukar DUA hal sekaligus: dokumen yang tampil DAN URL di bar.
+     Kalau keduanya ditukar di jalur kode yang berbeda, ada kemungkinan urutannya tidak atomik.
+     DUA ARAH, dua-duanya bernilai:
+       bar duluan  -> bar menulis tujuan, layar masih halaman ini   (spoofing klasik)
+       konten duluan -> layar sudah tujuan, bar masih halaman ini   (lebih jarang, sama buruknya)
+     File ini juga jadi KONTROL untuk 1-3: halaman ter-prerender melukis instan, jadi
+     jendela commit-vs-paint HARUS ~0 ms. Kalau di sini pun ada jendela, sebabnya bukan paint.
+     EXPECTED-SECURE  aktivasi atomik, selisih 0 ms, di kedua arah. -->
+<script type="speculationrules">
+{"prerender":[{"urls":["2.html?block=0&via=prerender"]}]}
+</script>
+<h2 style="font:20px system-ui">HALAMAN A (ter-prerender: B sudah dilukis di latar)</h2>
+<button onclick="go()">Aktivasi prerender</button>
+<button onclick="location.href='2.html?block=0&via=normal'">Pembanding: navigasi biasa</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
-document.addEventListener('visibilitychange', function () {
-  if (document.visibilityState !== 'visible') return;
-  document.write('<h2>SPOOFED saat tab kembali &mdash; bukan google.com</h2>');
-  location = 'https://www.google.com:82';
-  setInterval(function () { location = 'https://www.google.com:82'; }, 9800);
-});
+g.textContent = 'REAL ORIGIN: ' + location.href +
+  '\ndukungan prerender: ' + (HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules') ? 'ADA' : 'TIDAK ADA -> catat ilmu-negatif') +
+  '\n\nJalankan KEDUA tombol dan bandingkan angka jendela yang dicetak 2.html.' +
+  '\nprerender harus ~0 ms. Kalau navigasi biasa jauh lebih besar, selisih itu' +
+  '\nmembuktikan jendelanya memang dari paint, bukan dari jaringan.';
+function go() { sessionStorage.t0 = Date.now(); location.href = '2.html?block=0&via=prerender'; }
 </script>
