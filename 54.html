@@ -1,0 +1,37 @@
+<!-- 54 | ⭐ PiP + ABORT — jendela yang memang tanpa bar, lalu dokumennya dibuat tanpa URL | [1-CLICK]
+     Kamu menyebut PiP, dan ini titik gabungnya dengan primitif 204.
+     Document PiP sudah TANPA address bar by design; satu-satunya yang menyebut origin adalah
+     strip judul kecil, dan strip itu dihitung dari DOKUMEN yang ada di dalamnya.
+     Pertanyaannya: apa yang ditulis strip itu kalau dokumen di dalamnya TIDAK PUNYA URL —
+     yaitu initial empty document yang lahir dari navigasi yang dibatalkan?
+     Empat lengan, dari yang paling normal ke yang paling merosot:
+       A. PiP biasa (dokumen disalin)          -> baseline, strip harus menyebut origin
+       B. PiP lalu navigasi ke 204             -> masih hidup? strip berubah?
+       C. PiP lalu opener DINAVIGASI pergi     -> PiP hidup lebih lama dari pembuatnya
+       D. PiP lalu opener DITUTUP              -> siapa yang jadi pemilik atribusinya?
+     C dan D yang paling bernilai: atribusi yang hidup lebih lama dari jendela yang melahirkannya.
+     EXPECTED-SECURE  strip selalu menyebut origin yang benar; PiP mati bersama pembuatnya. -->
+<button onclick="go()">Run 54 (Chrome 116+)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  if (!window.documentPictureInPicture) { g.textContent = 'Document PiP tidak ada di mesin ini (Safari: pakai 36.html) -> catat ilmu-negatif.'; return; }
+  documentPictureInPicture.requestWindow({ width: 460, height: 280 }).then(function (p) {
+    p.document.body.style.cssText = 'margin:0;font:13px system-ui';
+    p.document.body.innerHTML = '<div style="padding:12px"><b>A. PiP baseline</b><p style="font:11px monospace">origin: ' + location.origin + '</p></div>';
+    var log = ['REAL ORIGIN: ' + location.origin, '', 'A. strip judul PiP menyebut apa? ______'];
+    g.textContent = log.join('\n');
+    setTimeout(function () {
+      try { p.location.href = 'https://www.google.com/gen_204'; log.push('B. navigasi ke 204 dikirim'); } catch (e) { log.push('B. navigasi DITOLAK: ' + e.name + ' (batas yang bagus)'); }
+      g.textContent = log.join('\n');
+    }, 2500);
+    setTimeout(function () {
+      var st; try { st = p.closed ? 'TERTUTUP' : 'HIDUP, isi=' + (p.document.body.textContent.length > 5 ? 'utuh' : 'kosong'); } catch (e) { st = 'BLOCKED'; }
+      log.push('   setelah 204: PiP ' + st, '', 'C. sekarang navigasikan TAB INI ke tempat lain — PiP bertahan? strip berubah?',
+        'D. lalu tutup tab ini — PiP masih hidup? siapa yang disebut strip-nya?');
+      g.textContent = log.join('\n');
+    }, 5000);
+  }, function (e) { g.textContent = 'PiP ditolak: ' + e.name; });
+}
+</script>

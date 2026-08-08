@@ -1,0 +1,33 @@
+# Endpoint 204 / no-content — primitif ABORT untuk keluarga bar-kosong (15.html, 16.html)
+#
+# KENAPA DAFTAR INI ADA
+# Bar jadi kosong karena navigasi DIBATALKAN BERSIH: bar sudah menulis tujuan, lalu tidak ada
+# dokumen untuk di-commit dan tidak ada halaman error. 204 No Content memberi itu.
+# Yang membuatnya kuat: host-nya SUNGGUHAN. Bukan port mati, bukan DNS gagal, bukan sertifikat
+# salah — jadi tidak ada satu pun sinyal error yang bisa membantahnya.
+#
+# CARA MEMPERLUAS DAFTAR INI SENDIRI (jangan berhenti di baris yang sudah ada):
+#   curl -s -o /dev/null -D - "https://<host>/<path>" | head -1
+# Cari "204". Pola nama yang hampir selalu ada di situs besar:
+#   /gen_204  /generate_204  /csi  /beacon  /ping  /collect  /log  /track  /pixel  /e  /i/adsct
+#   /favicon.ico (kadang 204)  /robots.txt (kadang 204 di CDN)  endpoint NEL/CSP-report
+#   endpoint telemetri SDK  health-check  /__/ping  /_ah/health
+#
+# TERVERIFIKASI 204 (dicek 2026-08-08, ulangi sebelum dipakai — bisa berubah kapan saja):
+https://www.google.com/gen_204
+https://www.google.com/csi
+https://www.google.com/generate_204
+
+# KANDIDAT — WAJIB dicek dulu dengan curl di atas sebelum dipakai.
+# Host yang boleh kamu sentuh saja. Ini GET biasa ke endpoint publik, sama seperti membuka tab.
+https://www.gstatic.com/generate_204
+https://connectivitycheck.gstatic.com/generate_204
+https://clients3.google.com/generate_204
+https://www.youtube.com/generate_204
+
+# CATATAN PENTING
+# - Endpoint 204 yang berguna adalah yang ada di host yang INGIN kamu tampilkan di bar.
+#   Nilai temuan datang dari host-nya, bukan dari path-nya.
+# - Kalau target tidak punya endpoint 204, sapu jenis abort lain lewat 16.html
+#   (unduhan / skema asing / stop). Yang dicari sama: batal tanpa meninggalkan dokumen.
+# - Selalu pasangkan dengan lengan kontrol 23.html sebelum menyimpulkan apa pun.

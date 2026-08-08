@@ -30,7 +30,7 @@ footer{padding:14px 16px;border-top:1px solid #30363d;color:#8b949e;font-size:12
 <p id="o"></p>
 <ul id="l"></ul>
 <footer>
-  <b>Mulai dari 18</b> (kenapa Safari mengubah semuanya) → <b>3</b> dan <b>13</b> (dua sumbu terkuat) → <b>30</b> (paling macOS) → <b>21</b> (Arc, bar hilang total).<br>
+  <b>Mulai dari 58</b> (1-klik, bentuk akhir) → <b>23</b> (kontrol WAJIB) → <b>56</b> (urutan lengkap) → <b>52</b> (bar = situs orang). Sesudah itu <b>18</b> (kenapa Safari mengubah semuanya) → <b>3</b> dan <b>13</b> (dua sumbu terkuat) → <b>30</b> (paling macOS) → <b>21</b> (Arc, bar hilang total).<br>
   Kontrol wajib: <b>12</b> untuk file 1–11, <b>46</b> sebelum submit apa pun, <b>50</b> untuk apa pun yang hasilnya "kadang jalan".<br>
   Alur: jalankan → screenshot permukaan yang bohong + panel origin asli dalam SATU gambar → catat mesin+versi+OS → <b>STOP</b> → lapor (Apple / Chrome VRP / Mozilla / Arc / vendor app).
 </footer>
@@ -50,15 +50,15 @@ var D = [
  [12,'n','KONTROL SILANG K1/K2/K3 untuk 1–11','wajib sebelum lapor'],
  [13,'b','⭐ dialog beforeunload — bar berganti sebelum kamu memutuskan','abort #1'],
  [14,'b','beforeunload di-arm ulang — jendela diperpanjang','abort #1b'],
- [15,'b','⭐ navigasi jadi UNDUHAN — bar wajib mundur, selalu?','abort #2'],
- [16,'b','window.stop() disapu di 12 titik waktu','abort #3'],
+ [15,'b','⭐⭐⭐ BAR KOSONG via 204 — primitif terkonfirmasi','abort bersih'],
+ [16,'b','sapuan 6 JENIS abort — mana yang mengosongkan bar','famili'],
  [17,'b','skema diserahkan ke OS lalu gagal','abort #4'],
  [18,'m','⭐⭐ Safari menampilkan HANYA domain — panen konsekuensinya','baca ini dulu'],
  [19,'m','label domain didorong keluar oleh subdomain panjang','elisi'],
  [20,'m','kebijakan IDN Safari ≠ Chrome','punycode'],
  [21,'m','⭐⭐ Arc: sidebar disembunyikan = nol address bar','Cmd+S'],
  [22,'m','fork patch-lag — matriks yang harus diisi','jangan vonis 1 mesin'],
- [23,'m','fullscreen JS vs fullscreen OS (toolbar auto-hide)','macOS'],
+ [23,'b','⛔ KONTROL untuk 15/52 — syarat "jendela tanpa riwayat"','WAJIB'],
  [24,'m','⭐ Safari Add to Dock — nol bar, permanen','6 jalur keluar-scope'],
  [25,'m','popup: Safari/Arc/Chrome beri chrome berbeda','6 kombinasi'],
  [26,'m','halaman ERROR sebagai permukaan — 6 bentuk gagal','bar menulis apa'],
@@ -85,7 +85,15 @@ var D = [
  [47,'n','MATRIKS INDUK macOS: konteks × mesin','yang kosong = kerjamu'],
  [48,'n','JURNAL + protokol p','flaky ≠ gagal'],
  [49,'b','⭐⭐ RANTAI: 18 + 13 + 25 digabung','laporan penuh'],
- [50,'n','⭐ RUNNER N=20 — ubah "kadang jalan" jadi angka','WAJIB']
+ [50,'n','⭐ RUNNER N=20 — ubah "kadang jalan" jadi angka','WAJIB'],
+ [51,'b','⭐⭐⭐ satu jalur, DUA arah gagal (kosong vs tersangkut)','pemersatu'],
+ [52,'b','⭐⭐ abort lintas-origin — bar = situs orang, layar = kita','termahal'],
+ [53,'b','jendela mikro — bar hilang oleh geometri','1px + resize'],
+ [54,'b','⭐ PiP + abort — jendela yang memang tanpa bar','Chrome 116+'],
+ [55,'b','beri URL ke dokumen yang TIDAK punya URL','replaceState'],
+ [56,'n','🧭 URUTAN EKSEKUSI keluarga bar-kosong','BACA INI DULU'],
+ [57,'n','cari endpoint 204 di host incaranmu (generator curl)','tidak mengirim'],
+ [58,'b','⭐⭐⭐ 1-KLIK: situsmu tampil PENUH, bar KOSONG TOTAL','bentuk akhir']
 ];
 document.getElementById('o').textContent = 'ORIGIN HALAMAN INI: ' + location.origin;
 document.getElementById('l').innerHTML = D.map(function(d){
@@ -94,7 +102,8 @@ document.getElementById('l').innerHTML = D.map(function(d){
            : d[0]===13 ? '<h2>B · navigasi DIBATALKAN setelah bar terlanjur berganti</h2>'
            : d[0]===18 ? '<h2>C · macOS: Safari · Arc · WKWebView</h2>'
            : d[0]===38 ? '<h2>D · weird-lab + oracle UXSS</h2>'
-           : d[0]===46 ? '<h2>E · bukti, matriks, jurnal, rantai</h2>' : '';
+           : d[0]===46 ? '<h2>E · bukti, matriks, jurnal, rantai</h2>'
+           : d[0]===51 ? '<h2>F · ⭐ BAR KOSONG via ABORT-204 — primitif terkonfirmasi, mulai dari 56</h2>' : '';
   return head+'<li><a href="'+d[0]+'.html"><b>'+d[0]+'</b><i class="'+d[1]+'">'+tag+'</i>'+d[2]+' <span>· '+d[3]+'</span></a></li>';
 }).join('');
 </script>

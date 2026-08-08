@@ -1,0 +1,45 @@
+<!-- 56 | 🧭 URUTAN EKSEKUSI keluarga BAR-KOSONG — jalankan ini dulu sebelum yang lain | [NO-CLICK]
+     Setelah primitif 204 terkonfirmasi, urutannya tidak lagi tebak-tebakan. Ini pohon keputusannya. -->
+<pre id=g style="font:12px/1.75 monospace"></pre>
+<script>
+g.textContent =
+  'UA: ' + navigator.userAgent.slice(0, 90) +
+  '\n\nMEKANISME SATU KALIMAT' +
+  '\n  Jendela BARU belum punya entri riwayat. Navigasi ke endpoint 204 membuat bar mencatat' +
+  '\n  tujuan, lalu navigasi DIBATALKAN BERSIH (tanpa dokumen, tanpa halaman error).' +
+  '\n  Bar harus mundur — tapi tak ada tempat untuk mundur.' +
+  '\n\nABORT != HANG. Port mati memberi hang atau halaman error, dan dua-duanya BUKAN kosong.' +
+  '\nItu sebabnya percobaan berbasis port mati gagal. Pakai 204.' +
+  '\n\n─────────── URUTAN ───────────' +
+  '\nLANGKAH 1  jalankan 15.html' +
+  '\n           bar KOSONG?      -> ke LANGKAH 2 (arah "mundur terlalu jauh")' +
+  '\n           bar TUJUAN?      -> ke LANGKAH 3 (arah "tidak mundur") — ini yang lebih mahal' +
+  '\n           bar about:blank? -> mesin ini aman, ganti mesin (22.html/47.html)' +
+  '\n' +
+  '\nLANGKAH 2  23.html — WAJIB. Buktikan sebabnya "jendela tanpa riwayat", bukan hal lain.' +
+  '\n           A kosong + B & C tidak = mekanisme terbukti. Selain itu = hipotesis salah, revisi.' +
+  '\n' +
+  '\nLANGKAH 3  52.html — ganti host tujuan ke host yang INGIN kamu tampilkan.' +
+  '\n           Bar menulis host orang + isi tulisanmu = laporan termahal di keluarga ini.' +
+  '\n' +
+  '\nLANGKAH 4  51.html — sapu 6 kondisi riwayat. Yang menyimpang = jalur belum di-harden.' +
+  '\n           16.html — sapu 6 JENIS abort (204/205/unduhan/skema/stop/kontrol).' +
+  '\n' +
+  '\nLANGKAH 5  perdalam sesuai hasil:' +
+  '\n           55.html  beri URL ke dokumen yang tidak punya URL' +
+  '\n           53.html  hilangkan bar dgn geometri (jendela mikro)' +
+  '\n           54.html  bawa ke PiP — jendela yang memang tanpa bar' +
+  '\n           49.html  rantai: domain-only + dialog + jendela sempit' +
+  '\n' +
+  '\nLANGKAH 6  hasil "kadang jalan"? JANGAN dibuang -> 50.html, ukur N=20, dapatkan p.' +
+  '\n           46.html sebelum submit. 47.html isi matriks mesin.' +
+  '\n' +
+  '\n─────────── URUTAN MESIN (macOS) ───────────' +
+  '\n  Arc -> Safari -> WKWebView app (Slack/Notion/Discord) -> Brave/Vivaldi -> Chrome' +
+  '\n  Vonis "tidak rentan" tanpa menyebut mesin+versi tidak berarti apa-apa.' +
+  '\n' +
+  '\n─────────── BAR PELAPORAN ───────────' +
+  '\n  Satu screenshot memuat DUA-duanya: bar yang bohong/kosong + panel origin asli (46.html).' +
+  '\n  Lengan kontrol sudah dijalankan di sesi yang sama.' +
+  '\n  Nol form kredensial. Predikat = bar, bukan halaman login. STOP di predikat.';
+</script>

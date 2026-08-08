@@ -1,0 +1,26 @@
+<!-- 53 | jendela MIKRO — hilangkan bar dgn geometri, bukan dgn bug | [1-CLICK]
+     Sumbu berbeda: bar tidak dikosongkan, ia tidak punya RUANG untuk digambar.
+     Browser menjepit ukuran minimum popup, tapi nilai jepitannya berbeda per mesin, per OS,
+     dan sering tidak dijepit ulang setelah resizeTo() dipanggil BELAKANGAN — jalur kode
+     kedua itu yang lebih sering lupa dijaga.
+     Digabung dgn 204 (jendela tanpa riwayat), targetnya jadi: jendela yang bar-nya kosong
+     DAN terlalu sempit untuk menampilkan apa pun seandainya ada isinya.
+     Empat tahap, tiap tahap satu knob: ukuran saat dibuka -> resizeTo setelah lahir ->
+     resizeBy bertahap -> moveTo keluar layar. Angka akhir dicetak supaya laporanmu berisi ukuran.
+     EXPECTED-SECURE  ukuran akhir dijepit ke minimum yang masih memuat teks origin,
+     berapa pun yang diminta dan lewat jalur mana pun. -->
+<button onclick="go()">Run 53</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var w = window.open('https://www.google.com/gen_204', '_blank', 'width=1,height=1,left=60,top=60');
+  if (!w) { g.textContent = 'popup diblokir.'; return; }
+  var log = ['REAL ORIGIN: ' + location.origin, ''];
+  function snap(t) { try { log.push(t.padEnd(24) + 'outer ' + w.outerWidth + 'x' + w.outerHeight + '  inner ' + w.innerWidth + 'x' + w.innerHeight + '  chrome ' + (w.outerHeight - w.innerHeight) + 'px  pos ' + w.screenX + ',' + w.screenY); } catch (e) { log.push(t + ' BLOCKED'); } g.textContent = log.join('\n'); }
+  setTimeout(function () { snap('1. diminta 1x1'); }, 800);
+  setTimeout(function () { try { w.document.write('<div style="font:11px system-ui">konten ' + location.origin + '</div>'); w.document.close(); } catch (e) { } try { w.resizeTo(1, 1); } catch (e) { } snap('2. resizeTo(1,1)'); }, 1600);
+  setTimeout(function () { try { for (var i = 0; i < 20; i++) w.resizeBy(-20, -20); } catch (e) { } snap('3. resizeBy x20'); }, 2400);
+  setTimeout(function () { try { w.moveTo(-200, -200); } catch (e) { } snap('4. moveTo(-200,-200)'); g.textContent += '\n\nchrome mendekati 0 atau posisi negatif = origin tidak ada di layar.'; }, 3200);
+}
+</script>

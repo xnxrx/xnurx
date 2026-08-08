@@ -1,0 +1,48 @@
+<!-- 58 | ⭐⭐⭐ 1-KLIK: situsmu tampil PENUH, address bar KOSONG TOTAL | [1-CLICK]
+     Ini bentuk akhir dari keluarga ini, dan jawaban langsung atas "situs saya tampil tapi bar kosong".
+     KOREKSI YANG HARUS DIPAHAMI DULU
+       Kamu TIDAK bisa memuat situsmu di top-level dan sekaligus punya bar kosong.
+       Memuat = commit dokumen = bar terisi. Itu bukan bug yang bisa dicari, itu definisi.
+       Yang BISA: jendela tetap berhenti di dokumen hasil-ABORT (bar tak punya apa pun untuk
+       ditulis), lalu situsmu dirender DI DALAM iframe yang memenuhi jendela.
+       Iframe memuat normal dan penuh. Top-level tetap dokumen tanpa URL. Bar tetap kosong.
+     URUTAN
+       1. window.open ke endpoint 204        -> navigasi batal bersih, jendela tanpa riwayat
+       2. bar tak punya tempat mundur        -> KOSONG (bukan about:blank)
+       3. dokumen = initial empty, mewarisi origin opener -> document.write diizinkan
+       4. tulis satu <iframe> full-bleed ke situsmu -> tampil 100%, bar tetap kosong
+     PREDIKAT  address bar tanpa satu karakter pun, sementara jendela menampilkan situs penuh.
+     EXPECTED-SECURE  bar menulis about:blank (atau URL yang gagal) begitu navigasi dibatalkan.
+     KONTROL WAJIB 23.html — buktikan sebabnya "jendela tanpa riwayat", bukan hal lain.
+     BENIGN  situs yang di-frame adalah MILIKMU SENDIRI. Nol form kredensial, nol peniruan
+     organisasi, nol pengumpulan data. Predikatnya adalah BAR, bukan halaman di dalamnya. -->
+<button onclick="go()">Buka (1 klik)</button>
+<input id=s value="https://xnxrx.github.io/xnurx/" style="width:300px;font:13px monospace">
+<select id=e style="font:13px monospace">
+  <option>https://www.google.com/gen_204</option>
+  <option>https://www.google.com/csi</option>
+  <option>https://www.gstatic.com/generate_204</option>
+</select>
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href +
+  '\n\nsitus  = yang akan tampil penuh (milikmu sendiri)' +
+  '\nabort  = endpoint 204 yang mengosongkan bar';
+function go() {
+  var w = window.open(e.value, '_blank', 'width=980,height=680');
+  if (!w) { g.textContent = 'popup diblokir — izinkan popup untuk situs ini.'; return; }
+  setTimeout(function () {
+    try {
+      w.document.write('<style>html,body{margin:0;height:100%;overflow:hidden}iframe{border:0;width:100%;height:100%;display:block}</style>' +
+        '<iframe src="' + s.value.trim() + '"></iframe>');
+      w.document.close();
+    } catch (err) { g.textContent += '\n\nwrite DITOLAK: ' + err.name + '\n=> navigasi ternyata COMMIT, bukan abort. Ganti endpoint 204.'; }
+  }, 2400);
+  g.textContent = 'REAL ORIGIN: ' + location.origin +
+    '\n\nJendela terbuka. Tunggu ~2.5 detik sampai situs tampil, lalu BACA ADDRESS BAR:' +
+    '\n  KOSONG total  = predikat terpenuhi -> screenshot (bar + situs dalam SATU gambar) -> STOP' +
+    '\n  about:blank   = aman di mesin ini -> catat ilmu-negatif, ganti mesin (47.html)' +
+    '\n  URL 204       = arah gagal yang satunya -> lihat 52.html, itu lebih mahal' +
+    '\n\nLalu jalankan 23.html di sesi yang sama. Tanpa itu laporanmu akan ditutup.';
+}
+</script>

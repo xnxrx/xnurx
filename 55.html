@@ -1,0 +1,32 @@
+<!-- 55 | dokumen tanpa URL DIBERI URL — replaceState di jendela yang bar-nya kosong | [1-CLICK]
+     Lanjutan langsung dari 15. Setelah 204 meninggalkan jendela dgn bar kosong, dokumen di
+     dalamnya adalah initial empty document yang MEWARISI origin opener. Karena origin-nya sama,
+     history.replaceState DIIZINKAN di sana.
+     Artinya kita bisa MENULIS URL ke bar sebuah jendela yang tidak pernah memuat apa pun.
+     Dua hasil, dua-duanya layak dicatat:
+       bar terisi URL yang kita tulis -> kita mengendalikan teks bar untuk dokumen tanpa jaringan
+       bar tetap kosong               -> keadaan kosongnya lebih dalam dari yang dikira, dan
+                                          itu justru menaikkan nilai temuan 15
+     Lalu diuji batasnya: sampai mana URL boleh dibentuk sebelum browser menolak? Lintas-origin
+     harus ditolak — kalau TIDAK ditolak, hentikan semuanya, itu temuan jauh lebih besar.
+     EXPECTED-SECURE  replaceState same-origin boleh; lintas-origin selalu SecurityError. -->
+<button onclick="go()">Run 55</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<script>
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var w = window.open('https://www.google.com/gen_204', '_blank', 'width=560,height=360');
+  if (!w) { g.textContent = 'popup diblokir.'; return; }
+  setTimeout(function () {
+    var out = ['REAL ORIGIN: ' + location.origin, ''];
+    try { w.document.write('<div style="font:14px system-ui;padding:14px"><b>dokumen tanpa URL</b><br><span style="font:11px monospace">' + location.origin + '</span></div>'); w.document.close(); } catch (e) { out.push('write ditolak: ' + e.name); }
+    ['/account/verify', '/' + 'x'.repeat(200), '/#' + 'y'.repeat(200)].forEach(function (u) {
+      try { w.history.replaceState({}, '', u); out.push('OK      ' + u.slice(0, 50)); } catch (e) { out.push('DITOLAK ' + e.name + '  ' + u.slice(0, 30)); }
+    });
+    try { w.history.replaceState({}, '', 'https://www.google.com/'); out.push('OK      LINTAS-ORIGIN (!!) — HENTIKAN, screenshot, ini temuan besar'); }
+    catch (e) { out.push('DITOLAK lintas-origin -> ' + e.name + '  (benar sesuai spesifikasi)'); }
+    out.push('', 'Sekarang baca bar jendela itu: terisi URL terakhir yang OK, atau tetap kosong?');
+    g.textContent = out.join('\n');
+  }, 2400);
+}
+</script>

