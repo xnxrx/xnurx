@@ -1,52 +1,35 @@
-<!DOCTYPE html>
-<!--
-============================================================================
- WEIRD-LAB address-bar spoof probe - gray-zone / flaky measurement. BENIGN.
-============================================================================
- weird-lab operators: W6 reentrant (fire the desync from INSIDE fullscreenchange)
-   + W2 teardown (also fire on pagehide/visibilitychange, when gates often relax).
- Doctrine: a FLAKY result = a bug whose window is not yet measured. This runs the
- nav-timing dead-port desync N times, records p = successes/N, and asks you to note
- the hidden variable (load/GC/focus/bg-tab) so you can WIDEN the window toward p->1.
- ORACLE: footer prints REAL location.href; you record whether the omnibox showed
- SPOOF on each run. Verdict is a NUMBER ("k/N; with bg-tab -> m/N"), never "sometimes".
- ETHICS: own browser only, bounded (no loop/crash), benign - prove -> STOP -> report.
-============================================================================
--->
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>https://google.com</title>
-<style>
- body{font:15px/1.6 system-ui,sans-serif;margin:0;padding:1rem;max-width:720px}
- button{font:inherit;padding:.5rem .9rem;border:1px solid #888;border-radius:8px;background:#fafafa;cursor:pointer}
- #log{font:12px/1.5 monospace;white-space:pre-wrap;background:#f2f2f2;border-radius:8px;padding:.7rem;margin-top:.8rem}
- @media(prefers-color-scheme:dark){body{background:#0f0f10;color:#e8eaed}#log{background:#1c1c1e}}
-</style></head><body>
-<h2>weird flaky-spoof probe</h2>
-<p>Run <b>N</b> trials. After each, note in <code>#log</code> whether the omnibox showed <b>google.com</b> over this page (1) or kept the real URL (0). p = &Sigma;/N.</p>
-<p><button id="go">Run trial (W6 reentrant + W2 teardown)</button>
-   <button id="reset">reset counter</button></p>
-<div id="log">REAL = <span id="real"></span>
-p tracker: runs=0  hits=?  (you score each run 1/0 by eye)</div>
+<!-- 4 | 2026 · jalur BROWSER-INITIATED lewat noopener | [1-CLICK]
+     ASUMSI YANG DIUJI  "renderer tidak boleh mendorong URL pending ke bar" - benar, TAPI aturan itu
+     berlaku untuk navigasi yang dimulai RENDERER. Tidak semua navigasi begitu.
+     window.open(url, '_blank', 'noopener') memutus hubungan opener, dan di beberapa jalur
+     navigasinya diserahkan ke PROSES BROWSER, bukan renderer. Kalau benar, tab baru itu
+     kembali masuk kategori yang BOLEH menampilkan URL pending - karena belum ada yang commit.
+     Ini bukan varian dari file lama: yang diganti bukan cara-hang, tapi SIAPA YANG MEMULAI navigasi.
+     Tiga jalur ditembak berdampingan supaya bisa dibandingkan langsung:
+       (a) window.open biasa      (renderer-initiated)
+       (b) window.open + noopener (kandidat browser-initiated)
+       (c) <a rel=noopener target=_blank>
+     YANG DIBACA  ketiga tab: mana yang menampilkan URL tujuan padahal belum ada yang commit?
+     Kalau (b) atau (c) berbeda dari (a) -> perbedaan itu temuannya.
+     EXPECTED-SECURE  ketiganya berperilaku sama. -->
+<button onclick="go()">Run 4 (buka 3 tab)</button>
+<a id=lnk href="https://www.google.com:81/" target="_blank" rel="noopener" style="font:13px system-ui;margin-left:8px">(c) buka via anchor rel=noopener</a>
+<pre id=g style="font:12px/1.7 monospace"></pre>
 <script>
- var SPOOF="https://google.com", n=0;
- document.getElementById('real').textContent=location.href;
- function desync(tag){ // the mechanism under test: pending-URL dead-port desync
-   try{location.href=SPOOF+':9090/#'+tag;}catch(e){}
- }
- // W6 reentrant: re-enter the gated moment from INSIDE its own state-change handler (bounded)
- var re=0;
- document.addEventListener('fullscreenchange',function(){ if(re++>1)return; desync('reentrant'); });
- // W2 teardown: gates often relax while the context is dying - fire there too
- document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') desync('hidden'); });
- window.addEventListener('pagehide',function(){ desync('pagehide'); });
- function run(){
-   n++; var L=document.getElementById('log');
-   L.textContent=L.textContent.replace(/runs=\d+/,'runs='+n)+'\n#'+n+' fired: enter-fullscreen->reentrant desync; then background/close the tab to hit teardown. Score 1 if bar showed '+SPOOF+'.';
-   try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}catch(e){}
- }
- document.getElementById('go').addEventListener('click',run);
- document.getElementById('reset').addEventListener('click',function(){n=0;
-   document.getElementById('log').textContent='REAL = '+location.href+'\np tracker: runs=0  hits=?';});
+var T = 'https://www.google.com:81/';   // port yang paketnya di-DROP -> pending panjang
+g.textContent = 'REAL ORIGIN: ' + location.href;
+function go() {
+  var a = window.open(T, '_blank');
+  var b = window.open(T, '_blank', 'noopener');
+  g.textContent = 'REAL ORIGIN: ' + location.origin +
+    '\ntujuan: ' + T +
+    '\n\n(a) window.open biasa      -> opener ' + (a ? 'ADA' : 'null') +
+    '\n(b) window.open + noopener -> opener ' + (b ? 'ADA' : 'null (browser-initiated?)') +
+    '\n(c) anchor rel=noopener    -> klik link di atas' +
+    '\n\nBandingkan omnibox KETIGA tab. Sama = aturan seragam.' +
+    '\nBeda = ada jalur yang masih menampilkan URL pending -> itu pintunya.' +
+    '\n\nCATATAN: kalau ketiganya langsung error-page, port ' + T.split(":")[2] +
+    '\nme-RST (bukan drop) di jaringanmu. Ganti ke 81/444/4444/8081 dan ulangi -' +
+    '\nDROP memberi pending panjang, RST memberi commit instan. Ini knob penentu.';
+}
 </script>
-</body></html>
