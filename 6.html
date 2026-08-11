@@ -1,35 +1,13 @@
-<!-- 6 | 2026 · siapa yang DISEBUT toast fullscreen saat yang fullscreen adalah dokumen LAIN? | [1-CLICK]
-     PERTANYAAN YANG BELUM PERNAH DIJAWAB DI KORPUS INI.
-     Toast "… is now full screen" adalah SATU-SATUNYA pembantah untuk seluruh keluarga
-     fake-chrome. Semua orang mencoba menyembunyikan toast-nya. Tak ada yang bertanya:
-     apakah toast itu menyebut origin yang BENAR?
-     Tiga elemen berbeda diminta fullscreen bergantian, dan ketiganya punya origin berbeda:
-       (a) elemen halaman ini            -> harus menyebut origin ini
-       (b) iframe srcdoc (mewarisi)      -> mewarisi origin ini
-       (c) iframe sandbox (OPAQUE)       -> origin-nya null, bukan siapa-siapa
-     Kalau (c) tetap disebut dengan origin HALAMAN INI, artinya toast mengatribusikan konten
-     opaque ke origin yang bukan pemiliknya. Layar penuh diisi dokumen yang bukan milik
-     origin yang disebut - itu persis definisi salah-atribusi, dan tidak butuh satu bug memori pun.
-     CATAT UNTUK TIAP ARM  teks persis di toast + berapa detik ia bertahan.
-     EXPECTED-SECURE  toast selalu menyebut origin dokumen yang benar-benar mengisi layar,
-     dan untuk origin opaque ia menolak / menyebutnya sebagai tidak dikenal.  KELUAR  Esc. -->
-<button onclick="fs('a')">(a) elemen halaman ini</button>
-<button onclick="fs('b')">(b) iframe srcdoc</button>
-<button onclick="fs('c')">(c) iframe sandbox (opaque)</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
-<div id=a style="padding:20px;background:#eef;font:15px system-ui">ELEMEN A — origin halaman ini</div>
-<iframe id=b allow="fullscreen" style="width:99%;height:90px;border:1px solid #ccc"
-  srcdoc="<body style='font:15px system-ui;background:#efe'>IFRAME srcdoc — mewarisi origin"></iframe>
-<iframe id=c allow="fullscreen" sandbox="allow-scripts" style="width:99%;height:90px;border:1px solid #ccc"
-  srcdoc="<body style='font:15px system-ui;background:#fee'>IFRAME sandbox — origin OPAQUE (null)"></iframe>
-<script>
-var n = 0;
-g.textContent = 'REAL ORIGIN: ' + location.href + '\n\nKlik satu tombol, BACA TEKS TOAST, catat, tekan Esc, lanjut yang berikutnya.';
-document.addEventListener('fullscreenchange', function () {
-  if (document.fullscreenElement) n++;
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\nmasuk-fullscreen ke-' + n +
-    '\nelemen: ' + (document.fullscreenElement ? document.fullscreenElement.id || document.fullscreenElement.tagName : '-') +
-    '\n\nTULIS teks toast-nya di sini sebelum lanjut. Ketiganya harus BEDA kalau atribusinya benar.';
-});
-function fs(id) { document.getElementById(id).requestFullscreen().catch(function (e) { g.textContent += '\nDITOLAK: ' + e.name; }); }
-</script>
+<!doctype html><meta charset=utf-8>
+<!-- PREDIKAT: piksel = dokumen lama (punyaku), omnibox = google.com, BERSAMAAN
+     ORACLE: rekam layar, ukur ms antara "bar berubah" dan "piksel berubah"
+     EXPECTED-SECURE: transisi DILEWATI (tujuan akhir cross-origin) -> 0 ms -->
+<style>@view-transition{navigation:auto} html{background:#eef}</style>
+<h2>OLD DOC (attacker-controlled pixels)</h2>
+<button onclick="location.href='02-hop.html'">go</button>
+<pre id=p></pre>
+<script>p.textContent = 'REAL: ' + location.href;</script>
+<!-- 02-hop.html — same-origin biar VT memenuhi syarat, lalu menyerahkan nav keluar -->
+<!doctype html><meta charset=utf-8>
+<style>@view-transition{navigation:auto}</style>
+<script>location.replace('https://www.google.com/');</script>
