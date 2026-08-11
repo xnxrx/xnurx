@@ -1,31 +1,17 @@
-<!-- 26 | macOS · halaman ERROR sebagai permukaan — apa yang bar tulis saat tak ada dokumen? | [1-CLICK]
-     Pertanyaan yang belum dijawab di seluruh korpus: kalau navigasi GAGAL, dokumen tak lahir.
-     Jadi bar menulis apa? URL yang gagal? URL sebelumnya? Kosong?
-     Enam bentuk kegagalan yang jalur kodenya BERBEDA-BEDA di dalam engine:
-       DNS tidak ada        · koneksi ditolak (RST)    · koneksi di-drop (timeout)
-       TLS tidak cocok      · skema tak dikenal        · blob: yang sudah dicabut
-     Masing-masing dibuka di tabnya sendiri. Yang dicari bukan "error" — semua akan error.
-     Yang dicari: apakah ADA SATU bentuk kegagalan yang meninggalkan bar dalam keadaan
-     berbeda dari yang lain. Bentuk yang menyimpang itulah jalur yang belum di-harden.
-     Bonus: pada halaman error, coba tekan Back — bar dan konten dipulihkan dari sumber berbeda.
-     EXPECTED-SECURE  keenam bentuk meninggalkan bar dalam keadaan yang sama & jujur. -->
-<button onclick="go()">Run 26 (6 tab)</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<style>#bar{position:fixed;top:0;left:0;right:0;height:38px;background:#dee1e6;font:13px system-ui;display:none;align-items:center;padding:0 10px;z-index:9}
+#pill{background:#fff;border-radius:16px;padding:5px 12px;flex:1}</style>
+<div id=bar><span id=pill>&#128274; https://www.google.com/</span></div>
+<p style="margin-top:60px"><button onclick="go()">go fullscreen</button>
+<button onclick="document.exitFullscreen&&document.exitFullscreen()">KELUAR</button></p>
+<pre id=p></pre>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  var b = URL.createObjectURL(new Blob(['<h3>blob</h3>'], { type: 'text/html' }));
-  URL.revokeObjectURL(b);
-  var U = [['DNS tidak ada', 'https://tidak-ada-' + Math.floor(performance.now()) + '.invalid/'],
-  ['koneksi ditolak', 'https://127.0.0.1:1/'],
-  ['koneksi di-drop', 'https://192.0.2.1/'],
-  ['TLS tidak cocok', 'https://expired.badssl.com/'],
-  ['skema tak dikenal', 'xnurx-noop://hold'],
-  ['blob dicabut', b]];
-  U.forEach(function (u, i) { setTimeout(function () { window.open(u[1], '_blank'); }, i * 600); });
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n6 tab dibuka:\n' +
-    U.map(function (u, i) { return '  ' + (i + 1) + '. ' + u[0].padEnd(20) + u[1]; }).join('\n') +
-    '\n\nUntuk TIAP tab catat: bar menulis apa? URL yang gagal / URL lama / kosong?' +
-    '\nLalu tekan Back di tab itu dan catat lagi. Yang menyimpang = jalurnya.';
+async function go(){
+  try { await document.documentElement.requestFullscreen(); } catch(e){ return p.textContent += '\nfullscreen ditolak: ' + e.name; }
+  bar.style.display = 'flex';
+  try { await navigator.keyboard.lock(['Escape']); p.textContent += '\nkeyboard.lock AKTIF (Esc ditelan)'; }
+  catch(e){ p.textContent += '\nkeyboard.lock: ' + e.name + ' (tidak aktif)'; }
 }
+addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) { bar.style.display = 'none'; navigator.keyboard && navigator.keyboard.unlock && navigator.keyboard.unlock(); } });
+p.textContent = 'REAL: ' + location.href + '\nUKUR: berapa ms notice "Press Esc" bertahan?';
 </script>
