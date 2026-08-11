@@ -1,27 +1,14 @@
-<!-- 23 | ⛔ LENGAN KONTROL untuk 15/16 — membuktikan syarat "JENDELA TANPA RIWAYAT" | [1-CLICK]
-     Tanpa file ini, angka 15 tidak bisa dibaca, dan laporanmu akan ditutup.
-     HIPOTESIS YANG DIUJI  bar jadi kosong BUKAN karena 204 itu ajaib, melainkan karena
-     jendela baru TIDAK PUNYA entri riwayat untuk dimundurkan. Kalau benar, maka 204 yang
-     SAMA PERSIS di tab yang SUDAH punya riwayat harus mengembalikan bar ke URL sebelumnya,
-     bukan mengosongkannya.
-     TIGA LENGAN, satu variabel yang berubah:
-       A. jendela BARU + 204        -> prediksi: bar KOSONG        (= 15.html)
-       B. tab INI + 204             -> prediksi: bar kembali ke sini (kontrol)
-       C. jendela BARU + 200 biasa  -> prediksi: bar menulis URL tujuan (kontrol)
-     Kalau B ikut kosong -> sebabnya bukan "tanpa riwayat", hipotesismu salah, revisi dulu.
-     Kalau C ikut kosong -> sebabnya bukan 204, revisi dulu.
-     HANYA bila A kosong sementara B dan C tidak, kamu boleh menulis mekanismenya di laporan. -->
-<button onclick="A()">A · jendela baru + 204</button>
-<button onclick="B()">B · TAB INI + 204</button>
-<button onclick="C()">C · jendela baru + 200</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html><meta charset=utf-8>
+<!-- PREDIKAT (VULN): credentialless terbaca ("Example Domain") sementara iframe biasa SecurityError
+     ORACLE: butuh http(s). Klik probe setelah kedua frame selesai memuat
+     EXPECTED-SECURE: KEDUA lengan SecurityError -->
+<iframe id=a credentialless src="https://example.com/" width=200 height=90></iframe>
+<iframe id=b src="https://example.com/" width=200 height=90></iframe>
+<button onclick="probe()">probe</button>
+<pre id=p></pre>
 <script>
-var E = 'https://www.google.com/gen_204';
-g.textContent = 'REAL ORIGIN: ' + location.href +
-  '\n\nJalankan KETIGANYA di sesi yang sama, catat bar tiap kali.' +
-  '\nA kosong + B & C tidak = mekanisme terbukti. Selain itu = hipotesis salah.';
-function paint(w, t) { setTimeout(function () { try { w.document.write('<div style="font:13px system-ui;padding:12px"><b>' + t + '</b><br>' + location.origin + '</div>'); w.document.close(); } catch (e) { } }, 2200); }
-function A() { var w = window.open(E, '_blank', 'width=460,height=300'); if (w) paint(w, 'A · jendela baru + 204'); }
-function B() { g.textContent += '\n\nB dijalankan di TAB INI — catat bar setelah beberapa detik.'; location.href = E; }
-function C() { var w = window.open('30.html', '_blank', 'width=460,height=300'); if (w) paint(w, 'C · jendela baru + 200'); }
+function rd(f){ try { return 'TERBACA: ' + f.contentDocument.title; } catch (e) { return 'SecurityError (' + e.name + ')'; } }
+function probe(){ p.textContent = 'REAL: ' + location.href
+  + '\ncredentialless : ' + rd(a) + '\niframe biasa   : ' + rd(b) + '   <- KONTROL, harus SecurityError'; }
+p.textContent = 'REAL: ' + location.href + '\nsupport credentialless: ' + ('credentialless' in HTMLIFrameElement.prototype);
 </script>
