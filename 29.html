@@ -1,31 +1,31 @@
-<!-- 29 | macOS/WebKit · bfcache Safari sangat agresif — bar dan dokumen dipulihkan dari SUMBER BERBEDA | [1-CLICK lalu BACK]
-     Safari menyimpan halaman utuh di bfcache jauh lebih sering daripada Chrome: DOM, timer,
-     variabel, semuanya dibekukan dan dihidupkan lagi apa adanya saat Back.
-     Tapi bar TIDAK ikut dibekukan bersama dokumen — ia dihitung ulang dari entri session-history.
-     Jadi saat Back, dua hal dipulihkan dari dua tempat yang berbeda, oleh kode yang berbeda.
-     Kalau keduanya bisa tidak sepakat walau sesaat, itu jendela yang tidak butuh jaringan sama sekali.
-     Diperkuat: sebelum pergi, halaman ini memasang state yang mudah dikenali (judul + DOM),
-     jadi saat kembali kamu bisa melihat langsung apakah yang muncul adalah dokumen LAMA
-     sementara bar sudah menghitung sesuatu yang lain.
-     PROSEDUR  klik Pergi -> tunggu halaman tujuan tampil -> tekan BACK -> baca bar & layar bersamaan.
-     EXPECTED-SECURE  saat kembali, bar dan dokumen selalu menunjuk hal yang sama. -->
-<h2 id=h style="font:20px system-ui">HALAMAN A — state akan dibekukan</h2>
-<button onclick="prep()">1. pasang state</button>
-<button onclick="location.href='2.html?block=1200&via=bfcache'">2. Pergi (lalu tekan BACK)</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<style>
+html,body{margin:0;font:15px/1.5 system-ui}
+#bar{position:fixed;top:0;left:0;right:0;display:none;align-items:center;background:#dee1e6;padding:0 10px;z-index:9}
+#pill{background:#fff;border-radius:20px;padding:6px 14px;flex:1;white-space:nowrap;overflow:hidden}
+#main{padding:70px 16px 0}#jail{height:220vh}
+</style>
+<div id=bar><span id=pill>&#128274; https://www.google.com/</span></div>
+<div id=main>
+  <button onclick="go()">MULAI</button> <button onclick="out()">KELUAR</button>
+  <pre id=p></pre>
+</div>
+<div id=jail></div>
 <script>
-var armed = false, t0 = Date.now();
-function draw(x) {
-  g.textContent = 'REAL ORIGIN: ' + location.href + '\nstate terpasang: ' + armed +
-    '\numur dokumen  : ' + Math.round((Date.now() - t0) / 1000) + ' detik' + (x ? '\n\n' + x : '');
+const MOBILE = matchMedia('(pointer:coarse)').matches || /Android/.test(navigator.userAgent);
+function log(s){ p.textContent = 'REAL: ' + location.href + '\n' + s; }
+function jail(){ if (scrollY > 60) scrollTo(0, 60); }
+async function go(){
+  bar.style.height = MOBILE ? '52px' : '38px'; bar.style.display = 'flex';
+  if (MOBILE) { addEventListener('scroll', jail, { passive: true }); scrollTo(0, 62);
+    return log('ANDROID: gulir sedikit - toolbar asli menyembunyikan diri, bar di atas tinggal satu-satunya'); }
+  try { await document.documentElement.requestFullscreen(); } catch (e) { return log('fullscreen ditolak: ' + e.name); }
+  try { await navigator.keyboard.lock(['Escape']); log('DESKTOP: fullscreen + keyboard.lock AKTIF - UKUR ms notice bertahan'); }
+  catch (e) { log('DESKTOP: fullscreen aktif, keyboard.lock ' + e.name + ' - UKUR ms notice bertahan'); }
 }
-draw('');
-function prep() { armed = true; h.textContent = 'HALAMAN A — STATE TERPASANG (tandai ini)'; h.style.color = '#b00'; draw(''); }
-addEventListener('pageshow', function (e) {
-  draw('pageshow persisted(bfcache) = ' + e.persisted +
-    '\nstate masih ada = ' + armed +
-    '\n\n' + (e.persisted
-      ? 'DIPULIHKAN dari bfcache. Umur dokumen di atas TIDAK di-reset = dokumen lama.\nBaca bar SEKARANG: ia menunjuk halaman ini, atau masih 2.html?'
-      : 'dimuat ulang biasa — Safari tidak memakai bfcache di sini. Catat sbg ilmu-negatif.'));
-});
+function out(){ removeEventListener('scroll', jail); bar.style.display = 'none'; scrollTo(0, 0);
+  if (navigator.keyboard && navigator.keyboard.unlock) navigator.keyboard.unlock();
+  if (document.fullscreenElement) document.exitFullscreen(); log('keluar'); }
+addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) out(); });
+log(MOBILE ? 'mode: Android (scroll-jail)' : 'mode: desktop (fullscreen)');
 </script>
