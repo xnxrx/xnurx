@@ -1,34 +1,85 @@
-<!-- 17 | F1 · skema yang diserahkan ke OS lalu GAGAL — pembatalan dari jalur keempat | [1-CLICK]
-     Empat cara navigasi dibatalkan setelah bar berganti: dialog (13), unduhan (15),
-     stop() (16), dan yang ini - penyerahan skema ke sistem operasi.
-     Browser melihat skema yang bukan miliknya, menyerahkannya ke OS, dan MEMBATALKAN
-     navigasi web-nya. Kalau OS tak punya penangan, tak ada apa pun yang terbuka -
-     tapi jalur pembatalannya tetap dilewati.
-     Empat skema diuji, dari yang pasti tidak ada sampai yang mungkin ada, supaya kamu bisa
-     memisahkan "dibatalkan karena tak ada penangan" dari "dibatalkan setelah OS menolak":
-       xnurx-noop://   (dijamin tidak ada, nol aplikasi terbuka)
-       web+xnurx://    (skema web+ terdaftar, ditangani berbeda)
-       ms-noop://      (bentuk skema Windows)
-       intent://       (bentuk Android, diabaikan di desktop)
-     EXPECTED-SECURE  bar tidak pernah berubah oleh navigasi yang dibatalkan sebelum commit.
-     Nol aplikasi eksternal dibuka: keempatnya sengaja tidak ada. -->
-<h2 style="font:20px system-ui">HALAMAN PENYERANG</h2>
-<button onclick="go()">Run 17 (4 tab)</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SOP Membrane Probe</title>
+<style>
+ body{font:13px/1.6 ui-monospace,monospace;background:#0d1117;color:#cdd9e5;padding:20px}
+ h3{margin:0 0 6px} small{color:#8b949e}
+ button{background:#238636;color:#fff;border:0;padding:7px 14px;border-radius:6px;cursor:pointer}
+ table{border-collapse:collapse;margin-top:14px;max-width:980px;width:100%}
+ th,td{border:1px solid #30363d;padding:5px 9px;text-align:left}th{background:#161b22}
+ .vuln{color:#ff7b72;font-weight:700}.sec{color:#3fb950}.bad{color:#d29922;font-weight:700}
+ #sink{position:absolute;left:-9999px;width:1px;height:1px}
+</style>
+</head>
+<body>
+<h3>SOP Membrane Probe <small>— satu canary, delapan cara menyeberangi batas origin</small></h3>
+<div>Canary tujuan: <code id="cn"></code> &nbsp;<button id="go">RUN (N=20 / arm)</button> <span id="st"></span></div>
+<div id="out"></div><div id="sink"></div>
 <script>
-var S = ['xnurx-noop://hold', 'web+xnurx://hold', 'ms-noop://hold', 'intent://hold#Intent;scheme=xnurx;end'];
-var T = 'https://www.google.com/';
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  S.forEach(function (s, i) {
-    setTimeout(function () {
-      var w = window.open('', '', 'width=340,height=200,left=' + (30 + i * 350) + ',top=60');
-      if (!w) return;
-      w.document.write('<div style="font:12px system-ui;padding:8px"><b>' + s.split(':')[0] + '</b><br>isi milik ' + location.origin + '</div>');
-      w.location = T;
-      setTimeout(function () { try { w.location = s; } catch (e) { } }, 120);
-    }, i * 300);
-  });
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n4 tab dibuka.\n\nCari tab yang omniboxnya tersangkut di ' + T + '\nsementara isinya masih tulisan di atas.';
+const TOK=Math.random().toString(36).slice(2,10);
+const SRC='CANARY-SRC-'+TOK;              // dokumen LAMA  -> sah dibaca, bukan bug
+const DST='CANARY-DST-'+TOK;              // dokumen TUJUAN-> terbaca = SOP jebol
+const N=20, html=t=>'<!doctype html><meta charset=utf-8><h1>'+t+'</h1>';
+cn.textContent=DST;
+
+function read(win,tok){                    // satu-satunya primitif baca
+  try{const d=win.document; if(!d||!d.documentElement)return'NULL';
+      return d.documentElement.textContent.includes(tok)?'READ':'EMPTY';}
+  catch(e){return'BLOCKED:'+e.name}
 }
+const mk=c=>new Promise(r=>{const f=document.createElement('iframe');
+  if(c.sandbox!==undefined)f.setAttribute('sandbox',c.sandbox);
+  if(c.srcdoc)f.srcdoc=c.srcdoc; if(c.src)f.src=c.src;
+  f.onload=()=>setTimeout(()=>r(f),0); sink.appendChild(f);
+  if(!c.src&&!c.srcdoc)setTimeout(()=>r(f),0);});
+
+const ARMS=[
+{n:'1 about:blank + parent.write',w:'kontrol positif: probe harus bisa baca',x:'READ',
+ r:async()=>{const f=await mk({src:'about:blank'});f.contentDocument.write(html(DST));
+   const v=read(f.contentWindow,DST);f.remove();return v}},
+{n:'2 blob: buatan parent',w:'blob mewarisi origin pembuatnya',x:'READ',
+ r:async()=>{const u=URL.createObjectURL(new Blob([html(DST)],{type:'text/html'}));
+   const f=await mk({src:u});const v=read(f.contentWindow,DST);URL.revokeObjectURL(u);f.remove();return v}},
+{n:'3 srcdoc tanpa sandbox',w:'srcdoc mewarisi origin induk',x:'READ',
+ r:async()=>{const f=await mk({srcdoc:html(DST)});const v=read(f.contentWindow,DST);f.remove();return v}},
+{n:'4 srcdoc + sandbox=""',w:'sandbox tanpa allow-same-origin = origin OPAK',x:'BLOCKED',
+ r:async()=>{const f=await mk({srcdoc:html(DST),sandbox:''});const v=read(f.contentWindow,DST);f.remove();return v}},
+{n:'5 data:text/html',w:'data: URL selalu origin opak',x:'BLOCKED',
+ r:async()=>{const f=await mk({src:'data:text/html,'+encodeURIComponent(html(DST))});
+   const v=read(f.contentWindow,DST);f.remove();return v}},
+{n:'6 javascript: di frame sandbox',w:'skema js: tak boleh menghidupkan origin induk di frame opak',x:'BLOCKED',
+ r:async()=>{const f=await mk({sandbox:'allow-scripts',src:'javascript:'+JSON.stringify(html(DST))});
+   const v=read(f.contentWindow,DST);f.remove();return v}},
+{n:'7 cucu: sandbox -> about:blank anak',w:'rantai pewarisan origin lewat dua lapis',x:'BLOCKED',
+ r:async()=>{const kid='<script>const i=document.createElement("iframe");document.body.appendChild(i);'+
+   'i.contentDocument.write('+JSON.stringify(html(DST))+')<\/script>';
+   const f=await mk({srcdoc:'<body>'+kid,sandbox:'allow-scripts'});
+   let v;try{v=read(f.contentWindow.frames[0],DST)}catch(e){v='BLOCKED:'+e.name}
+   f.remove();return v}},
+{n:'8 overhang commit (same-origin -> opak)',w:'jendela antara navigasi dimulai & origin di-update',x:'BLOCKED',
+ r:async()=>{const f=await mk({src:'about:blank'});f.contentDocument.write(html(SRC));
+   const t0=performance.now();f.src='data:text/html,'+encodeURIComponent(html(DST));
+   let v='BLOCKED:timeout';
+   while(performance.now()-t0<200){const q=read(f.contentWindow,DST);
+     if(q==='READ'){v='READ@'+(performance.now()-t0).toFixed(1)+'ms';break}
+     if(q.startsWith('BLOCKED')){v=q;break}
+     await new Promise(s=>setTimeout(s,0));}
+   f.remove();return v}},
+];
+
+go.onclick=async()=>{go.disabled=true;let invalid=false;
+  let t='<table><tr><th>Arm</th><th>Harus</th><th>p (x/'+N+')</th><th>Contoh hasil</th><th>Vonis</th><th>Garansi yang diuji</th></tr>';
+  for(const a of ARMS){st.textContent=' menjalankan '+a.n+'...';
+    let hit=0,last='';
+    for(let i=0;i<N;i++){last=await a.r();if(last.startsWith('READ'))hit++;}
+    let v,c; if(a.x==='BLOCKED'){v=hit?'UXSS-VULN':'SECURE';c=hit?'vuln':'sec';}
+    else{v=hit===N?'OK':'HARNESS-INVALID';c=hit===N?'sec':'bad';if(hit!==N)invalid=true;}
+    t+=`<tr><td>${a.n}</td><td>${a.x}</td><td>${hit}/${N}</td><td>${last}</td><td class=${c}>${v}</td><td>${a.w}</td></tr>`;}
+  out.innerHTML=t+'</table>'+(invalid
+    ?'<p class=bad>Lengan kontrol gagal -> hasil arm lain TIDAK sah. Jalankan lewat http(s)://, bukan file://.</p>'
+    :'<p class=sec>Kontrol lolos: arm 4-8 sah dinilai. Aman = semua arm 4-8 SECURE (0/'+N+').</p>');
+  st.textContent='';go.disabled=false;};
 </script>
+</body></html>
