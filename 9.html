@@ -1,32 +1,4 @@
-<!-- 9 | 2026 · INVENTARIS "di mana bar benar-benar NOL" di browser INI | [1-CLICK per baris]
-     Berhenti menebak. Enumerasi dulu.
-     Ada tepat lima konteks di mana browser modern menampilkan halaman TANPA teks origin.
-     Yang mana yang hidup berbeda per engine, per versi, per OS, per fork - jadi tebakan
-     tidak berguna, pengukuran berguna. File ini membuka tiap konteks dan mencetak geometrinya,
-     supaya kamu tahu MANA yang layak dikejar di build yang benar-benar kamu punya.
-     Kolom "chrome tegak" = outerHeight - innerHeight. Mendekati 0 = tidak ada chrome sama sekali.
-     Konteks yang chrome-nya 0 DAN kontennya penuh = kandidat, dan di situ kamu taruh usahamu.
-     EXPECTED-SECURE  setiap konteks tetap punya satu tempat yang menyebut origin. -->
-<pre id=g style="font:12px/1.7 monospace"></pre>
-<div id=b style="font:13px system-ui"></div>
-<script>
-var rows = {};
-function draw() {
-  var modes = ['browser', 'minimal-ui', 'standalone', 'fullscreen', 'window-controls-overlay'];
-  g.textContent = 'REAL ORIGIN : ' + location.href +
-    '\ntab ini     : chrome tegak ' + (outerHeight - innerHeight) + 'px, display-mode ' +
-    (modes.filter(function (m) { return matchMedia('(display-mode:' + m + ')').matches; }).join(',') || '-') +
-    '\n\n' + Object.keys(rows).map(function (k) { return k.padEnd(26) + rows[k]; }).join('\n') +
-    '\n\nchrome tegak ~0 + konten penuh = konteks tanpa atribusi -> kejar yang itu.';
-}
-var C = [
-  ['popup normal', function () { var w = window.open('', '', 'width=500,height=320'); if (!w) return 'POPUP DIBLOKIR'; w.document.write('<b style="font:14px system-ui">popup normal</b>'); setTimeout(function () { rows['popup normal'] = 'chrome ' + (w.outerHeight - w.innerHeight) + 'px, screenY ' + w.screenY; draw(); w.close(); }, 900); return 'mengukur...'; }],
-  ['popup location=no', function () { var w = window.open('', '', 'width=500,height=320,location=no,toolbar=no,menubar=no'); if (!w) return 'POPUP DIBLOKIR'; w.document.write('<b style="font:14px system-ui">popup chromeless</b>'); setTimeout(function () { rows['popup location=no'] = 'chrome ' + (w.outerHeight - w.innerHeight) + 'px, screenY ' + w.screenY; draw(); w.close(); }, 900); return 'mengukur...'; }],
-  ['fullscreen', function () { document.documentElement.requestFullscreen().then(function () { rows['fullscreen'] = 'chrome ' + (outerHeight - innerHeight) + 'px — CATAT teks toast + berapa detik'; draw(); }); return 'lihat toast, lalu Esc'; }],
-  ['document PiP', function () { if (!window.documentPictureInPicture) return 'API TIDAK ADA'; documentPictureInPicture.requestWindow({ width: 420, height: 240 }).then(function (p) { p.document.body.innerHTML = '<b style="font:14px system-ui;padding:10px;display:block">PiP</b>'; rows['document PiP'] = 'chrome ' + (p.outerHeight - p.innerHeight) + 'px — CATAT: origin terlihat di strip?'; draw(); }); return 'mengukur...'; }],
-  ['PWA standalone', function () { return matchMedia('(display-mode:browser)').matches ? 'belum diinstall — lihat 8.html' : 'AKTIF, chrome ' + (outerHeight - innerHeight) + 'px'; }]
-];
-b.innerHTML = C.map(function (c, i) { return '<button data-i="' + i + '">' + c[0] + '</button> '; }).join('');
-b.onclick = function (e) { var i = e.target.dataset.i; if (i) { rows[C[i][0]] = C[i][1](); draw(); } };
-draw();
-</script>
+<!doctype html><meta charset=utf-8>
+<button onclick="location.href='https://www.google.com/'">go</button>
+<pre id=p></pre>
+<script>p.textContent = 'REAL: ' + location.href;</script>
