@@ -1,31 +1,16 @@
-<!-- 21 | ⭐⭐ Arc (macOS) · SIDEBAR DISEMBUNYIKAN = tidak ada address bar sama sekali | [NO-CLICK]
-     INI KANDIDAT TERKUAT UNTUK "BAR HILANG" DI MAC, dan ia bukan bug — ia fitur.
-     Arc menaruh identitas di SIDEBAR VERTIKAL, bukan di strip horizontal di atas. Sidebar itu
-     bisa disembunyikan (Cmd+S), dan dalam keadaan itu jendela menampilkan konten penuh
-     TANPA satu pun teks origin di layar.
-     Seluruh kelas spoofing selama ini mengasumsikan omnibox ada DI ATAS dan selebar layar.
-     Asumsi itu tidak berlaku di sini, jadi semua aturan geometrisnya berubah — dan Arc
-     sudah ada di scope engagement KB-mu (targets/arc/), jadi ini sah diuji.
-     PERTANYAAN RISET  saat sidebar tersembunyi, adakah SATU tempat yang masih menyebut origin?
-     Kalau tidak ada, berapa lama keadaan itu bisa bertahan, dan apakah halaman bisa
-     MEMPERTAHANKANNYA (mis. dgn menahan fokus / mencegah hover ke tepi)?
-     EXPECTED-SECURE  ada satu permukaan yang menyebut origin dan tak bisa disembunyikan halaman.
-     ETIKA  instance Arc milikmu sendiri. Tekan Cmd+S untuk mengembalikan sidebar kapan saja. -->
-<h2 style="font:20px system-ui">Tekan <b>Cmd + S</b> untuk menyembunyikan sidebar Arc.</h2>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html><meta charset=utf-8>
+<!-- PREDIKAT-A (spoof): saat aktivasi, bar berpindah sebelum/sesudah dokumennya benar-benar tampil?
+     PREDIKAT-B (uxss): sebelum aktivasi, dokumen prerender bisa dibaca dari sini?
+     ORACLE: butuh http(s), taruh bersama 02-prerendered.html
+     CONTROL: hapus blok speculationrules -> jadi navigasi biasa
+     EXPECTED-SECURE: nol akses baca sebelum aktivasi, dan bar berpindah tepat saat dokumen tampil -->
+<script type="speculationrules">{"prerender":[{"urls":["02-prerendered.html"]}]}</script>
+<button onclick="go()">activate</button> <button onclick="probe()">probe read</button>
+<pre id=p></pre>
 <script>
-var ua = navigator.userAgent;
-function draw() {
-  g.textContent =
-    'REAL ORIGIN  : ' + location.href +
-    '\nArc terdeteksi: ' + (/Arc\//.test(ua) ? 'YA' : 'tidak dari UA (Arc sering menyamar sbg Chrome — cek manual)') +
-    '\nviewport     : ' + innerWidth + 'x' + innerHeight +
-    '\nouter        : ' + outerWidth + 'x' + outerHeight +
-    '\nchrome tegak : ' + (outerHeight - innerHeight) + 'px' +
-    '\nchrome datar : ' + (outerWidth - innerWidth) + 'px   <== ini yang menyusut saat sidebar disembunyikan' +
-    '\n\nCatat angka SEBELUM dan SESUDAH Cmd+S. Selisih pada "chrome datar" = lebar sidebar.' +
-    '\nKalau sesudahnya 0: tidak ada permukaan origin di layar sama sekali.' +
-    '\n\nLalu jawab: masih ada tempat lain yang menyebut origin? (hover tepi? shortcut? menu?)';
-}
-draw(); setInterval(draw, 700);
+function probe(){ let r = 'nol handle ke dokumen prerender (EXPECTED-SECURE)';
+  try { const w = window.open('02-prerendered.html', 'pr'); r = 'title=' + w.document.title; } catch (e) { r = 'SecurityError: ' + e.name; }
+  p.textContent = 'REAL: ' + location.href + '\nprobe-baca: ' + r; }
+function go(){ location.href = '02-prerendered.html'; }
+p.textContent = 'REAL: ' + location.href;
 </script>
