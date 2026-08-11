@@ -1,22 +1,16 @@
-<!-- 13 | ⭐⭐ F1 · dialog beforeunload — bar sudah berganti SEBELUM kamu memutuskan | [1-CLICK]
-     INI FLAGSHIP BATCH 13-50. Nol jaringan, nol port mati, nol DNS. Deterministik.
-     MEKANISME  saat halaman punya handler beforeunload, browser MENAHAN navigasi dan
-     menampilkan dialog "Leave site?". Tapi keputusan menampilkan dialog dibuat SETELAH
-     browser mulai memproses navigasi. Di sejumlah engine omnibox SUDAH menulis URL tujuan
-     pada saat dialog itu muncul - padahal dokumen tujuan belum ada dan mungkin tak akan pernah ada.
-     Yang membuat ini beda dari seluruh keluarga lama: penyerang TIDAK menahan jaringan.
-     Yang menahan navigasi adalah BROWSER SENDIRI, atas permintaan yang sah, selama yang
-     dibutuhkan - karena dialog menunggu manusia. Jendelanya selebar keraguan pengguna.
-     PREDIKAT  saat dialog tampil: baca omnibox. Menulis google.com? Layar masih halaman ini?
-     Lalu tekan STAY -> bar HARUS kembali. Kalau tidak kembali = bar tersangkut = temuan penuh.
-     EXPECTED-SECURE  bar tetap menulis halaman ini selama dialog, dan tetap begitu setelah Stay. -->
-<h2 style="font:20px system-ui">HALAMAN PENYERANG — perhatikan ini tidak pernah hilang</h2>
-<input id=t value="https://www.google.com/" style="width:320px;font:13px monospace">
-<button onclick="go()">Navigasi (dialog akan muncul)</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html><meta charset=utf-8>
+<!-- BATAS: 1200ms, SEKALI per klik, bukan loop berkelanjutan (dos.md: ukur, jangan meledakkan)
+     PREDIKAT: bar melukis google.com sementara layar masih dokumen lama; ukur berapa lama bertahan
+     ORACLE: rekam layar, hitung ms sejak klik sampai bar/piksel berubah
+     CONTROL: ganti 1200 -> 0  |  EXPECTED-SECURE: selisih 0 ms -->
+<button onclick="go()">go</button>
+<pre id=p></pre>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href +
-  '\n\n1. klik tombol  2. saat dialog muncul: BACA OMNIBOX  3. tekan STAY  4. baca omnibox lagi';
-addEventListener('beforeunload', function (e) { e.preventDefault(); e.returnValue = ''; return ''; });
-function go() { location.href = t.value.trim(); }
+const T = 'https://www.google.com/', MS = 1200;
+function go(){
+  location.href = T;
+  const end = performance.now() + MS; while (performance.now() < end);   // sekali, berbatas
+  p.textContent += '\nbusy ' + MS + 'ms selesai';
+}
+p.textContent = 'REAL: ' + location.href;
 </script>
