@@ -1,29 +1,19 @@
-<!-- 24 | ⭐ macOS/Safari · "Add to Dock" web app — nol address bar, permanen, tanpa notice | [NO-CLICK]
-     Safari 17+ di Sonoma bisa mengubah situs apa pun jadi aplikasi Dock. Jendela hasilnya
-     TIDAK punya address bar, tidak punya toast, tidak punya Esc, dan tidak berbatas waktu.
-     Ini padanan Safari dari PWA standalone, tapi jauh lebih mudah dipasang (File > Add to Dock)
-     dan jauh lebih jarang diuji orang.
-     PERTANYAAN RISET sama dgn 8.html tapi di mesin yang berbeda: saat aplikasi Dock menavigasi
-     KELUAR dari situs asalnya, Safari seharusnya menunjukkan sesuatu yang menyebut origin baru.
-     Apakah selalu? Untuk SETIAP jalur navigasi? Satu jalur yang lolos = konten origin lain
-     tampil di dalam bingkai aplikasi tanpa satu pun permukaan yang menyebutnya.
-     CARA UJI  Safari > File > Add to Dock > buka dari Dock > buka file ini > jalankan 6 jalur.
-     EXPECTED-SECURE  keenam jalur memunculkan penanda origin saat keluar situs asal. -->
-<pre id=g style="font:12px/1.7 monospace"></pre>
-<div id=b style="font:13px system-ui;line-height:2.2"></div>
+<!doctype html><meta charset=utf-8>
+<!-- PREDIKAT (VULN): setelah PiP menampilkan example.com, w.document masih terbaca dari sini
+     ORACLE: butuh http(s) + gesture. Klik go, tunggu PiP memuat example.com, lalu klik probe
+     CONTROL: klik probe SEBELUM navigasi - harus terbaca (same-origin, wajar)
+     EXPECTED-SECURE: sesudah navigasi cross-origin -> SecurityError -->
+<button onclick="go()">go</button> <button onclick="probe()">probe</button>
+<pre id=p></pre>
 <script>
-var OUT = 'https://example.com/';
-g.textContent = 'REAL ORIGIN : ' + location.href +
-  '\nstandalone  : ' + (navigator.standalone === undefined ? 'n/a (bukan WebKit iOS)' : navigator.standalone) +
-  '\nchrome tegak: ' + (outerHeight - innerHeight) + 'px  (kecil/0 = mode aplikasi)' +
-  '\ndisplay-mode: ' + (matchMedia('(display-mode:standalone)').matches ? 'standalone' : matchMedia('(display-mode:browser)').matches ? 'browser' : '?') +
-  '\n\nKalau masih "browser": Safari > File > Add to Dock, buka dari Dock, lalu kembali ke sini.';
-var J = [['link', function () { var a = document.createElement('a'); a.href = OUT; document.body.appendChild(a); a.click(); }],
-['window.open', function () { window.open(OUT, '_blank'); }],
-['location.replace', function () { location.replace(OUT); }],
-['form GET', function () { var f = document.createElement('form'); f.action = OUT; document.body.appendChild(f); f.submit(); }],
-['meta refresh', function () { var m = document.createElement('meta'); m.httpEquiv = 'refresh'; m.content = '0;url=' + OUT; document.head.appendChild(m); }],
-['noopener', function () { window.open(OUT, '_blank', 'noopener'); }]];
-b.innerHTML = J.map(function (j, i) { return '<button data-i="' + i + '">' + (i + 1) + '. ' + j[0] + '</button> '; }).join('');
-b.onclick = function (e) { if (e.target.dataset.i) J[+e.target.dataset.i][1](); };
+let w = null;
+async function go(){
+  if (!self.documentPictureInPicture) return p.textContent += '\nPiP API tidak ada = INERT (catat).';
+  w = await documentPictureInPicture.requestWindow({ width: 420, height: 220 });
+  w.document.body.innerHTML = '<h2>PiP lahir same-origin</h2>';
+  setTimeout(() => { w.location.href = 'https://example.com/'; p.textContent += '\nPiP dinavigasikan cross-origin'; }, 600);
+}
+function probe(){ let r; try { r = 'TERBACA: ' + w.document.title; } catch (e) { r = 'SecurityError (' + e.name + ')'; }
+  p.textContent = 'REAL: ' + location.href + '\nbaca w.document: ' + r; }
+p.textContent = 'REAL: ' + location.href;
 </script>
