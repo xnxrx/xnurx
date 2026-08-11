@@ -1,33 +1,18 @@
-<!-- 22 | ⭐ macOS · fork patch-lag — file yang "gagal" mungkin diuji di mesin yang SALAH | [NO-CLICK]
-     KOREKSI PENTING atas kesimpulan "1-50 gagal semua".
-     Keluarga setInterval(location=...) ditutup Chrome di tingkat arsitektur. Tapi yang
-     ditutup adalah CHROME. Fork memasang patch upstream dengan jeda, dan Safari punya
-     jalur kodenya sendiri yang tidak pernah menerima patch Chrome sama sekali.
-     Sejarahnya jelas: keluarga nav-timing bertahan JAUH lebih lama di Safari (CVE-2018-4307,
-     CVE-2020-9987 keduanya WebKit), dan fork Chromium tertinggal berminggu-minggu.
-     Jadi jangan tulis "tidak rentan". Tulis "tidak rentan DI MESIN MANA, versi berapa".
-     File ini memberi matriks yang harus kamu isi — dan yang kosong itulah pekerjaanmu.
-     Di Mac urutan biaya-termurah: Arc -> Safari -> Brave -> Vivaldi -> Chrome. -->
-<pre id=g style="font:12px/1.7 monospace"></pre>
-<h3 style="font:15px system-ui">Ulangi file-file ini di TIAP mesin, bukan cuma satu:</h3>
-<p style="font:13px system-ui"><a href="13.html">13 beforeunload</a> · <a href="15.html">15 unduhan</a> ·
-<a href="16.html">16 stop-sweep</a> · <a href="3.html">3 commit-vs-paint</a> · <a href="1.html">1 blokir-paint</a></p>
+<!doctype html><meta charset=utf-8>
+<!-- DELTA vs 35-02: di sana transisinya CROSS-document dan gerbang same-origin bisa membatalkannya
+     PREDIKAT: bar melukis www.google.com sementara layar masih snapshot beku milikku
+     ORACLE: rekam layar; ukur ms antara "bar berubah" dan "piksel berubah"
+     CONTROL: hapus startViewTransition, sisakan location
+     EXPECTED-SECURE: snapshot dibuang saat nav cross-document dimulai -> selisih 0 ms -->
+<button onclick="go()">go</button>
+<pre id=p></pre>
+<div id=box style="view-transition-name:box;padding:20px;background:#dde">konten penyerang (dibekukan)</div>
 <script>
-var ua = navigator.userAgent;
-g.textContent =
-  'UA           : ' + ua +
-  '\nplatform     : ' + navigator.platform +
-  '\n\nMATRIKS YANG HARUS DIISI (satu baris per mesin):' +
-  '\n' +
-  '\nmesin        versi   13   15   16    3    1' +
-  '\nSafari       ____    __   __   __   __   __' +
-  '\nArc          ____    __   __   __   __   __' +
-  '\nBrave        ____    __   __   __   __   __' +
-  '\nVivaldi      ____    __   __   __   __   __' +
-  '\nChrome       ____    __   __   __   __   __' +
-  '\nFirefox      ____    __   __   __   __   __' +
-  '\n' +
-  '\nisi tiap sel: SPOOFED / INERT / BLOCKED / INCONCLUSIVE' +
-  '\n\nSel BLOCKED JANGAN dihapus — catat MEKANISME pemblokirnya.' +
-  '\nItu peta hardening, dan peta itu menunjukkan sumbu mana yang masih terbuka.';
+const T = 'https://www.google.com/';
+function go(){
+  if (!document.startViewTransition) return p.textContent += '\nView Transition tidak ada = INERT (catat).';
+  document.startViewTransition(() => { box.style.background = '#fdd'; location.href = T; });
+  p.textContent += '\ntransisi dimulai + nav cross-origin ditembak di dalamnya';
+}
+p.textContent = 'REAL: ' + location.href;
 </script>
