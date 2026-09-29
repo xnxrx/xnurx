@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!-- DEMO / EDUKASI SAJA — INI BUKAN HALAMAN THREADS ASLI. Form tidak mengirim data ke mana pun. -->
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in • Threads (FAKE / DEMO)</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background:#101010; color:#f3f5f7;
+  }
+
+  /* ===== BANNER PERINGATAN (permanen, tidak bisa dilewatkan) ===== */
+  .fake-warning {
+    width:100%; background:#b00020; color:#fff; text-align:center;
+    padding:12px 16px; font-weight:700; font-size:15px; letter-spacing:.3px;
+    border-bottom:4px solid #ffcc00; position:sticky; top:0; z-index:999;
+  }
+  .fake-warning small { display:block; font-weight:400; opacity:.9; margin-top:2px; }
+
+  .wrap { flex:1; display:flex; align-items:center; justify-content:center; padding:24px; width:100%; }
+
+  .card { width:100%; max-width:370px; text-align:center; position:relative; }
+
+  .logo { margin:0 auto 26px; width:80px; height:80px; }
+  .logo svg { width:100%; height:100%; display:block; }
+
+  h1 { font-size:16px; font-weight:600; color:#8a8d91; margin:0 0 26px; }
+
+  .badge { display:inline-block; font-size:11px; font-weight:700; color:#ff6b6b;
+           letter-spacing:1px; margin-bottom:18px; }
+
+  .field { margin-bottom:10px; }
+  .field input {
+    width:100%; padding:16px 14px; font-size:15px; color:#f3f5f7;
+    background:#1e1e1e; border:1px solid #2f3031; border-radius:12px; outline:none;
+  }
+  .field input::placeholder { color:#777a7e; }
+  .field input:focus { border-color:#4a4c4e; background:#232323; }
+
+  .showpw { display:flex; align-items:center; gap:9px; font-size:13px; color:#8a8d91;
+            justify-content:flex-start; margin:2px 2px 16px; }
+  .showpw input { width:15px; height:15px; accent-color:#f3f5f7; cursor:pointer; }
+  .showpw label { cursor:pointer; }
+
+  .login-btn {
+    width:100%; padding:16px; font-size:15px; font-weight:600; color:#101010;
+    background:#f3f5f7; border:none; border-radius:12px; cursor:pointer; margin-top:4px;
+  }
+  .login-btn:hover { opacity:.92; }
+
+  .forgot { display:block; color:#f3f5f7; font-size:14px; text-decoration:none;
+            margin:22px 0; }
+  .forgot:hover { text-decoration:underline; }
+
+  .divider { display:flex; align-items:center; gap:14px; color:#5c5f63; font-size:14px; margin:8px 0 22px; }
+  .divider::before, .divider::after { content:""; flex:1; height:1px; background:#2f3031; }
+
+  .ig-btn {
+    width:100%; padding:15px; font-size:15px; font-weight:500; color:#f3f5f7;
+    background:transparent; border:1px solid #2f3031; border-radius:12px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+  .ig-btn:hover { background:#1a1a1a; }
+
+  .demo-msg { margin-top:18px; font-size:14px; color:#ff6b6b; font-weight:600; min-height:20px; }
+
+  footer { font-size:12px; color:#5c5f63; padding:18px; text-align:center; max-width:370px; }
+</style>
+</head>
+<body>
+
+  <div class="fake-warning">
+    ⚠️ THIS IS A FAKE THREADS LOGIN — JUST FOR EXAMPLE / DEMO ONLY
+    <small>Halaman ini BUKAN Threads. Jangan masukkan kredensial asli — form ini tidak mengirim data apa pun.</small>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="logo">
+        <svg viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" aria-label="Threads">
+          <path fill="#f3f5f7" d="M141.537 88.988c-.827-.396-1.667-.778-2.518-1.143-1.482-27.307-16.403-42.94-41.457-43.1h-.34c-14.986 0-27.449 6.397-35.12 18.036l13.779 9.452c5.73-8.694 14.724-10.548 21.347-10.548h.229c8.249.053 14.474 2.451 18.503 7.129 2.932 3.405 4.893 8.111 5.864 14.05-7.314-1.243-15.224-1.625-23.68-1.14-23.82 1.372-39.134 15.264-38.105 34.568.522 9.792 5.4 18.216 13.736 23.72 7.047 4.651 16.124 6.926 25.557 6.411 12.458-.683 22.231-5.436 29.049-14.127 5.178-6.6 8.453-15.153 9.899-25.93 5.937 3.583 10.337 8.298 12.767 13.966 4.132 9.635 4.373 25.468-8.546 38.376-11.319 11.308-24.925 16.2-45.488 16.351-22.809-.169-40.06-7.484-51.228-21.742C35.329 139.966 29.925 120.682 29.723 96c.202-24.682 5.606-43.966 16.063-57.318C56.954 24.425 74.204 17.11 97.013 16.94c22.975.17 40.526 7.521 52.171 21.848 5.71 7.026 10.015 15.861 12.853 26.162l16.147-4.308c-3.44-12.68-8.853-23.606-16.219-32.668C147.036 9.607 125.202.195 97.07 0h-.113C68.882.194 47.292 9.642 32.788 28.079 19.882 44.486 13.224 67.316 13 95.933l.001.135c.224 28.616 6.881 51.446 19.788 67.853 14.504 18.437 36.093 27.885 64.168 28.079h.113c24.96-.173 42.555-6.708 57.049-21.195 18.963-18.945 18.392-42.695 12.142-57.264-4.484-10.454-13.033-18.946-24.724-24.553zM98.44 129.507c-10.44.588-21.286-4.098-21.82-14.135-.397-7.442 5.296-15.746 22.461-16.735 1.966-.114 3.895-.169 5.79-.169 6.235 0 12.068.606 17.371 1.765-1.978 24.702-13.58 28.713-23.802 29.274z"/>
+        </svg>
+      </div>
+
+      <div class="badge">DEMO • FAKE</div>
+      <h1>Log in with your Instagram account</h1>
+
+      <form id="loginForm" autocomplete="off">
+        <div class="field">
+          <input type="text" id="email" placeholder="Email address" required>
+        </div>
+        <div class="field">
+          <input type="password" id="password" placeholder="Password" required>
+        </div>
+
+        <div class="showpw">
+          <input type="checkbox" id="togglePw">
+          <label for="togglePw">Show password</label>
+        </div>
+
+        <button type="submit" class="login-btn">Log in</button>
+
+        <div class="demo-msg" id="msg"></div>
+      </form>
+
+      <a href="#" class="forgot" onclick="return false">Forgot password?</a>
+
+      <div class="divider">or</div>
+
+      <button type="button" class="ig-btn" onclick="return false">
+        Continue with Instagram
+      </button>
+    </div>
+  </div>
+
+  <footer>
+    DEMO EDUKASI — bukan afiliasi Threads / Meta. Nama & logo hanya untuk contoh tampilan.
+  </footer>
+
+  <script>
+    // Toggle tampilkan/sembunyikan password (UI saja).
+    document.getElementById('togglePw').addEventListener('change', function () {
+      document.getElementById('password').type = this.checked ? 'text' : 'password';
+    });
+
+    // Form sengaja MATI: tidak ada pengiriman ke server mana pun.
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      document.getElementById('msg').textContent =
+        'Ini demo — tidak ada data (email/password) yang dikirim ke mana pun.';
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+    });
+  </script>
+</body>
+</html>
