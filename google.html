@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<!-- DEMO / EDUKASI SAJA — INI BUKAN HALAMAN GOOGLE ASLI. Form tidak mengirim data ke mana pun. -->
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in - Google Accounts (FAKE / DEMO)</title>
+<style>
+  :root { --blue:#4285F4; --red:#EA4335; --yellow:#FBBC05; --green:#34A853; }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    font-family: 'Roboto', arial, sans-serif; background:#fff; color:#202124;
+  }
+
+  /* ===== BANNER PERINGATAN (permanen, tidak bisa dilewatkan) ===== */
+  .fake-warning {
+    width:100%; background:#b00020; color:#fff; text-align:center;
+    padding:12px 16px; font-weight:700; font-size:15px; letter-spacing:.3px;
+    border-bottom:4px solid #ffcc00; position:sticky; top:0; z-index:999;
+  }
+  .fake-warning small { display:block; font-weight:400; opacity:.9; margin-top:2px; }
+
+  .wrap { flex:1; display:flex; align-items:center; justify-content:center; padding:24px; }
+
+  .card {
+    width:100%; max-width:450px; border:1px solid #dadce0; border-radius:8px;
+    padding:48px 40px 36px; position:relative;
+  }
+  .card::after { /* watermark FAKE di kartu */
+    content:"DEMO • FAKE"; position:absolute; top:14px; right:16px;
+    font-size:11px; font-weight:700; color:#b00020; letter-spacing:1px; opacity:.6;
+  }
+
+  /* ===== Logo Google (warna asli) ===== */
+  .glogo { text-align:center; font-size:28px; font-weight:500; margin-bottom:16px;
+           font-family: 'Product Sans', 'Roboto', arial, sans-serif; }
+  .glogo b { font-weight:500; }
+  .g1{color:var(--blue)} .g2{color:var(--red)} .g3{color:var(--yellow)}
+  .g4{color:var(--blue)} .g5{color:var(--green)} .g6{color:var(--red)}
+
+  h1 { font-size:24px; font-weight:400; text-align:center; margin:8px 0 4px; }
+  .sub { text-align:center; font-size:16px; color:#202124; margin-bottom:28px; }
+
+  .field { position:relative; margin-bottom:20px; }
+  .field input {
+    width:100%; padding:13px 15px; font-size:16px; border:1px solid #dadce0;
+    border-radius:4px; outline:none;
+  }
+  .field input:focus { border:2px solid var(--blue); padding:12px 14px; }
+  .field label {
+    position:absolute; left:14px; top:14px; color:#5f6368; background:#fff;
+    padding:0 4px; font-size:16px; pointer-events:none; transition:.15s;
+  }
+  .field input:focus + label,
+  .field input:not(:placeholder-shown) + label {
+    top:-8px; font-size:12px; color:var(--blue);
+  }
+
+  /* Checkbox "Show password" ala Google */
+  .showpw { display:flex; align-items:center; gap:10px; font-size:14px; color:#202124;
+            margin:-6px 0 24px; }
+  .showpw input { width:16px; height:16px; accent-color:var(--blue); cursor:pointer; }
+
+  .forgot { color:var(--blue); font-size:14px; font-weight:500; text-decoration:none;
+            display:inline-block; margin-bottom:28px; }
+
+  .row { display:flex; align-items:center; justify-content:space-between; }
+  .create { color:var(--blue); font-weight:500; font-size:14px; text-decoration:none; }
+  .next {
+    background:var(--blue); color:#fff; border:none; border-radius:4px;
+    padding:10px 24px; font-size:14px; font-weight:500; cursor:pointer;
+  }
+  .next:hover { background:#3b78e7; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+
+  .demo-msg { margin-top:18px; text-align:center; font-size:14px; color:#b00020;
+              font-weight:600; min-height:20px; }
+
+  footer { font-size:12px; color:#5f6368; padding:16px; text-align:center; }
+</style>
+</head>
+<body>
+
+  <div class="fake-warning">
+    ⚠️ THIS IS A FAKE GOOGLE LOGIN — JUST FOR EXAMPLE / DEMO ONLY
+    <small>Halaman ini BUKAN Google. Jangan masukkan kredensial asli — form ini tidak mengirim data apa pun.</small>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="glogo">
+        <b class="g1">G</b><b class="g2">o</b><b class="g3">o</b><b class="g4">g</b><b class="g5">l</b><b class="g6">e</b>
+      </div>
+      <h1>Sign in</h1>
+      <div class="sub">Use your Google Account</div>
+
+      <form id="loginForm" autocomplete="off">
+        <div class="field">
+          <input type="text" id="email" placeholder=" " required>
+          <label for="email">Email or phone</label>
+        </div>
+
+        <div class="field">
+          <input type="password" id="password" placeholder=" " required>
+          <label for="password">Enter your password</label>
+        </div>
+
+        <div class="showpw">
+          <input type="checkbox" id="togglePw">
+          <label for="togglePw" style="position:static;background:none;padding:0;font-size:14px;color:#202124;">Show password</label>
+        </div>
+
+        <a href="#" class="forgot" onclick="return false">Forgot password?</a>
+
+        <div class="row">
+          <a href="#" class="create" onclick="return false">Create account</a>
+          <button type="submit" class="next">Next</button>
+        </div>
+
+        <div class="demo-msg" id="msg"></div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    DEMO EDUKASI — bukan afiliasi Google. Nama & logo Google hanya untuk contoh tampilan.
+  </footer>
+
+  <script>
+    // Toggle tampilkan/sembunyikan password (UI saja).
+    document.getElementById('togglePw').addEventListener('change', function () {
+      document.getElementById('password').type = this.checked ? 'text' : 'password';
+    });
+
+    // Form sengaja MATI: tidak ada pengiriman ke server mana pun.
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      document.getElementById('msg').textContent =
+        'Ini demo — tidak ada data (email/password) yang dikirim ke mana pun.';
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+    });
+  </script>
+</body>
+</html>
