@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<!--
+  BROWSER ORIGIN-SURFACE & SPOOFING AUTO-TESTER  (research / VRP use)
+  ================================================================
+  Jalankan di BROWSER MILIKMU SENDIRI untuk memetakan permukaan tampilan-origin
+  (address-bar-spoofing S1..S20): mana yang menampilkan origin dan mana yang TIDAK.
+  Predikat temuan = "displayed-origin != real-origin" atau "kapabilitas tanpa origin/notif".
+  Buktikan predikat -> screenshot -> STOP -> lapor ke VRP (Chrome/Mozilla/Apple/Arc).
+  BUKAN kit phishing: tidak memanen kredensial, tidak menyerang situs lain, semua self-contained.
+-->
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browser Origin-Surface & Spoofing Auto-Tester</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --line:#30363d;
+    --fg:#e6edf3; --mut:#8b949e; --accent:#58a6ff;
+    --ok:#3fb950; --warn:#d29922; --bad:#f85149; --susp:#db61a2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5}
+  header{padding:20px 24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#11161f,#0d1117)}
+  header h1{margin:0 0 4px;font-size:20px}
+  header .sub{color:var(--mut);font-size:13px}
+  .ethics{margin:14px 24px 0;padding:10px 14px;border:1px solid #7d4b12;background:#241a0c;
+    border-radius:8px;color:#e3b341;font-size:12.5px}
+  .env{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;
+    padding:16px 24px;border-bottom:1px solid var(--line)}
+  .env div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px}
+  .env b{color:var(--accent);font-weight:600}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;padding:14px 24px;border-bottom:1px solid var(--line);align-items:center}
+  button{cursor:pointer;font-family:inherit;font-size:13px;border-radius:8px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--fg);padding:8px 14px}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);color:#0d1117;border-color:var(--accent);font-weight:600}
+  button.sm{padding:5px 10px;font-size:12px}
+  .summary{margin-left:auto;display:flex;gap:14px;font-size:13px;color:var(--mut)}
+  .summary b{font-size:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;padding:20px 24px}
+  .cat-title{grid-column:1/-1;margin:8px 0 -4px;font-size:13px;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--accent);font-weight:700;border-top:1px solid var(--line);padding-top:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+  .card h3{margin:0;font-size:14.5px;display:flex;align-items:center;gap:8px}
+  .id{font-size:10px;color:var(--mut);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+  .card p{margin:0;color:var(--mut);font-size:12.5px}
+  .why{color:#c9a4dc;font-size:12px}
+  .badge{font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;white-space:nowrap}
+  .b-idle{background:#21262d;color:var(--mut)}
+  .b-sup{background:#12261a;color:var(--ok);border:1px solid #1f6f36}
+  .b-unsup{background:#2b1416;color:var(--bad);border:1px solid #6f2a25}
+  .b-noorigin{background:#2a1120;color:var(--susp);border:1px solid #7d3560}
+  .b-origin{background:#12261a;color:var(--ok);border:1px solid #1f6f36}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;align-items:center}
+  .ask{font-size:12px;color:var(--warn);margin-top:6px}
+  .out{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--mut);
+    background:#0b0f14;border:1px solid var(--line);border-radius:6px;padding:6px 8px;white-space:pre-wrap;max-height:120px;overflow:auto}
+  footer{padding:18px 24px;color:var(--mut);font-size:12px;border-top:1px solid var(--line)}
+  .hidden-stage{position:fixed;left:-9999px;top:-9999px}
+  /* fake-chrome demo (dibuat jelas sebagai DEMO) */
+  #fakeChrome{position:fixed;inset:0;background:#fff;color:#202124;z-index:99999;display:none;flex-direction:column}
+  #fakeChrome .bar{display:flex;align-items:center;gap:10px;background:#dee1e6;padding:8px 12px}
+  #fakeChrome .tab{background:#fff;border-radius:8px 8px 0 0;padding:6px 16px;font-size:12px;color:#333}
+  #fakeChrome .omni{flex:1;background:#fff;border-radius:16px;padding:7px 14px;font-size:13px;color:#202124;display:flex;align-items:center;gap:8px}
+  #fakeChrome .lock{color:#5f6368}
+  #fakeChrome .body{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px}
+  #fakeChrome .demo-tag{position:fixed;top:8px;right:10px;background:#b00020;color:#fff;font-weight:700;
+    font-size:12px;padding:4px 10px;border-radius:6px}
+  #fakeChrome button{background:#1a73e8;color:#fff;border:none;padding:10px 20px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛰️ Browser Origin-Surface &amp; Spoofing Auto-Tester</h1>
+  <div class="sub">Memetakan tiap permukaan tampilan-origin (S1–S20) &amp; kapabilitas senyap — menandai mana yang <b style="color:var(--susp)">tidak menampilkan origin/notif</b> = kandidat design-flaw spoofing.</div>
+</header>
+
+<div class="ethics">
+  ⚠️ <b>Riset / VRP di browser milikmu sendiri.</b> Oracle-nya: “displayed-origin ≠ real-origin” atau “kapabilitas tanpa origin/notifikasi”.
+  Buktikan predikat → screenshot → <b>STOP</b> → lapor (Chrome/Mozilla/Apple/Arc). Alat ini tidak memanen kredensial &amp; tidak menyentuh situs lain.
+</div>
+
+<div class="env" id="env"></div>
+
+<div class="toolbar">
+  <button class="primary" onclick="runAll()">▶ Run semua auto-check</button>
+  <button onclick="exportJSON()">⬇ Export hasil (JSON)</button>
+  <button onclick="copyReport()">📋 Copy ringkasan</button>
+  <div class="summary" id="summary"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  Verdict: <b style="color:var(--ok)">ORIGIN SHOWN</b> = permukaan meng-atribusi origin (aman) ·
+  <b style="color:var(--susp)">NO ORIGIN</b> = kapabilitas tanpa origin/notif (selidiki) ·
+  <b style="color:var(--bad)">UNSUPPORTED</b> = API tak ada di browser ini.
+  Untuk verdict observasional, klik <b>Trigger</b>, amati permukaan asli, lalu jawab Y/T.
+</footer>
+
+<!-- stage tersembunyi utk video PiP & audio -->
+<div class="hidden-stage">
+  <video id="vid" muted loop playsinline width="320" height="180"></video>
+  <audio id="aud" loop></audio>
+</div>
+
+<!-- overlay fake-chrome (DEMO permukaan, bukan phishing) -->
+<div id="fakeChrome">
+  <div class="demo-tag">DEMO • FAKE CHROME (tekan ESC / klik Tutup)</div>
+  <div class="bar">
+    <div class="tab">🔒 Accounts</div>
+    <div class="omni"><span class="lock">🔒</span><span id="fakeUrl">https://accounts.google.com/signin</span></div>
+  </div>
+  <div class="body">
+    <h2 style="margin:0">Ini permukaan yang digambar oleh HALAMAN, bukan browser</h2>
+    <p style="color:#5f6368;max-width:520px;text-align:center">Kalau bilah alamat &amp; gembok di atas tampak meyakinkan padahal 100% HTML dari origin-mu, berarti permukaan ini bisa dipakai memalsukan chrome browser. Screenshot ini = bukti predikat.</p>
+    <button onclick="closeFakeChrome()">Tutup demo</button>
+  </div>
+</div>
+
+<script>
+/* ---------- util ---------- */
+const $ = s => document.querySelector(s);
+const results = {};
+function realOrigin(){ return location.origin || '(null/opaque origin)'; }
+
+/* ---------- environment ---------- */
+const envItems = {
+  'Real origin': realOrigin(),
+  'Secure context': window.isSecureContext,
+  'Protocol': location.protocol,
+  'Browser (UA-CH)': (navigator.userAgentData?.brands||[]).map(b=>b.brand+' '+b.version).join(', ') || 'n/a',
+  'Platform': navigator.userAgentData?.platform || navigator.platform,
+  'User-Agent': navigator.userAgent,
+};
+$('#env').innerHTML = Object.entries(envItems)
+  .map(([k,v])=>`<div><b>${k}</b><br>${String(v)}</div>`).join('');
+
+/* ---------- katalog test ---------- */
+/* verdict:
+   'origin'   -> ORIGIN SHOWN (aman)
+   'noorigin' -> NO ORIGIN (kandidat spoofing)
+   'sup'      -> SUPPORTED (perlu observasi manual)
+   'unsup'    -> UNSUPPORTED
+*/
+const TESTS = [
+/* ===== A. PiP & FULLSCREEN ===== */
+{id:'S07a',cat:'A. PiP & Fullscreen',name:'Video Picture-in-Picture',
+ why:'Window PiP video melayang di atas semua app — apakah menampilkan origin sumbernya?',
+ support:()=> 'pictureInPictureEnabled' in document,
+ run: async ()=>{
+   const v=$('#vid'); paintVideo(v); await v.play().catch(()=>{});
+   await v.requestPictureInPicture();
+   ask('S07a','Apakah window PiP menampilkan origin / nama situs sumbernya?');
+ }},
+{id:'S07b',cat:'A. PiP & Fullscreen',name:'Document Picture-in-Picture',
+ why:'documentPictureInPicture merender HTML SEWENANG-WENANG di window melayang tanpa bilah alamat = permukaan fake-chrome kelas satu.',
+ support:()=> 'documentPictureInPicture' in window,
+ run: async ()=>{
+   const pip = await documentPictureInPicture.requestWindow({width:420,height:150});
+   pip.document.body.style.cssText='margin:0;font-family:system-ui;background:#fff;color:#202124';
+   pip.document.body.innerHTML =
+     `<div style="background:#dee1e6;padding:8px 12px;display:flex;gap:10px;align-items:center">
+        <span>🔒</span><div style="flex:1;background:#fff;border-radius:16px;padding:6px 12px">https://accounts.google.com/signin</div>
+      </div>
+      <div style="padding:14px"><b style="color:#b00020">DEMO:</b> bilah alamat ini digambar HALAMAN, bukan browser. Window PiP ini tak punya origin bar asli.</div>`;
+   ask('S07b','Apakah window Document-PiP menampilkan origin ASLI dari browser (bukan yang kamu gambar)?');
+ }},
+{id:'S09',cat:'A. PiP & Fullscreen',name:'Fullscreen API + toast',
+ why:'Saat fullscreen, toast origin muncul lalu HILANG — setelah itu konten mengontrol seluruh layar tanpa origin.',
+ support:()=> !!document.documentElement.requestFullscreen,
+ run: async ()=>{
+   await document.documentElement.requestFullscreen();
+   setTimeout(()=>ask('S09','Setelah toast origin memudar, adakah indikator origin yang tersisa di layar?'),1500);
+ }},
+{id:'S09b',cat:'A. PiP & Fullscreen',name:'Fullscreen + fake browser chrome (demo)',
+ why:'Kombinasi fullscreen + UI palsu = spoof address-bar penuh layar. Buktikan permukaan bisa digambar.',
+ support:()=> !!document.documentElement.requestFullscreen,
+ run: async ()=>{
+   $('#fakeChrome').style.display='flex';
+   try{ await $('#fakeChrome').requestFullscreen(); }catch(e){}
+   ask('S09b','Apakah bilah alamat palsu terlihat meyakinkan tanpa chrome asli browser di sekitarnya?');
+ }},
+
+/* ===== B. PERMUKAAN ATRIBUSI ORIGIN ===== */
+{id:'S06',cat:'B. Atribusi origin',name:'JS dialog (alert/confirm/prompt)',
+ why:'Historisnya dialog JS tak menyebut origin (dipakai spoof). Cek apa yang ditampilkan browser ini.',
+ support:()=> true,
+ run: ()=>{ alert('Origin check — apakah kotak dialog ini menyebut '+realOrigin()+' ?');
+   ask('S06','Apakah dialog menampilkan origin/host halaman?'); }},
+{id:'S05',cat:'B. Atribusi origin',name:'Permission prompt (Geolocation)',
+ why:'Prompt izin adalah titik atribusi-origin utama. Cek origin yang ditampilkan.',
+ support:()=> !!navigator.geolocation,
+ run: ()=>{ navigator.geolocation.getCurrentPosition(()=>{},()=>{});
+   ask('S05','Apakah prompt izin lokasi menampilkan origin yang benar?'); }},
+{id:'S15',cat:'B. Atribusi origin',name:'Notification API',
+ why:'Notifikasi OS kadang tak menyertakan origin (bergantung OS/browser) = permukaan atribusi lemah.',
+ support:()=> 'Notification' in window,
+ run: async ()=>{
+   const p = await Notification.requestPermission();
+   if(p==='granted'){ new Notification('Origin check',{body:'Apakah notif ini menyebut '+realOrigin()+' ?'});
+     ask('S15','Apakah notifikasi OS menampilkan origin/host pengirim?'); }
+   else setV('S15','noorigin','IZIN DITOLAK');
+ }},
+{id:'S08',cat:'B. Atribusi origin',name:'Download shelf',
+ why:'Shelf unduhan menampilkan nama file (bisa dikontrol) — cek atribusi origin sumber unduhan.',
+ support:()=> true,
+ run: ()=>{ const a=document.createElement('a');
+   a.href=URL.createObjectURL(new Blob(['origin-surface-test'],{type:'text/plain'}));
+   a.download='invoice_from_your_bank.txt'; a.click();
+   ask('S08','Apakah UI unduhan menampilkan origin sumber, bukan hanya nama file?'); }},
+{id:'S01',cat:'B. Atribusi origin',name:'window.open — popup minimal-chrome',
+ why:'Popup dengan chrome minimal + about:blank = klasik pending-URL / origin-inheritance spoof.',
+ support:()=> true,
+ run: ()=>{ const w=window.open('','_blank','width=500,height=360,menubar=no,toolbar=no,location=yes');
+   if(w){ w.document.write('<title>accounts.google.com</title><body style="font-family:system-ui;padding:20px">'
+     +'<h3>Popup ini di-<i>write</i> oleh opener.</h3><p>Cek: bilah alamat menampilkan about:blank, origin opener, atau kosong?</p></body>');
+     ask('S01','Bilah alamat popup: menampilkan origin ASLI (about:blank / origin-mu) dengan jelas?'); }
+   else setV('S01','noorigin','POPUP DIBLOKIR'); }},
+
+/* ===== C. KAPABILITAS SENYAP (tanpa origin/notif) ===== */
+{id:'S18',cat:'C. Kapabilitas senyap',name:'Vibration API',
+ why:'navigator.vibrate() memicu getaran perangkat tanpa origin/prompt apa pun.',
+ support:()=> 'vibrate' in navigator,
+ run: ()=>{ const ok=navigator.vibrate([200,100,200]);
+   setV('S18','noorigin', ok?'GETAR DIPICU — TANPA ORIGIN':'dipanggil (mungkin butuh gesture)'); }},
+{id:'S14',cat:'C. Kapabilitas senyap',name:'MediaSession lockscreen metadata',
+ why:'Now-playing di lockscreen/OS media UI menampilkan judul+artwork PILIHAN HALAMAN tanpa origin (transfer CVE-2026-7935/8963).',
+ support:()=> 'mediaSession' in navigator,
+ run: async ()=>{
+   const a=$('#aud'); a.src=toneDataURI(); await a.play().catch(()=>{});
+   navigator.mediaSession.metadata = new MediaMetadata({
+     title:'Verifikasi Akun — Masuk', artist:'Google Accounts', album:'Security',
+     artwork:[{src:logoDataURI(),sizes:'512x512',type:'image/png'}]});
+   ask('S14','Cek OS media-controls/lockscreen: apakah now-playing "Google Accounts" muncul TANPA menyebut origin aslimu?');
+ }},
+{id:'S13',cat:'C. Kapabilitas senyap',name:'Web Speech / TTS (audio tanpa origin)',
+ why:'speechSynthesis memutar audio suara yang tak dapat diatribusi ke origin — bisa menyamar jadi "sistem".',
+ support:()=> 'speechSynthesis' in window,
+ run: ()=>{ speechSynthesis.speak(new SpeechSynthesisUtterance(
+   'Peringatan keamanan. Sesi anda kedaluwarsa. Ini demo suara tanpa atribusi origin.'));
+   setV('S13','noorigin','AUDIO SUARA DIPUTAR — TANPA ORIGIN'); }},
+{id:'S17',cat:'C. Kapabilitas senyap',name:'Background audio autoplay',
+ why:'Audio yang terus berbunyi setelah navigasi = pembawa lintas-halaman tanpa origin.',
+ support:()=> true,
+ run: async ()=>{ const a=$('#aud'); a.src=toneDataURI(); const ok=await a.play().then(()=>1).catch(()=>0);
+   setV('S17', ok?'noorigin':'sup', ok?'AUDIO BERBUNYI — TANPA ORIGIN':'autoplay diblok (butuh gesture)'); }},
+{id:'S19',cat:'C. Kapabilitas senyap',name:'Screen Wake Lock',
+ why:'wakeLock menahan layar tetap menyala tanpa indikator origin persisten.',
+ support:()=> 'wakeLock' in navigator,
+ run: async ()=>{ try{ const wl=await navigator.wakeLock.request('screen');
+   setV('S19','noorigin','WAKE LOCK AKTIF — TANPA ORIGIN'); setTimeout(()=>wl.release(),4000);}catch(e){ setV('S19','sup','ditolak: '+e.name);} }},
+{id:'CLIP',cat:'C. Kapabilitas senyap',name:'Clipboard write',
+ why:'clipboard.writeText bisa menimpa clipboard senyap (pastejacking).',
+ support:()=> !!(navigator.clipboard&&navigator.clipboard.writeText),
+ run: async ()=>{ try{ await navigator.clipboard.writeText('origin-surface-test-'+Date.now());
+   setV('CLIP','noorigin','CLIPBOARD DITIMPA — SENYAP');}catch(e){ setV('CLIP','sup','butuh fokus/gesture: '+e.name);} }},
+
+/* ===== D. MANIPULASI TAMPILAN/IDENTITAS ===== */
+{id:'S19f',cat:'D. Manipulasi identitas',name:'Favicon swap dinamis',
+ why:'Favicon = identitas tab; bisa diganti runtime untuk meniru situs lain.',
+ support:()=> true,
+ run: ()=>{ let l=document.querySelector('link[rel~=icon]')||document.createElement('link');
+   l.rel='icon'; l.href=logoDataURI(); document.head.appendChild(l);
+   ask('S19f','Apakah favicon tab berubah jadi logo yang kamu suntikkan?'); }},
+{id:'TITLE',cat:'D. Manipulasi identitas',name:'Title swap + Unicode/RTL',
+ why:'document.title dikontrol penuh; karakter RTL/confusable bisa memalsukan konteks tab.',
+ support:()=> true,
+ run: ()=>{ document.title='‮elgoog//:sptth — '+'аccounts'; // RTL override + Cyrillic a
+   ask('TITLE','Apakah judul tab tampil menyesatkan (arah terbalik / huruf mirip Latin)?'); }},
+{id:'S02',cat:'D. Manipulasi identitas',name:'history.pushState — ubah path URL',
+ why:'pushState mengubah path yang ditampilkan tanpa navigasi (origin tetap, path menipu).',
+ support:()=> !!history.pushState,
+ run: ()=>{ try{ history.pushState({},'', '/secure/login/verify-account');
+   ask('S02','Apakah bilah alamat kini menampilkan path /secure/login/verify-account?'); }catch(e){ setV('S02','unsup',e.name);} }},
+{id:'IDN',cat:'D. Manipulasi identitas',name:'IDN / homograph render',
+ why:'Domain confusable (аррӏе, gооgle) tampil identik dgn Latin — cek rendering.',
+ support:()=> true,
+ run: ()=>{ setOut('IDN','Latin : apple.com  google.com paypal.com\nConfus: аррӏе.com  gооgle.com  paypaӏ.com');
+   ask('IDN','Apakah baris "Confus" tampak sama persis dengan yang Latin di font browser-mu?'); }},
+
+/* ===== E. RESOURCE LIFETIME / LINTAS-NAVIGASI ===== */
+{id:'S14x',cat:'E. Lintas-navigasi',name:'MediaSession persist lintas-navigasi',
+ why:'Metadata now-playing bisa bertahan setelah tab pindah situs — origin lama menyamar di situs baru.',
+ support:()=> 'mediaSession' in navigator,
+ run: ()=>{ ask('S14x','Setelah menjalankan test S14 lalu berpindah situs di tab yang sama, apakah now-playing lama masih menampilkan metadata yang kamu set?'); }},
+];
+
+/* ---------- render kartu ---------- */
+const grid=$('#grid'); let lastCat='';
+TESTS.forEach(t=>{
+  if(t.cat!==lastCat){ lastCat=t.cat; const c=document.createElement('div'); c.className='cat-title'; c.textContent=t.cat; grid.appendChild(c); }
+  const card=document.createElement('div'); card.className='card'; card.id='card-'+t.id;
+  card.innerHTML=`
+    <h3><span class="id">${t.id}</span> ${t.name} <span class="badge b-idle" id="badge-${t.id}" style="margin-left:auto">IDLE</span></h3>
+    <p class="why">${t.why}</p>
+    <div class="out" id="out-${t.id}" style="display:none"></div>
+    <div class="ask" id="ask-${t.id}" style="display:none"></div>
+    <div class="row">
+      <button class="sm" onclick="trigger('${t.id}')">Trigger</button>
+      <span id="ans-${t.id}"></span>
+    </div>`;
+  grid.appendChild(card);
+});
+
+/* ---------- mesin ---------- */
+function badge(id){return $('#badge-'+id);}
+function setV(id,kind,label){
+  results[id]={verdict:kind,label:label||''};
+  const b=badge(id); const map={origin:['b-origin','ORIGIN SHOWN'],noorigin:['b-noorigin','NO ORIGIN'],
+    sup:['b-sup','SUPPORTED'],unsup:['b-unsup','UNSUPPORTED']};
+  const [cls,txt]=map[kind]||['b-idle','IDLE'];
+  b.className='badge '+cls; b.textContent=(label||txt);
+  updateSummary();
+}
+function setOut(id,text){const o=$('#out-'+id);o.style.display='block';o.textContent=text;}
+function ask(id,q){
+  const a=$('#ask-'+id); a.style.display='block'; a.textContent='❓ '+q;
+  const holder=$('#ans-'+id);
+  holder.innerHTML=`<button class="sm" onclick="answer('${id}',true)">✔ Origin tampil</button>
+    <button class="sm" onclick="answer('${id}',false)">✘ Tidak / menipu</button>`;
+}
+function answer(id,originShown){
+  setV(id, originShown?'origin':'noorigin', originShown?'ORIGIN SHOWN':'NO ORIGIN / SPOOFABLE');
+}
+async function trigger(id){
+  const t=TESTS.find(x=>x.id===id);
+  if(!t.support()){ setV(id,'unsup','UNSUPPORTED'); return; }
+  try{ await t.run(); }catch(e){ setOut(id,'ERR: '+(e&&e.message||e)); setV(id,'sup','ERROR — lihat log'); }
+}
+async function runAll(){
+  for(const t of TESTS){
+    if(!t.support()){ setV(t.id,'unsup','UNSUPPORTED'); continue; }
+    // auto-check hanya dukungan; permukaan yg butuh gesture/observasi ditandai SUPPORTED
+    if(results[t.id]===undefined) setV(t.id,'sup','SUPPORTED — klik Trigger');
+  }
+  updateSummary();
+}
+function updateSummary(){
+  const v=Object.values(results);
+  const c={origin:0,noorigin:0,sup:0,unsup:0};
+  v.forEach(x=>c[x.verdict]=(c[x.verdict]||0)+1);
+  $('#summary').innerHTML=
+    `<span>🟢 <b style="color:var(--ok)">${c.origin}</b> origin</span>
+     <span>🟣 <b style="color:var(--susp)">${c.noorigin}</b> no-origin</span>
+     <span>⚪ <b>${c.sup}</b> supported</span>
+     <span>🔴 <b style="color:var(--bad)">${c.unsup}</b> unsupported</span>`;
+}
+function exportJSON(){
+  const data={when:new Date().toISOString(),origin:realOrigin(),ua:navigator.userAgent,
+    env:envItems, results:Object.fromEntries(TESTS.map(t=>[t.id,{name:t.name,category:t.cat,...(results[t.id]||{verdict:'idle'})}]))};
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download='origin-surface-report.json'; a.click();
+}
+function copyReport(){
+  const lines=['Origin-Surface Report  ('+realOrigin()+')  '+new Date().toISOString(),navigator.userAgent,''];
+  TESTS.forEach(t=>{const r=results[t.id]||{verdict:'idle',label:'IDLE'};
+    lines.push(`[${(r.label||r.verdict).padEnd(24)}] ${t.id}  ${t.name}`);});
+  navigator.clipboard?.writeText(lines.join('\n')).then(()=>alert('Ringkasan disalin ke clipboard.'),()=>{});
+}
+
+/* ---------- helpers media ---------- */
+function paintVideo(v){
+  const c=document.createElement('canvas'); c.width=320;c.height=180; const x=c.getContext('2d');
+  let i=0; function draw(){ x.fillStyle='#111';x.fillRect(0,0,320,180);
+    x.fillStyle='#58a6ff';x.font='20px system-ui';x.fillText('PiP origin test '+(i++),20,95); }
+  draw(); const s=c.captureStream(8); v.srcObject=s; setInterval(draw,150);
+}
+function toneDataURI(){ // WAV senyap-ish pendek utk mengaktifkan media session
+  const sr=8000,sec=1,n=sr*sec,buf=new Uint8Array(44+n*2),dv=new DataView(buf.buffer);
+  const w=(o,s)=>{for(let i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i));};
+  w(0,'RIFF');dv.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');dv.setUint32(16,16,true);
+  dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);
+  dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,'data');dv.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++)dv.setInt16(44+i*2, Math.sin(i/12)*1200, true);
+  let bin='';for(let i=0;i<buf.length;i++)bin+=String.fromCharCode(buf[i]);
+  return 'data:audio/wav;base64,'+btoa(bin);
+}
+function logoDataURI(){
+  const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');
+  x.fillStyle='#1a73e8';x.fillRect(0,0,128,128);x.fillStyle='#fff';x.font='bold 84px system-ui';
+  x.textAlign='center';x.textBaseline='middle';x.fillText('G',64,70);return c.toDataURL('image/png');
+}
+function closeFakeChrome(){ $('#fakeChrome').style.display='none'; if(document.fullscreenElement)document.exitFullscreen().catch(()=>{}); }
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFakeChrome();});
+window.trigger=trigger;window.runAll=runAll;window.answer=answer;window.exportJSON=exportJSON;window.copyReport=copyReport;window.closeFakeChrome=closeFakeChrome;
+updateSummary();
+</script>
+</body>
+</html>
