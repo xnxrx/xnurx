@@ -1,7 +1,9 @@
- <p class="test"><input class="btn btn-success btn-lg" type="button" value="Run test case"
-    onclick="win = window.open(&quot;https://www.facebook.com:8080&quot;,&quot;WIN&quot;);
-    window.open(&quot;https://www.bing.com&quot;, &quot;WIN&quot;);
-    win.window.stop();
-    win.document.write('This is not Facebook');
-    win.document.close();
-" /></p>
+<script>
+    function spoof() {
+    document.write("<h1>This is not Bing</h1>");
+    document.location = "https://bing.com:1234";
+    setInterval(function(){document.location="https://bing.com:1234";},9800);
+    };
+</script>
+<p class="test"><input class="btn btn-success btn-lg" type="button" value="Run test case" onclick="spoof();" />
+</p>
