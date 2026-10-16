@@ -1,24 +1,10 @@
-<!-- 30 | ⭐⭐ macOS/Safari · GESTUR SWIPE-BACK — jendela yang panjangnya dikendalikan JARI | [1-CLICK lalu SWIPE]
-     INI PALING MACOS DARI SEMUANYA, dan mekanismenya persis yang kita cari.
-     Saat kamu menggeser dua jari ke kanan di trackpad, Safari menampilkan PRATINJAU HIDUP
-     halaman sebelumnya sambil menggesernya masuk. Selama gestur berlangsung, layar sudah
-     menampilkan halaman LAMA sementara navigasinya BELUM di-commit.
-     Yang membuat ini istimewa: panjang jendelanya bukan ditentukan jaringan, bukan ditentukan
-     paint, tapi ditentukan SEBERAPA LAMBAT JARI PENGGUNA BERGERAK. Tahan jari di tengah
-     dan jendelanya bertahan selama itu. Itu jendela terpanjang di seluruh batch ini.
-     YANG DICATAT  selama swipe ditahan setengah jalan: bar menulis halaman mana?
-     Yang sedang terlihat, atau yang sedang ditinggalkan? Lalu batalkan swipe (lepas balik
-     ke kiri) — apakah bar kembali dengan benar?
-     PROSEDUR  klik Pergi -> di halaman tujuan SWIPE DUA JARI KE KANAN dan TAHAN -> baca bar.
-     EXPECTED-SECURE  bar hanya berganti setelah gestur diselesaikan dan navigasi di-commit. -->
-<h2 style="font:20px system-ui;color:#b00">HALAMAN A — ini yang akan muncul saat kamu swipe</h2>
-<button onclick="location.href='31.html'">Pergi ke B (lalu swipe dua jari ke kanan, TAHAN)</button>
-<pre id=g style="font:12px/1.7 monospace"></pre>
+<h2>Spoof 13</h2>
 <script>
-g.textContent = 'REAL ORIGIN: ' + location.href +
-  '\n\n1. klik Pergi' +
-  '\n2. di halaman B: geser DUA JARI ke kanan di trackpad, dan TAHAN di tengah' +
-  '\n3. sambil ditahan: BACA ADDRESS BAR — menulis A atau B?' +
-  '\n4. batalkan swipe (dorong balik ke kiri) dan baca bar lagi' +
-  '\n\nBar menulis B sementara layar menampilkan A = jendela yang panjangnya kamu kendalikan.';
+function pocccc(){
+var w=open('data://google.com');
+w.document.body.innerHTML='This is not google';
+}
 </script>
+<p class="test"><input class="btn btn-success btn-lg" type="button" value="Run test case"
+onclick="pocccc();" />
+</p>
