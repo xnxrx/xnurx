@@ -1,22 +1,27 @@
+
+<!DOCTYPE html>
 <html>
-	<head>
-		<script>
-			function next() {
-				w.location.replace('https://google.com:9090/#https://google.com:9090/?'+n);
-				n++;
+<body>
+<script>
+const w = open("https://www.threads.com", "LIFECYCLE_LAB");
 
-				setTimeout("next();",15);
-				setTimeout("next();",25);
-			}
+window.addEventListener("visibilitychange", () => {
+  console.log("Parent visibility:", document.visibilityState);
+});
 
-			function f() {
-				w = window.open("content.html", "_blank", "width=500 height=500");
-				i = setInterval("try { x = w.location.href; } catch(e) { clearInterval(i); n = 0; next(); }", 5);
-			}
-		</script>
-	</head>
+window.addEventListener("pagehide", () => {
+  console.log("Parent page hidden");
+});
 
-	<body>
-		<a href="#" onclick="f()">Login with Facebook</a>
-	</body>
+if (w) {
+  setTimeout(() => {
+    if (!w.closed) {
+      w.document.title = "Lifecycle Test";
+      w.document.body.innerHTML =
+        "<h1>Lifecycle State</h1>";
+    }
+  }, 2000);
+}
+</script>
+</body>
 </html>
