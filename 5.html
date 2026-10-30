@@ -1,4 +1,17 @@
- <a onclick="test()">CLICK</a> 
-<script> function test()
-{ window.open('http://threads.com/') setTimeout (function(){alert("HACKED");}, 5000) } 
+
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+window.onload = function() {
+  var w = window.open("about:blank");
+
+  setTimeout(function() {
+    if (w && !w.closed) {
+      w.document.body.innerHTML = "<h1>Delayed Execution</h1>";
+    }
+  }, 2000);
+};
 </script>
+</body>
+</html>
