@@ -1,17 +1,19 @@
-
 <!DOCTYPE html>
 <html>
 <body>
 <script>
-window.onload = function() {
-  var w = window.open("https://www.threads.com");
+var w = open("https://www.threads.com");
+var n = 0;
 
-  setTimeout(function() {
-    if (w && !w.closed) {
-      w.document.body.innerHTML = "<h1>Delayed Execution</h1>";
-    }
-  }, 2000);
-};
+var timer = setInterval(function() {
+  n++;
+
+  if (w && !w.closed) {
+    w.document.title = "Stage " + n;
+  }
+
+  if (n >= 5) clearInterval(timer);
+}, 1000);
 </script>
 </body>
 </html>
