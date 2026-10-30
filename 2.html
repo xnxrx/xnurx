@@ -2,11 +2,17 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h2>Android WebView Alert Test</h2>
-
 <script>
-alert("Hello from Android WebView!");
-</script>
+setTimeout(function() {
 
+  location.href = "https://example.com";
+
+  setTimeout(function() {
+    alert("REDIRECT COMPLETED");
+  }, 3000);
+
+}, 100);
+
+</script>
 </body>
 </html>
