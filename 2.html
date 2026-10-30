@@ -3,18 +3,24 @@
 <html>
 <body>
 <script>
-var w = open("https://www.threads.com");
-var n = 0;
+(async function() {
 
-var timer = setInterval(function() {
-  n++;
+  const w = window.open("https://www.threads.com", "ASYNC_LAB");
+
+  await new Promise(r => setTimeout(r, 1800));
 
   if (w && !w.closed) {
-    w.document.title = "Stage " + n;
+    w.document.body.innerHTML =
+      "<h1>Async Window Experiment</h1>";
   }
 
-  if (n >= 5) clearInterval(timer);
-}, 1000);
+  await new Promise(r => setTimeout(r, 1200));
+
+  if (w && !w.closed) {
+    w.document.title = "Completed";
+  }
+
+})();
 </script>
 </body>
 </html>
