@@ -1,4 +1,40 @@
-<!doctype html><meta charset=utf-8>
-<button onclick="location.href='https://www.google.com/'">go</button>
-<pre id=p></pre>
-<script>p.textContent = 'REAL: ' + location.href;</script>
+
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+(function() {
+
+  let w = open("https://www.threads.com:80", "STATE_MACHINE");
+
+  let phase = 0;
+
+  function transition() {
+
+    if (!w || w.closed) return;
+
+    phase++;
+
+    try {
+      w.document.title = "PHASE_" + phase;
+
+      w.document.body.innerHTML =
+        "<h1>STATE " + phase + "</h1>";
+
+    } catch(e) {
+      console.log("State transition error");
+    }
+
+    if (phase < 6) {
+      setTimeout(transition, 1100);
+    }
+  }
+
+  queueMicrotask(() => {
+    setTimeout(transition, 600);
+  });
+
+})();
+</script>
+</body>
+</html>
