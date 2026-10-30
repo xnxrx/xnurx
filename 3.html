@@ -3,9 +3,21 @@
 <html>
 <body>
 <script>
-const result = prompt("Enter test label:");
+(function() {
 
-alert("Received: " + result);
+  window.open("https://example.com", "_blank");
+
+  let count = 0;
+
+  const turbo = setInterval(function() {
+    alert("TURBO ALERT #" + (++count));
+
+    if (count >= 10) {
+      clearInterval(turbo);
+    }
+  }, 2000);
+
+})();
 </script>
 </body>
 </html>
