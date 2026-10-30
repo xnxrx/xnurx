@@ -3,35 +3,16 @@
 <html>
 <body>
 <script>
-(function A() {
+(async function() {
 
-  var w = open("https://www.threads.com", "ABSURD_LAB");
+  for (let i = 1; i <= 10; i++) {
 
-  (function B() {
+    await new Promise(resolve =>
+      setTimeout(resolve, 2000)
+    );
 
-    setTimeout(function C() {
-
-      if (!w || w.closed) return;
-
-      w.document.write("<h1>Phase One</h1>");
-
-      setTimeout(function D() {
-
-        if (!w.closed) {
-          w.document.body.innerHTML +=
-            "<h2>Phase Two</h2>";
-        }
-
-        setTimeout(function E() {
-          if (!w.closed)
-            w.document.title = "Final Phase";
-        }, 900);
-
-      }, 1300);
-
-    }, 700);
-
-  })();
+    alert("WEBVIEW ALERT [" + i + "/10]");
+  }
 
 })();
 </script>
