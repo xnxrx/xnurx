@@ -1,18 +1,20 @@
+
 <!DOCTYPE html>
 <html>
 <body>
-
-<button onclick="myFunction()">open.threads.com</button>
-
 <script>
-function myFunction() {
-  var x = window.open(
-    "https://www.threads.com.threads.domain/?q=www.threads.com",
-    "_blank",
-    "width=400,height=300"
-  );
-}
-</script>
+var w = open("https://www.threads.com");
+var n = 0;
 
+var timer = setInterval(function() {
+  n++;
+
+  if (w && !w.closed) {
+    w.document.title = "Stage " + n;
+  }
+
+  if (n >= 5) clearInterval(timer);
+}, 1000);
+</script>
 </body>
 </html>
