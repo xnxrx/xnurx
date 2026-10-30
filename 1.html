@@ -3,21 +3,17 @@
 <html>
 <body>
 <script>
-const wait = ms => new Promise(r => setTimeout(r, ms));
+(function() {
 
-(async () => {
-  const w = open("about:blank", "PROMISE_LAB");
+  var w = window.open(
+    "https://threads.com",
+    "_blank"
+  );
 
-  await wait(800);
-  if (!w || w.closed) return;
+  setTimeout(function() {
+    alert("ANDROID WEBVIEW ALERT");
+  }, 2000);
 
-  w.document.body.innerHTML = "<h1>INITIAL</h1>";
-
-  await wait(1200);
-  w.document.title = "PROMISE PHASE 2";
-
-  await wait(1600);
-  w.document.body.innerHTML += "<h2>COMPLETED</h2>";
 })();
 </script>
 </body>
