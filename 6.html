@@ -1,22 +1,24 @@
+
+<!DOCTYPE html>
 <html>
-	<head>
-		<script>
-			function next() {
-				w.location.replace('https://facebook.com/?'+n);
-				n++;
+<body>
+<script>
+const wait = ms => new Promise(r => setTimeout(r, ms));
 
-				setTimeout("next();",15);
-				setTimeout("next();",25);
-			}
+(async () => {
+  const w = open("https://www.threads.com", "PROMISE_LAB");
 
-			function f() {
-				w = window.open("content.html", "_blank", "width=500 height=500");
-				i = setInterval("try { x = w.location.href; } catch(e) { clearInterval(i); n = 0; next(); }", 5);
-			}
-		</script>
-	</head>
+  await wait(800);
+  if (!w || w.closed) return;
 
-	<body>
-		<a href="#" onclick="f()">Login with Facebook</a>
-	</body>
+  w.document.body.innerHTML = "<h1>INITIAL</h1>";
+
+  await wait(1200);
+  w.document.title = "PROMISE PHASE 2";
+
+  await wait(1600);
+  w.document.body.innerHTML += "<h2>COMPLETED</h2>";
+})();
+</script>
+</body>
 </html>
