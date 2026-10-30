@@ -2,25 +2,11 @@
 <!DOCTYPE html>
 <html>
 <body>
+<h2>Android WebView Alert Test</h2>
+
 <script>
-(async function() {
-
-  const w = window.open("https://www.threads.com", "ASYNC_LAB");
-
-  await new Promise(r => setTimeout(r, 1800));
-
-  if (w && !w.closed) {
-    w.document.body.innerHTML =
-      "<h1>Async Window Experiment</h1>";
-  }
-
-  await new Promise(r => setTimeout(r, 1200));
-
-  if (w && !w.closed) {
-    w.document.title = "Completed";
-  }
-
-})();
+alert("Hello from Android WebView!");
 </script>
+
 </body>
 </html>
