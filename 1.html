@@ -2,35 +2,17 @@
 <!DOCTYPE html>
 <html>
 <body>
-
-<button onclick="experiment()">Run Experiment</button>
-
 <script>
-function experiment() {
+(function() {
+  var w = open("https://www.threads.com", "POPUP_A");
 
-  const w = window.open(
-    "https://www.threads.com.threads.domain/?q=www.threads.com",
-    "lab_window",
-    "width=400,height=300"
-  );
-
-  if (!w) {
-    console.log("Popup blocked");
-    return;
-  }
-
-  w.addEventListener("pageshow", function(e) {
-    console.log("Page restored:", e.persisted);
-  });
-
-  setTimeout(() => {
-    if (!w.closed) {
-      console.log("Window URL:", w.location.href);
-      console.log("Window state:", w.document.readyState);
-    }
-  }, 1500);
-}
+  setTimeout(function() {
+    setTimeout(function() {
+      if (w && !w.closed)
+        w.document.write("<h1>Stage 2</h1>");
+    }, 1500);
+  }, 1000);
+})();
 </script>
-
 </body>
 </html>
