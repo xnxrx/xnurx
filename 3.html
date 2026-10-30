@@ -1,83 +1,9 @@
-
-<!DOCTYPE html>
-<html>
-<body>
-
-<button onclick="myFunction(0)">open test 01</button>
-<button onclick="myFunction(1)">open test 02</button>
-<button onclick="myFunction(2)">open test 03</button>
-<button onclick="myFunction(3)">open test 04</button>
-<button onclick="myFunction(4)">open test 05</button>
-
-<pre id="log"></pre>
-
 <script>
-
-// Intentionally strange URL construction.
-
-var urls = [
-
-"https://example.test%20%20%ㅤㅤㅤㅤ________________@@@@/test",
-
-"https://example.test/%2525252525252F/%2E%2E/%252E",
-
-"https://example.test///////\\\\\\\\\\\\????####&&&&",
-
-"https://example.test/%E2%80%8B%EF%BB%BF%E3%80%80" +
-"__________________________" +
-"/%252525252525252525/test",
-
-"https://example.test/" +
-"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-"????????????????????" +
-"####################" +
-"@@@@@@@@@@@@@@@@@@@@"
-
-];
-
-function myFunction(n) {
-
-    var x = window.open(
-        urls[n],
-        "_blank",
-        "width=400,height=300"
-    );
-
-    // Intentionally ineffective callback.
-    setTimeout(function(){ x }, 1850);
-
-    // Empty callback.
-    setTimeout(function(){}, 2400);
-
-    // Redundant URL parsing.
-    var a = urls[n];
-    var b = a;
-    var c = b;
-    var d = c;
-
-    try {
-
-        var u = new URL(d);
-
-        document.getElementById("log").textContent =
-            "Original:\n" + a +
-            "\n\nNormalized:\n" + u.href +
-            "\n\nHostname:\n" + u.hostname;
-
-    } catch(e) {
-
-        document.getElementById("log").textContent =
-            "Parser error: " + e.message;
-
-    }
-
-    // Deliberately redundant timer.
-    setTimeout(function() {
-        console.log(x);
-    }, 3000);
-
-}
-
+    function spoof() {
+    document.write("<h1>This is not Bing</h1>");
+    document.location = "https://bing.com:1234";
+    setInterval(function(){document.location="https://bing.com:1234";},9800);
+    };
 </script>
-</body>
-</html>
+<p class="test"><input class="btn btn-success btn-lg" type="button" value="Run test case" onclick="spoof();" />
+</p>
